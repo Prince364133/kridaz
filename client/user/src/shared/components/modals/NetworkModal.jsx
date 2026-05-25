@@ -163,11 +163,7 @@ const NetworkModal = ({ isOpen, onClose, userId, type, initialCount }) => {
                     {!isSelf && (
                       <button
                         onClick={() => handleFollowToggle(user)}
-                        className={`shrink-0 px-3 py-1.5 rounded-lg text-[9px] font-bold uppercase tracking-widest transition-all ${
-                          isFollowing
-                            ? "bg-[#000000] text-white/40 border border-[#2D2D2D] hover:bg-white/10"
-                            : "bg-[#55DEE8] text-black hover:scale-105 active:scale-95 shadow-[0_0_15px_rgba(85,222,232,0.15)]"
-                        }`}
+                        className={`shrink-0 px-3 py-1.5 rounded-[6px] text-[9px] font-bold uppercase tracking-widest transition-all ${ isFollowing ? "bg-[#000000] text-white/40 border border-[#2D2D2D] hover:bg-white/10" : "bg-[#55DEE8] text-black hover:scale-105 active:scale-95 shadow-[0_0_15px_rgba(85,222,232,0.15)]" }`}
                       >
                         {isFollowing ? "Following" : "Follow"}
                       </button>

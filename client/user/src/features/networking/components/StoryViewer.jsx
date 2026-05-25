@@ -27,12 +27,12 @@ const StoryViewer = ({ storyGroup, onClose, onDelete, currentUser, isAdmin, init
 
  return (
  <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black animate-in fade-in duration-300">
- <div className="relative w-full h-full max-w-lg md:h-[90vh] md:rounded-3xl overflow-hidden shadow-2xl flex flex-col bg-black">
+ <div className="relative w-full h-full max-w-lg md:h-[90vh] md:rounded-[8px] overflow-hidden shadow-2xl flex flex-col bg-black">
  
  {/* Close Button */}
  <button 
  onClick={onClose}
- className="absolute top-6 right-6 z-[110] p-2 bg-black/40 hover:bg-black/60 text-white rounded-full transition-all backdrop-blur-md"
+ className="absolute top-6 right-6 z-[110] p-2 bg-black/40 hover:bg-black/60 text-white rounded-[8px] transition-all backdrop-blur-md"
  >
  <X size={24} />
  </button>
@@ -127,7 +127,7 @@ const StoryViewer = ({ storyGroup, onClose, onDelete, currentUser, isAdmin, init
  e.stopPropagation();
  setShowViewers(true);
  }}
- className="flex items-center gap-2 px-3 py-1.5 bg-white/5 hover:bg-white/10 border border-white/10 rounded-full transition-all group"
+ className="flex items-center gap-2 px-3 py-1.5 bg-white/5 hover:bg-white/10 border border-white/10 rounded-[6px] transition-all group"
  >
  <Eye size={12} className="text-[#55DEE8]" />
  <span className="text-[10px] font-black text-white group-hover:text-[#55DEE8]">
@@ -142,7 +142,7 @@ const StoryViewer = ({ storyGroup, onClose, onDelete, currentUser, isAdmin, init
  e.stopPropagation();
  onDelete(currentStory._id);
  }}
- className="p-3 bg-red-500/10 hover:bg-red-500 text-red-500 hover:text-white rounded-2xl transition-all shrink-0 border border-red-500/20"
+ className="p-3 bg-red-500/10 hover:bg-red-500 text-red-500 hover:text-white rounded-[8px] transition-all shrink-0 border border-red-500/20"
  >
  <Trash2 size={18} />
  </button>
@@ -183,7 +183,7 @@ const StoryViewer = ({ storyGroup, onClose, onDelete, currentUser, isAdmin, init
  key={viewer._id}
  to={`/profile/${viewer._id}`}
  onClick={() => onClose()}
- className="flex items-center gap-4 p-3 rounded-2xl hover:bg-white/5 transition-all group border border-transparent hover:border-white/5"
+ className="flex items-center gap-4 p-3 rounded-[8px] hover:bg-white/5 transition-all group border border-transparent hover:border-white/5"
  >
  <div className="relative">
  <div className="w-12 h-12 rounded-full border-2 border-[#2D2D2D] group-hover:border-[#55DEE8] overflow-hidden transition-colors">

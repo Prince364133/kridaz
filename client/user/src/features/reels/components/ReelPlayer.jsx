@@ -162,7 +162,7 @@ const ReelPlayer = ({ reelId, hlsUrl, isVisible, poster }) => {
       {/* Mute/Unmute Button */}
       <button 
         onClick={toggleMute}
-        className="absolute bottom-4 right-4 p-2 bg-black/40 rounded-full text-white backdrop-blur-sm z-10"
+        className="absolute bottom-4 right-4 p-2 bg-black/40 rounded-[8px] text-white backdrop-blur-sm z-10"
       >
         {isMuted ? <VolumeX size={20} /> : <Volume2 size={20} />}
       </button>

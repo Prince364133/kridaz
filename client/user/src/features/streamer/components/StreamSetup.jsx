@@ -447,7 +447,7 @@ export default function StreamSetup() {
           </div>
 
           {!isOfficialsApproved && (
-            <div className="px-6 py-4 bg-amber-500/10 border border-amber-500/20 rounded-2xl flex items-center gap-4 animate-pulse">
+            <div className="px-6 py-4 bg-amber-500/10 border border-amber-500/20 rounded-[8px] flex items-center gap-4 animate-pulse">
               <AlertCircle className="text-amber-500" size={24} />
               <div>
                 <p className="text-[10px] font-black uppercase tracking-widest text-amber-500">Requirements Missing</p>
@@ -460,7 +460,7 @@ export default function StreamSetup() {
         {/* Connection Status Bars */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
           {/* YouTube Accounts */}
-          <div className="bg-[#0A0A0A] border border-white/10 rounded-[2rem] p-6 space-y-4 shadow-2xl">
+          <div className="bg-[#0A0A0A] border border-white/10 rounded-[8px] p-6 space-y-4 shadow-2xl">
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center gap-3">
                 <Youtube className="text-red-500" size={24} />
@@ -468,7 +468,7 @@ export default function StreamSetup() {
               </div>
               <button 
                 onClick={handleConnectYouTube}
-                className="px-4 py-2 bg-red-500/10 text-red-500 border border-red-500/20 text-[10px] font-black uppercase tracking-widest rounded-xl hover:bg-red-500/20 transition-all"
+                className="px-4 py-2 bg-red-500/10 text-red-500 border border-red-500/20 text-[10px] font-black uppercase tracking-widest rounded-[8px] hover:bg-red-500/20 transition-all"
               >
                 Connect New
               </button>
@@ -479,7 +479,7 @@ export default function StreamSetup() {
                 <p className="text-[10px] text-gray-500 font-bold uppercase tracking-widest text-center py-4">No channels connected</p>
               ) : (
                 youtubeAccounts.map(acc => (
-                  <div key={acc.accountId} className={`flex items-center justify-between p-3 rounded-xl border transition-all ${selectedPlatforms[acc.accountId] ? 'bg-red-500/10 border-red-500/20' : 'bg-white/5 border-white/10'}`}>
+                  <div key={acc.accountId} className={`flex items-center justify-between p-3 rounded-[8px] border transition-all ${selectedPlatforms[acc.accountId] ? 'bg-red-500/10 border-red-500/20' : 'bg-white/5 border-white/10'}`}>
                     <div className="flex items-center gap-3">
                       <input 
                         type="checkbox"
@@ -509,7 +509,7 @@ export default function StreamSetup() {
           </div>
 
           {/* Facebook Accounts */}
-          <div className="bg-[#0A0A0A] border border-white/10 rounded-[2rem] p-6 space-y-4 shadow-2xl">
+          <div className="bg-[#0A0A0A] border border-white/10 rounded-[8px] p-6 space-y-4 shadow-2xl">
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center gap-3">
                 <Facebook className="text-blue-500" size={24} />
@@ -517,7 +517,7 @@ export default function StreamSetup() {
               </div>
               <button 
                 onClick={handleConnectFacebook}
-                className="px-4 py-2 bg-blue-500/10 text-blue-500 border border-blue-500/20 text-[10px] font-black uppercase tracking-widest rounded-xl hover:bg-blue-500/20 transition-all"
+                className="px-4 py-2 bg-blue-500/10 text-blue-500 border border-blue-500/20 text-[10px] font-black uppercase tracking-widest rounded-[8px] hover:bg-blue-500/20 transition-all"
               >
                 Connect New
               </button>
@@ -528,7 +528,7 @@ export default function StreamSetup() {
                 <p className="text-[10px] text-gray-500 font-bold uppercase tracking-widest text-center py-4">No pages connected</p>
               ) : (
                 facebookAccounts.map(acc => (
-                  <div key={acc.accountId} className={`flex items-center justify-between p-3 rounded-xl border transition-all ${selectedPlatforms[acc.accountId] ? 'bg-blue-500/10 border-blue-500/20' : 'bg-white/5 border-white/10'}`}>
+                  <div key={acc.accountId} className={`flex items-center justify-between p-3 rounded-[8px] border transition-all ${selectedPlatforms[acc.accountId] ? 'bg-blue-500/10 border-blue-500/20' : 'bg-white/5 border-white/10'}`}>
                     <div className="flex items-center gap-3">
                       <input 
                         type="checkbox"
@@ -561,7 +561,7 @@ export default function StreamSetup() {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
           {/* Left Column: Create Stream Form */}
           <div className="space-y-8">
-            <div className="bg-[#0A0A0A] border border-white/5 rounded-[2rem] p-8 shadow-[0_0_50px_rgba(0,0,0,0.5)]">
+            <div className="bg-[#0A0A0A] border border-white/5 rounded-[8px] p-8 shadow-[0_0_50px_rgba(0,0,0,0.5)]">
               <h2 className="text-xl font-black uppercase tracking-tight mb-8 flex items-center gap-3">
                 <Video className="text-violet-500" size={24} /> 1. Configure Broadcast
               </h2>
@@ -575,7 +575,7 @@ export default function StreamSetup() {
                     value={formData.title}
                     onChange={(e) => setFormData({...formData, title: e.target.value})}
                     disabled={isStreamActive}
-                    className="w-full h-14 bg-white/5 border border-white/10 rounded-2xl px-6 text-xs font-bold tracking-widest text-white focus:border-violet-500/50 outline-none transition-all disabled:opacity-50"
+                    className="w-full h-14 bg-white/5 border border-white/10 rounded-[8px] px-6 text-xs font-bold tracking-widest text-white focus:border-violet-500/50 outline-none transition-all disabled:opacity-50"
                   />
                 </div>
 
@@ -586,7 +586,7 @@ export default function StreamSetup() {
                     value={formData.description}
                     onChange={(e) => setFormData({...formData, description: e.target.value})}
                     disabled={isStreamActive}
-                    className="w-full bg-white/5 border border-white/10 rounded-2xl p-6 text-xs font-bold tracking-widest text-white focus:border-violet-500/50 outline-none transition-all resize-none disabled:opacity-50"
+                    className="w-full bg-white/5 border border-white/10 rounded-[8px] p-6 text-xs font-bold tracking-widest text-white focus:border-violet-500/50 outline-none transition-all resize-none disabled:opacity-50"
                   />
                 </div>
 
@@ -597,7 +597,7 @@ export default function StreamSetup() {
                       value={formData.privacyStatus}
                       onChange={(e) => setFormData({...formData, privacyStatus: e.target.value})}
                       disabled={isStreamActive}
-                      className="w-full h-14 bg-white/5 border border-white/10 rounded-2xl px-6 text-xs font-bold uppercase tracking-widest text-white focus:border-violet-500/50 outline-none transition-all appearance-none disabled:opacity-50"
+                      className="w-full h-14 bg-white/5 border border-white/10 rounded-[8px] px-6 text-xs font-bold uppercase tracking-widest text-white focus:border-violet-500/50 outline-none transition-all appearance-none disabled:opacity-50"
                     >
                       <option value="public">Public</option>
                       <option value="unlisted">Unlisted</option>
@@ -610,7 +610,7 @@ export default function StreamSetup() {
                       value={formData.resolution}
                       onChange={(e) => setFormData({...formData, resolution: e.target.value})}
                       disabled={isStreamActive}
-                      className="w-full h-14 bg-white/5 border border-white/10 rounded-2xl px-6 text-xs font-bold uppercase tracking-widest text-white focus:border-violet-500/50 outline-none transition-all appearance-none disabled:opacity-50"
+                      className="w-full h-14 bg-white/5 border border-white/10 rounded-[8px] px-6 text-xs font-bold uppercase tracking-widest text-white focus:border-violet-500/50 outline-none transition-all appearance-none disabled:opacity-50"
                     >
                       <option value="1080p">1080p</option>
                       <option value="720p">720p</option>
@@ -622,7 +622,7 @@ export default function StreamSetup() {
                   <label className="text-[10px] font-black uppercase tracking-widest text-gray-500 ml-4">Thumbnail (1280x720)</label>
                   <div 
                     onClick={() => !isStreamActive && fileInputRef.current?.click()}
-                    className={`w-full h-32 bg-white/5 border border-dashed border-white/20 rounded-2xl flex flex-col items-center justify-center cursor-pointer hover:bg-white/10 transition-all overflow-hidden ${isStreamActive ? 'opacity-50 cursor-not-allowed' : ''}`}
+                    className={`w-full h-32 bg-white/5 border border-dashed border-white/20 rounded-[8px] flex flex-col items-center justify-center cursor-pointer hover:bg-white/10 transition-all overflow-hidden ${isStreamActive ? 'opacity-50 cursor-not-allowed' : ''}`}
                   >
                     {thumbnailPreview ? (
                       <img src={thumbnailPreview} alt="Thumbnail Preview" className="w-full h-full object-cover" />
@@ -647,7 +647,7 @@ export default function StreamSetup() {
                     <button 
                       type="submit"
                       disabled={generating || !isOfficialsApproved}
-                      className="w-full h-14 bg-violet-500 text-white font-black uppercase text-xs tracking-widest rounded-2xl shadow-[0_10px_30px_rgba(139,92,246,0.2)] hover:shadow-violet-500/40 transition-all flex items-center justify-center gap-3 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
+                      className="w-full h-14 bg-violet-500 text-white font-black uppercase text-xs tracking-widest rounded-[8px] shadow-[0_10px_30px_rgba(139,92,246,0.2)] hover:shadow-violet-500/40 transition-all flex items-center justify-center gap-3 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                       {generating ? <RefreshCw size={16} className="animate-spin" /> : <MonitorPlay size={16} />}
                       {generating ? "Generating..." : "Generate Multi-Stream"}
@@ -657,7 +657,7 @@ export default function StreamSetup() {
                       type="button"
                       onClick={handleEndStream}
                       disabled={ending}
-                      className="w-full h-14 bg-red-500/20 text-red-500 border border-red-500/30 font-black uppercase text-xs tracking-widest rounded-2xl hover:bg-red-500/30 transition-all flex items-center justify-center gap-3 active:scale-95 disabled:opacity-50"
+                      className="w-full h-14 bg-red-500/20 text-red-500 border border-red-500/30 font-black uppercase text-xs tracking-widest rounded-[8px] hover:bg-red-500/30 transition-all flex items-center justify-center gap-3 active:scale-95 disabled:opacity-50"
                     >
                       {ending ? <RefreshCw size={16} className="animate-spin" /> : <MonitorPlay size={16} />}
                       {ending ? "Ending..." : "End Broadcast"}
@@ -668,7 +668,7 @@ export default function StreamSetup() {
             </div>
 
             {/* Ticker Theme Selection */}
-            <div className="bg-[#0A0A0A] border border-white/5 rounded-[2rem] p-8 shadow-[0_0_50px_rgba(0,0,0,0.5)]">
+            <div className="bg-[#0A0A0A] border border-white/5 rounded-[8px] p-8 shadow-[0_0_50px_rgba(0,0,0,0.5)]">
               <h2 className="text-xl font-black uppercase tracking-tight mb-8 flex items-center justify-between gap-3">
                 <div className="flex items-center gap-3">
                   <Layout className="text-violet-500" size={24} /> 2. Ticker Theme
@@ -676,7 +676,7 @@ export default function StreamSetup() {
                 <button 
                   type="button"
                   onClick={() => navigate(`/streamer/ticker-gallery/${id}`)}
-                  className="px-4 py-2 bg-violet-500/10 text-violet-500 border border-violet-500/20 text-[10px] font-black uppercase tracking-widest rounded-xl hover:bg-violet-500/20 transition-all flex items-center gap-2"
+                  className="px-4 py-2 bg-violet-500/10 text-violet-500 border border-violet-500/20 text-[10px] font-black uppercase tracking-widest rounded-[8px] hover:bg-violet-500/20 transition-all flex items-center gap-2"
                 >
                   <Palette size={14} /> Browse Gallery
                 </button>
@@ -687,7 +687,7 @@ export default function StreamSetup() {
                   <button
                     key={theme.id}
                     onClick={() => handleThemeChange(theme.id)}
-                    className={`relative p-4 rounded-2xl border-2 transition-all flex flex-col items-center justify-center gap-2 ${selectedTheme === theme.id ? 'border-violet-500 bg-violet-500/10' : 'border-white/5 bg-white/5 hover:border-white/20'}`}
+                    className={`relative p-4 rounded-[8px] border-2 transition-all flex flex-col items-center justify-center gap-2 ${selectedTheme === theme.id ? 'border-violet-500 bg-violet-500/10' : 'border-white/5 bg-white/5 hover:border-white/20'}`}
                   >
                     <div className={`w-12 h-2 rounded-full ${theme.color} shadow-lg`} />
                     <p className="text-[10px] font-black uppercase tracking-widest text-white">{theme.name}</p>
@@ -704,13 +704,13 @@ export default function StreamSetup() {
 
           {/* Right Column: Keys and URLs */}
           <div className="space-y-6">
-            <div className="bg-[#0A0A0A] border border-white/5 rounded-[2rem] p-8 shadow-[0_0_50px_rgba(0,0,0,0.5)]">
+            <div className="bg-[#0A0A0A] border border-white/5 rounded-[8px] p-8 shadow-[0_0_50px_rgba(0,0,0,0.5)]">
                <h2 className="text-xl font-black uppercase tracking-tight mb-8 flex items-center gap-3">
                  <Key className="text-violet-500" size={24} /> 3. Encoder Setup
                </h2>
                
                {!isStreamActive ? (
-                 <div className="h-48 flex flex-col items-center justify-center text-center border border-dashed border-white/10 rounded-2xl bg-white/5">
+                 <div className="h-48 flex flex-col items-center justify-center text-center border border-dashed border-white/10 rounded-[8px] bg-white/5">
                    <AlertCircle className="text-gray-500 mb-3" size={32} />
                    <p className="text-xs text-gray-400 font-bold uppercase tracking-widest px-8">Create a stream first to generate your RTMP URL and Stream Key.</p>
                  </div>
@@ -729,7 +729,7 @@ export default function StreamSetup() {
                               <Copy size={12} /> Copy
                             </button>
                           </label>
-                          <div className="w-full bg-black border border-white/10 rounded-xl p-4 text-xs font-mono text-gray-300 break-all">
+                          <div className="w-full bg-black border border-white/10 rounded-[8px] p-4 text-xs font-mono text-gray-300 break-all">
                             {b.rtmpUrl}
                           </div>
                         </div>
@@ -746,7 +746,7 @@ export default function StreamSetup() {
                               </button>
                             </div>
                           </label>
-                          <div className="w-full bg-black border border-white/10 rounded-xl p-4 text-xs font-mono text-gray-300 tracking-widest">
+                          <div className="w-full bg-black border border-white/10 rounded-[8px] p-4 text-xs font-mono text-gray-300 tracking-widest">
                             {showKey ? b.streamKey : "••••••••••••••••••••••••••••"}
                           </div>
                         </div>
@@ -766,7 +766,7 @@ export default function StreamSetup() {
                               <Copy size={12} /> Copy
                             </button>
                           </label>
-                          <div className="w-full bg-black border border-white/10 rounded-xl p-4 text-xs font-mono text-gray-300 break-all">
+                          <div className="w-full bg-black border border-white/10 rounded-[8px] p-4 text-xs font-mono text-gray-300 break-all">
                             {b.rtmpUrl}
                           </div>
                         </div>
@@ -783,7 +783,7 @@ export default function StreamSetup() {
                               </button>
                             </div>
                           </label>
-                          <div className="w-full bg-black border border-white/10 rounded-xl p-4 text-xs font-mono text-gray-300 tracking-widest">
+                          <div className="w-full bg-black border border-white/10 rounded-[8px] p-4 text-xs font-mono text-gray-300 tracking-widest">
                             {showKey ? b.streamKey : "••••••••••••••••••••••••••••"}
                           </div>
                         </div>
@@ -794,7 +794,7 @@ export default function StreamSetup() {
             </div>
 
             {/* Manage Officials & Venue */}
-            <div className="bg-[#0A0A0A] border border-white/5 rounded-[2rem] p-8 shadow-[0_0_50px_rgba(0,0,0,0.5)]">
+            <div className="bg-[#0A0A0A] border border-white/5 rounded-[8px] p-8 shadow-[0_0_50px_rgba(0,0,0,0.5)]">
                <h2 className="text-xl font-black uppercase tracking-tight mb-8 flex items-center gap-3">
                  <Shield className="text-violet-500" size={24} /> 4. Match Personnel & Venue
                </h2>
@@ -804,7 +804,7 @@ export default function StreamSetup() {
                  <div className="space-y-4">
                    <p className="text-[10px] font-black uppercase tracking-widest text-gray-500 ml-4">MATCH VENUE (GROUND)</p>
                    {match.ground ? (
-                     <div className="flex items-center justify-between p-4 bg-white/5 rounded-2xl border border-white/10">
+                     <div className="flex items-center justify-between p-4 bg-white/5 rounded-[8px] border border-white/10">
                        <div className="flex items-center gap-3">
                          <div className="w-10 h-10 rounded-full bg-blue-500/20 flex items-center justify-center text-blue-500">
                            <Globe size={20} />
@@ -824,13 +824,13 @@ export default function StreamSetup() {
                          placeholder="SEARCH & ASSIGN GROUND..."
                          value={groundSearch}
                          onChange={(e) => handleSearchGrounds(e.target.value)}
-                         className="w-full h-14 bg-white/5 border border-white/10 rounded-xl pl-12 pr-4 text-xs font-bold tracking-widest text-white focus:border-violet-500/50 outline-none uppercase"
+                         className="w-full h-14 bg-white/5 border border-white/10 rounded-[8px] pl-12 pr-4 text-xs font-bold tracking-widest text-white focus:border-violet-500/50 outline-none uppercase"
                        />
                        {searchingGround && <RefreshCw className="absolute right-4 top-4 animate-spin text-violet-500" size={14} />}
                      </div>
                    )}
                    {groundResults.length > 0 && (
-                     <div className="bg-[#111] border border-white/10 rounded-xl overflow-hidden divide-y divide-white/5 mt-2">
+                     <div className="bg-[#111] border border-white/10 rounded-[8px] overflow-hidden divide-y divide-white/5 mt-2">
                        {groundResults.map(ground => (
                          <div key={ground._id} onClick={() => handleUpdateVenue(ground._id)} className="p-3 hover:bg-white/5 cursor-pointer flex justify-between items-center transition-all">
                            <div>
@@ -850,7 +850,7 @@ export default function StreamSetup() {
                    <div className="space-y-3">
                      <p className="text-[9px] font-black uppercase tracking-widest text-gray-500 text-center">Scorer</p>
                      <div className="relative group">
-                       <div className={`w-full aspect-square rounded-2xl border-2 flex flex-col items-center justify-center gap-2 transition-all ${match.scorer || match.scorerRequest?.status === 'APPROVED' ? 'border-green-500/50 bg-green-500/5' : 'border-white/5 bg-white/5'}`}>
+                       <div className={`w-full aspect-square rounded-[8px] border-2 flex flex-col items-center justify-center gap-2 transition-all ${match.scorer || match.scorerRequest?.status === 'APPROVED' ? 'border-green-500/50 bg-green-500/5' : 'border-white/5 bg-white/5'}`}>
                          {match.scorer?.profilePicture || match.scorerRequest?.user?.profilePicture ? (
                            <img src={match.scorer?.profilePicture || match.scorerRequest?.user?.profilePicture} className="w-12 h-12 rounded-full object-cover" />
                          ) : <MonitorPlay size={24} className="text-gray-600" />}
@@ -858,7 +858,7 @@ export default function StreamSetup() {
                            {match.scorer?.name || match.scorerRequest?.user?.name || "Vacant"}
                          </p>
                          {(!match.scorer && match.scorerRequest?.status !== 'APPROVED') && (
-                           <button onClick={() => setActiveOfficialType('SCORER')} className="absolute inset-0 bg-violet-500/90 opacity-0 group-hover:opacity-100 flex items-center justify-center text-[10px] font-black uppercase tracking-widest transition-opacity rounded-2xl">
+                           <button onClick={() => setActiveOfficialType('SCORER')} className="absolute inset-0 bg-violet-500/90 opacity-0 group-hover:opacity-100 flex items-center justify-center text-[10px] font-black uppercase tracking-widest transition-opacity rounded-[8px]">
                              Assign
                            </button>
                          )}
@@ -870,7 +870,7 @@ export default function StreamSetup() {
                    <div className="space-y-3">
                      <p className="text-[9px] font-black uppercase tracking-widest text-gray-500 text-center">Umpire</p>
                      <div className="relative group">
-                       <div className={`w-full aspect-square rounded-2xl border-2 flex flex-col items-center justify-center gap-2 transition-all ${match.umpire || match.umpireRequest?.status === 'APPROVED' ? 'border-green-500/50 bg-green-500/5' : 'border-white/5 bg-white/5'}`}>
+                       <div className={`w-full aspect-square rounded-[8px] border-2 flex flex-col items-center justify-center gap-2 transition-all ${match.umpire || match.umpireRequest?.status === 'APPROVED' ? 'border-green-500/50 bg-green-500/5' : 'border-white/5 bg-white/5'}`}>
                          {match.umpire?.profilePicture || match.umpireRequest?.user?.profilePicture ? (
                            <img src={match.umpire?.profilePicture || match.umpireRequest?.user?.profilePicture} className="w-12 h-12 rounded-full object-cover" />
                          ) : <Shield size={24} className="text-gray-600" />}
@@ -878,7 +878,7 @@ export default function StreamSetup() {
                            {match.umpire?.name || match.umpireRequest?.user?.name || "Vacant"}
                          </p>
                          {(!match.umpire && match.umpireRequest?.status !== 'APPROVED') && (
-                           <button onClick={() => setActiveOfficialType('UMPIRE')} className="absolute inset-0 bg-violet-500/90 opacity-0 group-hover:opacity-100 flex items-center justify-center text-[10px] font-black uppercase tracking-widest transition-opacity rounded-2xl">
+                           <button onClick={() => setActiveOfficialType('UMPIRE')} className="absolute inset-0 bg-violet-500/90 opacity-0 group-hover:opacity-100 flex items-center justify-center text-[10px] font-black uppercase tracking-widest transition-opacity rounded-[8px]">
                              Assign
                            </button>
                          )}
@@ -890,7 +890,7 @@ export default function StreamSetup() {
                    <div className="space-y-3">
                      <p className="text-[9px] font-black uppercase tracking-widest text-gray-500 text-center">Streamer</p>
                      <div className="relative group">
-                       <div className={`w-full aspect-square rounded-2xl border-2 flex flex-col items-center justify-center gap-2 transition-all ${match.streamer || match.streamerRequest?.status === 'APPROVED' ? 'border-blue-500/50 bg-blue-500/5' : 'border-white/5 bg-white/5'}`}>
+                       <div className={`w-full aspect-square rounded-[8px] border-2 flex flex-col items-center justify-center gap-2 transition-all ${match.streamer || match.streamerRequest?.status === 'APPROVED' ? 'border-blue-500/50 bg-blue-500/5' : 'border-white/5 bg-white/5'}`}>
                          {match.streamer?.profilePicture || match.streamerRequest?.user?.profilePicture ? (
                            <img src={match.streamer?.profilePicture || match.streamerRequest?.user?.profilePicture} className="w-12 h-12 rounded-full object-cover" />
                          ) : <Video size={24} className="text-gray-600" />}
@@ -898,7 +898,7 @@ export default function StreamSetup() {
                            {match.streamer?.name || match.streamerRequest?.user?.name || "Host"}
                          </p>
                          {(!match.streamer && match.streamerRequest?.status !== 'APPROVED') && (
-                           <button onClick={() => setActiveOfficialType('STREAMER')} className="absolute inset-0 bg-blue-500/90 opacity-0 group-hover:opacity-100 flex items-center justify-center text-[10px] font-black uppercase tracking-widest transition-opacity rounded-2xl">
+                           <button onClick={() => setActiveOfficialType('STREAMER')} className="absolute inset-0 bg-blue-500/90 opacity-0 group-hover:opacity-100 flex items-center justify-center text-[10px] font-black uppercase tracking-widest transition-opacity rounded-[8px]">
                              Invite
                            </button>
                          )}
@@ -922,12 +922,12 @@ export default function StreamSetup() {
                          placeholder={`SEARCH FOR ${activeOfficialType} BY NAME...`}
                          value={officialSearch}
                          onChange={(e) => handleSearchOfficials(e.target.value)}
-                         className="w-full h-14 bg-white/5 border border-violet-500/30 rounded-xl pl-12 pr-4 text-xs font-bold tracking-widest text-white focus:border-violet-500 outline-none uppercase"
+                         className="w-full h-14 bg-white/5 border border-violet-500/30 rounded-[8px] pl-12 pr-4 text-xs font-bold tracking-widest text-white focus:border-violet-500 outline-none uppercase"
                        />
                      </div>
                      
                      {searchResults.length > 0 && (
-                       <div className="bg-[#111] border border-white/10 rounded-xl overflow-hidden divide-y divide-white/5 mt-2 max-h-48 overflow-y-auto custom-scrollbar">
+                       <div className="bg-[#111] border border-white/10 rounded-[8px] overflow-hidden divide-y divide-white/5 mt-2 max-h-48 overflow-y-auto custom-scrollbar">
                          {searchResults.map(user => (
                            <div key={user._id} onClick={() => handleInviteOfficial(user._id, activeOfficialType)} className="p-3 hover:bg-white/5 cursor-pointer flex justify-between items-center transition-all group">
                              <div className="flex items-center gap-3">
@@ -948,7 +948,7 @@ export default function StreamSetup() {
             </div>
 
             {/* Overlays */}
-            <div className="bg-[#0A0A0A] border border-white/5 rounded-[2rem] p-8 shadow-[0_0_50px_rgba(0,0,0,0.5)]">
+            <div className="bg-[#0A0A0A] border border-white/5 rounded-[8px] p-8 shadow-[0_0_50px_rgba(0,0,0,0.5)]">
                <h2 className="text-xl font-black uppercase tracking-tight mb-8 flex items-center gap-3">
                  <Layers className="text-violet-500" size={24} /> 5. Overlays
                </h2>
@@ -961,7 +961,7 @@ export default function StreamSetup() {
                        <Copy size={12} /> Copy
                      </button>
                    </label>
-                   <div className="w-full bg-white/5 border border-white/10 rounded-xl p-4 text-xs font-mono text-gray-400 truncate">
+                   <div className="w-full bg-white/5 border border-white/10 rounded-[8px] p-4 text-xs font-mono text-gray-400 truncate">
                      {overlayUrl}
                    </div>
                  </div>
@@ -973,7 +973,7 @@ export default function StreamSetup() {
                        <Copy size={12} /> Copy
                      </button>
                    </label>
-                   <div className="w-full bg-white/5 border border-white/10 rounded-xl p-4 text-xs font-mono text-gray-400 truncate">
+                   <div className="w-full bg-white/5 border border-white/10 rounded-[8px] p-4 text-xs font-mono text-gray-400 truncate">
                      {scoreboardUrl}
                    </div>
                  </div>

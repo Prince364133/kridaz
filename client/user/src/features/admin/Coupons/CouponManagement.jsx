@@ -115,7 +115,7 @@ export const CouponManagement = () => {
         </div>
         <button
           onClick={handleOpenModal}
-          className="inline-flex items-center gap-2 bg-yellow-500 text-black px-4 py-2 rounded-lg font-bold hover:bg-yellow-400 transition-colors"
+          className="inline-flex items-center gap-2 bg-yellow-500 text-black px-4 py-2 rounded-[6px] font-bold hover:bg-yellow-400 transition-colors"
         >
           <Plus size={18} />
           Create Coupon
@@ -130,11 +130,11 @@ export const CouponManagement = () => {
           return (
             <div
               key={coupon.id}
-              className={`group relative flex flex-col rounded-xl border border-white/10 bg-[#1A1A1A] p-5 transition-all hover:border-yellow-500/50 ${!isUsable ? 'opacity-70' : ''}`}
+              className={`group relative flex flex-col rounded-[8px] border border-white/10 bg-[#1A1A1A] p-5 transition-all hover:border-yellow-500/50 ${!isUsable ? 'opacity-70' : ''}`}
             >
               <div className="flex justify-between items-start mb-4">
                 <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-xl bg-yellow-500/10 flex items-center justify-center text-yellow-500">
+                  <div className="w-10 h-10 rounded-[8px] bg-yellow-500/10 flex items-center justify-center text-yellow-500">
                     <Tag size={20} />
                   </div>
                   <div>
@@ -148,11 +148,7 @@ export const CouponManagement = () => {
                 
                 <button
                   onClick={() => handleToggleStatus(coupon.id, coupon.isActive)}
-                  className={`px-3 py-1 text-[10px] font-bold uppercase tracking-widest rounded-full flex items-center gap-1 ${
-                    coupon.isActive 
-                      ? "bg-green-500/10 text-green-500 border border-green-500/20" 
-                      : "bg-red-500/10 text-red-500 border border-red-500/20"
-                  }`}
+                  className={`px-3 py-1 text-[10px] font-bold uppercase tracking-widest rounded-[6px] flex items-center gap-1 ${ coupon.isActive ? "bg-green-500/10 text-green-500 border border-green-500/20" : "bg-red-500/10 text-red-500 border border-red-500/20" }`}
                 >
                   {coupon.isActive ? <CheckCircle size={10} /> : <XCircle size={10} />}
                   {coupon.isActive ? "Active" : "Disabled"}
@@ -194,7 +190,7 @@ export const CouponManagement = () => {
         })}
 
         {coupons.length === 0 && (
-          <div className="col-span-full py-20 flex flex-col items-center justify-center border border-dashed border-white/10 rounded-xl">
+          <div className="col-span-full py-20 flex flex-col items-center justify-center border border-dashed border-white/10 rounded-[8px]">
             <Tag size={40} className="text-gray-600 mb-4" />
             <h3 className="text-white font-bold">No coupons found</h3>
             <p className="text-gray-400 text-sm">Create your first coupon to get started.</p>
@@ -204,7 +200,7 @@ export const CouponManagement = () => {
 
       {isModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
-          <div className="w-full max-w-md bg-[#111] border border-white/10 rounded-2xl overflow-hidden shadow-2xl">
+          <div className="w-full max-w-md bg-[#111] border border-white/10 rounded-[8px] overflow-hidden shadow-2xl">
             <div className="p-6 border-b border-white/10 flex items-center justify-between">
               <h2 className="text-xl font-bold font-bebas tracking-wider text-white">
                 CREATE COUPON
@@ -285,13 +281,13 @@ export const CouponManagement = () => {
                 <button
                   type="button"
                   onClick={() => setIsModalOpen(false)}
-                  className="flex-1 py-3 rounded-xl border border-white/10 text-white font-bold hover:bg-white/5 transition-all"
+                  className="flex-1 py-3 rounded-[8px] border border-white/10 text-white font-bold hover:bg-white/5 transition-all"
                 >
                   CANCEL
                 </button>
                 <button
                   type="submit"
-                  className="flex-1 py-3 rounded-xl bg-yellow-500 text-black font-bold hover:bg-yellow-400 transition-all shadow-[0_0_20px_rgba(234,179,8,0.3)]"
+                  className="flex-1 py-3 rounded-[8px] bg-yellow-500 text-black font-bold hover:bg-yellow-400 transition-all shadow-[0_0_20px_rgba(234,179,8,0.3)]"
                 >
                   CREATE COUPON
                 </button>

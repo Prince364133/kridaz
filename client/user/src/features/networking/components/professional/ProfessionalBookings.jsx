@@ -69,7 +69,7 @@ export default function ProfessionalBookings() {
       </div>
 
       {bookings.length === 0 ? (
-        <div className="flex flex-col items-center justify-center min-h-[450px] bg-white/[0.03] backdrop-blur-xl rounded-lg border border-white/5 border-dashed p-12 text-center shadow-2xl relative overflow-hidden">
+        <div className="flex flex-col items-center justify-center min-h-[450px] bg-white/[0.03] backdrop-blur-xl rounded-[8px] border border-white/5 border-dashed p-12 text-center shadow-2xl relative overflow-hidden">
           <div className="absolute inset-0 bg-gradient-to-b from-transparent to-black/20 pointer-events-none" />
           <div className="w-20 h-20 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center mb-8 relative z-10 shadow-inner">
             <Calendar size={40} className="text-neutral-600" />
@@ -84,14 +84,14 @@ export default function ProfessionalBookings() {
       ) : (
         <div className="grid grid-cols-1 gap-6">
           {bookings.map((booking) => (
-            <div key={booking._id} className="bg-white/[0.03] backdrop-blur-xl border border-white/5 rounded-lg overflow-hidden group hover:border-white/10 transition-all shadow-2xl">
+            <div key={booking._id} className="bg-white/[0.03] backdrop-blur-xl border border-white/5 rounded-[8px] overflow-hidden group hover:border-white/10 transition-all shadow-2xl">
               <div className="p-8 lg:p-10">
                 <div className="flex flex-col md:flex-row justify-between gap-8">
                   <div className="flex gap-6">
                     <div className="relative">
                       <img 
                         src={booking.user?.profilePicture || "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=200&q=80"} 
-                        className="w-16 h-16 rounded-2xl object-cover border border-white/5"
+                        className="w-16 h-16 rounded-[8px] object-cover border border-white/5"
                         alt={booking.user?.name}
                       />
                       <div className="absolute -bottom-2 -right-2 w-7 h-7 rounded-lg flex items-center justify-center shadow-lg" style={{ backgroundColor: themeColor }}>
@@ -108,11 +108,7 @@ export default function ProfessionalBookings() {
                   </div>
 
                   <div className="flex flex-col md:items-end gap-3">
-                    <div className={`px-4 py-1.5 rounded-full text-[9px] font-black uppercase tracking-widest border font-inter ${
-                      booking.status === 'PENDING' ? 'bg-orange-500/10 border-orange-500/20 text-orange-500' :
-                      booking.status === 'ACCEPTED' ? 'bg-[#00C187]/10 border-[#00C187]/20' :
-                      'bg-red-500/10 border-red-500/20 text-red-500'
-                    }`}
+                    <div className={`px-4 py-1.5 rounded-full text-[9px] font-black uppercase tracking-widest border font-inter ${ booking.status === 'PENDING' ? 'bg-orange-500/10 border-orange-500/20 text-orange-500' : booking.status === 'ACCEPTED' ? 'bg-[#00C187]/10 border-[#00C187]/20' : 'bg-red-500/10 border-red-500/20 text-red-500' }`}
                     style={{ 
                       color: booking.status === 'ACCEPTED' ? themeColor : undefined,
                       borderColor: booking.status === 'ACCEPTED' ? themeColor : undefined 
@@ -142,7 +138,7 @@ export default function ProfessionalBookings() {
 
                   <div className="space-y-5 md:col-span-2">
                     <p className="text-[10px] font-black text-neutral-500 uppercase tracking-widest font-inter">Match Brief</p>
-                    <div className="p-5 bg-white/[0.05] border border-white/10 rounded-lg text-[13px] text-neutral-400 italic font-inter leading-relaxed">
+                    <div className="p-5 bg-white/[0.05] border border-white/10 rounded-[8px] text-[13px] text-neutral-400 italic font-inter leading-relaxed">
                       "{booking.message || "Standard match scoring and management assignment."}"
                     </div>
                   </div>
@@ -161,7 +157,7 @@ export default function ProfessionalBookings() {
                     <button 
                       onClick={() => handleAction(booking._id, 'REJECTED')}
                       disabled={actionLoading === booking._id}
-                      className="flex-1 h-14 bg-white/5 text-neutral-500 hover:text-white border border-white/10 rounded-lg font-black uppercase text-[12px] tracking-[0.2em] hover:bg-red-500/10 hover:border-red-500/30 hover:text-red-500 transition-all transform active:scale-95 flex items-center justify-center gap-3 font-inter"
+                      className="flex-1 h-14 bg-white/5 text-neutral-500 hover:text-white border border-white/10 rounded-[8px] font-black uppercase text-[12px] tracking-[0.2em] hover:bg-red-500/10 hover:border-red-500/30 hover:text-red-500 transition-all transform active:scale-95 flex items-center justify-center gap-3 font-inter"
                     >
                       {actionLoading === booking._id ? <Loader2 className="animate-spin" size={20} /> : <X size={20} />} Decline
                     </button>

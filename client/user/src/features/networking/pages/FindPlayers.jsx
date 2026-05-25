@@ -38,7 +38,7 @@ import { haversineMeters } from "@utils/geoUtils";
 const PRI = "#55DEE8";
 const GRAD = "linear-gradient(90deg, #55DEE8 0%, #BFF367 100%)";
 const HEADING_STYLE = { fontFamily: '"Outfit", sans-serif' };
-const SUBHEADING_STYLE = { fontFamily: '"Outfit", sans-serif' };
+const SUBHEADING_STYLE = { fontFamily: "'Inter 28pt Light', sans-serif", fontWeight: 300 };
 const SNAP_STATES = { COLLAPSED: 0, HALF: 33, EXPANDED: 50 };
 
 const MOCK_PLAYERS = [
@@ -62,10 +62,10 @@ const PlayerCard = ({ player, rank, followingIds, handleFollowToggle, handleAvat
       initial={{ opacity: 0, y: 20 }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true }}
-      className="relative bg-black rounded-[16px] border border-[#55DEE8]/20 overflow-hidden flex flex-col h-[360px] p-1 group hover:border-[#55DEE8]/60 transition-all duration-500 shadow-[0_0_30px_rgba(0,0,0,0.5)]"
+      className="relative bg-black rounded-[8px] border border-[#55DEE8]/20 overflow-hidden flex flex-col h-[360px] p-1 group hover:border-[#55DEE8]/60 transition-all duration-500 shadow-[0_0_30px_rgba(0,0,0,0.5)]"
     >
       <div className="flex justify-end items-start p-4 absolute top-0 left-0 right-0 z-20">
-        <div className="p-1.5 bg-[#55DEE8]/10 rounded-lg border border-[#55DEE8]/20">
+        <div className="p-1.5 bg-[#55DEE8]/10 rounded-[8px] border border-[#55DEE8]/20">
           <ShieldCheck size={14} className="text-[#55DEE8]" />
         </div>
       </div>
@@ -118,10 +118,10 @@ const PlayerCard = ({ player, rank, followingIds, handleFollowToggle, handleAvat
           </div>
         </div>
         <div className="flex items-center gap-2 w-full mt-auto">
-          <button onClick={() => handleFollowToggle(player.id || player._id)} className={`flex-1 h-11 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${followingIds.includes(player.id || player._id) ? "bg-white/5 text-white/20 border border-white/10" : "text-black hover:scale-105 shadow-[0_0_15px_rgba(85,222,232,0.3)]"}`} style={!followingIds.includes(player.id || player._id) ? { background: GRAD } : {}}>
+          <button onClick={() => handleFollowToggle(player.id || player._id)} className={`flex-1 h-11 rounded-[8px] text-[10px] font-black uppercase tracking-widest transition-all ${followingIds.includes(player.id || player._id) ? "bg-white/5 text-white/20 border border-white/10" : "text-black hover:scale-105 shadow-[0_0_15px_rgba(85,222,232,0.3)]"}`} style={!followingIds.includes(player.id || player._id) ? { background: GRAD } : {}}>
             {followingIds.includes(player.id || player._id) ? "Following" : "Follow"}
           </button>
-          <button onClick={() => gateInteraction(() => navigate(`/messages?userId=${player.id || player._id}`))} className="w-11 h-11 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center text-white/40 hover:text-[#55DEE8] transition-all">
+          <button onClick={() => gateInteraction(() => navigate(`/messages?userId=${player.id || player._id}`))} className="w-11 h-11 rounded-[8px] bg-white/5 border border-white/10 flex items-center justify-center text-white/40 hover:text-[#55DEE8] transition-all">
             <MessageCircle size={18} />
           </button>
         </div>
@@ -136,7 +136,7 @@ const TeamCard = ({ team, navigate }) => {
       initial={{ opacity: 0, y: 20 }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true }}
-      className="relative bg-[#0A0A0A] rounded-[20px] border border-white/5 overflow-hidden flex flex-col h-[380px] group hover:border-[#55DEE8]/30 transition-all duration-500 shadow-2xl"
+      className="relative bg-[#0A0A0A] rounded-[8px] border border-white/5 overflow-hidden flex flex-col h-[380px] group hover:border-[#55DEE8]/30 transition-all duration-500 shadow-2xl"
     >
       {/* Top Section: Banner */}
       <div className="h-32 relative">
@@ -148,7 +148,7 @@ const TeamCard = ({ team, navigate }) => {
         <div className="absolute inset-0 bg-gradient-to-t from-[#0A0A0A] to-transparent" />
         
         {/* Verified Badge */}
-        <div className="absolute top-4 right-4 flex items-center gap-1.5 bg-black/40 backdrop-blur-md px-2.5 py-1.5 rounded-full border border-white/10">
+        <div className="absolute top-4 right-4 flex items-center gap-1.5 bg-black/40 backdrop-blur-md px-2.5 py-1.5 rounded-[6px] border border-white/10">
           <div className="w-3.5 h-3.5 rounded-full flex items-center justify-center" style={{ background: GRAD }}>
             <ShieldCheck size={10} className="text-black" />
           </div>
@@ -190,7 +190,7 @@ const TeamCard = ({ team, navigate }) => {
             </div>
             <p className="text-gray-600 text-[8px] font-bold uppercase tracking-widest mt-0.5">@ {team.city || 'Global'}</p>
           </div>
-          <div className="p-2 bg-white/5 rounded-xl border border-white/10 text-white/40 hover:text-[#55DEE8] transition-colors">
+          <div className="p-2 bg-white/5 rounded-[8px] border border-white/10 text-white/40 hover:text-[#55DEE8] transition-colors">
             <Star size={16} />
           </div>
         </div>
@@ -198,7 +198,7 @@ const TeamCard = ({ team, navigate }) => {
         {/* Stats Section */}
         <div className="grid grid-cols-2 gap-2 py-3 border-y border-white/5 mb-3">
           <div className="flex items-center gap-2">
-             <div className="p-2 bg-white/5 rounded-lg border border-white/10">
+             <div className="p-2 bg-white/5 rounded-[8px] border border-white/10">
                 <Users size={14} className="text-[#55DEE8]" />
              </div>
              <div>
@@ -207,7 +207,7 @@ const TeamCard = ({ team, navigate }) => {
              </div>
           </div>
           <div className="flex items-center gap-2">
-             <div className="p-2 bg-white/5 rounded-lg border border-white/10">
+             <div className="p-2 bg-white/5 rounded-[8px] border border-white/10">
                 <Target size={14} className="text-[#55DEE8]" />
              </div>
              <div>
@@ -221,7 +221,7 @@ const TeamCard = ({ team, navigate }) => {
         <div className="grid grid-cols-2 gap-3 mb-4">
            <Link 
               to={`/team/${team._id}`}
-              className="h-12 text-black rounded-xl font-black uppercase tracking-widest text-[10px] flex items-center justify-center gap-2 hover:scale-[1.02] active:scale-95 transition-all shadow-[0_5px_15px_rgba(85,222,232,0.2)]"
+              className="h-12 text-black rounded-[8px] font-black uppercase tracking-widest text-[10px] flex items-center justify-center gap-2 hover:scale-[1.02] active:scale-95 transition-all shadow-[0_5px_15px_rgba(85,222,232,0.2)]"
               style={{ background: GRAD }}
            >
               <UserPlus size={14} strokeWidth={3} />
@@ -229,7 +229,7 @@ const TeamCard = ({ team, navigate }) => {
            </Link>
            <Link 
               to={`/team/${team._id}`}
-              className="h-12 bg-transparent border-2 border-white/10 text-white rounded-xl font-black uppercase tracking-widest text-[10px] flex items-center justify-center gap-2 hover:bg-white/5 transition-all"
+              className="h-12 bg-transparent border-2 border-white/10 text-white rounded-[8px] font-black uppercase tracking-widest text-[10px] flex items-center justify-center gap-2 hover:bg-white/5 transition-all"
            >
               <Swords size={14} />
               Challenge
@@ -766,7 +766,7 @@ const FindPlayers = () => {
 
                   {/* HEADER STATUS BAR */}
                   <div className="absolute top-4 left-4 right-4 z-[1000] flex items-center justify-between pointer-events-none">
-                    <div className="flex items-center gap-3 bg-black/60 backdrop-blur-xl border border-white/10 p-1.5 px-4 rounded-2xl shadow-2xl">
+                    <div className="flex items-center gap-3 bg-black/60 backdrop-blur-xl border border-white/10 p-1.5 px-4 rounded-[8px] shadow-2xl">
                       <div className="flex items-center gap-2">
                         <div className="w-2 h-2 bg-[#55DEE8] rounded-full animate-pulse shadow-[0_0_10px_#55DEE8]" />
                         <span className="text-white text-[11px] font-black uppercase tracking-widest">Live Map</span>
@@ -793,11 +793,7 @@ const FindPlayers = () => {
                     <div className="flex items-center gap-2 pointer-events-auto">
                       <button 
                         onClick={toggleLocationSharing}
-                        className={`flex items-center gap-2 px-4 py-2 rounded-2xl border transition-all duration-300 backdrop-blur-xl shadow-2xl ${
-                          isLocationSharing 
-                            ? "bg-[#55DEE8]/20 border-[#55DEE8]/30 text-[#55DEE8]" 
-                            : "bg-red-500/10 border-red-500/20 text-red-500"
-                        }`}
+                        className={`flex items-center gap-2 px-4 py-2 rounded-[8px] border transition-all duration-300 backdrop-blur-xl shadow-2xl ${ isLocationSharing ? "bg-[#55DEE8]/20 border-[#55DEE8]/30 text-[#55DEE8]" : "bg-red-500/10 border-red-500/20 text-red-500" }`}
                       >
                         {isLocationSharing ? <Eye size={14} /> : <EyeOff size={14} />}
                         <span className="text-[10px] font-black uppercase tracking-widest">
@@ -834,7 +830,7 @@ const FindPlayers = () => {
                   {/* ERROR STATE */}
                   {locationError && (
                     <div className="absolute inset-0 z-[2000] bg-[#0A0A0A]/90 backdrop-blur-md flex flex-col items-center justify-center p-8 text-center">
-                      <div className="w-16 h-16 bg-red-500/20 border border-red-500/30 rounded-3xl flex items-center justify-center mb-4">
+                      <div className="w-16 h-16 bg-red-500/20 border border-red-500/30 rounded-[8px] flex items-center justify-center mb-4">
                         <AlertCircle className="text-red-500" size={32} />
                       </div>
                       <h3 className="text-white font-black uppercase tracking-widest mb-2">Location Required</h3>
@@ -843,7 +839,7 @@ const FindPlayers = () => {
                       </p>
                       <button 
                         onClick={() => window.location.reload()}
-                        className="px-8 py-3 bg-white/5 border border-white/10 rounded-2xl text-[10px] font-black uppercase tracking-widest text-white hover:bg-white/10 transition-all"
+                        className="px-8 py-3 bg-white/5 border border-white/10 rounded-[8px] text-[10px] font-black uppercase tracking-widest text-white hover:bg-white/10 transition-all"
                       >
                         Retry Connection
                       </button>
@@ -864,7 +860,7 @@ const FindPlayers = () => {
                   </AnimatePresence>
 
                   <div className="absolute bottom-8 left-1/2 -translate-x-1/2 z-[1000] w-[90%] max-w-xs">
-                    <div className="bg-black/80 backdrop-blur-2xl border border-[#55DEE8]/30 rounded-full p-1.5 px-6 flex items-center justify-between shadow-2xl">
+                    <div className="bg-black/80 backdrop-blur-2xl border border-[#55DEE8]/30 rounded-[8px] p-1.5 px-6 flex items-center justify-between shadow-2xl">
                         <span className="text-[10px] font-black text-white/40 uppercase tracking-widest">Radius</span>
                         <div className="flex items-center gap-1">
                           {[5, 10, 20, 50, 100].map(r => (
@@ -926,7 +922,7 @@ const FindPlayers = () => {
           </div>
 
           {/* Compact Header Row */}
-          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white/[0.02] border border-white/5 rounded-2xl p-3 md:p-4">
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white/[0.02] border border-white/5 rounded-[8px] p-3 md:p-4">
             <div className="flex items-center gap-4 flex-1">
               <div className="relative flex-1 max-w-md group">
                 <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-white/20 group-focus-within:text-[#55DEE8] transition-colors" size={16} />
@@ -935,7 +931,7 @@ const FindPlayers = () => {
                   value={searchQuery}
                   onChange={handleSearch}
                   placeholder="SEARCH..."
-                  className="w-full bg-white/[0.03] hover:bg-white/[0.05] border border-white/10 focus:border-[#55DEE8]/50 rounded-xl h-10 pl-11 pr-4 text-white text-[10px] md:text-xs placeholder:text-white/20 outline-none transition-all uppercase tracking-widest font-bold"
+                  className="w-full bg-white/[0.03] hover:bg-white/[0.05] border border-white/10 focus:border-[#55DEE8]/50 rounded-[8px] h-10 pl-11 pr-4 text-white text-[10px] md:text-xs placeholder:text-white/20 outline-none transition-all uppercase tracking-widest font-bold"
                 />
               </div>
             </div>
@@ -944,7 +940,7 @@ const FindPlayers = () => {
               <select 
                 value={filters.sport}
                 onChange={(e) => handleFilterChange("sport", e.target.value)}
-                className="bg-white/5 border border-white/10 rounded-lg px-3 py-1.5 text-[9px] md:text-[10px] font-bold uppercase tracking-widest text-white/60 focus:text-[#55DEE8] focus:border-[#55DEE8]/50 outline-none cursor-pointer hover:bg-white/10 transition-all"
+                className="bg-white/5 border border-white/10 rounded-[6px] px-3 py-1.5 text-[9px] md:text-[10px] font-bold uppercase tracking-widest text-white/60 focus:text-[#55DEE8] focus:border-[#55DEE8]/50 outline-none cursor-pointer hover:bg-white/10 transition-all"
               >
                 <option value="">All Sports</option>
                 {sports.map(s => <option key={s} value={s}>{s}</option>)}
@@ -1009,11 +1005,7 @@ const FindPlayers = () => {
               {activeTab === "players" && (
                 <button 
                   onClick={() => setShowNearbyOnly(!showNearbyOnly)}
-                  className={`flex items-center gap-2 px-3 py-1.5 rounded-lg border transition-all text-[9px] font-black uppercase tracking-widest ${
-                    showNearbyOnly 
-                    ? "bg-[#55DEE8] border-[#55DEE8] text-black shadow-[0_0_15px_rgba(85,222,232,0.4)]" 
-                    : "bg-white/5 border-white/10 text-white/60 hover:bg-white/10"
-                  }`}
+                  className={`flex items-center gap-2 px-3 py-1.5 rounded-[6px] border transition-all text-[9px] font-black uppercase tracking-widest ${ showNearbyOnly ? "bg-[#55DEE8] border-[#55DEE8] text-black shadow-[0_0_15px_rgba(85,222,232,0.4)]" : "bg-white/5 border-white/10 text-white/60 hover:bg-white/10" }`}
                 >
                   <Navigation size={10} className={showNearbyOnly ? "animate-pulse" : ""} />
                   Nearby
@@ -1026,7 +1018,7 @@ const FindPlayers = () => {
           {loading ? (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
               {[1, 2, 3, 4].map(i => (
-                <div key={i} className="h-[360px] bg-white/[0.02] border border-white/5 rounded-[16px] animate-pulse" />
+                <div key={i} className="h-[360px] bg-white/[0.02] border border-white/5 rounded-[8px] animate-pulse" />
               ))}
             </div>
           ) : activeTab === "players" ? (

@@ -8,7 +8,7 @@ const TransactionFilters = ({ filters, onFilterChange, onClear }) => {
   const hasActiveFilter = Object.values(filters).some((v) => v !== "");
 
   return (
-    <div className="flex items-center gap-2 flex-wrap lg:flex-nowrap bg-[#0D0D0D] border border-white/8 rounded-2xl px-3 py-2.5">
+    <div className="flex items-center gap-2 flex-wrap lg:flex-nowrap bg-[#0D0D0D] border border-white/8 rounded-[8px] px-3 py-2.5">
       {/* Search */}
       <div className="relative flex-1 min-w-[140px]">
         <Search size={13} className="absolute left-2.5 top-1/2 -translate-y-1/2 text-white/30 pointer-events-none" />
@@ -81,7 +81,7 @@ const TransactionFilters = ({ filters, onFilterChange, onClear }) => {
         <button
           onClick={onClear}
           title="Clear filters"
-          className="flex items-center gap-1.5 h-9 px-3 rounded-xl bg-white/5 border border-white/10 hover:border-red-500/40 hover:bg-red-500/10 text-white/40 hover:text-red-400 transition-all text-[11px] font-bold uppercase tracking-wider shrink-0"
+          className="flex items-center gap-1.5 h-9 px-3 rounded-[8px] bg-white/5 border border-white/10 hover:border-red-500/40 hover:bg-red-500/10 text-white/40 hover:text-red-400 transition-all text-[11px] font-bold uppercase tracking-wider shrink-0"
         >
           <X size={12} />
           Clear

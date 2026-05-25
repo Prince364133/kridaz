@@ -24,7 +24,7 @@ const SEC = "#55DEE8"; // Secondary cyan accent matching the gradient cool stop
 
 // --- STYLE TOKENS ---
 const HEADING_STYLE = { fontFamily: "'Open Sans', sans-serif" };
-const SUBHEADING_STYLE = { fontFamily: "'Inter', sans-serif" };
+const SUBHEADING_STYLE = { fontFamily: "'Inter 28pt Light', sans-serif", fontWeight: 300 };
 
 const QuickStatCard = ({ icon: Icon, label, value, showDivider }) => (
   <div className={`flex-1 flex items-center justify-center gap-4 py-4 ${showDivider ? 'border-r border-white/10' : ''}`}>
@@ -47,15 +47,15 @@ const AchievementCard = ({ icon: Icon, title, rarity, year }) => {
     silver: 'from-gray-300 to-gray-400',
   };
   return (
-    <div className="group relative rounded-[15px] p-[1px] transition-all duration-300 cursor-pointer overflow-hidden">
+    <div className="group relative rounded-[8px] p-[1px] transition-all duration-300 cursor-pointer overflow-hidden">
       {/* Gradient Border Overlay - Only visible on hover */}
-      <div className="absolute inset-0 bg-gradient-to-r from-[#55DEE8] to-[#BFF367] opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-[15px]" />
+      <div className="absolute inset-0 bg-gradient-to-r from-[#55DEE8] to-[#BFF367] opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-[8px]" />
       
       {/* Normal Border Overlay - Fades out on hover */}
-      <div className="absolute inset-0 border border-white/10 group-hover:opacity-0 transition-opacity duration-300 rounded-[15px] animate-in" />
+      <div className="absolute inset-0 border border-white/10 group-hover:opacity-0 transition-opacity duration-300 rounded-[8px] animate-in" />
 
       {/* Card Content Wrapper */}
-      <div className="relative bg-[#0d0d0d] rounded-[15px] p-4 h-full flex flex-col justify-between">
+      <div className="relative bg-[#0d0d0d] rounded-[8px] p-4 h-full flex flex-col justify-between">
         <div className="relative">
           <div className={`w-12 h-12 mx-auto mb-3 rounded-full bg-gradient-to-br ${rarityColors[rarity]} p-[2px]`}>
             <div className="w-full h-full bg-black rounded-full flex items-center justify-center">
@@ -109,7 +109,7 @@ const MatchDetailModal = ({ isOpen, onClose, match, userId }) => {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md">
-      <div className="relative w-full max-w-2xl bg-[#0a0a0a] border border-white/10 rounded-[2.5rem] p-8 overflow-hidden shadow-2xl animate-in fade-in zoom-in-95 duration-200">
+      <div className="relative w-full max-w-2xl bg-[#0a0a0a] border border-white/10 rounded-[8px] p-8 overflow-hidden shadow-2xl animate-in fade-in zoom-in-95 duration-200">
         
         {/* Header */}
         <div className="flex justify-between items-center mb-6">
@@ -117,7 +117,7 @@ const MatchDetailModal = ({ isOpen, onClose, match, userId }) => {
             <h2 className="text-2xl font-black uppercase tracking-tight text-white">{match.name || "Match Details"}</h2>
             <p className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">{match.turf?.name || match.customVenue || "Local Ground"} • {new Date(match.date).toLocaleDateString('en-GB')}</p>
           </div>
-          <button onClick={onClose} className="px-3.5 py-2 bg-white/5 hover:bg-white/10 border border-white/10 text-white rounded-[15px] font-black uppercase tracking-wider text-[9px] transition-all">
+          <button onClick={onClose} className="px-3.5 py-2 bg-white/5 hover:bg-white/10 border border-white/10 text-white rounded-[8px] font-black uppercase tracking-wider text-[9px] transition-all">
             Close
           </button>
         </div>
@@ -143,7 +143,7 @@ const MatchDetailModal = ({ isOpen, onClose, match, userId }) => {
           {activeSubTab === "impact" ? (
             <div className="space-y-6">
               {/* Highlight Banner */}
-              <div className={`p-6 rounded-[1.5rem] border ${won ? 'bg-[#55DEE8]/5 border-[#55DEE8]/10 text-[#55DEE8]' : 'bg-red-500/5 border-red-500/10 text-red-400'} flex items-center justify-between`}>
+              <div className={`p-6 rounded-[8px] border ${won ? 'bg-[#55DEE8]/5 border-[#55DEE8]/10 text-[#55DEE8]' : 'bg-red-500/5 border-red-500/10 text-red-400'} flex items-center justify-between`}>
                 <div>
                   <p className="text-[9px] font-bold uppercase tracking-widest opacity-60">Result</p>
                   <p className="text-xl font-black uppercase tracking-tight">{outcomeText}</p>
@@ -160,7 +160,7 @@ const MatchDetailModal = ({ isOpen, onClose, match, userId }) => {
 
               {/* Milestones celebrations */}
               {playerStat.battingRuns >= 100 && (
-                <div className="p-4 bg-gradient-to-r from-yellow-400/10 to-orange-400/10 border border-yellow-400/20 rounded-[1.5rem] flex items-center gap-3">
+                <div className="p-4 bg-gradient-to-r from-yellow-400/10 to-orange-400/10 border border-yellow-400/20 rounded-[8px] flex items-center gap-3">
                   <Crown className="text-yellow-400 animate-bounce" size={24} />
                   <div>
                     <h4 className="text-xs font-black uppercase text-yellow-400">Magnificent Century!</h4>
@@ -169,7 +169,7 @@ const MatchDetailModal = ({ isOpen, onClose, match, userId }) => {
                 </div>
               )}
               {playerStat.bowlingWickets >= 5 && (
-                <div className="p-4 bg-gradient-to-r from-red-500/10 to-orange-500/10 border border-red-500/20 rounded-[1.5rem] flex items-center gap-3">
+                <div className="p-4 bg-gradient-to-r from-red-500/10 to-orange-500/10 border border-red-500/20 rounded-[8px] flex items-center gap-3">
                   <Zap className="text-red-500 animate-pulse" size={24} />
                   <div>
                     <h4 className="text-xs font-black uppercase text-red-500">Five-Wicket Haul!</h4>
@@ -180,7 +180,7 @@ const MatchDetailModal = ({ isOpen, onClose, match, userId }) => {
 
               {/* Batting Card */}
               {isBatting && (
-                <div className="bg-white/[0.02] border border-white/5 rounded-[1.5rem] p-5">
+                <div className="bg-white/[0.02] border border-white/5 rounded-[8px] p-5">
                   <h3 className="text-xs font-black uppercase tracking-widest text-gray-400 mb-4">Batting Performance</h3>
                   <div className="grid grid-cols-4 gap-4">
                     <div className="text-center">
@@ -207,7 +207,7 @@ const MatchDetailModal = ({ isOpen, onClose, match, userId }) => {
 
               {/* Bowling Card */}
               {isBowling && (
-                <div className="bg-white/[0.02] border border-white/5 rounded-[1.5rem] p-5">
+                <div className="bg-white/[0.02] border border-white/5 rounded-[8px] p-5">
                   <h3 className="text-xs font-black uppercase tracking-widest text-gray-400 mb-4">Bowling Performance</h3>
                   <div className="grid grid-cols-4 gap-4">
                     <div className="text-center">
@@ -235,7 +235,7 @@ const MatchDetailModal = ({ isOpen, onClose, match, userId }) => {
           ) : (
             <div className="space-y-6">
               {/* Scoreboard Overall */}
-              <div className="grid grid-cols-2 gap-4 bg-white/[0.02] border border-white/5 rounded-[1.5rem] p-6 text-center relative overflow-hidden">
+              <div className="grid grid-cols-2 gap-4 bg-white/[0.02] border border-white/5 rounded-[8px] p-6 text-center relative overflow-hidden">
                 <div>
                   <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1">{userTeamName}</p>
                   <p className="text-3xl font-black text-white">{userRuns}/{userWickets}</p>
@@ -253,7 +253,7 @@ const MatchDetailModal = ({ isOpen, onClose, match, userId }) => {
                   {match.teams?.flatMap(t => t.slots || []).map((slot, index) => {
                     if (!slot.user) return null;
                     return (
-                      <div key={index} className="flex items-center justify-between p-3.5 bg-black/40 border border-white/5 rounded-[15px] hover:border-white/10 transition-all">
+                      <div key={index} className="flex items-center justify-between p-3.5 bg-black/40 border border-white/5 rounded-[8px] hover:border-white/10 transition-all">
                         <div className="flex items-center gap-3">
                           <img src={slot.user.profilePicture || "https://ui-avatars.com/api/?name=" + slot.user.name} className="w-8 h-8 rounded-full object-cover border border-white/10" />
                           <div>
@@ -301,7 +301,7 @@ const ConnectionsModal = ({ isOpen, onClose, followersList = [], followingList =
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md">
-      <div className="relative w-full max-w-xl bg-[#0a0a0a] border border-white/10 rounded-[2.5rem] p-8 overflow-hidden shadow-2xl animate-in fade-in zoom-in-95 duration-200">
+      <div className="relative w-full max-w-xl bg-[#0a0a0a] border border-white/10 rounded-[8px] p-8 overflow-hidden shadow-2xl animate-in fade-in zoom-in-95 duration-200">
         
         {/* Header */}
         <div className="flex justify-between items-center mb-6">
@@ -309,7 +309,7 @@ const ConnectionsModal = ({ isOpen, onClose, followersList = [], followingList =
             <h2 className="text-2xl font-black uppercase tracking-tight text-white" style={HEADING_STYLE}>Connections</h2>
             <p className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Network details & mutual links</p>
           </div>
-          <button onClick={onClose} className="px-3.5 py-2 bg-white/5 hover:bg-white/10 border border-white/10 text-white rounded-[15px] font-black uppercase tracking-wider text-[9px] transition-all">
+          <button onClick={onClose} className="px-3.5 py-2 bg-white/5 hover:bg-white/10 border border-white/10 text-white rounded-[8px] font-black uppercase tracking-wider text-[9px] transition-all">
             Close
           </button>
         </div>
@@ -340,7 +340,7 @@ const ConnectionsModal = ({ isOpen, onClose, followersList = [], followingList =
         <div className="max-h-[350px] overflow-y-auto pr-2 custom-scrollbar space-y-3">
           {list.length > 0 ? (
             list.map((player) => (
-              <div key={player.id} className="flex items-center justify-between p-3 bg-[#0d0d0d] border border-white/5 rounded-[15px] hover:border-white/10 transition-all">
+              <div key={player.id} className="flex items-center justify-between p-3 bg-[#0d0d0d] border border-white/5 rounded-[8px] hover:border-white/10 transition-all">
                 <Link 
                   to={`/profile/${player.id}`} 
                   onClick={onClose} 
@@ -366,11 +366,7 @@ const ConnectionsModal = ({ isOpen, onClose, followersList = [], followingList =
                   {player.id !== (currentUser?.id || currentUser?._id) && (
                     <button
                       onClick={() => handlePlayerFollowToggle(player)}
-                      className={`px-3 py-1.5 rounded-[12px] font-black uppercase tracking-wider text-[9px] transition-all ${
-                        followingIds.includes(player.id)
-                          ? 'bg-white/10 text-white/40 border border-white/5'
-                          : 'bg-gradient-to-r from-[#55DEE8] to-[#BFF367] text-black hover:scale-105 active:scale-95'
-                      }`}
+                      className={`px-3 py-1.5 rounded-[12px] font-black uppercase tracking-wider text-[9px] transition-all ${ followingIds.includes(player.id) ? 'bg-white/10 text-white/40 border border-white/5' : 'bg-gradient-to-r from-[#55DEE8] to-[#BFF367] text-black hover:scale-105 active:scale-95' }`}
                     >
                       {followingIds.includes(player.id) ? "Following" : "Follow"}
                     </button>
@@ -379,7 +375,7 @@ const ConnectionsModal = ({ isOpen, onClose, followersList = [], followingList =
               </div>
             ))
           ) : (
-            <div className="text-center py-12 bg-black/40 rounded-[15px] border border-white/5">
+            <div className="text-center py-12 bg-black/40 rounded-[8px] border border-white/5">
               <p className="text-xs font-bold text-gray-500 uppercase tracking-widest">
                 {activeTab === "followers" && "No followers yet"}
                 {activeTab === "following" && "Not following anyone yet"}
@@ -599,7 +595,7 @@ export default function Profile() {
           {/* Share button at top right corner */}
           <button 
             onClick={handleShare}
-            className="absolute top-6 right-6 p-3 bg-black/40 backdrop-blur-md border border-white/10 hover:border-white/20 text-white rounded-full hover:scale-105 active:scale-95 transition-all shadow-lg flex items-center justify-center z-30"
+            className="absolute top-6 right-6 p-3 bg-black/40 backdrop-blur-md border border-white/10 hover:border-white/20 text-white rounded-[8px] hover:scale-105 active:scale-95 transition-all shadow-lg flex items-center justify-center z-30"
           >
             <Share2 size={18} className="text-white" />
           </button>
@@ -685,12 +681,12 @@ export default function Profile() {
                       })()
                     : null;
                   return online ? (
-                    <span className="px-3 py-0.5 bg-[#55DEE8]/10 text-[#55DEE8] rounded-full border border-[#55DEE8]/20 text-[9px] flex items-center gap-1">
+                    <span className="px-3 py-0.5 bg-[#55DEE8]/10 text-[#55DEE8] rounded-[6px] border border-[#55DEE8]/20 text-[9px] flex items-center gap-1">
                       <span className="w-1.5 h-1.5 rounded-full bg-[#55DEE8] animate-pulse" />
                       Online
                     </span>
                   ) : lastSeenText ? (
-                    <span className="px-3 py-0.5 bg-white/5 text-gray-500 rounded-full border border-white/5 text-[9px] flex items-center gap-1">
+                    <span className="px-3 py-0.5 bg-white/5 text-gray-500 rounded-[6px] border border-white/5 text-[9px] flex items-center gap-1">
                       <span className="w-1.5 h-1.5 rounded-full bg-gray-600" />
                       {lastSeenText}
                     </span>
@@ -701,22 +697,22 @@ export default function Profile() {
               <div className="flex flex-wrap gap-2 pt-2">
                 {isOwnProfile ? (
                   <>
-                    <button className="px-5 py-2.5 bg-gradient-to-r from-[#55DEE8] to-[#BFF367] text-black rounded-[15px] font-black uppercase tracking-wider text-[11px] hover:scale-105 active:scale-95 transition-all shadow-[0_5px_15px_rgba(85,222,232,0.25)] flex items-center gap-2">
+                    <button className="px-5 py-2.5 bg-gradient-to-r from-[#55DEE8] to-[#BFF367] text-black rounded-[8px] font-black uppercase tracking-wider text-[11px] hover:scale-105 active:scale-95 transition-all shadow-[0_5px_15px_rgba(85,222,232,0.25)] flex items-center gap-2">
                       <UserPlus size={14} strokeWidth={3} />
                       Invite Player
                     </button>
                   </>
                 ) : (
                   <>
-                    <button className="px-5 py-2.5 bg-gradient-to-r from-[#55DEE8] to-[#BFF367] text-black rounded-[15px] font-black uppercase tracking-wider text-[11px] hover:scale-105 active:scale-95 transition-all shadow-[0_5px_15px_rgba(85,222,232,0.25)] flex items-center gap-2">
+                    <button className="px-5 py-2.5 bg-gradient-to-r from-[#55DEE8] to-[#BFF367] text-black rounded-[8px] font-black uppercase tracking-wider text-[11px] hover:scale-105 active:scale-95 transition-all shadow-[0_5px_15px_rgba(85,222,232,0.25)] flex items-center gap-2">
                       <UserPlus size={14} strokeWidth={3} />
                       Invite Player
                     </button>
-                    <button onClick={() => navigate(`/messages?userId=${targetUserId}`)} className="px-4 py-2.5 bg-white/5 text-white rounded-[15px] font-black uppercase tracking-wider text-[11px] hover:bg-white/10 transition-all backdrop-blur-md border border-white/10 flex items-center gap-2">
+                    <button onClick={() => navigate(`/messages?userId=${targetUserId}`)} className="px-4 py-2.5 bg-white/5 text-white rounded-[8px] font-black uppercase tracking-wider text-[11px] hover:bg-white/10 transition-all backdrop-blur-md border border-white/10 flex items-center gap-2">
                       <MessageCircle size={14} />
                       Message
                     </button>
-                    <button onClick={() => gateInteraction(handleFollowToggle)} className={`px-4 py-2.5 rounded-[15px] font-black uppercase tracking-wider text-[11px] transition-all flex items-center gap-2 ${followingIds.includes(targetUserId) ? 'bg-white/10 text-white/40' : 'bg-white text-black hover:scale-105'}`}>
+                    <button onClick={() => gateInteraction(handleFollowToggle)} className={`px-4 py-2.5 rounded-[8px] font-black uppercase tracking-wider text-[11px] transition-all flex items-center gap-2 ${followingIds.includes(targetUserId) ? 'bg-white/10 text-white/40' : 'bg-white text-black hover:scale-105'}`}>
                       <Heart size={14} fill={followingIds.includes(targetUserId) ? "currentColor" : "none"} />
                       {followingIds.includes(targetUserId) ? "Following" : "Follow"}
                     </button>
@@ -746,7 +742,7 @@ export default function Profile() {
           ) : null}
             {/* Squads Horizontal Row */}
             {profileUser?.teams && profileUser.teams.length > 0 && (
-              <div className="mb-6 bg-white/[0.02] border border-white/5 p-5 rounded-[1.5rem] backdrop-blur-md">
+              <div className="mb-6 bg-white/[0.02] border border-white/5 p-5 rounded-[8px] backdrop-blur-md">
                 <h3 className="text-xs font-black uppercase tracking-wider text-gray-400 mb-4 flex items-center gap-2">
                   <Users className="w-4 h-4 text-[#55DEE8]" />
                   My Teams
@@ -776,9 +772,9 @@ export default function Profile() {
 
             {/* ── Live Playing Matches Section */}
             {profileUser?.liveMatches && profileUser.liveMatches.length > 0 && (
-              <div className="mb-6 relative overflow-hidden rounded-[1.5rem] border border-[#55DEE8]/30 bg-gradient-to-br from-[#55DEE8]/10 via-black/80 to-[#BFF367]/5 backdrop-blur-md p-5">
+              <div className="mb-6 relative overflow-hidden rounded-[8px] border border-[#55DEE8]/30 bg-gradient-to-br from-[#55DEE8]/10 via-black/80 to-[#BFF367]/5 backdrop-blur-md p-5">
                 {/* Animated background pulse */}
-                <div className="absolute inset-0 rounded-[1.5rem] bg-gradient-to-r from-[#55DEE8]/5 to-[#BFF367]/5 animate-pulse pointer-events-none" />
+                <div className="absolute inset-0 rounded-[8px] bg-gradient-to-r from-[#55DEE8]/5 to-[#BFF367]/5 animate-pulse pointer-events-none" />
 
                 <h3 className="text-xs font-black uppercase tracking-wider text-[#55DEE8] mb-4 flex items-center gap-2 relative z-10">
                   <span className="relative flex items-center justify-center">
@@ -802,7 +798,7 @@ export default function Profile() {
                       <Link
                         key={match.id}
                         to={`/analytics/${match.id}`}
-                        className="group flex items-center justify-between gap-4 bg-black/50 border border-[#55DEE8]/20 hover:border-[#55DEE8]/60 rounded-[1rem] px-5 py-4 transition-all duration-300 hover:bg-black/70 hover:shadow-[0_0_20px_rgba(85,222,232,0.15)]"
+                        className="group flex items-center justify-between gap-4 bg-black/50 border border-[#55DEE8]/20 hover:border-[#55DEE8]/60 rounded-[8px] px-5 py-4 transition-all duration-300 hover:bg-black/70 hover:shadow-[0_0_20px_rgba(85,222,232,0.15)]"
                       >
                         <div className="flex-1 min-w-0">
                           {/* Teams vs */}
@@ -851,7 +847,7 @@ export default function Profile() {
             )}
 
             {/* Sports Filter & Resume Header */}
-            <div className="flex items-center justify-between mb-8 bg-white/[0.02] border border-white/5 p-5 rounded-[1.5rem] backdrop-blur-md">
+            <div className="flex items-center justify-between mb-8 bg-white/[0.02] border border-white/5 p-5 rounded-[8px] backdrop-blur-md">
               <div className="flex items-center gap-3">
                 <Medal className="text-[#BFF367]" size={22} />
                 <div>
@@ -862,7 +858,7 @@ export default function Profile() {
               <select 
                 value={sportFilter} 
                 onChange={(e) => setSportFilter(e.target.value)} 
-                className="bg-black border border-white/10 text-white text-[10px] font-black uppercase tracking-widest px-4 py-2.5 rounded-[15px] focus:outline-none focus:border-[#55DEE8] transition-all cursor-pointer"
+                className="bg-black border border-white/10 text-white text-[10px] font-black uppercase tracking-widest px-4 py-2.5 rounded-[8px] focus:outline-none focus:border-[#55DEE8] transition-all cursor-pointer"
               >
                 <option value="CRICKET">Cricket Stats</option>
                 <option value="FOOTBALL">Football (Coming Soon)</option>
@@ -870,7 +866,7 @@ export default function Profile() {
             </div>
 
             {/* Earned Badges Scrollable Row */}
-            <div className="mb-8 bg-gradient-to-br from-white/5 to-white/[0.02] backdrop-blur-sm rounded-[1.5rem] p-6 border border-white/10 animate-in fade-in duration-500">
+            <div className="mb-8 bg-gradient-to-br from-white/5 to-white/[0.02] backdrop-blur-sm rounded-[8px] p-6 border border-white/10 animate-in fade-in duration-500">
               <div className="mb-4">
                 <h2 className="text-xl font-black text-white flex items-center gap-2 uppercase tracking-tight" style={HEADING_STYLE}>
                   <Award className="w-5 h-5" stroke="url(#cyan-lime-gradient)" />
@@ -882,10 +878,10 @@ export default function Profile() {
               {profileUser?.badges && profileUser.badges.length > 0 ? (
                 <div className="flex items-center gap-6 overflow-x-auto pb-2 scrollbar-thin scrollbar-thumb-white/10 scrollbar-track-transparent">
                   {profileUser.badges.map((badge, idx) => (
-                    <div key={idx} className="group relative rounded-[15px] p-[1px] transition-all duration-300 cursor-pointer overflow-hidden shadow-lg hover:shadow-[#55DEE8]/10 shrink-0 min-w-[200px] max-w-[240px]">
-                      <div className="absolute inset-0 bg-gradient-to-r from-[#55DEE8] to-[#BFF367] opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-[15px]" />
-                      <div className="absolute inset-0 border border-white/10 group-hover:opacity-0 transition-opacity duration-300 rounded-[15px]" />
-                      <div className="relative bg-[#0d0d0d] rounded-[15px] p-4 h-full flex flex-col justify-between text-center min-h-[130px]">
+                    <div key={idx} className="group relative rounded-[8px] p-[1px] transition-all duration-300 cursor-pointer overflow-hidden shadow-lg hover:shadow-[#55DEE8]/10 shrink-0 min-w-[200px] max-w-[240px]">
+                      <div className="absolute inset-0 bg-gradient-to-r from-[#55DEE8] to-[#BFF367] opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-[8px]" />
+                      <div className="absolute inset-0 border border-white/10 group-hover:opacity-0 transition-opacity duration-300 rounded-[8px]" />
+                      <div className="relative bg-[#0d0d0d] rounded-[8px] p-4 h-full flex flex-col justify-between text-center min-h-[130px]">
                         <div>
                           <div className="w-10 h-10 mx-auto mb-2 rounded-full bg-zinc-950 border border-white/10 flex items-center justify-center">
                             <Medal className="w-5 h-5 text-[#BFF367]" />
@@ -899,7 +895,7 @@ export default function Profile() {
                   ))}
                 </div>
               ) : (
-                <div className="text-center py-6 bg-black/40 rounded-[15px] border border-white/5">
+                <div className="text-center py-6 bg-black/40 rounded-[8px] border border-white/5">
                   <p className="text-xs font-bold text-gray-500 uppercase tracking-widest">No career badges unlocked yet</p>
                   <p className="text-[9px] text-gray-600 uppercase tracking-widest mt-1">Score centuries, claim five-wicket hauls, or hit boundaries to earn yours!</p>
                 </div>
@@ -930,7 +926,7 @@ export default function Profile() {
                   {/* Grid layout for Stats Summary & Form Guide */}
                   <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                     {/* Career Statistics */}
-                    <div className="lg:col-span-2 bg-gradient-to-br from-white/5 to-white/[0.02] backdrop-blur-sm rounded-[1.5rem] p-6 border border-white/10 flex flex-col justify-between">
+                    <div className="lg:col-span-2 bg-gradient-to-br from-white/5 to-white/[0.02] backdrop-blur-sm rounded-[8px] p-6 border border-white/10 flex flex-col justify-between">
                       <div 
                         onClick={() => setIsCareerStatsExpanded(prev => !prev)}
                         className="flex justify-between items-center cursor-pointer select-none group"
@@ -944,7 +940,7 @@ export default function Profile() {
                             {isCareerStatsExpanded ? "Click here to collapse this section" : "Click here to expand this section"}
                           </p>
                         </div>
-                        <div className="p-2 bg-white/5 rounded-full border border-white/10 text-white group-hover:scale-105 transition-all">
+                        <div className="p-2 bg-white/5 rounded-[8px] border border-white/10 text-white group-hover:scale-105 transition-all">
                           {isCareerStatsExpanded ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
                         </div>
                       </div>
@@ -965,7 +961,7 @@ export default function Profile() {
                             { label: 'Bowling Avg', value: currentStats.bowlingAverage || "0.00", color: '#white' },
                             { label: 'Best Bowling', value: currentStats.bestBowlingWickets ? `${currentStats.bestBowlingWickets}/${currentStats.bestBowlingRuns}` : "N/A", color: '#white' },
                           ].map((stat, idx) => (
-                            <div key={idx} className="bg-black/40 rounded-[15px] p-4 border border-white/5 hover:border-[#55DEE8]/30 transition-all group">
+                            <div key={idx} className="bg-black/40 rounded-[8px] p-4 border border-white/5 hover:border-[#55DEE8]/30 transition-all group">
                               <p className="text-xs font-bold text-gray-500 uppercase tracking-widest mb-1">{stat.label}</p>
                               <p className="text-lg font-black tracking-tight" style={{ color: stat.color }}>{stat.value}</p>
                             </div>
@@ -975,7 +971,7 @@ export default function Profile() {
                     </div>
 
                     {/* Form Guide */}
-                    <div className="bg-gradient-to-br from-white/5 to-white/[0.02] backdrop-blur-sm rounded-[1.5rem] p-6 border border-white/10 flex flex-col justify-between">
+                    <div className="bg-gradient-to-br from-white/5 to-white/[0.02] backdrop-blur-sm rounded-[8px] p-6 border border-white/10 flex flex-col justify-between">
                       <div 
                         onClick={() => setIsFormGuideExpanded(prev => !prev)}
                         className="flex justify-between items-center cursor-pointer select-none group"
@@ -989,7 +985,7 @@ export default function Profile() {
                             {isFormGuideExpanded ? "Click here to collapse this section" : "Click here to expand this section"}
                           </p>
                         </div>
-                        <div className="p-2 bg-white/5 rounded-full border border-white/10 text-white group-hover:scale-105 transition-all">
+                        <div className="p-2 bg-white/5 rounded-[8px] border border-white/10 text-white group-hover:scale-105 transition-all">
                           {isFormGuideExpanded ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
                         </div>
                       </div>
@@ -1009,7 +1005,7 @@ export default function Profile() {
                               </ResponsiveContainer>
                             </div>
                           ) : (
-                            <div className="flex-1 flex items-center justify-center bg-black/40 border border-white/5 rounded-[15px] py-12 text-center">
+                            <div className="flex-1 flex items-center justify-center bg-black/40 border border-white/5 rounded-[8px] py-12 text-center">
                               <p className="text-[9px] font-black text-gray-600 uppercase tracking-widest">No match form data available</p>
                             </div>
                           )}
@@ -1024,7 +1020,7 @@ export default function Profile() {
                   <div className="space-y-6">
                     <div 
                       onClick={() => setIsMatchHistoryExpanded(prev => !prev)}
-                      className="bg-gradient-to-br from-white/5 to-white/[0.02] backdrop-blur-sm rounded-[1.5rem] p-6 border border-white/10 flex justify-between items-center cursor-pointer select-none group"
+                      className="bg-gradient-to-br from-white/5 to-white/[0.02] backdrop-blur-sm rounded-[8px] p-6 border border-white/10 flex justify-between items-center cursor-pointer select-none group"
                     >
                       <div>
                         <h2 className="text-xl font-black text-white flex items-center gap-2 uppercase tracking-tight" style={HEADING_STYLE}>
@@ -1035,7 +1031,7 @@ export default function Profile() {
                           {isMatchHistoryExpanded ? "Click here to collapse this section" : "Click here to expand this section"}
                         </p>
                       </div>
-                      <div className="p-2 bg-white/5 rounded-full border border-white/10 text-white group-hover:scale-105 transition-all">
+                      <div className="p-2 bg-white/5 rounded-[8px] border border-white/10 text-white group-hover:scale-105 transition-all">
                         {isMatchHistoryExpanded ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
                       </div>
                     </div>
@@ -1059,14 +1055,14 @@ export default function Profile() {
                                 <div 
                                   key={idx} 
                                   onClick={() => setSelectedMatch(match)}
-                                  className="group relative rounded-[15px] p-[1px] transition-all duration-300 cursor-pointer overflow-hidden hover:shadow-[#BFF367]/5"
+                                  className="group relative rounded-[8px] p-[1px] transition-all duration-300 cursor-pointer overflow-hidden hover:shadow-[#BFF367]/5"
                                 >
-                                  <div className="absolute inset-0 bg-gradient-to-r from-[#55DEE8] to-[#BFF367] opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-[15px]" />
-                                  <div className="absolute inset-0 border border-white/10 group-hover:opacity-0 transition-opacity duration-300 rounded-[15px]" />
-                                  <div className="relative bg-[#0d0d0d] rounded-[15px] p-5 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                                  <div className="absolute inset-0 bg-gradient-to-r from-[#55DEE8] to-[#BFF367] opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-[8px]" />
+                                  <div className="absolute inset-0 border border-white/10 group-hover:opacity-0 transition-opacity duration-300 rounded-[8px]" />
+                                  <div className="relative bg-[#0d0d0d] rounded-[8px] p-5 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                                     <div>
                                       <div className="flex items-center gap-2 mb-2">
-                                        <span className={`px-2 py-0.5 rounded-[15px] text-[8px] font-black uppercase tracking-widest border ${won ? 'text-[#55DEE8] bg-[#55DEE8]/10 border-[#55DEE8]/20' : 'text-red-400 bg-red-500/10 border-red-500/20'}`}>
+                                        <span className={`px-2 py-0.5 rounded-[8px] text-[8px] font-black uppercase tracking-widest border ${won ? 'text-[#55DEE8] bg-[#55DEE8]/10 border-[#55DEE8]/20' : 'text-red-400 bg-red-500/10 border-red-500/20'}`}>
                                           {won ? 'WON' : 'LOST'}
                                         </span>
                                         <span className="text-[8px] font-bold text-gray-500 uppercase tracking-widest">{new Date(match.date).toLocaleDateString('en-GB')}</span>
@@ -1077,7 +1073,7 @@ export default function Profile() {
                                       </p>
                                     </div>
                                     <div className="flex items-center gap-3 shrink-0 self-end md:self-auto">
-                                      <div className="bg-white/5 border border-white/10 px-4 py-2 rounded-[15px] text-right">
+                                      <div className="bg-white/5 border border-white/10 px-4 py-2 rounded-[8px] text-right">
                                         <p className="text-[7px] font-black text-gray-500 uppercase tracking-widest">Match Performance</p>
                                         <p className="text-xs font-black text-[#BFF367]">
                                           {stat.battingRuns > 0 ? `${stat.battingRuns} Runs ` : ""}
@@ -1085,7 +1081,7 @@ export default function Profile() {
                                           {stat.battingRuns === 0 && stat.bowlingWickets === 0 ? "Fielded" : ""}
                                         </p>
                                       </div>
-                                      <button className="p-2.5 bg-white/5 hover:bg-white/10 border border-white/10 rounded-[15px] text-white transition-all group-hover:scale-105">
+                                      <button className="p-2.5 bg-white/5 hover:bg-white/10 border border-white/10 rounded-[8px] text-white transition-all group-hover:scale-105">
                                         <ArrowRight size={14} />
                                       </button>
                                     </div>
@@ -1095,7 +1091,7 @@ export default function Profile() {
                             })}
                           </div>
                         ) : (
-                          <div className="text-center py-12 bg-black/40 rounded-[15px] border border-white/10">
+                          <div className="text-center py-12 bg-black/40 rounded-[8px] border border-white/10">
                             <p className="text-xs font-bold text-gray-500 uppercase tracking-widest">No match history available</p>
                             <p className="text-[9px] text-gray-600 uppercase tracking-widest mt-1">Once matches are completed on Kridaz, your detailed resumes will display here!</p>
                           </div>
@@ -1117,7 +1113,7 @@ export default function Profile() {
                 {isOwnProfile && (
                   <Link 
                     to="/community?createPost=true"
-                    className="px-4 py-2 bg-gradient-to-r from-[#55DEE8] to-[#BFF367] text-black rounded-[15px] text-[10px] font-black uppercase tracking-widest hover:scale-105 active:scale-95 transition-all shadow-[0_4px_12px_rgba(85,222,232,0.2)] flex items-center justify-center"
+                    className="px-4 py-2 bg-gradient-to-r from-[#55DEE8] to-[#BFF367] text-black rounded-[8px] text-[10px] font-black uppercase tracking-widest hover:scale-105 active:scale-95 transition-all shadow-[0_4px_12px_rgba(85,222,232,0.2)] flex items-center justify-center"
                   >
                     Create New Post
                   </Link>
@@ -1134,7 +1130,7 @@ export default function Profile() {
                     const postImage = post.mediaUrls?.[0] || post.image || post.imageUrl || "https://images.unsplash.com/photo-1517466787929-bc90951d0974?q=80&w=2070";
                     const postDate = post.createdAt ? new Date(post.createdAt).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' }) : 'Recent';
                     return (
-                      <div key={post.id || post._id} className="bg-gradient-to-br from-white/5 to-white/[0.02] backdrop-blur-sm rounded-[15px] border border-white/10 overflow-hidden hover:border-[#55DEE8]/40 transition-all group">
+                      <div key={post.id || post._id} className="bg-gradient-to-br from-white/5 to-white/[0.02] backdrop-blur-sm rounded-[8px] border border-white/10 overflow-hidden hover:border-[#55DEE8]/40 transition-all group">
                         <div className="h-40 relative overflow-hidden bg-zinc-900/50">
                           {post.mediaType === 'video' ? (
                             <div className="w-full h-full relative">
@@ -1146,7 +1142,7 @@ export default function Profile() {
                           ) : (
                             <img src={postImage} alt="" className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" />
                           )}
-                          <div className="absolute top-3 right-3 px-1.5 py-0.5 bg-black/60 backdrop-blur-md rounded-[15px] text-[8px] font-black text-white uppercase tracking-widest border border-white/10">
+                          <div className="absolute top-3 right-3 px-1.5 py-0.5 bg-black/60 backdrop-blur-md rounded-[8px] text-[8px] font-black text-white uppercase tracking-widest border border-white/10">
                             {post.mediaType || 'Post'}
                           </div>
                         </div>
@@ -1188,7 +1184,7 @@ export default function Profile() {
                   })}
                 </div>
               ) : (
-                <div className="text-center py-12 bg-black/40 rounded-[15px] border border-white/10">
+                <div className="text-center py-12 bg-black/40 rounded-[8px] border border-white/10">
                   <p className="text-xs font-bold text-gray-500 uppercase tracking-widest">No posts uploaded yet</p>
                   {isOwnProfile && (
                     <p className="text-[9px] text-gray-600 uppercase tracking-widest mt-1">Create your first community update to share your sports achievements!</p>

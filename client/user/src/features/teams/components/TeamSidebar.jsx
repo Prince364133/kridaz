@@ -69,7 +69,7 @@ const TeamSidebar = ({ onSelectTeam, selectedTeamId, onCreateTeam }) => {
         <div className="mb-4">
           <button
             onClick={() => setIsStartScoringOpen(true)}
-            className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-gradient-to-r from-[#55DEE8] to-[#BFF367] text-black font-black uppercase tracking-widest text-sm rounded-[15px] shadow-lg shadow-[#55DEE8]/10 hover:shadow-[#BFF367]/15 hover:scale-[1.02] hover:-translate-y-0.5 transition-all duration-300"
+            className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-gradient-to-r from-[#55DEE8] to-[#BFF367] text-black font-black uppercase tracking-widest text-sm rounded-[8px] shadow-lg shadow-[#55DEE8]/10 hover:shadow-[#BFF367]/15 hover:scale-[1.02] hover:-translate-y-0.5 transition-all duration-300"
             style={{ fontFamily: "'Inter', sans-serif" }}
           >
             <Trophy size={16} />
@@ -85,7 +85,7 @@ const TeamSidebar = ({ onSelectTeam, selectedTeamId, onCreateTeam }) => {
               type="text" 
               placeholder="Search..." 
               style={{ fontFamily: "'Inter', sans-serif" }}
-              className="w-full bg-white/[0.03] border border-white/10 rounded-[15px] py-2.5 pl-10 pr-4 text-white text-sm focus:outline-none focus:border-[#55DEE8]/30 transition-colors uppercase font-bold tracking-widest"
+              className="w-full bg-white/[0.03] border border-white/10 rounded-[8px] py-2.5 pl-10 pr-4 text-white text-sm focus:outline-none focus:border-[#55DEE8]/30 transition-colors uppercase font-bold tracking-widest"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
             />
@@ -104,31 +104,25 @@ const TeamSidebar = ({ onSelectTeam, selectedTeamId, onCreateTeam }) => {
         </div>
 
         {/* Tabs */}
-        <div className="flex gap-2 p-1 bg-white/[0.03] rounded-[15px] border border-white/5">
+        <div className="flex gap-2 p-1 bg-white/[0.03] rounded-[8px] border border-white/5">
           <button 
             onClick={() => setActiveTab('myTeams')}
             style={{ fontFamily: "'Inter', sans-serif" }}
-            className={`flex-1 py-1.5 text-[10px] font-black uppercase tracking-widest rounded-[15px] transition-all ${
-              activeTab === 'myTeams' ? 'bg-gradient-to-r from-[#55DEE8] to-[#BFF367] text-black shadow-lg shadow-[#55DEE8]/10' : 'text-white/40 hover:text-white'
-            }`}
+            className={`flex-1 py-1.5 text-[10px] font-black uppercase tracking-widest rounded-[8px] transition-all ${ activeTab === 'myTeams' ? 'bg-gradient-to-r from-[#55DEE8] to-[#BFF367] text-black shadow-lg shadow-[#55DEE8]/10' : 'text-white/40 hover:text-white' }`}
           >
             My Teams
           </button>
           <button 
             onClick={() => setActiveTab('opponentTeams')}
             style={{ fontFamily: "'Inter', sans-serif" }}
-            className={`flex-1 py-1.5 text-[10px] font-black uppercase tracking-widest rounded-[15px] transition-all ${
-              activeTab === 'opponentTeams' ? 'bg-gradient-to-r from-[#55DEE8] to-[#BFF367] text-black shadow-lg shadow-[#55DEE8]/10' : 'text-white/40 hover:text-white'
-            }`}
+            className={`flex-1 py-1.5 text-[10px] font-black uppercase tracking-widest rounded-[8px] transition-all ${ activeTab === 'opponentTeams' ? 'bg-gradient-to-r from-[#55DEE8] to-[#BFF367] text-black shadow-lg shadow-[#55DEE8]/10' : 'text-white/40 hover:text-white' }`}
           >
             Opponents
           </button>
           <button 
             onClick={() => setActiveTab('scoringMatches')}
             style={{ fontFamily: "'Inter', sans-serif" }}
-            className={`flex-1 py-1.5 text-[10px] font-black uppercase tracking-widest rounded-[15px] transition-all ${
-              activeTab === 'scoringMatches' ? 'bg-gradient-to-r from-[#55DEE8] to-[#BFF367] text-black shadow-lg shadow-[#55DEE8]/10' : 'text-white/40 hover:text-white'
-            }`}
+            className={`flex-1 py-1.5 text-[10px] font-black uppercase tracking-widest rounded-[8px] transition-all ${ activeTab === 'scoringMatches' ? 'bg-gradient-to-r from-[#55DEE8] to-[#BFF367] text-black shadow-lg shadow-[#55DEE8]/10' : 'text-white/40 hover:text-white' }`}
           >
             Matches
           </button>
@@ -140,7 +134,7 @@ const TeamSidebar = ({ onSelectTeam, selectedTeamId, onCreateTeam }) => {
         {isLoading ? (
           <div className="flex flex-col gap-2 p-2">
             {[1, 2, 3].map(i => (
-              <div key={i} className="h-20 bg-white/[0.03] animate-pulse rounded-[15px]" />
+              <div key={i} className="h-20 bg-white/[0.03] animate-pulse rounded-[8px]" />
             ))}
           </div>
         ) : filteredItems.length > 0 ? (
@@ -157,7 +151,7 @@ const TeamSidebar = ({ onSelectTeam, selectedTeamId, onCreateTeam }) => {
               };
               const statusStyle = statusColors[item.scoringStatus] || statusColors['NOT_STARTED'];
               if (isMatch) return (
-                <div key={itemId} className="w-full flex flex-col p-3 rounded-[15px] bg-white/[0.02] border border-white/5 mb-2 hover:border-white/10 transition-colors">
+                <div key={itemId} className="w-full flex flex-col p-3 rounded-[8px] bg-white/[0.02] border border-white/5 mb-2 hover:border-white/10 transition-colors">
                   <div className="flex items-center justify-between mb-2">
                     <h4 className="font-black text-[#55DEE8] text-sm truncate flex-1 mr-2">{item.name || item.title}</h4>
                     <div className="flex items-center gap-1.5 flex-shrink-0">
@@ -195,14 +189,10 @@ const TeamSidebar = ({ onSelectTeam, selectedTeamId, onCreateTeam }) => {
                 whileTap={{ scale: 0.98 }}
                 onClick={() => onSelectTeam(item)}
                 style={{ fontFamily: "'Inter', sans-serif" }}
-                className={`w-full flex items-center gap-3 p-3 rounded-[15px] transition-all group ${
-                  isSelected 
-                    ? 'bg-gradient-to-r from-[#55DEE8]/5 to-[#BFF367]/5 border border-[#55DEE8]/20 shadow-[0_0_15px_rgba(85,222,232,0.06)]' 
-                    : 'hover:bg-white/[0.03] border border-transparent'
-                }`}
+                className={`w-full flex items-center gap-3 p-3 rounded-[8px] transition-all group ${ isSelected ? 'bg-gradient-to-r from-[#55DEE8]/5 to-[#BFF367]/5 border border-[#55DEE8]/20 shadow-[0_0_15px_rgba(85,222,232,0.06)]' : 'hover:bg-white/[0.03] border border-transparent' }`}
               >
                 <div className="relative shrink-0">
-                  <div className={`w-12 h-12 rounded-[15px] bg-black border-2 flex items-center justify-center text-[#55DEE8] font-bold overflow-hidden transition-colors ${isSelected ? 'border-[#55DEE8]' : 'border-white/10 group-hover:border-[#55DEE8]/50'}`}>
+                  <div className={`w-12 h-12 rounded-[8px] bg-black border-2 flex items-center justify-center text-[#55DEE8] font-bold overflow-hidden transition-colors ${isSelected ? 'border-[#55DEE8]' : 'border-white/10 group-hover:border-[#55DEE8]/50'}`}>
                     {item.image ? (
                       <img src={item.image} alt={item.name} className="w-full h-full object-cover" />
                     ) : (
@@ -232,7 +222,7 @@ const TeamSidebar = ({ onSelectTeam, selectedTeamId, onCreateTeam }) => {
           })
         ) : (
           <div className="flex flex-col items-center justify-center h-full text-center p-8">
-            <div className="w-16 h-16 rounded-[15px] bg-white/[0.03] border border-white/5 flex items-center justify-center mb-4">
+            <div className="w-16 h-16 rounded-[8px] bg-white/[0.03] border border-white/5 flex items-center justify-center mb-4">
               <Users className="text-white/10 text-2xl" />
             </div>
             <p className="text-white/40 text-sm font-bold">No teams found</p>

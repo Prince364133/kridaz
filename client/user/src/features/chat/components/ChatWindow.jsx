@@ -380,13 +380,7 @@ const ChatWindow = ({ chat, onBack, onSelectChat }) => {
  }}
  >
  <h3 className="text-white font-bold text-sm truncate hover:underline">{getChatName()}</h3>
- <p className={`text-[11px] transition-colors ${
- showTypingIndicator 
- ? 'text-[#55DEE8] font-medium' 
- : otherOnline 
- ? 'text-green-400' 
- : 'text-white/40'
- }`}>
+ <p className={`text-[11px] transition-colors ${ showTypingIndicator ? 'text-[#55DEE8] font-medium' : otherOnline ? 'text-green-400' : 'text-white/40' }`}>
  {showTypingIndicator ? 'typing...' : getStatusText()}
  </p>
  </div>
@@ -396,7 +390,7 @@ const ChatWindow = ({ chat, onBack, onSelectChat }) => {
  {chat.isCommunity && !isSelectionMode && (
  <button 
  onClick={() => setIsAddGroupToCommunityOpen(true)}
- className="flex items-center gap-2 px-3 py-1.5 bg-[#55DEE8]/10 text-[#55DEE8] hover:bg-[#55DEE8] hover:text-black rounded-lg transition-all text-[11px] font-black uppercase tracking-wider shadow-sm"
+ className="flex items-center gap-2 px-3 py-1.5 bg-[#55DEE8]/10 text-[#55DEE8] hover:bg-[#55DEE8] hover:text-black rounded-[6px] transition-all text-[11px] font-black uppercase tracking-wider shadow-sm"
  >
  <Plus size={14} />
  <span>Add Group</span>
@@ -426,7 +420,7 @@ const ChatWindow = ({ chat, onBack, onSelectChat }) => {
 
  {/* Dropdown Menu */}
  {isDropdownOpen && (
- <div className="absolute top-12 right-0 w-48 bg-[#232323] border border-white/10 rounded-lg shadow-xl py-2 z-50 animate-fade-in">
+ <div className="absolute top-12 right-0 w-48 bg-[#232323] border border-white/10 rounded-[8px] shadow-xl py-2 z-50 animate-fade-in">
  <button 
  onClick={() => {
  setIsDropdownOpen(false);
@@ -650,7 +644,7 @@ const ChatWindow = ({ chat, onBack, onSelectChat }) => {
  <div className="flex-1 flex flex-col p-6 animate-fade-in">
  {/* Dashboard Header */}
  <div className="flex flex-col items-center text-center mb-10">
- <div className="w-24 h-24 rounded-3xl bg-[#55DEE8]/10 flex items-center justify-center mb-4 border border-[#55DEE8]/20 shadow-[0_0_40px_-10px_rgba(85,222,232,0.2)]">
+ <div className="w-24 h-24 rounded-[8px] bg-[#55DEE8]/10 flex items-center justify-center mb-4 border border-[#55DEE8]/20 shadow-[0_0_40px_-10px_rgba(85,222,232,0.2)]">
  <Globe size={48} className="text-[#55DEE8]" />
  </div>
  <h2 className="text-2xl font-black text-white uppercase tracking-tight">{chat.chatName}</h2>
@@ -668,9 +662,9 @@ const ChatWindow = ({ chat, onBack, onSelectChat }) => {
  {/* Add Group Action */}
  <button 
  onClick={() => setIsAddGroupToCommunityOpen(true)}
- className="w-full flex items-center gap-4 p-4 bg-white/[0.03] border border-white/5 rounded-2xl hover:bg-[#55DEE8]/10 hover:border-[#55DEE8]/30 transition-all group"
+ className="w-full flex items-center gap-4 p-4 bg-white/[0.03] border border-white/5 rounded-[8px] hover:bg-[#55DEE8]/10 hover:border-[#55DEE8]/30 transition-all group"
  >
- <div className="w-12 h-12 rounded-xl bg-[#55DEE8] text-black flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform">
+ <div className="w-12 h-12 rounded-[8px] bg-[#55DEE8] text-black flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform">
  <Plus size={24} />
  </div>
  <div className="text-left">
@@ -683,9 +677,9 @@ const ChatWindow = ({ chat, onBack, onSelectChat }) => {
  {announcementGroup ? (
  <button 
  onClick={() => onSelectChat && onSelectChat(announcementGroup)}
- className="w-full flex items-center gap-4 p-4 bg-white/[0.03] border border-white/5 rounded-2xl hover:bg-white/[0.05] transition-all"
+ className="w-full flex items-center gap-4 p-4 bg-white/[0.03] border border-white/5 rounded-[8px] hover:bg-white/[0.05] transition-all"
  >
- <div className="w-12 h-12 rounded-xl bg-white/5 flex items-center justify-center">
+ <div className="w-12 h-12 rounded-[8px] bg-white/5 flex items-center justify-center">
  <MessageSquare size={20} className="text-[#55DEE8]" />
  </div>
  <div className="text-left flex-1">
@@ -697,8 +691,8 @@ const ChatWindow = ({ chat, onBack, onSelectChat }) => {
  </div>
  </button>
  ) : (
- <div className="w-full flex items-center gap-4 p-4 bg-white/[0.03] border border-white/5 rounded-2xl cursor-default opacity-80">
- <div className="w-12 h-12 rounded-xl bg-white/5 flex items-center justify-center">
+ <div className="w-full flex items-center gap-4 p-4 bg-white/[0.03] border border-white/5 rounded-[8px] cursor-default opacity-80">
+ <div className="w-12 h-12 rounded-[8px] bg-white/5 flex items-center justify-center">
  <MessageSquare size={20} className="text-[#55DEE8]" />
  </div>
  <div className="text-left flex-1">
@@ -716,9 +710,9 @@ const ChatWindow = ({ chat, onBack, onSelectChat }) => {
  <button 
  key={group._id}
  onClick={() => onSelectChat && onSelectChat(group)}
- className="w-full flex items-center gap-4 p-4 bg-white/[0.02] border border-transparent hover:border-white/10 hover:bg-white/[0.04] rounded-2xl transition-all"
+ className="w-full flex items-center gap-4 p-4 bg-white/[0.02] border border-transparent hover:border-white/10 hover:bg-white/[0.04] rounded-[8px] transition-all"
  >
- <div className="w-12 h-12 rounded-xl bg-white/5 flex items-center justify-center">
+ <div className="w-12 h-12 rounded-[8px] bg-white/5 flex items-center justify-center">
  <Users size={20} className="text-white/20" />
  </div>
  <div className="text-left">
@@ -750,7 +744,7 @@ const ChatWindow = ({ chat, onBack, onSelectChat }) => {
  String(member._id) === String(chat.groupAdmin?.user?._id || chat.groupAdmin?.user || chat.groupAdmin || chat.createdBy?.user?._id || chat.createdBy?.user || chat.createdBy);
  
  return (
- <div key={`member-${member._id}-${i}`} className="flex items-center gap-3 p-3 bg-white/[0.02] border border-white/5 rounded-2xl">
+ <div key={`member-${member._id}-${i}`} className="flex items-center gap-3 p-3 bg-white/[0.02] border border-white/5 rounded-[8px]">
  <img 
  src={member.profilePicture || `https://ui-avatars.com/api/?name=${member.name}&background=random`} 
  className="w-10 h-10 rounded-full object-cover border border-white/10" 
@@ -854,11 +848,7 @@ const ChatWindow = ({ chat, onBack, onSelectChat }) => {
  )}
  
  {/* Message Bubble */}
- <div className={`relative px-3 py-1.5 shadow-md border bg-[#55DEE8]/10 border-[#55DEE8]/30 text-[#55DEE8] rounded-[8px] ${
- isMine 
- ? (!isSameDirection ? 'rounded-tr-none' : '') 
- : (!isSameDirection ? 'rounded-tl-none' : '')
- }`}>
+ <div className={`relative px-3 py-1.5 shadow-md border bg-[#55DEE8]/10 border-[#55DEE8]/30 text-[#55DEE8] rounded-[8px] ${ isMine ? (!isSameDirection ? 'rounded-tr-none' : '') : (!isSameDirection ? 'rounded-tl-none' : '') }`}>
  <p className="text-[14.2px] leading-[19px] break-words whitespace-pre-wrap">{m.content}</p>
  <div className="flex items-center justify-end gap-1 mt-1 -mb-1 float-right ml-4 text-[#55DEE8]/60">
  <span className="text-[11px]">
@@ -892,9 +882,7 @@ const ChatWindow = ({ chat, onBack, onSelectChat }) => {
 
  {/* Selection Checkbox for Sent Messages */}
  {isSelectionMode && isMine && (
- <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center shrink-0 cursor-pointer transition-colors ${
- selectedMessages.includes(m._id) ? 'bg-[#55DEE8] border-[#55DEE8]' : 'border-white/30'
- }`}>
+ <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center shrink-0 cursor-pointer transition-colors ${ selectedMessages.includes(m._id) ? 'bg-[#55DEE8] border-[#55DEE8]' : 'border-white/30' }`}>
  {selectedMessages.includes(m._id) && <svg className="w-3 h-3 text-black" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>}
  </div>
  )}
@@ -908,7 +896,7 @@ const ChatWindow = ({ chat, onBack, onSelectChat }) => {
  {/* Typing indicator bubble */}
  {showTypingIndicator && (
  <div className="flex items-start mt-3">
- <div className="bg-white/[0.08] rounded-2xl rounded-tl-md px-4 py-3">
+ <div className="bg-white/[0.08] rounded-[8px] rounded-tl-md px-4 py-3">
  <div className="flex items-center gap-1">
  <span className="w-2 h-2 bg-white/40 rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></span>
  <span className="w-2 h-2 bg-white/40 rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></span>
@@ -963,7 +951,7 @@ const ChatWindow = ({ chat, onBack, onSelectChat }) => {
 
     return canMessage ? (
       <form onSubmit={handleSendMessage} className="p-3 bg-black/60 border-t border-white/10 z-10 relative">
-        <div className="flex items-center gap-2 bg-white/[0.04] border border-white/10 rounded-2xl px-4 py-1 focus-within:border-[#55DEE8]/40 transition-all">
+        <div className="flex items-center gap-2 bg-white/[0.04] border border-white/10 rounded-[8px] px-4 py-1 focus-within:border-[#55DEE8]/40 transition-all">
           <input
             type="text"
             value={message}
@@ -974,7 +962,7 @@ const ChatWindow = ({ chat, onBack, onSelectChat }) => {
           <button
             type="submit"
             disabled={!message.trim()}
-            className="p-2 bg-[#55DEE8] text-black rounded-xl hover:scale-105 active:scale-95 transition-all disabled:opacity-30 disabled:scale-100 disabled:bg-white/10 disabled:text-white/30"
+            className="p-2 bg-[#55DEE8] text-black rounded-[8px] hover:scale-105 active:scale-95 transition-all disabled:opacity-30 disabled:scale-100 disabled:bg-white/10 disabled:text-white/30"
           >
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
@@ -984,7 +972,7 @@ const ChatWindow = ({ chat, onBack, onSelectChat }) => {
       </form>
     ) : (
       <div className="p-6 bg-black/60 border-t border-white/10 text-center relative z-10">
-        <p className="text-xs text-[#55DEE8]/60 font-bold uppercase tracking-widest ">
+        <p className="text-xs text-[#55DEE8]/60 font-bold uppercase tracking-widest">
           Only admins can send messages to this group
         </p>
       </div>
@@ -1011,7 +999,7 @@ const ChatWindow = ({ chat, onBack, onSelectChat }) => {
  {showDeleteOptions && (
  <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
  <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setShowDeleteOptions(false)} />
- <div className="bg-[#1e1e1e] border border-white/10 rounded-2xl p-6 w-full max-w-sm relative z-10 shadow-2xl">
+ <div className="bg-[#1e1e1e] border border-white/10 rounded-[8px] p-6 w-full max-w-sm relative z-10 shadow-2xl">
  <h3 className="text-white text-lg font-bold mb-4">Delete messages?</h3>
  <p className="text-white/60 text-sm mb-6">
  Delete {selectedMessages.length} selected message{selectedMessages.length > 1 ? 's' : ''}?
@@ -1029,7 +1017,7 @@ const ChatWindow = ({ chat, onBack, onSelectChat }) => {
  console.error(err);
  }
  }}
- className="w-full py-3 bg-[#55DEE8] text-black font-bold rounded-xl hover:scale-[1.02] active:scale-[0.98] transition-all"
+ className="w-full py-3 bg-[#55DEE8] text-black font-bold rounded-[8px] hover:scale-[1.02] active:scale-[0.98] transition-all"
  >
  Delete for everyone
  </button>
@@ -1045,7 +1033,7 @@ const ChatWindow = ({ chat, onBack, onSelectChat }) => {
  console.error(err);
  }
  }}
- className="w-full py-3 bg-white/[0.05] text-white font-bold rounded-xl hover:bg-white/[0.1] transition-all"
+ className="w-full py-3 bg-white/[0.05] text-white font-bold rounded-[8px] hover:bg-white/[0.1] transition-all"
  >
  Delete for me
  </button>

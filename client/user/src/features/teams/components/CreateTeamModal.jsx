@@ -297,7 +297,7 @@ const CreateTeamModal = ({ isOpen, onClose, onSuccess }) => {
             animate={{ scale: 1, opacity: 1, y: 0 }}
             exit={{ scale: 0.95, opacity: 0, y: 15 }}
             transition={{ type: "spring", duration: 0.5, bounce: 0.2 }}
-            className="relative w-full max-w-lg bg-[#0a0a0a]/90 border border-white/10 rounded-[15px] overflow-hidden shadow-[0_0_50px_rgba(85,222,232,0.1)] backdrop-blur-2xl z-10 my-4"
+            className="relative w-full max-w-lg bg-[#0a0a0a]/90 border border-white/10 rounded-[8px] overflow-hidden shadow-[0_0_50px_rgba(85,222,232,0.1)] backdrop-blur-2xl z-10 my-4"
           >
             {/* Header */}
             <div className="p-4 border-b border-white/5 flex items-center justify-between bg-white/[0.02]">
@@ -311,7 +311,7 @@ const CreateTeamModal = ({ isOpen, onClose, onSuccess }) => {
               </div>
               <button 
                 onClick={onClose} 
-                className="w-9 h-9 rounded-[15px] bg-white/5 flex items-center justify-center text-white/40 hover:text-white hover:bg-white/10 border border-white/5 transition-all hover:shadow-[0_0_15px_rgba(85,222,232,0.3)] hover:border-[#55DEE8]/30 duration-300"
+                className="w-9 h-9 rounded-[8px] bg-white/5 flex items-center justify-center text-white/40 hover:text-white hover:bg-white/10 border border-white/5 transition-all hover:shadow-[0_0_15px_rgba(85,222,232,0.3)] hover:border-[#55DEE8]/30 duration-300"
               >
                 <X size={18} />
               </button>
@@ -340,11 +340,7 @@ const CreateTeamModal = ({ isOpen, onClose, onSuccess }) => {
                   onDragOver={handleDragOver}
                   onDragLeave={handleDragLeave}
                   onDrop={handleDrop}
-                  className={`relative h-24 rounded-[15px] bg-white/[0.02] border border-dashed flex flex-col items-center justify-center cursor-pointer overflow-hidden transition-all duration-300 group ${
-                    isDragging 
-                      ? 'border-[#55DEE8] bg-[#55DEE8]/5 shadow-[0_0_20px_rgba(85,222,232,0.15)]' 
-                      : 'border-white/10 hover:border-[#55DEE8]/40 hover:bg-white/[0.04] hover:shadow-[0_0_15px_rgba(85,222,232,0.05)]'
-                  }`}
+                  className={`relative h-24 rounded-[8px] bg-white/[0.02] border border-dashed flex flex-col items-center justify-center cursor-pointer overflow-hidden transition-all duration-300 group ${ isDragging ? 'border-[#55DEE8] bg-[#55DEE8]/5 shadow-[0_0_20px_rgba(85,222,232,0.15)]' : 'border-white/10 hover:border-[#55DEE8]/40 hover:bg-white/[0.04] hover:shadow-[0_0_15px_rgba(85,222,232,0.05)]' }`}
                 >
                   <input 
                     type="file" 
@@ -361,7 +357,7 @@ const CreateTeamModal = ({ isOpen, onClose, onSuccess }) => {
                         <button 
                           type="button"
                           onClick={handleRemoveLogo}
-                          className="p-2.5 bg-red-500 hover:bg-red-600 text-white rounded-[15px] shadow-lg transition-transform hover:scale-105 active:scale-95 duration-200"
+                          className="p-2.5 bg-red-500 hover:bg-red-600 text-white rounded-[8px] shadow-lg transition-transform hover:scale-105 active:scale-95 duration-200"
                         >
                           <Trash2 size={16} />
                         </button>
@@ -376,7 +372,7 @@ const CreateTeamModal = ({ isOpen, onClose, onSuccess }) => {
                     </div>
                   ) : (
                     <div className="flex flex-col items-center text-center p-3">
-                      <div className="w-8 h-8 rounded-[15px] bg-white/5 flex items-center justify-center mb-1 group-hover:scale-105 group-hover:bg-[#55DEE8]/10 group-hover:text-[#55DEE8] transition-all duration-300">
+                      <div className="w-8 h-8 rounded-[8px] bg-white/5 flex items-center justify-center mb-1 group-hover:scale-105 group-hover:bg-[#55DEE8]/10 group-hover:text-[#55DEE8] transition-all duration-300">
                         <Upload size={14} className="text-white/40 group-hover:text-[#55DEE8] transition-colors" />
                       </div>
                       <span className="text-[11px] font-bold text-white/80 tracking-wide uppercase" style={{ fontFamily: "'Inter', sans-serif" }}>
@@ -410,7 +406,7 @@ const CreateTeamModal = ({ isOpen, onClose, onSuccess }) => {
                       placeholder="e.g. Royal Strikers"
                       maxLength={30}
                       style={{ fontFamily: "'Inter', sans-serif" }}
-                      className="w-full bg-white/[0.02] border border-white/10 rounded-[15px] py-2.5 pl-11 pr-4 text-white text-xs focus:outline-none focus:border-[#55DEE8]/40 focus:shadow-[0_0_15px_rgba(85,222,232,0.1)] transition-all duration-300"
+                      className="w-full bg-white/[0.02] border border-white/10 rounded-[8px] py-2.5 pl-11 pr-4 text-white text-xs focus:outline-none focus:border-[#55DEE8]/40 focus:shadow-[0_0_15px_rgba(85,222,232,0.1)] transition-all duration-300"
                       value={formData.name}
                       onChange={handleChange}
                       required
@@ -432,7 +428,7 @@ const CreateTeamModal = ({ isOpen, onClose, onSuccess }) => {
                     <select 
                       name="sport"
                       style={{ fontFamily: "'Inter', sans-serif" }}
-                      className="w-full bg-[#111] border border-white/10 rounded-[15px] py-2.5 px-4 text-white text-xs focus:outline-none focus:border-[#55DEE8]/40 focus:shadow-[0_0_15px_rgba(85,222,232,0.1)] transition-all duration-300 appearance-none cursor-pointer"
+                      className="w-full bg-[#111] border border-white/10 rounded-[8px] py-2.5 px-4 text-white text-xs focus:outline-none focus:border-[#55DEE8]/40 focus:shadow-[0_0_15px_rgba(85,222,232,0.1)] transition-all duration-300 appearance-none cursor-pointer"
                       value={formData.sport}
                       onChange={handleChange}
                     >
@@ -463,7 +459,7 @@ const CreateTeamModal = ({ isOpen, onClose, onSuccess }) => {
                     <select 
                       name="state"
                       style={{ fontFamily: "'Inter', sans-serif" }}
-                      className="w-full bg-[#111] border border-white/10 rounded-[15px] py-2.5 pl-11 pr-8 text-white text-xs focus:outline-none focus:border-[#55DEE8]/40 focus:shadow-[0_0_15px_rgba(85,222,232,0.1)] transition-all duration-300 appearance-none cursor-pointer"
+                      className="w-full bg-[#111] border border-white/10 rounded-[8px] py-2.5 pl-11 pr-8 text-white text-xs focus:outline-none focus:border-[#55DEE8]/40 focus:shadow-[0_0_15px_rgba(85,222,232,0.1)] transition-all duration-300 appearance-none cursor-pointer"
                       value={formData.state}
                       onChange={handleStateChange}
                     >
@@ -491,7 +487,7 @@ const CreateTeamModal = ({ isOpen, onClose, onSuccess }) => {
                       name="city"
                       disabled={!formData.state}
                       style={{ fontFamily: "'Inter', sans-serif" }}
-                      className="w-full bg-[#111] border border-white/10 rounded-[15px] py-2.5 pl-11 pr-8 text-white text-xs focus:outline-none focus:border-[#55DEE8]/40 focus:shadow-[0_0_15px_rgba(85,222,232,0.1)] transition-all duration-300 appearance-none cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
+                      className="w-full bg-[#111] border border-white/10 rounded-[8px] py-2.5 pl-11 pr-8 text-white text-xs focus:outline-none focus:border-[#55DEE8]/40 focus:shadow-[0_0_15px_rgba(85,222,232,0.1)] transition-all duration-300 appearance-none cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
                       value={formData.city}
                       onChange={handleChange}
                     >
@@ -526,7 +522,7 @@ const CreateTeamModal = ({ isOpen, onClose, onSuccess }) => {
                     maxLength={200}
                     rows={2}
                     style={{ fontFamily: "'Inter', sans-serif" }}
-                    className="w-full bg-white/[0.02] border border-white/10 rounded-[15px] py-2.5 pl-11 pr-4 text-white text-xs focus:outline-none focus:border-[#55DEE8]/40 focus:shadow-[0_0_15px_rgba(85,222,232,0.1)] transition-all duration-300 resize-none min-h-[64px] leading-relaxed"
+                    className="w-full bg-white/[0.02] border border-white/10 rounded-[8px] py-2.5 pl-11 pr-4 text-white text-xs focus:outline-none focus:border-[#55DEE8]/40 focus:shadow-[0_0_15px_rgba(85,222,232,0.1)] transition-all duration-300 resize-none min-h-[64px] leading-relaxed"
                     value={formData.description}
                     onChange={handleTextareaChange}
                   />
@@ -546,7 +542,7 @@ const CreateTeamModal = ({ isOpen, onClose, onSuccess }) => {
                       name="captainName"
                       placeholder="Name"
                       style={{ fontFamily: "'Inter', sans-serif" }}
-                      className="w-full bg-white/[0.02] border border-white/10 rounded-[15px] py-2.5 pl-11 pr-4 text-white text-xs focus:outline-none focus:border-[#55DEE8]/40 focus:shadow-[0_0_15px_rgba(85,222,232,0.1)] transition-all duration-300"
+                      className="w-full bg-white/[0.02] border border-white/10 rounded-[8px] py-2.5 pl-11 pr-4 text-white text-xs focus:outline-none focus:border-[#55DEE8]/40 focus:shadow-[0_0_15px_rgba(85,222,232,0.1)] transition-all duration-300"
                       value={formData.captainName}
                       onChange={handleChange}
                     />
@@ -564,7 +560,7 @@ const CreateTeamModal = ({ isOpen, onClose, onSuccess }) => {
                       name="captainPhone"
                       placeholder="Phone number"
                       style={{ fontFamily: "'Inter', sans-serif" }}
-                      className="w-full bg-white/[0.02] border border-white/10 rounded-[15px] py-2.5 pl-11 pr-4 text-white text-xs focus:outline-none focus:border-[#55DEE8]/40 focus:shadow-[0_0_15px_rgba(85,222,232,0.1)] transition-all duration-300"
+                      className="w-full bg-white/[0.02] border border-white/10 rounded-[8px] py-2.5 pl-11 pr-4 text-white text-xs focus:outline-none focus:border-[#55DEE8]/40 focus:shadow-[0_0_15px_rgba(85,222,232,0.1)] transition-all duration-300"
                       value={formData.captainPhone}
                       onChange={handleChange}
                     />
@@ -578,7 +574,7 @@ const CreateTeamModal = ({ isOpen, onClose, onSuccess }) => {
                   type="button"
                   onClick={onClose}
                   style={{ fontFamily: "'Inter', sans-serif" }}
-                  className="flex-1 py-2.5 bg-white/5 hover:bg-white/10 text-white/60 hover:text-white font-bold rounded-[15px] border border-white/5 hover:border-white/10 transition-all duration-300 text-xs"
+                  className="flex-1 py-2.5 bg-white/5 hover:bg-white/10 text-white/60 hover:text-white font-bold rounded-[8px] border border-white/5 hover:border-white/10 transition-all duration-300 text-xs"
                 >
                   Cancel
                 </button>
@@ -586,7 +582,7 @@ const CreateTeamModal = ({ isOpen, onClose, onSuccess }) => {
                   type="submit" 
                   disabled={isSubmitDisabled}
                   style={{ fontFamily: "'Inter', sans-serif" }}
-                  className="flex-[2] py-2.5 bg-gradient-to-r from-[#55DEE8] to-[#BFF367] hover:brightness-[1.04] text-black font-black uppercase tracking-wider rounded-[15px] shadow-lg shadow-[#55DEE8]/10 hover:shadow-[#BFF367]/15 transition-all duration-300 flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed hover:-translate-y-0.5 active:translate-y-0 text-xs"
+                  className="flex-[2] py-2.5 bg-gradient-to-r from-[#55DEE8] to-[#BFF367] hover:brightness-[1.04] text-black font-black uppercase tracking-wider rounded-[8px] shadow-lg shadow-[#55DEE8]/10 hover:shadow-[#BFF367]/15 transition-all duration-300 flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed hover:-translate-y-0.5 active:translate-y-0 text-xs"
                 >
                   {isCreating ? (
                     <>

@@ -71,7 +71,7 @@ export const VideoSection = ({ videos = [] }) => {
  return (
  <div 
  key={`${video._id}-${idx}`}
- className="w-[350px] md:w-[450px] aspect-video rounded-2xl overflow-hidden border border-white/10 relative group bg-[#111]"
+ className="w-[350px] md:w-[450px] aspect-video rounded-[8px] overflow-hidden border border-white/10 relative group bg-[#111]"
  >
  <img 
  src={thumbUrl} 

@@ -149,7 +149,7 @@ export const MarketingManagement = () => {
         </div>
         <button
           onClick={() => handleOpenModal()}
-          className="inline-flex items-center gap-2 bg-lime-500 text-black px-4 py-2 rounded-lg font-bold hover:bg-lime-400 transition-colors"
+          className="inline-flex items-center gap-2 bg-lime-500 text-black px-4 py-2 rounded-[6px] font-bold hover:bg-lime-400 transition-colors"
         >
           <Plus size={18} />
           Add New {activeTab === "banners" ? "Banner" : "Video"}
@@ -160,9 +160,7 @@ export const MarketingManagement = () => {
       <div className="flex border-b border-white/10">
         <button
           onClick={() => setActiveTab("banners")}
-          className={`px-6 py-3 text-sm font-bold uppercase tracking-wider transition-colors border-b-2 ${
-            activeTab === "banners" ? "border-lime-500 text-lime-500" : "border-transparent text-gray-400 hover:text-white"
-          }`}
+          className={`px-6 py-3 text-sm font-bold uppercase tracking-wider transition-colors border-b-2 ${ activeTab === "banners" ? "border-lime-500 text-lime-500" : "border-transparent text-gray-400 hover:text-white" }`}
         >
           <div className="flex items-center gap-2">
             <Layout size={16} />
@@ -171,9 +169,7 @@ export const MarketingManagement = () => {
         </button>
         <button
           onClick={() => setActiveTab("videos")}
-          className={`px-6 py-3 text-sm font-bold uppercase tracking-wider transition-colors border-b-2 ${
-            activeTab === "videos" ? "border-lime-500 text-lime-500" : "border-transparent text-gray-400 hover:text-white"
-          }`}
+          className={`px-6 py-3 text-sm font-bold uppercase tracking-wider transition-colors border-b-2 ${ activeTab === "videos" ? "border-lime-500 text-lime-500" : "border-transparent text-gray-400 hover:text-white" }`}
         >
           <div className="flex items-center gap-2">
             <Video size={16} />
@@ -187,7 +183,7 @@ export const MarketingManagement = () => {
         {(activeTab === "banners" ? banners : videos).map((item) => (
           <div
             key={item._id}
-            className="group relative flex flex-col rounded-xl border border-white/10 bg-[#1A1A1A] overflow-hidden transition-all hover:border-lime-500/50"
+            className="group relative flex flex-col rounded-[8px] border border-white/10 bg-[#1A1A1A] overflow-hidden transition-all hover:border-lime-500/50"
           >
             {activeTab === "banners" ? (
               <div className="aspect-video w-full bg-black overflow-hidden relative">
@@ -241,7 +237,7 @@ export const MarketingManagement = () => {
         ))}
 
         {((activeTab === "banners" ? banners : videos).length === 0) && (
-          <div className="col-span-full py-20 flex flex-col items-center justify-center border border-dashed border-white/10 rounded-xl">
+          <div className="col-span-full py-20 flex flex-col items-center justify-center border border-dashed border-white/10 rounded-[8px]">
             <Layout size={40} className="text-gray-600 mb-4" />
             <h3 className="text-white font-bold">No {activeTab} found</h3>
             <p className="text-gray-400 text-sm">Start by adding your first marketing asset.</p>
@@ -252,7 +248,7 @@ export const MarketingManagement = () => {
       {/* Modal */}
       {isModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
-          <div className="w-full max-w-lg bg-[#111] border border-white/10 rounded-2xl overflow-hidden shadow-2xl">
+          <div className="w-full max-w-lg bg-[#111] border border-white/10 rounded-[8px] overflow-hidden shadow-2xl">
             <div className="p-6 border-b border-white/10 flex items-center justify-between">
               <h2 className="text-xl font-bold font-bebas tracking-wider text-white">
                 {editingItem ? "EDIT" : "ADD NEW"} {activeTab.toUpperCase().slice(0, -1)}
@@ -285,7 +281,7 @@ export const MarketingManagement = () => {
                          {/* Compact Preview Area */}
                          <div 
                            onClick={() => fileInputRef.current?.click()}
-                           className="relative h-36 w-full rounded-xl border-2 border-dashed border-white/10 bg-white/5 overflow-hidden group cursor-pointer hover:border-lime-500/50 transition-all flex flex-col items-center justify-center gap-2"
+                           className="relative h-36 w-full rounded-[8px] border-2 border-dashed border-white/10 bg-white/5 overflow-hidden group cursor-pointer hover:border-lime-500/50 transition-all flex flex-col items-center justify-center gap-2"
                          >
                            {previewUrl ? (
                              <>
@@ -372,9 +368,7 @@ export const MarketingManagement = () => {
                     <button
                       type="button"
                       onClick={() => setFormData({ ...formData, isActive: !formData.isActive })}
-                      className={`w-full h-[42px] flex items-center justify-center rounded-lg border font-bold text-[10px] uppercase tracking-widest transition-all ${
-                        formData.isActive ? "bg-lime-500/10 border-lime-500 text-lime-500" : "bg-red-500/10 border-red-500 text-red-500"
-                      }`}
+                      className={`w-full h-[42px] flex items-center justify-center rounded-lg border font-bold text-[10px] uppercase tracking-widest transition-all ${ formData.isActive ? "bg-lime-500/10 border-lime-500 text-lime-500" : "bg-red-500/10 border-red-500 text-red-500" }`}
                     >
                       {formData.isActive ? "Active" : "Inactive"}
                     </button>
@@ -386,13 +380,13 @@ export const MarketingManagement = () => {
                 <button
                   type="button"
                   onClick={() => setIsModalOpen(false)}
-                  className="flex-1 py-3 rounded-xl border border-white/10 text-white font-bold hover:bg-white/5 transition-all"
+                  className="flex-1 py-3 rounded-[8px] border border-white/10 text-white font-bold hover:bg-white/5 transition-all"
                 >
                   CANCEL
                 </button>
                 <button
                   type="submit"
-                  className="flex-1 py-3 rounded-xl bg-lime-500 text-black font-bold hover:bg-lime-400 transition-all shadow-[0_0_20px_rgba(132,204,22,0.3)]"
+                  className="flex-1 py-3 rounded-[8px] bg-lime-500 text-black font-bold hover:bg-lime-400 transition-all shadow-[0_0_20px_rgba(132,204,22,0.3)]"
                 >
                   SAVE {activeTab.toUpperCase().slice(0, -1)}
                 </button>

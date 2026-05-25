@@ -16,14 +16,10 @@ const OwnerCard = ({ owner, isSelected, onSelect, onDelete, onToggleStatus }) =>
   return (
     <div 
       onClick={handleRowClick}
-      className={`group relative bg-[#000000] border transition-all duration-500 rounded-[12px] p-4 lg:px-8 lg:py-5 shadow-xl overflow-hidden cursor-pointer ${
-        isSelected ? "border-[#CCFF00] bg-[#CCFF00]/5" : "border-[#2D2D2D] hover:border-[#CCFF00]/40"
-      }`}
+      className={`group relative bg-[#000000] border transition-all duration-500 rounded-[12px] p-4 lg:px-8 lg:py-5 shadow-xl overflow-hidden cursor-pointer ${ isSelected ? "border-[#CCFF00] bg-[#CCFF00]/5" : "border-[#2D2D2D] hover:border-[#CCFF00]/40" }`}
     >
       {/* Interaction Highlight */}
-      <div className={`absolute inset-y-0 left-0 w-1 bg-[#CCFF00] transition-transform duration-500 shadow-[0_0_15px_#CCFF00] ${
-        isSelected ? "scale-y-100" : "scale-y-0 group-hover:scale-y-100"
-      }`} />
+      <div className={`absolute inset-y-0 left-0 w-1 bg-[#CCFF00] transition-transform duration-500 shadow-[0_0_15px_#CCFF00] ${ isSelected ? "scale-y-100" : "scale-y-0 group-hover:scale-y-100" }`} />
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-center relative z-10">
         {/* Checkbox */}
@@ -75,9 +71,7 @@ const OwnerCard = ({ owner, isSelected, onSelect, onDelete, onToggleStatus }) =>
 
         {/* Status */}
         <div className="lg:col-span-1 flex items-center">
-          <div className={`flex items-center gap-2 px-3 py-1 border rounded-full ${
-            isBlocked ? "bg-red-500/5 border-red-500/20 text-red-400" : "bg-green-500/5 border-green-500/20 text-green-400"
-          }`}>
+          <div className={`flex items-center gap-2 px-3 py-1 border rounded-[6px] ${ isBlocked ? "bg-red-500/5 border-red-500/20 text-red-400" : "bg-green-500/5 border-green-500/20 text-green-400" }`}>
             <div className={`w-1.5 h-1.5 rounded-full ${isBlocked ? "bg-red-400" : "bg-green-400 shadow-[0_0_8px_#4ade80]"}`} />
             <span className="text-[9px] font-black uppercase tracking-widest">{isBlocked ? "Blocked" : "Active"}</span>
           </div>
@@ -91,11 +85,7 @@ const OwnerCard = ({ owner, isSelected, onSelect, onDelete, onToggleStatus }) =>
               onToggleStatus([owner._id], isBlocked ? "active" : "blocked");
             }}
             title={isBlocked ? "Activate Record" : "Block Record"}
-            className={`p-2 rounded-lg border transition-all ${
-              isBlocked 
-                ? "bg-green-500/10 border-green-500/20 text-green-400 hover:bg-green-500/20" 
-                : "bg-orange-500/10 border-orange-500/20 text-orange-400 hover:bg-orange-500/20"
-            }`}
+            className={`p-2 rounded-[8px] border transition-all ${ isBlocked ? "bg-green-500/10 border-green-500/20 text-green-400 hover:bg-green-500/20" : "bg-orange-500/10 border-orange-500/20 text-orange-400 hover:bg-orange-500/20" }`}
           >
             {isBlocked ? <CheckCircle size={16} /> : <Ban size={16} />}
           </button>
@@ -104,7 +94,7 @@ const OwnerCard = ({ owner, isSelected, onSelect, onDelete, onToggleStatus }) =>
               e.stopPropagation();
               onDelete(owner);
             }}
-            className="p-2 rounded-lg bg-red-500/10 border border-red-500/20 text-red-400 hover:bg-red-500/20 transition-all"
+            className="p-2 rounded-[8px] bg-red-500/10 border border-red-500/20 text-red-400 hover:bg-red-500/20 transition-all"
           >
             <Trash2 size={16} />
           </button>
@@ -113,7 +103,7 @@ const OwnerCard = ({ owner, isSelected, onSelect, onDelete, onToggleStatus }) =>
               e.stopPropagation();
               navigate(`/admin/owners/${owner._id}/turf`);
             }}
-            className="p-2 rounded-lg bg-white/5 border border-white/10 text-white/40 hover:bg-[#CCFF00] hover:text-black transition-all"
+            className="p-2 rounded-[8px] bg-white/5 border border-white/10 text-white/40 hover:bg-[#CCFF00] hover:text-black transition-all"
           >
             <ExternalLink size={16} />
           </button>

@@ -47,7 +47,7 @@ export default function CoachMasterclass() {
           </div>
           
           <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4 w-full xl:w-auto">
-            <div className="flex items-center gap-4 bg-white/[0.03] border border-white/5 px-8 py-4 rounded-lg backdrop-blur-xl">
+            <div className="flex items-center gap-4 bg-white/[0.03] border border-white/5 px-8 py-4 rounded-[6px] backdrop-blur-xl">
               <div className="w-10 h-10 rounded-lg flex items-center justify-center text-black" style={{ backgroundColor: themeColor }}>
                 <Calendar size={20} />
               </div>
@@ -69,12 +69,12 @@ export default function CoachMasterclass() {
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 relative z-10">
           {[1, 2, 3].map((i) => (
-            <div key={i} className="group relative bg-white/[0.03] backdrop-blur-xl border border-white/5 rounded-lg overflow-hidden hover:border-white/20 transition-all duration-500 shadow-2xl">
+            <div key={i} className="group relative bg-white/[0.03] backdrop-blur-xl border border-white/5 rounded-[8px] overflow-hidden hover:border-white/20 transition-all duration-500 shadow-2xl">
                <div className="aspect-video bg-white/[0.02] flex items-center justify-center relative">
                   <div className="w-16 h-16 bg-black/60 backdrop-blur-md rounded-lg flex items-center justify-center border border-white/10 group-hover:scale-110 transition-transform">
                      <PlayCircle size={32} style={{ color: themeColor }} className="opacity-60 group-hover:opacity-100 transition-opacity" />
                   </div>
-                  <div className="absolute top-4 left-4 px-3 py-1 bg-black/60 backdrop-blur-md rounded-md border border-white/5">
+                  <div className="absolute top-4 left-4 px-3 py-1 bg-black/60 backdrop-blur-md rounded-[8px] border border-white/5">
                      <span className="text-[9px] font-black text-neutral-500 uppercase tracking-widest">Training Node #{i}</span>
                   </div>
                </div>

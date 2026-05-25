@@ -329,7 +329,7 @@ export default function ProfessionalProfile() {
           </div>
           
           <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 w-full xl:w-auto">
-            <div className="flex items-center gap-4 bg-white/[0.03] border border-white/5 px-6 py-2.5 rounded-lg backdrop-blur-xl">
+            <div className="flex items-center gap-4 bg-white/[0.03] border border-white/5 px-6 py-2.5 rounded-[6px] backdrop-blur-xl">
               <div className="w-8 h-8 rounded-lg flex items-center justify-center text-black" style={{ backgroundColor: themeColor }}>
                 <Zap size={16} />
               </div>
@@ -365,7 +365,7 @@ export default function ProfessionalProfile() {
               {/* Left Column */}
               <div className="lg:col-span-4 space-y-4">
                 {/* Domain Expertise */}
-                <div className={`bg-white/[0.03] border border-white/5 rounded-lg p-5 backdrop-blur-xl relative ${showSportsDropdown ? 'z-[100]' : 'z-10'}`}>
+                <div className={`bg-white/[0.03] border border-white/5 rounded-[8px] p-5 backdrop-blur-xl relative ${showSportsDropdown ? 'z-[100]' : 'z-10'}`}>
                   <h3 className="text-[9px] font-black uppercase tracking-[0.3em] text-neutral-500 mb-6 flex items-center gap-2">
                     <Award size={14} style={{ color: themeColor }} /> Domain Expertise
                   </h3>
@@ -389,7 +389,7 @@ export default function ProfessionalProfile() {
                     </div>
 
                     {showSportsDropdown && filteredSports.length > 0 && (
-                      <div className="absolute top-full left-0 right-0 mt-1 bg-[#0A0A0A] border border-white/10 rounded-lg shadow-2xl z-[100] max-h-64 overflow-y-auto custom-scrollbar">
+                      <div className="absolute top-full left-0 right-0 mt-1 bg-[#0A0A0A] border border-white/10 rounded-[8px] shadow-2xl z-[100] max-h-64 overflow-y-auto custom-scrollbar">
                         {filteredSports.map(sport => (
                           <button 
                             key={sport}
@@ -405,7 +405,7 @@ export default function ProfessionalProfile() {
                   
                   <div className="flex flex-wrap gap-1.5">
                     {formData.gameTypes.map(type => (
-                      <span key={type} className="px-3 py-1.5 bg-white/[0.05] border border-white/5 rounded-md text-[8px] font-black text-white flex items-center gap-2 uppercase tracking-widest">
+                      <span key={type} className="px-3 py-1.5 bg-white/[0.05] border border-white/5 rounded-[6px] text-[8px] font-black text-white flex items-center gap-2 uppercase tracking-widest">
                         {type}
                         <button onClick={() => removeGameType(type)} className="text-neutral-600 hover:text-red-500 transition-colors"><X size={10} /></button>
                       </span>
@@ -414,21 +414,21 @@ export default function ProfessionalProfile() {
                 </div>
 
                 {/* Custom Engagement Mode Dropdown */}
-                <div className={`bg-white/[0.03] border border-white/5 rounded-lg p-5 backdrop-blur-xl relative ${showEngagementDropdown ? 'z-[100]' : 'z-10'}`}>
+                <div className={`bg-white/[0.03] border border-white/5 rounded-[8px] p-5 backdrop-blur-xl relative ${showEngagementDropdown ? 'z-[100]' : 'z-10'}`}>
                   <h3 className="text-[9px] font-black uppercase tracking-[0.3em] text-neutral-500 mb-6 flex items-center gap-2">
                     <MapPin size={14} style={{ color: themeColor }} /> Engagement
                   </h3>
                   <div className="relative">
                     <button 
                       onClick={() => setShowEngagementDropdown(!showEngagementDropdown)}
-                      className="w-full bg-white/[0.03] border border-white/5 rounded-lg p-3.5 text-[11px] text-white outline-none font-black uppercase tracking-widest transition-all flex items-center justify-between"
+                      className="w-full bg-white/[0.03] border border-white/5 rounded-[8px] p-3.5 text-[11px] text-white outline-none font-black uppercase tracking-widest transition-all flex items-center justify-between"
                     >
                       <span>{formData.availabilityMode === 'Both' ? 'Hybrid Mode' : formData.availabilityMode === 'Offline' ? 'Physical Only' : 'Remote Only'}</span>
                       <ChevronDown size={16} className={`transition-transform duration-300 ${showEngagementDropdown ? 'rotate-180' : ''}`} />
                     </button>
 
                     {showEngagementDropdown && (
-                      <div className="absolute top-full left-0 right-0 mt-1 bg-[#0A0A0A] border border-white/10 rounded-lg shadow-2xl z-[100] overflow-hidden">
+                      <div className="absolute top-full left-0 right-0 mt-1 bg-[#0A0A0A] border border-white/10 rounded-[8px] shadow-2xl z-[100] overflow-hidden">
                         {[
                           { label: 'Physical Only', value: 'Offline' },
                           { label: 'Remote Only', value: 'Online' },
@@ -451,7 +451,7 @@ export default function ProfessionalProfile() {
                 </div>
 
                 {/* Linguistics */}
-                <div className={`bg-white/[0.03] border border-white/5 rounded-lg p-5 backdrop-blur-xl relative ${showLanguagesDropdown ? 'z-[100]' : 'z-10'}`}>
+                <div className={`bg-white/[0.03] border border-white/5 rounded-[8px] p-5 backdrop-blur-xl relative ${showLanguagesDropdown ? 'z-[100]' : 'z-10'}`}>
                   <h3 className="text-[9px] font-black uppercase tracking-[0.3em] text-neutral-500 mb-6 flex items-center gap-2">
                     <Globe size={14} style={{ color: themeColor }} /> Languages
                   </h3>
@@ -475,7 +475,7 @@ export default function ProfessionalProfile() {
                       </div>
 
                       {showLanguagesDropdown && filteredLanguages.length > 0 && (
-                        <div className="absolute top-full left-0 right-0 mt-1 bg-[#0A0A0A] border border-white/10 rounded-lg shadow-2xl z-[100] max-h-64 overflow-y-auto custom-scrollbar">
+                        <div className="absolute top-full left-0 right-0 mt-1 bg-[#0A0A0A] border border-white/10 rounded-[8px] shadow-2xl z-[100] max-h-64 overflow-y-auto custom-scrollbar">
                           {filteredLanguages.map(lang => (
                             <button 
                               key={lang}
@@ -491,7 +491,7 @@ export default function ProfessionalProfile() {
                     
                     <div className="flex flex-wrap gap-1.5">
                       {formData.languages.map(lang => (
-                        <span key={lang} className="px-3 py-1.5 bg-white/[0.05] border border-white/5 rounded-md text-[8px] font-black text-white flex items-center gap-2 uppercase tracking-widest">
+                        <span key={lang} className="px-3 py-1.5 bg-white/[0.05] border border-white/5 rounded-[6px] text-[8px] font-black text-white flex items-center gap-2 uppercase tracking-widest">
                           {lang}
                           <button onClick={() => removeLanguage(lang)} className="text-neutral-600 hover:text-red-500 transition-colors"><X size={10} /></button>
                         </span>
@@ -503,7 +503,7 @@ export default function ProfessionalProfile() {
 
               {/* Right Column */}
               <div className="lg:col-span-8 space-y-4">
-                <div className="bg-white/[0.03] border border-white/5 rounded-lg p-6 backdrop-blur-xl space-y-8 shadow-2xl relative overflow-hidden">
+                <div className="bg-white/[0.03] border border-white/5 rounded-[8px] p-6 backdrop-blur-xl space-y-8 shadow-2xl relative overflow-hidden">
                   {/* Professional Matrix */}
                   <div className="space-y-6 relative z-10">
                     <h3 className="text-[10px] font-black uppercase tracking-[0.3em] text-white flex items-center gap-3">
@@ -516,7 +516,7 @@ export default function ProfessionalProfile() {
                         <input 
                           type="text" 
                           placeholder="e.g. Senior Scorer"
-                          className="w-full bg-white/[0.03] border border-white/5 rounded-lg p-3.5 text-[12px] text-white focus:border-white/10 outline-none font-inter font-black transition-all"
+                          className="w-full bg-white/[0.03] border border-white/5 rounded-[8px] p-3.5 text-[12px] text-white focus:border-white/10 outline-none font-inter font-black transition-all"
                           value={formData.specialization}
                           onChange={(e) => setFormData({...formData, specialization: e.target.value})}
                         />
@@ -526,7 +526,7 @@ export default function ProfessionalProfile() {
                         <div className="relative">
                             <button 
                               onClick={() => setShowProficiencyDropdown(!showProficiencyDropdown)}
-                              className="w-full bg-white/[0.03] border border-white/5 rounded-lg p-3.5 text-[12px] text-white focus:border-white/10 outline-none font-black uppercase tracking-widest flex items-center justify-between"
+                              className="w-full bg-white/[0.03] border border-white/5 rounded-[8px] p-3.5 text-[12px] text-white focus:border-white/10 outline-none font-black uppercase tracking-widest flex items-center justify-between"
                             >
                               <span>{
                                 formData.coachingLevel === 'Beginner' ? 'Junior Associate' : 
@@ -537,7 +537,7 @@ export default function ProfessionalProfile() {
                             </button>
 
                             {showProficiencyDropdown && (
-                              <div className="absolute top-full left-0 right-0 mt-1 bg-[#0A0A0A] border border-white/10 rounded-lg shadow-2xl z-[100] overflow-hidden">
+                              <div className="absolute top-full left-0 right-0 mt-1 bg-[#0A0A0A] border border-white/10 rounded-[8px] shadow-2xl z-[100] overflow-hidden">
                                 {[
                                   { label: 'Junior Associate', value: 'Beginner' },
                                   { label: 'Mid-Tier Professional', value: 'Intermediate' },
@@ -564,7 +564,7 @@ export default function ProfessionalProfile() {
                         <input 
                           type="text" 
                           placeholder="e.g. 12+ Professional Seasons"
-                          className="w-full bg-white/[0.03] border border-white/5 rounded-lg p-3.5 text-[12px] text-white focus:border-white/10 outline-none font-black transition-all"
+                          className="w-full bg-white/[0.03] border border-white/5 rounded-[8px] p-3.5 text-[12px] text-white focus:border-white/10 outline-none font-black transition-all"
                           value={formData.experience}
                           onChange={(e) => setFormData({...formData, experience: e.target.value})}
                         />
@@ -586,11 +586,7 @@ export default function ProfessionalProfile() {
                             <button 
                               key={type}
                               onClick={() => toggleArrayItem("trainingTypes", type)}
-                              className={`px-4 py-2.5 rounded-lg text-[8px] font-black uppercase tracking-widest transition-all ${
-                                formData.trainingTypes.includes(type) 
-                                  ? "text-black" 
-                                  : "bg-white/[0.03] border border-white/5 text-neutral-600 hover:text-white"
-                              }`}
+                              className={`px-4 py-2.5 rounded-lg text-[8px] font-black uppercase tracking-widest transition-all ${ formData.trainingTypes.includes(type) ? "text-black" : "bg-white/[0.03] border border-white/5 text-neutral-600 hover:text-white" }`}
                               style={{ backgroundColor: formData.trainingTypes.includes(type) ? themeColor : 'transparent' }}
                             >
                               {type}
@@ -605,11 +601,7 @@ export default function ProfessionalProfile() {
                             <button 
                               key={age}
                               onClick={() => toggleArrayItem("ageGroups", age)}
-                              className={`px-4 py-2.5 rounded-lg text-[8px] font-black uppercase tracking-widest transition-all ${
-                                formData.ageGroups.includes(age) 
-                                  ? "text-black" 
-                                  : "bg-white/[0.03] border border-white/5 text-neutral-600 hover:text-white"
-                              }`}
+                              className={`px-4 py-2.5 rounded-lg text-[8px] font-black uppercase tracking-widest transition-all ${ formData.ageGroups.includes(age) ? "text-black" : "bg-white/[0.03] border border-white/5 text-neutral-600 hover:text-white" }`}
                               style={{ backgroundColor: formData.ageGroups.includes(age) ? themeColor : 'transparent' }}
                             >
                               {age}
@@ -624,7 +616,7 @@ export default function ProfessionalProfile() {
             </div>
 
             {/* Career Milestones ΓÇö Full Width */}
-            <div className="bg-white/[0.03] border border-white/5 rounded-lg p-6 backdrop-blur-xl relative overflow-hidden">
+            <div className="bg-white/[0.03] border border-white/5 rounded-[8px] p-6 backdrop-blur-xl relative overflow-hidden">
                 <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-6 mb-8">
                 <div className="space-y-1">
                     <h3 className="text-[20px] font-black text-white uppercase tracking-widest flex items-center gap-3 font-inter">
@@ -649,7 +641,7 @@ export default function ProfessionalProfile() {
 
                 <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-3">
                 {formData.achievements.map((ach, idx) => (
-                    <div key={idx} className="flex items-start justify-between p-4 bg-white/[0.03] border border-white/5 rounded-lg group/item transition-all hover:border-white/10">
+                    <div key={idx} className="flex items-start justify-between p-4 bg-white/[0.03] border border-white/5 rounded-[8px] group/item transition-all hover:border-white/10">
                     <div className="flex items-start gap-3">
                         <CheckCircle2 size={14} style={{ color: themeColor }} className="mt-0.5 shrink-0" />
                         <span className="text-[11px] text-neutral-300 font-black uppercase tracking-tight leading-snug">{ach}</span>
@@ -670,7 +662,7 @@ export default function ProfessionalProfile() {
               {currentStep > 1 && (
                 <button 
                   onClick={prevStep}
-                  className="px-5 h-10 bg-white/5 border border-white/10 rounded-lg text-[8px] font-black uppercase tracking-[0.2em] hover:bg-white/10 transition-all flex items-center justify-center gap-2 text-neutral-400 active:scale-95"
+                  className="px-5 h-10 bg-white/5 border border-white/10 rounded-[8px] text-[8px] font-black uppercase tracking-[0.2em] hover:bg-white/10 transition-all flex items-center justify-center gap-2 text-neutral-400 active:scale-95"
                 >
                   <ChevronLeft size={14} /> Previous
                 </button>
@@ -695,7 +687,7 @@ export default function ProfessionalProfile() {
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
                 {/* Add Certification */}
                 <div className="lg:col-span-4 space-y-4">
-                <div className="bg-white/[0.03] border border-white/5 rounded-lg p-5 backdrop-blur-xl space-y-6 shadow-2xl relative overflow-hidden group">
+                <div className="bg-white/[0.03] border border-white/5 rounded-[8px] p-5 backdrop-blur-xl space-y-6 shadow-2xl relative overflow-hidden group">
                     <div className="flex items-center gap-4 border-b border-white/5 pb-4">
                     <div className="w-10 h-10 rounded-lg flex items-center justify-center text-black" style={{ backgroundColor: themeColor }}>
                         <Award size={20} />
@@ -712,7 +704,7 @@ export default function ProfessionalProfile() {
                         <input 
                         type="text" 
                         placeholder="e.g. Master Scorer"
-                        className="w-full bg-white/[0.03] border border-white/5 rounded-lg p-3.5 text-[11px] text-white focus:border-white/10 outline-none font-black transition-all"
+                        className="w-full bg-white/[0.03] border border-white/5 rounded-[8px] p-3.5 text-[11px] text-white focus:border-white/10 outline-none font-black transition-all"
                         value={newCert.title}
                         onChange={(e) => setNewCert({...newCert, title: e.target.value})}
                         />
@@ -723,7 +715,7 @@ export default function ProfessionalProfile() {
                         <textarea 
                         rows="3"
                         placeholder="Detail scope..."
-                        className="w-full bg-white/[0.03] border border-white/5 rounded-lg p-3.5 text-[11px] text-white focus:border-white/10 outline-none font-black transition-all resize-none"
+                        className="w-full bg-white/[0.03] border border-white/5 rounded-[8px] p-3.5 text-[11px] text-white focus:border-white/10 outline-none font-black transition-all resize-none"
                         value={newCert.description}
                         onChange={(e) => setNewCert({...newCert, description: e.target.value})}
                         />
@@ -738,7 +730,7 @@ export default function ProfessionalProfile() {
                             onChange={handleCertImageUpload}
                             className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
                         />
-                        <div className={`w-full h-36 border border-dashed rounded-lg flex flex-col items-center justify-center gap-3 transition-all ${newCert.image ? "border-white/20 bg-white/5" : "border-white/5 bg-white/[0.02] group-hover/upload:border-white/10"}`}>
+                        <div className={`w-full h-36 border border-dashed rounded-[8px] flex flex-col items-center justify-center gap-3 transition-all ${newCert.image ? "border-white/20 bg-white/5" : "border-white/5 bg-white/[0.02] group-hover/upload:border-white/10"}`}>
                             {newCert.image ? (
                             <img src={newCert.image} className="w-full h-full object-contain p-2" alt="Preview" />
                             ) : (
@@ -764,7 +756,7 @@ export default function ProfessionalProfile() {
 
                 {/* Right: Credentials List */}
                 <div className="lg:col-span-8 space-y-4">
-                <div className="bg-white/[0.03] border border-white/5 rounded-lg p-6 backdrop-blur-xl space-y-6 min-h-[500px] relative overflow-hidden">
+                <div className="bg-white/[0.03] border border-white/5 rounded-[8px] p-6 backdrop-blur-xl space-y-6 min-h-[500px] relative overflow-hidden">
                     <div className="flex items-center justify-between border-b border-white/5 pb-4 relative z-10">
                     <h3 className="text-[10px] font-black uppercase tracking-[0.3em] text-white flex items-center gap-3 font-['Open_Sans']">
                         <ShieldCheck size={16} style={{ color: themeColor }} /> Verified Stack
@@ -807,7 +799,7 @@ export default function ProfessionalProfile() {
             <div className="flex items-center justify-end gap-3 pt-6">
               <button 
                 onClick={prevStep}
-                className="px-5 h-10 bg-white/5 border border-white/10 rounded-lg text-[8px] font-black uppercase tracking-[0.2em] hover:bg-white/10 transition-all flex items-center justify-center gap-2 text-neutral-400 active:scale-95"
+                className="px-5 h-10 bg-white/5 border border-white/10 rounded-[8px] text-[8px] font-black uppercase tracking-[0.2em] hover:bg-white/10 transition-all flex items-center justify-center gap-2 text-neutral-400 active:scale-95"
               >
                 <ChevronLeft size={14} /> Previous
               </button>
@@ -827,7 +819,7 @@ export default function ProfessionalProfile() {
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
                 {/* Gallery Form */}
                 <div className="lg:col-span-4 space-y-4">
-                <div className="bg-white/[0.03] border border-white/5 rounded-lg p-5 backdrop-blur-xl space-y-6 shadow-2xl relative overflow-hidden group">
+                <div className="bg-white/[0.03] border border-white/5 rounded-[8px] p-5 backdrop-blur-xl space-y-6 shadow-2xl relative overflow-hidden group">
                     <div className="flex items-center gap-4 border-b border-white/5 pb-4">
                         <div className="w-10 h-10 rounded-lg flex items-center justify-center text-black" style={{ backgroundColor: themeColor }}>
                         <Layout size={20} />
@@ -839,7 +831,7 @@ export default function ProfessionalProfile() {
                     </div>
 
                     <div className="space-y-6">
-                        <div className="flex bg-white/[0.03] p-1 rounded-lg border border-white/5">
+                        <div className="flex bg-white/[0.03] p-1 rounded-[8px] border border-white/5">
                         <button 
                             onClick={() => setNewPortfolioItem({...newPortfolioItem, mediaType: 'image', mediaUrl: ''})}
                             className={`flex-1 py-2 text-[8px] font-black uppercase tracking-widest rounded-md transition-all ${newPortfolioItem.mediaType === 'image' ? "text-black" : "text-neutral-600"}`}
@@ -861,7 +853,7 @@ export default function ProfessionalProfile() {
                         <input 
                             type="text" 
                             placeholder="e.g. IPL Regional"
-                            className="w-full bg-white/[0.03] border border-white/5 rounded-lg p-3.5 text-[11px] text-white outline-none font-black transition-all"
+                            className="w-full bg-white/[0.03] border border-white/5 rounded-[8px] p-3.5 text-[11px] text-white outline-none font-black transition-all"
                             value={newPortfolioItem.title}
                             onChange={(e) => setNewPortfolioItem({...newPortfolioItem, title: e.target.value})}
                         />
@@ -872,7 +864,7 @@ export default function ProfessionalProfile() {
                         <textarea 
                             rows="3"
                             placeholder="Impact..."
-                            className="w-full bg-white/[0.03] border border-white/5 rounded-lg p-3.5 text-[11px] text-white outline-none font-black transition-all resize-none"
+                            className="w-full bg-white/[0.03] border border-white/5 rounded-[8px] p-3.5 text-[11px] text-white outline-none font-black transition-all resize-none"
                             value={newPortfolioItem.description}
                             onChange={(e) => setNewPortfolioItem({...newPortfolioItem, description: e.target.value})}
                         />
@@ -887,7 +879,7 @@ export default function ProfessionalProfile() {
                             onChange={handlePortfolioMediaUpload}
                             className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
                             />
-                            <div className={`w-full h-36 border border-dashed rounded-lg flex flex-col items-center justify-center gap-3 transition-all ${newPortfolioItem.mediaUrl ? "border-white/20 bg-white/5" : "border-white/5 bg-white/[0.02] group-hover/upload:border-white/10"}`}>
+                            <div className={`w-full h-36 border border-dashed rounded-[8px] flex flex-col items-center justify-center gap-3 transition-all ${newPortfolioItem.mediaUrl ? "border-white/20 bg-white/5" : "border-white/5 bg-white/[0.02] group-hover/upload:border-white/10"}`}>
                             {newPortfolioItem.mediaUrl ? (
                                 newPortfolioItem.mediaType === 'image' ? (
                                     <img src={newPortfolioItem.mediaUrl} className="w-full h-full object-contain p-2" alt="Preview" />
@@ -920,7 +912,7 @@ export default function ProfessionalProfile() {
 
                 {/* Right: Exhibition Gallery */}
                 <div className="lg:col-span-8 space-y-4">
-                <div className="bg-white/[0.03] border border-white/5 rounded-lg p-6 backdrop-blur-xl space-y-6 min-h-[500px] relative overflow-hidden">
+                <div className="bg-white/[0.03] border border-white/5 rounded-[8px] p-6 backdrop-blur-xl space-y-6 min-h-[500px] relative overflow-hidden">
                     <div className="flex items-center justify-between border-b border-white/5 pb-4 relative z-10">
                     <h3 className="text-[10px] font-black uppercase tracking-[0.3em] text-white flex items-center gap-3 font-['Open_Sans']">
                         <Layout size={16} style={{ color: themeColor }} /> Exhibition
@@ -966,7 +958,7 @@ export default function ProfessionalProfile() {
             <div className="flex items-center justify-end gap-3 pt-6">
               <button 
                 onClick={prevStep}
-                className="px-5 h-10 bg-white/5 border border-white/10 rounded-lg text-[8px] font-black uppercase tracking-[0.2em] hover:bg-white/10 transition-all flex items-center justify-center gap-2 text-neutral-400 active:scale-95"
+                className="px-5 h-10 bg-white/5 border border-white/10 rounded-[8px] text-[8px] font-black uppercase tracking-[0.2em] hover:bg-white/10 transition-all flex items-center justify-center gap-2 text-neutral-400 active:scale-95"
               >
                 <ChevronLeft size={14} /> Previous
               </button>

@@ -61,11 +61,7 @@ const DashboardProfile = () => {
            </div>
            <button 
              onClick={() => setIsEditing(!isEditing)}
-             className={`flex items-center gap-2 px-6 py-2.5 rounded-[6px] font-normal text-[13px] uppercase tracking-wider transition-all border ${
-               isEditing 
-                 ? "bg-white/10 text-white border-white/20" 
-                 : "bg-[#CCFF00] text-black border-transparent hover:bg-[#BFFF00] shadow-[0_4px_12px_rgba(204,255,0,0.2)]"
-             }`}
+             className={`flex items-center gap-2 px-6 py-2.5 rounded-[6px] font-normal text-[13px] uppercase tracking-wider transition-all border ${ isEditing ? "bg-white/10 text-white border-white/20" : "bg-[#CCFF00] text-black border-transparent hover:bg-[#BFFF00] shadow-[0_4px_12px_rgba(204,255,0,0.2)]" }`}
            >
              {isEditing ? "Discard Changes" : "Edit Profile"}
            </button>

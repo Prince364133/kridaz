@@ -90,9 +90,9 @@ export default function StreamerMatches() {
   return (
     <div className="space-y-12 animate-fade-in pb-20">
       {isLimitedStreamer && (
-        <div className="bg-gradient-to-r from-red-500/20 via-red-500/5 to-transparent border border-red-500/20 rounded-[2rem] p-8 flex flex-col md:flex-row items-center justify-between gap-6 shadow-[0_0_50px_rgba(239,68,68,0.05)]">
+        <div className="bg-gradient-to-r from-red-500/20 via-red-500/5 to-transparent border border-red-500/20 rounded-[8px] p-8 flex flex-col md:flex-row items-center justify-between gap-6 shadow-[0_0_50px_rgba(239,68,68,0.05)]">
           <div className="flex items-center gap-6">
-            <div className="w-16 h-16 rounded-2xl bg-red-500/10 flex items-center justify-center shrink-0 border border-red-500/20">
+            <div className="w-16 h-16 rounded-[8px] bg-red-500/10 flex items-center justify-center shrink-0 border border-red-500/20">
               <Shield className={`text-red-500 ${!upgradeRequested ? "animate-pulse" : ""}`} size={32} />
             </div>
             <div className="space-y-1">
@@ -116,14 +116,14 @@ export default function StreamerMatches() {
             </div>
           </div>
           {upgradeRequested ? (
-            <div className="w-full md:w-auto h-14 px-10 bg-yellow-500/10 text-yellow-400 font-black uppercase text-xs tracking-widest rounded-2xl border border-yellow-500/20 flex items-center justify-center gap-3">
+            <div className="w-full md:w-auto h-14 px-10 bg-yellow-500/10 text-yellow-400 font-black uppercase text-xs tracking-widest rounded-[8px] border border-yellow-500/20 flex items-center justify-center gap-3">
               <Clock size={16} /> Awaiting Approval
             </div>
           ) : (
             <button 
               onClick={() => setShowUpgradeModal(true)}
               disabled={requestingUpgrade}
-              className="w-full md:w-auto h-14 px-10 bg-white text-black font-black uppercase text-xs tracking-widest rounded-2xl hover:bg-gray-100 transition-all shadow-[0_10px_30px_rgba(255,255,255,0.1)] active:scale-95 disabled:opacity-60 disabled:cursor-not-allowed flex items-center gap-3"
+              className="w-full md:w-auto h-14 px-10 bg-white text-black font-black uppercase text-xs tracking-widest rounded-[8px] hover:bg-gray-100 transition-all shadow-[0_10px_30px_rgba(255,255,255,0.1)] active:scale-95 disabled:opacity-60 disabled:cursor-not-allowed flex items-center gap-3"
             >
               {requestingUpgrade ? <><Loader2 size={16} className="animate-spin" /> Submitting...</> : "Apply for Full Access"}
             </button>
@@ -135,7 +135,7 @@ export default function StreamerMatches() {
       {showUpgradeModal && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
           <div className="absolute inset-0 bg-black/90 backdrop-blur-xl" onClick={() => setShowUpgradeModal(false)} />
-          <div className="relative w-full max-w-2xl bg-[#0A0A0A] border border-white/10 rounded-[2.5rem] shadow-[0_50px_100px_-20px_rgba(0,0,0,0.5)] overflow-hidden animate-in zoom-in-95 duration-300">
+          <div className="relative w-full max-w-2xl bg-[#0A0A0A] border border-white/10 rounded-[8px] shadow-[0_50px_100px_-20px_rgba(0,0,0,0.5)] overflow-hidden animate-in zoom-in-95 duration-300">
             <div className="p-8 md:p-12 space-y-8">
               <div className="space-y-2">
                 <h2 className="text-3xl font-black text-white uppercase tracking-tight">Professional <span className="text-violet-500">Registration</span></h2>
@@ -152,7 +152,7 @@ export default function StreamerMatches() {
                       value={formData.phone}
                       onChange={(e) => setFormData({...formData, phone: e.target.value})}
                       placeholder="CONTACT NUMBER"
-                      className="w-full h-14 bg-white/5 border border-white/10 rounded-2xl px-6 text-xs font-bold uppercase tracking-widest text-white focus:border-violet-500/50 outline-none transition-all"
+                      className="w-full h-14 bg-white/5 border border-white/10 rounded-[8px] px-6 text-xs font-bold uppercase tracking-widest text-white focus:border-violet-500/50 outline-none transition-all"
                     />
                   </div>
                   <div className="space-y-2">
@@ -163,7 +163,7 @@ export default function StreamerMatches() {
                       value={formData.city}
                       onChange={(e) => setFormData({...formData, city: e.target.value})}
                       placeholder="PRIMARY LOCATION"
-                      className="w-full h-14 bg-white/5 border border-white/10 rounded-2xl px-6 text-xs font-bold uppercase tracking-widest text-white focus:border-violet-500/50 outline-none transition-all"
+                      className="w-full h-14 bg-white/5 border border-white/10 rounded-[8px] px-6 text-xs font-bold uppercase tracking-widest text-white focus:border-violet-500/50 outline-none transition-all"
                     />
                   </div>
                   <div className="space-y-2">
@@ -174,7 +174,7 @@ export default function StreamerMatches() {
                       value={formData.experience}
                       onChange={(e) => setFormData({...formData, experience: e.target.value})}
                       placeholder="E.G. 5 YEARS"
-                      className="w-full h-14 bg-white/5 border border-white/10 rounded-2xl px-6 text-xs font-bold uppercase tracking-widest text-white focus:border-violet-500/50 outline-none transition-all"
+                      className="w-full h-14 bg-white/5 border border-white/10 rounded-[8px] px-6 text-xs font-bold uppercase tracking-widest text-white focus:border-violet-500/50 outline-none transition-all"
                     />
                   </div>
                   <div className="space-y-2">
@@ -182,7 +182,7 @@ export default function StreamerMatches() {
                     <select 
                       value={formData.specialization}
                       onChange={(e) => setFormData({...formData, specialization: e.target.value})}
-                      className="w-full h-14 bg-white/5 border border-white/10 rounded-2xl px-6 text-xs font-bold uppercase tracking-widest text-white focus:border-violet-500/50 outline-none transition-all appearance-none"
+                      className="w-full h-14 bg-white/5 border border-white/10 rounded-[8px] px-6 text-xs font-bold uppercase tracking-widest text-white focus:border-violet-500/50 outline-none transition-all appearance-none"
                     >
                       <option value="Cricket">Cricket</option>
                       <option value="Football">Football</option>
@@ -200,7 +200,7 @@ export default function StreamerMatches() {
                     value={formData.bio}
                     onChange={(e) => setFormData({...formData, bio: e.target.value})}
                     placeholder="TELL US ABOUT YOUR STREAMING BACKGROUND..."
-                    className="w-full bg-white/5 border border-white/10 rounded-3xl p-6 text-xs font-bold uppercase tracking-widest text-white focus:border-violet-500/50 outline-none transition-all resize-none"
+                    className="w-full bg-white/5 border border-white/10 rounded-[8px] p-6 text-xs font-bold uppercase tracking-widest text-white focus:border-violet-500/50 outline-none transition-all resize-none"
                   />
                 </div>
 
@@ -208,14 +208,14 @@ export default function StreamerMatches() {
                   <button 
                     type="button"
                     onClick={() => setShowUpgradeModal(false)}
-                    className="flex-1 h-14 bg-white/5 text-white font-black uppercase text-xs tracking-widest rounded-2xl hover:bg-white/10 transition-all"
+                    className="flex-1 h-14 bg-white/5 text-white font-black uppercase text-xs tracking-widest rounded-[8px] hover:bg-white/10 transition-all"
                   >
                     Cancel
                   </button>
                   <button 
                     type="submit"
                     disabled={requestingUpgrade}
-                    className="flex-[2] h-14 bg-violet-500 text-white font-black uppercase text-xs tracking-widest rounded-2xl shadow-[0_10px_30px_rgba(139,92,246,0.2)] hover:shadow-violet-500/40 transition-all flex items-center justify-center gap-3 active:scale-95 disabled:opacity-60"
+                    className="flex-[2] h-14 bg-violet-500 text-white font-black uppercase text-xs tracking-widest rounded-[8px] shadow-[0_10px_30px_rgba(139,92,246,0.2)] hover:shadow-violet-500/40 transition-all flex items-center justify-center gap-3 active:scale-95 disabled:opacity-60"
                   >
                     {requestingUpgrade ? <Loader2 size={16} className="animate-spin" /> : "Submit Application"}
                   </button>
@@ -240,7 +240,7 @@ export default function StreamerMatches() {
             placeholder="ENTER MATCH SHORT ID (KRZ-XXXX)"
             value={searchId}
             onChange={(e) => setSearchId(e.target.value.toUpperCase())}
-            className="w-full h-14 bg-white/5 border border-white/10 rounded-2xl px-6 text-xs font-bold uppercase tracking-widest text-white focus:border-violet-500/50 outline-none transition-all pr-12"
+            className="w-full h-14 bg-white/5 border border-white/10 rounded-[8px] px-6 text-xs font-bold uppercase tracking-widest text-white focus:border-violet-500/50 outline-none transition-all pr-12"
           />
           <div className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 group-focus-within:text-violet-500 transition-colors">
             <Video size={18} />
@@ -256,14 +256,14 @@ export default function StreamerMatches() {
         
         {/* Global Search Result */}
         {searching && (
-          <div className="p-12 bg-white/[0.02] border border-white/5 rounded-[2.5rem] text-center flex flex-col items-center gap-4">
+          <div className="p-12 bg-white/[0.02] border border-white/5 rounded-[8px] text-center flex flex-col items-center gap-4">
              <Loader2 className="animate-spin text-violet-500" size={24} />
              <p className="text-[10px] font-black uppercase tracking-widest text-gray-600">Searching global network...</p>
           </div>
         )}
 
         {!searching && globalMatch && !activeMatches.some(m => m._id === globalMatch._id) && (
-          <div className="bg-gradient-to-r from-violet-500/10 to-transparent border border-violet-500/20 rounded-[2rem] p-8 group shadow-[0_0_50px_rgba(139,92,246,0.05)] animate-in slide-in-from-bottom-4 duration-500">
+          <div className="bg-gradient-to-r from-violet-500/10 to-transparent border border-violet-500/20 rounded-[8px] p-8 group shadow-[0_0_50px_rgba(139,92,246,0.05)] animate-in slide-in-from-bottom-4 duration-500">
             <div className="flex flex-col md:flex-row justify-between gap-8">
               <div 
                 className="space-y-4 cursor-pointer"
@@ -292,24 +292,24 @@ export default function StreamerMatches() {
               <div className="flex items-center gap-3">
                 {globalMatch.streamer ? (
                      <div className="flex flex-col md:flex-row items-center gap-3">
-                       <div className="flex items-center gap-2 px-6 py-4 bg-violet-500/10 rounded-2xl text-[10px] font-black text-violet-500 uppercase tracking-widest border border-violet-500/20 shadow-[0_0_20px_rgba(139,92,246,0.1)]">
+                       <div className="flex items-center gap-2 px-6 py-4 bg-violet-500/10 rounded-[8px] text-[10px] font-black text-violet-500 uppercase tracking-widest border border-violet-500/20 shadow-[0_0_20px_rgba(139,92,246,0.1)]">
                          <MonitorPlay size={16} className="fill-violet-500/20" /> Streamer Hired
                        </div>
                          <button 
                            onClick={() => navigate(`/streamer/manage/${globalMatch._id}`)}
-                           className="h-14 px-8 bg-violet-500 text-white font-black uppercase text-xs tracking-widest rounded-2xl shadow-[0_10px_30px_rgba(139,92,246,0.2)] hover:shadow-violet-500/40 transition-all flex items-center justify-center gap-3"
+                           className="h-14 px-8 bg-violet-500 text-white font-black uppercase text-xs tracking-widest rounded-[8px] shadow-[0_10px_30px_rgba(139,92,246,0.2)] hover:shadow-violet-500/40 transition-all flex items-center justify-center gap-3"
                          >
                            Manage Stream <Settings size={16} />
                          </button>
                      </div>
                 ) : globalMatch.streamerRequest?.status === "PENDING" ? (
-                   <div className="flex items-center gap-2 px-6 py-4 bg-white/5 rounded-2xl text-[10px] font-black text-gray-500 uppercase tracking-widest border border-white/5">
+                   <div className="flex items-center gap-2 px-6 py-4 bg-white/5 rounded-[8px] text-[10px] font-black text-gray-500 uppercase tracking-widest border border-white/5">
                       <Clock size={16} /> Request Pending Approval
                    </div>
                 ) : (
                   <button 
                     onClick={() => handleRequestStreamer(globalMatch._id)}
-                    className="w-full md:w-auto h-14 px-10 bg-violet-500 text-white font-black uppercase text-xs tracking-widest rounded-2xl shadow-[0_10px_30px_rgba(139,92,246,0.2)] hover:shadow-violet-500/40 transition-all flex items-center justify-center gap-3"
+                    className="w-full md:w-auto h-14 px-10 bg-violet-500 text-white font-black uppercase text-xs tracking-widest rounded-[8px] shadow-[0_10px_30px_rgba(139,92,246,0.2)] hover:shadow-violet-500/40 transition-all flex items-center justify-center gap-3"
                   >
                     Request to Stream <Hand size={16} fill="currentColor" />
                   </button>
@@ -320,7 +320,7 @@ export default function StreamerMatches() {
         )}
 
         {(filteredMatches.length === 0 && !globalMatch && !searching) ? (
-          <div className="p-12 bg-white/[0.02] border border-white/5 border-dashed rounded-[2.5rem] text-center">
+          <div className="p-12 bg-white/[0.02] border border-white/5 border-dashed rounded-[8px] text-center">
             <p className="text-[10px] font-black uppercase tracking-widest text-gray-600">
               {searchId.length >= 4 ? `No match found for "${searchId}"` : "No active matches found"}
             </p>
@@ -331,7 +331,7 @@ export default function StreamerMatches() {
               <div 
                 key={match._id} 
                 onClick={() => navigate(`/match/${match._id}`)}
-                className="cursor-pointer bg-gradient-to-r from-white/[0.03] to-transparent border border-white/10 rounded-[2rem] p-8 hover:border-violet-500/20 transition-all group"
+                className="cursor-pointer bg-gradient-to-r from-white/[0.03] to-transparent border border-white/10 rounded-[8px] p-8 hover:border-violet-500/20 transition-all group"
               >
                 <div className="flex flex-col md:flex-row justify-between gap-8">
                   <div className="space-y-4">
@@ -339,7 +339,7 @@ export default function StreamerMatches() {
                       <span className="px-3 py-1 bg-violet-500/10 text-violet-500 text-[10px] font-black uppercase tracking-widest rounded-full border border-violet-500/20">
                         Match ID: {match.shortId || 'N/A'}
                       </span>
-                      <span className="px-3 py-1 bg-green-500/10 text-green-500 text-[10px] font-black uppercase tracking-widest rounded-full border border-green-500/20 flex items-center gap-1">
+                      <span className="px-3 py-1 bg-green-500/10 text-green-500 text-[10px] font-black uppercase tracking-widest rounded-[6px] border border-green-500/20 flex items-center gap-1">
                         <CheckCircle2 size={10} /> Streamer Hired
                       </span>
                       <span className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">
@@ -363,7 +363,7 @@ export default function StreamerMatches() {
                          e.stopPropagation();
                          navigate(`/streamer/manage/${match._id}`);
                        }}
-                       className="w-full sm:w-auto h-14 px-10 bg-violet-500 text-white font-black uppercase text-xs tracking-widest rounded-2xl shadow-[0_10px_30px_rgba(139,92,246,0.2)] hover:shadow-violet-500/40 transition-all flex items-center justify-center gap-3 group-hover:scale-[1.02]"
+                       className="w-full sm:w-auto h-14 px-10 bg-violet-500 text-white font-black uppercase text-xs tracking-widest rounded-[8px] shadow-[0_10px_30px_rgba(139,92,246,0.2)] hover:shadow-violet-500/40 transition-all flex items-center justify-center gap-3 group-hover:scale-[1.02]"
                      >
                        Manage Match <Settings size={16} />
                      </button>
@@ -383,7 +383,7 @@ export default function StreamerMatches() {
             <div 
               key={match._id} 
               onClick={() => navigate(`/match/${match._id}`)}
-              className="cursor-pointer bg-[#0D0D0D] border border-white/5 rounded-[1.5rem] p-6 flex justify-between items-center hover:border-white/10 transition-all"
+              className="cursor-pointer bg-[#0D0D0D] border border-white/5 rounded-[8px] p-6 flex justify-between items-center hover:border-white/10 transition-all"
             >
                <div className="space-y-1">
                  <h4 className="text-sm font-bold text-white uppercase">{match.name}</h4>

@@ -17,9 +17,7 @@ const Carousel = ({slides}) => {
       {slides.map((slide, index) => (
         <div
           key={index}
-          className={`absolute top-0 left-0 w-full h-full transition-opacity duration-500 ease-in-out ${
-            index === currentSlide ? "opacity-100" : "opacity-0"
-          }`}
+          className={`absolute top-0 left-0 w-full h-full transition-opacity duration-500 ease-in-out ${ index === currentSlide ? "opacity-100" : "opacity-0" }`}
         >
           <img
             src={slide}

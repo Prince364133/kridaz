@@ -24,12 +24,12 @@ const TeamMembersModal = ({ isOpen, onClose, team }) => {
             initial={{ scale: 0.9, opacity: 0, y: 20 }}
             animate={{ scale: 1, opacity: 1, y: 0 }}
             exit={{ scale: 0.9, opacity: 0, y: 20 }}
-            className="relative bg-[#0d0d0d] border border-white/10 rounded-[32px] w-full max-w-lg overflow-hidden shadow-2xl"
+            className="relative bg-[#0d0d0d] border border-white/10 rounded-[8px] w-full max-w-lg overflow-hidden shadow-2xl"
           >
             {/* Header */}
             <div className="p-6 border-b border-white/5 flex items-center justify-between bg-white/[0.02]">
               <div className="flex items-center gap-4">
-                <div className="w-12 h-12 rounded-xl bg-[#1a1a1a] border border-white/10 flex items-center justify-center overflow-hidden">
+                <div className="w-12 h-12 rounded-[8px] bg-[#1a1a1a] border border-white/10 flex items-center justify-center overflow-hidden">
                   {team.logo ? (
                     <img src={team.logo} alt="" className="w-full h-full object-cover" />
                   ) : (
@@ -55,7 +55,7 @@ const TeamMembersModal = ({ isOpen, onClose, team }) => {
                 {team.members?.map((member, idx) => (
                   <div 
                     key={member.user?._id || idx}
-                    className="flex items-center justify-between p-3 rounded-2xl bg-white/[0.02] border border-white/5 hover:bg-white/[0.04] transition-all group"
+                    className="flex items-center justify-between p-3 rounded-[8px] bg-white/[0.02] border border-white/5 hover:bg-white/[0.04] transition-all group"
                   >
                     <div className="flex items-center gap-3">
                       <div 
@@ -87,7 +87,7 @@ const TeamMembersModal = ({ isOpen, onClose, team }) => {
                       onClick={() => {
                         if (member.user?._id) navigate(`/profile/${member.user._id}`);
                       }}
-                      className="p-2 rounded-xl bg-white/5 text-white/40 opacity-0 group-hover:opacity-100 transition-all hover:bg-[#55DEE8] hover:text-black"
+                      className="p-2 rounded-[8px] bg-white/5 text-white/40 opacity-0 group-hover:opacity-100 transition-all hover:bg-[#55DEE8] hover:text-black"
                     >
                       <ExternalLink size={14} />
                     </button>
@@ -100,7 +100,7 @@ const TeamMembersModal = ({ isOpen, onClose, team }) => {
             <div className="p-6 border-t border-white/5 bg-white/[0.01]">
               <button 
                 onClick={() => navigate(`/team/${team._id}`)}
-                className="w-full py-4 bg-gradient-to-r from-[#55DEE8] to-[#BFF367] hover:brightness-[1.04] text-black font-black text-xs uppercase tracking-[0.2em] rounded-2xl shadow-lg shadow-[#55DEE8]/10 hover:shadow-[#BFF367]/15 transition-all hover:scale-[1.02] active:scale-[0.98] duration-300"
+                className="w-full py-4 bg-gradient-to-r from-[#55DEE8] to-[#BFF367] hover:brightness-[1.04] text-black font-black text-xs uppercase tracking-[0.2em] rounded-[8px] shadow-lg shadow-[#55DEE8]/10 hover:shadow-[#BFF367]/15 transition-all hover:scale-[1.02] active:scale-[0.98] duration-300"
               >
                 View Full Team Profile
               </button>

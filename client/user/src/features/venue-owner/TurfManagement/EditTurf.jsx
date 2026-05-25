@@ -533,11 +533,7 @@ const EditTurf = () => {
                           key={day}
                           type="button"
                           onClick={() => toggleDay(day)}
-                          className={`px-5 py-3 rounded-[8px] text-[11px] font-black uppercase tracking-widest transition-all border ${
-                            isActive 
-                            ? "bg-[#55DEE8] text-black border-[#55DEE8] shadow-[0_5px_15px_rgba(204,255,0,0.2)]" 
-                            : "bg-[#111111] text-[#444] border-[#2D2D2D] hover:border-[#55DEE8]/40"
-                          }`}
+                          className={`px-5 py-3 rounded-[8px] text-[11px] font-black uppercase tracking-widest transition-all border ${ isActive ? "bg-[#55DEE8] text-black border-[#55DEE8] shadow-[0_5px_15px_rgba(204,255,0,0.2)]" : "bg-[#111111] text-[#444] border-[#2D2D2D] hover:border-[#55DEE8]/40" }`}
                         >
                           {day.substring(0, 3)}
                         </button>
@@ -627,11 +623,7 @@ const EditTurf = () => {
                       return (
                         <div
                           key={index}
-                          className={`p-4 rounded-[8px] border transition-all flex flex-col gap-4 ${
-                            slot.isActive
-                            ? "bg-[#111111] border-[#2D2D2D] hover:border-[#55DEE8]/20"
-                            : "bg-black/50 border-[#1A1A1A] opacity-40"
-                          }`}
+                          className={`p-4 rounded-[8px] border transition-all flex flex-col gap-4 ${ slot.isActive ? "bg-[#111111] border-[#2D2D2D] hover:border-[#55DEE8]/20" : "bg-black/50 border-[#1A1A1A] opacity-40" }`}
                         >
                           <div className="flex justify-between items-center">
                             <button

@@ -53,7 +53,7 @@ const ScorerDashboard = () => {
         <p className="font-bold text-xl uppercase tracking-wider text-[#00C187]">Connection Interrupted</p>
         <button
           onClick={() => window.location.reload()}
-          className="mt-6 px-8 py-3 border border-[#00C187]/50 text-[#00C187] font-bold uppercase rounded-xl hover:bg-[#00C187]/10 transition-all"
+          className="mt-6 px-8 py-3 border border-[#00C187]/50 text-[#00C187] font-bold uppercase rounded-[8px] hover:bg-[#00C187]/10 transition-all"
         >
           Try Again
         </button>
@@ -94,8 +94,8 @@ const ScorerDashboard = () => {
               </p>
             </div>
 
-            <div className="flex items-center gap-4 bg-white/[0.03] border border-white/5 px-6 py-4 rounded-2xl backdrop-blur-xl">
-              <div className="w-12 h-12 bg-[#00C187]/10 rounded-xl flex items-center justify-center text-[#00C187]">
+            <div className="flex items-center gap-4 bg-white/[0.03] border border-white/5 px-6 py-4 rounded-[8px] backdrop-blur-xl">
+              <div className="w-12 h-12 bg-[#00C187]/10 rounded-[8px] flex items-center justify-center text-[#00C187]">
                 <Calendar size={24} />
               </div>
               <div className="space-y-0.5">

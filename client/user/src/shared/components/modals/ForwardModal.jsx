@@ -57,7 +57,7 @@ const ForwardModal = ({ isOpen, onClose, messageId }) => {
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 animate-fade-in">
       <div 
-        className="bg-[#1a1a1a] border border-white/10 rounded-2xl w-full max-w-md overflow-hidden shadow-2xl flex flex-col animate-scale-up"
+        className="bg-[#1a1a1a] border border-white/10 rounded-[8px] w-full max-w-md overflow-hidden shadow-2xl flex flex-col animate-scale-up"
         style={{ maxHeight: '80vh' }}
         onClick={(e) => e.stopPropagation()}
       >
@@ -79,7 +79,7 @@ const ForwardModal = ({ isOpen, onClose, messageId }) => {
               placeholder="Search followers..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full bg-white/5 border border-white/10 rounded-xl py-2.5 pl-10 pr-4 text-sm text-white placeholder-white/40 focus:outline-none focus:border-[#55DEE8]/50 transition-colors"
+              className="w-full bg-white/5 border border-white/10 rounded-[8px] py-2.5 pl-10 pr-4 text-sm text-white placeholder-white/40 focus:outline-none focus:border-[#55DEE8]/50 transition-colors"
             />
           </div>
         </div>
@@ -100,9 +100,7 @@ const ForwardModal = ({ isOpen, onClose, messageId }) => {
                 <div 
                   key={user._id}
                   onClick={() => toggleUser(user._id)}
-                  className={`flex items-center justify-between p-2 rounded-xl cursor-pointer transition-all ${
-                    isSelected ? 'bg-[#55DEE8]/10' : 'hover:bg-white/5'
-                  }`}
+                  className={`flex items-center justify-between p-2 rounded-[8px] cursor-pointer transition-all ${ isSelected ? 'bg-[#55DEE8]/10' : 'hover:bg-white/5' }`}
                 >
                   <div className="flex items-center gap-3">
                     <div className="w-10 h-10 rounded-full border border-white/10 bg-white/5 flex items-center justify-center overflow-hidden">
@@ -134,9 +132,7 @@ const ForwardModal = ({ isOpen, onClose, messageId }) => {
                       <p className="text-white/40 text-xs">@{user.username || user.name.toLowerCase().replace(' ', '')}</p>
                     </div>
                   </div>
-                  <div className={`w-6 h-6 rounded-full border flex items-center justify-center transition-colors ${
-                    isSelected ? 'bg-[#55DEE8] border-[#55DEE8]' : 'border-white/20'
-                  }`}>
+                  <div className={`w-6 h-6 rounded-full border flex items-center justify-center transition-colors ${ isSelected ? 'bg-[#55DEE8] border-[#55DEE8]' : 'border-white/20' }`}>
                     {isSelected && <Check size={14} className="text-black" />}
                   </div>
                 </div>
@@ -150,7 +146,7 @@ const ForwardModal = ({ isOpen, onClose, messageId }) => {
             <button
               onClick={handleForward}
               disabled={isForwarding}
-              className="w-full flex items-center justify-center gap-2 py-3 bg-[#55DEE8] text-black font-black uppercase tracking-wider text-sm rounded-xl hover:bg-[#95e61a] transition-colors disabled:opacity-50"
+              className="w-full flex items-center justify-center gap-2 py-3 bg-[#55DEE8] text-black font-black uppercase tracking-wider text-sm rounded-[8px] hover:bg-[#95e61a] transition-colors disabled:opacity-50"
             >
               <Send size={16} />
               {isForwarding ? "Forwarding..." : `Forward to ${selectedUsers.length} user${selectedUsers.length > 1 ? 's' : ''}`}

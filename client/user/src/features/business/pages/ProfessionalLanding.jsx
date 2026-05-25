@@ -165,7 +165,7 @@ export default function ProfessionalLanding() {
         <div className="grid md:grid-cols-2 gap-10 md:gap-16 items-center min-h-[70vh] md:min-h-[80vh] py-10 md:py-0">
           <div className="text-center md:text-left">
             <div
-              className="inline-flex items-center gap-2 px-4 py-2 rounded-full border text-[10px] md:text-xs font-semibold mb-4 md:mb-6 uppercase tracking-widest"
+              className="inline-flex items-center gap-2 px-4 py-2 rounded-[6px] border text-[10px] md:text-xs font-semibold mb-4 md:mb-6 uppercase tracking-widest"
               style={{ background: "rgba(85,222,232,0.08)", borderColor: "rgba(85,222,232,0.25)" }}
             >
               <span style={{ background: GRADIENT, WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", fontFamily: "'Inter'" }}>
@@ -181,7 +181,7 @@ export default function ProfessionalLanding() {
             </p>
             <button
               onClick={() => setModalStep(1)}
-              className="inline-flex items-center gap-3 font-bold text-black rounded-full px-8 py-4 hover:brightness-110 transition-all uppercase tracking-widest text-sm md:text-base"
+              className="inline-flex items-center gap-3 font-bold text-black rounded-[6px] px-8 py-4 hover:brightness-110 transition-all uppercase tracking-widest text-sm md:text-base"
               style={{ background: GRADIENT }}
             >
               Join as a Professional <ArrowRight size={20} />
@@ -192,11 +192,11 @@ export default function ProfessionalLanding() {
             {benefits.map((b, i) => (
               <div
                 key={i}
-                className="flex gap-4 p-4 md:p-6 rounded-2xl md:rounded-3xl border border-white/10 backdrop-blur-sm"
+                className="flex gap-4 p-4 md:p-6 rounded-[8px] md:rounded-[8px] border border-white/10 backdrop-blur-sm"
                 style={{ background: "rgba(10,10,10,0.75)" }}
               >
                 <div
-                  className="w-10 h-10 md:w-12 md:h-12 rounded-xl flex items-center justify-center shrink-0 border relative"
+                  className="w-10 h-10 md:w-12 md:h-12 rounded-[8px] flex items-center justify-center shrink-0 border relative"
                   style={{ borderColor: "rgba(85,222,232,0.2)", backgroundColor: "rgba(85,222,232,0.08)" }}
                 >
                   <b.icon size={20} className="md:w-6 md:h-6" stroke="url(#primaryGradient)" />
@@ -219,8 +219,8 @@ export default function ProfessionalLanding() {
               { icon: Target, title: "Manage Bookings", desc: "Digital calendar, match reports, and client communication tools." },
               { icon: CheckCircle, title: "Automate Billing", desc: "Automatic invoices and payment reminders so you can focus on the game." }
             ].map((step, i) => (
-              <div key={i} className="p-6 md:p-8 bg-white/5 backdrop-blur-sm rounded-2xl md:rounded-3xl border border-white/10 hover:border-[#55DEE8]/30 transition-all group">
-                <div className="flex items-center justify-center w-12 h-12 md:w-14 md:h-14 mx-auto mb-4 md:mb-6 rounded-xl md:rounded-2xl bg-white/10 group-hover:bg-[#55DEE8]/20 transition-colors">
+              <div key={i} className="p-6 md:p-8 bg-white/5 backdrop-blur-sm rounded-[8px] md:rounded-[8px] border border-white/10 hover:border-[#55DEE8]/30 transition-all group">
+                <div className="flex items-center justify-center w-12 h-12 md:w-14 md:h-14 mx-auto mb-4 md:mb-6 rounded-[8px] md:rounded-[8px] bg-white/10 group-hover:bg-[#55DEE8]/20 transition-colors">
                   <step.icon className="w-6 h-6 md:w-7 md:h-7 text-white transition-colors" stroke="currentColor" />
                 </div>
                 <h3 className="text-lg md:text-xl font-bold text-white mb-2 md:mb-3 uppercase tracking-wider" style={{ fontFamily: "'Open Sans'" }}>{step.title}</h3>
@@ -242,7 +242,7 @@ export default function ProfessionalLanding() {
                 icon: Trophy 
               }
             ].map((t, i) => (
-              <div key={i} className="p-6 md:p-10 bg-white/5 backdrop-blur-md rounded-[2rem] md:rounded-[2.5rem] border border-white/10 relative overflow-hidden group">
+              <div key={i} className="p-6 md:p-10 bg-white/5 backdrop-blur-md rounded-[8px] md:rounded-[8px] border border-white/10 relative overflow-hidden group">
                 <div className="absolute top-0 right-0 p-4 md:p-8 opacity-10 group-hover:opacity-20 transition-opacity">
                   <t.icon size={60} className="md:w-20 md:h-20" />
                 </div>
@@ -319,11 +319,7 @@ export default function ProfessionalLanding() {
                       <button
                         key={role.id}
                         onClick={() => toggleRole(role.id)}
-                        className={`flex flex-col items-center justify-center p-6 border rounded-[10px] transition-all ${
-                          isSelected 
-                            ? 'border-[#55DEE8] bg-[#55DEE8]/10 text-white' 
-                            : 'border-white/10 bg-white/5 text-gray-400 hover:border-white/30 hover:bg-white/10'
-                        }`}
+                        className={`flex flex-col items-center justify-center p-6 border rounded-[10px] transition-all ${ isSelected ? 'border-[#55DEE8] bg-[#55DEE8]/10 text-white' : 'border-white/10 bg-white/5 text-gray-400 hover:border-white/30 hover:bg-white/10' }`}
                       >
                         <role.icon size={32} className={`mb-3 ${isSelected ? 'text-[#55DEE8]' : ''}`} />
                         <span className="font-bold uppercase tracking-wider text-sm">{role.label}</span>

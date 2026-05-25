@@ -110,7 +110,7 @@ const ProfessionalManagement = ({ role }) => {
 
         {/* Bulk Actions Bar */}
         {selectedIds.length > 0 && (
-          <div className="sticky top-6 z-[40] bg-[#0d0d0d] border border-[#CCFF00]/30 rounded-2xl p-4 shadow-2xl flex items-center justify-between animate-in slide-in-from-top-4 duration-500">
+          <div className="sticky top-6 z-[40] bg-[#0d0d0d] border border-[#CCFF00]/30 rounded-[8px] p-4 shadow-2xl flex items-center justify-between animate-in slide-in-from-top-4 duration-500">
             <div className="flex items-center gap-6 pl-4">
               <div className="flex items-center gap-2">
                 <div className="w-6 h-6 rounded bg-[#CCFF00] flex items-center justify-center text-black font-black text-xs">
@@ -129,20 +129,20 @@ const ProfessionalManagement = ({ role }) => {
             <div className="flex items-center gap-3">
               <button 
                 onClick={() => handleBatchStatusUpdate("blocked")}
-                className="px-4 py-2 bg-orange-500/10 border border-orange-500/20 rounded-xl text-orange-400 font-black text-[10px] uppercase tracking-widest hover:bg-orange-500/20 transition-all flex items-center gap-2"
+                className="px-4 py-2 bg-orange-500/10 border border-orange-500/20 rounded-[8px] text-orange-400 font-black text-[10px] uppercase tracking-widest hover:bg-orange-500/20 transition-all flex items-center gap-2"
               >
                 <Ban size={14} /> Block
               </button>
               <button 
                 onClick={() => handleBatchStatusUpdate("active")}
-                className="px-4 py-2 bg-green-500/10 border border-green-500/20 rounded-xl text-green-400 font-black text-[10px] uppercase tracking-widest hover:bg-green-500/20 transition-all flex items-center gap-2"
+                className="px-4 py-2 bg-green-500/10 border border-green-500/20 rounded-[8px] text-green-400 font-black text-[10px] uppercase tracking-widest hover:bg-green-500/20 transition-all flex items-center gap-2"
               >
                 <CheckCircle size={14} /> Activate
               </button>
               <div className="w-px h-6 bg-white/10 mx-2" />
               <button 
                 onClick={openBatchDeleteModal}
-                className="px-4 py-2 bg-red-500/10 border border-red-500/20 rounded-xl text-red-400 font-black text-[10px] uppercase tracking-widest hover:bg-red-500/20 transition-all flex items-center gap-2"
+                className="px-4 py-2 bg-red-500/10 border border-red-500/20 rounded-[8px] text-red-400 font-black text-[10px] uppercase tracking-widest hover:bg-red-500/20 transition-all flex items-center gap-2"
               >
                 <Trash2 size={14} /> Delete
               </button>
@@ -175,7 +175,7 @@ const ProfessionalManagement = ({ role }) => {
             </div>
 
             {professionals.length === 0 ? (
-              <div className="relative p-20 rounded-[16px] border border-[#2D2D2D] bg-[#000000] text-center overflow-hidden">
+              <div className="relative p-20 rounded-[8px] border border-[#2D2D2D] bg-[#000000] text-center overflow-hidden">
                 <div className="absolute inset-0 bg-[#CCFF00]/5 blur-[100px]" />
                 <div className="relative z-10 space-y-4">
                   <p className="text-2xl font-black text-white uppercase tracking-tighter">No {role}s Found</p>
@@ -186,17 +186,13 @@ const ProfessionalManagement = ({ role }) => {
                 {professionals.map((prof) => (
                   <div 
                     key={prof._id} 
-                    className={`group relative bg-[#000000] border transition-all duration-500 rounded-[12px] p-4 lg:px-8 lg:py-5 shadow-xl overflow-hidden cursor-pointer ${
-                      selectedIds.includes(prof._id) ? "border-[#CCFF00] bg-[#CCFF00]/5" : "border-[#2D2D2D] hover:border-[#CCFF00]/40"
-                    }`}
+                    className={`group relative bg-[#000000] border transition-all duration-500 rounded-[12px] p-4 lg:px-8 lg:py-5 shadow-xl overflow-hidden cursor-pointer ${ selectedIds.includes(prof._id) ? "border-[#CCFF00] bg-[#CCFF00]/5" : "border-[#2D2D2D] hover:border-[#CCFF00]/40" }`}
                     onClick={(e) => {
                       if (e.target.closest('button') || e.target.closest('input[type="checkbox"]')) return;
                       navigate(`/admin/professionals/${prof._id}`);
                     }}
                   >
-                    <div className={`absolute inset-y-0 left-0 w-1 bg-[#CCFF00] transition-transform duration-500 shadow-[0_0_15px_#CCFF00] ${
-                      selectedIds.includes(prof._id) ? "scale-y-100" : "scale-y-0 group-hover:scale-y-100"
-                    }`} />
+                    <div className={`absolute inset-y-0 left-0 w-1 bg-[#CCFF00] transition-transform duration-500 shadow-[0_0_15px_#CCFF00] ${ selectedIds.includes(prof._id) ? "scale-y-100" : "scale-y-0 group-hover:scale-y-100" }`} />
 
                     <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-center relative z-10">
                       {/* Checkbox */}
@@ -248,9 +244,7 @@ const ProfessionalManagement = ({ role }) => {
 
                       {/* Status */}
                       <div className="lg:col-span-1">
-                        <div className={`inline-flex items-center gap-1.5 px-2 py-0.5 border rounded-full ${
-                          prof.status === "blocked" ? "border-red-500/20 text-red-400 bg-red-500/5" : "border-green-500/20 text-green-400 bg-green-500/5"
-                        }`}>
+                        <div className={`inline-flex items-center gap-1.5 px-2 py-0.5 border rounded-[6px] ${ prof.status === "blocked" ? "border-red-500/20 text-red-400 bg-red-500/5" : "border-green-500/20 text-green-400 bg-green-500/5" }`}>
                           <div className={`w-1 h-1 rounded-full ${prof.status === "blocked" ? "bg-red-400" : "bg-green-400"}`} />
                           <span className="text-[8px] font-black uppercase">{prof.status || "active"}</span>
                         </div>
@@ -264,11 +258,7 @@ const ProfessionalManagement = ({ role }) => {
                             batchUpdateProfessionalStatus([prof._id], prof.status === "blocked" ? "active" : "blocked");
                           }}
                           title={prof.status === "blocked" ? "Activate Record" : "Block Record"}
-                          className={`p-2 rounded-lg border transition-all ${
-                            prof.status === "blocked" 
-                              ? "bg-green-500/10 border-green-500/20 text-green-400 hover:bg-green-500/20" 
-                              : "bg-orange-500/10 border-orange-500/20 text-orange-400 hover:bg-orange-500/20"
-                          }`}
+                          className={`p-2 rounded-[8px] border transition-all ${ prof.status === "blocked" ? "bg-green-500/10 border-green-500/20 text-green-400 hover:bg-green-500/20" : "bg-orange-500/10 border-orange-500/20 text-orange-400 hover:bg-orange-500/20" }`}
                         >
                           {prof.status === "blocked" ? <CheckCircle size={16} /> : <Ban size={16} />}
                         </button>
@@ -277,7 +267,7 @@ const ProfessionalManagement = ({ role }) => {
                             e.stopPropagation();
                             openDeleteModal(prof);
                           }}
-                          className="p-2 rounded-lg bg-red-500/10 border border-red-500/20 text-red-400 hover:bg-red-500/20 transition-all"
+                          className="p-2 rounded-[8px] bg-red-500/10 border border-red-500/20 text-red-400 hover:bg-red-500/20 transition-all"
                         >
                           <Trash2 size={16} />
                         </button>
@@ -286,7 +276,7 @@ const ProfessionalManagement = ({ role }) => {
                             e.stopPropagation();
                             navigate(`/admin/professionals/${prof._id}`);
                           }}
-                          className="p-2 rounded-lg bg-white/5 border border-white/10 text-white/40 hover:bg-[#CCFF00] hover:text-black transition-all"
+                          className="p-2 rounded-[8px] bg-white/5 border border-white/10 text-white/40 hover:bg-[#CCFF00] hover:text-black transition-all"
                         >
                           <ExternalLink size={16} />
                         </button>

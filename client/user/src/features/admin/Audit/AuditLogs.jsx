@@ -47,7 +47,7 @@ const AuditLogs = () => {
         </div>
 
         {/* Log Terminal */}
-        <div className="bg-[#050505] border border-white/10 rounded-2xl overflow-hidden shadow-2xl">
+        <div className="bg-[#050505] border border-white/10 rounded-[8px] overflow-hidden shadow-2xl">
            <div className="bg-[#111] px-4 py-2 border-b border-white/10 flex items-center gap-2">
               <div className="flex gap-1.5">
                  <div className="w-2.5 h-2.5 rounded-full bg-red-500/50"></div>
@@ -107,7 +107,7 @@ const AuditLogs = () => {
                               <div className="flex items-center gap-4">
                                  <div className="group/meta relative cursor-help">
                                     <Info size={14} className="text-gray-500 hover:text-white transition-colors" />
-                                    <div className="absolute bottom-full left-0 mb-2 hidden group-hover/meta:block w-64 bg-[#1a1a1a] border border-white/10 rounded-lg p-3 shadow-2xl z-50">
+                                    <div className="absolute bottom-full left-0 mb-2 hidden group-hover/meta:block w-64 bg-[#1a1a1a] border border-white/10 rounded-[8px] p-3 shadow-2xl z-50">
                                        <pre className="text-[10px] text-gray-300 overflow-auto max-h-40 no-scrollbar">
                                           {JSON.stringify(log.details, null, 2)}
                                        </pre>
@@ -128,8 +128,8 @@ const AuditLogs = () => {
 
         {/* Security Info */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-           <div className="bg-[#111] border border-white/10 p-6 rounded-2xl flex items-start gap-4">
-              <div className="w-10 h-10 bg-blue-500/10 rounded-xl flex items-center justify-center text-blue-500 border border-blue-500/20">
+           <div className="bg-[#111] border border-white/10 p-6 rounded-[8px] flex items-start gap-4">
+              <div className="w-10 h-10 bg-blue-500/10 rounded-[8px] flex items-center justify-center text-blue-500 border border-blue-500/20">
                  <HardDrive size={20} />
               </div>
               <div>
@@ -137,8 +137,8 @@ const AuditLogs = () => {
                  <p className="text-xs text-gray-500">System logs are retained for 365 days for regulatory compliance and security auditing.</p>
               </div>
            </div>
-           <div className="bg-[#111] border border-white/10 p-6 rounded-2xl flex items-start gap-4">
-              <div className="w-10 h-10 bg-[#84CC16]/10 rounded-xl flex items-center justify-center text-[#84CC16] border border-[#84CC16]/20">
+           <div className="bg-[#111] border border-white/10 p-6 rounded-[8px] flex items-start gap-4">
+              <div className="w-10 h-10 bg-[#84CC16]/10 rounded-[8px] flex items-center justify-center text-[#84CC16] border border-[#84CC16]/20">
                  <Terminal size={20} />
               </div>
               <div>
@@ -146,8 +146,8 @@ const AuditLogs = () => {
                  <p className="text-xs text-gray-500">Every sensitive action is cryptographically linked to the performing administrator.</p>
               </div>
            </div>
-           <div className="bg-[#111] border border-white/10 p-6 rounded-2xl flex items-start gap-4">
-              <div className="w-10 h-10 bg-red-500/10 rounded-xl flex items-center justify-center text-red-500 border border-red-500/20">
+           <div className="bg-[#111] border border-white/10 p-6 rounded-[8px] flex items-start gap-4">
+              <div className="w-10 h-10 bg-red-500/10 rounded-[8px] flex items-center justify-center text-red-500 border border-red-500/20">
                  <Shield size={20} />
               </div>
               <div>

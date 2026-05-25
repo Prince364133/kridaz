@@ -41,15 +41,7 @@ const ImageUploadZone = ({ value, onChange, onFileSelect }) => {
         onDragLeave={() => setDragging(false)}
         onDrop={handleDrop}
         onClick={() => inputRef.current?.click()}
-        className={`
-          relative flex flex-col items-center justify-center w-full h-36 rounded-2xl border-2 border-dashed cursor-pointer transition-all
-          ${dragging
-            ? "border-[#84CC16] bg-[#84CC16]/10 scale-[1.01]"
-            : value
-              ? "border-[#84CC16]/40 bg-[#84CC16]/5 hover:border-[#84CC16]/60"
-              : "border-white/10 bg-white/2 hover:bg-white/5 hover:border-white/20"
-          }
-        `}
+        className={`relative flex flex-col items-center justify-center w-full h-36 rounded-[8px] border-2 border-dashed cursor-pointer transition-all ${dragging ? "border-[#84CC16] bg-[#84CC16]/10 scale-[1.01]" : value ? "border-[#84CC16]/40 bg-[#84CC16]/5 hover:border-[#84CC16]/60" : "border-white/10 bg-white/2 hover:bg-white/5 hover:border-white/20" }`}
       >
         <input
           ref={inputRef}
@@ -77,7 +69,7 @@ const ImageUploadZone = ({ value, onChange, onFileSelect }) => {
 
       {/* Live preview */}
       {value && (
-        <div className="relative aspect-video w-full rounded-2xl overflow-hidden border border-white/10 group/preview">
+        <div className="relative aspect-video w-full rounded-[8px] overflow-hidden border border-white/10 group/preview">
           <img src={value} alt="Preview" className="w-full h-full object-cover" />
           <div className="absolute inset-0 bg-black/0 group-hover/preview:bg-black/40 transition-all flex items-center justify-center">
             <button
@@ -250,7 +242,7 @@ export const BlogManagement = () => {
         </div>
         <button
           onClick={() => handleOpenModal()}
-          className="inline-flex items-center gap-2 bg-lime-500 text-black px-4 py-2 rounded-lg font-bold hover:bg-lime-400 transition-colors"
+          className="inline-flex items-center gap-2 bg-lime-500 text-black px-4 py-2 rounded-[6px] font-bold hover:bg-lime-400 transition-colors"
         >
           <Plus size={18} />
           Create New Article
@@ -262,7 +254,7 @@ export const BlogManagement = () => {
         {blogs.map((blog, index) => (
           <div
             key={blog._id}
-            className="group relative flex flex-col rounded-2xl border border-white/10 bg-[#1A1A1A] overflow-hidden transition-all hover:border-lime-500/50"
+            className="group relative flex flex-col rounded-[8px] border border-white/10 bg-[#1A1A1A] overflow-hidden transition-all hover:border-lime-500/50"
           >
             <div className="aspect-[4/3] w-full bg-black overflow-hidden relative">
               <img
@@ -302,14 +294,14 @@ export const BlogManagement = () => {
               <div className="mt-auto flex items-center gap-2 pt-4 border-t border-white/5">
                 <button
                   onClick={() => handleOpenModal(blog)}
-                  className="flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-xl bg-white/5 text-gray-400 hover:bg-white/10 hover:text-white transition-all text-xs font-bold uppercase tracking-widest"
+                  className="flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-[8px] bg-white/5 text-gray-400 hover:bg-white/10 hover:text-white transition-all text-xs font-bold uppercase tracking-widest"
                 >
                   <Edit2 size={14} />
                   Edit
                 </button>
                 <button
                   onClick={() => handleDelete(blog._id)}
-                  className="w-11 h-11 flex items-center justify-center rounded-xl bg-red-500/10 text-red-500 hover:bg-red-500 hover:text-white transition-all"
+                  className="w-11 h-11 flex items-center justify-center rounded-[8px] bg-red-500/10 text-red-500 hover:bg-red-500 hover:text-white transition-all"
                 >
                   <Trash2 size={18} />
                 </button>
@@ -319,7 +311,7 @@ export const BlogManagement = () => {
         ))}
 
         {blogs.length === 0 && (
-          <div className="col-span-full py-24 flex flex-col items-center justify-center border border-dashed border-white/10 rounded-2xl bg-black/20">
+          <div className="col-span-full py-24 flex flex-col items-center justify-center border border-dashed border-white/10 rounded-[8px] bg-black/20">
             <div className="w-16 h-16 rounded-full bg-white/5 flex items-center justify-center mb-4 border border-white/10">
               <FileText size={32} className="text-gray-600" />
             </div>
@@ -332,7 +324,7 @@ export const BlogManagement = () => {
       {/* ── Modal ─────────────────────────────────────────────────────────── */}
       {isModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/90 backdrop-blur-md">
-          <div className="w-full max-w-2xl bg-[#0A0A0A] border border-white/10 rounded-3xl overflow-hidden shadow-2xl relative">
+          <div className="w-full max-w-2xl bg-[#0A0A0A] border border-white/10 rounded-[8px] overflow-hidden shadow-2xl relative">
 
             {/* Modal Header */}
             <div className="p-8 border-b border-white/10 flex items-center justify-between bg-black/40">
@@ -365,7 +357,7 @@ export const BlogManagement = () => {
                     required
                     value={formData.title}
                     onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                    className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-lime-500 transition-all font-bold placeholder:text-white/10"
+                    className="w-full bg-white/5 border border-white/10 rounded-[8px] px-4 py-3 text-white focus:outline-none focus:border-lime-500 transition-all font-bold placeholder:text-white/10"
                     placeholder="ENTER ARTICLE HEADLINE..."
                   />
                 </div>
@@ -377,7 +369,7 @@ export const BlogManagement = () => {
                     type="text"
                     value={formData.subtitle}
                     onChange={(e) => setFormData({ ...formData, subtitle: e.target.value })}
-                    className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-lime-500 transition-all placeholder:text-white/10"
+                    className="w-full bg-white/5 border border-white/10 rounded-[8px] px-4 py-3 text-white focus:outline-none focus:border-lime-500 transition-all placeholder:text-white/10"
                     placeholder="Short summary for the card..."
                   />
                 </div>
@@ -404,7 +396,7 @@ export const BlogManagement = () => {
                   <select
                     value={formData.category}
                     onChange={(e) => setFormData({ ...formData, category: e.target.value })}
-                    className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-lime-500 transition-all appearance-none"
+                    className="w-full bg-white/5 border border-white/10 rounded-[8px] px-4 py-3 text-white focus:outline-none focus:border-lime-500 transition-all appearance-none"
                   >
                     <option value="Sports">SPORTS</option>
                     <option value="Football">FOOTBALL</option>
@@ -422,7 +414,7 @@ export const BlogManagement = () => {
                     type="text"
                     value={formData.readTime}
                     onChange={(e) => setFormData({ ...formData, readTime: e.target.value })}
-                    className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-lime-500 transition-all"
+                    className="w-full bg-white/5 border border-white/10 rounded-[8px] px-4 py-3 text-white focus:outline-none focus:border-lime-500 transition-all"
                     placeholder="e.g. 5 MINS READ"
                   />
                 </div>
@@ -434,7 +426,7 @@ export const BlogManagement = () => {
                     type="text"
                     value={formData.date}
                     onChange={(e) => setFormData({ ...formData, date: e.target.value })}
-                    className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-lime-500 transition-all"
+                    className="w-full bg-white/5 border border-white/10 rounded-[8px] px-4 py-3 text-white focus:outline-none focus:border-lime-500 transition-all"
                     placeholder="e.g. 4 MAY 2026"
                   />
                 </div>
@@ -446,7 +438,7 @@ export const BlogManagement = () => {
                     type="number"
                     value={formData.order}
                     onChange={(e) => setFormData({ ...formData, order: parseInt(e.target.value) })}
-                    className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-lime-500 transition-all"
+                    className="w-full bg-white/5 border border-white/10 rounded-[8px] px-4 py-3 text-white focus:outline-none focus:border-lime-500 transition-all"
                   />
                 </div>
 
@@ -458,7 +450,7 @@ export const BlogManagement = () => {
                     rows={8}
                     value={formData.content}
                     onChange={(e) => setFormData({ ...formData, content: e.target.value })}
-                    className="w-full bg-white/5 border border-white/10 rounded-2xl px-6 py-4 text-white focus:outline-none focus:border-lime-500 transition-all resize-none custom-scrollbar"
+                    className="w-full bg-white/5 border border-white/10 rounded-[8px] px-6 py-4 text-white focus:outline-none focus:border-lime-500 transition-all resize-none custom-scrollbar"
                     placeholder="Write your article content here..."
                   />
                 </div>
@@ -469,14 +461,14 @@ export const BlogManagement = () => {
                 <button
                   type="button"
                   onClick={() => setIsModalOpen(false)}
-                  className="flex-1 py-4 rounded-2xl border border-white/10 text-white font-bold hover:bg-white/5 transition-all uppercase tracking-widest text-xs"
+                  className="flex-1 py-4 rounded-[8px] border border-white/10 text-white font-bold hover:bg-white/5 transition-all uppercase tracking-widest text-xs"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={submitting}
-                  className="flex-1 py-4 rounded-2xl bg-lime-500 text-black font-bold hover:bg-lime-400 transition-all shadow-[0_0_30px_rgba(132,204,22,0.4)] uppercase tracking-widest text-xs disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                  className="flex-1 py-4 rounded-[8px] bg-lime-500 text-black font-bold hover:bg-lime-400 transition-all shadow-[0_0_30px_rgba(132,204,22,0.4)] uppercase tracking-widest text-xs disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                 >
                   {submitting ? (
                     <>

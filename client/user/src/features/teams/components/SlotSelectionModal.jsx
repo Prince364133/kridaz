@@ -60,7 +60,7 @@ const SlotSelectionModal = ({ isOpen, onClose, onSelect }) => {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/85 backdrop-blur-md animate-fade-in">
-      <div className="relative w-full max-w-lg overflow-hidden rounded-3xl border border-white/10 bg-slate-900 shadow-2xl">
+      <div className="relative w-full max-w-lg overflow-hidden rounded-[8px] border border-white/10 bg-slate-900 shadow-2xl">
         {/* Glow decoration */}
         <div className="absolute -top-[30%] -right-[30%] w-[60%] h-[60%] rounded-full bg-violet-600/10 blur-[80px] pointer-events-none" />
         
@@ -82,15 +82,11 @@ const SlotSelectionModal = ({ isOpen, onClose, onSelect }) => {
         </div>
 
         {/* Tab Controls */}
-        <div className="relative flex border-b border-white/5 bg-slate-950/30 p-1.5 m-4 rounded-xl">
+        <div className="relative flex border-b border-white/5 bg-slate-950/30 p-1.5 m-4 rounded-[8px]">
           <button
             type="button"
             onClick={() => setActiveTab('squad')}
-            className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-lg text-xs font-bold transition-all ${
-              activeTab === 'squad'
-                ? 'bg-violet-600 text-white shadow-md'
-                : 'text-slate-400 hover:text-slate-200'
-            }`}
+            className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-lg text-xs font-bold transition-all ${ activeTab === 'squad' ? 'bg-violet-600 text-white shadow-md' : 'text-slate-400 hover:text-slate-200' }`}
           >
             <Users className="h-4 w-4" />
             Club Squad Members
@@ -98,11 +94,7 @@ const SlotSelectionModal = ({ isOpen, onClose, onSelect }) => {
           <button
             type="button"
             onClick={() => setActiveTab('guest')}
-            className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-lg text-xs font-bold transition-all ${
-              activeTab === 'guest'
-                ? 'bg-violet-600 text-white shadow-md'
-                : 'text-slate-400 hover:text-slate-200'
-            }`}
+            className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-lg text-xs font-bold transition-all ${ activeTab === 'guest' ? 'bg-violet-600 text-white shadow-md' : 'text-slate-400 hover:text-slate-200' }`}
           >
             <UserPlus className="h-4 w-4" />
             Guest Player
@@ -127,7 +119,7 @@ const SlotSelectionModal = ({ isOpen, onClose, onSelect }) => {
                     key={idx}
                     type="button"
                     onClick={() => handleSquadMemberSelect(member)}
-                    className="w-full p-3.5 rounded-2xl border border-white/5 bg-slate-950/40 hover:bg-violet-600/10 hover:border-violet-500/30 text-left flex justify-between items-center transition-all group"
+                    className="w-full p-3.5 rounded-[8px] border border-white/5 bg-slate-950/40 hover:bg-violet-600/10 hover:border-violet-500/30 text-left flex justify-between items-center transition-all group"
                   >
                     <div className="flex items-center gap-3">
                       <div className="h-9 w-9 rounded-full bg-violet-600/10 border border-violet-500/20 flex items-center justify-center text-violet-400 text-sm font-bold group-hover:scale-105 transition-transform">
@@ -161,7 +153,7 @@ const SlotSelectionModal = ({ isOpen, onClose, onSelect }) => {
                     value={guestName}
                     onChange={(e) => setGuestName(e.target.value)}
                     placeholder="e.g. Michael Jordan"
-                    className="w-full bg-slate-950 border border-white/10 rounded-2xl py-3 pl-10 pr-4 text-xs text-slate-200 focus:outline-none focus:border-violet-500/50 transition-all font-inter"
+                    className="w-full bg-slate-950 border border-white/10 rounded-[8px] py-3 pl-10 pr-4 text-xs text-slate-200 focus:outline-none focus:border-violet-500/50 transition-all font-inter"
                   />
                 </div>
               </div>
@@ -175,7 +167,7 @@ const SlotSelectionModal = ({ isOpen, onClose, onSelect }) => {
                     value={guestEmail}
                     onChange={(e) => setGuestEmail(e.target.value)}
                     placeholder="e.g. jordan@gmail.com"
-                    className="w-full bg-slate-950 border border-white/10 rounded-2xl py-3 pl-10 pr-4 text-xs text-slate-200 focus:outline-none focus:border-violet-500/50 transition-all font-inter"
+                    className="w-full bg-slate-950 border border-white/10 rounded-[8px] py-3 pl-10 pr-4 text-xs text-slate-200 focus:outline-none focus:border-violet-500/50 transition-all font-inter"
                   />
                 </div>
               </div>
@@ -183,7 +175,7 @@ const SlotSelectionModal = ({ isOpen, onClose, onSelect }) => {
               <button
                 type="submit"
                 disabled={!guestName.trim()}
-                className="w-full mt-4 py-3 bg-violet-600 hover:bg-violet-700 text-white rounded-2xl text-xs font-bold transition-all shadow-[0_4px_12px_rgba(109,40,217,0.2)] disabled:opacity-50 disabled:cursor-not-allowed active:scale-95"
+                className="w-full mt-4 py-3 bg-violet-600 hover:bg-violet-700 text-white rounded-[8px] text-xs font-bold transition-all shadow-[0_4px_12px_rgba(109,40,217,0.2)] disabled:opacity-50 disabled:cursor-not-allowed active:scale-95"
               >
                 Assign Guest Player to Slot
               </button>

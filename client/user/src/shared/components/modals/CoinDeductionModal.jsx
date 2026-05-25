@@ -214,7 +214,7 @@ const CoinDeductionModal = ({
     <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/80 backdrop-blur-md">
       <div 
         ref={modalRef}
-        className="bg-[#000000] border border-[#2D2D2D] w-full max-w-md rounded-[2.5rem] overflow-hidden shadow-2xl relative"
+        className="bg-[#000000] border border-[#2D2D2D] w-full max-w-md rounded-[8px] overflow-hidden shadow-2xl relative"
       >
         <button 
           onClick={onClose}
@@ -291,11 +291,7 @@ const CoinDeductionModal = ({
                         <button
                           key={pct}
                           onClick={() => setPaymentPercentage(pct)}
-                          className={`relative py-4 px-2 rounded-[8px] border-2 transition-all flex flex-col items-center gap-1 group ${
-                            paymentPercentage === pct 
-                            ? "bg-[#55DEE8]/10 border-[#55DEE8] text-[#55DEE8]" 
-                            : "bg-[#000000] border-[#2D2D2D] text-white hover:border-white/20"
-                          }`}
+                          className={`relative py-4 px-2 rounded-[8px] border-2 transition-all flex flex-col items-center gap-1 group ${ paymentPercentage === pct ? "bg-[#55DEE8]/10 border-[#55DEE8] text-[#55DEE8]" : "bg-[#000000] border-[#2D2D2D] text-white hover:border-white/20" }`}
                         >
                           <span className={`text-sm font-black ${paymentPercentage === pct ? "text-[#55DEE8]" : "text-white"}`}>
                             {pct}%
@@ -341,7 +337,7 @@ const CoinDeductionModal = ({
                     <div className="flex items-center justify-between px-1">
                         <p className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest">Select Payment Mode</p>
                         {paymentMode === "WALLET" && (
-                            <div className="flex items-center gap-1.5 px-2 py-1 bg-[#55DEE8]/10 rounded-full">
+                            <div className="flex items-center gap-1.5 px-2 py-1 bg-[#55DEE8]/10 rounded-[6px]">
                                 <Zap size={10} className="text-[#55DEE8] fill-[#55DEE8]" />
                                 <span className="text-[8px] font-black text-[#55DEE8] uppercase">5% Cashback</span>
                             </div>

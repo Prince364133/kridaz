@@ -12,7 +12,7 @@ import axiosInstance from '@infrastructure/axios';
 
 const PRI = "#55DEE8";
 const HEADING_STYLE = { fontFamily: "'Open Sans', sans-serif" };
-const SUBHEADING_STYLE = { fontFamily: "'Inter', sans-serif" };
+const SUBHEADING_STYLE = { fontFamily: "'Inter 28pt Light', sans-serif", fontWeight: 300 };
 
 const TeamPass = () => {
   const { id } = useParams();
@@ -103,12 +103,12 @@ const TeamPass = () => {
 
       {/* Pass Wrapper (Fixed dimensions for exact pass proportions) */}
       <div className="relative z-10 w-full max-w-[420px]" ref={passRef}>
-        <div className="relative bg-gradient-to-b from-[#121212] to-[#080808] border border-white/10 rounded-[32px] overflow-hidden shadow-2xl p-6 flex flex-col justify-between aspect-[3/5] min-h-[580px]">
+        <div className="relative bg-gradient-to-b from-[#121212] to-[#080808] border border-white/10 rounded-[8px] overflow-hidden shadow-2xl p-6 flex flex-col justify-between aspect-[3/5] min-h-[580px]">
           
           {/* Header Strip */}
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <div className="w-8 h-8 rounded-xl bg-black border border-white/10 p-1 flex items-center justify-center">
+              <div className="w-8 h-8 rounded-[8px] bg-black border border-white/10 p-1 flex items-center justify-center">
                 <Trophy size={14} className="text-[#55DEE8]" />
               </div>
               <div>
@@ -116,14 +116,14 @@ const TeamPass = () => {
                 <p className="text-[6px] font-bold text-gray-500 uppercase tracking-widest mt-0.5">Champions League</p>
               </div>
             </div>
-            <div className="flex items-center gap-1.5 px-3 py-1 bg-white/5 border border-white/10 rounded-full">
+            <div className="flex items-center gap-1.5 px-3 py-1 bg-white/5 border border-white/10 rounded-[6px]">
               <span className="w-1.5 h-1.5 bg-[#55DEE8] rounded-full animate-pulse" />
               <span className="text-[7px] font-black text-[#55DEE8] uppercase tracking-wider">Active</span>
             </div>
           </div>
 
           {/* Stadium Silhouette Panel */}
-          <div className="relative h-44 rounded-2xl overflow-hidden border border-white/5 my-4">
+          <div className="relative h-44 rounded-[8px] overflow-hidden border border-white/5 my-4">
             <img 
               src="https://images.unsplash.com/photo-1540747913346-19e32dc3e97e?q=80&w=2105&auto=format&fit=crop" 
               className="w-full h-full object-cover opacity-20 grayscale" 
@@ -133,9 +133,9 @@ const TeamPass = () => {
             
             {/* Logo Centerpiece */}
             <div className="absolute inset-0 flex flex-col items-center justify-center gap-3">
-              <div className="w-18 h-18 rounded-[20px] bg-black border-2 border-[#55DEE8] p-1 flex items-center justify-center shadow-[0_0_20px_rgba(85, 222, 232,0.15)]">
+              <div className="w-18 h-18 rounded-[8px] bg-black border-2 border-[#55DEE8] p-1 flex items-center justify-center shadow-[0_0_20px_rgba(85, 222, 232,0.15)]">
                 {team?.logo ? (
-                  <img src={team.logo} className="w-full h-full object-cover rounded-[14px]" alt="Logo" />
+                  <img src={team.logo} className="w-full h-full object-cover rounded-[8px]" alt="Logo" />
                 ) : (
                   <Trophy size={28} className="text-[#55DEE8]/20" />
                 )}
@@ -158,7 +158,7 @@ const TeamPass = () => {
               { label: 'City', value: team?.city || 'HQ', icon: MapPin },
               { label: 'Members', value: `${team?.members?.length || 1} Players`, icon: Users }
             ].map((stat, i) => (
-              <div key={i} className="bg-white/[0.02] border border-white/5 rounded-xl p-3 text-center">
+              <div key={i} className="bg-white/[0.02] border border-white/5 rounded-[8px] p-3 text-center">
                 <div className="flex items-center justify-center gap-1 text-gray-500 mb-1">
                   <stat.icon size={8} />
                   <span className="text-[6px] font-black uppercase tracking-widest">{stat.label}</span>
@@ -182,19 +182,19 @@ const TeamPass = () => {
                 <p className="text-[6px] font-black text-gray-500 uppercase tracking-widest">Entry ID</p>
                 <p className="text-[10px] font-black text-[#55DEE8] uppercase mt-0.5">{team?.teamCode || 'KR-0000'}</p>
               </div>
-              <div className="bg-[#55DEE8]/10 px-3 py-1.5 rounded-lg border border-[#55DEE8]/20 inline-flex items-center gap-1.5">
+              <div className="bg-[#55DEE8]/10 px-3 py-1.5 rounded-[6px] border border-[#55DEE8]/20 inline-flex items-center gap-1.5">
                 <Sparkles size={8} className="text-[#55DEE8]" />
                 <span className="text-[7px] font-black text-white uppercase tracking-wider">Digital Verification</span>
               </div>
             </div>
             
-            <div className="w-20 h-20 bg-white rounded-2xl p-1.5 flex items-center justify-center shadow-lg relative group overflow-hidden">
+            <div className="w-20 h-20 bg-white rounded-[8px] p-1.5 flex items-center justify-center shadow-lg relative group overflow-hidden">
               {team?.qrCode ? (
                 <img src={team.qrCode} alt="Team QR" className="w-full h-full object-cover" />
               ) : (
                 <QrCode size={68} className="text-black" />
               )}
-              <div className="absolute inset-0 bg-black/10 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+              <div className="absolute inset-0 bg-black/10 rounded-[8px] opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
                 <Info size={16} className="text-black" />
               </div>
             </div>
@@ -208,14 +208,14 @@ const TeamPass = () => {
         <button 
           onClick={handleDownload}
           disabled={isDownloading}
-          className="py-3.5 bg-[#55DEE8] text-black rounded-xl font-black uppercase text-[10px] tracking-widest flex items-center justify-center gap-2 hover:brightness-110 shadow-[0_5px_20px_rgba(85, 222, 232,0.25)] transition-all"
+          className="py-3.5 bg-[#55DEE8] text-black rounded-[8px] font-black uppercase text-[10px] tracking-widest flex items-center justify-center gap-2 hover:brightness-110 shadow-[0_5px_20px_rgba(85, 222, 232,0.25)] transition-all"
         >
           {isDownloading ? <Loader2 className="animate-spin w-4 h-4" /> : <Download size={14} />}
           Save Pass
         </button>
         <button 
           onClick={handlePrint}
-          className="py-3.5 bg-white/5 border border-white/10 text-white rounded-xl font-black uppercase text-[10px] tracking-widest flex items-center justify-center gap-2 hover:bg-white/10 transition-all"
+          className="py-3.5 bg-white/5 border border-white/10 text-white rounded-[8px] font-black uppercase text-[10px] tracking-widest flex items-center justify-center gap-2 hover:bg-white/10 transition-all"
         >
           <Printer size={14} />
           Print Pass

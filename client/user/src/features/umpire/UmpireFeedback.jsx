@@ -22,7 +22,7 @@ export default function UmpireFeedback() {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <div className="md:col-span-1 bg-[#0D0D0D] border border-white/5 rounded-[32px] p-8 text-center space-y-6">
+        <div className="md:col-span-1 bg-[#0D0D0D] border border-white/5 rounded-[8px] p-8 text-center space-y-6">
           <div className="w-24 h-24 bg-primary/10 rounded-full flex items-center justify-center mx-auto border border-primary/20">
             <Star size={40} className="text-primary fill-primary" />
           </div>
@@ -38,9 +38,9 @@ export default function UmpireFeedback() {
         </div>
 
         <div className="md:col-span-2 space-y-6">
-          <div className="bg-[#0D0D0D] border border-white/5 rounded-[32px] p-8">
+          <div className="bg-[#0D0D0D] border border-white/5 rounded-[8px] p-8">
             <div className="flex items-center gap-4 mb-8">
-              <div className="w-12 h-12 bg-white/5 rounded-2xl flex items-center justify-center">
+              <div className="w-12 h-12 bg-white/5 rounded-[8px] flex items-center justify-center">
                 <Award size={24} className="text-primary" />
               </div>
               <div>
@@ -68,7 +68,7 @@ export default function UmpireFeedback() {
             </div>
           </div>
 
-          <div className="bg-[#0D0D0D] border border-white/5 rounded-[32px] p-8">
+          <div className="bg-[#0D0D0D] border border-white/5 rounded-[8px] p-8">
              <div className="flex flex-col items-center justify-center py-4 text-center">
                 <ThumbsUp size={32} className="text-white/10 mb-4" />
                 <h4 className="text-white font-bold uppercase tracking-tight mb-2">Verified Feedback</h4>

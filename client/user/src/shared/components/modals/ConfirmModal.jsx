@@ -7,7 +7,7 @@ const ConfirmModal = ({ isOpen, onClose, onConfirm, title, message, confirmText 
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 animate-fade-in">
       <div 
-        className="bg-[#1a1a1a] border border-white/10 rounded-2xl w-full max-w-sm overflow-hidden shadow-2xl animate-scale-up"
+        className="bg-[#1a1a1a] border border-white/10 rounded-[8px] w-full max-w-sm overflow-hidden shadow-2xl animate-scale-up"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="p-5 flex items-start gap-4">
@@ -32,11 +32,7 @@ const ConfirmModal = ({ isOpen, onClose, onConfirm, title, message, confirmText 
               onConfirm();
               onClose();
             }}
-            className={`flex-1 py-3 text-sm font-bold transition-colors ${
-              isDestructive 
-                ? 'text-red-500 hover:bg-red-500/10 hover:text-red-400' 
-                : 'text-[#55DEE8] hover:bg-[#55DEE8]/10 hover:text-[#a3f01b]'
-            }`}
+            className={`flex-1 py-3 text-sm font-bold transition-colors ${ isDestructive ? 'text-red-500 hover:bg-red-500/10 hover:text-red-400' : 'text-[#55DEE8] hover:bg-[#55DEE8]/10 hover:text-[#a3f01b]' }`}
           >
             {confirmText}
           </button>

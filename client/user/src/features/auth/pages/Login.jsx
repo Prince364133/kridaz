@@ -98,7 +98,7 @@ const Login = () => {
                         type="text" 
                         placeholder="000000"
                         maxLength={6}
-                        className="w-full bg-white/[0.03] border border-white/5 focus:border-[#55DEE8]/50 rounded-xl h-14 pl-12 pr-4 text-white text-center tracking-widest text-lg outline-none transition-all"
+                        className="w-full bg-white/[0.03] border border-white/5 focus:border-[#55DEE8]/50 rounded-[8px] h-14 pl-12 pr-4 text-white text-center tracking-widest text-lg outline-none transition-all"
                       />
                     </div>
                     {errors.otp && <p className="text-xs text-red-500 mt-1 ml-1 text-center">{errors.otp.message}</p>}
@@ -107,7 +107,7 @@ const Login = () => {
                   <button 
                     type="submit" 
                     disabled={loading}
-                    className="w-full bg-[#55DEE8] hover:bg-[#a3e635] text-black h-14 rounded-xl font-bold text-lg flex items-center justify-center gap-2 active:scale-[0.98] transition-all disabled:opacity-50 mt-4 group/btn" 
+                    className="w-full bg-[#55DEE8] hover:bg-[#a3e635] text-black h-14 rounded-[8px] font-bold text-lg flex items-center justify-center gap-2 active:scale-[0.98] transition-all disabled:opacity-50 mt-4 group/btn" 
                   >
                     {loading ? "Verifying..." : "Verify & Login"}
                     {!loading && <ArrowRight className="w-5 h-5 group-hover/btn:translate-x-1 transition-transform" />}
@@ -153,7 +153,7 @@ const Login = () => {
                               register("email").onChange(e);
                             }}
                             placeholder="name@example.com or 9876543210"
-                            className="w-full bg-white/[0.03] border border-white/5 focus:border-[#55DEE8]/50 rounded-xl h-14 pl-12 pr-4 text-white text-sm placeholder:text-white/20 outline-none transition-all group-hover/input:bg-white/[0.05]"
+                            className="w-full bg-white/[0.03] border border-white/5 focus:border-[#55DEE8]/50 rounded-[8px] h-14 pl-12 pr-4 text-white text-sm placeholder:text-white/20 outline-none transition-all group-hover/input:bg-white/[0.05]"
                           />
                           {errors.email && <p className="text-xs text-red-500 mt-1 ml-1">{errors.email.message}</p>}
                         </div>
@@ -173,7 +173,7 @@ const Login = () => {
                             {...register("password")}
                             type="password"
                             placeholder="Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½"
-                            className="w-full bg-white/[0.03] border border-white/5 focus:border-[#55DEE8]/50 rounded-xl h-14 pl-12 pr-4 text-white text-sm placeholder:text-white/20 outline-none transition-all group-hover/input:bg-white/[0.05]"
+                            className="w-full bg-white/[0.03] border border-white/5 focus:border-[#55DEE8]/50 rounded-[8px] h-14 pl-12 pr-4 text-white text-sm placeholder:text-white/20 outline-none transition-all group-hover/input:bg-white/[0.05]"
                           />
                           {errors.password && <p className="text-xs text-red-500 mt-1 ml-1">{errors.password.message}</p>}
                         </div>
@@ -183,7 +183,7 @@ const Login = () => {
                     {/* Submit Button */}
                     <div className="space-y-4 mt-8">
                       {accountNotFound && (
-                        <div className="p-4 bg-red-500/10 border border-red-500/20 rounded-xl mb-4 animate-fade-in">
+                        <div className="p-4 bg-red-500/10 border border-red-500/20 rounded-[8px] mb-4 animate-fade-in">
                           <p className="text-sm text-red-500 text-center mb-3 font-medium">
                             Account not found. Create a new account to get started!
                           </p>
@@ -200,7 +200,7 @@ const Login = () => {
                       <button 
                         type="submit" 
                         disabled={loading}
-                        className="w-full bg-[#55DEE8] hover:bg-[#a3e635] text-black h-14 rounded-xl font-bold text-lg flex items-center justify-center gap-2 active:scale-[0.98] transition-all disabled:opacity-50 group/btn" 
+                        className="w-full bg-[#55DEE8] hover:bg-[#a3e635] text-black h-14 rounded-[8px] font-bold text-lg flex items-center justify-center gap-2 active:scale-[0.98] transition-all disabled:opacity-50 group/btn" 
                       >
                         {loading ? "Sending OTP..." : "Continue"}
                         {!loading && <ArrowRight className="w-5 h-5 group-hover/btn:translate-x-1 transition-transform" />}

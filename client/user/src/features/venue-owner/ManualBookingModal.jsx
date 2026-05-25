@@ -207,13 +207,7 @@ const ManualBookingModal = ({ isOpen, onClose }) => {
                             key={i}
                             disabled={slot.isBooked}
                             onClick={() => setSelectedSlot(slot)}
-                            className={`py-2.5 rounded-[4px] border text-[10px] font-black tracking-tighter transition-all font-inter ${
-                              selectedSlot === slot 
-                              ? 'bg-[#55DEE8] text-black border-[#55DEE8]' 
-                              : slot.isBooked 
-                              ? 'bg-red-500/10 border-red-500/20 text-red-500 cursor-not-allowed opacity-50' 
-                              : 'bg-[#1A1A1A] border-[#2D2D2D] hover:border-[#55DEE8]/50 text-[#878C9F] hover:text-white'
-                            }`}
+                            className={`py-2.5 rounded-[4px] border text-[10px] font-black tracking-tighter transition-all font-inter ${ selectedSlot === slot ? 'bg-[#55DEE8] text-black border-[#55DEE8]' : slot.isBooked ? 'bg-red-500/10 border-red-500/20 text-red-500 cursor-not-allowed opacity-50' : 'bg-[#1A1A1A] border-[#2D2D2D] hover:border-[#55DEE8]/50 text-[#878C9F] hover:text-white' }`}
                           >
                              {slot.startTime}
                           </button>
