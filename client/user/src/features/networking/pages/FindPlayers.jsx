@@ -573,7 +573,7 @@ const FindPlayers = () => {
   const fetchNearbyPlayers = useCallback(async () => {
     if (!userLocation) return;
     try {
-      const res = await axiosInstance.get("/api/user/players", {
+      const res = await axiosInstance.get("/api/user/players/nearby", {
         params: {
           lat: userLocation.lat,
           lng: userLocation.lng,
@@ -586,17 +586,20 @@ const FindPlayers = () => {
           toast("Showing top nearby players. Zoom in to see more.", { icon: "=ƒôì" });
           setHasShownLimitToast(true);
         }
-        const mapPlayers = res.data.players.map(p => ({
-          _id: p.id || p._id,
-          name: p.name,
-          username: p.username,
-          profilePicture: p.profilePicture,
-          lat: p.locationData.coordinates[1],
-          lng: p.locationData.coordinates[0],
-          distanceKm: p.distanceKm,
-          city: p.city,
-          sportTypes: p.sportTypes
-        }));
+        const mapPlayers = res.data.players
+          .map(p => ({
+            _id: p.id || p._id,
+            name: p.name,
+            username: p.username,
+            profilePicture: p.profilePicture,
+            lat: p.lat,
+            lng: p.lng,
+            distanceKm: p.distanceKm,
+            city: p.city,
+            sportTypes: p.sportTypes
+          }))
+          .filter(p => p.lat != null && p.lng != null);
+
         const mocks = userLocation ? MOCK_PLAYERS.map(m => ({
           ...m,
           lat: userLocation.lat + m.latOffset,
@@ -604,7 +607,7 @@ const FindPlayers = () => {
           profilePicture: "https://pngimg.com/d/cricket_PNG102.png",
           distanceKm: 0.5,
           sportTypes: [m.sport]
-        })) : [];
+        })).filter(m => m.lat != null && m.lng != null) : [];
 
         setAllNearbyPlayers([...mapPlayers, ...mocks]);
       }

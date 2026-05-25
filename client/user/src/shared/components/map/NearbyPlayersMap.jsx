@@ -109,10 +109,16 @@ const MapController = ({ userLocation, radiusKm }) => {
   return null;
 };
 
+const getValidAvatar = (url) => {
+  const fallback = "https://pngimg.com/d/cricket_PNG102.png";
+  return (!url || url === "null" || url === "undefined") ? fallback : url;
+};
+
 const createClusterIcon = (count, previews) => {
   const avatarsHtml = previews.map(p => 
-    `<img src="${p.profilePicture || 'https://pngimg.com/d/cricket_PNG102.png'}" 
-          style="width:14px;height:14px;border-radius:50%;object-fit:cover;border:1px solid #55DEE8" />`
+    `<img src="${getValidAvatar(p.profilePicture)}" 
+          style="width:14px;height:14px;border-radius:50%;object-fit:cover;border:1px solid #55DEE8" 
+          onerror="this.src='https://pngimg.com/d/cricket_PNG102.png'; this.onerror=null;" />`
   ).join('');
 
   const html = `
@@ -145,7 +151,6 @@ const createClusterIcon = (count, previews) => {
 };
 
 const createPlayerIcon = (profilePicture) => {
-  const fallback = "https://pngimg.com/d/cricket_PNG102.png";
   const markerHtml = `
     <div style="position:relative; cursor:pointer">
       <div style="
@@ -157,9 +162,9 @@ const createPlayerIcon = (profilePicture) => {
         box-shadow: 0 2px 8px rgba(0,0,0,0.5);
         background: #0a0a0a;
       ">
-        <img src="${profilePicture || fallback}" 
+        <img src="${getValidAvatar(profilePicture)}" 
              style="width:100%;height:100%;object-fit:cover" 
-             onerror="this.src='${fallback}'"
+             onerror="this.src='https://pngimg.com/d/cricket_PNG102.png'; this.onerror=null;"
         />
       </div>
       <div style="
@@ -196,35 +201,11 @@ const PlayerMarker = ({ player, onPlayerClick }) => {
       position={[player.lat, player.lng]}
       icon={icon}
       eventHandlers={{
-        click: () => onPlayerClick?.(player._id)
+        click: () => {
+          if (onPlayerClick) onPlayerClick(player._id);
+        }
       }}
-    >
-      <Popup closeButton={false} className="premium-map-popup">
-        <div className="flex flex-col items-center gap-2 p-1 min-w-[120px]">
-          <div className="w-12 h-12 rounded-full border-2 border-[#55DEE8] overflow-hidden">
-             <img 
-               src={player.profilePicture || "https://pngimg.com/d/cricket_PNG102.png"} 
-               className="w-full h-full object-cover" 
-               alt=""
-             />
-          </div>
-          <div className="text-center">
-            <h4 className="text-white font-black uppercase text-[10px] tracking-widest leading-tight">{player.name}</h4>
-            <div className="flex items-center justify-center gap-1 mt-1">
-               <Activity size={10} className="text-[#55DEE8]" />
-               <span className="text-[#55DEE8] text-[8px] font-black uppercase tracking-tighter">
-                {player.sportTypes?.[0] || 'Active Player'}
-               </span>
-            </div>
-          </div>
-          <div className="w-full h-px bg-white/10 my-1" />
-          <div className="flex items-center gap-1.5 text-white/40 text-[7px] font-bold uppercase tracking-widest">
-            <MapPin size={8} />
-            {player.distanceKm?.toFixed(1)}km Away
-          </div>
-        </div>
-      </Popup>
-    </Marker>
+    />
   );
 };
 

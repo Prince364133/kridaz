@@ -613,8 +613,8 @@ export const getNearbyPlayers = async (req, res) => {
     const formattedPlayers = players.map(p => ({
       ...p,
       id: p.id,
-      lat: p.latitude ? parseFloat(String(p.latitude)) : null,
-      lng: p.longitude ? parseFloat(String(p.longitude)) : null,
+      lat: p.latitude != null ? parseFloat(String(p.latitude)) : null,
+      lng: p.longitude != null ? parseFloat(String(p.longitude)) : null,
       distanceKm: null // PostGIS distance can be added if needed
     }));
 
