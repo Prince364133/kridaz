@@ -9,8 +9,18 @@ export default {
         primary: "#55DEE8",
         "primary-focus": "#3cc5ce",
       },
+      fontFamily: {
+        sans: ['"Open Sans"', "sans-serif"],
+      },
       backgroundImage: {
         banner: "url('/r.png')",
+      },
+      borderRadius: {
+        'md': '6px',
+        'lg': '8px',
+        'xl': '8px',
+        '2xl': '8px',
+        '3xl': '8px',
       },
     },
   },

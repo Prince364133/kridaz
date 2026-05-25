@@ -6,6 +6,14 @@
 @import "tailwindcss/utilities";
 @import "leaflet/dist/leaflet.css";
 
+@font-face {
+  font-family: 'Inter 28pt Light';
+  src: url('/inter-28pt-light.ttf') format('truetype');
+  font-weight: 300;
+  font-style: normal;
+  font-display: swap;
+}
+
 /* ── Leaflet Customization ────────────────────────────────────────── */
 .leaflet-container {
   background-color: var(--bg-base) !important;
@@ -70,6 +78,11 @@
 }
 
 /* ── Design Tokens ──────────────────────────────────────────────── */
+:root, [data-theme] {
+  --rounded-btn: 6px;
+  --rounded-box: 8px;
+}
+
 :root {
   /* Unified Primary - Main Branch Official */
   --primary:       #55DEE8; /* Updated to Match requested brand Cyan */
@@ -112,10 +125,39 @@
 }
 
 /* ── Typography ──────────────────────────────────────────────────── */
-h1, h2, h3, .font-display {
+h1 {
+  font-family: "Open Sans", sans-serif !important;
+  font-weight: 700 !important;
+  font-size: 32px !important;
+  line-height: 115% !important;
+  letter-spacing: 0% !important;
+}
+
+@media (min-width: 768px) {
+  h1 {
+    font-size: 60.21px !important;
+  }
+}
+
+h2, h3, .font-display {
   font-family: "Bebas Neue", sans-serif;
   letter-spacing: 0.08em;
   text-transform: uppercase;
+}
+
+.global-subheading {
+  font-family: 'Inter 28pt Light', sans-serif !important;
+  font-weight: 300 !important;
+  font-size: 13px !important;
+  line-height: 119% !important;
+  letter-spacing: 1.5% !important;
+  opacity: 0.7;
+}
+
+@media (min-width: 768px) {
+  .global-subheading {
+    font-size: 20.04px !important;
+  }
 }
 
 /* Scoped styles for the Admin Panel */
@@ -131,7 +173,8 @@ h1, h2, h3, .font-display {
 }
 
 .admin-panel .admin-subheading {
-  font-family: 'Inter', sans-serif !important;
+  font-family: 'Inter 28pt Light', sans-serif !important;
+  font-weight: 300 !important;
   font-size: 20px !important;
   letter-spacing: -0.01em;
 }
@@ -165,7 +208,7 @@ h1, h2, h3, .font-display {
 
 body {
   margin: 0;
-  font-family: "Inter", sans-serif;
+  font-family: "Open Sans", sans-serif;
   background-color: var(--bg-base);
   color: var(--fg);
   min-height: 100vh;
@@ -259,7 +302,7 @@ body {
   font-weight: 700;
   font-size: 14px;
   text-transform: uppercase;
-  border-radius: 12px;
+  border-radius: 6px;
   padding: 12px 28px;
   border: none;
   cursor: pointer;
@@ -283,7 +326,7 @@ body {
   font-weight: 700;
   font-size: 14px;
   text-transform: uppercase;
-  border-radius: 12px;
+  border-radius: 6px;
   padding: 11px 28px;
   border: 1.5px solid var(--border);
   cursor: pointer;
@@ -300,7 +343,7 @@ body {
   background-color: var(--primary) !important;
   border-color: var(--primary) !important;
   color: #000 !important;
-  border-radius: 9999px !important;
+  border-radius: 6px !important;
   font-family: "Bebas Neue", sans-serif !important;
   font-weight: 900 !important;
   font-style: italic !important;
@@ -310,7 +353,7 @@ body {
 .bms-card {
   background-color: var(--surface);
   border: 1px solid var(--border);
-  border-radius: 16px;
+  border-radius: 8px;
   overflow: hidden;
   transition: all 0.3s;
 }
