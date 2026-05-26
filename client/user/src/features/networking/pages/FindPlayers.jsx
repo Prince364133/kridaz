@@ -147,9 +147,9 @@ const PlayerCard = ({ player, followingIds, handleFollowToggle, handleAvatarClic
         {isFollowing ? (
           <button
             onClick={() => gateInteraction(() => navigate(`/messages?userId=${playerId}`))}
-            className="flex items-center gap-1.5 px-4 py-1.5 rounded-xl text-[9px] font-black uppercase tracking-widest text-black bg-white hover:bg-white/95 active:scale-95 transition-all whitespace-nowrap shadow-[0_4px_14px_rgba(255,255,255,0.15)]"
+            className="flex items-center gap-1.5 px-4 py-1.5 rounded-xl text-[9px] font-black uppercase tracking-widest text-white bg-white/10 border border-white/20 hover:bg-white/20 active:scale-95 transition-all whitespace-nowrap"
           >
-            <MessageCircle size={12} className="shrink-0 text-black" />
+            <MessageCircle size={12} className="shrink-0" />
             Message
           </button>
         ) : (
@@ -569,12 +569,8 @@ const FindPlayers = () => {
         }
       });
       if (response.data.success) {
-        const fetchedPlayers = response.data.players || [];
-        setPlayers(fetchedPlayers);
-        const initialFollowing = fetchedPlayers
-          .filter(p => p.isFollowing)
-          .map(p => p.id || p._id);
-        setFollowingIds(prev => Array.from(new Set([...prev, ...initialFollowing])));
+        setPlayers(response.data.players || []);
+        if (response.data.followingIds) setFollowingIds(response.data.followingIds);
       }
     } catch (error) {
       console.error("Error fetching players:", error);
@@ -889,10 +885,7 @@ const FindPlayers = () => {
                   className="w-full h-full relative"
                 >
                   <NearbyPlayersMap 
-                    userLocation={userLocation ? {
-                      ...userLocation,
-                      profilePicture: currentUser?.profilePicture || currentUser?.profileImage
-                    } : null}
+                    userLocation={userLocation}
                     nearbyPlayers={displayedPlayers} 
                     radiusKm={selectedRadius}
                     onMapMove={handleMapMove}
@@ -1099,34 +1092,32 @@ const FindPlayers = () => {
                 </div>
               </div>
 
-              {/* Mobile/Tab Location Filter */}
-              <div className="flex items-center gap-1.5 lg:hidden">
-                <div className="relative group">
-                  <MapPin className="absolute left-2 top-1/2 -translate-y-1/2 text-white/20 group-focus-within:text-[#55DEE8]" size={8} />
-                  <select 
-                    value={filters.state || ""}
-                    onChange={(e) => {
-                      handleFilterChange("state", e.target.value);
-                      handleFilterChange("city", "");
-                    }}
-                    className="bg-white/5 border border-white/10 rounded-lg pl-5 pr-2 py-1.5 text-[8px] font-bold uppercase tracking-widest text-white/60 focus:text-[#55DEE8] focus:border-[#55DEE8]/50 outline-none w-20 cursor-pointer hover:bg-white/10 transition-all appearance-none"
-                  >
-                    <option value="">STATE</option>
-                    {statesList.map(s => <option key={s} value={s}>{s}</option>)}
-                  </select>
-                </div>
-                <div className="relative group">
-                  <MapPin className="absolute left-2 top-1/2 -translate-y-1/2 text-white/20 group-focus-within:text-[#55DEE8]" size={8} />
-                  <select 
-                    value={filters.city || ""}
-                    onChange={(e) => handleFilterChange("city", e.target.value)}
-                    className="bg-white/5 border border-white/10 rounded-lg pl-5 pr-2 py-1.5 text-[8px] font-bold uppercase tracking-widest text-white/60 focus:text-[#55DEE8] focus:border-[#55DEE8]/50 outline-none w-20 cursor-pointer hover:bg-white/10 transition-all appearance-none"
-                    disabled={!filters.state}
-                  >
-                    <option value="">CITY</option>
-                    {citiesList.map(c => <option key={c} value={c}>{c}</option>)}
-                  </select>
-                </div>
+              {/* Mobile/Tab Location Filters */}
+              <div className="relative group lg:hidden">
+                <MapPin className="absolute left-2.5 top-1/2 -translate-y-1/2 text-white/20 group-focus-within:text-[#55DEE8]" size={10} />
+                <select
+                  value={filters.state || ""}
+                  onChange={(e) => {
+                    handleFilterChange("state", e.target.value);
+                    handleFilterChange("city", "");
+                  }}
+                  className="bg-white/5 border border-white/10 rounded-lg pl-7 pr-3 py-1.5 text-[9px] md:text-[10px] font-bold uppercase tracking-widest text-white/60 focus:text-[#55DEE8] focus:border-[#55DEE8]/50 outline-none w-24 md:w-28 cursor-pointer hover:bg-white/10 transition-all appearance-none"
+                >
+                  <option value="">STATE...</option>
+                  {statesList.map(s => <option key={s} value={s}>{s}</option>)}
+                </select>
+              </div>
+              <div className="relative group lg:hidden">
+                <MapPin className="absolute left-2.5 top-1/2 -translate-y-1/2 text-white/20 group-focus-within:text-[#55DEE8]" size={10} />
+                <select
+                  value={filters.city || ""}
+                  onChange={(e) => handleFilterChange("city", e.target.value)}
+                  disabled={!filters.state}
+                  className="bg-white/5 border border-white/10 rounded-lg pl-7 pr-3 py-1.5 text-[9px] md:text-[10px] font-bold uppercase tracking-widest text-white/60 focus:text-[#55DEE8] focus:border-[#55DEE8]/50 outline-none w-24 md:w-28 cursor-pointer hover:bg-white/10 transition-all appearance-none disabled:opacity-40"
+                >
+                  <option value="">CITY...</option>
+                  {citiesList.map(c => <option key={c} value={c}>{c}</option>)}
+                </select>
               </div>
 
               {activeTab === "players" && (

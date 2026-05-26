@@ -90,11 +90,15 @@ export const getPublicPlayers = async (req, res) => {
         ]);
         const storyUserIds = new Set(activeStories.map(s => s.userId));
         
+        // Collect IDs the current user is following
+        const currentUserFollowingIds = [];
+
         const players = nearbyUsers.map((u) => {
           const uIdStr = u.id;
           const stats = networkStats.get(uIdStr) || { followerIds: [], followingIds: [] };
           const isFollowing = currentUserId ? stats.followerIds.includes(currentUserId) : false;
           const isFollowedBy = currentUserId ? stats.followingIds.includes(currentUserId) : false;
+          if (isFollowing) currentUserFollowingIds.push(uIdStr);
           return {
             id: u.id,
             name: u.name,
@@ -106,12 +110,12 @@ export const getPublicPlayers = async (req, res) => {
             city: u.city,
             state: u.state,
             sportTypes: u.sportTypes || [],
+            followersCount: stats.followerIds.length,
             hasActiveStory: storyUserIds.has(uIdStr) && (req.user ? (isFollowing || isFollowedBy) : false),
-            isFollowing,
-            followersCount: stats.followerIds.length
+            isFollowing
           };
         });
-        return res.status(200).json({ success: true, players });
+        return res.status(200).json({ success: true, players, followingIds: currentUserFollowingIds });
       }
     }
 
@@ -143,12 +147,16 @@ export const getPublicPlayers = async (req, res) => {
 
     const storyUserIds = new Set(activeStories.map(s => s.userId));
     
+    // Collect IDs the current user is following
+    const currentUserFollowingIds = [];
+
     const players = users.map((u) => {
       const uIdStr = u.id;
       const stats = networkStats.get(uIdStr) || { followerIds: [], followingIds: [] };
       
       const isFollowing = currentUserId ? stats.followerIds.includes(currentUserId) : false;
       const isFollowedBy = currentUserId ? stats.followingIds.includes(currentUserId) : false;
+      if (isFollowing) currentUserFollowingIds.push(uIdStr);
 
       return {
         id: u.id,
@@ -161,15 +169,15 @@ export const getPublicPlayers = async (req, res) => {
         city: u.city,
         state: u.state,
         sportTypes: u.sportTypes || [],
+        followersCount: stats.followerIds.length,
         hasActiveStory: storyUserIds.has(uIdStr) && (
           req.user ? (isFollowing || isFollowedBy) : false
         ),
-        isFollowing,
-        followersCount: stats.followerIds.length
+        isFollowing
       };
     });
 
-    return res.status(200).json({ success: true, players });
+    return res.status(200).json({ success: true, players, followingIds: currentUserFollowingIds });
   } catch (err) {
     logger.error("Error in getPublicPlayers", err);
     return res.status(500).json({ message: err.message });

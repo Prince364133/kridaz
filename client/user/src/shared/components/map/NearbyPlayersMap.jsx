@@ -8,9 +8,9 @@ import iconShadow from "leaflet/dist/images/marker-shadow.png";
 
 // Fix default icon issue in Leaflet with Vite
 delete L.Icon.Default.prototype._getIconUrl;
-L.Icon.Default.mergeOptions({ 
-  iconUrl, 
-  shadowUrl: iconShadow 
+L.Icon.Default.mergeOptions({
+  iconUrl,
+  shadowUrl: iconShadow
 });
 
 const mapStyles = `
@@ -30,7 +30,7 @@ const mapStyles = `
   .pulsing-marker img {
     width: 100%;
     height: 100%;
-    object-cover: cover;
+    object-fit: cover;
   }
   @keyframes pulse {
     0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(85,222,232,0.7); }
@@ -110,12 +110,12 @@ const MapController = ({ userLocation, radiusKm }) => {
 };
 
 const getValidAvatar = (url) => {
-  const fallback = "https://cdn-icons-png.flaticon.com/512/149/149071.png";
+  const fallback = "https://pngimg.com/d/cricket_PNG102.png";
   return (!url || url === "null" || url === "undefined") ? fallback : url;
 };
 
 const createClusterIcon = (count, previews) => {
-  const avatarsHtml = previews.map(p => 
+  const avatarsHtml = previews.map(p =>
     `<img src="${getValidAvatar(p.profilePicture)}" 
           style="width:14px;height:14px;border-radius:50%;object-fit:cover;border:1px solid #55DEE8" 
           onerror="this.src='https://pngimg.com/d/cricket_PNG102.png'; this.onerror=null;" />`
@@ -196,7 +196,7 @@ const PlayerMarker = ({ player, onPlayerClick }) => {
   const icon = useMemo(() => createPlayerIcon(player.profilePicture), [player.profilePicture]);
 
   return (
-    <Marker 
+    <Marker
       ref={markerRef}
       position={[player.lat, player.lng]}
       icon={icon}
@@ -223,14 +223,12 @@ const MapResizer = () => {
 
 const MapInner = ({ nearbyPlayers, onPlayerClick, userLocation, radiusKm, onMapMove }) => {
   const map = useMap();
-  
+
   const userIcon = L.divIcon({
     className: 'pulsing-marker-container',
     html: `
       <div class="pulsing-marker">
-        <img src="${getValidAvatar(userLocation?.profilePicture)}" 
-             onerror="this.src='https://cdn-icons-png.flaticon.com/512/149/149071.png'; this.onerror=null;"
-             style="width:100%;height:100%;object-fit:cover" />
+        <img src="${userLocation?.profilePicture || 'https://pngimg.com/d/cricket_PNG102.png'}" />
       </div>
     `,
     iconSize: [24, 24],
@@ -246,14 +244,14 @@ const MapInner = ({ nearbyPlayers, onPlayerClick, userLocation, radiusKm, onMapM
         updateWhenIdle={true}
         keepBuffer={2}
       />
-      
+
       <MapController userLocation={userLocation} radiusKm={radiusKm} />
       <MapEventsHandler onMapMove={onMapMove} />
 
       {/* Relocate Button */}
       {userLocation && (
         <div className="absolute bottom-[60px] right-4 z-[1000]">
-          <button 
+          <button
             onClick={(e) => {
               e.stopPropagation();
               e.preventDefault();
@@ -276,7 +274,7 @@ const MapInner = ({ nearbyPlayers, onPlayerClick, userLocation, radiusKm, onMapM
       {nearbyPlayers.map(item => {
         if (item.type === "cluster") {
           return (
-            <Marker 
+            <Marker
               key={item._id}
               position={[item.lat, item.lng]}
               icon={createClusterIcon(item.count, item.previews)}
@@ -287,10 +285,10 @@ const MapInner = ({ nearbyPlayers, onPlayerClick, userLocation, radiusKm, onMapM
           );
         }
         return (
-          <PlayerMarker 
-            key={item._id} 
-            player={item} 
-            onPlayerClick={onPlayerClick} 
+          <PlayerMarker
+            key={item._id}
+            player={item}
+            onPlayerClick={onPlayerClick}
           />
         );
       })}
@@ -299,21 +297,21 @@ const MapInner = ({ nearbyPlayers, onPlayerClick, userLocation, radiusKm, onMapM
   );
 };
 
-const NearbyPlayersMap = ({ 
-  userLocation, 
-  nearbyPlayers = [], 
-  radiusKm, 
-  onMapMove, 
-  onPlayerClick 
+const NearbyPlayersMap = ({
+  userLocation,
+  nearbyPlayers = [],
+  radiusKm,
+  onMapMove,
+  onPlayerClick
 }) => {
   const defaultCenter = userLocation ? [userLocation.lat, userLocation.lng] : [20.5937, 78.9629];
-  
+
   return (
     <div className="w-full h-full relative">
       <style>{mapStyles}</style>
-      <MapContainer 
-        center={defaultCenter} 
-        zoom={14} 
+      <MapContainer
+        center={defaultCenter}
+        zoom={14}
         scrollWheelZoom={true}
         minZoom={10}
         maxZoom={18}
@@ -321,7 +319,7 @@ const NearbyPlayersMap = ({
         preferCanvas={true}
         attributionControl={false}
       >
-        <MapInner 
+        <MapInner
           nearbyPlayers={nearbyPlayers}
           onPlayerClick={onPlayerClick}
           userLocation={userLocation}
