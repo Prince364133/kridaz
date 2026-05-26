@@ -50,17 +50,11 @@ const OwnerReviews = () => {
                {turfs.map((turf) => (
                  <li key={turf.id}>
                    <button
-                     className={`w-full text-left p-4 rounded-[6px] border transition-all flex justify-between items-center group ${
-                       selectedTurf === turf.id 
-                         ? "bg-[#55DEE8]/10 border-[#55DEE8]/40 text-white" 
-                         : "bg-[#1A1A1A] border-[#2D2D2D] text-[#878C9F] hover:border-[#55DEE8]/20 hover:text-white"
-                     }`}
+                     className={`w-full text-left p-4 rounded-[6px] border transition-all flex justify-between items-center group ${ selectedTurf === turf.id ? "bg-[#55DEE8]/10 border-[#55DEE8]/40 text-white" : "bg-[#1A1A1A] border-[#2D2D2D] text-[#878C9F] hover:border-[#55DEE8]/20 hover:text-white" }`}
                      onClick={() => setSelectedTurf(turf.id)}
                    >
                      <span className="font-bold text-[13px] uppercase tracking-widest">{turf.name}</span>
-                     <span className={`px-2 py-1 rounded-[4px] font-bold text-[11px] flex items-center gap-1.5 ${
-                       selectedTurf === turf.id ? "bg-[#55DEE8] text-black" : "bg-[#111] text-[#878C9F] border border-[#2D2D2D] group-hover:text-[#55DEE8]"
-                     }`}>
+                     <span className={`px-2 py-1 rounded-[4px] font-bold text-[11px] flex items-center gap-1.5 ${ selectedTurf === turf.id ? "bg-[#55DEE8] text-black" : "bg-[#111] text-[#878C9F] border border-[#2D2D2D] group-hover:text-[#55DEE8]" }`}>
                        <Star size={11} className={selectedTurf === turf.id ? "fill-black" : ""} />
                        {turf.avgRating.toFixed(1)}
                      </span>

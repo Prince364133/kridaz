@@ -38,8 +38,8 @@ import { haversineMeters } from "@utils/geoUtils";
 const PRI = "#55DEE8";
 const GRAD = "linear-gradient(90deg, #55DEE8 0%, #BFF367 100%)";
 const HEADING_STYLE = { fontFamily: '"Outfit", sans-serif' };
-const SUBHEADING_STYLE = { fontFamily: '"Outfit", sans-serif' };
-const SNAP_STATES = { COLLAPSED: 0, HALF: 33, EXPANDED: 50 };
+const SUBHEADING_STYLE = { fontFamily: "'Inter 28pt Light', sans-serif", fontWeight: 300 };
+const SNAP_STATES = { COLLAPSED: 0, HALF: 33, EXPANDED: 85 };
 
 const MOCK_PLAYERS = [
   { _id: "m1", name: "Simulated Virat", latOffset: 0.015, lngOffset: 0.015, sport: "Cricket" },
@@ -48,201 +48,252 @@ const MOCK_PLAYERS = [
   { _id: "m4", name: "Simulated Rahul", latOffset: -0.015, lngOffset: -0.015, sport: "Cricket" }
 ];
 
-const PlayerCard = ({ player, rank, followingIds, handleFollowToggle, handleAvatarClick, currentUser, navigate, gateInteraction }) => {
-  const shapes = [
-    "polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%)",
-    "circle(50% at 50% 50%)",
-    "polygon(50% 0%, 100% 100%, 0% 100%)",
-    "polygon(25% 0%, 75% 0%, 100% 50%, 75% 100%, 25% 100%, 0% 50%)"
-  ];
-  const shape = shapes[rank % shapes.length];
+const PlayerCard = ({ player, followingIds, handleFollowToggle, handleAvatarClick, currentUser, navigate, gateInteraction }) => {
+  const isFollowing = followingIds.includes(player.id || player._id);
+  const playerId = player.id || player._id;
+
+  const sportTypes = player.sportTypes || (player.sport ? [player.sport] : []);
+
+  const locationParts = [
+    player.city,
+    player.state,
+    player.country,
+  ].filter(Boolean);
 
   return (
-    <motion.div 
-      initial={{ opacity: 0, y: 20 }}
+    <motion.div
+      initial={{ opacity: 0, y: 10 }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true }}
-      className="relative bg-black rounded-[16px] border border-[#55DEE8]/20 overflow-hidden flex flex-col h-[360px] p-1 group hover:border-[#55DEE8]/60 transition-all duration-500 shadow-[0_0_30px_rgba(0,0,0,0.5)]"
+      transition={{ duration: 0.25 }}
+      className="flex items-center gap-3 bg-[#0D0D0D] border border-white/[0.07] rounded-2xl px-4 py-3 group hover:border-[#55DEE8]/20 transition-all duration-300"
+      style={{ boxShadow: '0 4px 20px rgba(0,0,0,0.4)' }}
     >
-      <div className="flex justify-end items-start p-4 absolute top-0 left-0 right-0 z-20">
-        <div className="p-1.5 bg-[#55DEE8]/10 rounded-lg border border-[#55DEE8]/20">
-          <ShieldCheck size={14} className="text-[#55DEE8]" />
-        </div>
-      </div>
-
-      <div className="h-40 relative mt-2 flex items-center justify-center overflow-hidden">
-        <div 
-          className="absolute w-52 h-52 bg-[#55DEE8]/10 border border-[#55DEE8]/30 blur-sm opacity-50 group-hover:opacity-80 transition-opacity duration-700"
-          style={{ clipPath: shape }}
-        />
-        <div 
-          className="absolute w-48 h-48 border-2 border-[#55DEE8]/40"
-          style={{ clipPath: shape }}
-        />
-        <div className="relative w-full h-full flex items-center justify-center z-10 pointer-events-none">
-          <img 
-            src={player.profilePicture || "https://pngimg.com/d/cricket_PNG102.png"} 
-            alt="" 
-            className="h-[95%] w-[90%] object-contain filter drop-shadow-[0_10px_30px_rgba(85,222,232,0.4)] group-hover:scale-110 transition-transform duration-700 select-none"
-          />
-        </div>
-        <div className="absolute bottom-4 left-1/2 -translate-x-1/2 z-20">
-          <div className="bg-black border-2 border-[#55DEE8] w-12 h-14 flex items-center justify-center" style={{ clipPath: "polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%)" }}>
-            <span className="text-[#55DEE8] font-black text-sm uppercase">
-              {player.name?.split(" ").map(w => w[0]).join("").toUpperCase().slice(0, 2) || "P"}
+      {/* Avatar */}
+      <div
+        className="relative shrink-0 cursor-pointer"
+        onClick={() => handleAvatarClick(player)}
+      >
+        <div
+          className="w-14 h-14 rounded-2xl overflow-hidden bg-[#111] flex items-center justify-center border-2 border-transparent"
+          style={{ boxShadow: '0 0 0 2px rgba(85,222,232,0.4)' }}
+        >
+          {player.profilePicture ? (
+            <img src={player.profilePicture} alt="" className="w-full h-full object-cover" />
+          ) : (
+            <span className="text-[#55DEE8] font-black text-xl leading-none">
+              {player.name?.charAt(0).toUpperCase()}
             </span>
-          </div>
+          )}
         </div>
+        {/* online dot */}
+        <div className="absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 bg-[#BFF367] rounded-full border-2 border-[#0D0D0D]" />
       </div>
 
-      <div className="flex-1 px-3 pt-4 pb-2 flex flex-col items-center text-center">
-        <h3 className="text-sm font-black text-white uppercase tracking-tight mb-1 truncate w-full" style={HEADING_STYLE}>
-          {player.name}
-        </h3>
-        <div className="flex items-center gap-1 text-[9px] font-bold text-gray-500 uppercase tracking-widest mb-4">
-          <MapPin size={10} className="text-[#55DEE8]" />
-          {player.city || 'Athletic'}
+      {/* Info block */}
+      <div className="flex-1 min-w-0">
+        {/* Name row */}
+        <div className="flex items-center gap-2 mb-0.5">
+          <h3
+            className="text-sm font-black text-white uppercase tracking-tight truncate cursor-pointer hover:text-[#55DEE8] transition-colors"
+            style={HEADING_STYLE}
+            onClick={() => navigate(`/profile/${playerId}`)}
+          >
+            {player.name}
+          </h3>
+          {player.isVerified && (
+            <ShieldCheck size={12} className="text-[#55DEE8] shrink-0" />
+          )}
         </div>
-        <div className="grid grid-cols-3 w-full border-t border-white/5 pt-2 mb-2">
-          <div className="flex flex-col items-center">
-            <span className="text-[#55DEE8] text-[6px] font-black uppercase tracking-widest mb-1">Matches</span>
-            <span className="text-white font-black text-[10px]">GÇö</span>
-          </div>
-          <div className="flex flex-col items-center border-x border-white/5">
-            <span className="text-[#55DEE8] text-[6px] font-black uppercase tracking-widest mb-1">Runs</span>
-            <span className="text-white font-black text-[10px]">GÇö</span>
-          </div>
-          <div className="flex flex-col items-center">
-            <span className="text-[#55DEE8] text-[6px] font-black uppercase tracking-widest mb-1">Strike Rate</span>
-            <span className="text-white font-black text-[10px]">GÇö</span>
-          </div>
+
+        {/* Followers only */}
+        <div className="flex items-center gap-1 mb-2">
+          <span className="text-[10px] text-white/40 font-bold">
+            <span className="text-white font-black">{player.followersCount ?? player.followers?.length ?? 0}</span> Followers
+          </span>
         </div>
-        <div className="flex items-center gap-2 w-full mt-auto">
-          <button onClick={() => handleFollowToggle(player.id || player._id)} className={`flex-1 h-11 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${followingIds.includes(player.id || player._id) ? "bg-white/5 text-white/20 border border-white/10" : "text-black hover:scale-105 shadow-[0_0_15px_rgba(85,222,232,0.3)]"}`} style={!followingIds.includes(player.id || player._id) ? { background: GRAD } : {}}>
-            {followingIds.includes(player.id || player._id) ? "Following" : "Follow"}
+
+        {/* Sports chips – max 2 */}
+        {sportTypes.length > 0 && (
+          <div className="flex gap-1 mb-2">
+            {sportTypes.slice(0, 2).map(s => (
+              <span
+                key={s}
+                className="px-2 py-0.5 rounded-full text-[8px] font-black uppercase tracking-widest text-black"
+                style={{ background: GRAD }}
+              >
+                {s}
+              </span>
+            ))}
+            {sportTypes.length > 2 && (
+              <span className="px-2 py-0.5 rounded-full text-[8px] font-black uppercase tracking-widest text-white/30 bg-white/5 border border-white/10">
+                +{sportTypes.length - 2}
+              </span>
+            )}
+          </div>
+        )}
+
+        {/* Location */}
+        {locationParts.length > 0 && (
+          <div className="flex items-center gap-1 text-[9px] text-white/30 font-semibold">
+            <MapPin size={9} className="text-[#55DEE8] shrink-0" />
+            <span className="truncate">{locationParts.join(', ')}</span>
+          </div>
+        )}
+      </div>
+
+      {/* Single action button – Follow or Message */}
+      <div className="shrink-0">
+        {isFollowing ? (
+          <button
+            onClick={() => gateInteraction(() => navigate(`/messages?userId=${playerId}`))}
+            className="flex items-center gap-1.5 px-4 py-1.5 rounded-xl text-[9px] font-black uppercase tracking-widest text-white bg-white/10 border border-white/20 hover:bg-white/20 active:scale-95 transition-all whitespace-nowrap"
+          >
+            <MessageCircle size={12} className="shrink-0" />
+            Message
           </button>
-          <button onClick={() => gateInteraction(() => navigate(`/messages?userId=${player.id || player._id}`))} className="w-11 h-11 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center text-white/40 hover:text-[#55DEE8] transition-all">
-            <MessageCircle size={18} />
+        ) : (
+          <button
+            onClick={() => handleFollowToggle(playerId)}
+            className="px-4 py-1.5 rounded-xl text-[9px] font-black uppercase tracking-widest text-black active:scale-95 transition-all whitespace-nowrap shadow-[0_4px_14px_rgba(85,222,232,0.25)]"
+            style={{ background: GRAD }}
+          >
+            Follow
           </button>
-        </div>
+        )}
       </div>
     </motion.div>
   );
 };
 
 const TeamCard = ({ team, navigate }) => {
+  const sportBanners = {
+    Cricket: 'https://images.unsplash.com/photo-1531415074968-036ba1b575da?q=80&w=2067&auto=format&fit=crop',
+    Football: 'https://images.unsplash.com/photo-1574629810360-7efbbe195018?q=80&w=2076&auto=format&fit=crop',
+    Basketball: 'https://images.unsplash.com/photo-1546519638-68e109498ffc?q=80&w=2090&auto=format&fit=crop',
+    default: 'https://images.unsplash.com/photo-1579952363873-27f3bade9f55?q=80&w=2070&auto=format&fit=crop',
+  };
+  const banner = sportBanners[team.sportType] || sportBanners.default;
+
   return (
-    <motion.div 
-      initial={{ opacity: 0, y: 20 }}
+    <motion.div
+      initial={{ opacity: 0, y: 16 }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true }}
-      className="relative bg-[#0A0A0A] rounded-[20px] border border-white/5 overflow-hidden flex flex-col h-[380px] group hover:border-[#55DEE8]/30 transition-all duration-500 shadow-2xl"
+      whileHover={{ y: -4 }}
+      transition={{ duration: 0.35, ease: 'easeOut' }}
+      onClick={() => navigate(`/team/${team._id}`)}
+      className="relative bg-[#0D0D0D] rounded-2xl border border-white/[0.07] overflow-hidden flex flex-col cursor-pointer group"
+      style={{ boxShadow: '0 8px 32px rgba(0,0,0,0.6)' }}
     >
-      {/* Top Section: Banner */}
-      <div className="h-32 relative">
-        <img 
-          src={team.sportType === 'Cricket' ? 'https://images.unsplash.com/photo-1531415074968-036ba1b575da?q=80&w=2067&auto=format&fit=crop' : 'https://images.unsplash.com/photo-1574629810360-7efbbe195018?q=80&w=2076&auto=format&fit=crop'} 
-          alt="" 
-          className="w-full h-full object-cover opacity-60 grayscale group-hover:grayscale-0 transition-all duration-700"
+      {/* ── Banner ── */}
+      <div className="h-28 relative overflow-hidden">
+        <img
+          src={banner}
+          alt=""
+          className="w-full h-full object-cover scale-105 group-hover:scale-110 transition-transform duration-700 grayscale-[40%] group-hover:grayscale-0"
         />
-        <div className="absolute inset-0 bg-gradient-to-t from-[#0A0A0A] to-transparent" />
-        
-        {/* Verified Badge */}
-        <div className="absolute top-4 right-4 flex items-center gap-1.5 bg-black/40 backdrop-blur-md px-2.5 py-1.5 rounded-full border border-white/10">
-          <div className="w-3.5 h-3.5 rounded-full flex items-center justify-center" style={{ background: GRAD }}>
-            <ShieldCheck size={10} className="text-black" />
-          </div>
-          <span className="text-[8px] font-black text-white uppercase tracking-widest">Verified</span>
+        {/* deep gradient so content below is legible */}
+        <div className="absolute inset-0 bg-gradient-to-t from-[#0D0D0D] via-[#0D0D0D]/60 to-transparent" />
+
+        {/* Verified pill – top-right */}
+        <div className="absolute top-3 right-3 flex items-center gap-1 bg-black/50 backdrop-blur-md px-2 py-1 rounded-full border border-white/10">
+          <ShieldCheck size={9} className="text-[#55DEE8]" />
+          <span className="text-[7px] font-black uppercase tracking-widest text-white/80">Verified</span>
         </div>
 
-        {/* Team Avatar Overlay */}
-        <div className="absolute bottom-[-16px] left-4 z-10">
-          <div className="w-14 h-14 rounded-full border-[2px] border-[#0A0A0A] bg-[#0A0A0A] relative overflow-hidden group/avatar">
-            <div className="absolute inset-0 border-2 border-[#55DEE8] rounded-full z-20" />
-            <div className="w-full h-full flex items-center justify-center bg-[#111] relative z-10">
-              {team.logo ? (
-                <img src={team.logo} alt="" className="w-full h-full object-cover" />
-              ) : (
-                <div className="flex flex-col items-center text-[#55DEE8]">
-                  <Crown size={24} className="mb-1" />
-                  <div className="w-10 h-10 border-2 border-[#55DEE8] rounded-full flex items-center justify-center p-1">
-                     {team.sportType === 'Cricket' ? <Trophy size={16} /> : <Activity size={16} />}
-                  </div>
-                </div>
-              )}
-            </div>
-            {/* Status Indicator */}
-            <div className="absolute bottom-2 right-2 w-4 h-4 bg-[#55DEE8] rounded-full border-[3px] border-[#0A0A0A] z-30" />
-          </div>
+        {/* Sport chip – top-left */}
+        <div
+          className="absolute top-3 left-3 px-2 py-1 rounded-full text-[7px] font-black uppercase tracking-widest text-black"
+          style={{ background: GRAD }}
+        >
+          {team.sportType || 'Sport'}
         </div>
       </div>
 
-      {/* Middle Section: Details */}
-      <div className="flex-1 pt-6 px-4 pb-2 flex flex-col">
-        <div className="flex justify-between items-start mb-1">
-          <div>
-            <h3 className="text-base font-black text-white uppercase tracking-tighter mb-0.5" style={HEADING_STYLE}>{team.name}</h3>
-            <div className="flex items-center gap-2">
-              <span className="text-[#55DEE8] font-black text-[8px] uppercase tracking-widest flex items-center gap-1.5">
-                {team.sportType === 'Cricket' ? <Trophy size={10} /> : <Activity size={10} />}
-                {team.sportType}
+      {/* ── Avatar row ── */}
+      <div className="relative px-4 -mt-6 flex items-end mb-3">
+        {/* Avatar */}
+        <div className="relative">
+          <div
+            className="w-12 h-12 rounded-xl border-2 border-[#0D0D0D] overflow-hidden bg-[#111] flex items-center justify-center"
+            style={{ boxShadow: '0 0 0 2px #55DEE8, 0 0 16px rgba(85,222,232,0.35)' }}
+          >
+            {team.logo ? (
+              <img src={team.logo} alt="" className="w-full h-full object-cover" />
+            ) : (
+              <span className="text-[#55DEE8] font-black text-lg leading-none">
+                {team.name?.charAt(0).toUpperCase()}
               </span>
-            </div>
-            <p className="text-gray-600 text-[8px] font-bold uppercase tracking-widest mt-0.5">@ {team.city || 'Global'}</p>
+            )}
           </div>
-          <div className="p-2 bg-white/5 rounded-xl border border-white/10 text-white/40 hover:text-[#55DEE8] transition-colors">
-            <Star size={16} />
-          </div>
+          {/* Online dot */}
+          <div className="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-[#BFF367] rounded-full border-2 border-[#0D0D0D]" />
+        </div>
+      </div>
+
+      {/* ── Body ── */}
+      <div className="flex-1 px-4 pb-4 flex flex-col gap-3">
+
+        {/* Name + Location */}
+        <div>
+          <h3
+            className="text-sm font-black text-white uppercase tracking-tight leading-tight line-clamp-1"
+            style={HEADING_STYLE}
+          >
+            {team.name}
+          </h3>
+          <p className="text-[9px] font-semibold text-white/30 mt-0.5 flex items-center gap-1">
+            <MapPin size={8} className="text-[#55DEE8]" />
+            {team.city || 'Global'}
+          </p>
         </div>
 
-        {/* Stats Section */}
-        <div className="grid grid-cols-2 gap-2 py-3 border-y border-white/5 mb-3">
-          <div className="flex items-center gap-2">
-             <div className="p-2 bg-white/5 rounded-lg border border-white/10">
-                <Users size={14} className="text-[#55DEE8]" />
-             </div>
-             <div>
-                <p className="text-sm font-black text-white leading-none mb-0.5">{team.memberCount || 1}</p>
-                <p className="text-[6px] text-gray-500 font-black uppercase tracking-widest">Members</p>
-             </div>
-          </div>
-          <div className="flex items-center gap-2">
-             <div className="p-2 bg-white/5 rounded-lg border border-white/10">
-                <Target size={14} className="text-[#55DEE8]" />
-             </div>
-             <div>
-                <p className="text-sm font-black text-white leading-none mb-0.5">{team.matchesPlayed || 0}</p>
-                <p className="text-[6px] text-gray-500 font-black uppercase tracking-widest">Matches</p>
-             </div>
-          </div>
+        {/* Stats inline row */}
+        <div className="flex items-center gap-2 text-[10px] font-bold text-white/40">
+          <Users size={10} className="text-[#55DEE8] shrink-0" />
+          <span><span className="text-white font-black">{team.memberCount || 1}</span> Members</span>
+          <span className="text-white/15">·</span>
+          <Target size={10} className="text-[#55DEE8] shrink-0" />
+          <span><span className="text-white font-black">{team.matchesPlayed || 0}</span> Matches</span>
         </div>
 
         {/* Action Buttons */}
-        <div className="grid grid-cols-2 gap-3 mb-4">
-           <Link 
-              to={`/team/${team._id}`}
-              className="h-12 text-black rounded-xl font-black uppercase tracking-widest text-[10px] flex items-center justify-center gap-2 hover:scale-[1.02] active:scale-95 transition-all shadow-[0_5px_15px_rgba(85,222,232,0.2)]"
-              style={{ background: GRAD }}
-           >
-              <UserPlus size={14} strokeWidth={3} />
-              Join Team
-           </Link>
-           <Link 
-              to={`/team/${team._id}`}
-              className="h-12 bg-transparent border-2 border-white/10 text-white rounded-xl font-black uppercase tracking-widest text-[10px] flex items-center justify-center gap-2 hover:bg-white/5 transition-all"
-           >
-              <Swords size={14} />
-              Challenge
-           </Link>
+        <div className="grid grid-cols-2 gap-2 mt-auto">
+          <Link
+            to={`/team/${team._id}`}
+            onClick={e => e.stopPropagation()}
+            className="h-9 text-black rounded-xl font-black uppercase tracking-widest text-[9px] flex items-center justify-center gap-1.5 active:scale-95 transition-all"
+            style={{ background: GRAD, boxShadow: '0 4px 14px rgba(85,222,232,0.25)' }}
+          >
+            <UserPlus size={12} strokeWidth={3} />
+            Join
+          </Link>
+          <Link
+            to={`/team/${team._id}`}
+            onClick={e => e.stopPropagation()}
+            className="h-9 bg-white/[0.04] border border-white/10 text-white/70 rounded-xl font-black uppercase tracking-widest text-[9px] flex items-center justify-center gap-1.5 hover:bg-white/10 hover:text-white transition-all active:scale-95"
+          >
+            <Swords size={12} />
+            Challenge
+          </Link>
         </div>
 
-        <Link 
+        {/* Team Pass link */}
+        <Link
           to={`/team-pass/${team._id}`}
-          className="mt-3 flex items-center justify-center gap-2 text-gray-600 hover:text-[#55DEE8] text-[9px] font-black uppercase tracking-[0.2em] transition-all"
+          onClick={e => e.stopPropagation()}
+          className="flex items-center justify-center gap-1 text-white/20 hover:text-[#55DEE8] text-[8px] font-black uppercase tracking-[0.2em] transition-all group/pass"
         >
-          View Team Pass <ChevronRight size={12} />
+          <span>View Team Pass</span>
+          <ChevronRight size={10} className="group-hover/pass:translate-x-0.5 transition-transform" />
         </Link>
       </div>
+
+      {/* Subtle glow border on hover */}
+      <div className="absolute inset-0 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none"
+        style={{ boxShadow: 'inset 0 0 0 1px rgba(85,222,232,0.2)' }}
+      />
     </motion.div>
   );
 };
@@ -297,7 +348,13 @@ const FindPlayers = () => {
   }, [filters.state]);
 
   const [showNearbyOnly, setShowNearbyOnly] = useState(false);
-  const [userLocation, setUserLocation] = useState(null);
+  const [userLocation, setUserLocation] = useState(() => {
+    const cached = localStorage.getItem("kridaz_guest_location");
+    if (cached) {
+      try { return JSON.parse(cached); } catch(e) {}
+    }
+    return null;
+  });
   const { socket } = useSocket();
   const lastBoundsRef = useRef(null);
   const [currentZoom, setCurrentZoom] = useState(14);
@@ -314,7 +371,7 @@ const FindPlayers = () => {
   const lastEmittedLocation = useRef(null);
   const lastEmitTime = useRef(0);
   const watchId = useRef(null);
-  const MOVEMENT_THRESHOLD_METERS = 10;
+  const MOVEMENT_THRESHOLD_METERS = 50;
   const HEARTBEAT_INTERVAL_MS = 30000;
 
   const clusterPlayers = (players, zoom, radiusPx) => {
@@ -335,7 +392,8 @@ const FindPlayers = () => {
         return distPx < radiusPx;
       });
       
-      if (nearby.length >= 2) {
+      // If there is at least 1 other nearby player, form a cluster (total >= 2)
+      if (nearby.length >= 1) {
         const clusterMembers = [player, ...nearby];
         clusterMembers.forEach(member => {
           const idx = players.findIndex(p => (p.id || p._id) === (member.id || member._id));
@@ -391,12 +449,26 @@ const FindPlayers = () => {
 
     watchId.current = navigator.geolocation.watchPosition(
       (position) => {
+        const newLat = position.coords.latitude;
+        const newLng = position.coords.longitude;
         const newLocation = {
-          lat: position.coords.latitude,
-          lng: position.coords.longitude,
+          lat: newLat,
+          lng: newLng,
           profilePicture: currentUser?.profilePicture || currentUser?.profileImage
         };
-        setUserLocation(newLocation);
+
+        setUserLocation(prev => {
+          if (!prev) {
+            localStorage.setItem("kridaz_guest_location", JSON.stringify({ lat: newLat, lng: newLng }));
+            return newLocation;
+          }
+          const dist = haversineMeters(prev.lat, prev.lng, newLat, newLng);
+          if (dist > MOVEMENT_THRESHOLD_METERS) {
+            localStorage.setItem("kridaz_guest_location", JSON.stringify({ lat: newLat, lng: newLng }));
+            return newLocation;
+          }
+          return prev;
+        });
         setLocationError(null);
 
         // Adaptive emitting logic
@@ -437,14 +509,16 @@ const FindPlayers = () => {
   }, [isTrackingActive, isLocationSharing, socket, activeTab]);
 
   useEffect(() => {
-    if (snapState !== 'COLLAPSED') {
+    if (activeTab === 'players' && snapState !== 'COLLAPSED') {
       document.body.style.overflow = 'hidden';
     } else {
       document.body.style.overflow = 'unset';
-      window.scrollTo({ top: 0, behavior: 'smooth' });
+      if (activeTab === 'players' && snapState === 'COLLAPSED') {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }
     }
     return () => { document.body.style.overflow = 'unset'; };
-  }, [snapState]);
+  }, [snapState, activeTab]);
 
   const toggleLocationSharing = async () => {
     const newState = !isLocationSharing;
@@ -508,7 +582,7 @@ const FindPlayers = () => {
   const fetchNearbyPlayers = useCallback(async () => {
     if (!userLocation) return;
     try {
-      const res = await axiosInstance.get("/api/user/players", {
+      const res = await axiosInstance.get("/api/user/players/nearby", {
         params: {
           lat: userLocation.lat,
           lng: userLocation.lng,
@@ -521,17 +595,20 @@ const FindPlayers = () => {
           toast("Showing top nearby players. Zoom in to see more.", { icon: "=ƒôì" });
           setHasShownLimitToast(true);
         }
-        const mapPlayers = res.data.players.map(p => ({
-          _id: p.id || p._id,
-          name: p.name,
-          username: p.username,
-          profilePicture: p.profilePicture,
-          lat: p.locationData.coordinates[1],
-          lng: p.locationData.coordinates[0],
-          distanceKm: p.distanceKm,
-          city: p.city,
-          sportTypes: p.sportTypes
-        }));
+        const mapPlayers = res.data.players
+          .map(p => ({
+            _id: p.id || p._id,
+            name: p.name,
+            username: p.username,
+            profilePicture: p.profilePicture,
+            lat: p.lat,
+            lng: p.lng,
+            distanceKm: p.distanceKm,
+            city: p.city,
+            sportTypes: p.sportTypes
+          }))
+          .filter(p => p.lat != null && p.lng != null);
+
         const mocks = userLocation ? MOCK_PLAYERS.map(m => ({
           ...m,
           lat: userLocation.lat + m.latOffset,
@@ -539,7 +616,7 @@ const FindPlayers = () => {
           profilePicture: "https://pngimg.com/d/cricket_PNG102.png",
           distanceKm: 0.5,
           sportTypes: [m.sport]
-        })) : [];
+        })).filter(m => m.lat != null && m.lng != null) : [];
 
         setAllNearbyPlayers([...mapPlayers, ...mocks]);
       }
@@ -589,19 +666,23 @@ const FindPlayers = () => {
 
   useEffect(() => {
     if (userLocation) {
-      setIsRadiusChanging(true);
       fetchNearbyPlayers();
-      setTimeout(() => setIsRadiusChanging(false), 500);
-      
       const interval = setInterval(fetchNearbyPlayers, HEARTBEAT_INTERVAL_MS);
       return () => clearInterval(interval);
     }
-  }, [userLocation, fetchNearbyPlayers, selectedRadius]);
+  }, [userLocation, fetchNearbyPlayers]);
+
+  useEffect(() => {
+    if (userLocation) {
+      setIsRadiusChanging(true);
+      setTimeout(() => setIsRadiusChanging(false), 500);
+    }
+  }, [selectedRadius]);
 
   useEffect(() => {
     if (!socket || !userLocation || snapState === 'COLLAPSED' || !isLocationSharing) return;
     
-    socket.emit("location:start", {
+    socket.emit("location:update", {
       lat: userLocation.lat,
       lng: userLocation.lng,
       radiusKm: selectedRadius
@@ -616,8 +697,11 @@ const FindPlayers = () => {
         const existing = prev.find(p => (p.id || p._id) === userId);
         if (existing) {
           return prev.map(p => (p.id || p._id) === userId ? { ...p, lat, lng } : p);
+        } else {
+          // New user moved into radius, trigger fetch to get their profile data
+          fetchNearbyPlayers();
+          return prev;
         }
-        return prev;
       });
     };
 
@@ -647,20 +731,27 @@ const FindPlayers = () => {
     } finally {
       setLoading(false);
     }
-  }, [filters, searchQuery, selectedRadius, userLocation]);
+  }, [filters, searchQuery]);
+  const fetchTeamsRef = useRef(fetchTeams);
+  const fetchPlayersRef = useRef(fetchPlayers);
 
   useEffect(() => {
-    if (activeTab === "players") fetchPlayers();
-    else fetchTeams();
-  }, [activeTab, fetchPlayers, fetchTeams]);
+    fetchTeamsRef.current = fetchTeams;
+    fetchPlayersRef.current = fetchPlayers;
+  }, [fetchTeams, fetchPlayers]);
+
+  useEffect(() => {
+    if (activeTab === "players") fetchPlayersRef.current();
+    else fetchTeamsRef.current();
+  }, [activeTab, filters, selectedRadius, showNearbyOnly, userLocation]);
 
   useEffect(() => {
     const timer = setTimeout(() => {
-      if (activeTab === "players") fetchPlayers();
-      else fetchTeams();
+      if (activeTab === "players") fetchPlayersRef.current();
+      else fetchTeamsRef.current();
     }, 500);
     return () => clearTimeout(timer);
-  }, [searchQuery, activeTab, fetchPlayers, fetchTeams]);
+  }, [searchQuery]);
 
   const handleSearch = (e) => {
     setSearchQuery(e.target.value);
@@ -670,24 +761,57 @@ const FindPlayers = () => {
     setFilters(prev => ({ ...prev, [name]: value }));
   };
 
-  const handleFollowToggle = async (targetUserId) => {
+  const handleFollowToggle = (targetUserId) => {
     gateInteraction(async () => {
-      const isFollowing = followingIds.includes(targetUserId);
+      const wasFollowing = followingIds.includes(targetUserId);
+
+      // ── Optimistic update: flip state instantly ──────────────────────
+      setFollowingIds(prev =>
+        wasFollowing
+          ? prev.filter(id => id !== targetUserId)
+          : [...prev, targetUserId]
+      );
+
+      // ── Also update follower count in the players list optimistically ─
+      setPlayers(prev =>
+        prev.map(p => {
+          const id = p.id || p._id;
+          if (id !== targetUserId) return p;
+          const delta = wasFollowing ? -1 : 1;
+          return {
+            ...p,
+            followersCount: Math.max(0, (p.followersCount ?? p.followers?.length ?? 0) + delta),
+          };
+        })
+      );
+
       try {
-        const endpoint = `/api/user/players/${targetUserId}/${isFollowing ? 'unfollow' : 'follow'}`;
+        const endpoint = `/api/user/players/${targetUserId}/${wasFollowing ? 'unfollow' : 'follow'}`;
         await axiosInstance.post(endpoint);
-        if (isFollowing) {
-          setFollowingIds(prev => prev.filter(id => id !== targetUserId));
-          toast.success("Unfollowed player");
-        } else {
-          setFollowingIds(prev => [...prev, targetUserId]);
-          toast.success("Following player");
-        }
+        // Success – no toast needed, the UI already reflected the change
       } catch (error) {
-        toast.error("Failed to update follow status");
+        // ── Rollback on failure ──────────────────────────────────────────
+        setFollowingIds(prev =>
+          wasFollowing
+            ? [...prev, targetUserId]
+            : prev.filter(id => id !== targetUserId)
+        );
+        setPlayers(prev =>
+          prev.map(p => {
+            const id = p.id || p._id;
+            if (id !== targetUserId) return p;
+            const delta = wasFollowing ? 1 : -1;
+            return {
+              ...p,
+              followersCount: Math.max(0, (p.followersCount ?? p.followers?.length ?? 0) + delta),
+            };
+          })
+        );
+        toast.error("Couldn't update follow status. Please try again.");
       }
     });
   };
+
 
   const handleAvatarClick = (player) => {
     gateInteraction(() => {
@@ -725,21 +849,25 @@ const FindPlayers = () => {
   };
 
   const handleDragEnd = (_, info) => {
-    const threshold = 50;
-    const velocity = info.velocity.y;
-    const currentHeight = SNAP_STATES[snapState];
-    
-    if (velocity > threshold) {
+    const velocityThreshold = 30;
+    const offsetThreshold = 40;
+    const vy = info.velocity.y;
+    const dy = info.offset.y;
+
+    // Drag UP (negative y) → close/collapse map
+    if (vy < -velocityThreshold || dy < -offsetThreshold) {
       if (snapState === "EXPANDED") setSnapState("HALF");
       else if (snapState === "HALF") setSnapState("COLLAPSED");
-    } else if (velocity < -threshold) {
+    }
+    // Drag DOWN (positive y) → open/expand map
+    else if (vy > velocityThreshold || dy > offsetThreshold) {
       if (snapState === "COLLAPSED") setSnapState("HALF");
       else if (snapState === "HALF") setSnapState("EXPANDED");
     }
   };
 
   return (
-    <div className={`bg-black text-white flex flex-col ${activeTab === "players" ? "fixed inset-0 overflow-hidden pt-16" : "min-h-screen overflow-y-auto no-scrollbar"}`}>
+    <div className={`bg-black text-white flex flex-col ${activeTab === "players" ? "fixed inset-0 lg:left-64 overflow-hidden pt-16 lg:pt-0" : "min-h-screen overflow-y-auto no-scrollbar"}`}>
       
       {activeTab === "players" && (
         <>
@@ -765,46 +893,18 @@ const FindPlayers = () => {
                   />
 
                   {/* HEADER STATUS BAR */}
-                  <div className="absolute top-4 left-4 right-4 z-[1000] flex items-center justify-between pointer-events-none">
-                    <div className="flex items-center gap-3 bg-black/60 backdrop-blur-xl border border-white/10 p-1.5 px-4 rounded-2xl shadow-2xl">
-                      <div className="flex items-center gap-2">
-                        <div className="w-2 h-2 bg-[#55DEE8] rounded-full animate-pulse shadow-[0_0_10px_#55DEE8]" />
-                        <span className="text-white text-[11px] font-black uppercase tracking-widest">Live Map</span>
-                      </div>
-                      <div className="flex items-center gap-1.5">
-                        <Users size={12} className="text-[#55DEE8]" />
-                        <span className="text-[#55DEE8] text-[11px] font-black">{allNearbyPlayers.length}</span>
-                        <span className="text-white/40 text-[9px] font-bold uppercase">Players</span>
-                      </div>
-
-                      {allNearbyPlayers.length === 0 && userLocation && !locationError && (
-                        <>
-                          <div className="w-px h-3 bg-white/10" />
-                          <div className="flex items-center gap-1.5">
-                            <AlertCircle size={12} className="text-white/40" />
-                            <span className="text-white/40 text-[9px] font-black uppercase tracking-widest">
-                              No players nearby in {selectedRadius}KM
-                            </span>
-                          </div>
-                        </>
-                      )}
+                  <div className="absolute top-4 left-4 z-[1000] flex items-center gap-2 pointer-events-auto">
+                    <div className="flex items-center gap-1.5 bg-black/60 backdrop-blur-xl border border-white/10 p-1.5 px-2.5 rounded-[8px] shadow-2xl">
+                      <Users size={14} className="text-[#55DEE8]" />
+                      <span className="text-[#55DEE8] text-[12px] font-black">{allNearbyPlayers.length}</span>
                     </div>
 
-                    <div className="flex items-center gap-2 pointer-events-auto">
-                      <button 
-                        onClick={toggleLocationSharing}
-                        className={`flex items-center gap-2 px-4 py-2 rounded-2xl border transition-all duration-300 backdrop-blur-xl shadow-2xl ${
-                          isLocationSharing 
-                            ? "bg-[#55DEE8]/20 border-[#55DEE8]/30 text-[#55DEE8]" 
-                            : "bg-red-500/10 border-red-500/20 text-red-500"
-                        }`}
-                      >
-                        {isLocationSharing ? <Eye size={14} /> : <EyeOff size={14} />}
-                        <span className="text-[10px] font-black uppercase tracking-widest">
-                          {isLocationSharing ? "Visible" : "Hidden"}
-                        </span>
-                      </button>
-                    </div>
+                    <button 
+                      onClick={toggleLocationSharing}
+                      className={`flex items-center justify-center p-1.5 w-8 h-8 rounded-[8px] border transition-all duration-300 backdrop-blur-xl shadow-2xl ${ isLocationSharing ? "bg-[#55DEE8]/20 border-[#55DEE8]/30 text-[#55DEE8]" : "bg-red-500/10 border-red-500/20 text-red-500" }`}
+                    >
+                      {isLocationSharing ? <Eye size={16} /> : <EyeOff size={16} />}
+                    </button>
                   </div>
 
                   {/* LOADING SKELETON */}
@@ -834,7 +934,7 @@ const FindPlayers = () => {
                   {/* ERROR STATE */}
                   {locationError && (
                     <div className="absolute inset-0 z-[2000] bg-[#0A0A0A]/90 backdrop-blur-md flex flex-col items-center justify-center p-8 text-center">
-                      <div className="w-16 h-16 bg-red-500/20 border border-red-500/30 rounded-3xl flex items-center justify-center mb-4">
+                      <div className="w-16 h-16 bg-red-500/20 border border-red-500/30 rounded-[8px] flex items-center justify-center mb-4">
                         <AlertCircle className="text-red-500" size={32} />
                       </div>
                       <h3 className="text-white font-black uppercase tracking-widest mb-2">Location Required</h3>
@@ -843,7 +943,7 @@ const FindPlayers = () => {
                       </p>
                       <button 
                         onClick={() => window.location.reload()}
-                        className="px-8 py-3 bg-white/5 border border-white/10 rounded-2xl text-[10px] font-black uppercase tracking-widest text-white hover:bg-white/10 transition-all"
+                        className="px-8 py-3 bg-white/5 border border-white/10 rounded-[8px] text-[10px] font-black uppercase tracking-widest text-white hover:bg-white/10 transition-all"
                       >
                         Retry Connection
                       </button>
@@ -863,23 +963,21 @@ const FindPlayers = () => {
                     )}
                   </AnimatePresence>
 
-                  <div className="absolute bottom-8 left-1/2 -translate-x-1/2 z-[1000] w-[90%] max-w-xs">
-                    <div className="bg-black/80 backdrop-blur-2xl border border-[#55DEE8]/30 rounded-full p-1.5 px-6 flex items-center justify-between shadow-2xl">
-                        <span className="text-[10px] font-black text-white/40 uppercase tracking-widest">Radius</span>
-                        <div className="flex items-center gap-1">
-                          {[5, 10, 20, 50, 100].map(r => (
-                              <button 
-                                key={r}
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  setSelectedRadius(r);
-                                }}
-                                className={`min-w-[40px] px-2 py-1.5 rounded-full text-[9px] font-black transition-all uppercase ${selectedRadius === r ? "bg-[#55DEE8] text-black shadow-[0_0_15px_rgba(85,222,232,0.4)]" : "text-white/40 hover:text-white/70"}`}
-                              >
-                                {r}KM
-                              </button>
-                          ))}
-                        </div>
+                  <div className="absolute bottom-0 left-0 w-full z-[1000]">
+                    <div className="bg-black/80 backdrop-blur-xl border-t border-white/10 p-2.5 px-6 flex items-center gap-4 pointer-events-auto w-full">
+                        <span className="text-white/40 text-[9px] font-black uppercase tracking-widest">Radius</span>
+                        <input 
+                          type="range"
+                          min="5" max="100" step="5"
+                          value={selectedRadius}
+                          onPointerDown={(e) => e.stopPropagation()}
+                          onChange={(e) => {
+                            e.stopPropagation();
+                            setSelectedRadius(Number(e.target.value));
+                          }}
+                          className="flex-1 h-1 bg-white/20 rounded-lg appearance-none cursor-pointer accent-[#55DEE8]"
+                        />
+                        <span className="text-[#55DEE8] text-[10px] font-black min-w-[40px] text-right">{selectedRadius} KM</span>
                     </div>
                   </div>
                 </motion.div>
@@ -926,7 +1024,7 @@ const FindPlayers = () => {
           </div>
 
           {/* Compact Header Row */}
-          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white/[0.02] border border-white/5 rounded-2xl p-3 md:p-4">
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white/[0.02] border border-white/5 rounded-[8px] p-3 md:p-4">
             <div className="flex items-center gap-4 flex-1">
               <div className="relative flex-1 max-w-md group">
                 <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-white/20 group-focus-within:text-[#55DEE8] transition-colors" size={16} />
@@ -935,7 +1033,7 @@ const FindPlayers = () => {
                   value={searchQuery}
                   onChange={handleSearch}
                   placeholder="SEARCH..."
-                  className="w-full bg-white/[0.03] hover:bg-white/[0.05] border border-white/10 focus:border-[#55DEE8]/50 rounded-xl h-10 pl-11 pr-4 text-white text-[10px] md:text-xs placeholder:text-white/20 outline-none transition-all uppercase tracking-widest font-bold"
+                  className="w-full bg-white/[0.03] hover:bg-white/[0.05] border border-white/10 focus:border-[#55DEE8]/50 rounded-[8px] h-10 pl-11 pr-4 text-white text-[10px] md:text-xs placeholder:text-white/20 outline-none transition-all uppercase tracking-widest font-bold"
                 />
               </div>
             </div>
@@ -944,7 +1042,7 @@ const FindPlayers = () => {
               <select 
                 value={filters.sport}
                 onChange={(e) => handleFilterChange("sport", e.target.value)}
-                className="bg-white/5 border border-white/10 rounded-lg px-3 py-1.5 text-[9px] md:text-[10px] font-bold uppercase tracking-widest text-white/60 focus:text-[#55DEE8] focus:border-[#55DEE8]/50 outline-none cursor-pointer hover:bg-white/10 transition-all"
+                className="bg-white/5 border border-white/10 rounded-[6px] px-3 py-1.5 text-[9px] md:text-[10px] font-bold uppercase tracking-widest text-white/60 focus:text-[#55DEE8] focus:border-[#55DEE8]/50 outline-none cursor-pointer hover:bg-white/10 transition-all"
               >
                 <option value="">All Sports</option>
                 {sports.map(s => <option key={s} value={s}>{s}</option>)}
@@ -994,26 +1092,38 @@ const FindPlayers = () => {
                 </div>
               </div>
 
-              {/* Mobile/Tab Location Filter */}
+              {/* Mobile/Tab Location Filters */}
               <div className="relative group lg:hidden">
                 <MapPin className="absolute left-2.5 top-1/2 -translate-y-1/2 text-white/20 group-focus-within:text-[#55DEE8]" size={10} />
-                <input 
-                  type="text"
-                  placeholder="LOCATION..."
+                <select
+                  value={filters.state || ""}
+                  onChange={(e) => {
+                    handleFilterChange("state", e.target.value);
+                    handleFilterChange("city", "");
+                  }}
+                  className="bg-white/5 border border-white/10 rounded-lg pl-7 pr-3 py-1.5 text-[9px] md:text-[10px] font-bold uppercase tracking-widest text-white/60 focus:text-[#55DEE8] focus:border-[#55DEE8]/50 outline-none w-24 md:w-28 cursor-pointer hover:bg-white/10 transition-all appearance-none"
+                >
+                  <option value="">STATE...</option>
+                  {statesList.map(s => <option key={s} value={s}>{s}</option>)}
+                </select>
+              </div>
+              <div className="relative group lg:hidden">
+                <MapPin className="absolute left-2.5 top-1/2 -translate-y-1/2 text-white/20 group-focus-within:text-[#55DEE8]" size={10} />
+                <select
                   value={filters.city || ""}
                   onChange={(e) => handleFilterChange("city", e.target.value)}
-                  className="bg-white/5 border border-white/10 rounded-lg pl-7 pr-3 py-1.5 text-[9px] md:text-[10px] font-bold uppercase tracking-widest text-white/60 focus:text-[#55DEE8] focus:border-[#55DEE8]/50 outline-none w-24 md:w-28 placeholder:text-white/20"
-                />
+                  disabled={!filters.state}
+                  className="bg-white/5 border border-white/10 rounded-lg pl-7 pr-3 py-1.5 text-[9px] md:text-[10px] font-bold uppercase tracking-widest text-white/60 focus:text-[#55DEE8] focus:border-[#55DEE8]/50 outline-none w-24 md:w-28 cursor-pointer hover:bg-white/10 transition-all appearance-none disabled:opacity-40"
+                >
+                  <option value="">CITY...</option>
+                  {citiesList.map(c => <option key={c} value={c}>{c}</option>)}
+                </select>
               </div>
 
               {activeTab === "players" && (
                 <button 
                   onClick={() => setShowNearbyOnly(!showNearbyOnly)}
-                  className={`flex items-center gap-2 px-3 py-1.5 rounded-lg border transition-all text-[9px] font-black uppercase tracking-widest ${
-                    showNearbyOnly 
-                    ? "bg-[#55DEE8] border-[#55DEE8] text-black shadow-[0_0_15px_rgba(85,222,232,0.4)]" 
-                    : "bg-white/5 border-white/10 text-white/60 hover:bg-white/10"
-                  }`}
+                  className={`flex items-center gap-2 px-3 py-1.5 rounded-[6px] border transition-all text-[9px] font-black uppercase tracking-widest ${ showNearbyOnly ? "bg-[#55DEE8] border-[#55DEE8] text-black shadow-[0_0_15px_rgba(85,222,232,0.4)]" : "bg-white/5 border-white/10 text-white/60 hover:bg-white/10" }`}
                 >
                   <Navigation size={10} className={showNearbyOnly ? "animate-pulse" : ""} />
                   Nearby
@@ -1024,18 +1134,17 @@ const FindPlayers = () => {
 
           {/* Content Grid */}
           {loading ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
-              {[1, 2, 3, 4].map(i => (
-                <div key={i} className="h-[360px] bg-white/[0.02] border border-white/5 rounded-[16px] animate-pulse" />
+            <div className="space-y-3">
+              {[1, 2, 3, 4, 5].map(i => (
+                <div key={i} className="h-20 bg-white/[0.02] border border-white/5 rounded-2xl animate-pulse" />
               ))}
             </div>
           ) : activeTab === "players" ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
-              {players.map((player, idx) => (
-                <div key={player.id || player._id} id={`player-card-${player.id || player._id}`} className="transition-all duration-500">
-                  <PlayerCard 
-                    player={player} 
-                    rank={idx}
+            <div className="space-y-3">
+              {players.map((player) => (
+                <div key={player.id || player._id} id={`player-card-${player.id || player._id}`}>
+                  <PlayerCard
+                    player={player}
                     followingIds={followingIds}
                     handleFollowToggle={handleFollowToggle}
                     handleAvatarClick={handleAvatarClick}
@@ -1047,7 +1156,7 @@ const FindPlayers = () => {
               ))}
             </div>
           ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+            <div className="grid grid-cols-2 lg:grid-cols-3 gap-4 md:gap-8">
               {teams.length > 0 ? (
                 teams.map((team) => (
                   <TeamCard key={team._id} team={team} navigate={navigate} />

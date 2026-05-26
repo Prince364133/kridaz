@@ -13,11 +13,7 @@ const DocumentUpload = ({ label, id, onFileSelect, selectedFile }) => {
       />
       <label 
         htmlFor={id}
-        className={`flex flex-col items-center justify-center p-6 border border-dashed transition-all cursor-pointer h-32 text-center rounded-[8px]
-          ${selectedFile 
-            ? 'border-[#CCFF00] bg-[#CCFF00]/5' 
-            : 'border-[#2D2D2D] bg-[#000000] hover:border-[#CCFF00]/50 hover:bg-[#CCFF00]/5'
-          }`}
+        className={`flex flex-col items-center justify-center p-6 border border-dashed transition-all cursor-pointer h-32 text-center rounded-[8px] ${selectedFile ? 'border-[#CCFF00] bg-[#CCFF00]/5' : 'border-[#2D2D2D] bg-[#000000] hover:border-[#CCFF00]/50 hover:bg-[#CCFF00]/5' }`}
       >
         {selectedFile ? (
           <div className="space-y-1">

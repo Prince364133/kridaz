@@ -13,12 +13,12 @@ const PRI = "#55DEE8";
 const GRAD = "linear-gradient(90deg, #55DEE8 0%, #BFF367 100%)";
 
 const HEADING_STYLE = { fontFamily: "'Open Sans', sans-serif" };
-const SUBHEADING_STYLE = { fontFamily: "'Inter', sans-serif", fontSize: "20px" };
+const SUBHEADING_STYLE = { fontFamily: "'Inter 28pt Light', sans-serif", fontWeight: 300 };
 
 const SidebarIcon = ({ icon: Icon, active, onClick, label }) => (
   <div 
     onClick={onClick}
-    className={`p-3 rounded-xl transition-all cursor-pointer flex flex-col items-center gap-1 group ${active ? 'shadow-[0_0_15px_rgba(85,222,232,0.1)] border' : 'text-gray-500 hover:text-white hover:bg-white/5 border border-transparent'}`}
+    className={`p-3 rounded-[8px] transition-all cursor-pointer flex flex-col items-center gap-1 group ${active ? 'shadow-[0_0_15px_rgba(85,222,232,0.1)] border' : 'text-gray-500 hover:text-white hover:bg-white/5 border border-transparent'}`}
     style={active ? { background: GRAD, borderColor: 'transparent' } : {}}
   >
     <Icon size={22} strokeWidth={active ? 2.5 : 2} className={active ? 'text-black' : ''} />
@@ -129,7 +129,7 @@ const Leaderboard = () => {
               <select 
                 value={category}
                 onChange={(e) => setCategory(e.target.value)}
-                className="w-full bg-[#0A0A0A] border border-white/5 rounded-2xl px-6 py-4 text-[11px] font-black uppercase tracking-[0.2em] outline-none focus:border-[#55DEE8]/50 transition-all appearance-none cursor-pointer shadow-2xl text-[#55DEE8]"
+                className="w-full bg-[#0A0A0A] border border-white/5 rounded-[8px] px-6 py-4 text-[11px] font-black uppercase tracking-[0.2em] outline-none focus:border-[#55DEE8]/50 transition-all appearance-none cursor-pointer shadow-2xl text-[#55DEE8]"
               >
                 {sportCategories[selectedSport].map((cat) => (
                   <option key={cat} value={cat}>{cat.replace('_', ' ')} CATEGORY</option>
@@ -142,7 +142,7 @@ const Leaderboard = () => {
 
             <div className="flex gap-4 w-full lg:w-auto">
               <div className="relative flex-1 lg:flex-none">
-                <select className="w-full bg-[#0A0A0A] border border-white/5 rounded-xl px-4 py-3 text-[10px] font-black uppercase tracking-widest outline-none focus:border-[#55DEE8]/50 transition-all appearance-none cursor-pointer pr-10">
+                <select className="w-full bg-[#0A0A0A] border border-white/5 rounded-[8px] px-4 py-3 text-[10px] font-black uppercase tracking-widest outline-none focus:border-[#55DEE8]/50 transition-all appearance-none cursor-pointer pr-10">
                   <option>All Time</option>
                   <option>Monthly</option>
                   <option>Weekly</option>
@@ -152,7 +152,7 @@ const Leaderboard = () => {
                 </div>
               </div>
               <div className="relative flex-1 lg:flex-none">
-                <select className="w-full bg-[#0A0A0A] border border-white/5 rounded-xl px-4 py-3 text-[10px] font-black uppercase tracking-widest outline-none focus:border-[#55DEE8]/50 transition-all appearance-none cursor-pointer pr-10">
+                <select className="w-full bg-[#0A0A0A] border border-white/5 rounded-[8px] px-4 py-3 text-[10px] font-black uppercase tracking-widest outline-none focus:border-[#55DEE8]/50 transition-all appearance-none cursor-pointer pr-10">
                   <option>Worldwide</option>
                   <option>National</option>
                   <option>Regional</option>
@@ -168,7 +168,7 @@ const Leaderboard = () => {
           <div className="flex flex-col xl:flex-row gap-8">
             
             {/* Table Area */}
-            <div className="flex-1 bg-[#0A0A0A]/80 backdrop-blur-md rounded-3xl border border-white/5 overflow-hidden shadow-2xl">
+            <div className="flex-1 bg-[#0A0A0A]/80 backdrop-blur-md rounded-[8px] border border-white/5 overflow-hidden shadow-2xl">
               <div className="grid grid-cols-[80px_2fr_1fr_1fr_1fr_1fr_1fr] p-6 border-b border-white/5 bg-white/[0.02]">
                 <div className="text-[10px] font-black text-gray-500 uppercase tracking-widest">Rank</div>
                 <div className="text-[10px] font-black text-gray-500 uppercase tracking-widest">Player</div>
@@ -256,7 +256,7 @@ const Leaderboard = () => {
             {/* Sidebar Stats Area */}
             <div className="w-full xl:w-[320px] space-y-6">
               
-              <div className="bg-[#0A0A0A] rounded-3xl border border-white/5 p-6 shadow-2xl">
+              <div className="bg-[#0A0A0A] rounded-[8px] border border-white/5 p-6 shadow-2xl">
                 <h3 className="text-xs font-black text-[#55DEE8] uppercase tracking-[0.2em] mb-8 text-center" style={HEADING_STYLE}>{selectedSport} Overview</h3>
                 
                 <div className="flex flex-col items-center mb-8 relative">
@@ -288,10 +288,10 @@ const Leaderboard = () => {
                 </div>
               </div>
 
-              <div className="bg-gradient-to-br from-[#111] to-[#050505] rounded-3xl border border-[#55DEE8]/20 p-6 shadow-2xl relative overflow-hidden group">
+              <div className="bg-gradient-to-br from-[#111] to-[#050505] rounded-[8px] border border-[#55DEE8]/20 p-6 shadow-2xl relative overflow-hidden group">
                 <div className="absolute top-[-20px] right-[-20px] w-32 h-32 bg-[#55DEE8]/5 rounded-full blur-3xl group-hover:bg-[#55DEE8]/10 transition-all"></div>
                 <div className="flex items-start gap-4">
-                  <div className="p-3 rounded-2xl bg-[#55DEE8]/10 text-[#55DEE8] shadow-inner shadow-[#55DEE8]/20">
+                  <div className="p-3 rounded-[8px] bg-[#55DEE8]/10 text-[#55DEE8] shadow-inner shadow-[#55DEE8]/20">
                     <Crown size={24} strokeWidth={2.5} />
                   </div>
                   <div>

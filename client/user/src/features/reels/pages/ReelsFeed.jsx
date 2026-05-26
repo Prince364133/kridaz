@@ -38,7 +38,8 @@ const ReelsFeed = () => {
           reelsApi.util.updateQueryData('getReelsFeed', queryArg, (draft) => {
             const reel = draft.reels.find((r) => (r.id || r._id) === reelId);
             if (reel) {
-              reel.stats.likes = likes;
+              if (reel.stats) reel.stats.likes = likes;
+              reel.likes = likes;
             }
           })
         );
@@ -54,7 +55,8 @@ const ReelsFeed = () => {
           reelsApi.util.updateQueryData('getReelsFeed', queryArg, (draft) => {
             const reel = draft.reels.find((r) => (r.id || r._id) === reelId);
             if (reel) {
-              reel.stats.comments += 1;
+              if (reel.stats) reel.stats.comments += 1;
+              if (typeof reel.comments === 'number') reel.comments += 1;
             }
           })
         );
@@ -189,26 +191,30 @@ const ReelsFeed = () => {
   return (
     <div className="fixed inset-0 h-[100dvh] w-full bg-black overflow-hidden z-50 flex justify-center">
       {/* Header Overlay */}
-      <div className="absolute top-0 w-full max-w-[500px] p-6 flex items-center justify-between z-30 pointer-events-none">
+      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-[500px] p-4 pt-[env(safe-area-inset-top,16px)] flex items-center justify-between z-[60] pointer-events-none">
         <button 
           onClick={() => navigate(-1)} 
-          className="p-2.5 bg-black/30 rounded-full text-white pointer-events-auto backdrop-blur-md border border-white/10 active:scale-90 transition-transform"
+          className="p-2.5 bg-black/50 rounded-full text-white pointer-events-auto backdrop-blur-md border border-white/10 active:scale-90 transition-transform shadow-lg"
         >
-          <ChevronLeft size={24} />
+          <ChevronLeft size={22} />
         </button>
-        <h2 className="text-white font-bold text-xl tracking-tight pointer-events-auto drop-shadow-md">Shorts</h2>
+        <h2 className="text-white font-bold text-lg tracking-tight pointer-events-auto drop-shadow-[0_2px_8px_rgba(0,0,0,0.9)]">Shorts</h2>
         <button 
           onClick={() => navigate('/reels/upload')}
-          className="p-2.5 bg-black/30 rounded-full text-white pointer-events-auto backdrop-blur-md border border-white/10 active:scale-90 transition-transform"
+          className="p-2.5 bg-black/50 rounded-full text-white pointer-events-auto backdrop-blur-md border border-white/10 active:scale-90 transition-transform shadow-lg"
         >
-          <Camera size={24} />
+          <Camera size={22} />
         </button>
       </div>
 
       {/* Vertical Feed Container */}
       <div 
         ref={feedRef}
-        className="reels-feed-container scrollbar-hide snap-y snap-mandatory overflow-y-auto h-full w-full max-w-[500px]"
+        className="reels-feed-container scrollbar-hide snap-y snap-mandatory overflow-y-auto mx-auto"
+        style={{ 
+          width: 'min(100vw, calc(100dvh * 9 / 16))', 
+          height: 'min(100dvh, calc(100vw * 16 / 9))'
+        }}
       >
         {reels.map((reel, index) => {
           // Preload: render actual component if within 2 items of active

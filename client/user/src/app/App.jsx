@@ -83,7 +83,7 @@ export default function App() {
             role: meResponse.data.role,
             token: meResponse.data.token,
             followingIds: networkResponse.data.success 
-              ? (networkResponse.data.following || []).filter(u => u).map(u => u._id)
+              ? (networkResponse.data.following || []).filter(u => u).map(u => u.id || u._id)
               : []
           }));
         }

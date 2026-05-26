@@ -15,6 +15,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import toast from "react-hot-toast";
 import StoryViewer from "@features/networking/components/StoryViewer";
 import useLoginOnDemand from "@hooks/useLoginOnDemand";
+import useGuestLocation from "@hooks/useGuestLocation";
 import {
   communityApi,
   useGetCommunityFeedQuery,
@@ -25,7 +26,7 @@ import {
   useUpdatePostMutation,
   useDeletePostMutation,
   useLikePostMutation,
-  useAddCommentMutation,
+  useAddPostCommentMutation,
   useDeleteCommentMutation,
   useUploadStoryMutation,
   useDeleteStoryMutation,
@@ -43,9 +44,10 @@ import { uploadFileToR2 } from "@utils/mediaUpload";
 
 const PRI = "#55DEE8";
 const HEADING_STYLE = { fontFamily: "'Open Sans', sans-serif" };
-const SUBHEADING_STYLE = { fontFamily: "'Inter', sans-serif" };
+const SUBHEADING_STYLE = { fontFamily: "'Inter 28pt Light', sans-serif", fontWeight: 300 };
 
 const getPostShareId = (post) => post?._id || post?.id;
+const getPostId = (post) => post?._id || post?.id;
 
 const sharePlatforms = [
   { id: "native", name: "More", icon: Share2 },
@@ -55,7 +57,7 @@ const sharePlatforms = [
   { id: "facebook", name: "Facebook", icon: Facebook },
 ];
 
-const Community = () => {
+const Community = ({ children, onSearchActive }) => {
   const { user, role, isLoggedIn, followingIds } = useSelector((state) => state.auth);
   const dispatch = useDispatch();
   const { gateInteraction } = useLoginOnDemand();
@@ -63,9 +65,12 @@ const Community = () => {
   const isAdmin = role === 'admin' || role === 'BMSP_ADMIN';
 
   // RTK Query Hooks
+  const { location } = useGuestLocation();
   const [triggerGetFeed] = useLazyGetCommunityFeedQuery();
   const [triggerSearchPlayers] = useLazySearchPlayersQuery();
-  const { data: storiesData } = useGetStoriesFeedQuery();
+  const { data: storiesData } = useGetStoriesFeedQuery(
+    location ? { lat: location.lat, lng: location.lng } : undefined
+  );
   const stories = storiesData?.stories || [];
   const { data: statsData } = useGetCommunityStatsQuery();
 
@@ -73,7 +78,7 @@ const Community = () => {
   const [updatePost] = useUpdatePostMutation();
   const [deletePost] = useDeletePostMutation();
   const [likePost] = useLikePostMutation();
-  const [addComment] = useAddCommentMutation();
+  const [addPostComment] = useAddPostCommentMutation();
   const [deleteComment] = useDeleteCommentMutation();
   const [uploadStory] = useUploadStoryMutation();
   const [deleteStory] = useDeleteStoryMutation();
@@ -91,15 +96,39 @@ const Community = () => {
   const [activePanel, setActivePanel] = useState(null); // 'messages' | 'notifications' | null
   const togglePanel = (panel) => setActivePanel(prev => prev === panel ? null : panel);
 
+  // Sync activeFilter if URL changes (e.g. from Home page click)
+  useEffect(() => {
+    if (searchParams.get("tab") === "shots") {
+      setActiveFilter("Reels");
+    } else if (activeFilter === "Reels") {
+      setActiveFilter("All");
+    }
+  }, [searchParams.get("tab")]);
+
   // Sync URL when Shots/Reels view is toggled (also puts the reel id in the URL)
   const handleSetActiveFilter = (filter) => {
     setActiveFilter(filter);
     if (filter === "Reels") {
-      setSearchParams({ tab: "shots" }, { replace: true });
+      searchParams.set("tab", "shots");
+      setSearchParams(searchParams, { replace: true });
     } else {
-      setSearchParams({}, { replace: true });
+      searchParams.delete("tab");
+      searchParams.delete("id");
+      setSearchParams(searchParams, { replace: true });
     }
   };
+
+  // Disable body scroll when viewing Reels
+  useEffect(() => {
+    if (activeFilter === "Reels") {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "auto";
+    }
+    return () => {
+      document.body.style.overflow = "auto";
+    };
+  }, [activeFilter]);
 
 
   // Reels (Shots) hook â€” cursor-based infinite scroll
@@ -121,16 +150,23 @@ const Community = () => {
     if (currentReel?.id) {
       setSearchParams({ tab: "shots", id: currentReel.id }, { replace: true });
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activeReelIndex, activeFilter, reels.length]);
 
   const { socket, onlineCount } = useSocket();
 
   // (activeFilter, activeSportFilter, activePanel are declared above â€” before the reels hook)
-  
+
   // Search state
   const [feedSearchQuery, setFeedSearchQuery] = useState("");
   const [debouncedSearchQuery, setDebouncedSearchQuery] = useState("");
+
+  // Notify parent of search state
+  useEffect(() => {
+    if (onSearchActive) {
+      onSearchActive(debouncedSearchQuery.trim() !== "");
+    }
+  }, [debouncedSearchQuery, onSearchActive]);
 
   // Debounce search input
   useEffect(() => {
@@ -145,6 +181,7 @@ const Community = () => {
   const [loadedPosts, setLoadedPosts] = useState([]);
   const [hasMorePosts, setHasMorePosts] = useState(true);
   const [postsLoading, setPostsLoading] = useState(false);
+  const [activeDropdownId, setActiveDropdownId] = useState(null);
 
   const [playersPage, setPlayersPage] = useState(1);
   const [loadedPlayers, setLoadedPlayers] = useState([]);
@@ -178,6 +215,10 @@ const Community = () => {
       } else {
         if (activeFilter === "Following") {
           params.following = "true";
+        }
+        if (location) {
+          params.lat = location.lat;
+          params.lng = location.lng;
         }
       }
 
@@ -417,7 +458,10 @@ const Community = () => {
   const [currentStoryIndex, setCurrentStoryIndex] = useState(0);
 
   const [commentInputs, setCommentInputs] = useState({});
+  const [expandedComments, setExpandedComments] = useState({});
   const [sharePostId, setSharePostId] = useState(null);
+  const [reportPostId, setReportPostId] = useState(null);
+  const [showReportModal, setShowReportModal] = useState(false);
 
   const [showGlobalSearch, setShowGlobalSearch] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
@@ -432,7 +476,7 @@ const Community = () => {
         setNewPost(prev => ({ ...prev, content: text }));
       }
       setShowPostModal(true);
-      
+
       // Clean up the URL
       const newParams = new URLSearchParams(searchParams);
       newParams.delete('createPost');
@@ -545,7 +589,8 @@ const Community = () => {
         previewUrl: URL.createObjectURL(file),
         metadata: {
           type: 'story',
-          content: ''
+          content: '',
+          durationDays: newStory.durationDays
         }
       }));
       setNewStory({ content: '', mediaFiles: [], durationDays: 1 });
@@ -597,7 +642,7 @@ const Community = () => {
       await deletePost(postId).unwrap();
       toast.success("Post deleted");
     } catch (error) {
-      toast.error("Failed to delete post");
+      toast.error(error?.data?.message || error.message || "Failed to delete post");
     }
   };
 
@@ -608,7 +653,7 @@ const Community = () => {
       toast.success("Story deleted");
       setSelectedStoryGroup(null);
     } catch (error) {
-      toast.error("Failed to delete story");
+      toast.error(error?.data?.message || error.message || "Failed to delete story");
     }
   };
 
@@ -616,12 +661,64 @@ const Community = () => {
     gateInteraction(async () => {
       const text = commentInputs[postId];
       if (!text || !text.trim()) return;
+
+      // Optimistic comment
+      const optimisticComment = {
+        id: `temp-${Date.now()}`,
+        _id: `temp-${Date.now()}`,
+        text: text.trim(),
+        createdAt: new Date().toISOString(),
+        userId: {
+          id: user?.id,
+          _id: user?.id,
+          name: user?.name || 'You',
+          username: user?.username || '',
+          profilePicture: user?.profilePicture || null
+        }
+      };
+
+      // Immediately add to local state
+      setLoadedPosts(prev => prev.map(post => {
+        if ((post._id || post.id) === postId) {
+          return {
+            ...post,
+            comments: [...(post.comments || []), optimisticComment],
+          };
+        }
+        return post;
+      }));
+      setCommentInputs(prev => ({ ...prev, [postId]: "" }));
+
       try {
-        await addComment({ postId, text }).unwrap();
-        setCommentInputs(prev => ({ ...prev, [postId]: "" }));
+        const res = await addPostComment({ postId, text: text.trim() }).unwrap();
+        // Replace optimistic comment with server response if available
+        if (res?.comment) {
+          setLoadedPosts(prev => prev.map(post => {
+            if ((post._id || post.id) === postId) {
+              return {
+                ...post,
+                comments: (post.comments || []).map(c =>
+                  c.id === optimisticComment.id ? { ...res.comment, userId: res.comment.user || res.comment.userId } : c
+                ),
+              };
+            }
+            return post;
+          }));
+        }
         toast.success("Comment added!");
       } catch (error) {
-        toast.error("Failed to add comment");
+        // Rollback optimistic comment
+        setLoadedPosts(prev => prev.map(post => {
+          if ((post._id || post.id) === postId) {
+            return {
+              ...post,
+              comments: (post.comments || []).filter(c => c.id !== optimisticComment.id),
+            };
+          }
+          return post;
+        }));
+        const errorMsg = error?.data?.errors?.[0]?.message || error?.data?.message || error.message || "Failed to add comment";
+        toast.error(errorMsg);
       }
     }, {
       title: "Join the Discussion",
@@ -631,10 +728,62 @@ const Community = () => {
 
   const handleLike = async (postId) => {
     gateInteraction(async () => {
+      // Optimistic like toggle with real user details
+      const userId = user?.id || user?._id;
+      setLoadedPosts(prev => prev.map(post => {
+        if ((post._id || post.id) === postId) {
+          const alreadyLiked = post.likes?.some(l => (l.id || l._id || l) === userId);
+          return {
+            ...post,
+            likes: alreadyLiked
+              ? (post.likes || []).filter(l => (l.id || l._id || l) !== userId)
+              : [...(post.likes || []), { 
+                  id: userId, 
+                  _id: userId,
+                  name: user?.name,
+                  username: user?.username,
+                  profilePicture: user?.profilePicture
+                }],
+          };
+        }
+        return post;
+      }));
+
       try {
-        await likePost(postId).unwrap();
+        const res = await likePost(postId).unwrap();
+        if (res.likes) {
+          setLoadedPosts(prev => prev.map(post => {
+            if ((post._id || post.id) === postId) {
+              return {
+                ...post,
+                likes: res.likes,
+                likesCount: res.likes.length
+              };
+            }
+            return post;
+          }));
+        }
       } catch (error) {
-        toast.error("Failed to like post");
+        // Rollback
+        setLoadedPosts(prev => prev.map(post => {
+          if ((post._id || post.id) === postId) {
+            const wasLiked = post.likes?.some(l => (l.id || l._id || l) === userId);
+            return {
+              ...post,
+              likes: wasLiked
+                ? (post.likes || []).filter(l => (l.id || l._id || l) !== userId)
+                : [...(post.likes || []), { 
+                    id: userId, 
+                    _id: userId,
+                    name: user?.name,
+                    username: user?.username,
+                    profilePicture: user?.profilePicture
+                  }],
+            };
+          }
+          return post;
+        }));
+        toast.error(error?.data?.message || error.message || "Failed to like post");
       }
     });
   };
@@ -735,7 +884,7 @@ const Community = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#050505] text-white pt-4 pb-12 px-4 md:px-6 font-sans relative">
+    <div className={`min-h-screen bg-[#050505] text-white pt-4 pb-12 ${activeFilter === 'Reels' ? 'px-0 md:px-6' : 'px-4 md:px-6'} font-sans relative`}>
 
 
 
@@ -754,7 +903,7 @@ const Community = () => {
               animate={{ y: 0, opacity: 1, scale: 1 }}
               exit={{ y: -20, opacity: 0, scale: 0.95 }}
               transition={{ duration: 0.2 }}
-              className="w-full max-w-2xl bg-[#0A0A0A] border border-white/10 rounded-[15px] overflow-hidden shadow-2xl mx-4"
+              className="w-full max-w-2xl bg-[#0A0A0A] border border-white/10 rounded-[8px] overflow-hidden shadow-2xl mx-4"
               onClick={e => e.stopPropagation()}
             >
               <div className="flex items-center gap-3 p-5 border-b border-white/5 bg-[#111]">
@@ -786,7 +935,7 @@ const Community = () => {
                           setShowGlobalSearch(false);
                           navigate(`/profile/${player._id}`);
                         }}
-                        className="flex items-center gap-4 p-3 hover:bg-white/5 rounded-xl cursor-pointer transition-all group"
+                        className="flex items-center gap-4 p-3 hover:bg-white/5 rounded-[8px] cursor-pointer transition-all group"
                       >
                         <div className="w-[46px] h-[46px] rounded-full bg-[#111] border border-white/10 flex items-center justify-center overflow-hidden shrink-0">
                           <img
@@ -826,13 +975,13 @@ const Community = () => {
 
 
           {/* ================= FEED (centered, full-width on desktop) ================= */}
-          <div className={`max-w-3xl mx-auto w-full transition-all duration-300 ${activeFilter === 'Reels' ? 'h-[calc(100vh-100px)] sticky top-[80px] max-w-none' : 'space-y-6'}`}>
+          <div className={`max-w-3xl mx-auto w-full transition-all duration-300 ${activeFilter === 'Reels' ? 'h-[calc(100vh-100px)] sticky top-[80px] max-w-none' : 'space-y-2'}`}>
 
             {activeFilter !== "Reels" && (
-              <div className="space-y-6 mb-6">
+              <div className="space-y-3 mb-2">
 
                 {/* Search, Post, and Message Header Row */}
-                <div className="relative z-10 flex items-center gap-3 pb-4">
+                <div className="relative z-10 flex items-center gap-3">
 
                   {/* Search input field styled with theme */}
                   <div className="relative flex-1">
@@ -840,7 +989,7 @@ const Community = () => {
                     <input
                       type="text"
                       placeholder="Search community posts or players..."
-                      className="w-full bg-[#0A0A0A] border border-white/10 rounded-xl py-3 pl-11 pr-4 text-sm font-bold text-white outline-none focus:border-[#55DEE8]/50 focus:ring-1 focus:ring-[#55DEE8]/20 transition-all placeholder:text-white/30"
+                      className="w-full bg-[#0A0A0A] border border-white/10 rounded-[8px] py-3 pl-11 pr-4 text-sm font-bold text-white outline-none focus:border-[#55DEE8]/50 focus:ring-1 focus:ring-[#55DEE8]/20 transition-all placeholder:text-white/30"
                       value={feedSearchQuery}
                       onChange={(e) => setFeedSearchQuery(e.target.value)}
                     />
@@ -875,33 +1024,14 @@ const Community = () => {
                     <Plus size={20} strokeWidth={2.5} className="relative z-10 text-white group-hover:text-black transition-colors" />
                   </motion.button>
 
-                  {/* Message Button */}
-                  <motion.button
-                    onClick={() => gateInteraction(() => navigate('/messages'))}
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
-                    title="Messages"
-                    className="relative flex items-center justify-center w-11 h-11 rounded-full shrink-0 group z-10"
-                  >
-                    <svg className="absolute inset-0 w-full h-full pointer-events-none z-[-1]" viewBox="0 0 100 100">
-                      <defs>
-                        <linearGradient id="msg-btn-grad" x1="0%" y1="0%" x2="100%" y2="0%">
-                          <stop stopColor="#55DEE8" offset="0%" />
-                          <stop stopColor="#BFF367" offset="100%" />
-                        </linearGradient>
-                      </defs>
-                      <circle cx="50" cy="50" r="47" fill="none" stroke="url(#msg-btn-grad)" strokeWidth="4" pathLength="100" strokeDasharray="4 6" strokeLinecap="round" />
-                    </svg>
-                    <div className="absolute inset-0 rounded-full bg-gradient-to-r from-[#55DEE8] to-[#BFF367] opacity-0 group-hover:opacity-100 transition-opacity z-[-1]" />
-                    <Send size={18} className="relative z-10 text-white group-hover:text-black transition-colors transform rotate-0 -ml-0.5" />
-                  </motion.button>
+                  {/* Removed Message Button */}
                 </div>
 
 
 
                 {/* Stories Section */}
                 {!debouncedSearchQuery.trim() && (
-                  <div className="bg-[#0A0A0A] border border-white/5 rounded-[15px] p-5">
+                  <div className="bg-[#0A0A0A] border border-white/5 rounded-[8px] p-5">
                     <div className="flex gap-4 overflow-x-auto no-scrollbar scroll-smooth items-center pb-2">
 
                       {/* Add Story */}
@@ -960,6 +1090,8 @@ const Community = () => {
                   </div>
                 )}
 
+                {!debouncedSearchQuery.trim() && children}
+
                 {/* Filters Row */}
                 {!debouncedSearchQuery.trim() && (
                   <div>
@@ -969,10 +1101,7 @@ const Community = () => {
                         <button
                           key={filter}
                           onClick={() => handleSetActiveFilter(filter)}
-                          className={`px-4 py-2 rounded-full text-[11px] font-bold whitespace-nowrap transition-all border ${activeFilter === filter
-                              ? 'bg-gradient-to-r from-[#55DEE8] to-[#BFF367] text-black border-transparent hover:brightness-110'
-                              : 'bg-transparent text-white/70 border-white/10 hover:bg-white/5 hover:text-white'
-                            }`}
+                          className={`px-4 py-2 rounded-[6px] text-[11px] font-bold whitespace-nowrap transition-all border ${activeFilter === filter ? 'bg-gradient-to-r from-[#55DEE8] to-[#BFF367] text-black border-transparent hover:brightness-110' : 'bg-transparent text-white/70 border-white/10 hover:bg-white/5 hover:text-white'}`}
                         >
                           {filter}
                         </button>
@@ -996,7 +1125,7 @@ const Community = () => {
                           </div>
                         </div>
                         {/* Sort: Latest */}
-                        <button className="px-3 py-2 rounded-full bg-transparent border border-white/10 text-white/70 hover:bg-white/5 text-[11px] font-bold flex items-center gap-1.5">
+                        <button className="px-3 py-2 rounded-[6px] bg-transparent border border-white/10 text-white/70 hover:bg-white/5 text-[11px] font-bold flex items-center gap-1.5">
                           Latest <ChevronDown size={12} />
                         </button>
                       </div>
@@ -1007,11 +1136,7 @@ const Community = () => {
                       {/* Mobile Reels Button */}
                       <button
                         onClick={() => handleSetActiveFilter(activeFilter === "Reels" ? "All" : "Reels")}
-                        className={`relative flex items-center gap-1.5 px-3 py-1.5 rounded-[15px] text-[10px] font-bold uppercase tracking-wider transition-all shrink-0 z-10 group ${
-                          activeFilter === 'Reels' 
-                            ? 'text-[#55DEE8] bg-[#55DEE8]/10' 
-                            : 'text-white/70 hover:text-white'
-                        }`}
+                        className={`relative flex items-center gap-1.5 px-3 py-1.5 rounded-[8px] text-[10px] font-bold uppercase tracking-wider transition-all shrink-0 z-10 group ${activeFilter === 'Reels' ? 'text-[#55DEE8] bg-[#55DEE8]/10' : 'text-white/70 hover:text-white'}`}
                       >
                         <svg className="absolute inset-0 w-full h-full pointer-events-none z-[-1]">
                           <defs>
@@ -1029,7 +1154,7 @@ const Community = () => {
                       {/* Features Dropdown */}
                       <div className="relative w-[115px]">
                         <select
-                          className="w-full bg-neutral-900 border border-white/10 rounded-[15px] py-1.5 pl-2.5 pr-6 text-white text-[10px] font-bold focus:outline-none focus:border-[#55DEE8]/40 transition-all appearance-none cursor-pointer"
+                          className="w-full bg-neutral-900 border border-white/10 rounded-[8px] py-1.5 pl-2.5 pr-6 text-white text-[10px] font-bold focus:outline-none focus:border-[#55DEE8]/40 transition-all appearance-none cursor-pointer"
                           style={{ fontFamily: "'Inter', sans-serif" }}
                           value={activeFilter}
                           onChange={(e) => handleSetActiveFilter(e.target.value)}
@@ -1046,8 +1171,8 @@ const Community = () => {
                       {/* Categories Dropdown */}
                       <div className="relative w-[115px]">
                         <select
-                          className="w-full border border-transparent rounded-[15px] py-1.5 pl-2.5 pr-6 text-white text-[10px] font-bold focus:outline-none transition-all appearance-none cursor-pointer shadow-[0_0_15px_rgba(85,222,232,0.1)]"
-                          style={{ 
+                          className="w-full border border-transparent rounded-[8px] py-1.5 pl-2.5 pr-6 text-white text-[10px] font-bold focus:outline-none transition-all appearance-none cursor-pointer shadow-[0_0_15px_rgba(85,222,232,0.1)]"
+                          style={{
                             fontFamily: "'Inter', sans-serif",
                             backgroundImage: "linear-gradient(rgba(10, 10, 10, 0.95), rgba(10, 10, 10, 0.95)), linear-gradient(to right, #55DEE8, #BFF367)",
                             backgroundOrigin: "border-box",
@@ -1071,7 +1196,7 @@ const Community = () => {
 
                 {/* Players Search Results Section */}
                 {debouncedSearchQuery.trim() !== "" && (
-                  <div className="flex flex-col gap-3 bg-[#0A0A0A] border border-white/5 rounded-[15px] p-5">
+                  <div className="flex flex-col gap-3 bg-[#0A0A0A] border border-white/5 rounded-[8px] p-5">
                     <div className="flex items-center justify-between mb-1">
                       <h3 className="text-xs font-black uppercase tracking-widest text-[#55DEE8]" style={HEADING_STYLE}>
                         PLAYERS MATCHING "{debouncedSearchQuery}"
@@ -1084,21 +1209,21 @@ const Community = () => {
                         No players found
                       </div>
                     ) : (
-                      <div 
+                      <div
                         className="grid grid-rows-2 grid-flow-col gap-4 overflow-x-auto pb-3 scrollbar-thin scrollbar-thumb-white/10 hover:scrollbar-thumb-white/20 scroll-smooth"
                         style={{ maxHeight: "240px", minHeight: loadedPlayers.length > 1 ? "180px" : "90px" }}
                         onScroll={handlePlayersHorizontalScroll}
                       >
                         {loadedPlayers.map(player => (
-                          <div 
+                          <div
                             key={player.id}
                             onClick={() => navigate(`/profile/${player.id}`)}
-                            className="flex items-center gap-3 bg-neutral-900/50 hover:bg-neutral-900 border border-white/5 hover:border-[#55DEE8]/30 p-3 rounded-xl cursor-pointer transition-all min-w-[220px] max-w-[280px] group shrink-0"
+                            className="flex items-center gap-3 bg-neutral-900/50 hover:bg-neutral-900 border border-white/5 hover:border-[#55DEE8]/30 p-3 rounded-[8px] cursor-pointer transition-all min-w-[220px] max-w-[280px] group shrink-0"
                           >
                             <div className="w-[42px] h-[42px] rounded-full bg-[#111] border border-white/10 overflow-hidden shrink-0">
-                              <img 
-                                src={player.profilePicture || `https://api.dicebear.com/7.x/avataaars/svg?seed=${player.name}`} 
-                                className="w-full h-full object-cover" 
+                              <img
+                                src={player.profilePicture || `https://api.dicebear.com/7.x/avataaars/svg?seed=${player.name}`}
+                                className="w-full h-full object-cover"
                                 alt=""
                               />
                             </div>
@@ -1140,23 +1265,32 @@ const Community = () => {
 
             {/* Main Feed Posts / Reels */}
             {activeFilter === "Reels" ? (
-              <div className="relative flex justify-center h-[calc(100vh-180px)] bg-black/40 rounded-[15px]">
+              <div className="relative flex justify-center h-[calc(100vh-180px)] bg-black/40 md:rounded-[8px]">
                 {/* Back button & header */}
-                <div className="absolute top-3 left-3 right-3 z-30 flex items-center gap-3">
-                  <button
-                    onClick={() => handleSetActiveFilter("All")}
-                    className="flex items-center gap-2 bg-black/60 backdrop-blur-md border border-white/10 text-white px-3 py-2 rounded-xl text-xs font-bold uppercase tracking-wider hover:bg-white/10 transition-all"
-                  >
-                    <ArrowLeft size={14} strokeWidth={2.5} />
-                    <span>Community</span>
-                  </button>
-                  <div className="flex items-center gap-1.5 bg-black/60 backdrop-blur-md border border-[#55DEE8]/20 text-[#55DEE8] px-3 py-2 rounded-xl text-xs font-black uppercase tracking-widest">
-                    <PlaySquare size={13} />
-                    <span>Shots</span>
+                <div className="absolute top-3 left-3 right-3 z-30 flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <button
+                      onClick={() => handleSetActiveFilter("All")}
+                      className="flex items-center gap-2 bg-black/60 backdrop-blur-md border border-white/10 text-white px-3 py-2 rounded-[8px] text-xs font-bold uppercase tracking-wider hover:bg-white/10 transition-all"
+                    >
+                      <ArrowLeft size={14} strokeWidth={2.5} />
+                      <span>Community</span>
+                    </button>
+                    <div className="flex items-center gap-1.5 bg-black/60 backdrop-blur-md border border-[#55DEE8]/20 text-[#55DEE8] px-3 py-2 rounded-[8px] text-xs font-black uppercase tracking-widest">
+                      <PlaySquare size={13} />
+                      <span>Shots</span>
+                    </div>
                   </div>
+                  <button
+                    onClick={() => gateInteraction(() => navigate('/reels/upload'))}
+                    className="flex items-center gap-1.5 bg-[#55DEE8] text-black px-3 py-2 rounded-[8px] text-xs font-black uppercase tracking-widest hover:bg-[#BFF367] transition-colors shadow-lg shadow-[#55DEE8]/20"
+                  >
+                    <Plus size={14} strokeWidth={3} />
+                    <span>Upload</span>
+                  </button>
                 </div>
                 <div
-                  className="w-[380px] h-full overflow-y-scroll snap-y snap-mandatory no-scrollbar rounded-[15px]"
+                  className="w-full h-full md:w-auto md:aspect-[9/16] overflow-y-scroll snap-y snap-mandatory no-scrollbar md:rounded-[8px] bg-black shadow-2xl mx-auto"
                   onScroll={(e) => {
                     const el = e.currentTarget;
                     const idx = Math.round(el.scrollTop / el.clientHeight);
@@ -1196,39 +1330,78 @@ const Community = () => {
                 <Loader2 size={32} className="text-[#55DEE8] animate-spin" />
               </div>
             ) : loadedPosts.length === 0 ? (
-              <div className="bg-[#0A0A0A] border border-white/5 rounded-[15px] p-16 text-center text-white/30 font-bold uppercase tracking-widest text-sm">
+              <div className="bg-[#0A0A0A] border border-white/5 rounded-[8px] p-16 text-center text-white/30 font-bold uppercase tracking-widest text-sm">
                 No posts found
               </div>
             ) : (
               <div className="space-y-6">
                 {loadedPosts.map(post => (
-                  <div key={post._id} className="bg-[#0A0A0A] border border-white/5 rounded-[15px] p-5 space-y-4">
+                  <div key={getPostId(post)} className="bg-[#0A0A0A] border border-white/5 rounded-[8px] p-5 space-y-4">
                     {/* Post Header */}
                     <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-3">
+                      <Link to={`/profile/${post.adminId?.id || post.adminId?._id || post.author?.id || post.author?._id || post.authorId}`} className="flex items-center gap-3 group">
                         <img
                           src={post.adminId?.profilePicture || "/default-avatar.png"}
-                          className="w-10 h-10 rounded-full object-cover border border-white/10"
+                          className="w-10 h-10 rounded-full object-cover border border-white/10 group-hover:border-[#55DEE8]/50 transition-colors"
                         />
                         <div>
                           <div className="flex items-center gap-1.5">
-                            <span className="text-[13px] font-bold">{post.adminId?.name || "Player"}</span>
+                            <span className="text-[13px] font-bold group-hover:text-[#55DEE8] transition-colors">{post.adminId?.name || "Player"}</span>
                             <ShieldCheck size={14} className="text-[#55DEE8]" />
                           </div>
                           <div className="text-[11px] font-bold text-white/40 mt-0.5">
                             2h ago
                           </div>
                         </div>
-                      </div>
+                      </Link>
                       <div className="flex items-center gap-3">
-                        <button className="text-white/40 hover:text-white transition-colors">
-                          <MoreVertical size={18} />
-                        </button>
+                        <div className="relative">
+                          <button 
+                            onClick={() => setActiveDropdownId(activeDropdownId === getPostId(post) ? null : getPostId(post))}
+                            className="text-white/40 hover:text-white transition-colors p-2"
+                          >
+                            <MoreVertical size={18} />
+                          </button>
+                          {activeDropdownId === getPostId(post) && (
+                            <div className="absolute right-0 mt-2 w-32 bg-neutral-900 border border-white/10 rounded-[8px] shadow-lg overflow-hidden z-50">
+                              {((post.adminId?.id || post.adminId?._id) === (user?.id || user?._id) || (post.author?.id || post.author?._id) === (user?.id || user?._id) || post.authorId === (user?.id || user?._id)) ? (
+                                <button
+                                  onClick={() => {
+                                    setActiveDropdownId(null);
+                                    handleDeletePost(getPostId(post));
+                                  }}
+                                  className="w-full text-left px-4 py-2 text-[12px] font-bold text-red-500 hover:bg-white/5 transition-colors"
+                                >
+                                  Delete
+                                </button>
+                              ) : (
+                                <button
+                                  onClick={() => {
+                                    setActiveDropdownId(null);
+                                    setReportPostId(getPostId(post));
+                                    setShowReportModal(true);
+                                  }}
+                                  className="w-full text-left px-4 py-2 text-[12px] font-bold text-white hover:bg-white/5 transition-colors"
+                                >
+                                  Report
+                                </button>
+                              )}
+                            </div>
+                          )}
+                        </div>
                       </div>
                     </div>
 
+                    {/* Caption */}
+                    {(post.title || post.content) && (
+                      <div className="text-[12px] font-medium leading-relaxed">
+                        {post.title && <span className="font-bold mr-2">{post.title}</span>}
+                        <span className="text-white/90 whitespace-pre-wrap">{post.content}</span>
+                      </div>
+                    )}
+
                     {(post.image || post.imageUrl || post.mediaUrl) && (
-                      <div className="relative rounded-[15px] overflow-hidden group border border-white/5 bg-[#111]">
+                      <div className="relative rounded-[8px] overflow-hidden group border border-white/5 bg-[#111]">
                         <img
                           src={post.image || post.imageUrl || post.thumbnailUrl}
                           className={`w-full object-cover max-h-[500px] transition-all duration-500 ${(post.status === 'pending' || post.status === 'processing') ? 'blur-xl scale-110 opacity-50' : ''}`}
@@ -1290,12 +1463,15 @@ const Community = () => {
                     {/* Action Bar */}
                     <div className="flex items-center justify-between pt-1">
                       <div className="flex items-center gap-5">
-                        <button onClick={() => handleLike(post._id)} className="flex items-center gap-2 group">
-                          <Heart size={20} className={`transition-colors ${post.likes?.some(l => (l._id || l) === user?._id) ? 'fill-[#55DEE8] text-[#55DEE8]' : 'text-white/70 group-hover:text-red-500'}`} />
+                        <button onClick={() => handleLike(getPostId(post))} className="flex items-center gap-2 group">
+                          <Heart size={20} className={`transition-colors ${post.likes?.some(l => (l.id || l._id || l) === (user?.id || user?._id)) ? 'fill-[#55DEE8] text-[#55DEE8]' : 'text-white/70 group-hover:text-red-500'}`} />
                           <span className="text-[12px] font-bold text-white">{post.likes?.length || 0}</span>
                         </button>
-                        <button className="flex items-center gap-2 group">
-                          <MessageCircle size={20} className="text-white/70 group-hover:text-white transition-colors" />
+                        <button
+                          onClick={() => setExpandedComments(prev => ({ ...prev, [getPostId(post)]: !prev[getPostId(post)] }))}
+                          className="flex items-center gap-2 group"
+                        >
+                          <MessageCircle size={20} className={`transition-colors ${expandedComments[getPostId(post)] ? 'text-[#55DEE8]' : 'text-white/70 group-hover:text-white'}`} />
                           <span className="text-[12px] font-bold text-white">{post.comments?.length || 0}</span>
                         </button>
                         <button
@@ -1315,49 +1491,130 @@ const Community = () => {
                           <span className="text-[12px] font-bold text-white">Share</span>
                         </button>
                       </div>
-                      <button>
-                        <Bookmark size={20} className="text-white/70 hover:text-white transition-colors" />
-                      </button>
                     </div>
 
-                    {/* Caption & Likes List */}
-                    <div className="space-y-2">
-                      <div className="text-[12px] font-medium leading-relaxed">
-                        {post.title && <span className="font-bold mr-2">{post.title}</span>}
-                        <span className="text-white/90 whitespace-pre-wrap">{post.content}</span>
-                      </div>
-
-                      {post.likes?.length > 0 && (
-                        <div className="flex items-center gap-2 text-[11px] font-medium text-white/50 pt-1">
-                          <div className="flex -space-x-1.5">
-                            {[1, 2, 3].slice(0, Math.min(3, post.likes.length)).map((_, i) => (
-                              <div key={i} className="w-5 h-5 rounded-full bg-white/20 border border-[#0A0A0A] overflow-hidden">
-                                <UserIcon size={18} className="text-white/50" />
-                              </div>
-                            ))}
-                          </div>
-                          <p>Liked by <span className="font-bold text-white">simran.s</span>, <span className="font-bold text-white">deepak_29</span> and <span className="font-bold text-white">{Math.max(0, post.likes?.length - 2)} others</span></p>
+                    {/* Likes Summary */}
+                    {post.likes?.length > 0 && (
+                      <div className="flex items-center gap-2 text-[11px] font-medium text-white/50 pt-1">
+                        <div className="flex -space-x-1.5 shrink-0">
+                          {post.likes.slice(0, 3).map((likeUser, i) => (
+                            <div key={likeUser.id || likeUser._id || i} className="w-5 h-5 rounded-full bg-zinc-800 border border-[#0A0A0A] overflow-hidden flex items-center justify-center shrink-0">
+                              {likeUser.profilePicture ? (
+                                <img src={likeUser.profilePicture} className="w-full h-full object-cover" alt="" />
+                              ) : (
+                                <div className="w-full h-full flex items-center justify-center bg-zinc-700 text-white text-[8px] font-bold">
+                                  {(likeUser.username || likeUser.name || 'U')[0].toUpperCase()}
+                                </div>
+                              )}
+                            </div>
+                          ))}
                         </div>
-                      )}
-                    </div>
+                        <p className="text-[11px] text-white/50 font-medium">
+                          {post.likes.length === 1 && (
+                            <span>
+                              Liked by{' '}
+                              <span className="font-bold text-white">
+                                {post.likes[0].username || post.likes[0].name || 'User'}
+                              </span>
+                            </span>
+                          )}
+                          {post.likes.length === 2 && (
+                            <span>
+                              Liked by{' '}
+                              <span className="font-bold text-white">
+                                {post.likes[0].username || post.likes[0].name || 'User'}
+                              </span>{' '}
+                              and{' '}
+                              <span className="font-bold text-white">
+                                {post.likes[1].username || post.likes[1].name || 'User'}
+                              </span>
+                            </span>
+                          )}
+                          {post.likes.length > 2 && (
+                            <span>
+                              Liked by{' '}
+                              <span className="font-bold text-white">
+                                {post.likes[0].username || post.likes[0].name || 'User'}
+                              </span>
+                              ,{' '}
+                              <span className="font-bold text-white">
+                                {post.likes[1].username || post.likes[1].name || 'User'}
+                              </span>{' '}
+                              and{' '}
+                              <span className="font-bold text-white">
+                                {post.likes.length - 2} {post.likes.length - 2 === 1 ? 'other' : 'others'}
+                              </span>
+                            </span>
+                          )}
+                        </p>
+                      </div>
+                    )}
 
-                    {/* Comment Input */}
-                    <div className="flex items-center gap-3 pt-3">
-                      <img src={user?.profilePicture || "/default-avatar.png"} className="w-7 h-7 rounded-full object-cover border border-white/10" />
-                      <input
-                        type="text"
-                        placeholder="Add a comment..."
-                        className="flex-1 bg-transparent text-[12px] font-medium outline-none text-white placeholder:text-white/40"
-                        value={commentInputs[post._id] || ""}
-                        onChange={(e) => setCommentInputs({ ...commentInputs, [post._id]: e.target.value })}
-                        onKeyDown={(e) => {
-                          if (e.key === 'Enter') handleAddComment(post._id);
-                        }}
-                      />
-                      <button className="text-white/40 hover:text-white">
-                        <Smile size={16} />
-                      </button>
-                    </div>
+                    {/* Expandable Comments Section */}
+                    <AnimatePresence>
+                      {expandedComments[getPostId(post)] && (
+                        <motion.div
+                          initial={{ height: 0, opacity: 0 }}
+                          animate={{ height: "auto", opacity: 1 }}
+                          exit={{ height: 0, opacity: 0 }}
+                          transition={{ duration: 0.25 }}
+                          className="overflow-hidden"
+                        >
+                          <div className="space-y-3 pt-2 border-t border-white/5">
+                            {/* Scrollable Comments List – max 4 visible */}
+                            {post.comments && post.comments.length > 0 && (
+                              <div className="max-h-[200px] overflow-y-auto space-y-2.5 pr-1 scrollbar-thin scrollbar-thumb-white/10 scrollbar-track-transparent">
+                                {post.comments.slice(0, 4).map((comment) => {
+                                  const commentUser = comment.userId || comment.user;
+                                  return (
+                                    <div key={comment.id || comment._id} className="flex items-start gap-2 text-[12px] leading-relaxed">
+                                      <Link to={`/profile/${commentUser?.id || commentUser?._id}`} className="font-bold text-white hover:text-[#55DEE8] transition-colors shrink-0">
+                                        {commentUser?.name || commentUser?.username || "Player"}
+                                      </Link>
+                                      <span className="text-white/80 break-words">{comment.text}</span>
+                                    </div>
+                                  );
+                                })}
+                                {post.comments.length > 4 && (
+                                  <button className="text-[11px] text-[#55DEE8] font-bold hover:underline">
+                                    View all {post.comments.length} comments
+                                  </button>
+                                )}
+                              </div>
+                            )}
+                            {post.comments?.length === 0 && (
+                              <p className="text-[12px] text-white/30 italic">No comments yet. Be the first!</p>
+                            )}
+
+                            {/* Comment Input */}
+                            <div className="flex items-center gap-3 pt-2 border-t border-white/5">
+                              <img src={user?.profilePicture || "/default-avatar.png"} className="w-7 h-7 rounded-full object-cover border border-white/10 shrink-0" />
+                              <input
+                                type="text"
+                                placeholder="Add a comment..."
+                                className="flex-1 bg-transparent text-[12px] font-medium outline-none text-white placeholder:text-white/40"
+                                value={commentInputs[getPostId(post)] || ""}
+                                onChange={(e) => setCommentInputs({ ...commentInputs, [getPostId(post)]: e.target.value })}
+                                onKeyDown={(e) => {
+                                  if (e.key === 'Enter') handleAddComment(getPostId(post));
+                                }}
+                              />
+                              <button
+                                onClick={() => handleAddComment(getPostId(post))}
+                                disabled={!commentInputs[getPostId(post)]?.trim()}
+                                className={`text-[12px] font-bold px-3 py-1.5 rounded-full transition-all ${
+                                  commentInputs[getPostId(post)]?.trim()
+                                    ? 'bg-[#55DEE8] text-black hover:bg-[#55DEE8]/80 cursor-pointer'
+                                    : 'bg-white/5 text-white/20 cursor-not-allowed'
+                                }`}
+                              >
+                                Post
+                              </button>
+                            </div>
+                          </div>
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
 
                   </div>
                 ))}
@@ -1391,7 +1648,7 @@ const Community = () => {
               animate={{ opacity: 1, y: 0, scale: 1 }}
               exit={{ opacity: 0, y: 24, scale: 0.96 }}
               transition={{ type: "spring", damping: 24, stiffness: 260 }}
-              className="relative z-20 w-full max-h-[86vh] overflow-hidden rounded-t-[24px] border border-white/10 bg-neutral-950/95 shadow-[0_25px_80px_rgba(0,0,0,0.85)] backdrop-blur-2xl sm:max-w-xl sm:rounded-[22px]"
+              className="relative z-20 w-full max-h-[86vh] overflow-hidden rounded-t-[24px] border border-white/10 bg-neutral-950/95 shadow-[0_25px_80px_rgba(0,0,0,0.85)] backdrop-blur-2xl sm:max-w-xl sm:rounded-[8px]"
               style={HEADING_STYLE}
               onClick={(e) => e.stopPropagation()}
             >
@@ -1449,12 +1706,12 @@ const Community = () => {
               onClick={closePostModal}
               className="absolute inset-0 bg-[#030303]/75 backdrop-blur-md"
             />
-            <motion.div 
-              initial={{ opacity: 0, y: 50, scale: 0.95, rotateX: -8 }} 
-              animate={{ opacity: 1, y: 0, scale: 1, rotateX: 0 }} 
+            <motion.div
+              initial={{ opacity: 0, y: 50, scale: 0.95, rotateX: -8 }}
+              animate={{ opacity: 1, y: 0, scale: 1, rotateX: 0 }}
               exit={{ opacity: 0, y: 30, scale: 0.95, rotateX: 5 }}
               transition={{ type: "spring", damping: 25, stiffness: 240 }}
-              className="relative w-full max-w-lg bg-neutral-950/80 border border-white/5 rounded-[15px] overflow-hidden shadow-[0_25px_60px_rgba(0,0,0,0.8)] backdrop-blur-2xl"
+              className="relative w-full max-w-lg bg-neutral-950/80 border border-white/5 rounded-[8px] overflow-hidden shadow-[0_25px_60px_rgba(0,0,0,0.8)] backdrop-blur-2xl"
             >
               {/* Dual Glowing Spots using the new gradient stops */}
               <div className="absolute -top-24 -left-24 w-52 h-52 bg-[#55DEE8]/10 blur-[80px] rounded-full pointer-events-none" />
@@ -1474,8 +1731,8 @@ const Community = () => {
                   {/* Sports Dropdown */}
                   <div className="relative">
                     <select
-                      className="border border-transparent rounded-[15px] py-1.5 pl-3 pr-8 text-white text-[10px] font-bold focus:outline-none transition-all appearance-none cursor-pointer shadow-[0_0_15px_rgba(85,222,232,0.1)]"
-                      style={{ 
+                      className="border border-transparent rounded-[8px] py-1.5 pl-3 pr-8 text-white text-[10px] font-bold focus:outline-none transition-all appearance-none cursor-pointer shadow-[0_0_15px_rgba(85,222,232,0.1)]"
+                      style={{
                         fontFamily: "'Inter', sans-serif",
                         backgroundImage: "linear-gradient(rgba(10, 10, 10, 0.95), rgba(10, 10, 10, 0.95)), linear-gradient(to right, #55DEE8, #BFF367)",
                         backgroundOrigin: "border-box",
@@ -1494,10 +1751,10 @@ const Community = () => {
                     </div>
                   </div>
 
-                  <motion.button 
+                  <motion.button
                     whileHover={{ rotate: 90, scale: 1.08, backgroundColor: "rgba(239, 68, 68, 0.12)", color: "#ef4444" }}
                     whileTap={{ scale: 0.92 }}
-                    onClick={closePostModal} 
+                    onClick={closePostModal}
                     className="p-1.5 rounded-full text-white/40 transition-colors cursor-pointer"
                   >
                     <X size={18} />
@@ -1507,9 +1764,9 @@ const Community = () => {
 
               {/* User Profile Section */}
               <div className="flex items-center gap-3 px-5 pt-3.5 pb-1 relative z-10">
-                <img 
-                  src={user?.profilePicture || "/default-avatar.png"} 
-                  className="w-9 h-9 rounded-full object-cover border border-white/10 bg-neutral-900" 
+                <img
+                  src={user?.profilePicture || "/default-avatar.png"}
+                  className="w-9 h-9 rounded-full object-cover border border-white/10 bg-neutral-900"
                   alt=""
                 />
                 <div>
@@ -1533,7 +1790,7 @@ const Community = () => {
                     placeholder="Title (Optional)"
                     maxLength={80}
                     style={SUBHEADING_STYLE}
-                    className="w-full bg-white/[0.01] hover:bg-white/[0.02] border border-white/5 focus:border-[#55DEE8]/30 focus:bg-white/[0.03] rounded-xl h-10 px-3.5 text-white text-xs outline-none transition-all duration-300 placeholder:text-white/20"
+                    className="w-full bg-white/[0.01] hover:bg-white/[0.02] border border-white/5 focus:border-[#55DEE8]/30 focus:bg-white/[0.03] rounded-[8px] h-10 px-3.5 text-white text-xs outline-none transition-all duration-300 placeholder:text-white/20"
                   />
                   {newPost.title.length > 0 && (
                     <span className="absolute right-3.5 top-3 text-[9px] font-bold text-neutral-500" style={SUBHEADING_STYLE}>
@@ -1550,7 +1807,7 @@ const Community = () => {
                     placeholder="Whatâ€™s happening in your match? Share updates, highlights, or announcementsâ€¦"
                     maxLength={1000}
                     style={SUBHEADING_STYLE}
-                    className="w-full bg-white/[0.01] hover:bg-white/[0.02] border border-white/5 focus:border-[#BFF367]/30 focus:bg-white/[0.03] rounded-xl min-h-[100px] max-h-[200px] p-3.5 text-white text-xs outline-none transition-all duration-300 resize-none placeholder:text-white/20"
+                    className="w-full bg-white/[0.01] hover:bg-white/[0.02] border border-white/5 focus:border-[#BFF367]/30 focus:bg-white/[0.03] rounded-[8px] min-h-[100px] max-h-[200px] p-3.5 text-white text-xs outline-none transition-all duration-300 resize-none placeholder:text-white/20"
                   />
                   {newPost.content.length > 0 && (
                     <span className="absolute right-3.5 bottom-3.5 text-[9px] font-bold text-neutral-500" style={SUBHEADING_STYLE}>
@@ -1561,18 +1818,18 @@ const Community = () => {
 
                 {/* Visual Image Preview */}
                 {postImagePreview && (
-                  <motion.div 
+                  <motion.div
                     initial={{ opacity: 0, scale: 0.97, y: 5 }}
                     animate={{ opacity: 1, scale: 1, y: 0 }}
                     exit={{ opacity: 0, scale: 0.97, y: -5 }}
-                    className="relative h-36 w-full rounded-xl overflow-hidden border border-white/5 group shadow-lg"
+                    className="relative h-36 w-full rounded-[8px] overflow-hidden border border-white/5 group shadow-lg"
                   >
                     <img src={postImagePreview} alt="" className="w-full h-full object-cover group-hover:scale-105 transition-all duration-500" />
                     <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center pointer-events-none">
                       <span className="text-[9px] font-bold text-white uppercase tracking-widest bg-black/60 px-3 py-1.5 rounded-full border border-white/10" style={SUBHEADING_STYLE}>Image Selected</span>
                     </div>
-                    <motion.button 
-                      type="button" 
+                    <motion.button
+                      type="button"
                       whileHover={{ scale: 1.08, backgroundColor: "#ef4444" }}
                       whileTap={{ scale: 0.92 }}
                       onClick={() => { setNewPost({ ...newPost, image: null }); setPostImagePreview(null); }}
@@ -1589,12 +1846,12 @@ const Community = () => {
                   <div className="flex items-center gap-2">
                     {/* Image Selector Button */}
                     <div className="relative">
-                      <motion.button 
-                        type="button" 
-                        style={SUBHEADING_STYLE} 
+                      <motion.button
+                        type="button"
+                        style={SUBHEADING_STYLE}
                         whileHover={{ scale: 1.05, backgroundColor: "rgba(85,222,232,0.08)", border: "1px solid rgba(85,222,232,0.2)", color: "#55DEE8" }}
                         whileTap={{ scale: 0.95 }}
-                        className="p-2.5 bg-white/[0.02] border border-white/5 rounded-xl text-neutral-400 hover:text-[#55DEE8] transition-all flex items-center justify-center cursor-pointer"
+                        className="p-2.5 bg-white/[0.02] border border-white/5 rounded-[8px] text-neutral-400 hover:text-[#55DEE8] transition-all flex items-center justify-center cursor-pointer"
                         title="Add Image"
                       >
                         <ImageIcon size={16} />
@@ -1604,10 +1861,10 @@ const Community = () => {
 
                     {/* Image Upload Status capsule */}
                     {newPost.image && (
-                      <motion.div 
+                      <motion.div
                         initial={{ opacity: 0, scale: 0.9 }}
                         animate={{ opacity: 1, scale: 1 }}
-                        className="hidden sm:flex items-center gap-1.5 bg-neutral-900/60 border border-neutral-800 rounded-xl px-2.5 py-1.5 text-[9px] font-black uppercase tracking-wider text-neutral-400" 
+                        className="hidden sm:flex items-center gap-1.5 bg-neutral-900/60 border border-neutral-800 rounded-[8px] px-2.5 py-1.5 text-[9px] font-black uppercase tracking-wider text-neutral-400"
                         style={SUBHEADING_STYLE}
                       >
                         <ShieldCheck size={12} className="text-[#55DEE8]" />
@@ -1618,29 +1875,29 @@ const Community = () => {
 
                   {/* Right Side: Action Button Clusters */}
                   <div className="flex items-center gap-2">
-                    <motion.button 
+                    <motion.button
                       type="button"
                       onClick={closePostModal}
                       whileHover={{ scale: 1.02, backgroundColor: "rgba(255,255,255,0.03)" }}
                       whileTap={{ scale: 0.98 }}
-                      className="px-4 h-9 rounded-xl text-xs font-bold text-neutral-400 hover:text-white transition-all cursor-pointer"
+                      className="px-4 h-9 rounded-[8px] text-xs font-bold text-neutral-400 hover:text-white transition-all cursor-pointer"
                     >
                       Cancel
                     </motion.button>
 
-                    <motion.button 
+                    <motion.button
                       type="submit"
                       disabled={isPublishing || (!newPost.content.trim() && !newPost.image)}
                       style={SUBHEADING_STYLE}
                       whileHover={{ scale: 1.03, boxShadow: "0px 8px 25px rgba(85,222,232,0.18)", filter: "brightness(1.04)" }}
                       whileTap={{ scale: 0.97 }}
-                      className="bg-gradient-to-r from-[#55DEE8] to-[#BFF367] text-black px-5 h-9 rounded-xl font-black uppercase tracking-wider flex items-center justify-center gap-1.5 transition-all disabled:opacity-25 disabled:cursor-not-allowed text-xs cursor-pointer group/publish"
+                      className="bg-gradient-to-r from-[#55DEE8] to-[#BFF367] text-black px-5 h-9 rounded-[8px] font-black uppercase tracking-wider flex items-center justify-center gap-1.5 transition-all disabled:opacity-25 disabled:cursor-not-allowed text-xs cursor-pointer group/publish"
                     >
                       {isPublishing ? (
                         <Loader2 size={13} className="animate-spin" />
                       ) : (
                         <Send size={12} className="group-hover/publish:translate-x-0.5 group-hover/publish:-translate-y-0.5 transition-transform duration-300" />
-                      )} 
+                      )}
                       {isPublishing ? "Saving..." : (editingPost ? "Update" : "Post")}
                     </motion.button>
                   </div>
@@ -1653,19 +1910,19 @@ const Community = () => {
         {/* Story Modal */}
         {showStoryModal && (
           <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
-            <motion.div 
-              initial={{ opacity: 0 }} 
-              animate={{ opacity: 1 }} 
-              exit={{ opacity: 0 }} 
-              onClick={() => setShowStoryModal(false)} 
-              className="absolute inset-0 bg-[#030303]/75 backdrop-blur-md" 
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setShowStoryModal(false)}
+              className="absolute inset-0 bg-[#030303]/75 backdrop-blur-md"
             />
-            <motion.div 
-              initial={{ opacity: 0, y: 50, scale: 0.95, rotateX: -8 }} 
-              animate={{ opacity: 1, y: 0, scale: 1, rotateX: 0 }} 
+            <motion.div
+              initial={{ opacity: 0, y: 50, scale: 0.95, rotateX: -8 }}
+              animate={{ opacity: 1, y: 0, scale: 1, rotateX: 0 }}
               exit={{ opacity: 0, y: 30, scale: 0.95, rotateX: 5 }}
               transition={{ type: "spring", damping: 25, stiffness: 240 }}
-              className="relative w-full max-w-lg bg-neutral-950/80 border border-white/5 rounded-[15px] overflow-hidden shadow-[0_25px_60px_rgba(0,0,0,0.8)] backdrop-blur-2xl"
+              className="relative w-full max-w-lg bg-neutral-950/80 border border-white/5 rounded-[8px] overflow-hidden shadow-[0_25px_60px_rgba(0,0,0,0.8)] backdrop-blur-2xl"
             >
               {/* Dual Glowing Spots using the same brand gradient stops */}
               <div className="absolute -top-24 -left-24 w-52 h-52 bg-[#55DEE8]/10 blur-[80px] rounded-full pointer-events-none" />
@@ -1679,10 +1936,10 @@ const Community = () => {
                     Share quick updates with your community
                   </p>
                 </div>
-                <motion.button 
+                <motion.button
                   whileHover={{ rotate: 90, scale: 1.08, backgroundColor: "rgba(239, 68, 68, 0.12)", color: "#ef4444" }}
                   whileTap={{ scale: 0.92 }}
-                  onClick={() => setShowStoryModal(false)} 
+                  onClick={() => setShowStoryModal(false)}
                   className="p-1.5 rounded-full text-white/40 transition-colors cursor-pointer"
                 >
                   <X size={18} />
@@ -1691,9 +1948,9 @@ const Community = () => {
 
               {/* User Profile Section */}
               <div className="flex items-center gap-3 px-5 pt-3.5 pb-1 relative z-10">
-                <img 
-                  src={user?.profilePicture || "/default-avatar.png"} 
-                  className="w-9 h-9 rounded-full object-cover border border-white/10 bg-neutral-900" 
+                <img
+                  src={user?.profilePicture || "/default-avatar.png"}
+                  className="w-9 h-9 rounded-full object-cover border border-white/10 bg-neutral-900"
                   alt=""
                 />
                 <div>
@@ -1709,26 +1966,51 @@ const Community = () => {
                   <textarea
                     value={newStory.content}
                     onChange={(e) => setNewStory({ ...newStory, content: e.target.value })}
-                    placeholder="Share a quick moment, match update, highlight, or announcementâ€¦"
+                    placeholder="Share a quick moment, match update, highlight, or announcement..."
                     style={SUBHEADING_STYLE}
-                    className="w-full bg-white/[0.01] hover:bg-white/[0.02] border border-white/5 focus:border-[#55DEE8]/30 focus:bg-white/[0.03] rounded-xl h-20 p-3 text-white text-xs outline-none transition-all duration-300 resize-none placeholder:text-white/20"
+                    className="w-full bg-white/[0.01] hover:bg-white/[0.02] border border-white/5 focus:border-[#55DEE8]/30 focus:bg-white/[0.03] rounded-[8px] h-20 p-3 text-white text-xs outline-none transition-all duration-300 resize-none placeholder:text-white/20"
                   />
+                </div>
+
+                {/* Expiry Duration Dropdown */}
+                <div className="flex items-center justify-between bg-white/[0.01] border border-white/5 p-3 rounded-[8px]">
+                  <span className="text-xs text-neutral-400 font-bold" style={SUBHEADING_STYLE}>Expiry Duration</span>
+                  <div className="relative">
+                    <select
+                      className="border border-transparent rounded-[8px] py-1.5 pl-3 pr-8 text-white text-[10px] font-bold focus:outline-none transition-all appearance-none cursor-pointer"
+                      style={{
+                        fontFamily: "'Inter', sans-serif",
+                        backgroundImage: "linear-gradient(rgba(10, 10, 10, 0.95), rgba(10, 10, 10, 0.95)), linear-gradient(to right, #55DEE8, #BFF367)",
+                        backgroundOrigin: "border-box",
+                        backgroundClip: "padding-box, border-box"
+                      }}
+                      value={newStory.durationDays}
+                      onChange={(e) => setNewStory(prev => ({ ...prev, durationDays: parseInt(e.target.value) }))}
+                    >
+                      {[1, 2, 3, 4, 5, 6, 7].map(d => (
+                        <option key={d} value={d} className="bg-neutral-950 text-white">{d} {d === 1 ? 'Day' : 'Days'}</option>
+                      ))}
+                    </select>
+                    <div className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 flex items-center text-white/40">
+                      <ChevronDown size={10} />
+                    </div>
+                  </div>
                 </div>
 
                 {/* Aspect 9:16 Live Preview */}
                 {storyMediaPreviews.length > 0 && (
                   <div className="flex justify-center py-1">
-                    <motion.div 
+                    <motion.div
                       initial={{ opacity: 0, scale: 0.97 }}
                       animate={{ opacity: 1, scale: 1 }}
-                      className="relative aspect-[9/16] h-52 rounded-xl overflow-hidden border border-white/5 group shadow-2xl bg-neutral-900"
+                      className="relative aspect-[9/16] h-52 rounded-[8px] overflow-hidden border border-white/5 group shadow-2xl bg-neutral-900"
                     >
                       <img src={storyMediaPreviews[0]} alt="" className="w-full h-full object-cover group-hover:scale-102 transition-all duration-700" />
                       <div className="absolute inset-0 bg-black/45 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center pointer-events-none">
                         <span className="text-[9px] font-bold text-white uppercase tracking-widest bg-black/60 px-2.5 py-1.5 rounded-full border border-white/10" style={SUBHEADING_STYLE}>Preview</span>
                       </div>
-                      <motion.button 
-                        type="button" 
+                      <motion.button
+                        type="button"
                         whileHover={{ scale: 1.08, backgroundColor: "#ef4444" }}
                         whileTap={{ scale: 0.92 }}
                         onClick={() => {
@@ -1750,12 +2032,12 @@ const Community = () => {
                   {/* Modern Compact Toolbar */}
                   <div className="flex items-center gap-2">
                     <div className="relative">
-                      <motion.button 
-                        type="button" 
-                        style={SUBHEADING_STYLE} 
+                      <motion.button
+                        type="button"
+                        style={SUBHEADING_STYLE}
                         whileHover={{ scale: 1.05, backgroundColor: "rgba(85,222,232,0.08)", border: "1px solid rgba(85,222,232,0.2)", color: "#55DEE8" }}
                         whileTap={{ scale: 0.95 }}
-                        className="p-2.5 bg-white/[0.02] border border-white/5 rounded-[15px] text-neutral-400 hover:text-[#55DEE8] transition-all flex items-center justify-center cursor-pointer"
+                        className="p-2.5 bg-white/[0.02] border border-white/5 rounded-[8px] text-neutral-400 hover:text-[#55DEE8] transition-all flex items-center justify-center cursor-pointer"
                         title="Upload Photo/Video"
                       >
                         <ImageIcon size={16} />
@@ -1764,10 +2046,10 @@ const Community = () => {
                     </div>
 
                     {storyMediaPreviews.length > 0 && (
-                      <motion.div 
+                      <motion.div
                         initial={{ opacity: 0, scale: 0.9 }}
                         animate={{ opacity: 1, scale: 1 }}
-                        className="hidden sm:flex items-center gap-1.5 bg-neutral-900/60 border border-neutral-800 rounded-xl px-2.5 py-1.5 text-[9px] font-black uppercase tracking-wider text-neutral-400" 
+                        className="hidden sm:flex items-center gap-1.5 bg-neutral-900/60 border border-neutral-800 rounded-[8px] px-2.5 py-1.5 text-[9px] font-black uppercase tracking-wider text-neutral-400"
                         style={SUBHEADING_STYLE}
                       >
                         <ShieldCheck size={12} className="text-[#55DEE8]" />
@@ -1778,29 +2060,29 @@ const Community = () => {
 
                   {/* Actions clusters */}
                   <div className="flex items-center gap-2">
-                    <motion.button 
+                    <motion.button
                       type="button"
                       onClick={() => setShowStoryModal(false)}
                       whileHover={{ scale: 1.02, backgroundColor: "rgba(255,255,255,0.03)" }}
                       whileTap={{ scale: 0.98 }}
-                      className="px-4 h-9 rounded-xl text-xs font-bold text-neutral-400 hover:text-white transition-all cursor-pointer"
+                      className="px-4 h-9 rounded-[8px] text-xs font-bold text-neutral-400 hover:text-white transition-all cursor-pointer"
                     >
                       Cancel
                     </motion.button>
 
-                    <motion.button 
+                    <motion.button
                       type="submit"
                       disabled={isPublishing || (!newStory.content.trim() && storyMediaPreviews.length === 0)}
                       style={SUBHEADING_STYLE}
                       whileHover={{ scale: 1.03, boxShadow: "0px 8px 25px rgba(85,222,232,0.18)", filter: "brightness(1.04)" }}
                       whileTap={{ scale: 0.97 }}
-                      className="bg-gradient-to-r from-[#55DEE8] to-[#BFF367] text-black px-5 h-9 rounded-xl font-black uppercase tracking-wider flex items-center justify-center gap-1.5 transition-all disabled:opacity-25 disabled:cursor-not-allowed text-xs cursor-pointer group/story"
+                      className="bg-gradient-to-r from-[#55DEE8] to-[#BFF367] text-black px-5 h-9 rounded-[8px] font-black uppercase tracking-wider flex items-center justify-center gap-1.5 transition-all disabled:opacity-25 disabled:cursor-not-allowed text-xs cursor-pointer group/story"
                     >
                       {isPublishing ? (
                         <Loader2 size={13} className="animate-spin" />
                       ) : (
                         <Plus size={12} className="group-hover/story:scale-110 transition-transform duration-300" />
-                      )} 
+                      )}
                       {isPublishing ? "Posting..." : "Post Story"}
                     </motion.button>
                   </div>

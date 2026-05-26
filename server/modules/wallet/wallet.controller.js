@@ -94,8 +94,8 @@ export const verifyTopup = async (req, res) => {
     // Atomic wallet credit and status update inside Prisma transaction
     const newBalance = await prisma.$transaction(async (tx) => {
       const balance = await WalletService.credit(
-        account.id,
-        req.user.role,
+        req.user.id,
+        "user", // Force role to "user" so top-ups ALWAYS go to the User Wallet
         transaction.amount,
         tx
       );
@@ -126,9 +126,23 @@ export const verifyTopup = async (req, res) => {
 export const getWalletData = async (req, res) => {
   const userId = req.user.id;
   try {
-    const wallet = await WalletService.getWallet(userId, req.user.role);
+    const isOwnerRoute = req.originalUrl.includes('/owner');
+    const roleToFetch = isOwnerRoute ? (req.user?.role || req.owner?.role || 'VENUE_OWNER') : 'user';
+    
+    const wallet = await WalletService.getWallet(userId, roleToFetch);
+    
+    // Define what transaction types belong to which wallet
+    const txTypes = isOwnerRoute 
+      ? ['SETTLEMENT', 'REVENUE', 'WITHDRAWAL', 'DISPUTE_FREEZE', 'DISPUTE_RELEASE', 'HOST_GAME', 'JOIN_GAME']
+      : ['TOPUP', 'OFFER', 'REFUND', 'SLOT_INCOME', 'CREDIT', 'HOST_GAME', 'JOIN_GAME'];
+
     const transactions = await prisma.walletTransaction.findMany({
-      where: { userId: userId },
+      where: { 
+        userId: userId,
+        type: {
+          in: txTypes
+        }
+      },
       orderBy: { createdAt: 'desc' },
       take: 20
     });
@@ -167,7 +181,7 @@ export const checkPaymentStatus = async (req, res) => {
         const newBalance = await prisma.$transaction(async (tx) => {
           const balance = await WalletService.credit(
             transaction.userId,
-            role,
+            "user", // Force role to "user" so top-ups ALWAYS go to the User Wallet
             transaction.amount,
             tx
           );

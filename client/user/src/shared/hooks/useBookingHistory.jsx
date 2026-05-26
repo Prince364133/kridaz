@@ -55,7 +55,7 @@ export default function useBookingHistory() {
  if (!window.confirm(confirmMsg)) return;
  
  try {
- const response = await axiosInstance.post(`/api/booking/user/cancel/${booking._id}`);
+ const response = await axiosInstance.post(`/api/booking/user/cancel/${booking.id || booking._id}`);
  if (response.data.success) {
  toast.success(response.data.message || "Booking cancelled successfully.");
  fetchBookings();

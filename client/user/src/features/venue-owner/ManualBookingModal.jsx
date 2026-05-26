@@ -1,10 +1,14 @@
-﻿import React, { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { X, Calendar, Clock, User, Phone, Mail, CreditCard, Banknote, MapPin, ChevronRight, Check } from "lucide-react";
 import axiosInstance from "@hooks/useAxiosInstance";
+import axios from "axios";
+import { useDispatch } from "react-redux";
+import { restoreAuth, logout } from "@redux/slices/authSlice";
 import toast from "react-hot-toast";
 import { format, parseISO } from "date-fns";
 
 const ManualBookingModal = ({ isOpen, onClose }) => {
+  const dispatch = useDispatch();
   const [step, setStep] = useState(1);
   const [loading, setLoading] = useState(false);
   const [turfs, setTurfs] = useState([]);
@@ -33,7 +37,7 @@ const ManualBookingModal = ({ isOpen, onClose }) => {
 
   const fetchTurfs = async () => {
     try {
-      const res = await axiosInstance.get("/api/owner/turf/all");
+      const res = await axiosInstance.get("/api/owner/turf/owner/all");
       setTurfs(res.data || []);
     } catch (err) {
       toast.error("Failed to load grounds");
@@ -78,31 +82,51 @@ const ManualBookingModal = ({ isOpen, onClose }) => {
     }
 
     setLoading(true);
-    try {
-      await axiosInstance.post("/api/owner/bookings/manual", {
-        turfId: selectedTurf._id,
-        startTime: selectedSlot.startTime,
-        endTime: selectedSlot.endTime,
-        selectedTurfDate: selectedDate,
-        totalPrice: selectedTurf.pricePerHour, 
-        paymentMethod: customerData.paymentMethod,
-        customerName: customerData.name,
-        customerEmail: customerData.email,
-        customerPhone: customerData.phone
-      });
 
-      toast.success("Manual booking successful!");
-      onClose();
-      // Reset state
-      setStep(1);
-      setSelectedTurf(null);
-      setSelectedSlot(null);
-      setCustomerData({ name: "", email: "", phone: "", paymentMethod: "CASH" });
-    } catch (err) {
-      toast.error(err.response?.data?.message || "Booking failed");
-    } finally {
-      setLoading(false);
-    }
+    const performBooking = async (retryCount = 0) => {
+      try {
+        await axiosInstance.post("/api/booking/owner/manual", {
+          turfId: selectedTurf._id,
+          startTime: selectedSlot.startTime,
+          endTime: selectedSlot.endTime,
+          selectedTurfDate: selectedDate,
+          totalPrice: selectedTurf.pricePerHour, 
+          paymentMethod: customerData.paymentMethod,
+          customerName: customerData.name,
+          customerEmail: customerData.email,
+          customerPhone: customerData.phone
+        });
+        
+        toast.success("Manual booking successful!");
+        onClose();
+        // Reset state
+        setStep(1);
+        setSelectedTurf(null);
+        setSelectedSlot(null);
+        setCustomerData({ name: "", email: "", phone: "", paymentMethod: "CASH" });
+      } catch (err) {
+        if (err.response?.status === 401 && err.response?.data?.message === "TOKEN_EXPIRED" && retryCount < 1) {
+           try {
+             const refreshUrl = `${import.meta.env.VITE_API_URL || ""}/api/user/auth/refresh`;
+             const { data } = await axios.post(refreshUrl, {}, { withCredentials: true });
+             if (data.token) {
+               dispatch(restoreAuth({ token: data.token }));
+               // Small delay to ensure state updates
+               await new Promise(resolve => setTimeout(resolve, 100));
+               return performBooking(retryCount + 1);
+             }
+           } catch (refreshErr) {
+             toast.error("Session expired. Please log in again.");
+             dispatch(logout());
+             return;
+           }
+        }
+        toast.error(err.response?.data?.message || "Booking failed");
+      }
+    };
+
+    await performBooking();
+    setLoading(false);
   };
 
   if (!isOpen) return null;
@@ -183,13 +207,7 @@ const ManualBookingModal = ({ isOpen, onClose }) => {
                             key={i}
                             disabled={slot.isBooked}
                             onClick={() => setSelectedSlot(slot)}
-                            className={`py-2.5 rounded-[4px] border text-[10px] font-black tracking-tighter transition-all font-inter ${
-                              selectedSlot === slot 
-                              ? 'bg-[#55DEE8] text-black border-[#55DEE8]' 
-                              : slot.isBooked 
-                              ? 'bg-red-500/10 border-red-500/20 text-red-500 cursor-not-allowed opacity-50' 
-                              : 'bg-[#1A1A1A] border-[#2D2D2D] hover:border-[#55DEE8]/50 text-[#878C9F] hover:text-white'
-                            }`}
+                            className={`py-2.5 rounded-[4px] border text-[10px] font-black tracking-tighter transition-all font-inter ${ selectedSlot === slot ? 'bg-[#55DEE8] text-black border-[#55DEE8]' : slot.isBooked ? 'bg-red-500/10 border-red-500/20 text-red-500 cursor-not-allowed opacity-50' : 'bg-[#1A1A1A] border-[#2D2D2D] hover:border-[#55DEE8]/50 text-[#878C9F] hover:text-white' }`}
                           >
                              {slot.startTime}
                           </button>

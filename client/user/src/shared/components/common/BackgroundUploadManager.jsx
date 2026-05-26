@@ -109,7 +109,8 @@ const BackgroundUploadManager = () => {
           storyId: dbId,
           key,
           mediaType: upload.file.type.startsWith('video') ? 'video' : 'image',
-          content: upload.metadata.content
+          content: upload.metadata.content,
+          durationDays: upload.metadata.durationDays
         }).unwrap();
       } else {
         await confirmReel({
@@ -148,7 +149,7 @@ const BackgroundUploadManager = () => {
           initial={{ y: 50, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
           exit={{ y: 50, opacity: 0 }}
-          className="bg-zinc-900 border border-white/10 rounded-2xl p-4 shadow-2xl max-w-md mx-auto pointer-events-auto flex items-center gap-4"
+          className="bg-zinc-900 border border-white/10 rounded-[8px] p-4 shadow-2xl max-w-md mx-auto pointer-events-auto flex items-center gap-4"
         >
           {/* Preview Thumbnail (Optimistic) */}
           <div className="w-12 h-16 bg-white/5 rounded-lg overflow-hidden flex-shrink-0 border border-white/5">

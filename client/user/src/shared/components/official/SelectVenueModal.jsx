@@ -68,7 +68,7 @@ const SelectVenueModal = ({ isOpen, onClose, gameId, onVenueSelected }) => {
             initial={{ opacity: 0, scale: 0.95, y: 20 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.95, y: 20 }}
-            className="relative w-full max-w-md bg-neutral-900 border border-neutral-800 rounded-3xl overflow-hidden shadow-2xl"
+            className="relative w-full max-w-md bg-neutral-900 border border-neutral-800 rounded-[8px] overflow-hidden shadow-2xl"
           >
             <div className="p-6 border-b border-neutral-800 flex justify-between items-center">
               <div>
@@ -88,7 +88,7 @@ const SelectVenueModal = ({ isOpen, onClose, gameId, onVenueSelected }) => {
                   placeholder="Search by name, city or state..."
                   value={query}
                   onChange={(e) => setQuery(e.target.value)}
-                  className="w-full bg-neutral-800 border border-neutral-700 rounded-2xl py-3 pl-12 pr-4 text-sm focus:outline-none focus:border-[#55DEE8] transition-all"
+                  className="w-full bg-neutral-800 border border-neutral-700 rounded-[8px] py-3 pl-12 pr-4 text-sm focus:outline-none focus:border-yellow-500 transition-all"
                   autoFocus
                 />
               </div>
@@ -101,9 +101,9 @@ const SelectVenueModal = ({ isOpen, onClose, gameId, onVenueSelected }) => {
                   </div>
                 ) : results.length > 0 ? (
                   results.map((ground) => (
-                    <div key={ground._id} className="flex items-center justify-between p-3 bg-neutral-800/40 border border-neutral-800 rounded-2xl hover:border-neutral-700 transition-all group">
+                    <div key={ground._id} className="flex items-center justify-between p-3 bg-neutral-800/40 border border-neutral-800 rounded-[8px] hover:border-neutral-700 transition-all group">
                       <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-xl bg-orange-500/10 flex items-center justify-center text-orange-500 border border-orange-500/20">
+                        <div className="w-10 h-10 rounded-[8px] bg-orange-500/10 flex items-center justify-center text-orange-500 border border-orange-500/20">
                           <MapPin size={20} />
                         </div>
                         <div>
@@ -116,7 +116,7 @@ const SelectVenueModal = ({ isOpen, onClose, gameId, onVenueSelected }) => {
                       <button
                         onClick={() => handleSelect(ground._id)}
                         disabled={selectingId === ground._id}
-                        className="px-4 py-2 bg-gradient-to-r from-[#55DEE8] to-[#BFF367] text-black text-[10px] font-black rounded-xl uppercase hover:scale-105 transition-all disabled:opacity-50 disabled:scale-100"
+                        className="px-4 py-2 bg-yellow-500 text-black text-[10px] font-black rounded-[8px] uppercase hover:scale-105 transition-all disabled:opacity-50 disabled:scale-100"
                       >
                         {selectingId === ground._id ? (
                           <Loader2 size={14} className="animate-spin" />

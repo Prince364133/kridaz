@@ -1,4 +1,4 @@
-import { prisma } from "../../config/prisma.js";
+﻿import { prisma } from "../../config/prisma.js";
 import { logAdminAction } from "../../utils/auditLogger.js";
 import NotificationService from "../../services/notification.service.js";
 import logger from "../../utils/logger.js";
@@ -13,6 +13,17 @@ const cleanupUserData = async (userIds) => {
   try {
     const owners = await prisma.ownerProfile.findMany({ where: { userId: { in: userIds } } });
     const ownerIds = owners.map(o => o.id);
+    
+    // Find all stories for these users to clean up R2
+    const userStories = await prisma.story.findMany({
+      where: { userId: { in: userIds } }
+    });
+    if (userStories.length > 0) {
+      const { deleteStoryFilesFromR2 } = await import("../../utils/r2.js");
+      await Promise.all(
+        userStories.map(story => deleteStoryFilesFromR2(story).catch(err => logger.error(`[ADMIN_CLEANUP] R2 cleanup error for user story ${story.id}:`, err)))
+      );
+    }
     
     await prisma.$transaction([
       // 1. Content: Posts & Stories
@@ -804,7 +815,7 @@ export const approveWithdrawalRequest = async (req, res) => {
       <div style="font-family: Arial, sans-serif; padding: 20px; color: #333;">
         <h2 style="color: #4CAF50;">Withdrawal Successful!</h2>
         <p>Hello ${owner.name},</p>
-        <p>Your withdrawal request for <strong>₹${request.amount}</strong> has been approved and processed.</p>
+        <p>Your withdrawal request for <strong>Ã¢â€šÂ¹${request.amount}</strong> has been approved and processed.</p>
         <p><strong>Transaction ID:</strong> ${transactionId || "N/A"}</p>
         <p>The funds should reflect in your bank account shortly.</p>
         <p>Best regards,<br/>The Kridaz Team</p>
@@ -873,7 +884,7 @@ export const rejectWithdrawalRequest = async (req, res) => {
         <div style="font-family: Arial, sans-serif; padding: 20px; color: #333;">
           <h2 style="color: #f44336;">Withdrawal Request Update</h2>
           <p>Hello ${owner.name},</p>
-          <p>Your withdrawal request for <strong>₹${request.amount}</strong> has been rejected.</p>
+          <p>Your withdrawal request for <strong>Ã¢â€šÂ¹${request.amount}</strong> has been rejected.</p>
           <p><strong>Reason:</strong> ${reason || "No specific reason provided."}</p>
           <p>The amount has been credited back to your usable wallet balance.</p>
           <p>Best regards,<br/>The Kridaz Team</p>
@@ -1284,3 +1295,122 @@ export const batchUpdateOwnerStatus = async (req, res) => {
 };
 
 
+
+export const getAllDisputes = async (req, res) => {
+  try {
+    const disputedGames = await prisma.hostedGame.findMany({
+      where: { coinTransferStatus: "DISPUTED" },
+      include: {
+        host: {
+          select: { id: true, name: true, phone: true }
+        },
+        slots: {
+          where: { status: "JOINED", userId: { not: null } },
+          include: {
+            user: { select: { id: true, name: true, phone: true, email: true } }
+          }
+        },
+        disputes: {
+          include: {
+            raisedBy: { select: { id: true, name: true } }
+          }
+        }
+      }
+    });
+
+    return res.status(200).json({ success: true, games: disputedGames });
+  } catch (error) {
+    logger.error("Error fetching disputes:", error);
+    return res.status(500).json({ message: error.message });
+  }
+};
+
+export const resolveDispute = async (req, res) => {
+  try {
+    const { gameId, action, refunds } = req.body;
+
+    const { default: WalletService } = await import("../services/wallet.service.js");
+    const { runInTransaction } = await import("../../utils/dbHelpers.js");
+
+    await runInTransaction(async ({ tx }) => {
+      const game = await tx.hostedGame.findUnique({
+        where: { id: gameId },
+        include: { slots: true }
+      });
+      if (!game) throw new Error("Game not found");
+      if (game.coinTransferStatus !== "DISPUTED") {
+        throw new Error("Game is not in a disputed state");
+      }
+
+      const totalPaidSlots = game.slots.filter(s => s.status === "JOINED" && s.userId).length;
+      const totalAmountCollected = Number(game.perPlayerCharge) * totalPaidSlots;
+
+      if (action === "TRANSFER_TO_HOST") {
+        if (totalAmountCollected > 0) {
+          await WalletService.credit(game.hostId, 'user', totalAmountCollected, tx);
+          await tx.walletTransaction.create({
+            data: {
+              userId: game.hostId,
+              amount: totalAmountCollected,
+              type: "SLOT_INCOME",
+              status: "SUCCESS",
+              description: `Received payment from players for game (Dispute Resolved)`
+            }
+          });
+        }
+      } else if (action === "REFUND_SELECTED") {
+        let totalRefunded = 0;
+
+        if (refunds && refunds.length > 0) {
+          for (const refund of refunds) {
+            const { userId, amount } = refund;
+            if (amount > game.perPlayerCharge) {
+              throw new Error("Refund amount cannot exceed limit");
+            }
+            
+            await WalletService.credit(userId, 'user', amount, tx);
+            await tx.walletTransaction.create({
+              data: {
+                userId,
+                amount,
+                type: "REFUND",
+                status: "SUCCESS",
+                description: "Partial refund for disputed game"
+              }
+            });
+            totalRefunded += amount;
+          }
+        }
+
+        const remainingToHost = totalAmountCollected - totalRefunded;
+        if (remainingToHost > 0) {
+          await WalletService.credit(game.hostId, 'user', remainingToHost, tx);
+          await tx.walletTransaction.create({
+            data: {
+              userId: game.hostId,
+              amount: remainingToHost,
+              type: "SLOT_INCOME",
+              status: "SUCCESS",
+              description: "Received remaining payment for game after refunds"
+            }
+          });
+        }
+      }
+
+      await tx.hostedGame.update({
+        where: { id: gameId },
+        data: { coinTransferStatus: "RESOLVED" }
+      });
+
+      await tx.gameDispute.updateMany({
+        where: { gameId },
+        data: { status: "RESOLVED", resolvedAt: new Date() }
+      });
+    });
+
+    return res.status(200).json({ success: true, message: "Dispute resolved successfully" });
+  } catch (error) {
+    logger.error("Error resolving dispute:", error);
+    return res.status(error.status || 500).json({ message: error.message });
+  }
+};

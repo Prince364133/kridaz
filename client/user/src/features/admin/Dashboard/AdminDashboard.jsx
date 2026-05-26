@@ -27,7 +27,7 @@ export default function AdminDashboard() {
         <p className="font-bold text-xl uppercase tracking-wider text-red-500">Telemetry Link Failure</p>
         <button 
           onClick={() => window.location.reload()}
-          className="mt-8 px-10 py-4 bg-white/5 border border-red-500/50 text-red-500 font-bold uppercase rounded-2xl hover:bg-red-500/10 transition-all flex items-center gap-3"
+          className="mt-8 px-10 py-4 bg-white/5 border border-red-500/50 text-red-500 font-bold uppercase rounded-[8px] hover:bg-red-500/10 transition-all flex items-center gap-3"
         >
           <RefreshCw className="w-4 h-4" />
           Reconnect
@@ -171,7 +171,7 @@ export default function AdminDashboard() {
             </div>
             <button 
               onClick={() => navigate("/admin/marketing")}
-              className="w-full mt-6 py-3 bg-white/5 border border-white/10 hover:border-[#CCFF00]/50 hover:bg-[#CCFF00]/5 text-white hover:text-[#CCFF00] rounded-xl transition-all font-bold uppercase text-[10px] tracking-widest group"
+              className="w-full mt-6 py-3 bg-white/5 border border-white/10 hover:border-[#CCFF00]/50 hover:bg-[#CCFF00]/5 text-white hover:text-[#CCFF00] rounded-[8px] transition-all font-bold uppercase text-[10px] tracking-widest group"
             >
               Open CMS Hub <ChevronRight className="w-3 h-3 inline ml-2 group-hover:translate-x-1 transition-transform" />
             </button>
@@ -225,10 +225,7 @@ const StatsCard = ({ title, value, prefix = "", suffix = "", icon: Icon, trend =
       <div className="w-10 h-10 bg-[#CCFF00]/10 rounded-[6px] text-[#CCFF00] flex items-center justify-center border border-[#CCFF00]/20 shadow-sm">
         <Icon size={20} />
       </div>
-      <div className={`px-2 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-wider flex items-center gap-1 ${
-        trend === 'Stable' || trend === 'Optimal' ? 'bg-blue-500/10 text-blue-400 border border-blue-500/20' :
-        trendNegative ? 'bg-red-500/10 text-red-400 border border-red-500/20' : 'bg-[#CCFF00]/10 text-[#CCFF00] border border-[#CCFF00]/20'
-      }`}>
+      <div className={`px-2 py-0.5 rounded-[6px] text-[9px] font-bold uppercase tracking-wider flex items-center gap-1 ${ trend === 'Stable' || trend === 'Optimal' ? 'bg-blue-500/10 text-blue-400 border border-blue-500/20' : trendNegative ? 'bg-red-500/10 text-red-400 border border-red-500/20' : 'bg-[#CCFF00]/10 text-[#CCFF00] border border-[#CCFF00]/20' }`}>
         {trend}
       </div>
     </div>
@@ -260,7 +257,7 @@ const ChartCard = ({ title, subtitle, children, action = null }) => (
 const ModerationItem = ({ icon: Icon, label, count, color = "text-white", onClick }) => (
   <div 
     onClick={onClick}
-    className={`flex items-center justify-between p-3 bg-white/[0.02] border border-white/5 rounded-xl hover:border-[#CCFF00]/30 transition-all ${onClick ? 'cursor-pointer hover:bg-[#CCFF00]/5' : ''}`}
+    className={`flex items-center justify-between p-3 bg-white/[0.02] border border-white/5 rounded-[8px] hover:border-[#CCFF00]/30 transition-all ${onClick ? 'cursor-pointer hover:bg-[#CCFF00]/5' : ''}`}
   >
     <div className="flex items-center gap-3">
       <div className="w-8 h-8 rounded-lg bg-white/5 flex items-center justify-center">

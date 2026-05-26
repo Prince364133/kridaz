@@ -64,7 +64,7 @@ const OwnerRequestsCard = ({ request, onAccept, onReject, onReconsider, onViewDe
       <div className="space-y-4 flex-1 relative z-10">
         <div className="flex items-center justify-between mb-2">
            <span className="text-[9px] font-medium text-[#878C9F] uppercase tracking-[2px]">Verification Dossier</span>
-           <div className={`flex items-center gap-1.5 px-2 py-0.5 ${isRejected ? 'bg-red-500/5 border-red-500/10' : 'bg-[#CCFF00]/5 border-[#CCFF00]/10'} border rounded-full`}>
+           <div className={`flex items-center gap-1.5 px-2 py-0.5 ${isRejected ? 'bg-red-500/5 border-red-500/10' : 'bg-[#CCFF00]/5 border-[#CCFF00]/10'} border rounded-[6px]`}>
               <div className={`w-1 h-1 rounded-full ${isRejected ? 'bg-red-500' : 'bg-[#CCFF00]'} animate-pulse`} />
               <span className={`text-[8px] font-bold ${isRejected ? 'text-red-500' : 'text-[#CCFF00]'} uppercase tracking-widest`}>
                 {isRejected ? 'Access Revoked' : 'Awaiting Scan'}

@@ -140,11 +140,11 @@ const HostedGamesPage = () => {
           <div className="flex items-center gap-4">
             <button 
               onClick={fetchGames}
-              className="p-3 bg-white/5 border border-white/10 rounded-xl text-white/60 hover:text-[#CCFF00] hover:border-[#CCFF00]/40 transition-all"
+              className="p-3 bg-white/5 border border-white/10 rounded-[8px] text-white/60 hover:text-[#CCFF00] hover:border-[#CCFF00]/40 transition-all"
             >
               <RefreshCw size={20} className={loading ? "animate-spin" : ""} />
             </button>
-            <div className="bg-[#CCFF00]/10 border border-[#CCFF00]/20 text-[#CCFF00] px-4 py-2 rounded-xl font-black text-sm uppercase tracking-tighter">
+            <div className="bg-[#CCFF00]/10 border border-[#CCFF00]/20 text-[#CCFF00] px-4 py-2 rounded-[8px] font-black text-sm uppercase tracking-tighter">
               {games.length} Total Games
             </div>
           </div>
@@ -152,7 +152,7 @@ const HostedGamesPage = () => {
 
         {/* Bulk Actions Bar */}
         {selectedIds.length > 0 && (
-          <div className="sticky top-6 z-[40] bg-[#0d0d0d] border border-[#CCFF00]/30 rounded-2xl p-4 shadow-2xl flex items-center justify-between animate-in slide-in-from-top-4 duration-500">
+          <div className="sticky top-6 z-[40] bg-[#0d0d0d] border border-[#CCFF00]/30 rounded-[8px] p-4 shadow-2xl flex items-center justify-between animate-in slide-in-from-top-4 duration-500">
             <div className="flex items-center gap-6 pl-4">
               <div className="flex items-center gap-2">
                 <div className="w-6 h-6 rounded bg-[#CCFF00] flex items-center justify-center text-black font-black text-xs">
@@ -177,14 +177,14 @@ const HostedGamesPage = () => {
               </button>
               <button 
                 onClick={() => handleBatchStatusUpdate("ACTIVE")}
-                className="px-4 py-2 bg-green-500/10 border border-green-500/20 rounded-xl text-green-400 font-black text-[10px] uppercase tracking-widest hover:bg-green-500/20 transition-all flex items-center gap-2"
+                className="px-4 py-2 bg-green-500/10 border border-green-500/20 rounded-[8px] text-green-400 font-black text-[10px] uppercase tracking-widest hover:bg-green-500/20 transition-all flex items-center gap-2"
               >
                 <CheckCircle size={14} /> Reactivate
               </button>
               <div className="w-px h-6 bg-white/10 mx-2" />
               <button 
                 onClick={openBatchDeleteModal}
-                className="px-4 py-2 bg-red-500/10 border border-red-500/20 rounded-xl text-red-400 font-black text-[10px] uppercase tracking-widest hover:bg-red-500/20 transition-all flex items-center gap-2"
+                className="px-4 py-2 bg-red-500/10 border border-red-500/20 rounded-[8px] text-red-400 font-black text-[10px] uppercase tracking-widest hover:bg-red-500/20 transition-all flex items-center gap-2"
               >
                 <Trash2 size={14} /> Delete
               </button>
@@ -202,7 +202,7 @@ const HostedGamesPage = () => {
                 placeholder="Search by game type, host name or ground..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full bg-white/5 border border-white/10 rounded-2xl py-4 pl-12 pr-6 text-white focus:outline-none focus:border-[#CCFF00]/40 transition-all font-medium"
+                className="w-full bg-white/5 border border-white/10 rounded-[8px] py-4 pl-12 pr-6 text-white focus:outline-none focus:border-[#CCFF00]/40 transition-all font-medium"
               />
             </div>
             <div className="md:col-span-4 flex gap-2">
@@ -211,7 +211,7 @@ const HostedGamesPage = () => {
                 <select 
                   value={filterStatus}
                   onChange={(e) => setFilterStatus(e.target.value)}
-                  className="w-full bg-white/5 border border-white/10 rounded-2xl py-4 pl-12 pr-6 text-white appearance-none focus:outline-none focus:border-[#CCFF00]/40 transition-all font-bold text-xs uppercase tracking-widest"
+                  className="w-full bg-white/5 border border-white/10 rounded-[8px] py-4 pl-12 pr-6 text-white appearance-none focus:outline-none focus:border-[#CCFF00]/40 transition-all font-bold text-xs uppercase tracking-widest"
                 >
                   <option value="ALL">All Status</option>
                   <option value="ACTIVE">Active</option>
@@ -228,7 +228,7 @@ const HostedGamesPage = () => {
         {loading ? (
           <HostedGamesSkeleton />
         ) : filteredGames.length === 0 ? (
-          <div className="bg-white/5 border border-dashed border-white/10 rounded-3xl p-20 text-center">
+          <div className="bg-white/5 border border-dashed border-white/10 rounded-[8px] p-20 text-center">
             <Activity size={64} className="mx-auto text-white/10 mb-6" />
             <h3 className="text-xl font-bold text-white uppercase">No Games Found</h3>
             <p className="text-gray-500 mt-2">Try adjusting your search or filters</p>
@@ -236,7 +236,7 @@ const HostedGamesPage = () => {
         ) : (
           <div className="space-y-4">
             {/* Table Header */}
-            <div className="hidden lg:grid grid-cols-12 gap-4 px-8 py-4 bg-[#0d0d0d] border border-white/5 rounded-2xl text-[10px] font-black text-gray-500 uppercase tracking-widest items-center">
+            <div className="hidden lg:grid grid-cols-12 gap-4 px-8 py-4 bg-[#0d0d0d] border border-white/5 rounded-[8px] text-[10px] font-black text-gray-500 uppercase tracking-widest items-center">
               <div className="col-span-1 flex justify-center">
                 <input 
                   type="checkbox" 
@@ -256,13 +256,9 @@ const HostedGamesPage = () => {
               <div 
                 key={game._id}
                 onClick={() => handleSelect(game._id)}
-                className={`group relative bg-[#0d0d0d] border transition-all duration-500 rounded-2xl p-6 overflow-hidden cursor-pointer ${
-                  selectedIds.includes(game._id) ? "border-[#CCFF00] bg-[#CCFF00]/5" : "border-white/5 hover:border-[#CCFF00]/40"
-                }`}
+                className={`group relative bg-[#0d0d0d] border transition-all duration-500 rounded-[8px] p-6 overflow-hidden cursor-pointer ${ selectedIds.includes(game._id) ? "border-[#CCFF00] bg-[#CCFF00]/5" : "border-white/5 hover:border-[#CCFF00]/40" }`}
               >
-                <div className={`absolute inset-y-0 left-0 w-1 bg-[#CCFF00] transition-transform duration-500 ${
-                  selectedIds.includes(game._id) ? "scale-y-100" : "scale-y-0 group-hover:scale-y-100"
-                }`} />
+                <div className={`absolute inset-y-0 left-0 w-1 bg-[#CCFF00] transition-transform duration-500 ${ selectedIds.includes(game._id) ? "scale-y-100" : "scale-y-0 group-hover:scale-y-100" }`} />
                 
                 <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-center relative z-10">
                   
@@ -281,7 +277,7 @@ const HostedGamesPage = () => {
 
                   {/* Match Info */}
                   <div className="lg:col-span-3 flex items-center gap-5">
-                    <div className="w-12 h-12 rounded-xl bg-[#CCFF00]/10 flex items-center justify-center text-[#CCFF00] border border-[#CCFF00]/20">
+                    <div className="w-12 h-12 rounded-[8px] bg-[#CCFF00]/10 flex items-center justify-center text-[#CCFF00] border border-[#CCFF00]/20">
                       <Activity size={24} />
                     </div>
                     <div className="min-w-0">
@@ -319,18 +315,8 @@ const HostedGamesPage = () => {
 
                   {/* Status */}
                   <div className="lg:col-span-1">
-                    <div className={`inline-flex items-center gap-2 px-2.5 py-1 rounded-full border text-[9px] font-black uppercase tracking-widest ${
-                      game.status === "ACTIVE" ? "bg-green-500/10 border-green-500/20 text-green-400" :
-                      game.status === "PENDING" ? "bg-gradient-to-r from-[#55DEE8]/10 to-[#BFF367]/10 border-[#55DEE8]/20 text-transparent bg-clip-text bg-gradient-to-r from-[#55DEE8] to-[#BFF367]" :
-                      game.status === "CANCELLED" ? "bg-red-500/10 border-red-500/20 text-red-400" :
-                      "bg-blue-500/10 border-blue-500/20 text-blue-400"
-                    }`}>
-                      <div className={`w-1 h-1 rounded-full ${
-                        game.status === "ACTIVE" ? "bg-green-400 shadow-[0_0_8px_#4ade80]" :
-                        game.status === "PENDING" ? "bg-gradient-to-r from-[#55DEE8] to-[#BFF367]" :
-                        game.status === "CANCELLED" ? "bg-red-400" :
-                        "bg-blue-400"
-                      }`} />
+                    <div className={`inline-flex items-center gap-2 px-2.5 py-1 rounded-[6px] border text-[9px] font-black uppercase tracking-widest ${ game.status === "ACTIVE" ? "bg-green-500/10 border-green-500/20 text-green-400" : game.status === "PENDING" ? "bg-yellow-500/10 border-yellow-500/20 text-yellow-400" : game.status === "CANCELLED" ? "bg-red-500/10 border-red-500/20 text-red-400" : "bg-blue-500/10 border-blue-500/20 text-blue-400" }`}>
+                      <div className={`w-1 h-1 rounded-full ${ game.status === "ACTIVE" ? "bg-green-400 shadow-[0_0_8px_#4ade80]" : game.status === "PENDING" ? "bg-yellow-400" : game.status === "CANCELLED" ? "bg-red-400" : "bg-blue-400" }`} />
                       {game.status}
                     </div>
                   </div>
@@ -342,7 +328,7 @@ const HostedGamesPage = () => {
                         e.stopPropagation();
                         navigate(`/match/${game._id}`);
                       }}
-                      className="p-2 rounded-xl bg-white/5 border border-white/10 text-white/40 hover:bg-[#CCFF00] hover:text-black hover:border-[#CCFF00] transition-all"
+                      className="p-2 rounded-[8px] bg-white/5 border border-white/10 text-white/40 hover:bg-[#CCFF00] hover:text-black hover:border-[#CCFF00] transition-all"
                     >
                       <Eye size={18} />
                     </button>
@@ -351,7 +337,7 @@ const HostedGamesPage = () => {
                         e.stopPropagation();
                         openDeleteModal(game);
                       }}
-                      className="p-2 rounded-xl bg-red-500/10 border border-red-500/20 text-red-400 hover:bg-red-500/20 transition-all"
+                      className="p-2 rounded-[8px] bg-red-500/10 border border-red-500/20 text-red-400 hover:bg-red-500/20 transition-all"
                     >
                       <Trash2 size={18} />
                     </button>

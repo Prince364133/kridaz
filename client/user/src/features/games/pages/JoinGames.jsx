@@ -15,6 +15,8 @@ import { fetchStates, fetchCities } from '@utils/locationService';
 import CoinAnimation from '@components/CoinAnimation';
 import useLoginOnDemand from "@hooks/useLoginOnDemand";
 
+const SUBHEADING_STYLE = { fontFamily: "'Inter 28pt Light', sans-serif", fontWeight: 300 };
+
 
 // Custom cricket ball SVG icon for Bowler role
 const CricketBallIcon = ({ size = 12, className = '' }) => (
@@ -27,7 +29,7 @@ const CricketBallIcon = ({ size = 12, className = '' }) => (
 const JoinGames = () => {
  const navigate = useNavigate();
  const { gateInteraction } = useLoginOnDemand();
- const { isAuthenticated } = useSelector((/** @type {any} */ state) => state.auth);
+ const { isAuthenticated, user } = useSelector((/** @type {any} */ state) => state.auth);
  const [games, setGames] = useState([]);
  const [loading, setLoading] = useState(true);
  const [selectedGame, setSelectedGame] = useState(null);
@@ -69,41 +71,64 @@ const JoinGames = () => {
  }
  };
 
- useEffect(() => {
- const fetchUserAndGames = async () => {
- try {
- const userRes = await axiosInstance.get(`/api/user/auth/getMe`);
- const user = userRes.data.user;
- if (user?.city || user?.state) {
- setUserLocation({ city: user.city || '', state: user.state || '' });
- setSelectedState(user.state || '');
- setSelectedCity(user.city || '');
- fetchGames(user.city, user.state);
- } else {
- fetchGames();
- }
- } catch (err) {
- fetchGames();
- }
- };
- fetchUserAndGames();
+  const normalizeString = (str) => {
+    return str ? str.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase() : "";
+  };
 
- // Load all Indian states for the dropdown
- const loadStates = async () => {
- setLoadingStates(true);
- const data = await fetchStates();
- setStates(data);
- setLoadingStates(false);
- };
- loadStates();
+  useEffect(() => {
+    const initializePage = async () => {
+      try {
+        setLoadingStates(true);
+        const statesData = await fetchStates();
+        setStates(statesData);
+        setLoadingStates(false);
 
- // Check for deep-link inviteToken
- const params = new URLSearchParams(window.location.search);
- const token = params.get('inviteToken');
- if (token) {
- handleVerifyInvite(token);
- }
- }, []);
+        let uCity = '';
+        let uState = '';
+        try {
+          const userRes = await axiosInstance.get(`/api/user/auth/getMe`);
+          const user = userRes.data.user;
+          if (user?.city || user?.state) {
+            uCity = user.city || '';
+            uState = user.state || '';
+          }
+        } catch (e) {
+          // ignore auth errors if user not logged in
+        }
+
+        let matchedState = '';
+        if (uState) {
+          matchedState = statesData.find(s => normalizeString(s) === normalizeString(uState)) || '';
+        }
+
+        let matchedCity = '';
+        if (matchedState && uCity) {
+          const citiesData = await fetchCities(matchedState);
+          setCities(citiesData);
+          matchedCity = citiesData.find(c => normalizeString(c) === normalizeString(uCity)) || '';
+        }
+
+        if (matchedCity || matchedState) {
+          setUserLocation({ city: matchedCity, state: matchedState });
+          setSelectedState(matchedState);
+          setSelectedCity(matchedCity);
+          fetchGames(matchedCity, matchedState);
+        } else {
+          fetchGames();
+        }
+      } catch (err) {
+        fetchGames();
+      }
+    };
+    initializePage();
+
+    // Check for deep-link inviteToken
+    const params = new URLSearchParams(window.location.search);
+    const token = params.get('inviteToken');
+    if (token) {
+      handleVerifyInvite(token);
+    }
+  }, []);
 
  const handleVerifyInvite = async (token) => {
  try {
@@ -193,12 +218,19 @@ const JoinGames = () => {
 
  const handleSearch = (e) => setSearch(e.target.value);
 
- const filteredGames = games.filter(game => {
+  const filteredGames = games.filter(game => {
+    if (!game) return false;
+    const currentUserId = user?.id || user?._id;
+    
+    if (matchTypeFilter === 'My Hosted Games') {
+      if (!currentUserId || (game.hostId !== currentUserId && game.host?._id !== currentUserId && game.host?.id !== currentUserId)) {
+        return false;
+      }
+    }
+
     if (matchTypeFilter === 'Live' && !game.isLive) return false;
     if (matchTypeFilter === 'Quick' && game.gameMode?.toUpperCase() !== 'QUICK') return false;
     if (matchTypeFilter === 'Professional' && game.gameMode?.toUpperCase() !== 'PROFESSIONAL') return false;
-
-    if (!game) return false;
 
     const searchLower = search ? search.toLowerCase() : '';
     if (!searchLower) return true;
@@ -217,7 +249,7 @@ const JoinGames = () => {
  gateInteraction(async () => {
  try {
  const res = await axiosInstance.post(`/api/hosted-game/join`, {
- gameId: selectedGame._id,
+ gameId: selectedGame.id,
  team: joiningSlot.team,
  slotIndex: joiningSlot.index,
  role: joiningSlot.role
@@ -246,19 +278,18 @@ const JoinGames = () => {
   {/* Header Section */}
   <div className="relative flex flex-col lg:flex-row lg:items-center justify-between gap-10 border-b border-[#2D2D2D] pb-10 mb-12">
   <div className="relative w-full lg:w-auto">
-  <div className="absolute -left-6 top-1/2 -translate-y-1/2 w-1.5 h-16 bg-gradient-to-b from-[#55DEE8] to-[#BFF367] rounded-full shadow-[0_0_25px_rgba(85,222,232,0.4)] hidden md:block"></div>
   <div className="flex items-center justify-between lg:justify-start gap-4 mb-4 w-full">
     <h1 className="text-4xl md:text-6xl font-black text-white uppercase tracking-tighter leading-none font-open-sans">
     Join <span className="bg-gradient-to-r from-[#55DEE8] to-[#BFF367] bg-clip-text text-transparent">Games</span>
     </h1>
     <button 
     onClick={() => gateInteraction(() => navigate('/host-game'))}
-    className="lg:hidden px-4 py-2.5 bg-gradient-to-r from-[#55DEE8] to-[#BFF367] text-black font-black text-[10px] uppercase tracking-widest rounded-[15px] flex items-center gap-2 hover:scale-105 transition-all duration-500 shadow-[0_0_20px_rgba(85,222,232,0.25)] hover:shadow-[0_0_30px_rgba(191,243,103,0.35)] whitespace-nowrap"
+    className="lg:hidden px-4 py-2.5 bg-gradient-to-r from-[#55DEE8] to-[#BFF367] text-black font-black text-[10px] uppercase tracking-widest rounded-[8px] flex items-center gap-2 hover:scale-105 transition-all duration-500 shadow-[0_0_20px_rgba(85,222,232,0.25)] hover:shadow-[0_0_30px_rgba(191,243,103,0.35)] whitespace-nowrap"
     >
     <Trophy size={14} /> Host Match
     </button>
   </div>
-  <p className="text-sm md:text-xl font-medium text-[#999999] tracking-tight max-w-xl">
+  <p className="text-sm md:text-xl text-[#999999] tracking-tight max-w-xl" style={SUBHEADING_STYLE}>
   Competitive Matchmaking • Discover & participate in matches hosted by the elite sports community.
   </p>
   </div>
@@ -267,7 +298,7 @@ const JoinGames = () => {
   <div className="hidden lg:flex flex-wrap items-center gap-4">
     <button 
     onClick={() => gateInteraction(() => navigate('/host-game'))}
-    className="px-6 py-3.5 bg-gradient-to-r from-[#55DEE8] to-[#BFF367] text-black font-black text-[9px] md:text-[11px] uppercase tracking-widest rounded-[15px] flex items-center gap-2.5 hover:scale-105 transition-all duration-500 shadow-[0_0_30px_rgba(85,222,232,0.25)] hover:shadow-[0_0_40px_rgba(191,243,103,0.35)] whitespace-nowrap"
+    className="px-6 py-3.5 bg-gradient-to-r from-[#55DEE8] to-[#BFF367] text-black font-black text-[9px] md:text-[11px] uppercase tracking-widest rounded-[8px] flex items-center gap-2.5 hover:scale-105 transition-all duration-500 shadow-[0_0_30px_rgba(85,222,232,0.25)] hover:shadow-[0_0_40px_rgba(191,243,103,0.35)] whitespace-nowrap"
     >
     <Trophy size={16} /> Host Match
     </button>
@@ -276,10 +307,10 @@ const JoinGames = () => {
 
 
   {/* Search & Filters Container */}
-  <div className="w-full mb-12 flex flex-col md:flex-row md:items-center gap-3 md:gap-0 md:bg-[#0a0a0c]/80 md:backdrop-blur-2xl md:border md:border-white/10 md:rounded-[15px] md:p-1.5 md:shadow-2xl transition-all duration-500 hover:border-[#55DEE8]/30">
+  <div className="w-full mb-12 flex flex-col md:flex-row md:items-center gap-3 md:gap-0 md:bg-[#0a0a0c]/80 md:backdrop-blur-2xl md:border md:border-white/10 md:rounded-[8px] md:p-1.5 md:shadow-2xl transition-all duration-500 hover:border-[#55DEE8]/30">
     
     {/* Search Input Container */}
-    <div className="w-full md:w-auto md:flex-[2] relative flex items-center min-h-[56px] md:min-h-full bg-[#0a0a0c]/80 md:bg-transparent backdrop-blur-2xl md:backdrop-blur-none border border-white/10 md:border-none md:border-r md:border-white/5 rounded-[15px] md:rounded-none px-4 py-3 md:py-0 shadow-2xl md:shadow-none transition-all hover:border-[#55DEE8]/30 md:hover:border-transparent">
+    <div className="w-full md:w-auto md:flex-[2] relative flex items-center min-h-[56px] md:min-h-full bg-[#0a0a0c]/80 md:bg-transparent backdrop-blur-2xl md:backdrop-blur-none border border-white/10 md:border-none md:border-r md:border-white/5 rounded-[8px] md:rounded-[6px] px-4 py-3 md:py-0 shadow-2xl md:shadow-none transition-all hover:border-[#55DEE8]/30 md:hover:border-transparent">
       <Search className="text-gray-500 mr-3" size={16} />
       <input 
         className="w-full h-full bg-transparent text-white outline-none text-xs font-bold placeholder-gray-500 tracking-wide" 
@@ -291,7 +322,7 @@ const JoinGames = () => {
     </div>
 
     {/* Filters Scrollable Container */}
-    <div className="w-full md:w-auto md:flex-[2.5] flex flex-row items-stretch overflow-x-auto hide-scrollbar bg-[#0a0a0c]/80 md:bg-transparent backdrop-blur-2xl md:backdrop-blur-none border border-white/10 md:border-none rounded-[15px] md:rounded-none min-h-[56px] md:min-h-full shadow-2xl md:shadow-none transition-all hover:border-[#55DEE8]/30 md:hover:border-transparent">
+    <div className="w-full md:w-auto md:flex-[2.5] flex flex-row items-stretch overflow-x-auto hide-scrollbar bg-[#0a0a0c]/80 md:bg-transparent backdrop-blur-2xl md:backdrop-blur-none border border-white/10 md:border-none rounded-[8px] md:rounded-[8px] min-h-[56px] md:min-h-full shadow-2xl md:shadow-none transition-all hover:border-[#55DEE8]/30 md:hover:border-transparent">
       
       {/* Sport Filter */}
       <div className="flex-1 md:w-auto md:flex-[0.6] relative border-r border-white/5 flex items-center group min-h-[56px] md:min-h-full flex-shrink-0 min-w-[80px] md:min-w-[130px]">
@@ -366,6 +397,7 @@ const JoinGames = () => {
           onChange={(e) => setMatchTypeFilter(e.target.value)}
         >
           <option className="bg-[#0a0a0a] text-white" value="All Matches">All Matches</option>
+          <option className="bg-[#0a0a0a] text-white" value="My Hosted Games">My Hosted Games</option>
           <option className="bg-[#0a0a0a] text-white" value="Live">Live Matches</option>
           <option className="bg-[#0a0a0a] text-white" value="Quick">Quick Matches</option>
           <option className="bg-[#0a0a0a] text-white" value="Professional">Professional</option>
@@ -379,10 +411,10 @@ const JoinGames = () => {
  <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-8">
  {loading ? (
  [1, 2, 3, 4, 5, 6, 7, 8].map(i => (
- <div key={i} className="h-[420px] bg-[#0d0d0d] rounded-[15px] border border-[#2D2D2D] animate-pulse" />
+ <div key={i} className="h-[420px] bg-[#0d0d0d] rounded-[8px] border border-[#2D2D2D] animate-pulse" />
  ))
  ) : filteredGames.length === 0 ? (
- <div className="col-span-full py-32 text-center bg-[#0d0d0d] rounded-[15px] border border-[#2D2D2D] relative overflow-hidden">
+ <div className="col-span-full py-32 text-center bg-[#0d0d0d] rounded-[8px] border border-[#2D2D2D] relative overflow-hidden">
  <div className="absolute inset-0 bg-[#55DEE8]/5 blur-[100px]" />
  <div className="relative z-10 space-y-6">
  <div className="w-24 h-24 bg-white/5 border border-white/5 rounded-full flex items-center justify-center mx-auto shadow-2xl">
@@ -415,12 +447,12 @@ const JoinGames = () => {
 
   return (
    <motion.div
-   key={game._id}
+   key={game.id}
    initial={{ opacity: 0, y: 20 }}
    animate={{ opacity: 1, y: 0 }}
    whileHover={{ y: -6, scale: 1.01 }}
    transition={{ duration: 0.3 }}
-   className="group relative rounded-[15px] overflow-hidden cursor-pointer bg-black border border-white/5 hover:border-[#55DEE8]/30 transition-all duration-500 flex flex-col aspect-square w-full shadow-2xl"
+   className="group relative rounded-[8px] overflow-hidden cursor-pointer bg-black border border-white/5 hover:border-[#55DEE8]/30 transition-all duration-500 flex flex-col aspect-square w-full shadow-2xl"
    onClick={() => setSelectedGame(game)}
    >
    {/* ── Background: Split Team Images (Full Height cover with steep 65% slant) ── */}
@@ -460,13 +492,13 @@ const JoinGames = () => {
    {/* Top Row Badging (Transparent Backgrounds) */}
    <div className="flex items-center justify-between w-full bg-transparent">
    {/* Left side: Sport badge */}
-   <div className="px-2 md:px-3 py-0.5 md:py-1 bg-black/40 border border-[#55DEE8]/20 rounded-full backdrop-blur-sm flex items-center gap-1 md:gap-1.5">
+   <div className="px-2 md:px-3 py-0.5 md:py-1 bg-black/40 border border-[#55DEE8]/20 rounded-[6px] backdrop-blur-sm flex items-center gap-1 md:gap-1.5">
    <Trophy className="w-2.5 h-2.5 md:w-3 md:h-3 text-[#55DEE8]" />
    <span className="text-[7px] md:text-[10px] font-black text-[#55DEE8] uppercase tracking-wider">{game.gameType}</span>
    </div>
 
    {/* Right side: Ticket Price badge */}
-   <div className="px-2 md:px-3 py-0.5 md:py-1 bg-black/40 border border-white/10 rounded-full backdrop-blur-sm flex items-center gap-1 md:gap-1.5">
+   <div className="px-2 md:px-3 py-0.5 md:py-1 bg-black/40 border border-white/10 rounded-[6px] backdrop-blur-sm flex items-center gap-1 md:gap-1.5">
    <Coins className="w-2.5 h-2.5 md:w-3 md:h-3 text-[#55DEE8]" />
    <span className="text-[7px] md:text-[10px] font-black text-white uppercase tracking-wider">{game.perPlayerCharge || 'FREE'}</span>
    </div>
@@ -493,16 +525,12 @@ const JoinGames = () => {
    onClick={(e) => {
    if (game.isLive || game.scoringStatus === 'IN_PROGRESS') {
    e.stopPropagation();
-   navigate(`/live-score/${game._id}`);
+   navigate(`/analytics/${game.shortId || game._id}`);
    } else {
    setSelectedGame(game);
    }
    }}
-   className={`px-6 py-1.5 rounded-full font-black text-[9px] uppercase tracking-wider transition-all duration-300 flex items-center justify-center gap-1 backdrop-blur-sm bg-transparent ${
-   game.isLive || game.scoringStatus === 'IN_PROGRESS'
-   ? 'border border-red-500/30 text-red-400 hover:bg-red-500/10 hover:border-red-500/50 hover:text-white shadow-[0_0_15px_rgba(239,68,68,0.1)]' 
-   : 'border border-white/10 text-white hover:bg-[#55DEE8]/10 hover:border-[#55DEE8]/40 hover:text-[#55DEE8] hover:shadow-[0_0_15px_rgba(85,222,232,0.15)]'
-   }`}
+   className={`px-6 py-1.5 rounded-[6px] font-black text-[9px] uppercase tracking-wider transition-all duration-300 flex items-center justify-center gap-1 backdrop-blur-sm bg-transparent ${ game.isLive || game.scoringStatus === 'IN_PROGRESS' ? 'border border-red-500/30 text-red-400 hover:bg-red-500/10 hover:border-red-500/50 hover:text-white shadow-[0_0_15px_rgba(239,68,68,0.1)]' : 'border border-white/10 text-white hover:bg-[#55DEE8]/10 hover:border-[#55DEE8]/40 hover:text-[#55DEE8] hover:shadow-[0_0_15px_rgba(85,222,232,0.15)]' }`}
    >
    {game.isLive || game.scoringStatus === 'IN_PROGRESS' ? 'WATCH' : 'JOIN'} <ChevronRight size={9} strokeWidth={3} />
    </button>
@@ -539,11 +567,7 @@ const JoinGames = () => {
    return (
    <div 
    key={idx} 
-   className={`w-1.5 h-1.5 rounded-full ${
-   isFilled 
-   ? 'bg-[#55DEE8]' 
-   : 'border border-[#55DEE8] bg-transparent'
-   }`} 
+   className={`w-1.5 h-1.5 rounded-full ${ isFilled ? 'bg-[#55DEE8]' : 'border border-[#55DEE8] bg-transparent' }`} 
    />
    );
    })}
@@ -599,7 +623,7 @@ const JoinGames = () => {
   initial={{ y: "100%", opacity: 0, scale: 0.95 }}
   animate={{ y: 0, opacity: 1, scale: 1 }}
   exit={{ y: "100%", opacity: 0, scale: 0.95 }}
-  className="relative bg-[#000000] border border-white/[0.04] w-full max-w-4xl max-h-[90vh] overflow-y-auto rounded-[15px] shadow-[0_30px_60px_rgba(0,0,0,0.8)] custom-scrollbar"
+  className="relative bg-[#000000] border border-white/[0.04] w-full max-w-4xl max-h-[90vh] overflow-y-auto rounded-[8px] shadow-[0_30px_60px_rgba(0,0,0,0.8)] custom-scrollbar"
   >
   <div className="sticky top-0 z-20 bg-[#060608]/90 backdrop-blur-xl border-b border-white/[0.06] px-8 py-5 flex items-center justify-between">
   <div className="flex items-center gap-3 flex-wrap">
@@ -609,7 +633,7 @@ const JoinGames = () => {
   {selectedGame.shortId && (
   <button
   onClick={() => { navigator.clipboard?.writeText(selectedGame.shortId); toast.success('Game ID copied!'); }}
-  className="px-3 py-1.5 bg-white/5 border border-white/10 hover:border-[#55DEE8]/40 text-[#55DEE8] rounded-full flex items-center gap-1.5 transition-all"
+  className="px-3 py-1.5 bg-white/5 border border-white/10 hover:border-[#55DEE8]/40 text-[#55DEE8] rounded-[6px] flex items-center gap-1.5 transition-all"
   >
   <Info size={11} />
   <span className="font-inter text-[10px] font-bold uppercase tracking-widest">ID: {selectedGame.shortId}</span>
@@ -632,8 +656,6 @@ const JoinGames = () => {
   { label: "Time", value: selectedGame.time },
   { label: "Fee", value: selectedGame.perPlayerCharge ? `${selectedGame.perPlayerCharge} Coins` : 'Free' },
   { label: "Umpire", value: selectedGame.umpire ? 'Verified' : 'Unmanaged' },
-  { label: "Streamer", value: selectedGame.streamer || 'None' },
-  { label: "Scorer", value: selectedGame.scorer || 'None' },
   ].map((stat, i, arr) => (
   <div key={i} className="flex items-center">
   <div className="px-4 py-1 text-center">
@@ -652,7 +674,7 @@ const JoinGames = () => {
   <div className="space-y-4">
   <div className="flex items-center justify-between pb-2 border-b border-white/[0.08]">
   <h3 className="font-open-sans text-base font-black text-white uppercase tracking-tight">Casual Match Pool</h3>
-  <span className="font-inter text-[9px] md:text-[11px] font-bold bg-gradient-to-r from-[#55DEE8] to-[#BFF367] bg-clip-text text-transparent border border-white/10 px-2.5 py-0.5 rounded-full">
+  <span className="font-inter text-[9px] md:text-[11px] font-bold bg-gradient-to-r from-[#55DEE8] to-[#BFF367] bg-clip-text text-transparent border border-white/10 px-2.5 py-0.5 rounded-[8px]">
   {selectedGame.quickSlots.filter(s => s.status !== 'OPEN').length}/{selectedGame.quickSlots.length}
   </span>
   </div>
@@ -666,23 +688,27 @@ const JoinGames = () => {
   disabled={isJoined}
   onClick={() => {
   if (!isAuthenticated) { toast.error("Please login to join this game"); navigate('/login'); return; }
+  const currentUserId = user?.id || user?._id;
+  const hasAlreadyJoined = selectedGame.quickSlots?.some(s => s.userId === currentUserId || s.user?._id === currentUserId || s.user?.id === currentUserId);
+  if (hasAlreadyJoined) {
+    toast.error("You have already joined a slot in this game.");
+    return;
+  }
   setJoiningSlot({ team: 'QUICK', index: sIdx, role: slot.role });
   setShowConfirm(true);
   }}
-  className={`relative w-12 h-12 rounded-full border-2 flex items-center justify-center transition-all duration-300 bg-black ${
-  isJoined ? 'border-white/15 cursor-not-allowed' : 'border-white/10 hover:border-[#55DEE8] hover:shadow-[0_0_12px_rgba(85,222,232,0.35)]'
-  }`}>
+  className={`relative w-12 h-12 rounded-full border-2 flex items-center justify-center transition-all duration-300 bg-black ${ isJoined ? 'border-white/15 cursor-not-allowed' : 'border-white/10 hover:border-[#55DEE8] hover:shadow-[0_0_12px_rgba(85,222,232,0.35)]' }`}>
   {isJoined ? (
   slot.user?.profilePicture
   ? <img src={slot.user.profilePicture} alt="" className="w-full h-full rounded-full object-cover" />
-  : <div className="w-full h-full rounded-full flex items-center justify-center font-inter text-[9px] md:text-[11px] font-bold text-white">{slot.user?.name?.[0]?.toUpperCase() || 'P'}</div>
+  : <div className="w-full h-full rounded-full flex items-center justify-center font-inter text-[9px] md:text-[11px] font-bold text-white">{(slot.user?.name || slot.customPlayer?.name)?.[0]?.toUpperCase() || 'P'}</div>
   ) : <span className="text-white/25 text-lg font-bold">+</span>}
   <div className="absolute -bottom-0.5 -right-0.5 w-4 h-4 rounded-full bg-[#08080a] border border-white/10 flex items-center justify-center">
   <RoleIcon size={8} className="text-[#55DEE8]" />
   </div>
   </button>
   <span className="font-inter text-[8px] text-white/40 uppercase tracking-wide text-center truncate w-full">
-  {isJoined ? (slot.user?.name?.split(' ')[0] || 'Player') : ''}
+  {isJoined ? ((slot.user?.name || slot.customPlayer?.name)?.split(' ')[0] || 'Player') : ''}
   </span>
   </div>
   );
@@ -695,7 +721,7 @@ const JoinGames = () => {
   <div key={teamKey} className="space-y-3">
   <div className="flex items-center justify-between pb-2 border-b border-white/[0.08]">
   <h3 className="font-open-sans text-base font-black text-white uppercase tracking-tight">{selectedGame.teams[teamKey].name}</h3>
-  <span className="font-inter text-[9px] md:text-[11px] font-bold bg-gradient-to-r from-[#55DEE8] to-[#BFF367] bg-clip-text text-transparent border border-white/10 px-2.5 py-0.5 rounded-full">
+  <span className="font-inter text-[9px] md:text-[11px] font-bold bg-gradient-to-r from-[#55DEE8] to-[#BFF367] bg-clip-text text-transparent border border-white/10 px-2.5 py-0.5 rounded-[8px]">
   {selectedGame.teams[teamKey].slots.filter(s => s.status !== 'OPEN').length}/{selectedGame.teams[teamKey].slots.length}
   </span>
   </div>
@@ -709,23 +735,28 @@ const JoinGames = () => {
   disabled={isJoined}
   onClick={() => {
   if (!isAuthenticated) { toast.error("Please login to join this game"); navigate('/login'); return; }
+  const currentUserId = user?.id || user?._id;
+  const hasAlreadyJoined = selectedGame.teams?.teamA?.slots?.some(s => s.userId === currentUserId || s.user?._id === currentUserId || s.user?.id === currentUserId) ||
+                           selectedGame.teams?.teamB?.slots?.some(s => s.userId === currentUserId || s.user?._id === currentUserId || s.user?.id === currentUserId);
+  if (hasAlreadyJoined) {
+    toast.error("You have already joined a slot in this game.");
+    return;
+  }
   setJoiningSlot({ team: teamKey === 'teamA' ? 'A' : 'B', index: sIdx, role: slot.role });
   setShowConfirm(true);
   }}
-  className={`relative w-12 h-12 rounded-full border-2 flex items-center justify-center transition-all duration-300 bg-black ${
-  isJoined ? 'border-white/15 cursor-not-allowed' : 'border-white/10 hover:border-[#55DEE8] hover:shadow-[0_0_12px_rgba(85,222,232,0.35)]'
-  }`}>
+  className={`relative w-12 h-12 rounded-full border-2 flex items-center justify-center transition-all duration-300 bg-black ${ isJoined ? 'border-white/15 cursor-not-allowed' : 'border-white/10 hover:border-[#55DEE8] hover:shadow-[0_0_12px_rgba(85,222,232,0.35)]' }`}>
   {isJoined ? (
   slot.user?.profilePicture
   ? <img src={slot.user.profilePicture} alt="" className="w-full h-full rounded-full object-cover" />
-  : <div className="w-full h-full rounded-full flex items-center justify-center font-inter text-[10px] font-bold text-white">{slot.user?.name?.[0]?.toUpperCase() || 'P'}</div>
+  : <div className="w-full h-full rounded-full flex items-center justify-center font-inter text-[10px] font-bold text-white">{(slot.user?.name || slot.customPlayer?.name)?.[0]?.toUpperCase() || 'P'}</div>
   ) : <span className="text-white/25 text-base font-bold">+</span>}
   <div className="absolute -bottom-0.5 -right-0.5 w-4 h-4 rounded-full bg-[#08080a] border border-white/10 flex items-center justify-center">
   <RoleIcon size={8} className="text-[#55DEE8]" />
   </div>
   </button>
   <span className="font-inter text-[8px] text-white/40 uppercase tracking-wide text-center truncate w-full">
-  {isJoined ? (slot.user?.name?.split(' ')[0] || 'Player') : ''}
+  {isJoined ? ((slot.user?.name || slot.customPlayer?.name)?.split(' ')[0] || 'Player') : ''}
   </span>
   </div>
   );
@@ -757,7 +788,7 @@ const JoinGames = () => {
   initial={{ scale: 0.9, opacity: 0, y: 20 }}
   animate={{ scale: 1, opacity: 1, y: 0 }}
   exit={{ scale: 0.9, opacity: 0, y: 20 }}
-  className="relative bg-[#000000] border border-[#2D2D2D] p-10 rounded-[15px] max-w-md w-full text-center shadow-2xl"
+  className="relative bg-[#000000] border border-[#2D2D2D] p-10 rounded-[8px] max-w-md w-full text-center shadow-2xl"
   >
   <div className="w-20 h-20 bg-[#55DEE8]/10 border border-[#55DEE8]/20 rounded-full flex items-center justify-center mx-auto mb-8 shadow-[0_0_30px_rgba(85,222,232,0.1)]">
   <Coins size={40} className="text-[#55DEE8]" />
@@ -767,13 +798,13 @@ const JoinGames = () => {
   Participation requires <span className="text-[#55DEE8] font-black">{selectedGame?.perPlayerCharge || 0} Coins</span>. These will be securely escrowed until match confirmation.
   </p>
   <div className="flex gap-4">
- <button onClick={() => setShowConfirm(false)} className="flex-1 py-4 bg-[#121212] border border-[#2D2D2D] rounded-[15px] font-black text-[9px] md:text-[11px] uppercase tracking-widest hover:bg-white hover:text-black transition-all">Abort</button>
+ <button onClick={() => setShowConfirm(false)} className="flex-1 py-4 bg-[#121212] border border-[#2D2D2D] rounded-[8px] font-black text-[9px] md:text-[11px] uppercase tracking-widest hover:bg-white hover:text-black transition-all">Abort</button>
  <button
  onClick={() => {
  setShowConfirm(false);
  handleJoinGame();
  }}
- className="flex-1 py-4 bg-gradient-to-r from-[#55DEE8] to-[#BFF367] text-black font-black rounded-[15px] text-[9px] md:text-[11px] uppercase tracking-widest shadow-[0_0_20px_rgba(85,222,232,0.25)] hover:scale-105 transition-all"
+ className="flex-1 py-4 bg-gradient-to-r from-[#55DEE8] to-[#BFF367] text-black font-black rounded-[8px] text-[9px] md:text-[11px] uppercase tracking-widest shadow-[0_0_20px_rgba(85,222,232,0.25)] hover:scale-105 transition-all"
  >
  Confirm
  </button>
@@ -803,7 +834,7 @@ const JoinGames = () => {
  initial={{ scale: 0.9, opacity: 0, y: 20 }}
  animate={{ scale: 1, opacity: 1, y: 0 }}
  exit={{ scale: 0.9, opacity: 0, y: 20 }}
- className="relative bg-[#000000] border border-[#55DEE8]/20 p-8 rounded-[15px] max-w-md w-full shadow-[0_0_50px_rgba(85,222,232,0.15)]"
+ className="relative bg-[#000000] border border-[#55DEE8]/20 p-8 rounded-[8px] max-w-md w-full shadow-[0_0_50px_rgba(85,222,232,0.15)]"
  >
  <div className="w-20 h-20 bg-[#55DEE8]/10 border border-[#55DEE8]/20 rounded-full flex items-center justify-center mx-auto mb-6">
  <Trophy size={40} className="text-[#55DEE8]" />
@@ -812,7 +843,7 @@ const JoinGames = () => {
  <h2 className="text-3xl font-black text-white uppercase tracking-tighter text-center mb-2">Claim Your Slot</h2>
  <p className="text-[#55DEE8] text-[10px] font-black uppercase tracking-[0.3em] text-center mb-6">Reserved For You</p>
  
- <div className="bg-[#121212] border border-white/5 rounded-[15px] p-5 mb-8 space-y-4">
+ <div className="bg-[#121212] border border-white/5 rounded-[8px] p-5 mb-8 space-y-4">
  <div className="flex items-center justify-between">
  <span className="text-[10px] font-bold text-white/40 uppercase">Match</span>
  <span className="text-sm font-black text-white uppercase">{inviteData.game.gameType}</span>
@@ -832,10 +863,10 @@ const JoinGames = () => {
  </div>
 
  <div className="flex gap-4">
- <button onClick={() => setShowInvitePopup(false)} className="flex-1 py-4 bg-[#121212] border border-[#2D2D2D] rounded-[15px] font-black text-[9px] md:text-[11px] uppercase tracking-widest hover:bg-white hover:text-black transition-all">Ignore</button>
+ <button onClick={() => setShowInvitePopup(false)} className="flex-1 py-4 bg-[#121212] border border-[#2D2D2D] rounded-[8px] font-black text-[9px] md:text-[11px] uppercase tracking-widest hover:bg-white hover:text-black transition-all">Ignore</button>
  <button
  onClick={handleClaimSlot}
- className="flex-1 py-4 bg-gradient-to-r from-[#55DEE8] to-[#BFF367] text-black font-black rounded-[15px] text-[9px] md:text-[11px] uppercase tracking-widest shadow-[0_0_20px_rgba(85,222,232,0.25)] hover:scale-105 transition-all"
+ className="flex-1 py-4 bg-gradient-to-r from-[#55DEE8] to-[#BFF367] text-black font-black rounded-[8px] text-[9px] md:text-[11px] uppercase tracking-widest shadow-[0_0_20px_rgba(85,222,232,0.25)] hover:scale-105 transition-all"
  >
  Join Match
  </button>

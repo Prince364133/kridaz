@@ -289,7 +289,7 @@ const AddTurf = () => {
                         rel="noopener noreferrer"
                         className="text-[10px] font-bold text-[#878C9F] hover:text-[#55DEE8] uppercase tracking-widest transition-colors"
                       >
-                        Open in Maps G��
+                        Open in Maps Rs �
                       </a>
                     )}
                   </div>
@@ -598,11 +598,7 @@ const AddTurf = () => {
                           key={day}
                           type="button"
                           onClick={() => toggleDay(day)}
-                          className={`px-5 py-3 rounded-[8px] text-[11px] font-black uppercase tracking-widest transition-all border ${
-                            isActive 
-                            ? "bg-[#55DEE8] text-black border-[#55DEE8] shadow-[0_5px_15px_rgba(204,255,0,0.2)]" 
-                            : "bg-[#111111] text-[#444] border-[#2D2D2D] hover:border-[#55DEE8]/40"
-                          }`}
+                          className={`px-5 py-3 rounded-[8px] text-[11px] font-black uppercase tracking-widest transition-all border ${ isActive ? "bg-[#55DEE8] text-black border-[#55DEE8] shadow-[0_5px_15px_rgba(204,255,0,0.2)]" : "bg-[#111111] text-[#444] border-[#2D2D2D] hover:border-[#55DEE8]/40" }`}
                         >
                           {day.substring(0, 3)}
                         </button>
@@ -679,20 +675,12 @@ const AddTurf = () => {
                     {generatedSlots.map((slot, index) => (
                       <div 
                         key={index}
-                        className={`flex items-center gap-4 p-3 rounded-[8px] border transition-all ${
-                          slot.isActive
-                          ? "bg-[#111111] border-[#2D2D2D] group hover:border-[#55DEE8]/30"
-                          : "bg-black/50 border-[#1A1A1A] opacity-40 grayscale"
-                        }`}
+                        className={`flex items-center gap-4 p-3 rounded-[8px] border transition-all ${ slot.isActive ? "bg-[#111111] border-[#2D2D2D] group hover:border-[#55DEE8]/30" : "bg-black/50 border-[#1A1A1A] opacity-40 grayscale" }`}
                       >
                         <button
                           type="button"
                           onClick={() => toggleSlotActive(index)}
-                          className={`w-10 h-10 shrink-0 rounded-[6px] border flex items-center justify-center transition-all ${
-                            slot.isActive 
-                            ? "bg-[#55DEE8]/10 border-[#55DEE8]/20 text-[#55DEE8]" 
-                            : "bg-[#1A1A1A] border-[#2D2D2D] text-[#444]"
-                          }`}
+                          className={`w-10 h-10 shrink-0 rounded-[6px] border flex items-center justify-center transition-all ${ slot.isActive ? "bg-[#55DEE8]/10 border-[#55DEE8]/20 text-[#55DEE8]" : "bg-[#1A1A1A] border-[#2D2D2D] text-[#444]" }`}
                         >
                           <span className="text-[10px] font-black">{index + 1}</span>
                         </button>

@@ -1,13 +1,14 @@
 import React, { useState, useEffect } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import GoogleAuthButton from "../components/GoogleAuthButton";
-import Turnstile from "react-turnstile";
 import OnboardingModal from "@components/modals/OnboardingModal";
 import { ArrowRight, ChevronLeft, User as UserIcon, Lock, CheckCircle2 } from "lucide-react";
 import toast from "react-hot-toast";
 import axiosInstance from "@hooks/useAxiosInstance";
 import { useDispatch } from "react-redux";
 import { login } from "@redux/slices/authSlice";
+
+const SUBHEADING_STYLE = { fontFamily: "'Inter 28pt Light', sans-serif", fontWeight: 300 };
 
 const SignUp = () => {
   const [mounted, setMounted] = useState(false);
@@ -20,9 +21,7 @@ const SignUp = () => {
   const [phone, setPhone] = useState("");
   const [otp, setOtp] = useState("");
   const [password, setPassword] = useState("");
-  const [loading, setLoading] = useState(false);
-  const [turnstileToken, setTurnstileToken] = useState("");
-  
+  const [loading, setLoading] = useState(false);  
   const [showOnboarding, setShowOnboarding] = useState(false);
   const [onboardingData, setOnboardingData] = useState(null);
   
@@ -32,14 +31,24 @@ const SignUp = () => {
 
   useEffect(() => {
     setMounted(true);
-    const inviteToken = searchParams.get("invite");
+    const inviteToken = searchParams.get("inviteToken") || searchParams.get("invite");
+    const inviter = searchParams.get("inviter");
+    const teamId = searchParams.get("teamId");
+    
     const umpireToken = searchParams.get("umpireInvite");
 
     if (inviteToken) {
-      localStorage.setItem("pendingInvite", inviteToken);
+      localStorage.setItem("pendingTeamInvite", inviteToken);
+      if (teamId) localStorage.setItem("pendingTeamId", teamId);
+      
       const emailParam = searchParams.get("email");
       if (emailParam) setIdentifier(decodeURIComponent(emailParam));
+
+      if (inviter) {
+        toast.success(`You are invited by ${inviter} to join their team!`, { duration: 6000, icon: 'ðŸ‘‹' });
+      }
     }
+    
     if (umpireToken) {
       localStorage.setItem("umpireInvite", umpireToken);
       const emailParam = searchParams.get("email");
@@ -49,30 +58,27 @@ const SignUp = () => {
 
   const handleSendOtp = async (e) => {
     e.preventDefault();
-    if (!identifier) return toast.error("Email or Phone number required");
+    if (!identifier) return toast.error("Phone number required");
 
-    const isEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(identifier);
     const isPhone = /^\d{10}$/.test(identifier);
 
-    if (!isEmail && !isPhone) {
-      return toast.error("Please enter a valid email or 10-digit phone number");
+    if (!isPhone) {
+      return toast.error("Please enter a valid 10-digit phone number");
     }
 
-    const mode = isEmail ? 'email' : 'phone';
-    setAuthMode(mode);
+    setAuthMode('phone');
     
     const formattedPhone = countryCode + identifier;
 
-    if (isEmail) setEmail(identifier);
-    else setPhone(formattedPhone);
+    setPhone(formattedPhone);
     
     setLoading(true);
     try {
-      const payload = isEmail ? { email: identifier } : { phone: formattedPhone };
+      const payload = { phone: formattedPhone };
       const res = await axiosInstance.post('/api/user/auth/send-otp', payload);
       toast.success(res.data.message);
       if (res.data.testOtp) {
-         toast(isEmail ? `Test OTP: ${res.data.testOtp.email}` : `Test OTP: ${res.data.testOtp.phone}`, { icon: '🧑‍💻', duration: 10000 });
+         toast(`Test OTP: ${res.data.testOtp.phone}`, { icon: 'ðŸ§‘â€ðŸ’»', duration: 10000 });
       }
       setStep(2);
     } catch (err) {
@@ -125,7 +131,7 @@ const SignUp = () => {
   };
 
   const handleGoogleSuccess = async (googleResponse) => {
-      console.log("GOOGLE RESPONSE:", googleResponse);
+      // console.log("GOOGLE RESPONSE received");
       setLoading(true);
       try {
         const inviteToken = localStorage.getItem("pendingInvite");
@@ -136,7 +142,7 @@ const SignUp = () => {
         } else if (googleResponse.access_token) {
           payload.accessToken = googleResponse.access_token;
         }
-        console.log("SENDING PAYLOAD:", payload);
+        // console.log("SENDING PAYLOAD");
   
         const response = await axiosInstance.post(`/api/user/auth/google-auth`, payload);
         const result = response.data;
@@ -154,6 +160,22 @@ const SignUp = () => {
           });
           setShowOnboarding(true);
         } else {
+          const teamInvite = localStorage.getItem("pendingTeamInvite");
+          if (teamInvite) {
+            try {
+               await axiosInstance.post(`/api/team/user/join/${teamInvite}`);
+               toast.success("Successfully joined the team!");
+               localStorage.removeItem("pendingTeamInvite");
+               const teamId = localStorage.getItem("pendingTeamId");
+               if (teamId) {
+                  localStorage.removeItem("pendingTeamId");
+                  return navigate(`/team/${teamId}`);
+               }
+            } catch (err) {
+               toast.error(err.response?.data?.message || "Failed to join team");
+            }
+          }
+
           const role = result.role?.toLowerCase() || "";
           if (role.includes("umpire")) navigate("/umpire");
           else navigate("/");
@@ -176,7 +198,7 @@ const SignUp = () => {
             <div className="flex flex-col items-center justify-center text-center mb-10">
                <div className="space-y-2">
                  <h2 className="text-3xl font-bold text-white">Create Account</h2>
-                 <p className="text-sm text-white/60">Sign up to get started</p>
+                 <p className="text-sm text-white/60" style={SUBHEADING_STYLE}>Sign up to get started</p>
                </div>
             </div>
 
@@ -215,38 +237,32 @@ const SignUp = () => {
                   {step === 1 && (
                     <div className="space-y-4">
                       <label className="text-sm font-medium text-white/60 ml-1">
-                        Email Address or Phone Number
+                        Phone Number
                       </label>
                       <div className="relative group/field flex gap-2">
-                        {(!identifier || /^\d/.test(identifier)) && (
-                          <select
-                            value={countryCode}
-                            onChange={(e) => setCountryCode(e.target.value)}
-                            className="bg-white/[0.03] border border-white/5 focus:border-[#55DEE8]/50 rounded-xl h-14 px-2 text-white text-sm outline-none transition-all cursor-pointer w-20 appearance-none text-center"
-                          >
-                            <option value="+91" className="text-black">+91 🇮🇳</option>
-                            <option value="+1" className="text-black">+1 🇺🇸</option>
-                            <option value="+44" className="text-black">+44 🇬🇧</option>
-                            <option value="+61" className="text-black">+61 🇦🇺</option>
-                            <option value="+971" className="text-black">+971 🇦🇪</option>
-                          </select>
-                        )}
+                        <select
+                          value={countryCode}
+                          onChange={(e) => setCountryCode(e.target.value)}
+                          className="bg-white/[0.03] border border-white/5 focus:border-[#55DEE8]/50 rounded-[8px] h-14 px-2 text-white text-sm outline-none transition-all cursor-pointer w-20 appearance-none text-center"
+                        >
+                          <option value="+91" className="text-black">+91 ðŸ‡®ðŸ‡³</option>
+                          <option value="+1" className="text-black">+1 ðŸ‡ºðŸ‡¸</option>
+                          <option value="+44" className="text-black">+44 ðŸ‡¬ðŸ‡§</option>
+                          <option value="+61" className="text-black">+61 ðŸ‡¦ðŸ‡º</option>
+                          <option value="+971" className="text-black">+971 ðŸ‡¦ðŸ‡ª</option>
+                        </select>
                         <div className="relative flex-1">
                           <UserIcon size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-white/20 group-focus-within/field:text-[#55DEE8] transition-colors" />
                           <input 
-                            type="text"
+                            type="tel"
                             required
                             value={identifier}
                             onChange={(e) => {
-                              const val = e.target.value;
-                              if (/^\d+$/.test(val)) {
-                                setIdentifier(val.slice(0, 10));
-                              } else {
-                                setIdentifier(val);
-                              }
+                              const val = e.target.value.replace(/\D/g, '');
+                              setIdentifier(val.slice(0, 10));
                             }}
-                            placeholder="name@example.com or 9876543210"
-                            className="w-full bg-white/[0.03] border border-white/5 focus:border-[#55DEE8]/50 rounded-xl h-14 pl-12 pr-4 text-white text-sm placeholder:text-white/20 outline-none transition-all"
+                            placeholder="9876543210"
+                            className="w-full bg-white/[0.03] border border-white/5 focus:border-[#55DEE8]/50 rounded-[8px] h-14 pl-12 pr-4 text-white text-sm placeholder:text-white/20 outline-none transition-all"
                           />
                         </div>
                       </div>
@@ -267,7 +283,7 @@ const SignUp = () => {
                           value={otp}
                           onChange={(e) => setOtp(e.target.value)}
                           placeholder="6-digit OTP"
-                          className="w-full bg-white/[0.03] border border-white/5 focus:border-[#55DEE8]/50 rounded-xl h-14 pl-12 pr-4 text-white text-sm placeholder:text-white/20 outline-none transition-all tracking-[0.5em] font-mono"
+                          className="w-full bg-white/[0.03] border border-white/5 focus:border-[#55DEE8]/50 rounded-[8px] h-14 pl-12 pr-4 text-white text-sm placeholder:text-white/20 outline-none transition-all tracking-[0.5em] font-mono"
                         />
                       </div>
                     </div>
@@ -275,18 +291,11 @@ const SignUp = () => {
 
 
 
-                  <div className="flex justify-center my-4">
-                    <Turnstile
-                      sitekey={import.meta.env.DEV ? "1x00000000000000000000AA" : import.meta.env.VITE_TURNSTILE_SITE_KEY}
-                      onVerify={(token) => setTurnstileToken(token)}
-                      theme="dark"
-                    />
-                  </div>
 
                   <button 
                     type="submit" 
-                    disabled={loading || !turnstileToken}
-                    className="w-full bg-[#55DEE8] hover:bg-[#a3e635] text-black h-14 rounded-xl font-bold text-lg flex items-center justify-center gap-2 active:scale-[0.98] transition-all disabled:opacity-50 mt-4 group/btn" 
+                    disabled={loading}
+                    className="w-full bg-[#55DEE8] hover:bg-[#a3e635] text-black h-14 rounded-[8px] font-bold text-lg flex items-center justify-center gap-2 active:scale-[0.98] transition-all disabled:opacity-50 mt-4 group/btn" 
                   >
                     {loading ? "Processing..." : step === 2 ? "Complete Profile" : "Continue"}
                     {!loading && <ArrowRight className="w-5 h-5 group-hover/btn:translate-x-1 transition-transform" />}
@@ -319,8 +328,25 @@ const SignUp = () => {
           isOpen={showOnboarding} 
           onClose={() => setShowOnboarding(false)}
           initialData={onboardingData}
-          onComplete={() => {
+          onComplete={async () => {
             const inviteToken = localStorage.getItem("pendingInvite");
+            const teamInvite = localStorage.getItem("pendingTeamInvite");
+            
+            if (teamInvite) {
+              try {
+                 await axiosInstance.post(`/api/team/user/join/${teamInvite}`);
+                 toast.success("Successfully joined the team!");
+                 localStorage.removeItem("pendingTeamInvite");
+                 const teamId = localStorage.getItem("pendingTeamId");
+                 if (teamId) {
+                    localStorage.removeItem("pendingTeamId");
+                    return navigate(`/team/${teamId}`);
+                 }
+              } catch (err) {
+                 toast.error(err.response?.data?.message || "Failed to join team");
+              }
+            }
+
             if (inviteToken) navigate(`/join-games?invite=${inviteToken}`);
             else navigate("/");
           }}

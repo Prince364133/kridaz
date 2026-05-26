@@ -22,3 +22,9 @@ export const commentSchema = z.object({
     text: z.string().min(1, "Comment text cannot be empty"),
   }),
 });
+
+export const reportPostSchema = z.object({
+  body: z.object({
+    reason: z.string().min(1, "Reason cannot be empty"),
+  }),
+});

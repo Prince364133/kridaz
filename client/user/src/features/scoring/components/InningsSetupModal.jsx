@@ -25,15 +25,17 @@ const InningsSetupModal = ({
   onConfirm,
   onClose,
 }) => {
-  const [step, setStep] = useState(1); // 1=striker 2=nonStriker 3=bowler
+  const [step, setStep] = useState(1); // 1=striker 2=nonStriker 3=bowler 4=wicketKeeper
   const [striker, setStriker] = useState(null);
   const [nonStriker, setNonStriker] = useState(null);
   const [bowler, setBowler] = useState(null);
+  const [wicketKeeper, setWicketKeeper] = useState(null);
 
   const STEPS = [
     { id: 1, label: 'Choose Opener (Striker)', icon: <Zap size={16} />, pool: battingTeamSlots, excludeId: null },
     { id: 2, label: 'Choose Opener (Non-Striker)', icon: <Users size={16} />, pool: battingTeamSlots, excludeId: striker?.userId },
     { id: 3, label: 'Choose Opening Bowler', icon: <Zap size={16} />, pool: bowlingTeamSlots, excludeId: null },
+    { id: 4, label: 'Choose Wicket Keeper', icon: <Users size={16} />, pool: bowlingTeamSlots.filter(p => p.role?.includes('WICKET_KEEPER')).length ? bowlingTeamSlots.filter(p => p.role?.includes('WICKET_KEEPER')) : bowlingTeamSlots, excludeId: bowler?.userId }
   ];
 
   const currentStep = STEPS[step - 1];
@@ -41,20 +43,22 @@ const InningsSetupModal = ({
   const handleSelect = (player) => {
     if (step === 1) { setStriker(player); setStep(2); }
     else if (step === 2) { setNonStriker(player); setStep(3); }
+    else if (step === 3) { setBowler(player); setStep(4); }
     else {
-      setBowler(player);
-      // Auto-confirm once all three are chosen
+      setWicketKeeper(player);
+      // Auto-confirm once all four are chosen
       onConfirm({
         strikerId: striker.userId,
         nonStrikerId: nonStriker.userId,
-        bowlerId: player.userId,
+        bowlerId: bowler.userId,
+        wicketKeeperId: player.userId,
       });
     }
   };
 
   const pool = (currentStep.pool || []).filter(p => p.userId !== currentStep.excludeId);
 
-  const stepColors = ['#EAB308', '#22D3EE', '#A78BFA'];
+  const stepColors = ['#EAB308', '#22D3EE', '#A78BFA', '#10B981'];
 
   return (
     <AnimatePresence>
@@ -73,7 +77,7 @@ const InningsSetupModal = ({
           animate={{ y: 0, opacity: 1 }}
           exit={{ y: 80, opacity: 0 }}
           transition={{ type: 'spring', damping: 22 }}
-          className="relative w-full max-w-md bg-[#111] rounded-3xl border border-white/10 overflow-hidden z-10"
+          className="relative w-full max-w-md bg-[#111] rounded-[8px] border border-white/10 overflow-hidden z-10"
         >
           {/* Header */}
           <div className="px-6 pt-6 pb-4 border-b border-white/10">
@@ -108,10 +112,10 @@ const InningsSetupModal = ({
               <button
                 key={player.userId}
                 onClick={() => handleSelect(player)}
-                className="w-full flex items-center gap-4 px-4 py-3.5 rounded-2xl border border-white/8 bg-white/4 hover:border-[#55DEE8]/50 hover:bg-gradient-to-r from-[#55DEE8]/8 to-[#BFF367]/8 transition-all group text-left"
+                className="w-full flex items-center gap-4 px-4 py-3.5 rounded-[8px] border border-white/8 bg-white/4 hover:border-yellow-500/50 hover:bg-yellow-500/8 transition-all group text-left"
               >
                 {/* Avatar */}
-                <div className="w-10 h-10 rounded-xl bg-neutral-800 flex items-center justify-center text-sm font-black text-transparent bg-clip-text bg-gradient-to-r from-[#55DEE8] to-[#BFF367] shrink-0">
+                <div className="w-10 h-10 rounded-[8px] bg-neutral-800 flex items-center justify-center text-sm font-black text-yellow-500 shrink-0">
                   {player.name?.charAt(0)?.toUpperCase() || '?'}
                 </div>
                 <span className="flex-1 font-bold text-white text-sm">{player.name || 'Unnamed'}</span>
@@ -124,13 +128,13 @@ const InningsSetupModal = ({
           {(striker || nonStriker) && (
             <div className="px-6 py-4 border-t border-white/10 flex gap-3">
               {striker && (
-                <div className="flex-1 bg-gradient-to-r from-[#55DEE8]/10 to-[#BFF367]/10 border border-[#55DEE8]/20 rounded-2xl px-3 py-2 text-center">
-                  <p className="text-[9px] font-black text-transparent bg-clip-text bg-gradient-to-r from-[#55DEE8] to-[#BFF367] uppercase tracking-widest mb-0.5">Striker</p>
+                <div className="flex-1 bg-yellow-500/10 border border-yellow-500/20 rounded-[8px] px-3 py-2 text-center">
+                  <p className="text-[9px] font-black text-yellow-500 uppercase tracking-widest mb-0.5">Striker</p>
                   <p className="text-xs font-black text-white truncate">{striker.name}</p>
                 </div>
               )}
               {nonStriker && (
-                <div className="flex-1 bg-cyan-500/10 border border-cyan-500/20 rounded-2xl px-3 py-2 text-center">
+                <div className="flex-1 bg-cyan-500/10 border border-cyan-500/20 rounded-[8px] px-3 py-2 text-center">
                   <p className="text-[9px] font-black text-cyan-400 uppercase tracking-widest mb-0.5">Non-Striker</p>
                   <p className="text-xs font-black text-white truncate">{nonStriker.name}</p>
                 </div>

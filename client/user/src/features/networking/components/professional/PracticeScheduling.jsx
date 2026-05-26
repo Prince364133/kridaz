@@ -144,17 +144,17 @@ export default function PracticeScheduling() {
 
         <button 
           onClick={() => setShowSettings(true)}
-          className="h-12 px-6 rounded-lg font-black uppercase text-[12px] tracking-[0.2em] transition-all transform active:scale-95 flex items-center gap-2 shadow-xl bg-white/5 border border-white/10 text-white hover:bg-white/10 hover:border-white/20"
+          className="h-12 px-6 rounded-[8px] font-black uppercase text-[12px] tracking-[0.2em] transition-all transform active:scale-95 flex items-center gap-2 shadow-xl bg-white/5 border border-white/10 text-white hover:bg-white/10 hover:border-white/20"
         >
           <Settings size={18} /> Settings
         </button>
       </div>
 
       {/* Date Navigation */}
-      <div className="flex items-center justify-between bg-white/[0.02] border border-white/5 p-4 rounded-xl backdrop-blur-xl">
+      <div className="flex items-center justify-between bg-white/[0.02] border border-white/5 p-4 rounded-[8px] backdrop-blur-xl">
         <button 
           onClick={() => setSelectedDate(subDays(selectedDate, 1))}
-          className="p-3 bg-white/5 hover:bg-white/10 rounded-lg transition-colors border border-white/10"
+          className="p-3 bg-white/5 hover:bg-white/10 rounded-[8px] transition-colors border border-white/10"
         >
           <ChevronLeft size={20} className="text-white" />
         </button>
@@ -169,7 +169,7 @@ export default function PracticeScheduling() {
         </div>
         <button 
           onClick={() => setSelectedDate(addDays(selectedDate, 1))}
-          className="p-3 bg-white/5 hover:bg-white/10 rounded-lg transition-colors border border-white/10"
+          className="p-3 bg-white/5 hover:bg-white/10 rounded-[8px] transition-colors border border-white/10"
         >
           <ChevronRight size={20} className="text-white" />
         </button>
@@ -185,7 +185,7 @@ export default function PracticeScheduling() {
                 const canAddTask = slotTasks.length < 2;
 
                 return (
-                    <div key={index} className="bg-white/[0.03] backdrop-blur-xl border border-white/5 rounded-xl overflow-hidden shadow-2xl relative">
+                    <div key={index} className="bg-white/[0.03] backdrop-blur-xl border border-white/5 rounded-[8px] overflow-hidden shadow-2xl relative">
                         {/* Slot Header */}
                         <div className="bg-[#111] p-4 border-b border-white/5 flex justify-between items-center relative overflow-hidden">
                              <div className="absolute inset-y-0 left-0 w-1" style={{ backgroundColor: themeColor }} />
@@ -207,7 +207,7 @@ export default function PracticeScheduling() {
                             ) : (
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                     {slotTasks.map(task => (
-                                        <div key={task.id} className="bg-[#1a1a1a] border border-white/10 rounded-lg p-5 relative group">
+                                        <div key={task.id} className="bg-[#1a1a1a] border border-white/10 rounded-[8px] p-5 relative group">
                                             <button 
                                                 onClick={() => handleDeleteTask(task.id)}
                                                 className="absolute top-4 right-4 text-neutral-600 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity"
@@ -237,7 +237,7 @@ export default function PracticeScheduling() {
                                         setSelectedSlot(slot);
                                         setShowTaskModal(true);
                                     }}
-                                    className="mt-6 w-full h-12 border border-white/10 border-dashed rounded-lg flex items-center justify-center gap-2 text-[11px] font-black uppercase tracking-[0.2em] text-neutral-400 hover:text-white hover:border-white/30 hover:bg-white/5 transition-all"
+                                    className="mt-6 w-full h-12 border border-white/10 border-dashed rounded-[8px] flex items-center justify-center gap-2 text-[11px] font-black uppercase tracking-[0.2em] text-neutral-400 hover:text-white hover:border-white/30 hover:bg-white/5 transition-all"
                                 >
                                     <Plus size={16} /> Add Task
                                 </button>
@@ -252,7 +252,7 @@ export default function PracticeScheduling() {
       {/* Settings Modal */}
       {showSettings && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
-          <div className="bg-[#111111] border border-white/10 rounded-xl w-full max-w-md overflow-hidden shadow-2xl font-inter animate-in fade-in zoom-in-95 duration-200">
+          <div className="bg-[#111111] border border-white/10 rounded-[8px] w-full max-w-md overflow-hidden shadow-2xl font-inter animate-in fade-in zoom-in-95 duration-200">
             <div className="p-6 border-b border-white/5">
               <h3 className="text-xl font-black text-white uppercase tracking-tight">Calendar <span style={{ color: themeColor }}>Settings</span></h3>
             </div>
@@ -309,7 +309,7 @@ export default function PracticeScheduling() {
       {/* Add Task Modal */}
       {showTaskModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
-          <div className="bg-[#111111] border border-white/10 rounded-xl w-full max-w-md overflow-hidden shadow-2xl font-inter animate-in fade-in zoom-in-95 duration-200">
+          <div className="bg-[#111111] border border-white/10 rounded-[8px] w-full max-w-md overflow-hidden shadow-2xl font-inter animate-in fade-in zoom-in-95 duration-200">
             <div className="p-6 border-b border-white/5">
               <h3 className="text-xl font-black text-white uppercase tracking-tight">Add <span style={{ color: themeColor }}>Task</span></h3>
               <p className="text-[10px] font-black text-neutral-500 uppercase tracking-widest mt-1">Slot: {selectedSlot?.label}</p>
@@ -347,7 +347,7 @@ export default function PracticeScheduling() {
                   value={newTask.description}
                   onChange={(e) => setNewTask({...newTask, description: e.target.value})}
                   placeholder="Additional details..."
-                  className="w-full h-24 bg-white/5 border border-white/10 rounded-lg p-4 text-white placeholder-neutral-600 focus:outline-none focus:border-white/20 transition-colors resize-none"
+                  className="w-full h-24 bg-white/5 border border-white/10 rounded-[8px] p-4 text-white placeholder-neutral-600 focus:outline-none focus:border-white/20 transition-colors resize-none"
                 />
               </div>
 

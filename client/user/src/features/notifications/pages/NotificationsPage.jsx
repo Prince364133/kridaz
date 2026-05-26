@@ -13,7 +13,7 @@ import { formatDistanceToNow } from "date-fns";
 
 const PRI = "#84CC16";
 const HEADING_STYLE = { fontFamily: "'Open Sans', sans-serif" };
-const SUBHEADING_STYLE = { fontFamily: "'Inter', sans-serif" };
+const SUBHEADING_STYLE = { fontFamily: "'Inter 28pt Light', sans-serif", fontWeight: 300 };
 
 /**
  * Notification type → visual configuration map.
@@ -73,6 +73,48 @@ const NOTIF_CONFIG = {
     color: "#F97316",
     bgColor: "rgba(249,115,22,0.08)",
     getRoute: (notif) => notif.link || "/wallet",
+  },
+  GAME_JOIN_REQUEST: {
+    icon: Zap,
+    color: "#BFF367",
+    bgColor: "rgba(191,243,103,0.08)",
+    getRoute: (notif) => notif.link || "/booking-history?subTab=games",
+  },
+  TEAM_INVITE: {
+    icon: Users,
+    color: "#55DEE8",
+    bgColor: "rgba(85,222,232,0.08)",
+    getRoute: (notif) => notif.link || "/profile?tab=connections",
+  },
+  TEAM_JOIN_REQUEST: {
+    icon: Users,
+    color: "#55DEE8",
+    bgColor: "rgba(85,222,232,0.08)",
+    getRoute: (notif) => notif.link || "/profile?tab=connections",
+  },
+  TEAM_JOIN_ACCEPTED: {
+    icon: ShieldCheck,
+    color: "#BFF367",
+    bgColor: "rgba(191,243,103,0.08)",
+    getRoute: (notif) => notif.link || "/profile?tab=connections",
+  },
+  TEAM_JOIN_REJECTED: {
+    icon: X,
+    color: "#EF4444",
+    bgColor: "rgba(239,68,68,0.08)",
+    getRoute: (notif) => notif.link || "/profile?tab=connections",
+  },
+  OPPONENT_REQUEST: {
+    icon: Trophy,
+    color: "#F59E0B",
+    bgColor: "rgba(245,158,11,0.08)",
+    getRoute: (notif) => notif.link || "/profile?tab=connections",
+  },
+  OPPONENT_ACCEPTED: {
+    icon: Trophy,
+    color: "#BFF367",
+    bgColor: "rgba(191,243,103,0.08)",
+    getRoute: (notif) => notif.link || "/profile?tab=connections",
   },
   SYSTEM: {
     icon: Zap,
@@ -216,7 +258,7 @@ const NotificationsPage = () => {
         <div className="flex items-center gap-4 mb-8">
           <button
             onClick={() => navigate(-1)}
-            className="w-10 h-10 rounded-xl bg-white/5 border border-white/5 flex items-center justify-center text-white/50 hover:text-white hover:border-white/10 transition-all"
+            className="w-10 h-10 rounded-[8px] bg-white/5 border border-white/5 flex items-center justify-center text-white/50 hover:text-white hover:border-white/10 transition-all"
           >
             <ArrowLeft size={18} />
           </button>
@@ -237,7 +279,7 @@ const NotificationsPage = () => {
             {unreadCount > 0 && (
               <button
                 onClick={markAllAsRead}
-                className="flex items-center gap-1.5 px-3 py-2 rounded-lg bg-[#84CC16]/10 border border-[#84CC16]/20 text-[#84CC16] text-[10px] font-black uppercase tracking-widest hover:bg-[#84CC16]/20 transition-all"
+                className="flex items-center gap-1.5 px-3 py-2 rounded-[6px] bg-[#84CC16]/10 border border-[#84CC16]/20 text-[#84CC16] text-[10px] font-black uppercase tracking-widest hover:bg-[#84CC16]/20 transition-all"
               >
                 <CheckCheck size={14} />
                 <span className="hidden sm:inline">Read All</span>
@@ -246,7 +288,7 @@ const NotificationsPage = () => {
             {notifications.length > 0 && (
               <button
                 onClick={clearAll}
-                className="flex items-center gap-1.5 px-3 py-2 rounded-lg bg-red-500/10 border border-red-500/20 text-red-400 text-[10px] font-black uppercase tracking-widest hover:bg-red-500/20 transition-all"
+                className="flex items-center gap-1.5 px-3 py-2 rounded-[6px] bg-red-500/10 border border-red-500/20 text-red-400 text-[10px] font-black uppercase tracking-widest hover:bg-red-500/20 transition-all"
               >
                 <Trash2 size={14} />
                 <span className="hidden sm:inline">Clear</span>
@@ -261,11 +303,7 @@ const NotificationsPage = () => {
             <button
               key={filter}
               onClick={() => setActiveFilter(filter)}
-              className={`px-4 py-2 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all border ${
-                activeFilter === filter
-                  ? "bg-[#84CC16]/10 border-[#84CC16]/30 text-[#84CC16]"
-                  : "bg-white/[0.02] border-white/5 text-white/40 hover:text-white/60 hover:border-white/10"
-              }`}
+              className={`px-4 py-2 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all border ${ activeFilter === filter ? "bg-[#84CC16]/10 border-[#84CC16]/30 text-[#84CC16]" : "bg-white/[0.02] border-white/5 text-white/40 hover:text-white/60 hover:border-white/10" }`}
             >
               {filter === "all" ? "All" : `Unread (${unreadCount})`}
             </button>
@@ -282,7 +320,7 @@ const NotificationsPage = () => {
           </div>
         ) : filtered.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-32 gap-5">
-            <div className="w-24 h-24 rounded-2xl bg-white/[0.02] border border-dashed border-white/10 flex items-center justify-center">
+            <div className="w-24 h-24 rounded-[8px] bg-white/[0.02] border border-dashed border-white/10 flex items-center justify-center">
               <Bell size={40} className="text-white/10" />
             </div>
             <div className="text-center">
@@ -313,11 +351,7 @@ const NotificationsPage = () => {
                     exit={{ opacity: 0, x: -40 }}
                     transition={{ duration: 0.2, delay: index * 0.03 }}
                     onClick={() => handleNotificationClick(notif)}
-                    className={`group relative flex items-start gap-4 p-4 sm:p-5 rounded-2xl border cursor-pointer transition-all duration-300 ${
-                      notif.isRead
-                        ? "bg-white/[0.01] border-white/[0.03] hover:bg-white/[0.03]"
-                        : "bg-white/[0.03] border-white/[0.06] hover:bg-white/[0.05]"
-                    }`}
+                    className={`group relative flex items-start gap-4 p-4 sm:p-5 rounded-[8px] border cursor-pointer transition-all duration-300 ${ notif.isRead ? "bg-white/[0.01] border-white/[0.03] hover:bg-white/[0.03]" : "bg-white/[0.03] border-white/[0.06] hover:bg-white/[0.05]" }`}
                   >
                     {/* Unread indicator */}
                     {!notif.isRead && (
@@ -326,7 +360,7 @@ const NotificationsPage = () => {
 
                     {/* Icon */}
                     <div
-                      className="w-11 h-11 rounded-xl flex items-center justify-center shrink-0 border border-white/5 transition-transform group-hover:scale-105"
+                      className="w-11 h-11 rounded-[8px] flex items-center justify-center shrink-0 border border-white/5 transition-transform group-hover:scale-105"
                       style={{
                         backgroundColor: notif.isRead ? "rgba(255,255,255,0.03)" : config.bgColor,
                       }}
@@ -341,20 +375,14 @@ const NotificationsPage = () => {
                     <div className="flex-1 min-w-0">
                       <div className="flex items-start justify-between gap-3">
                         <h4
-                          className={`text-[13px] font-bold leading-tight transition-colors ${
-                            notif.isRead
-                              ? "text-white/40"
-                              : "text-white group-hover:text-[#84CC16]"
-                          }`}
+                          className={`text-[13px] font-bold leading-tight transition-colors ${ notif.isRead ? "text-white/40" : "text-white group-hover:text-[#84CC16]" }`}
                           style={SUBHEADING_STYLE}
                         >
                           {notif.title}
                         </h4>
                       </div>
                       <p
-                        className={`text-[12px] mt-1 leading-relaxed ${
-                          notif.isRead ? "text-white/25" : "text-white/50"
-                        }`}
+                        className={`text-[12px] mt-1 leading-relaxed ${ notif.isRead ? "text-white/25" : "text-white/50" }`}
                         style={SUBHEADING_STYLE}
                       >
                         {notif.message}

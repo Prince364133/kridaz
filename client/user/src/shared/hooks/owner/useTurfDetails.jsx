@@ -11,7 +11,7 @@ const useTurfDetails = (turfId) => {
     if (!turfId) return;
     setIsLoading(true);
     try {
-      const response = await axiosInstance.get(`/api/owner/turf/${turfId}/details`);
+      const response = await axiosInstance.get(`/api/owner/turf/owner/${turfId}/details`);
       setTurfData(response.data);
       setError(null);
     } catch (err) {
@@ -29,7 +29,7 @@ const useTurfDetails = (turfId) => {
 
   const toggleVisibility = async () => {
     try {
-      await axiosInstance.put(`/api/owner/turf/${turfId}/visibility`);
+      await axiosInstance.put(`/api/owner/turf/owner/${turfId}/visibility`);
       await fetchTurfDetails();
       return true;
     } catch (err) {
@@ -40,7 +40,7 @@ const useTurfDetails = (turfId) => {
 
   const deleteArena = async () => {
     try {
-      await axiosInstance.delete(`/api/owner/turf/${turfId}`);
+      await axiosInstance.delete(`/api/owner/turf/owner/${turfId}`);
       return true;
     } catch (err) {
       console.error("Error deleting arena:", err);

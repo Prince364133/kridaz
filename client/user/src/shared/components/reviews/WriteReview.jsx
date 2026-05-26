@@ -25,7 +25,7 @@ const WriteReview = ({
 
  return (
  <div className="fixed inset-0 bg-black/80 flex items-center justify-center p-4 z-[100] backdrop-blur-sm animate-fade-in">
- <div className="bg-zinc-950 border border-[#2D2D2D] rounded-3xl p-8 w-full max-w-md shadow-2xl relative">
+ <div className="bg-zinc-950 border border-[#2D2D2D] rounded-[8px] p-8 w-full max-w-md shadow-2xl relative">
  <h2 className="text-3xl font-black uppercase tracking-tighter text-white mb-6">Write a Review</h2>
  <form onSubmit={handleSubmit}>
  <div className="mb-6">
@@ -34,11 +34,7 @@ const WriteReview = ({
  {[1, 2, 3, 4, 5].map((star) => (
  <Star
  key={star}
- className={`w-8 h-8 cursor-pointer transition-all duration-200 hover:scale-110 ${
- star <= rating
- ? "text-[#55DEE8] fill-[#55DEE8]"
- : "text-zinc-800 hover:text-zinc-600"
- }`}
+ className={`w-8 h-8 cursor-pointer transition-all duration-200 hover:scale-110 ${ star <= rating ? "text-[#55DEE8] fill-[#55DEE8]" : "text-zinc-800 hover:text-zinc-600" }`}
  onClick={() => onRatingChange(star)}
  />
  ))}

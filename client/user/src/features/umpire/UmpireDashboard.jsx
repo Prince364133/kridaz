@@ -27,7 +27,7 @@ export default function UmpireDashboard() {
         <p className="font-bold text-xl uppercase tracking-wider text-primary">System Offline</p>
         <button
           onClick={() => window.location.reload()}
-          className="mt-6 px-8 py-3 border border-primary/50 text-primary font-bold uppercase rounded-xl hover:bg-primary/10 transition-all"
+          className="mt-6 px-8 py-3 border border-primary/50 text-primary font-bold uppercase rounded-[8px] hover:bg-primary/10 transition-all"
         >
           Retry Link
         </button>
@@ -48,16 +48,16 @@ export default function UmpireDashboard() {
     <div className="h-full custom-scrollbar">
       <div className="p-4 md:p-10 space-y-6 md:space-y-12 animate-fade-in pt-2 pb-24 md:pb-12 max-w-[1600px] mx-auto">
 
-        {/* Primary Stats GÇö all real data, 0 when empty */}
+        {/* Primary Stats Rs ï¿½ all real data, 0 when empty */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
           <StatCard title="Matches Officiated" value={matchesOfficiated} icon={Trophy} />
           <StatCard title="Upcoming Matches" value={upcomingMatches} icon={Calendar} />
           <StatCard title="Official Rating" value={officialRating} icon={Star} />
-          <StatCard title="Earnings" value={earnings} icon={DollarSign} prefix="Gé¦" />
+          <StatCard title="Earnings" value={earnings} icon={DollarSign} prefix="Rs " />
         </div>
 
         {/* Scoring Center */}
-        <div className="p-8 md:p-10 bg-gradient-to-br from-[#111] to-[#050505] rounded-[2.5rem] border border-white/10 relative overflow-hidden group">
+        <div className="p-8 md:p-10 bg-gradient-to-br from-[#111] to-[#050505] rounded-[8px] border border-white/10 relative overflow-hidden group">
           <div className="absolute top-0 right-0 p-10 opacity-5 group-hover:opacity-10 transition-opacity">
             <Zap size={120} className="text-primary" />
           </div>
@@ -70,12 +70,12 @@ export default function UmpireDashboard() {
             </p>
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {/* Cricket Scoring GÇö navigates to matches list */}
+              {/* Cricket Scoring Rs ï¿½ navigates to matches list */}
               <div
-                className="p-6 bg-white/[0.03] rounded-3xl border border-white/5 hover:border-primary/30 transition-all group/app cursor-pointer"
+                className="p-6 bg-white/[0.03] rounded-[8px] border border-white/5 hover:border-primary/30 transition-all group/app cursor-pointer"
                 onClick={() => navigate("/umpire/matches")}
               >
-                <div className="w-12 h-12 bg-primary/10 rounded-2xl flex items-center justify-center mb-4 border border-primary/20 group-hover/app:bg-primary group-hover/app:text-black transition-all text-primary">
+                <div className="w-12 h-12 bg-primary/10 rounded-[8px] flex items-center justify-center mb-4 border border-primary/20 group-hover/app:bg-primary group-hover/app:text-black transition-all text-primary">
                   <Zap size={24} />
                 </div>
                 <h3 className="text-lg font-black uppercase tracking-tight text-white mb-2">
@@ -90,8 +90,8 @@ export default function UmpireDashboard() {
               </div>
 
               {/* Placeholder for future sports */}
-              <div className="p-6 bg-white/[0.01] rounded-3xl border border-white/5 opacity-40 cursor-not-allowed">
-                <div className="w-12 h-12 bg-gray-500/10 rounded-2xl flex items-center justify-center mb-4 border border-white/5">
+              <div className="p-6 bg-white/[0.01] rounded-[8px] border border-white/5 opacity-40 cursor-not-allowed">
+                <div className="w-12 h-12 bg-gray-500/10 rounded-[8px] flex items-center justify-center mb-4 border border-white/5">
                   <Star size={24} className="text-gray-500" />
                 </div>
                 <h3 className="text-lg font-black uppercase tracking-tight text-gray-500 mb-2">
@@ -105,7 +105,7 @@ export default function UmpireDashboard() {
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 md:gap-8">
           {/* Match Volume Chart */}
-          <div className="lg:col-span-2 p-6 md:p-10 bg-[#0A0A0A] rounded-[2.5rem] border border-white/5 relative transition-all hover:border-[#55DEE8]/20 group">
+          <div className="lg:col-span-2 p-6 md:p-10 bg-[#0A0A0A] rounded-[8px] border border-white/5 relative transition-all hover:border-[#55DEE8]/20 group">
             <div className="flex justify-between items-center mb-8 md:mb-12">
               <div>
                 <h2 className="text-xl md:text-2xl font-black uppercase tracking-tight text-white">
@@ -115,12 +115,12 @@ export default function UmpireDashboard() {
                   Monthly Assignment Analytics
                 </p>
               </div>
-              <div className="p-3 bg-white/5 rounded-2xl border border-white/5 group-hover:border-[#55DEE8]/30 transition-colors">
+              <div className="p-3 bg-white/5 rounded-[8px] border border-white/5 group-hover:border-[#55DEE8]/30 transition-colors">
                 <BarChartIcon size={20} className="text-[#55DEE8]" />
               </div>
             </div>
 
-            <div className="h-[300px] md:h-[400px] w-full flex items-center justify-center border border-white/5 border-dashed rounded-[2rem] overflow-hidden">
+            <div className="h-[300px] md:h-[400px] w-full flex items-center justify-center border border-white/5 border-dashed rounded-[8px] overflow-hidden">
               {matchEngagement.length > 0 ? (
                 <ResponsiveContainer width="100%" height="100%">
                   <BarChart data={matchEngagement} margin={{ top: 20, right: 20, left: 0, bottom: 0 }}>
@@ -161,7 +161,7 @@ export default function UmpireDashboard() {
           </div>
 
           {/* Upcoming Assignments */}
-          <div className="p-8 md:p-10 bg-[#0A0A0A] rounded-[2.5rem] border border-white/5 flex flex-col transition-all hover:border-[#55DEE8]/20 group">
+          <div className="p-8 md:p-10 bg-[#0A0A0A] rounded-[8px] border border-white/5 flex flex-col transition-all hover:border-[#55DEE8]/20 group">
             <h2 className="text-xl md:text-2xl font-black uppercase tracking-tight text-white mb-8">
               Upcoming Assignments
             </h2>
@@ -170,7 +170,7 @@ export default function UmpireDashboard() {
                 upcomingAssignments.map((match, i) => (
                   <div
                     key={i}
-                    className="p-5 md:p-6 bg-white/[0.02] rounded-[1.5rem] border border-white/5 group/item hover:bg-white/[0.05] transition-all relative"
+                    className="p-5 md:p-6 bg-white/[0.02] rounded-[8px] border border-white/5 group/item hover:bg-white/[0.05] transition-all relative"
                   >
                     <div className="absolute top-6 right-6">
                       <Zap
@@ -206,7 +206,7 @@ export default function UmpireDashboard() {
                 </div>
               )}
             </div>
-            <button className="mt-10 w-full h-14 border border-white/10 hover:border-[#55DEE8]/50 hover:bg-[#55DEE8]/5 rounded-2xl font-black uppercase text-xs tracking-[0.2em] transition-all text-gray-400 hover:text-white">
+            <button className="mt-10 w-full h-14 border border-white/10 hover:border-[#55DEE8]/50 hover:bg-[#55DEE8]/5 rounded-[8px] font-black uppercase text-xs tracking-[0.2em] transition-all text-gray-400 hover:text-white">
               Review Protocols
             </button>
           </div>

@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useSelector } from 'react-redux';
+import { useNavigate } from 'react-router-dom';
 import { 
   useUpdateGroupMutation, 
   useRemoveFromGroupMutation, 
@@ -13,6 +14,7 @@ import {
 
 const GroupInfoModal = ({ isOpen, onClose, chat }) => {
  const { user } = useSelector((state) => state.auth);
+ const navigate = useNavigate();
  const [groupName, setGroupName] = useState(chat?.chatName || "");
  const [isEditingName, setIsEditingName] = useState(false);
  const [searchQuery, setSearchQuery] = useState("");
@@ -139,9 +141,7 @@ const GroupInfoModal = ({ isOpen, onClose, chat }) => {
 
  {/* Sliding Drawer */}
  <div 
- className={`absolute top-0 right-0 h-full w-full sm:w-[380px] bg-[#0a0a0a] border-l border-white/10 z-50 flex flex-col transition-transform duration-300 ease-in-out shadow-2xl ${
- isOpen ? "translate-x-0" : "translate-x-full"
- }`}
+ className={`absolute top-0 right-0 h-full w-full sm:w-[380px] bg-[#0a0a0a] border-l border-white/10 z-50 flex flex-col transition-transform duration-300 ease-in-out shadow-2xl ${ isOpen ? "translate-x-0" : "translate-x-full" }`}
  >
  {/* Header - WhatsApp Style */}
  <div className="bg-[#111111] border-b border-white/10 px-5 py-4 flex items-center gap-4 shrink-0 shadow-sm">
@@ -236,7 +236,7 @@ const GroupInfoModal = ({ isOpen, onClose, chat }) => {
   {chat.parentCommunity && (
     <div className="bg-[#111111] py-4 px-6 mb-2 shadow-sm">
       <h4 className="text-[13px] font-medium text-white/50 mb-3">Parent Community</h4>
-      <div className="flex items-center gap-3 bg-[#1A1A1A] p-3 rounded-xl border border-white/5">
+      <div className="flex items-center gap-3 bg-[#1A1A1A] p-3 rounded-[8px] border border-white/5">
         <div className="w-10 h-10 rounded-full bg-[#55DEE8]/10 flex items-center justify-center shrink-0">
           <svg className="w-5 h-5 text-[#55DEE8]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
@@ -268,7 +268,14 @@ const GroupInfoModal = ({ isOpen, onClose, chat }) => {
  {availableUsers
  .filter(u => u.name?.toLowerCase().includes(searchQuery.toLowerCase()))
  .map(user => (
- <div key={user._id} className="flex justify-between items-center hover:bg-white/[0.03] p-2 rounded-lg cursor-pointer transition-colors group">
+  <div 
+    key={user._id} 
+    onClick={() => {
+      navigate(`/profile/${user._id}`);
+      onClose();
+    }}
+    className="flex justify-between items-center hover:bg-white/[0.03] p-2 rounded-lg cursor-pointer transition-colors group"
+  >
  <div className="flex items-center gap-3">
  <img src={user.profilePicture || "https://cdn-icons-png.flaticon.com/512/149/149071.png"} className="w-10 h-10 rounded-full object-cover" alt="" />
  <div>
@@ -277,7 +284,10 @@ const GroupInfoModal = ({ isOpen, onClose, chat }) => {
  </div>
  </div>
  <button 
- onClick={() => handleAddUser(user._id)}
+ onClick={(e) => {
+   e.stopPropagation();
+   handleAddUser(user._id);
+ }}
  className="text-[#55DEE8] opacity-0 group-hover:opacity-100 p-1.5 rounded-full hover:bg-[#55DEE8]/10 transition-all"
  title="Add"
  >
@@ -306,7 +316,14 @@ const GroupInfoModal = ({ isOpen, onClose, chat }) => {
  const isMe = myIds.includes(uid);
 
  return (
- <div key={`active-${uid}-${i}`} className="flex justify-between items-center hover:bg-white/[0.03] px-6 py-3 cursor-pointer transition-colors group/member">
+  <div 
+    key={`active-${uid}-${i}`} 
+    onClick={() => {
+      navigate(`/profile/${uid}`);
+      onClose();
+    }}
+    className="flex justify-between items-center hover:bg-white/[0.03] px-6 py-3 cursor-pointer transition-colors group/member"
+  >
  <div className="flex items-center gap-3">
  <div className="w-10 h-10 rounded-full bg-[#1A1A1A] flex items-center justify-center overflow-hidden shrink-0">
  {u.user?.profilePicture ? (

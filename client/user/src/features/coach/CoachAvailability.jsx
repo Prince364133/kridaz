@@ -114,7 +114,7 @@ export default function CoachAvailability() {
           </div>
           
           <div className="flex items-center gap-4">
-            <div className="flex items-center gap-4 bg-white/[0.03] border border-white/5 px-8 py-4 rounded-lg backdrop-blur-xl">
+            <div className="flex items-center gap-4 bg-white/[0.03] border border-white/5 px-8 py-4 rounded-[6px] backdrop-blur-xl">
               <div className="w-12 h-12 bg-opacity-10 rounded-md flex items-center justify-center" style={{ backgroundColor: `${themeColor}1a`, color: themeColor }}>
                 <Calendar size={24} />
               </div>
@@ -132,7 +132,7 @@ export default function CoachAvailability() {
             <button 
               onClick={handleSave}
               disabled={loading}
-              className="px-8 py-4 rounded-lg text-black font-black uppercase text-[11px] tracking-[0.2em] flex items-center gap-3 transition-all disabled:opacity-50 font-inter shadow-2xl active:scale-95 hover:brightness-110"
+              className="px-8 py-4 rounded-[6px] text-black font-black uppercase text-[11px] tracking-[0.2em] flex items-center gap-3 transition-all disabled:opacity-50 font-inter shadow-2xl active:scale-95 hover:brightness-110"
               style={{ backgroundColor: themeColor, boxShadow: `0 10px 30px ${themeColor}66` }}
             >
               {loading ? <Loader2 className="animate-spin" size={16} /> : <Save size={16} />} Save Schedule
@@ -143,7 +143,7 @@ export default function CoachAvailability() {
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 relative z-10">
           {/* Calendar Sidebar */}
           <div className="lg:col-span-4 space-y-6">
-            <div className="bg-white/[0.03] border border-white/5 rounded-lg p-6 lg:p-8 backdrop-blur-xl shadow-2xl">
+            <div className="bg-white/[0.03] border border-white/5 rounded-[8px] p-6 lg:p-8 backdrop-blur-xl shadow-2xl">
               <div className="flex items-center gap-3 mb-8">
                 <div className="p-2 bg-opacity-10 rounded-[6px]" style={{ backgroundColor: `${themeColor}1a`, color: themeColor }}>
                   <CalendarDays size={18} />
@@ -161,11 +161,7 @@ export default function CoachAvailability() {
                     <button 
                       key={dateStr}
                       onClick={() => setSelectedDate(dateStr)}
-                      className={`relative flex flex-col items-center justify-center p-3 rounded-lg border transition-all duration-300 ${
-                        isSelected 
-                        ? "text-black border-transparent shadow-lg" 
-                        : "bg-[#2D2D2D]/30 border-[#2D2D2D] text-[#878C9F] hover:border-[#55DEE8]/30 hover:bg-[#2D2D2D]/50"
-                      }`}
+                      className={`relative flex flex-col items-center justify-center p-3 rounded-[8px] border transition-all duration-300 ${ isSelected ? "text-black border-transparent shadow-lg" : "bg-[#2D2D2D]/30 border-[#2D2D2D] text-[#878C9F] hover:border-[#55DEE8]/30 hover:bg-[#2D2D2D]/50" }`}
                       style={isSelected ? { backgroundColor: themeColor, boxShadow: `0 0 20px ${themeColor}66` } : {}}
                     >
                       <span className="text-[9px] font-bold uppercase tracking-widest mb-1 font-inter">{format(date, 'EEE')}</span>
@@ -203,7 +199,7 @@ export default function CoachAvailability() {
 
           {/* Slot Management */}
           <div className="lg:col-span-8 space-y-6">
-            <div className="bg-white/[0.03] border border-white/5 rounded-lg p-6 lg:p-8 backdrop-blur-xl shadow-2xl">
+            <div className="bg-white/[0.03] border border-white/5 rounded-[8px] p-6 lg:p-8 backdrop-blur-xl shadow-2xl">
               <div className="flex items-center gap-3 mb-8">
                 <div className="p-2 bg-opacity-10 rounded-[6px]" style={{ backgroundColor: `${themeColor}1a`, color: themeColor }}>
                   <Clock size={18} />
@@ -238,7 +234,7 @@ export default function CoachAvailability() {
                 </div>
                 <button 
                   onClick={handleAddSlot}
-                  className="h-[54px] px-8 bg-transparent text-white hover:text-black rounded-lg font-bold uppercase text-[11px] tracking-[2px] transition-all flex items-center gap-3 font-inter group shadow-lg border border-white/10"
+                  className="h-[54px] px-8 bg-transparent text-white hover:text-black rounded-[8px] font-bold uppercase text-[11px] tracking-[2px] transition-all flex items-center gap-3 font-inter group shadow-lg border border-white/10"
                   onMouseEnter={(e) => { 
                     e.target.style.backgroundColor = themeColor; 
                     e.target.style.borderColor = themeColor; 
@@ -268,7 +264,7 @@ export default function CoachAvailability() {
               ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   {slots.map((slot, index) => (
-                    <div key={index} className="flex items-center justify-between p-5 bg-white/[0.03] border border-white/5 rounded-lg group hover:border-white/10 transition-all shadow-md relative overflow-hidden">
+                    <div key={index} className="flex items-center justify-between p-5 bg-white/[0.03] border border-white/5 rounded-[8px] group hover:border-white/10 transition-all shadow-md relative overflow-hidden">
                       <div className="absolute top-0 left-0 w-1 h-full" style={{ backgroundColor: slot.isAvailable ? themeColor : "#ef4444" }} />
                       <div className="flex items-center gap-5">
                         <div className="w-12 h-12 rounded-[8px] bg-opacity-10 border border-opacity-20 flex items-center justify-center transition-colors" style={{ backgroundColor: `${themeColor}1a`, borderColor: `${themeColor}33` }}>

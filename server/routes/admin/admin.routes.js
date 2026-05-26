@@ -40,6 +40,8 @@ adminRouter.use("/community", verifyAdminToken, communityRouter);
 adminRouter.use("/dispute", verifyAdminToken, adminDisputeRouter);
 adminRouter.use("/notifications", verifyAdminToken, adminNotificationRouter);
 adminRouter.use("/games", verifyAdminToken, gameRouter);
+import adminCouponRouter from "../../modules/admin/routes/coupon.routes.js";
+adminRouter.use("/coupons", verifyAdminToken, adminCouponRouter);
 
 export default adminRouter;
 

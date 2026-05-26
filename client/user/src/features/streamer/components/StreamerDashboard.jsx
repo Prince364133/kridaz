@@ -37,7 +37,7 @@ export default function StreamerDashboard() {
         <p className="font-bold text-xl uppercase tracking-wider text-violet-500">System Offline</p>
         <button
           onClick={() => window.location.reload()}
-          className="mt-6 px-8 py-3 border border-violet-500/50 text-violet-500 font-bold uppercase rounded-xl hover:bg-violet-500/10 transition-all"
+          className="mt-6 px-8 py-3 border border-violet-500/50 text-violet-500 font-bold uppercase rounded-[8px] hover:bg-violet-500/10 transition-all"
         >
           Retry Link
         </button>
@@ -88,7 +88,7 @@ export default function StreamerDashboard() {
         </div>
 
         {/* Streaming Center */}
-        <div className="p-8 md:p-10 bg-gradient-to-br from-[#111] to-[#050505] rounded-[2.5rem] border border-white/10 relative overflow-hidden group">
+        <div className="p-8 md:p-10 bg-gradient-to-br from-[#111] to-[#050505] rounded-[8px] border border-white/10 relative overflow-hidden group">
           <div className="absolute top-0 right-0 p-10 opacity-5 group-hover:opacity-10 transition-opacity">
             <MonitorPlay size={120} className="text-violet-500" />
           </div>
@@ -103,10 +103,10 @@ export default function StreamerDashboard() {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {/* Active Match Streams */}
               <div
-                className="p-6 bg-white/[0.03] rounded-3xl border border-white/5 hover:border-violet-500/30 transition-all group/app cursor-pointer"
+                className="p-6 bg-white/[0.03] rounded-[8px] border border-white/5 hover:border-violet-500/30 transition-all group/app cursor-pointer"
                 onClick={() => navigate("/streamer/matches")}
               >
-                <div className="w-12 h-12 bg-violet-500/10 rounded-2xl flex items-center justify-center mb-4 border border-violet-500/20 group-hover/app:bg-violet-500 group-hover/app:text-white transition-all text-violet-500">
+                <div className="w-12 h-12 bg-violet-500/10 rounded-[8px] flex items-center justify-center mb-4 border border-violet-500/20 group-hover/app:bg-violet-500 group-hover/app:text-white transition-all text-violet-500">
                   <MonitorPlay size={24} />
                 </div>
                 <h3 className="text-lg font-black uppercase tracking-tight text-white mb-2">
@@ -122,10 +122,10 @@ export default function StreamerDashboard() {
 
               {/* Match Assignments */}
               <div
-                className="p-6 bg-white/[0.03] rounded-3xl border border-white/5 hover:border-violet-500/30 transition-all group/app cursor-pointer"
+                className="p-6 bg-white/[0.03] rounded-[8px] border border-white/5 hover:border-violet-500/30 transition-all group/app cursor-pointer"
                 onClick={() => navigate("/streamer/schedule")}
               >
-                <div className="w-12 h-12 bg-violet-500/10 rounded-2xl flex items-center justify-center mb-4 border border-violet-500/20 group-hover/app:bg-violet-500 group-hover/app:text-white transition-all text-violet-500">
+                <div className="w-12 h-12 bg-violet-500/10 rounded-[8px] flex items-center justify-center mb-4 border border-violet-500/20 group-hover/app:bg-violet-500 group-hover/app:text-white transition-all text-violet-500">
                   <Calendar size={24} />
                 </div>
                 <h3 className="text-lg font-black uppercase tracking-tight text-white mb-2">
@@ -141,10 +141,10 @@ export default function StreamerDashboard() {
 
               {/* Ticker Theme Selection */}
               <div
-                className="p-6 bg-white/[0.03] rounded-3xl border border-white/5 hover:border-violet-500/30 transition-all group/app cursor-pointer"
+                className="p-6 bg-white/[0.03] rounded-[8px] border border-white/5 hover:border-violet-500/30 transition-all group/app cursor-pointer"
                 onClick={() => navigate("/streamer/ticker-gallery")}
               >
-                <div className="w-12 h-12 bg-violet-500/10 rounded-2xl flex items-center justify-center mb-4 border border-violet-500/20 group-hover/app:bg-violet-500 group-hover/app:text-white transition-all text-violet-500">
+                <div className="w-12 h-12 bg-violet-500/10 rounded-[8px] flex items-center justify-center mb-4 border border-violet-500/20 group-hover/app:bg-violet-500 group-hover/app:text-white transition-all text-violet-500">
                   <Palette size={24} />
                 </div>
                 <h3 className="text-lg font-black uppercase tracking-tight text-white mb-2">
@@ -159,8 +159,8 @@ export default function StreamerDashboard() {
               </div>
 
               {/* Streaming Analytics */}
-              <div className="p-6 bg-white/[0.01] rounded-3xl border border-white/5 opacity-40 cursor-not-allowed">
-                <div className="w-12 h-12 bg-gray-500/10 rounded-2xl flex items-center justify-center mb-4 border border-white/5">
+              <div className="p-6 bg-white/[0.01] rounded-[8px] border border-white/5 opacity-40 cursor-not-allowed">
+                <div className="w-12 h-12 bg-gray-500/10 rounded-[8px] flex items-center justify-center mb-4 border border-white/5">
                   <BarChartIcon size={24} className="text-gray-500" />
                 </div>
                 <h3 className="text-lg font-black uppercase tracking-tight text-gray-500 mb-2">
@@ -172,7 +172,7 @@ export default function StreamerDashboard() {
         </div>
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {/* YouTube Card */}
-          <div className="p-8 bg-gradient-to-br from-[#111] to-[#050505] rounded-[2.5rem] border border-white/10 relative overflow-hidden group">
+          <div className="p-8 bg-gradient-to-br from-[#111] to-[#050505] rounded-[8px] border border-white/10 relative overflow-hidden group">
             <div className="absolute top-0 right-0 p-8 opacity-5 group-hover:opacity-10 transition-opacity">
               <Youtube size={100} className="text-red-500" />
             </div>
@@ -180,7 +180,7 @@ export default function StreamerDashboard() {
             <div className="relative z-10">
               <div className="flex items-center justify-between mb-6">
                 <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 bg-red-500/10 rounded-xl flex items-center justify-center border border-red-500/20 text-red-500">
+                  <div className="w-10 h-10 bg-red-500/10 rounded-[8px] flex items-center justify-center border border-red-500/20 text-red-500">
                     <Youtube size={20} />
                   </div>
                   <h3 className="text-lg font-black uppercase tracking-tight text-white">YouTube Channel</h3>
@@ -190,7 +190,7 @@ export default function StreamerDashboard() {
                 ) : (
                   <button 
                     onClick={handleConnectYoutube}
-                    className="px-4 py-2 bg-red-500 hover:bg-red-600 text-white text-[10px] font-black uppercase rounded-xl transition-all flex items-center gap-2"
+                    className="px-4 py-2 bg-red-500 hover:bg-red-600 text-white text-[10px] font-black uppercase rounded-[8px] transition-all flex items-center gap-2"
                   >
                     <PlusCircle size={14} /> Connect
                   </button>
@@ -199,7 +199,7 @@ export default function StreamerDashboard() {
 
               {socialStats?.youtube ? (
                 <div className="space-y-6">
-                  <div className="flex items-center gap-4 p-4 bg-white/[0.03] rounded-2xl border border-white/5">
+                  <div className="flex items-center gap-4 p-4 bg-white/[0.03] rounded-[8px] border border-white/5">
                     <img 
                       src={socialStats.youtube.thumbnail || "https://via.placeholder.com/150"} 
                       alt="Channel" 
@@ -212,17 +212,17 @@ export default function StreamerDashboard() {
                   </div>
                   
                   <div className="grid grid-cols-3 gap-4">
-                    <div className="text-center p-3 bg-white/[0.02] rounded-2xl border border-white/5">
+                    <div className="text-center p-3 bg-white/[0.02] rounded-[8px] border border-white/5">
                       <div className="text-violet-500 mb-1 flex justify-center"><Users size={16} /></div>
                       <div className="text-white font-black text-lg">{socialStats.youtube.subscribers?.toLocaleString() || 0}</div>
                       <div className="text-[8px] text-gray-500 uppercase font-black">Subscribers</div>
                     </div>
-                    <div className="text-center p-3 bg-white/[0.02] rounded-2xl border border-white/5">
+                    <div className="text-center p-3 bg-white/[0.02] rounded-[8px] border border-white/5">
                       <div className="text-violet-500 mb-1 flex justify-center"><Eye size={16} /></div>
                       <div className="text-white font-black text-lg">{socialStats.youtube.views?.toLocaleString() || 0}</div>
                       <div className="text-[8px] text-gray-500 uppercase font-black">Total Views</div>
                     </div>
-                    <div className="text-center p-3 bg-white/[0.02] rounded-2xl border border-white/5">
+                    <div className="text-center p-3 bg-white/[0.02] rounded-[8px] border border-white/5">
                       <div className="text-violet-500 mb-1 flex justify-center"><VideoIcon size={16} /></div>
                       <div className="text-white font-black text-lg">{socialStats.youtube.videos || 0}</div>
                       <div className="text-[8px] text-gray-500 uppercase font-black">Videos</div>
@@ -230,7 +230,7 @@ export default function StreamerDashboard() {
                   </div>
                 </div>
               ) : (
-                <div className="h-32 flex flex-col items-center justify-center border-2 border-dashed border-white/5 rounded-3xl">
+                <div className="h-32 flex flex-col items-center justify-center border-2 border-dashed border-white/5 rounded-[8px]">
                   <p className="text-gray-600 text-xs font-bold uppercase tracking-widest">No Channel Linked</p>
                 </div>
               )}
@@ -238,7 +238,7 @@ export default function StreamerDashboard() {
           </div>
 
           {/* Facebook Card */}
-          <div className="p-8 bg-gradient-to-br from-[#111] to-[#050505] rounded-[2.5rem] border border-white/10 relative overflow-hidden group">
+          <div className="p-8 bg-gradient-to-br from-[#111] to-[#050505] rounded-[8px] border border-white/10 relative overflow-hidden group">
             <div className="absolute top-0 right-0 p-8 opacity-5 group-hover:opacity-10 transition-opacity">
               <Facebook size={100} className="text-blue-500" />
             </div>
@@ -246,7 +246,7 @@ export default function StreamerDashboard() {
             <div className="relative z-10">
               <div className="flex items-center justify-between mb-6">
                 <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 bg-blue-500/10 rounded-xl flex items-center justify-center border border-blue-500/20 text-blue-500">
+                  <div className="w-10 h-10 bg-blue-500/10 rounded-[8px] flex items-center justify-center border border-blue-500/20 text-blue-500">
                     <Facebook size={20} />
                   </div>
                   <h3 className="text-lg font-black uppercase tracking-tight text-white">Facebook Page</h3>
@@ -256,7 +256,7 @@ export default function StreamerDashboard() {
                 ) : (
                   <button 
                     onClick={handleConnectFacebook}
-                    className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-[10px] font-black uppercase rounded-xl transition-all flex items-center gap-2"
+                    className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-[10px] font-black uppercase rounded-[8px] transition-all flex items-center gap-2"
                   >
                     <PlusCircle size={14} /> Connect
                   </button>
@@ -265,7 +265,7 @@ export default function StreamerDashboard() {
 
               {socialStats?.facebook ? (
                 <div className="space-y-6">
-                  <div className="flex items-center gap-4 p-4 bg-white/[0.03] rounded-2xl border border-white/5">
+                  <div className="flex items-center gap-4 p-4 bg-white/[0.03] rounded-[8px] border border-white/5">
                     <img 
                       src={socialStats.facebook.thumbnail || "https://via.placeholder.com/150"} 
                       alt="Page" 
@@ -278,12 +278,12 @@ export default function StreamerDashboard() {
                   </div>
                   
                   <div className="grid grid-cols-2 gap-4">
-                    <div className="text-center p-3 bg-white/[0.02] rounded-2xl border border-white/5">
+                    <div className="text-center p-3 bg-white/[0.02] rounded-[8px] border border-white/5">
                       <div className="text-violet-500 mb-1 flex justify-center"><Users size={16} /></div>
                       <div className="text-white font-black text-lg">{socialStats.facebook.followers?.toLocaleString() || 0}</div>
                       <div className="text-[8px] text-gray-500 uppercase font-black">Followers</div>
                     </div>
-                    <div className="text-center p-3 bg-white/[0.02] rounded-2xl border border-white/5">
+                    <div className="text-center p-3 bg-white/[0.02] rounded-[8px] border border-white/5">
                       <div className="text-violet-500 mb-1 flex justify-center"><Star size={16} /></div>
                       <div className="text-white font-black text-lg">{socialStats.facebook.likes?.toLocaleString() || 0}</div>
                       <div className="text-[8px] text-gray-500 uppercase font-black">Page Likes</div>
@@ -291,7 +291,7 @@ export default function StreamerDashboard() {
                   </div>
                 </div>
               ) : (
-                <div className="h-32 flex flex-col items-center justify-center border-2 border-dashed border-white/5 rounded-3xl">
+                <div className="h-32 flex flex-col items-center justify-center border-2 border-dashed border-white/5 rounded-[8px]">
                   <p className="text-gray-600 text-xs font-bold uppercase tracking-widest">No Page Linked</p>
                 </div>
               )}

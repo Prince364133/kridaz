@@ -20,7 +20,7 @@ const LoginModal = ({ isOpen, onClose, title = "Login Required", message = "Plea
   return (
     <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-in fade-in duration-300">
       <div 
-        className="relative w-full max-w-md bg-[#000000] border border-[#2D2D2D] rounded-[32px] overflow-hidden shadow-[0_32px_64px_-16px_rgba(0,0,0,0.8)] animate-in zoom-in-95 slide-in-from-bottom-8 duration-500"
+        className="relative w-full max-w-md bg-[#000000] border border-[#2D2D2D] rounded-[8px] overflow-hidden shadow-[0_32px_64px_-16px_rgba(0,0,0,0.8)] animate-in zoom-in-95 slide-in-from-bottom-8 duration-500"
       >
         {/* Decorative Background Elements */}
         <div className="absolute top-0 right-0 w-32 h-32 bg-[#55DEE8]/10 rounded-full blur-[64px] -translate-y-1/2 translate-x-1/2" />
@@ -29,7 +29,7 @@ const LoginModal = ({ isOpen, onClose, title = "Login Required", message = "Plea
         {/* Close Button */}
         <button 
           onClick={onClose}
-          className="absolute top-6 right-6 p-2 rounded-full bg-[#000000] border border-[#2D2D2D] text-gray-400 hover:text-white hover:bg-white/10 transition-all z-10"
+          className="absolute top-6 right-6 p-2 rounded-[8px] bg-[#000000] border border-[#2D2D2D] text-gray-400 hover:text-white hover:bg-white/10 transition-all z-10"
         >
           <X size={18} />
         </button>

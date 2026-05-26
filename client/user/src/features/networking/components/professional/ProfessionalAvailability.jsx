@@ -165,7 +165,7 @@ export default function ProfessionalAvailability() {
           </div>
           
           <div className="flex items-center gap-4">
-            <div className="flex items-center gap-4 bg-white/[0.03] border border-white/5 px-6 py-4 rounded-lg backdrop-blur-xl">
+            <div className="flex items-center gap-4 bg-white/[0.03] border border-white/5 px-6 py-4 rounded-[6px] backdrop-blur-xl">
               <div className="w-12 h-12 bg-opacity-10 rounded-lg flex items-center justify-center" style={{ backgroundColor: `${themeColor}1a`, color: themeColor }}>
                 <Calendar size={24} />
               </div>
@@ -183,7 +183,7 @@ export default function ProfessionalAvailability() {
             <button 
               onClick={handleSave}
               disabled={loading}
-              className="px-8 py-4 rounded-lg text-black font-black uppercase text-[11px] tracking-[0.2em] flex items-center gap-3 transition-all disabled:opacity-50 font-inter shadow-2xl active:scale-95 hover:brightness-110"
+              className="px-8 py-4 rounded-[6px] text-black font-black uppercase text-[11px] tracking-[0.2em] flex items-center gap-3 transition-all disabled:opacity-50 font-inter shadow-2xl active:scale-95 hover:brightness-110"
               style={{ backgroundColor: themeColor, boxShadow: `0 10px 30px ${themeColor}66` }}
             >
               {loading ? <Loader2 className="animate-spin" size={16} /> : <Save size={16} />} Save Schedule
@@ -193,7 +193,7 @@ export default function ProfessionalAvailability() {
 
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 relative z-10">
           <div className="lg:col-span-4 space-y-6">
-            <div className="bg-white/[0.03] border border-white/5 rounded-lg p-6 lg:p-8 backdrop-blur-xl shadow-2xl">
+            <div className="bg-white/[0.03] border border-white/5 rounded-[8px] p-6 lg:p-8 backdrop-blur-xl shadow-2xl">
               <div className="flex items-center gap-3 mb-6">
                 <div className="p-2 bg-opacity-10 rounded-lg" style={{ backgroundColor: `${themeColor}1a`, color: themeColor }}>
                   <CalendarDays size={18} />
@@ -212,11 +212,7 @@ export default function ProfessionalAvailability() {
                     <button 
                       key={dateStr}
                       onClick={() => setSelectedDate(dateStr)}
-                      className={`relative flex flex-col items-center justify-center p-3 rounded-lg border transition-all duration-300 ${
-                        isSelected 
-                        ? "text-black shadow-lg" 
-                        : "bg-[#2D2D2D]/30 border-[#2D2D2D] text-[#878C9F] hover:border-[#55DEE8]/30 hover:bg-[#2D2D2D]/50"
-                      }`}
+                      className={`relative flex flex-col items-center justify-center p-3 rounded-[8px] border transition-all duration-300 ${ isSelected ? "text-black shadow-lg" : "bg-[#2D2D2D]/30 border-[#2D2D2D] text-[#878C9F] hover:border-[#55DEE8]/30 hover:bg-[#2D2D2D]/50" }`}
                       style={{ 
                         backgroundColor: isSelected ? themeColor : undefined,
                         borderColor: isSelected ? themeColor : undefined,
@@ -234,7 +230,7 @@ export default function ProfessionalAvailability() {
               </div>
             </div>
 
-            <div className="bg-opacity-5 border rounded-lg p-6 lg:p-8 relative overflow-hidden group" style={{ backgroundColor: `${themeColor}0d`, borderColor: `${themeColor}1a` }}>
+            <div className="bg-opacity-5 border rounded-[8px] p-6 lg:p-8 relative overflow-hidden group" style={{ backgroundColor: `${themeColor}0d`, borderColor: `${themeColor}1a` }}>
               <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
                 <Zap size={60} style={{ color: themeColor }} />
               </div>
@@ -260,7 +256,7 @@ export default function ProfessionalAvailability() {
           </div>
 
           <div className="lg:col-span-8 space-y-6">
-            <div className="bg-white/[0.03] border border-white/5 rounded-lg p-6 lg:p-8 backdrop-blur-xl shadow-2xl">
+            <div className="bg-white/[0.03] border border-white/5 rounded-[8px] p-6 lg:p-8 backdrop-blur-xl shadow-2xl">
               <div className="flex items-center gap-3 mb-8">
                 <div className="p-2 bg-opacity-10 rounded-lg" style={{ backgroundColor: `${themeColor}1a`, color: themeColor }}>
                   <Clock size={18} />
@@ -295,7 +291,7 @@ export default function ProfessionalAvailability() {
                 </div>
                 <button 
                   onClick={handleAddSlot}
-                  className="h-[54px] px-8 bg-transparent text-white hover:text-black rounded-lg font-bold uppercase text-[11px] tracking-[2px] transition-all flex items-center gap-3 font-inter group shadow-lg border border-white/10"
+                  className="h-[54px] px-8 bg-transparent text-white hover:text-black rounded-[8px] font-bold uppercase text-[11px] tracking-[2px] transition-all flex items-center gap-3 font-inter group shadow-lg border border-white/10"
                   style={{ '--hover-bg': themeColor }}
                   onMouseEnter={(e) => { 
                     e.target.style.backgroundColor = themeColor; 
@@ -328,7 +324,7 @@ export default function ProfessionalAvailability() {
                   <p className="text-[10px] font-black uppercase tracking-[4px] text-neutral-500">Fetching Schedule</p>
                 </div>
               ) : slots.length === 0 ? (
-                <div className="flex flex-col items-center justify-center min-h-[450px] bg-white/[0.03] backdrop-blur-xl rounded-lg border border-white/5 border-dashed p-12 text-center shadow-2xl relative overflow-hidden">
+                <div className="flex flex-col items-center justify-center min-h-[450px] bg-white/[0.03] backdrop-blur-xl rounded-[8px] border border-white/5 border-dashed p-12 text-center shadow-2xl relative overflow-hidden">
                   <div className="absolute inset-0 bg-gradient-to-b from-transparent to-black/20 pointer-events-none" />
                   <div className="w-20 h-20 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center mb-8 relative z-10 shadow-inner">
                     <Calendar size={40} className="text-neutral-600" />
@@ -343,7 +339,7 @@ export default function ProfessionalAvailability() {
               ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   {slots.map((slot, index) => (
-                    <div key={index} className="flex items-center justify-between p-5 bg-white/[0.03] border border-white/5 rounded-lg group hover:border-white/10 transition-all shadow-md relative overflow-hidden">
+                    <div key={index} className="flex items-center justify-between p-5 bg-white/[0.03] border border-white/5 rounded-[8px] group hover:border-white/10 transition-all shadow-md relative overflow-hidden">
                       <div className="absolute top-0 left-0 w-1 h-full" style={{ backgroundColor: slot.isAvailable ? themeColor : "#ef4444" }} />
                       <div className="flex items-center gap-5">
                         <div className="w-12 h-12 rounded-lg bg-opacity-5 border flex items-center justify-center transition-colors" style={{ backgroundColor: `${themeColor}0d`, borderColor: `${themeColor}1a` }}>
@@ -362,7 +358,7 @@ export default function ProfessionalAvailability() {
                       {slot.isAvailable && (
                         <button 
                           onClick={() => handleRemoveSlot(slot.startTime)}
-                          className="p-3 text-neutral-600 hover:text-red-500 hover:bg-red-500/10 rounded-lg transition-all border border-transparent hover:border-red-500/20"
+                          className="p-3 text-neutral-600 hover:text-red-500 hover:bg-red-500/10 rounded-[8px] transition-all border border-transparent hover:border-red-500/20"
                         >
                           <Trash2 size={18} />
                         </button>

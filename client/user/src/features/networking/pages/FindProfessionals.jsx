@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { useSelector } from "react-redux";
 import axiosInstance from "@hooks/useAxiosInstance";
 import { Search, MapPin, Star, ChevronRight, Users, User, Calendar, Shield, Trophy, Activity, Award, CheckCircle, Filter, Loader2, Check, X, LayoutGrid, Video, Dribbble, ChevronDown } from "lucide-react";
@@ -11,9 +11,11 @@ const BDR = "#2A2A2A";
 
 const sports = ["ALL SPORTS", "CRICKET", "BADMINTON", "FOOTBALL", "TENNIS", "PICKLEBALL"];
 const roles = ["All", "Coach", "Umpire", "Scorer", "Streamer"];
+const SUBHEADING_STYLE = { fontFamily: "'Inter 28pt Light', sans-serif", fontWeight: 300 };
 
 export default function FindProfessionals() {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const { isLoggedIn, user } = useSelector((state) => state.auth);
   const [professionals, setProfessionals] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -97,14 +99,14 @@ export default function FindProfessionals() {
         <h1 className="font-['Open_Sans'] font-extrabold text-7xl lg:text-[84px] uppercase tracking-tighter text-transparent bg-clip-text bg-gradient-to-r from-[#55DEE8] to-[#BFF367] mb-2 leading-[0.9]">
           PRO'S
         </h1>
-        <p className="hidden md:block font-sans font-medium text-[20px] text-white/60 uppercase tracking-[0.15em] leading-relaxed whitespace-nowrap overflow-hidden">
+        <p className="hidden md:block text-[20px] text-white/60 uppercase tracking-[0.15em] leading-relaxed whitespace-nowrap overflow-hidden" style={SUBHEADING_STYLE}>
           Elite Coaching • Certified Officiating • Expert Training • Efficient Streaming
         </p>
       </div>
 
       {/* Unified Search & Filters Card */}
       <div className="max-w-5xl mx-auto mb-12 px-4">
-        <div className="w-full bg-[#0a0a0c]/80 backdrop-blur-2xl border border-white/10 rounded-2xl p-1.5 shadow-2xl flex flex-col xl:flex-row items-stretch xl:items-center min-h-[56px] md:min-h-[64px] transition-all duration-500 hover:border-[#55DEE8]/30">
+        <div className="w-full bg-[#0a0a0c]/80 backdrop-blur-2xl border border-white/10 rounded-[8px] p-1.5 shadow-2xl flex flex-col xl:flex-row items-stretch xl:items-center min-h-[56px] md:min-h-[64px] transition-all duration-500 hover:border-[#55DEE8]/30">
           
           {/* Search Input */}
           <div className="flex-[2] relative xl:border-r border-white/5 flex items-center px-4 py-3 md:py-0 min-h-[56px] md:min-h-full">
@@ -202,14 +204,14 @@ export default function FindProfessionals() {
         {loading ? (
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 xl:grid-cols-6 gap-3">
             {[...Array(12)].map((_, i) => (
-              <div key={i} className="aspect-[1/1.3] rounded-xl bg-white/5 border border-white/5 animate-pulse" />
+              <div key={i} className="aspect-[1/1.3] rounded-[8px] bg-white/5 border border-white/5 animate-pulse" />
             ))}
           </div>
         ) : professionals.length === 0 ? (
-          <div className="text-center py-20 border-2 border-dashed border-neutral-800 rounded-xl">
+          <div className="text-center py-20 border-2 border-dashed border-neutral-800 rounded-[8px]">
             <Users size={48} className="mx-auto text-neutral-800 mb-4" />
             <h3 className="text-3xl md:text-4xl font-open-sans font-black uppercase tracking-widest text-transparent bg-clip-text bg-gradient-to-r from-[#55DEE8] to-[#BFF367] mb-2">No professionals found</h3>
-            <p className="text-[#999999] mt-2 font-inter text-[20px]">Try adjusting your filters or location</p>
+            <p className="text-[#999999] mt-2 text-[20px]" style={SUBHEADING_STYLE}>Try adjusting your filters or location</p>
           </div>
         ) : (
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 xl:grid-cols-6 gap-3 md:gap-4">
@@ -217,9 +219,13 @@ export default function FindProfessionals() {
               <div 
                 key={pro._id} 
                 className="group cursor-pointer"
-                onClick={() => navigate(`/professionals/${pro.id || pro._id}`)}
+                onClick={() => {
+                  const returnTo = searchParams.get('returnTo');
+                  const baseTo = `/professionals/${pro.id || pro._id}`;
+                  navigate(returnTo ? `${baseTo}?returnTo=${encodeURIComponent(returnTo)}` : baseTo);
+                }}
               >
-                <div className="relative bg-[#1a1a1a] rounded-xl p-1.5 border border-white/10 transition-all duration-500 hover:border-[#55DEE8]/30 hover:shadow-[0_15px_30px_rgba(0,0,0,0.5)]">
+                <div className="relative bg-[#1a1a1a] rounded-[8px] p-1.5 border border-white/10 transition-all duration-500 hover:border-[#55DEE8]/30 hover:shadow-[0_15px_30px_rgba(0,0,0,0.5)]">
                   
                   {/* Compact Profile Image Section */}
                   <div className="relative aspect-[1/1.2] rounded-lg overflow-hidden block mb-3">
@@ -247,7 +253,7 @@ export default function FindProfessionals() {
                     
                     {/* Top Right Badge - Rating (Global) */}
                     <div className="absolute top-2 right-2 z-20">
-                      <div className="flex px-2 py-1 rounded-lg bg-black/70 backdrop-blur-md border border-white/10 items-center justify-center text-[#BFF367] text-[10px] font-bold shadow-lg font-sans gap-1">
+                      <div className="flex px-2 py-1 rounded-[6px] bg-black/70 backdrop-blur-md border border-white/10 items-center justify-center text-[#BFF367] text-[10px] font-bold shadow-lg font-sans gap-1">
                         <Star size={10} className="fill-[#BFF367]" />
                         {pro.rating?.toFixed(1) || "5.0"}
                       </div>
@@ -255,7 +261,7 @@ export default function FindProfessionals() {
 
                     {/* Role Badge (Top Left) */}
                     <div className="absolute top-2 left-2 z-20">
-                      <div className="px-2.5 py-1 rounded-lg bg-black/70 backdrop-blur-md border border-white/10 flex items-center justify-center text-white text-[10px] font-black tracking-widest gap-1.5 shadow-lg font-sans">
+                      <div className="px-2.5 py-1 rounded-[6px] bg-black/70 backdrop-blur-md border border-white/10 flex items-center justify-center text-white text-[10px] font-black tracking-widest gap-1.5 shadow-lg font-sans">
                         {pro.role === 'umpire' ? <Shield size={10} className="text-[#55DEE8]" /> : 
                          pro.role === 'streamer' ? <Video size={10} className="text-[#55DEE8]" /> : 
                          pro.role === 'scorer' ? <Activity size={10} className="text-[#55DEE8]" /> : 
@@ -292,7 +298,9 @@ export default function FindProfessionals() {
                       <button 
                         onClick={(e) => {
                           e.stopPropagation();
-                          navigate(`/professionals/${pro.id || pro._id}`);
+                          const returnTo = searchParams.get('returnTo');
+                          const baseTo = `/professionals/${pro.id || pro._id}`;
+                          navigate(returnTo ? `${baseTo}?returnTo=${encodeURIComponent(returnTo)}` : baseTo);
                         }}
                         className="px-4 py-2 rounded-lg font-bold text-[10px] uppercase tracking-wider transition-all duration-300 bg-gradient-to-r from-[#55DEE8] to-[#BFF367] text-black font-sans hover:scale-105 shadow-lg active:scale-95 shrink-0"
                       >

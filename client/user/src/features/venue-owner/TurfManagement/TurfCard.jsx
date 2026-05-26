@@ -16,7 +16,7 @@ const TurfCard = ({ turf, onEdit, onDelete, onToggleVisibility }) => {
 
         {/* Status Icon Overlay (Top Right) */}
         {!turf.isActive && (
-          <div className="absolute top-3 right-3 z-20 bg-black/80 backdrop-blur-md border border-red-500/50 text-red-500 p-1.5 rounded-full shadow-2xl" title="Venue Hidden">
+          <div className="absolute top-3 right-3 z-20 bg-black/80 backdrop-blur-md border border-red-500/50 text-red-500 p-1.5 rounded-[8px] shadow-2xl" title="Venue Hidden">
             <EyeOff size={10} />
           </div>
         )}
@@ -30,13 +30,7 @@ const TurfCard = ({ turf, onEdit, onDelete, onToggleVisibility }) => {
                   {turf.name}
                 </h2>
                 <div className="flex items-center gap-2">
-                  <div className={`px-2 py-0.5 rounded-[4px] text-[9px] font-bold uppercase tracking-widest border ${
-                     turf.status === 'approved' ? 'bg-[#55DEE8]/10 border-[#55DEE8]/20 text-[#55DEE8]' :
-                     turf.status === 'rejected' ? 'bg-red-500/10 border-red-500/20 text-red-500' :
-                     turf.status === 'decommissioned' ? 'bg-orange-500/10 border-orange-500/20 text-orange-500' :
-                     turf.status === 'deleted' ? 'bg-zinc-800 border-zinc-700 text-zinc-500' :
-                     'bg-[#1A1A1A] border-[#2D2D2D] text-transparent bg-clip-text bg-gradient-to-r from-[#55DEE8] to-[#BFF367]'
-                  }`}>
+                  <div className={`px-2 py-0.5 rounded-[4px] text-[9px] font-bold uppercase tracking-widest border ${ turf.status === 'approved' ? 'bg-[#55DEE8]/10 border-[#55DEE8]/20 text-[#55DEE8]' : turf.status === 'rejected' ? 'bg-red-500/10 border-red-500/20 text-red-500' : turf.status === 'decommissioned' ? 'bg-orange-500/10 border-orange-500/20 text-orange-500' : turf.status === 'deleted' ? 'bg-zinc-800 border-zinc-700 text-zinc-500' : 'bg-[#1A1A1A] border-[#2D2D2D] text-yellow-500' }`}>
                      {turf.status}
                   </div>
                   <span className="text-[10px] text-[#444] font-medium uppercase tracking-widest">ΓÇó</span>
@@ -84,11 +78,7 @@ const TurfCard = ({ turf, onEdit, onDelete, onToggleVisibility }) => {
 
               <button
                 onClick={onToggleVisibility}
-                className={`w-8 h-8 rounded-[6px] transition-all flex items-center justify-center border ${
-                  turf.isActive 
-                  ? "bg-[#55DEE8]/5 border-[#55DEE8]/20 text-[#55DEE8] hover:bg-[#55DEE8]/10" 
-                  : "bg-black border-[#2D2D2D] text-[#444] hover:text-white"
-                }`}
+                className={`w-8 h-8 rounded-[6px] transition-all flex items-center justify-center border ${ turf.isActive ? "bg-[#55DEE8]/5 border-[#55DEE8]/20 text-[#55DEE8] hover:bg-[#55DEE8]/10" : "bg-black border-[#2D2D2D] text-[#444] hover:text-white" }`}
               >
                 {turf.isActive ? <Eye size={12} /> : <EyeOff size={12} />}
               </button>

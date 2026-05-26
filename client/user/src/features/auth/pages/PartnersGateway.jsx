@@ -82,7 +82,7 @@ export default function PartnersGateway() {
         <div className="container mx-auto px-6 lg:px-20 relative z-10">
           <div className="max-w-4xl space-y-10">
             {/* Status Tag */}
-            <div className="inline-flex items-center gap-3 px-4 py-1.5 rounded-full border border-white/10 bg-white/5">
+            <div className="inline-flex items-center gap-3 px-4 py-1.5 rounded-[6px] border border-white/10 bg-white/5">
               <Globe className="w-4 h-4 text-[#55DEE8]" />
               <span className="text-[10px] font-bold tracking-[0.2em] text-white/60 uppercase">Join Our Global Network</span>
             </div>
@@ -98,19 +98,19 @@ export default function PartnersGateway() {
             </div>
 
             <div className="flex flex-wrap items-center gap-4 pt-4">
-              <Link to="/signup/venue" className="bg-[#55DEE8] hover:bg-[#a3e635] text-black h-14 px-8 rounded-xl font-bold text-sm flex items-center gap-3 transition-all shadow-[0_10px_30px_rgba(85,222,232,0.2)] active:scale-[0.98]">
+              <Link to="/signup/venue" className="bg-[#55DEE8] hover:bg-[#a3e635] text-black h-14 px-8 rounded-[8px] font-bold text-sm flex items-center gap-3 transition-all shadow-[0_10px_30px_rgba(85,222,232,0.2)] active:scale-[0.98]">
                 <Store className="w-4 h-4" /> Venue Owner
               </Link>
-              <Link to="/signup/coach" className="bg-blue-500 hover:bg-blue-400 text-white h-14 px-8 rounded-xl font-bold text-sm flex items-center gap-3 transition-all active:scale-[0.98]">
+              <Link to="/signup/coach" className="bg-blue-500 hover:bg-blue-400 text-white h-14 px-8 rounded-[8px] font-bold text-sm flex items-center gap-3 transition-all active:scale-[0.98]">
                 <Award className="w-4 h-4" /> Coach
               </Link>
-              <Link to="/signup/official" className="bg-gradient-to-r from-[#55DEE8] to-[#BFF367] hover:bg-gradient-to-r from-[#55DEE8] to-[#BFF367] text-black h-14 px-8 rounded-xl font-bold text-sm flex items-center gap-3 transition-all active:scale-[0.98]">
+              <Link to="/signup/official" className="bg-amber-500 hover:bg-amber-400 text-black h-14 px-8 rounded-[8px] font-bold text-sm flex items-center gap-3 transition-all active:scale-[0.98]">
                 <Shield className="w-4 h-4" /> Umpire
               </Link>
-              <Link to="/signup/streamer" className="bg-red-500 hover:bg-red-400 text-white h-14 px-8 rounded-xl font-bold text-sm flex items-center gap-3 transition-all active:scale-[0.98]">
+              <Link to="/signup/streamer" className="bg-red-500 hover:bg-red-400 text-white h-14 px-8 rounded-[8px] font-bold text-sm flex items-center gap-3 transition-all active:scale-[0.98]">
                 <Tv className="w-4 h-4" /> Streamer
               </Link>
-              <Link to="/signup/scorer" className="bg-purple-500 hover:bg-purple-400 text-white h-14 px-8 rounded-xl font-bold text-sm flex items-center gap-3 transition-all active:scale-[0.98]">
+              <Link to="/signup/scorer" className="bg-purple-500 hover:bg-purple-400 text-white h-14 px-8 rounded-[8px] font-bold text-sm flex items-center gap-3 transition-all active:scale-[0.98]">
                 <Layout className="w-4 h-4" /> Scorer
               </Link>
               <div className="hidden sm:flex items-center gap-10 border-l border-white/10 pl-10">
@@ -137,7 +137,7 @@ export default function PartnersGateway() {
 
         <div className="grid lg:grid-cols-3 gap-6 max-w-6xl mx-auto">
           {partners.map((p) => (
-            <Link key={p.role} to={p.link} className="group relative flex flex-col p-8 bg-[#0A0A0A] border border-white/5 rounded-3xl transition-all duration-300 hover:border-white/20 hover:bg-[#111] hover:-translate-y-1 cursor-pointer shadow-lg hover:shadow-2xl"
+            <Link key={p.role} to={p.link} className="group relative flex flex-col p-8 bg-[#0A0A0A] border border-white/5 rounded-[8px] transition-all duration-300 hover:border-white/20 hover:bg-[#111] hover:-translate-y-1 cursor-pointer shadow-lg hover:shadow-2xl"
               style={{ "--accent": p.accent }}
             >
               {/* Status badge */}
@@ -156,7 +156,7 @@ export default function PartnersGateway() {
 
               {/* Icon */}
               <div
-                className="w-12 h-12 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-500"
+                className="w-12 h-12 rounded-[8px] flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-500"
                 style={{ backgroundColor: `${p.accent}15` }}
               >
                 {React.createElement(p.icon, { size: 24, style: { color: p.accent } })}
@@ -187,7 +187,7 @@ export default function PartnersGateway() {
         </div>
 
         {/* Call to Action */}
-        <div className="mt-40 p-20 bg-gradient-to-b from-[#0A0A0A] to-black border border-white/5 rounded-[64px] text-center relative overflow-hidden">
+        <div className="mt-40 p-20 bg-gradient-to-b from-[#0A0A0A] to-black border border-white/5 rounded-[8px] text-center relative overflow-hidden">
           <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-px bg-gradient-to-r from-transparent via-[#55DEE8]/20 to-transparent" />
 
           <div className="relative z-10 space-y-10">
@@ -198,7 +198,7 @@ export default function PartnersGateway() {
 
             <Link
               to="/login"
-              className="bg-white/5 hover:bg-white/10 border border-white/10 text-white h-16 px-16 rounded-xl text-lg font-bold tracking-widest uppercase inline-flex items-center gap-4 transition-all"
+              className="bg-white/5 hover:bg-white/10 border border-white/10 text-white h-16 px-16 rounded-[8px] text-lg font-bold tracking-widest uppercase inline-flex items-center gap-4 transition-all"
             >
               ACCESS PARTNER PORTAL <ArrowRight className="w-5 h-5" />
             </Link>

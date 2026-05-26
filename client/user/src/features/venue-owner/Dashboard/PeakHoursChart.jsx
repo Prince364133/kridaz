@@ -103,11 +103,7 @@ const PeakHoursChart = () => {
               <button
                 key={f}
                 onClick={() => setFilter(f)}
-                className={`px-3 py-1.5 text-[10px] font-bold uppercase tracking-widest rounded-[6px] transition-all ${
-                  filter === f 
-                    ? 'bg-[#55DEE8] text-black shadow-lg shadow-[#55DEE8]/10' 
-                    : 'text-[#999999] hover:text-white hover:bg-[#2D2D2D]'
-                }`}
+                className={`px-3 py-1.5 text-[10px] font-bold uppercase tracking-widest rounded-[6px] transition-all ${ filter === f ? 'bg-[#55DEE8] text-black shadow-lg shadow-[#55DEE8]/10' : 'text-[#999999] hover:text-white hover:bg-[#2D2D2D]' }`}
               >
                 {f}
               </button>

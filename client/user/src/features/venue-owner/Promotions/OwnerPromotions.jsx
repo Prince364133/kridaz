@@ -216,11 +216,7 @@ export default function OwnerPromotions() {
                   <td className="px-6 py-4">
                     <button 
                       onClick={() => toggleStatus(promo._id)}
-                      className={`px-2.5 py-1 text-[9px] font-bold uppercase tracking-wider rounded-[4px] border transition-colors ${
-                        promo.isActive 
-                          ? "bg-emerald-500/10 text-emerald-500 border-emerald-500/20 hover:bg-emerald-500/20" 
-                          : "bg-red-500/10 text-red-500 border-red-500/20 hover:bg-red-500/20"
-                      }`}
+                      className={`px-2.5 py-1 text-[9px] font-bold uppercase tracking-wider rounded-[4px] border transition-colors ${ promo.isActive ? "bg-emerald-500/10 text-emerald-500 border-emerald-500/20 hover:bg-emerald-500/20" : "bg-red-500/10 text-red-500 border-red-500/20 hover:bg-red-500/20" }`}
                     >
                       {promo.isActive ? 'ACTIVE' : 'INACTIVE'}
                     </button>

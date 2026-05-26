@@ -69,7 +69,7 @@ export default function ManageStream() {
             <p className="text-gray-500 text-[10px] font-black uppercase tracking-[0.3em]">Verify officials and setup broadcast parameters</p>
           </div>
           
-          <div className="flex items-center gap-3 bg-white/5 border border-white/10 px-6 py-3 rounded-2xl">
+          <div className="flex items-center gap-3 bg-white/5 border border-white/10 px-6 py-3 rounded-[8px]">
              <div className="text-right">
                 <p className="text-[8px] font-black text-gray-500 uppercase tracking-widest leading-none mb-1">Match Status</p>
                 <p className="text-xs font-black text-white uppercase">{match?.status}</p>
@@ -82,7 +82,7 @@ export default function ManageStream() {
           
           {/* Match Info Card */}
           <div className="lg:col-span-2 space-y-8">
-            <div className="bg-gradient-to-br from-white/[0.03] to-transparent border border-white/10 rounded-[2.5rem] p-10 relative overflow-hidden group">
+            <div className="bg-gradient-to-br from-white/[0.03] to-transparent border border-white/10 rounded-[8px] p-10 relative overflow-hidden group">
                <div className="absolute top-0 right-0 p-8 opacity-10 group-hover:scale-110 transition-transform duration-700">
                   <Video size={120} />
                </div>
@@ -98,8 +98,8 @@ export default function ManageStream() {
                   </div>
 
                   <h2 className="text-4xl font-black text-white uppercase italic tracking-tighter leading-tight">
-                    {match?.teams?.teamA?.name || 'TEAM A'} <br />
-                    <span className="text-violet-500">VS</span> {match?.teams?.teamB?.name || 'TEAM B'}
+                    {match?.teams?.teamA?.name || 'TBD'} <br />
+                    <span className="text-violet-500">VS</span> {match?.teams?.teamB?.name || 'TBD'}
                   </h2>
 
                   <div className="flex flex-wrap gap-8 pt-4">
@@ -120,10 +120,10 @@ export default function ManageStream() {
             </div>
 
             {/* Ticker Selection Gateway */}
-            <div className="bg-gradient-to-br from-violet-500/10 to-transparent border border-violet-500/20 rounded-[2.5rem] p-10 flex flex-col md:flex-row items-center justify-between gap-8 group cursor-pointer hover:border-violet-500/40 transition-all shadow-[0_0_50px_rgba(139,92,246,0.05)]"
+            <div className="bg-gradient-to-br from-violet-500/10 to-transparent border border-violet-500/20 rounded-[8px] p-10 flex flex-col md:flex-row items-center justify-between gap-8 group cursor-pointer hover:border-violet-500/40 transition-all shadow-[0_0_50px_rgba(139,92,246,0.05)]"
                  onClick={() => navigate(`/streamer/ticker-gallery/${matchId}`)}>
                <div className="flex items-center gap-8">
-                  <div className="w-20 h-20 rounded-3xl bg-violet-500 flex items-center justify-center shadow-[0_10px_30px_rgba(139,92,246,0.3)] group-hover:scale-110 transition-transform">
+                  <div className="w-20 h-20 rounded-[8px] bg-violet-500 flex items-center justify-center shadow-[0_10px_30px_rgba(139,92,246,0.3)] group-hover:scale-110 transition-transform">
                      <Palette size={40} className="text-white" />
                   </div>
                   <div className="space-y-1">
@@ -142,7 +142,7 @@ export default function ManageStream() {
 
           {/* Officials Checklist Card */}
           <div className="space-y-6">
-             <div className="bg-[#0A0A0A] border border-white/10 rounded-[2.5rem] p-8 space-y-8">
+             <div className="bg-[#0A0A0A] border border-white/10 rounded-[8px] p-8 space-y-8">
                 <div className="space-y-2">
                    <h3 className="text-xl font-black text-white uppercase tracking-tight">Officials <span className="text-emerald-500">Status</span></h3>
                    <p className="text-gray-500 text-[10px] font-black uppercase tracking-widest">Ecosystem verification required</p>
@@ -150,9 +150,9 @@ export default function ManageStream() {
 
                 <div className="space-y-4">
                    {officials.map((off, i) => (
-                     <div key={i} className="p-5 bg-white/[0.02] border border-white/5 rounded-2xl flex items-center justify-between group hover:border-white/20 transition-all">
+                     <div key={i} className="p-5 bg-white/[0.02] border border-white/5 rounded-[8px] flex items-center justify-between group hover:border-white/20 transition-all">
                         <div className="flex items-center gap-4">
-                           <div className={`w-12 h-12 rounded-xl bg-white/5 flex items-center justify-center ${off.color}`}>
+                           <div className={`w-12 h-12 rounded-[8px] bg-white/5 flex items-center justify-center ${off.color}`}>
                               <off.icon size={20} />
                            </div>
                            <div>
@@ -176,8 +176,8 @@ export default function ManageStream() {
                 </div>
 
                 {!allConnected && (
-                  <div className="p-6 bg-gradient-to-r from-[#55DEE8]/10 to-[#BFF367]/10 border border-[#55DEE8]/20 rounded-2xl space-y-2">
-                     <div className="flex items-center gap-2 text-transparent bg-clip-text bg-gradient-to-r from-[#55DEE8] to-[#BFF367]">
+                  <div className="p-6 bg-amber-500/10 border border-amber-500/20 rounded-[8px] space-y-2">
+                     <div className="flex items-center gap-2 text-amber-500">
                         <Info size={16} />
                         <p className="text-[10px] font-black uppercase tracking-widest">Action Required</p>
                      </div>
@@ -191,11 +191,7 @@ export default function ManageStream() {
                    <button 
                      disabled={!allConnected}
                      onClick={() => navigate(`/matches/${matchId}/stream-setup`)}
-                     className={`w-full h-16 rounded-2xl flex items-center justify-center gap-3 font-black uppercase text-xs tracking-[0.2em] transition-all shadow-2xl ${
-                       allConnected 
-                       ? 'bg-white text-black hover:bg-gray-100 hover:scale-[1.02] active:scale-95 shadow-[0_10px_30px_rgba(255,255,255,0.1)]' 
-                       : 'bg-white/5 text-gray-600 cursor-not-allowed border border-white/5'
-                     }`}
+                     className={`w-full h-16 rounded-[8px] flex items-center justify-center gap-3 font-black uppercase text-xs tracking-[0.2em] transition-all shadow-2xl ${ allConnected ? 'bg-white text-black hover:bg-gray-100 hover:scale-[1.02] active:scale-95 shadow-[0_10px_30px_rgba(255,255,255,0.1)]' : 'bg-white/5 text-gray-600 cursor-not-allowed border border-white/5' }`}
                    >
                      {allConnected ? (
                        <>Start Stream Setup <Video size={18} fill="currentColor" /></>
@@ -206,7 +202,7 @@ export default function ManageStream() {
                 </div>
              </div>
 
-             <div className="p-8 bg-gradient-to-br from-blue-500/10 to-transparent border border-blue-500/20 rounded-[2.5rem] space-y-4">
+             <div className="p-8 bg-gradient-to-br from-blue-500/10 to-transparent border border-blue-500/20 rounded-[8px] space-y-4">
                 <div className="flex items-center gap-3 text-blue-500">
                    <Star size={20} className="fill-blue-500" />
                    <h4 className="text-xs font-black uppercase tracking-widest">Pro Streamer Tip</h4>

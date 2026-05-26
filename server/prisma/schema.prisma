@@ -55,6 +55,7 @@ model User {
   chatMemberships         ChatParticipant[]     @relation("UserChatMemberships")
   comments                Comment[]
   disputes                Dispute[]             @relation("DisputeRaiser")
+  gameDisputes            GameDispute[]
   gameSlots               GameSlot[]
   hostedGames             HostedGame[]          @relation("HostRelation")
   scoredGames             HostedGame[]          @relation("ScorerRelation")
@@ -71,6 +72,7 @@ model User {
   reels                   Reel[]
   reelComments            ReelComment[]
   reelInteractions        ReelInteraction[]
+  reelReports             ReelReport[]
   refreshTokens           RefreshToken[]
   reviews                 Review[]
   stories                 Story[]
@@ -91,6 +93,9 @@ model User {
   turfLikes               TurfLike[]
   turfInteractions        TurfInteraction[]
   professionalCustomers   ProfessionalCustomer[]
+  careerStats             PlayerCareerStats[]
+  earnedBadges            UserBadge[]
+  postReports             PostReport[]
 
   @@index([role])
 }
@@ -414,12 +419,16 @@ model HostedGame {
   groundCost        Decimal              @default(0) @db.Decimal(10, 2)
   umpireCost        Decimal              @default(0) @db.Decimal(10, 2)
   streamerCost      Decimal              @default(0) @db.Decimal(10, 2)
+  discountAmount    Decimal              @default(0) @db.Decimal(10, 2)
+  platformFee       Decimal              @default(0) @db.Decimal(10, 2)
   totalCost         Decimal              @default(0) @db.Decimal(10, 2)
+  couponId          String?
   status            String               @default("ACTIVE")
   shortId           String?              @unique
   scoringStatus     String               @default("NOT_STARTED")
   city              String?
   state             String?
+  customVenue       String?
   isLive            Boolean              @default(false)
   streamStatus      String               @default("offline")
   overlayConfig     Json?
@@ -433,7 +442,14 @@ model HostedGame {
   customUmpire      Json?
   customScorer      Json?
   customStreamer    Json?
+  customProfessionals Json?
   
+  // AI Commentary Settings
+  isAiCommentaryEnabled Boolean @default(false)
+  commentaryVoice       String  @default("en_US-lessac-medium") // Piper TTS voice model name
+  commentaryLanguage    String  @default("en")
+  commentaryStyle       String  @default("professional")
+
   // New fields for Scoring Match
   name              String?
   format            String?
@@ -442,6 +458,14 @@ model HostedGame {
   scoringPassword   String?
   youtubeLiveUrl    String?
   maxMembers        Int                  @default(11)
+  customDays        Int                  @default(1)
+  customOversPerDay Int                  @default(20)
+  
+  // Escrow & Matchmaking fields
+  escrowAmount      Decimal              @default(0) @db.Decimal(10, 2)
+  disputeRaised     Boolean              @default(false)
+  payoutStatus      String               @default("PENDING") // PENDING, FROZEN, PAID, REFUNDED
+  scoringMatchId    String?
   
   createdAt         DateTime             @default(now())
   updatedAt         DateTime             @updatedAt
@@ -450,11 +474,16 @@ model HostedGame {
   invites           CustomPlayerInvite[]
   slots             GameSlot[]
   teams             GameTeam[]
+  gameDisputes      GameDispute[]
+  coinTransferStatus String               @default("PENDING")
+  votedStartedBy     String[]             @default([])
+  scheduledStartAt   DateTime?
   host              User                 @relation("HostRelation", fields: [hostId], references: [id])
   scorer            User?                @relation("ScorerRelation", fields: [scorerId], references: [id])
   streamer          User?                @relation("StreamerRelation", fields: [streamerId], references: [id])
   turf              Turf?                @relation(fields: [turfId], references: [id])
   umpire            User?                @relation("UmpireRelation", fields: [umpireId], references: [id])
+  coupon            Coupon?              @relation(fields: [couponId], references: [id])
 }
 
 model GameTeam {
@@ -464,8 +493,24 @@ model GameTeam {
   image     String?
   teamKey   String
   createdAt DateTime   @default(now())
-  slots     GameSlot[]
-  game      HostedGame @relation(fields: [gameId], references: [id], onDelete: Cascade)
+  slots      GameSlot[]
+  game       HostedGame @relation(fields: [gameId], references: [id], onDelete: Cascade)
+  linkedTeamId String?
+  linkedTeam   Team?      @relation(fields: [linkedTeamId], references: [id])
+}
+
+model GameDispute {
+  id          String     @id @default(uuid())
+  gameId      String
+  raisedById  String
+  reason      String?
+  status      String     @default("OPEN")
+  adminNote   String?
+  resolvedAt  DateTime?
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+  game        HostedGame @relation(fields: [gameId], references: [id], onDelete: Cascade)
+  raisedBy    User       @relation(fields: [raisedById], references: [id])
 }
 
 model GameSlot {
@@ -476,6 +521,7 @@ model GameSlot {
   customPlayerId String?             @unique
   role           String?
   status         String              @default("OPEN")
+  paymentStatus  String              @default("NONE") // NONE, RESERVED, CAPTURED, REFUNDED
   addedById      String?
   createdAt      DateTime            @default(now())
   customPlayer   CustomPlayerInvite? @relation("SlotInvite", fields: [customPlayerId], references: [id])
@@ -491,6 +537,8 @@ model CustomPlayerInvite {
   email        String
   phone        String?
   userId       String?
+  role         String     @default("PLAYER")
+  isProfessional Boolean  @default(false)
   inviteToken  String?    @unique
   inviteStatus String     @default("PENDING")
   mustPay      Boolean    @default(false)
@@ -503,7 +551,10 @@ model CustomPlayerInvite {
 model CricketMatch {
   id                  String            @id @default(uuid())
   gameId              String            @unique
-  status              String            @default("LIVE")
+  status              String            @default("NOT_STARTED")
+  timerState          String            @default("NOT_STARTED") // NOT_STARTED, RUNNING, PAUSED, ENDED
+  timerLastStartedAt  DateTime?
+  totalDurationSeconds Int              @default(0)
   result              String?
   tossWinner          String?
   tossDecision        String?
@@ -512,6 +563,9 @@ model CricketMatch {
   strikerId           String?
   nonStrikerId        String?
   bowlerId            String?
+  revisedTarget       Int?
+  revisedOvers        Float?
+  matchOfficials      Json?
   createdAt           DateTime          @default(now())
   updatedAt           DateTime          @updatedAt
   game                HostedGame        @relation(fields: [gameId], references: [id], onDelete: Cascade)
@@ -527,10 +581,13 @@ model Innings {
   battingTeam  String
   totalRuns    Int          @default(0)
   totalWickets Int          @default(0)
-  totalBalls   Int          @default(0)
-  isCompleted  Boolean      @default(false)
-  extras       Json
-  createdAt    DateTime     @default(now())
+  totalBalls         Int          @default(0)
+  isCompleted        Boolean      @default(false)
+  extras             Json
+  battingTeamReviews Int          @default(2)
+  fieldingTeamReviews Int         @default(2)
+  powerplayOvers     Int          @default(0)
+  createdAt          DateTime     @default(now())
   match        CricketMatch @relation(fields: [matchId], references: [id], onDelete: Cascade)
 }
 
@@ -546,9 +603,16 @@ model MatchBall {
   runs         Int          @default(0)
   isExtra      Boolean      @default(false)
   extraType    String       @default("NONE")
+  extraRuns    Int          @default(0)
   isBoundary   Boolean      @default(false)
+  isFour       Boolean      @default(false)
+  isSix        Boolean      @default(false)
   isWicket     Boolean      @default(false)
   wicketType   String?
+  playerOutId  String?
+  wicketTakerId String?
+  fieldingPosition String?
+  distance     String?
   commentary   String?
   timestamp    DateTime     @default(now())
   match        CricketMatch @relation(fields: [matchId], references: [id], onDelete: Cascade)
@@ -573,6 +637,10 @@ model MatchPlayerStat {
   bowlingWickets Int          @default(0)
   bowlingWides   Int          @default(0)
   bowlingNoBalls Int          @default(0)
+  isSubstitute   Boolean      @default(false)
+  substituteForId String?
+  timeSpentSeconds Int        @default(0)
+  timerLastStartedAt DateTime?
   createdAt      DateTime     @default(now())
   updatedAt      DateTime     @updatedAt
   match          CricketMatch @relation(fields: [matchId], references: [id], onDelete: Cascade)
@@ -612,6 +680,8 @@ model Team {
   captainPhone             String?
   qrCode                   String?
   ownerId                  String
+  isTemporaryPickup        Boolean               @default(false)
+  status                   String                @default("ACTIVE") // ACTIVE, ARCHIVED
   latitude                 Decimal?              @db.Decimal(10, 8)
   longitude                Decimal?              @db.Decimal(11, 8)
   createdAt                DateTime              @default(now())
@@ -619,6 +689,7 @@ model Team {
   owner                    User                  @relation("TeamOwner", fields: [ownerId], references: [id])
   customMembers            TeamCustomMember[]
   members                  TeamMember[]
+  linkedGameTeams          GameTeam[]
   opponentRequestsSent     TeamOpponentRequest[] @relation("RequestFrom")
   opponentRequestsReceived TeamOpponentRequest[] @relation("RequestTo")
   Team_A                   Team[]                @relation("TeamOpponents")
@@ -722,6 +793,7 @@ model Reel {
   creator         User              @relation(fields: [creatorId], references: [id])
   reelComments    ReelComment[]
   interactions    ReelInteraction[]
+  reports         ReelReport[]
 
   @@index([status, isPrivate, id])
   @@index([creatorId, status])
@@ -762,6 +834,22 @@ model ReelInteraction {
   @@index([userId])
 }
 
+model ReelReport {
+  id           String   @id @default(uuid())
+  reelId       String
+  reportedById String
+  reason       String
+  status       String   @default("PENDING")
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  reel         Reel     @relation(fields: [reelId], references: [id], onDelete: Cascade)
+  reportedBy   User     @relation(fields: [reportedById], references: [id], onDelete: Cascade)
+
+  @@index([reelId])
+  @@index([reportedById])
+  @@index([status])
+}
+
 model Post {
   id          String    @id @default(uuid())
   authorId    String    @map("creatorId")
@@ -777,6 +865,7 @@ model Post {
   comments    Comment[]
   author      User      @relation(fields: [authorId], references: [id])
   likes       User[]    @relation("PostLikes")
+  reports     PostReport[]
 
   @@index([authorId])
   @@index([status])
@@ -843,21 +932,23 @@ model SystemSetting {
 }
 
 model Coupon {
-  id            String       @id @default(uuid())
-  code          String       @unique
-  ownerId       String
+  id            String        @id @default(uuid())
+  code          String        @unique
+  ownerId       String?
   turfId        String?
-  discountType  String
-  discountValue Decimal      @db.Decimal(10, 2)
+  discountType  String        // e.g. 'PERCENTAGE', 'FIXED'
+  discountValue Decimal       @db.Decimal(10, 2)
   validUntil    DateTime
-  usageLimit    Int          @default(0)
-  timesUsed     Int          @default(0)
-  isActive      Boolean      @default(true)
-  createdAt     DateTime     @default(now())
-  updatedAt     DateTime     @updatedAt
-  owner         OwnerProfile @relation(fields: [ownerId], references: [id])
-  turf          Turf?        @relation(fields: [turfId], references: [id])
+  usageLimit    Int           @default(0)
+  timesUsed     Int           @default(0)
+  isActive      Boolean       @default(true)
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+  owner         OwnerProfile? @relation(fields: [ownerId], references: [id])
+  turf          Turf?         @relation(fields: [turfId], references: [id])
+  hostedGames   HostedGame[]
 }
+
 
 model FeatureFlag {
   id          String   @id @default(uuid())
@@ -1202,3 +1293,70 @@ model ProfessionalTask {
   professional    OwnerProfile @relation(fields: [professionalId], references: [id])
   customer        ProfessionalCustomer? @relation(fields: [customerId], references: [id])
 }
+
+model UserBadge {
+  id          String   @id @default(uuid())
+  userId      String
+  name        String
+  description String
+  sportType   String
+  category    String
+  badgeIcon   String
+  earnedAt    DateTime @default(now())
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  @@index([userId, sportType])
+}
+
+model PlayerCareerStats {
+  id                 String   @id @default(uuid())
+  userId             String
+  sportType          String   @default("CRICKET")
+  
+  matchesPlayed      Int      @default(0)
+  matchesWon         Int      @default(0)
+  matchesLost        Int      @default(0)
+  winPercentage      Float    @default(0.0)
+  
+  totalRuns          Int      @default(0)
+  ballsFaced         Int      @default(0)
+  fours              Int      @default(0)
+  sixes              Int      @default(0)
+  centuries          Int      @default(0)
+  halfCenturies      Int      @default(0)
+  highestScore       Int      @default(0)
+  battingAverage     Float    @default(0.0)
+  battingStrikeRate  Float    @default(0.0)
+  
+  ballsBowled        Int      @default(0)
+  runsConceded       Int      @default(0)
+  wickets            Int      @default(0)
+  fiveWicketHauls    Int      @default(0)
+  bestBowlingRuns    Int      @default(0)
+  bestBowlingWickets  Int      @default(0)
+  bowlingAverage     Float    @default(0.0)
+  bowlingEconomy     Float    @default(0.0)
+
+  updatedAt          DateTime @updatedAt
+  user               User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, sportType])
+  @@index([userId])
+}
+
+model PostReport {
+  id        String   @id @default(uuid())
+  postId    String
+  userId    String
+  reason    String
+  status    String   @default("PENDING") // PENDING, RESOLVED, DISMISSED
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  post      Post     @relation(fields: [postId], references: [id], onDelete: Cascade)
+  user      User     @relation(fields: [userId], references: [id])
+
+  @@index([postId])
+  @@index([userId])
+}
+
+

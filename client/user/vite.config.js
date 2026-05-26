@@ -1,6 +1,7 @@
 // vite.config.js
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
+import { VitePWA } from "vite-plugin-pwa";
 import path from "path";
 import { fileURLToPath } from "url";
 
@@ -8,7 +9,49 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 export default defineConfig({
-  plugins: [react()],
+  plugins: [
+    react(),
+    VitePWA({
+      registerType: 'autoUpdate',
+      injectRegister: 'auto',
+      includeAssets: ['favicon.png', 'logo.png'],
+      manifest: {
+        name: "Kridaz - Play Beyond Limits",
+        short_name: "Kridaz",
+        description: "Kridaz is the ultimate sports community platform for players and venue owners.",
+        display: "standalone",
+        background_color: "#000000",
+        theme_color: "#ff5722",
+        orientation: "portrait",
+        icons: [
+          {
+            src: "/favicon.png",
+            sizes: "192x192",
+            type: "image/png",
+            purpose: "any maskable"
+          },
+          {
+            src: "/logo.png",
+            sizes: "512x512",
+            type: "image/png"
+          }
+        ],
+        categories: ["sports", "social", "lifestyle"],
+        shortcuts: [
+          {
+            name: "Book Turf",
+            url: "/book-turf",
+            icons: [{ src: "/favicon.png", sizes: "192x192" }]
+          },
+          {
+            name: "Live Map",
+            url: "/find-players",
+            icons: [{ src: "/favicon.png", sizes: "192x192" }]
+          }
+        ]
+      }
+    })
+  ],
   resolve: {
     dedupe: ["react", "react-dom"],
     alias: {

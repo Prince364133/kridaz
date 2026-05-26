@@ -27,7 +27,7 @@ const BookingModal = ({ slot, onClose }) => {
               {startTime} - {endTime}
             </h3>
           </div>
-          <button onClick={onClose} className="p-2 hover:bg-[#111] rounded-full transition-colors border border-transparent hover:border-[#2D2D2D]">
+          <button onClick={onClose} className="p-2 hover:bg-[#111] rounded-[8px] transition-colors border border-transparent hover:border-[#2D2D2D]">
             <X size={18} className="text-[#878C9F]" />
           </button>
         </div>
@@ -241,11 +241,7 @@ export default function TurfDetails() {
              <div className="space-y-3">
                 <div className="flex flex-wrap items-center gap-4">
                    <div className="space-y-1">
-                      <h1 className={`text-4xl font-bold uppercase tracking-tight font-['Open_Sans'] ${
-                          turf.status === 'pending' ? 'text-transparent bg-clip-text bg-gradient-to-r from-[#55DEE8] to-[#BFF367]' :
-                          turf.status === 'rejected' ? 'text-red-500' :
-                          'text-white'
-                      }`}>
+                      <h1 className={`text-4xl font-bold uppercase tracking-tight font-['Open_Sans'] ${ turf.status === 'pending' ? 'text-amber-500' : turf.status === 'rejected' ? 'text-red-500' : 'text-white' }`}>
                          {turf.name}
                       </h1>
                       {pending.name && (
@@ -254,16 +250,8 @@ export default function TurfDetails() {
                          </p>
                       )}
                    </div>
-                    <div className={`px-3 py-1 border rounded-[4px] flex items-center gap-1 ${
-                       turf.status === 'approved' ? 'bg-[#55DEE8]/10 border-[#55DEE8]/20 text-[#55DEE8]' :
-                       turf.status === 'rejected' ? 'bg-red-500/10 border-red-500/20 text-red-500' :
-                       'bg-gradient-to-r from-[#55DEE8]/10 to-[#BFF367]/10 border-[#55DEE8]/20 text-transparent bg-clip-text bg-gradient-to-r from-[#55DEE8] to-[#BFF367]'
-                    }`}>
-                       <div className={`w-1.5 h-1.5 rounded-full animate-pulse ${
-                          turf.status === 'approved' ? 'bg-[#55DEE8]' :
-                          turf.status === 'rejected' ? 'bg-red-500' :
-                          'bg-gradient-to-r from-[#55DEE8] to-[#BFF367]'
-                       }`} />
+                    <div className={`px-3 py-1 border rounded-[4px] flex items-center gap-1 ${ turf.status === 'approved' ? 'bg-[#55DEE8]/10 border-[#55DEE8]/20 text-[#55DEE8]' : turf.status === 'rejected' ? 'bg-red-500/10 border-red-500/20 text-red-500' : 'bg-amber-500/10 border-amber-500/20 text-amber-500' }`}>
+                       <div className={`w-1.5 h-1.5 rounded-full animate-pulse ${ turf.status === 'approved' ? 'bg-[#55DEE8]' : turf.status === 'rejected' ? 'bg-red-500' : 'bg-amber-500' }`} />
                        <span className="text-[9px] font-bold uppercase tracking-widest">{turf.status}</span>
                     </div>
                    <div className="px-3 py-1 bg-[#111] border border-[#2D2D2D] rounded-[4px] flex items-center gap-2">
@@ -307,9 +295,7 @@ export default function TurfDetails() {
                    </div>
                 </div>
                 {turf.status !== 'approved' && (
-                   <div className={`flex items-center gap-2 p-2 px-3 rounded-[4px] border w-fit mt-2 ${
-                      turf.status === 'rejected' ? 'bg-red-500/5 border-red-500/10 text-red-500/80' : 'bg-gradient-to-r from-[#55DEE8]/5 to-[#BFF367]/5 border-[#55DEE8]/10 text-transparent bg-clip-text bg-gradient-to-r from-[#55DEE8]/80 to-[#BFF367]/80'
-                   }`}>
+                   <div className={`flex items-center gap-2 p-2 px-3 rounded-[4px] border w-fit mt-2 ${ turf.status === 'rejected' ? 'bg-red-500/5 border-red-500/10 text-red-500/80' : 'bg-amber-500/5 border-amber-500/10 text-amber-500/80' }`}>
                       <AlertCircle size={12} />
                       <span className="text-[9px] font-bold uppercase tracking-widest">
                          {turf.status === 'rejected' ? 'Critical: Corrections Required for Deployment' : 'Intelligence Audit: Verification in Progress'}
@@ -321,22 +307,14 @@ export default function TurfDetails() {
           <div className="flex flex-wrap gap-3">
              <button 
                 onClick={handleToggleVisibility}
-                className={`px-6 py-2.5 border rounded-[8px] font-bold uppercase text-[10px] tracking-widest transition-all flex items-center gap-2 ${
-                  turf.isActive 
-                  ? "bg-[#55DEE8]/5 border-[#55DEE8]/20 text-[#55DEE8] hover:bg-[#55DEE8]/10" 
-                  : "bg-black border-[#2D2D2D] text-[#444] hover:text-white"
-                }`}
+                className={`px-6 py-2.5 border rounded-[8px] font-bold uppercase text-[10px] tracking-widest transition-all flex items-center gap-2 ${ turf.isActive ? "bg-[#55DEE8]/5 border-[#55DEE8]/20 text-[#55DEE8] hover:bg-[#55DEE8]/10" : "bg-black border-[#2D2D2D] text-[#444] hover:text-white" }`}
              >
                 <Zap size={14} className={turf.isActive ? "fill-[#55DEE8]" : ""} />
                 {turf.isActive ? "Visible" : "Hidden"}
              </button>
              <button 
                 onClick={() => navigate(`/venue-owner/edit-turf/${id}`)}
-                className={`px-6 py-2.5 border rounded-[8px] font-bold uppercase text-[10px] tracking-widest transition-all flex items-center gap-2 ${
-                   turf.status === 'rejected' 
-                   ? "bg-red-500 text-white border-red-500 hover:bg-red-600 shadow-[0_5px_15px_rgba(239,68,68,0.2)]" 
-                   : "bg-[#111111] border-[#2D2D2D] text-[#878C9F] hover:text-white"
-                }`}
+                className={`px-6 py-2.5 border rounded-[8px] font-bold uppercase text-[10px] tracking-widest transition-all flex items-center gap-2 ${ turf.status === 'rejected' ? "bg-red-500 text-white border-red-500 hover:bg-red-600 shadow-[0_5px_15px_rgba(239,68,68,0.2)]" : "bg-[#111111] border-[#2D2D2D] text-[#878C9F] hover:text-white" }`}
              >
                 <Edit2 size={14} />
                 {turf.status === 'rejected' ? "Review & Re-apply" : "Edit Arena"}
@@ -488,9 +466,7 @@ export default function TurfDetails() {
                        </p>
                        <div className="flex flex-wrap gap-2">
                           {(pending.groundTypes || turf.groundTypes || []).map((ground, i) => (
-                             <span key={i} className={`px-2 py-1 border rounded-[4px] text-[9px] font-bold uppercase tracking-wider snap-start ${
-                                pending.groundTypes ? 'bg-gradient-to-r from-[#55DEE8]/5 to-[#BFF367]/5 border-[#55DEE8]/20 text-transparent bg-clip-text bg-gradient-to-r from-[#55DEE8] to-[#BFF367]' : 'bg-[#111] border-[#2D2D2D] text-white'
-                             }`}>
+                             <span key={i} className={`px-2 py-1 border rounded-[4px] text-[9px] font-bold uppercase tracking-wider snap-start ${ pending.groundTypes ? 'bg-amber-500/5 border-amber-500/20 text-amber-500' : 'bg-[#111] border-[#2D2D2D] text-white' }`}>
                                 {ground}
                              </span>
                           ))}
@@ -503,9 +479,7 @@ export default function TurfDetails() {
                        </p>
                        <div className="flex flex-wrap gap-2">
                           {(pending.facilities || turf.facilities || []).map((facility, i) => (
-                             <span key={i} className={`px-2 py-1 border rounded-[4px] text-[9px] font-bold uppercase tracking-wider snap-start ${
-                                pending.facilities ? 'bg-gradient-to-r from-[#55DEE8]/10 to-[#BFF367]/10 border-[#55DEE8]/20 text-transparent bg-clip-text bg-gradient-to-r from-[#55DEE8] to-[#BFF367]' : 'bg-[#55DEE8] border-[#55DEE8] text-black'
-                             }`}>
+                             <span key={i} className={`px-2 py-1 border rounded-[4px] text-[9px] font-bold uppercase tracking-wider snap-start ${ pending.facilities ? 'bg-amber-500/10 border-amber-500/20 text-amber-500' : 'bg-[#55DEE8] border-[#55DEE8] text-black' }`}>
                                 {facility}
                              </span>
                           ))}
@@ -523,15 +497,9 @@ export default function TurfDetails() {
                  </div>
                  <div className="flex flex-wrap gap-2">
                     {(pending.sportTypes || turf.sportTypes || []).map((sport, i) => (
-                       <div key={i} className={`flex items-center gap-3 border p-3 rounded-[6px] w-full group/sport transition-colors ${
-                          pending.sportTypes ? 'bg-gradient-to-r from-[#55DEE8]/5 to-[#BFF367]/5 border-[#55DEE8]/20' : 'bg-[#111] border-[#2D2D2D] hover:border-[#55DEE8]/40'
-                       }`}>
-                          <div className={`w-2 h-2 rounded-full transition-colors ${
-                             pending.sportTypes ? 'bg-gradient-to-r from-[#55DEE8] to-[#BFF367] animate-pulse' : 'bg-[#55DEE8]/20 group-hover/sport:bg-[#55DEE8]'
-                          }`} />
-                          <span className={`text-[11px] font-bold uppercase tracking-wider ${
-                             pending.sportTypes ? 'text-transparent bg-clip-text bg-gradient-to-r from-[#55DEE8] to-[#BFF367]' : 'text-white'
-                          }`}>{sport}</span>
+                       <div key={i} className={`flex items-center gap-3 border p-3 rounded-[6px] w-full group/sport transition-colors ${ pending.sportTypes ? 'bg-amber-500/5 border-amber-500/20' : 'bg-[#111] border-[#2D2D2D] hover:border-[#55DEE8]/40' }`}>
+                          <div className={`w-2 h-2 rounded-full transition-colors ${ pending.sportTypes ? 'bg-amber-500 animate-pulse' : 'bg-[#55DEE8]/20 group-hover/sport:bg-[#55DEE8]' }`} />
+                          <span className={`text-[11px] font-bold uppercase tracking-wider ${ pending.sportTypes ? 'text-amber-500' : 'text-white' }`}>{sport}</span>
                           {pending.sportTypes && <div className="ml-auto"><PendingBadge label="Add" /></div>}
                        </div>
                     ))}
@@ -686,11 +654,7 @@ export default function TurfDetails() {
                   <button
                     key={date}
                     onClick={() => setSelectedDate(date)}
-                    className={`w-full p-5 rounded-[8px] border text-left transition-all duration-300 flex justify-between items-center ${
-                      selectedDate === date 
-                      ? "bg-[#55DEE8] border-[#55DEE8] text-black shadow-[0_10px_20px_rgba(204,255,0,0.15)]" 
-                      : "bg-[#000000] border-[#2D2D2D] text-[#878C9F] hover:border-[#55DEE8]/40"
-                    }`}
+                    className={`w-full p-5 rounded-[8px] border text-left transition-all duration-300 flex justify-between items-center ${ selectedDate === date ? "bg-[#55DEE8] border-[#55DEE8] text-black shadow-[0_10px_20px_rgba(204,255,0,0.15)]" : "bg-[#000000] border-[#2D2D2D] text-[#878C9F] hover:border-[#55DEE8]/40" }`}
                   >
                     <div className="flex flex-col">
                        <span className="text-[11px] font-bold uppercase tracking-[1px]">
@@ -741,13 +705,7 @@ export default function TurfDetails() {
                     key={slot._id} 
                     onClick={() => slot.isBooked && setSelectedSlot(slot)}
                     disabled={!slot.isActive}
-                    className={`relative overflow-hidden p-6 rounded-[8px] border transition-all duration-500 group text-left flex flex-col justify-between min-h-[160px] ${
-                      !slot.isActive
-                      ? "bg-[#050505] border-[#1A1A1A] opacity-40 cursor-not-allowed"
-                      : slot.isBooked 
-                      ? "bg-[#55DEE8]/5 border-[#55DEE8]/30 shadow-[0_0_20px_rgba(204,255,0,0.05)] cursor-pointer hover:border-[#55DEE8]/60" 
-                      : "bg-[#000000] border-[#2D2D2D] hover:border-[#55DEE8]/40 cursor-default"
-                    }`}
+                    className={`relative overflow-hidden p-6 rounded-[8px] border transition-all duration-500 group text-left flex flex-col justify-between min-h-[160px] ${ !slot.isActive ? "bg-[#050505] border-[#1A1A1A] opacity-40 cursor-not-allowed" : slot.isBooked ? "bg-[#55DEE8]/5 border-[#55DEE8]/30 shadow-[0_0_20px_rgba(204,255,0,0.05)] cursor-pointer hover:border-[#55DEE8]/60" : "bg-[#000000] border-[#2D2D2D] hover:border-[#55DEE8]/40 cursor-default" }`}
                   >
                     <div className="flex justify-between items-start">
                        <div className="space-y-1">
@@ -760,9 +718,7 @@ export default function TurfDetails() {
                           </p>
                        </div>
                        {slot.isActive && (
-                         <div className={`px-2 py-0.5 rounded-[3px] text-[8px] font-bold uppercase tracking-widest border ${
-                           slot.isBooked ? "bg-[#55DEE8] border-[#55DEE8] text-black" : "bg-[#111] border-[#2D2D2D] text-[#878C9F]"
-                         }`}>
+                         <div className={`px-2 py-0.5 rounded-[3px] text-[8px] font-bold uppercase tracking-widest border ${ slot.isBooked ? "bg-[#55DEE8] border-[#55DEE8] text-black" : "bg-[#111] border-[#2D2D2D] text-[#878C9F]" }`}>
                            {slot.isBooked ? "Booked" : "Open"}
                          </div>
                        )}

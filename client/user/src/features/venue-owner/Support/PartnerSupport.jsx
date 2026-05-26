@@ -187,9 +187,7 @@ const PartnerSupport = () => {
                   {/* Replies */}
                   {selectedTicket.replies?.map((reply, idx) => (
                     <div key={idx} className={`flex flex-col ${reply.sender === 'OWNER' ? 'items-start' : 'items-end'} max-w-full`}>
-                      <div className={`p-4 rounded-[4px] border ${reply.sender === 'OWNER' 
-                        ? 'bg-[#111] border-white/5 max-w-[90%]' 
-                        : 'border-white/10 max-w-[90%]'}`}
+                      <div className={`p-4 rounded-[4px] border ${reply.sender === 'OWNER' ? 'bg-[#111] border-white/5 max-w-[90%]' : 'border-white/10 max-w-[90%]'}`}
                         style={{ backgroundColor: reply.sender !== 'OWNER' ? `${themeColor}0D` : undefined, borderColor: reply.sender !== 'OWNER' ? `${themeColor}33` : undefined }}>
                         <p className={`text-[10px] font-bold uppercase tracking-widest mb-2 font-inter ${reply.sender === 'OWNER' ? 'text-[#555]' : ''}`}
                            style={{ color: reply.sender !== 'OWNER' ? themeColor : undefined }}>
@@ -358,10 +356,7 @@ const PartnerSupport = () => {
                   >
                     <div className="flex justify-between items-start mb-4">
                       <div className="flex items-center gap-3">
-                        <span className={`text-[10px] font-bold px-3 py-1 rounded-[4px] uppercase tracking-widest border ${ticket.status === 'RESOLVED' ? 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20' :
-                            ticket.status === 'IN_PROGRESS' || ticket.status === 'OPEN' ? 'bg-blue-500/10 text-blue-500 border-blue-500/20' :
-                              'bg-gradient-to-r from-[#55DEE8]/10 to-[#BFF367]/10 text-transparent bg-clip-text bg-gradient-to-r from-[#55DEE8] to-[#BFF367] border-[#55DEE8]/20'
-                          }`}>
+                        <span className={`text-[10px] font-bold px-3 py-1 rounded-[4px] uppercase tracking-widest border ${ticket.status === 'RESOLVED' ? 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20' : ticket.status === 'IN_PROGRESS' || ticket.status === 'OPEN' ? 'bg-blue-500/10 text-blue-500 border-blue-500/20' : 'bg-amber-500/10 text-amber-500 border-amber-500/20' }`}>
                           {ticket.status}
                         </span>
                         {ticket.isAgentOnline ? (

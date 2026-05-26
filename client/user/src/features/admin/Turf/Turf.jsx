@@ -45,7 +45,7 @@ const Turf = ({ turf, onApprove, onReject, onDecommission, onDelete, onViewDetai
         </div>
         
         {/* Status badge */}
-        <div className={`absolute top-4 right-4 flex items-center gap-1.5 px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-widest border ${config.bg} text-${config.color}-500 ${config.border}`}>
+        <div className={`absolute top-4 right-4 flex items-center gap-1.5 px-3 py-1 rounded-[6px] text-[9px] font-black uppercase tracking-widest border ${config.bg} text-${config.color}-500 ${config.border}`}>
           <div className={`w-1.5 h-1.5 rounded-full ${config.icon}`} />
           <span>{turf.status}</span>
         </div>
@@ -55,7 +55,7 @@ const Turf = ({ turf, onApprove, onReject, onDecommission, onDelete, onViewDetai
       <div className="flex flex-col flex-1 p-6 gap-4">
         <div className="flex items-center justify-between">
           <span className="text-[10px] font-black text-[#CCFF00] uppercase tracking-[0.2em]">Arena</span>
-          <div className="flex items-center gap-1 bg-white/5 px-2 py-0.5 rounded-md border border-white/5">
+          <div className="flex items-center gap-1 bg-white/5 px-2 py-0.5 rounded-[6px] border border-white/5">
             <Star size={10} className="text-[#CCFF00] fill-[#CCFF00]" />
             <span className="text-white text-[10px] font-bold tracking-tighter">{turf.avgRating || "NEW"}</span>
           </div>
@@ -87,7 +87,7 @@ const Turf = ({ turf, onApprove, onReject, onDecommission, onDelete, onViewDetai
                     e.stopPropagation();
                     onApprove(turf._id);
                   }}
-                  className="flex items-center justify-center gap-2 py-3 bg-green-500/5 hover:bg-green-500/10 text-green-500 border border-green-500/10 rounded-xl text-[9px] font-black uppercase tracking-[0.1em] transition-all"
+                  className="flex items-center justify-center gap-2 py-3 bg-green-500/5 hover:bg-green-500/10 text-green-500 border border-green-500/10 rounded-[8px] text-[9px] font-black uppercase tracking-[0.1em] transition-all"
               >
                   <Check size={12} />
                   Approve
@@ -97,7 +97,7 @@ const Turf = ({ turf, onApprove, onReject, onDecommission, onDelete, onViewDetai
                     e.stopPropagation();
                     onReject(turf._id);
                   }}
-                  className="flex items-center justify-center gap-2 py-3 bg-red-500/5 hover:bg-red-500/10 text-red-500 border border-red-500/10 rounded-xl text-[9px] font-black uppercase tracking-[0.1em] transition-all"
+                  className="flex items-center justify-center gap-2 py-3 bg-red-500/5 hover:bg-red-500/10 text-red-500 border border-red-500/10 rounded-[8px] text-[9px] font-black uppercase tracking-[0.1em] transition-all"
               >
                   <X size={12} />
                   Reject
@@ -110,7 +110,7 @@ const Turf = ({ turf, onApprove, onReject, onDecommission, onDelete, onViewDetai
                     e.stopPropagation();
                     onDecommission(turf._id);
                   }}
-                  className="flex items-center justify-center gap-2 py-3 bg-orange-500/5 hover:bg-orange-500/10 text-orange-500 border border-orange-500/10 rounded-xl text-[9px] font-black uppercase tracking-[0.1em] transition-all"
+                  className="flex items-center justify-center gap-2 py-3 bg-orange-500/5 hover:bg-orange-500/10 text-orange-500 border border-orange-500/10 rounded-[8px] text-[9px] font-black uppercase tracking-[0.1em] transition-all"
               >
                   <Clock size={12} />
                   Decommission
@@ -120,7 +120,7 @@ const Turf = ({ turf, onApprove, onReject, onDecommission, onDelete, onViewDetai
                     e.stopPropagation();
                     onDelete(turf._id);
                   }}
-                  className="flex items-center justify-center gap-2 py-3 bg-gray-500/5 hover:bg-gray-500/10 text-gray-400 border border-white/10 rounded-xl text-[9px] font-black uppercase tracking-[0.1em] transition-all"
+                  className="flex items-center justify-center gap-2 py-3 bg-gray-500/5 hover:bg-gray-500/10 text-gray-400 border border-white/10 rounded-[8px] text-[9px] font-black uppercase tracking-[0.1em] transition-all"
               >
                   <X size={12} />
                   Soft Delete
@@ -132,7 +132,7 @@ const Turf = ({ turf, onApprove, onReject, onDecommission, onDelete, onViewDetai
                   e.stopPropagation();
                   onDelete(turf._id, true); // True for hard delete
                 }}
-                className="col-span-2 flex items-center justify-center gap-2 py-3 bg-red-600/10 hover:bg-red-600/20 text-red-500 border border-red-500/20 rounded-xl text-[9px] font-black uppercase tracking-[0.1em] transition-all"
+                className="col-span-2 flex items-center justify-center gap-2 py-3 bg-red-600/10 hover:bg-red-600/20 text-red-500 border border-red-500/20 rounded-[8px] text-[9px] font-black uppercase tracking-[0.1em] transition-all"
             >
                 <X size={12} />
                 Permanently Delete

@@ -13,26 +13,6 @@ const THEMES = [
     features: ['High-contrast glow', 'Modern compact layouts', 'Clean readability']
   },
   {
-    id: 'premium_glass',
-    name: 'Premium Glass',
-    description: 'Ultramodern glassmorphism card with frosted backdrop blurs, sleek golden typography, and premium corporate broadcast depth.',
-    colors: ['#F6D365', '#FDA085'],
-    previewBg: 'bg-white/[0.03] backdrop-blur-md border border-white/10 shadow-2xl',
-    tag: 'Premium',
-    glow: 'rgba(253, 160, 133, 0.4)',
-    features: ['Frosted glass backdrop', 'Gold-mesh accents', 'Chroma-key optimization']
-  },
-  {
-    id: 'retro_arcade',
-    name: 'Retro Arcade',
-    description: 'Nostalgic 8-bit game console styling featuring pixelated corners, neon orange arcade accents, and retro video game vibe.',
-    colors: ['#F093FB', '#F5576C'],
-    previewBg: 'bg-stone-950 border-2 border-dashed border-orange-500/40 shadow-[0_0_12px_rgba(249,115,22,0.15)]',
-    tag: '8-Bit Retro',
-    glow: 'rgba(249, 115, 22, 0.35)',
-    features: ['Monospace pixel font', 'Dashed border accents', 'Nostalgic 80s arcade feel']
-  },
-  {
     id: 'sports_network',
     name: 'Sports Network',
     description: 'Professional high-density television broadcast design. Bold color block layout optimized for maximum data display.',
@@ -41,16 +21,6 @@ const THEMES = [
     tag: 'TV Broadcast',
     glow: 'rgba(0, 193, 135, 0.4)',
     features: ['Television block design', 'High data readability', 'Sponsor integrations']
-  },
-  {
-    id: 'cyber_pulse',
-    name: 'Cyber Pulse',
-    description: 'Futuristic cyberpunk setup with deep violet bases, glowing neon pink indicators, and high-tech glitch grids.',
-    colors: ['#FA709F', '#FEE140'],
-    previewBg: 'bg-[#0f0c1b] border border-pink-500/30 shadow-[0_0_20px_rgba(236,72,153,0.15)]',
-    tag: 'Sci-Fi Cyber',
-    glow: 'rgba(236, 72, 153, 0.4)',
-    features: ['Glitch indicator pulse', 'Tech grid lines', 'Vibrant magenta/pink alerts']
   }
 ];
 
@@ -68,7 +38,7 @@ const TickerThemeStoreModal = ({ activeTheme = 'neon_classic', matchId, onClose,
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
+          'Authorization': `Bearer ${localStorage.getItem('scorer_token_' + matchId) || localStorage.getItem('token')}`
         },
         body: JSON.stringify({ tickerTheme: selectedTheme })
       });
@@ -95,7 +65,7 @@ const TickerThemeStoreModal = ({ activeTheme = 'neon_classic', matchId, onClose,
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 md:p-6 bg-black/80 backdrop-blur-xl animate-fade-in font-inter">
       {/* Modal Container */}
-      <div className="relative w-full max-w-5xl h-[88vh] md:h-[80vh] flex flex-col bg-neutral-950 border border-white/10 rounded-[32px] overflow-hidden shadow-[0_30px_100px_rgba(0,0,0,0.8)]">
+      <div className="relative w-full max-w-5xl h-[88vh] md:h-[80vh] flex flex-col bg-neutral-950 border border-white/10 rounded-[8px] overflow-hidden shadow-[0_30px_100px_rgba(0,0,0,0.8)]">
         
         {/* Header */}
         <div className="flex items-center justify-between p-6 md:px-8 border-b border-white/5 bg-white/[0.01]">
@@ -129,11 +99,7 @@ const TickerThemeStoreModal = ({ activeTheme = 'neon_classic', matchId, onClose,
                   onClick={() => setSelectedTheme(theme.id)}
                   onMouseEnter={() => setHoveredTheme(theme.id)}
                   onMouseLeave={() => setHoveredTheme(null)}
-                  className={`group relative flex flex-col justify-between p-6 rounded-[24px] border cursor-pointer transition-all duration-500 overflow-hidden ${
-                    isSelected 
-                      ? 'border-[#00C187] bg-white/[0.02] shadow-[0_15px_30px_rgba(0,193,135,0.06)]' 
-                      : 'border-white/5 bg-white/[0.01] hover:border-white/10 hover:bg-white/[0.02]'
-                  }`}
+                  className={`group relative flex flex-col justify-between p-6 rounded-[8px] border cursor-pointer transition-all duration-500 overflow-hidden ${ isSelected ? 'border-[#00C187] bg-white/[0.02] shadow-[0_15px_30px_rgba(0,193,135,0.06)]' : 'border-white/5 bg-white/[0.01] hover:border-white/10 hover:bg-white/[0.02]' }`}
                 >
                   {/* Dynamic Glowing Accent Background on Hover */}
                   <div 
@@ -164,7 +130,7 @@ const TickerThemeStoreModal = ({ activeTheme = 'neon_classic', matchId, onClose,
                     </p>
 
                     {/* CSS LIVE PREVIEW TICKER */}
-                    <div className={`w-full py-4 px-3 rounded-2xl flex items-center justify-between overflow-hidden shadow-lg ${theme.previewBg}`}>
+                    <div className={`w-full py-4 px-3 rounded-[8px] flex items-center justify-between overflow-hidden shadow-lg ${theme.previewBg}`}>
                       {theme.id === 'neon_classic' && (
                         <>
                           <div className="flex items-center gap-2">
@@ -229,11 +195,7 @@ const TickerThemeStoreModal = ({ activeTheme = 'neon_classic', matchId, onClose,
                         <div className="w-4 h-4 rounded-full bg-[#00C187]/80 border border-black" />
                       </div>
 
-                      <div className={`w-8 h-8 rounded-full flex items-center justify-center border transition-all duration-300 ${
-                        isSelected 
-                          ? 'bg-[#00C187]/10 border-[#00C187] text-[#00C187]' 
-                          : 'bg-white/5 border-white/5 text-neutral-600'
-                      }`}>
+                      <div className={`w-8 h-8 rounded-full flex items-center justify-center border transition-all duration-300 ${ isSelected ? 'bg-[#00C187]/10 border-[#00C187] text-[#00C187]' : 'bg-white/5 border-white/5 text-neutral-600' }`}>
                         {isSelected ? <Check size={14} className="stroke-[3]" /> : <Circle size={4} className="fill-neutral-600" />}
                       </div>
                     </div>
@@ -254,14 +216,14 @@ const TickerThemeStoreModal = ({ activeTheme = 'neon_classic', matchId, onClose,
           <div className="flex items-center gap-3 w-full md:w-auto">
             <button 
               onClick={onClose}
-              className="flex-1 md:flex-none px-6 py-3.5 rounded-2xl bg-neutral-900 border border-white/5 text-neutral-400 hover:text-white hover:bg-neutral-800 text-[10px] font-black uppercase tracking-widest transition-all"
+              className="flex-1 md:flex-none px-6 py-3.5 rounded-[8px] bg-neutral-900 border border-white/5 text-neutral-400 hover:text-white hover:bg-neutral-800 text-[10px] font-black uppercase tracking-widest transition-all"
             >
               Cancel
             </button>
             <button 
               onClick={handleApplyTheme}
               disabled={isApplying}
-              className="flex-1 md:flex-none px-8 py-3.5 rounded-2xl bg-[#00C187] hover:bg-[#00e39e] text-black font-black uppercase text-[10px] tracking-widest transition-all shadow-[0_10px_30px_rgba(0,193,135,0.2)] disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+              className="flex-1 md:flex-none px-8 py-3.5 rounded-[8px] bg-[#00C187] hover:bg-[#00e39e] text-black font-black uppercase text-[10px] tracking-widest transition-all shadow-[0_10px_30px_rgba(0,193,135,0.2)] disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
             >
               {isApplying ? (
                 <>

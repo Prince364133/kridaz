@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { useNavigate, useParams, Link } from "react-router-dom";
+import { useNavigate, useParams, Link, useSearchParams } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { useSelector } from "react-redux";
 import useTurfData from "../hooks/useTurfData";
@@ -62,6 +62,7 @@ const TurfDetails = () => {
   const { isLoggedIn } = useSelector((/** @type {any} */ state) => state.auth);
   const { id } = useParams();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const { loading, turfs } = useTurfData();
   const { averageRating, reviews } = useReviews(id);
   const { gateInteraction } = useLoginOnDemand();
@@ -148,16 +149,27 @@ const TurfDetails = () => {
 
   const handleBookingClick = () => {
     gateInteraction(() => {
-      navigate(`/checkout/${turf._id}`, {
-        state: {
-          turfName: turf.name,
-          selectedDate: selectedDate.toISOString(),
-          startTime: selectedStartTime,
-          duration: 1, // Default duration
-          amount: totalPrice,
-          location: turf.location
-        }
-      });
+      const returnTo = searchParams.get('returnTo');
+      if (returnTo) {
+        // Build return URL
+        const returnUrl = new URL(returnTo, window.location.origin);
+        returnUrl.searchParams.set('groundId', turf._id);
+        returnUrl.searchParams.set('date', selectedDate.toISOString());
+        returnUrl.searchParams.set('time', selectedStartTime);
+        returnUrl.searchParams.set('price', totalPrice || turf.pricePerHour);
+        navigate(returnUrl.pathname + returnUrl.search);
+      } else {
+        navigate(`/checkout/${turf._id}`, {
+          state: {
+            turfName: turf.name,
+            selectedDate: selectedDate.toISOString(),
+            startTime: selectedStartTime,
+            duration: 1, // Default duration
+            amount: totalPrice,
+            location: turf.location
+          }
+        });
+      }
     }, {
       title: "Confirm Your Slot",
       message: "Ready to dominate the pitch? Sign in to securely book your time slot and get instant confirmation."
@@ -188,10 +200,10 @@ const TurfDetails = () => {
   if (!turf) {
     return (
       <div className="min-h-screen bg-black flex items-center justify-center p-4">
-        <div className="bg-zinc-900 border border-zinc-800 p-8 rounded-[15px] text-center max-w-md w-full">
+        <div className="bg-zinc-900 border border-zinc-800 p-8 rounded-[8px] text-center max-w-md w-full">
           <Info className="w-16 h-16 text-zinc-500 mx-auto mb-4" />
           <h2 className="text-2xl font-bold text-white mb-2">Venue Not Found</h2>
-          <Link to="/venues" className="inline-flex items-center gap-2 bg-[#BFF367] text-black px-6 py-3 rounded-full font-bold">
+          <Link to="/venues" className="inline-flex items-center gap-2 bg-[#BFF367] text-black px-6 py-3 rounded-[6px] font-bold">
             <ChevronLeft className="w-5 h-5" /> Back to Discovery
           </Link>
         </div>
@@ -208,7 +220,7 @@ const TurfDetails = () => {
   };
 
   const bookingSelectorContent = (
-    <div className="w-full bg-[#121212] rounded-[15px] border border-zinc-800 p-4 md:p-6 flex flex-col shadow-2xl overflow-hidden h-auto max-h-[600px] lg:max-h-[800px]">
+    <div className="w-full bg-[#121212] rounded-[8px] border border-zinc-800 p-4 md:p-6 flex flex-col shadow-2xl overflow-hidden h-auto max-h-[600px] lg:max-h-[800px]">
 
       {/* Select Date */}
       <div className="space-y-4 shrink-0">
@@ -222,18 +234,12 @@ const TurfDetails = () => {
             return (
               <div
                 key={dateStr}
-                className={`flex-none rounded-[12px] p-[2px] transition-all duration-300 ${isActive
-                  ? "bg-gradient-to-r from-[#55DEE8] to-[#BFF367] shadow-[0_0_15px_rgba(85,222,232,0.2)]"
-                  : "bg-transparent"
-                  }`}
+                className={`flex-none rounded-[12px] p-[2px] transition-all duration-300 ${isActive ? "bg-gradient-to-r from-[#55DEE8] to-[#BFF367] shadow-[0_0_15px_rgba(85,222,232,0.2)]" : "bg-transparent" }`}
                 style={{ width: '68px', height: '85px' }}
               >
                 <button
                   onClick={() => handleDateChange(date)}
-                  className={`w-full h-full flex flex-col items-center justify-center gap-1 rounded-[10px] ${isActive
-                    ? "bg-[#1C1C1C]"
-                    : "bg-[#2A2A2A] hover:bg-[#333333]"
-                    }`}
+                  className={`w-full h-full flex flex-col items-center justify-center gap-1 rounded-[10px] ${isActive ? "bg-[#1C1C1C]" : "bg-[#2A2A2A] hover:bg-[#333333]" }`}
                 >
                   <span className={`text-[28px] font-bold leading-none tracking-tight ${isActive ? "text-white" : "text-zinc-200"}`}>
                     {String(date.getDate()).padStart(2, '0')}
@@ -275,20 +281,12 @@ const TurfDetails = () => {
               return (
                 <div
                   key={idx}
-                  className={`rounded-[8px] p-[1.5px] transition-all duration-300 ${isSelected
-                    ? "bg-gradient-to-r from-[#55DEE8] to-[#BFF367] shadow-[0_0_10px_rgba(85,222,232,0.2)]"
-                    : "bg-transparent"
-                    }`}
+                  className={`rounded-[8px] p-[1.5px] transition-all duration-300 ${isSelected ? "bg-gradient-to-r from-[#55DEE8] to-[#BFF367] shadow-[0_0_10px_rgba(85,222,232,0.2)]" : "bg-transparent" }`}
                 >
                   <button
                     disabled={!isAvailable}
                     onClick={() => handleTimeSelection(time)}
-                    className={`w-full h-full py-[8.5px] px-2 rounded-[6.5px] text-[13px] font-medium tracking-wide transition-all duration-300 font-['Open_Sans'] ${isSelected
-                      ? "bg-[#1C1C1C] text-white"
-                      : isAvailable
-                        ? "bg-[#2A2A2A] text-zinc-300 hover:bg-[#333333]"
-                        : "bg-[#1A1A1A] text-zinc-600 cursor-not-allowed opacity-50"
-                      }`}
+                    className={`w-full h-full py-[8.5px] px-2 rounded-[6.5px] text-[13px] font-medium tracking-wide transition-all duration-300 font-['Open_Sans'] ${isSelected ? "bg-[#1C1C1C] text-white" : isAvailable ? "bg-[#2A2A2A] text-zinc-300 hover:bg-[#333333]" : "bg-[#1A1A1A] text-zinc-600 cursor-not-allowed opacity-50" }`}
                   >
                     {displayTime}
                   </button>
@@ -296,7 +294,7 @@ const TurfDetails = () => {
               );
             })
           ) : (
-            <div className="col-span-3 py-10 text-center bg-[#1A1A1A] rounded-[16px] border border-zinc-800">
+            <div className="col-span-3 py-10 text-center bg-[#1A1A1A] rounded-[8px] border border-zinc-800">
               <Clock className="w-8 h-8 text-zinc-600 mx-auto mb-2" />
               <p className="text-[13px] font-medium text-zinc-500">No Slots Available</p>
             </div>
@@ -315,7 +313,7 @@ const TurfDetails = () => {
           disabled={bookingLoading || !selectedStartTime}
           className="bg-gradient-to-r from-[#55DEE8] to-[#BFF367] text-black px-8 h-12 rounded-[10px] font-bold text-[14px] hover:scale-[1.02] active:scale-[0.98] transition-all duration-300 disabled:opacity-50 disabled:grayscale shadow-[0_0_15px_rgba(85,222,232,0.3)] hover:shadow-[0_0_25px_rgba(191,243,103,0.5)]"
         >
-          {bookingLoading ? "..." : "Proceed"}
+          {bookingLoading ? "..." : (searchParams.get('returnTo') ? "Add this slot to my host game" : "Proceed")}
         </button>
       </div>
 
@@ -453,7 +451,7 @@ const TurfDetails = () => {
             </div>
 
             {/* Venue Details Card */}
-            <div className="bg-[#121212] rounded-[15px] border border-zinc-800 p-8 space-y-8 font-inter">
+            <div className="bg-[#121212] rounded-[8px] border border-zinc-800 p-8 space-y-8 font-inter">
 
               {/* Title & Stats */}
               <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 sm:gap-0">
@@ -474,10 +472,10 @@ const TurfDetails = () => {
                   </div>
                 </div>
                 <div className="flex items-center gap-3 w-full sm:w-auto justify-start sm:justify-end">
-                  <button onClick={() => setIsFavorite(!isFavorite)} className={`p-3 rounded-full bg-zinc-900/50 border ${isFavorite ? 'border-[#BFF367] text-[#BFF367]' : 'border-zinc-800 text-zinc-400'} hover:border-[#BFF367] transition-all`}>
+                  <button onClick={() => setIsFavorite(!isFavorite)} className={`p-3 rounded-[8px] bg-zinc-900/50 border ${isFavorite ? 'border-[#BFF367] text-[#BFF367]' : 'border-zinc-800 text-zinc-400'} hover:border-[#BFF367] transition-all`}>
                     <Heart className={`w-5 h-5 ${isFavorite ? 'fill-current' : ''}`} />
                   </button>
-                  <button onClick={handleShare} className="p-3 rounded-full bg-zinc-900/50 border border-zinc-800 text-zinc-400 hover:border-[#BFF367] transition-all">
+                  <button onClick={handleShare} className="p-3 rounded-[8px] bg-zinc-900/50 border border-zinc-800 text-zinc-400 hover:border-[#BFF367] transition-all">
                     <Share2 className="w-5 h-5" />
                   </button>
                 </div>
@@ -491,13 +489,13 @@ const TurfDetails = () => {
                   </h2>
                   <div className="flex flex-wrap gap-3">
                     {turf.sportTypes?.map((sport, i) => (
-                      <div key={i} className="px-4 py-1.5 rounded-full bg-zinc-900/50 border border-zinc-800 flex items-center gap-2 text-white group hover:border-[#BFF367] transition-all duration-300">
+                      <div key={i} className="px-4 py-1.5 rounded-[6px] bg-zinc-900/50 border border-zinc-800 flex items-center gap-2 text-white group hover:border-[#BFF367] transition-all duration-300">
                         <div className="w-1.5 h-1.5 rounded-full bg-gradient-to-r from-[#55DEE8] to-[#BFF367]" />
                         <span className="text-[10px] font-bold uppercase tracking-wider font-inter">{sport}</span>
                       </div>
                     ))}
                     {!turf.sportTypes?.length && (
-                      <div className="px-4 py-1.5 rounded-full bg-zinc-900/50 border border-zinc-800 flex items-center gap-2 text-zinc-400">
+                      <div className="px-4 py-1.5 rounded-[6px] bg-zinc-900/50 border border-zinc-800 flex items-center gap-2 text-zinc-400">
                         <Activity className="w-3 h-3" />
                         <span className="text-[10px] font-bold uppercase tracking-wider font-inter">Multisport</span>
                       </div>
@@ -509,7 +507,7 @@ const TurfDetails = () => {
                 <div className="space-y-4">
                   <h2 className="text-sm font-inter font-bold uppercase tracking-[0.15em] text-white">Ground Composition</h2>
                   <div className="flex flex-wrap gap-3">
-                    <div className="px-4 py-1.5 rounded-full bg-zinc-900 border border-zinc-800 flex items-center justify-center">
+                    <div className="px-4 py-1.5 rounded-[6px] bg-zinc-900 border border-zinc-800 flex items-center justify-center">
                       <span className="text-[10px] font-black uppercase tracking-widest text-white font-inter">
                         {turf.turfType || "Natural Grass"}
                       </span>
@@ -593,7 +591,7 @@ const TurfDetails = () => {
                     {[...Array(2)].map((_, i) => (
                       <div
                         key={i}
-                        className="rounded-[1.5rem] border border-white/5 bg-[#0d0d0d] animate-pulse h-[300px] relative overflow-hidden"
+                        className="rounded-[8px] border border-white/5 bg-[#0d0d0d] animate-pulse h-[300px] relative overflow-hidden"
                       >
                         <div className="absolute inset-0 bg-gradient-to-b from-white/5 to-transparent h-[60%]" />
                         <div className="absolute bottom-0 left-0 right-0 p-6 space-y-3">
@@ -676,7 +674,7 @@ const TurfDetails = () => {
             </div>
 
             {/* Map Card */}
-            <div className="rounded-[15px] overflow-hidden border border-zinc-800 shadow-2xl h-[200px] relative group">
+            <div className="rounded-[8px] overflow-hidden border border-zinc-800 shadow-2xl h-[200px] relative group">
               <VenueMap turf={turf} />
               <div className="absolute inset-0 bg-black/10 group-hover:bg-transparent transition-colors pointer-events-none" />
             </div>
@@ -749,7 +747,7 @@ const VenueMap = ({ turf }) => {
 
       {/* Click for Directions Overlay */}
       <div className="absolute inset-0 bg-black/20 group-hover/map:bg-black/40 transition-all flex items-end justify-center pb-4 opacity-0 group-hover/map:opacity-100">
-        <div className="bg-black/80 backdrop-blur-md px-4 py-2 rounded-full border border-white/10 flex items-center gap-2">
+        <div className="bg-black/80 backdrop-blur-md px-4 py-2 rounded-[6px] border border-white/10 flex items-center gap-2">
           <Navigation size={14} className="text-[#BFF367]" />
           <span className="text-[10px] font-bold text-white uppercase tracking-widest">Get Directions</span>
         </div>
@@ -775,7 +773,7 @@ const PoliciesModal = ({ isOpen, onClose, rules, turfName }) => {
             initial={{ opacity: 0, scale: 0.9, y: 20 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.9, y: 20 }}
-            className="relative w-full max-w-xl bg-[#121212] border border-zinc-800 rounded-[15px] p-8 shadow-2xl z-10"
+            className="relative w-full max-w-xl bg-[#121212] border border-zinc-800 rounded-[8px] p-8 shadow-2xl z-10"
           >
             <div className="flex items-center justify-between mb-6">
               <div className="flex items-center gap-3">
@@ -806,7 +804,7 @@ const PoliciesModal = ({ isOpen, onClose, rules, turfName }) => {
 
               <button
                 onClick={onClose}
-                className="w-full bg-gradient-to-r from-[#55DEE8] to-[#BFF367] text-black py-4 rounded-[15px] font-black uppercase text-xs tracking-widest hover:brightness-110 transition-all shadow-lg"
+                className="w-full bg-gradient-to-r from-[#55DEE8] to-[#BFF367] text-black py-4 rounded-[8px] font-black uppercase text-xs tracking-widest hover:brightness-110 transition-all shadow-lg"
               >
                 I Understand
               </button>

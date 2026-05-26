@@ -126,6 +126,20 @@ export const checkReelInteractionBloom = async (userId, reelId, type) => {
     }
 };
 
+/**
+ * Removes a reel interaction from the Bloom filter.
+ * Used when a user unlikes a reel.
+ */
+export const removeReelInteractionFromBloom = async (userId, reelId, type) => {
+    try {
+        if (!userId || !reelId || !type) return;
+        const interactionKey = `${userId}:${reelId}:${type}`;
+        await redisClient.srem(REELS_INTERACTION_KEY, interactionKey);
+    } catch (err) {
+        logger.error('[BLOOM] Error removing reel interaction', err);
+    }
+};
+
 // ── OTP SECURITY BLOOM ────────────────────────────────────────────────────────
 
 const OTP_BLACKLIST_KEY = 'kridaz:otp:blacklist:bloom';

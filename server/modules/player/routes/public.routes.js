@@ -1,5 +1,6 @@
 import express from "express";
 import { getPublicPlayers, getLeaderboard } from "../player.controller.js";
+import { optionalUserAuth } from "../../../middleware/jwt/user.middleware.js";
 
 const router = express.Router();
 
@@ -20,7 +21,7 @@ const router = express.Router();
  *       200:
  *         description: Array of player profiles
  */
-router.get("/players", getPublicPlayers);
+router.get("/players", optionalUserAuth, getPublicPlayers);
 
 /**
  * @swagger

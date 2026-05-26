@@ -3,7 +3,6 @@ import { Link, useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import useLoginForm from "../hooks/useLoginForm";
 import GoogleAuthButton from "../components/GoogleAuthButton";
-import Turnstile from "react-turnstile";
 import OnboardingModal from "@components/modals/OnboardingModal";
 import { 
   ArrowRight, 
@@ -23,6 +22,8 @@ import {
 } from "lucide-react";
 import { FormField } from "@components/common";
 
+const SUBHEADING_STYLE = { fontFamily: "'Inter 28pt Light', sans-serif", fontWeight: 300 };
+
 const Login = () => {
   const navigate = useNavigate();
   const { 
@@ -37,8 +38,7 @@ const Login = () => {
     showOnboarding,
     setShowOnboarding,
     onboardingUser,
-    accountNotFound,
-    setTurnstileToken
+    accountNotFound
   } = useLoginForm();
   const [mounted, setMounted] = useState(false);
   const dispatch = useDispatch(); // for quick demo button
@@ -61,13 +61,13 @@ const Login = () => {
 
   return (
     <div className="min-h-screen bg-[#000] relative flex flex-col items-center justify-start pt-4 lg:pt-10 pb-12 font-sans">
-      {/* G��G�� BACKGROUND LAYER G��G�� */}
+      {/* Gï¿½ï¿½Gï¿½ï¿½ BACKGROUND LAYER Gï¿½ï¿½Gï¿½ï¿½ */}
       <div className="absolute inset-0 z-0">
         <div className="absolute inset-0 bg-black" />
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,_transparent_0%,_black_100%)]" />
       </div>
 
-      {/* G��G�� MAIN CONTENT G��G�� */}
+      {/* Gï¿½ï¿½Gï¿½ï¿½ MAIN CONTENT Gï¿½ï¿½Gï¿½ï¿½ */}
       <div className={`relative z-10 w-full max-w-md mx-auto px-6 transition-all duration-1000 transform ${mounted ? "translate-y-0 opacity-100" : "translate-y-20 opacity-0"}`}>
         
         <div className="flex flex-col items-center w-full max-w-md mx-auto">
@@ -77,7 +77,7 @@ const Login = () => {
             <div className="flex flex-col items-center justify-center text-center mb-10">
                <div className="space-y-2">
                  <h2 className="text-3xl font-bold text-white">Login</h2>
-                 <p className="text-sm text-white/60">Welcome back, please enter your details</p>
+                 <p className="text-sm text-white/60" style={SUBHEADING_STYLE}>Welcome back, please enter your details</p>
                </div>
             </div>
 
@@ -100,7 +100,7 @@ const Login = () => {
                         type="text" 
                         placeholder="000000"
                         maxLength={6}
-                        className="w-full bg-white/[0.03] border border-white/5 focus:border-[#55DEE8]/50 rounded-xl h-14 pl-12 pr-4 text-white text-center tracking-widest text-lg outline-none transition-all"
+                        className="w-full bg-white/[0.03] border border-white/5 focus:border-[#55DEE8]/50 rounded-[8px] h-14 pl-12 pr-4 text-white text-center tracking-widest text-lg outline-none transition-all"
                       />
                     </div>
                     {errors.otp && <p className="text-xs text-red-500 mt-1 ml-1 text-center">{errors.otp.message}</p>}
@@ -109,7 +109,7 @@ const Login = () => {
                   <button 
                     type="submit" 
                     disabled={loading}
-                    className="w-full bg-[#55DEE8] hover:bg-[#a3e635] text-black h-14 rounded-xl font-bold text-lg flex items-center justify-center gap-2 active:scale-[0.98] transition-all disabled:opacity-50 mt-4 group/btn" 
+                    className="w-full bg-[#55DEE8] hover:bg-[#a3e635] text-black h-14 rounded-[8px] font-bold text-lg flex items-center justify-center gap-2 active:scale-[0.98] transition-all disabled:opacity-50 mt-4 group/btn" 
                   >
                     {loading ? "Verifying..." : "Verify & Login"}
                     {!loading && <ArrowRight className="w-5 h-5 group-hover/btn:translate-x-1 transition-transform" />}
@@ -155,7 +155,7 @@ const Login = () => {
                               register("email").onChange(e);
                             }}
                             placeholder="name@example.com or 9876543210"
-                            className="w-full bg-white/[0.03] border border-white/5 focus:border-[#55DEE8]/50 rounded-xl h-14 pl-12 pr-4 text-white text-sm placeholder:text-white/20 outline-none transition-all group-hover/input:bg-white/[0.05]"
+                            className="w-full bg-white/[0.03] border border-white/5 focus:border-[#55DEE8]/50 rounded-[8px] h-14 pl-12 pr-4 text-white text-sm placeholder:text-white/20 outline-none transition-all group-hover/input:bg-white/[0.05]"
                           />
                           {errors.email && <p className="text-xs text-red-500 mt-1 ml-1">{errors.email.message}</p>}
                         </div>
@@ -174,8 +174,8 @@ const Login = () => {
                           <input
                             {...register("password")}
                             type="password"
-                            placeholder="G��G��G��G��G��G��G��G��"
-                            className="w-full bg-white/[0.03] border border-white/5 focus:border-[#55DEE8]/50 rounded-xl h-14 pl-12 pr-4 text-white text-sm placeholder:text-white/20 outline-none transition-all group-hover/input:bg-white/[0.05]"
+                            placeholder="Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½"
+                            className="w-full bg-white/[0.03] border border-white/5 focus:border-[#55DEE8]/50 rounded-[8px] h-14 pl-12 pr-4 text-white text-sm placeholder:text-white/20 outline-none transition-all group-hover/input:bg-white/[0.05]"
                           />
                           {errors.password && <p className="text-xs text-red-500 mt-1 ml-1">{errors.password.message}</p>}
                         </div>
@@ -185,7 +185,7 @@ const Login = () => {
                     {/* Submit Button */}
                     <div className="space-y-4 mt-8">
                       {accountNotFound && (
-                        <div className="p-4 bg-red-500/10 border border-red-500/20 rounded-xl mb-4 animate-fade-in">
+                        <div className="p-4 bg-red-500/10 border border-red-500/20 rounded-[8px] mb-4 animate-fade-in">
                           <p className="text-sm text-red-500 text-center mb-3 font-medium">
                             Account not found. Create a new account to get started!
                           </p>
@@ -198,19 +198,11 @@ const Login = () => {
                         </div>
                       )}
                       
-                      {/* Turnstile Bot Protection */}
-                      <div className="flex justify-center my-4">
-                        <Turnstile
-                          sitekey={import.meta.env.DEV ? "1x00000000000000000000AA" : import.meta.env.VITE_TURNSTILE_SITE_KEY}
-                          onVerify={(token) => setTurnstileToken(token)}
-                          theme="dark"
-                        />
-                      </div>
                       
                       <button 
                         type="submit" 
                         disabled={loading}
-                        className="w-full bg-[#55DEE8] hover:bg-[#a3e635] text-black h-14 rounded-xl font-bold text-lg flex items-center justify-center gap-2 active:scale-[0.98] transition-all disabled:opacity-50 group/btn" 
+                        className="w-full bg-[#55DEE8] hover:bg-[#a3e635] text-black h-14 rounded-[8px] font-bold text-lg flex items-center justify-center gap-2 active:scale-[0.98] transition-all disabled:opacity-50 group/btn" 
                       >
                         {loading ? "Sending OTP..." : "Continue"}
                         {!loading && <ArrowRight className="w-5 h-5 group-hover/btn:translate-x-1 transition-transform" />}

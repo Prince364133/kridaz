@@ -43,7 +43,7 @@ const BookingInvoice = () => {
         </div>
         <h1 className="text-xl font-black text-white uppercase tracking-tight mb-2">Access Denied</h1>
         <p className="text-zinc-500 text-sm max-w-xs mb-8">{error || "Invoice not found"}</p>
-        <Link to="/" className="bg-white/5 hover:bg-white/10 text-white px-8 py-3 rounded-xl text-xs font-bold uppercase tracking-wider transition-all">
+        <Link to="/" className="bg-white/5 hover:bg-white/10 text-white px-8 py-3 rounded-[8px] text-xs font-bold uppercase tracking-wider transition-all">
           Go Back Home
         </Link>
       </div>
@@ -65,7 +65,7 @@ const BookingInvoice = () => {
             href={invoiceDownloadUrl}
             target="_blank"
             rel="noopener noreferrer"
-            className="flex items-center justify-center gap-2 bg-[#55DEE8] hover:bg-[#b8e600] rounded-xl px-6 py-3 text-black text-xs font-black uppercase tracking-widest transition-all shadow-[0_0_20px_rgba(204,255,0,0.1)]"
+            className="flex items-center justify-center gap-2 bg-[#55DEE8] hover:bg-[#b8e600] rounded-[8px] px-6 py-3 text-black text-xs font-black uppercase tracking-widest transition-all shadow-[0_0_20px_rgba(204,255,0,0.1)]"
           >
             <Download size={16} />
             Download PDF
@@ -73,7 +73,7 @@ const BookingInvoice = () => {
         </div>
 
         {/* Invoice PDF Viewer */}
-        <div className="bg-white rounded-3xl overflow-hidden shadow-2xl relative h-[75vh] w-full">
+        <div className="bg-white rounded-[8px] overflow-hidden shadow-2xl relative h-[75vh] w-full">
           <iframe 
             src={invoiceDownloadUrl} 
             className="w-full h-full border-0" 

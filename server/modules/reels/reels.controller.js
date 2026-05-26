@@ -1,6 +1,6 @@
 import { prisma } from '../../config/prisma.js';
-import { getOrSetCache, generateCacheKey } from '../../utils/cache.js';
-import { addReelInteractionToBloom, checkReelInteractionBloom } from '../../utils/bloomFilter.js';
+import { getOrSetCache, generateCacheKey, invalidateCache } from '../../utils/cache.js';
+import { addReelInteractionToBloom, checkReelInteractionBloom, removeReelInteractionFromBloom } from '../../utils/bloomFilter.js';
 
 import { mediaQueue } from '../../queues/media.queue.js';
 import { getPresignedUploadUrl } from '../../utils/r2.js';
@@ -12,12 +12,13 @@ import logger from "../../utils/logger.js";
 import { SOCKET } from "@kridaz/shared-constants/socketEvents";
 
 
+const isProd = process.env.NODE_ENV === "production" || !!process.env.RAILWAY_ENVIRONMENT || !!process.env.RAILWAY_ENVIRONMENT_NAME || !!process.env.RAILWAY_PROJECT_ID;
 const COOKIE_SETTINGS = {
   httpOnly: true,
-  secure: process.env.NODE_ENV === 'production',
-  sameSite: 'strict',
-  domain: process.env.COOKIE_DOMAIN || (process.env.NODE_ENV === 'production' ? '.kridaz.com' : 'localhost'),
-  maxAge: 7200 * 1000
+  secure: isProd,
+  sameSite: isProd ? "none" : "strict",
+  domain: process.env.COOKIE_DOMAIN || (isProd ? '.kridaz.com' : 'localhost'),
+  maxAge: 7 * 24 * 60 * 60 * 1000
 };
 
 /**
@@ -206,9 +207,28 @@ export const getReelsFeed = async (req, res) => {
       })),
       ...formattedReels
     ];
-    
+
     // Deduplicate
     const uniqueReels = finalReels.filter((v, i, a) => a.findIndex(t => t.id === v.id) === i);
+
+    // Check likes for logged in user
+    let likedReelIds = new Set();
+    if (req.user && uniqueReels.length > 0) {
+      const likes = await prisma.reelInteraction.findMany({
+        where: {
+          userId: req.user.id,
+          reelId: { in: uniqueReels.map(r => r.id) },
+          type: 'like'
+        },
+        select: { reelId: true }
+      });
+      likedReelIds = new Set(likes.map(l => l.reelId));
+    }
+
+    const finalReelsWithLikes = uniqueReels.map(r => ({
+      ...r,
+      isLiked: likedReelIds.has(r.id)
+    }));
 
     const nextCursor = reels.length > 0 ? reels[reels.length - 1].id : null;
 
@@ -229,7 +249,7 @@ export const getReelsFeed = async (req, res) => {
 
     res.status(200).json({ 
       success: true, 
-      reels: uniqueReels,
+      reels: finalReelsWithLikes,
       nextCursor 
     });
 
@@ -247,29 +267,64 @@ export const interactWithReel = async (req, res) => {
     const { type, watchTime, completionRate } = req.body;
     const userId = req.user.id;
 
+    // Normalize type to lowercase
+    const normalizedType = (type || 'like').toLowerCase();
+
+    // Support Unliking a Reel
+    if (normalizedType === 'unlike') {
+      // 1. Delete matching like interaction in DB
+      await prisma.reelInteraction.deleteMany({
+        where: {
+          userId,
+          reelId,
+          type: 'like'
+        }
+      });
+
+      // 2. Remove like from Bloom filter
+      await removeReelInteractionFromBloom(userId, reelId, 'like');
+
+      // 3. Decrement the likes count on the reel
+      const updatedReel = await prisma.reel.update({
+        where: { id: reelId },
+        data: { likes: { decrement: 1 } }
+      });
+
+      // 4. Invalidate cache so subsequent feed loads get the fresh count
+      await invalidateCache('reels:feed:*');
+
+      // 5. Broadcast to real-time clients
+      const io = getIO();
+      if (io) {
+        io.emit(SOCKET.REEL_LIKED, { reelId, likes: updatedReel.likes });
+      }
+
+      return res.status(200).json({ success: true, message: 'Reel unliked successfully' });
+    }
+
     // ── BLOOM FILTER OPTIMIZATION ───────────────────────────────────────────
     // If the user has already interacted (like/view), skip the expensive DB upsert.
-    const alreadyInteracted = await checkReelInteractionBloom(userId, reelId, type);
+    const alreadyInteracted = await checkReelInteractionBloom(userId, reelId, normalizedType);
     if (alreadyInteracted) {
       return res.status(200).json({ success: true, message: 'Interaction already tracked (Bloom hit)' });
     }
 
     const interaction = await prisma.reelInteraction.upsert({
       where: {
-        userId_reelId_type: { userId, reelId, type: type || 'like' }
+        userId_reelId_type: { userId, reelId, type: normalizedType }
       },
       update: { watchTime, completionRate },
-      create: { userId, reelId, type: type || 'like', watchTime, completionRate }
+      create: { userId, reelId, type: normalizedType, watchTime, completionRate }
     });
 
     // Update Bloom filter after successful DB operation
-    addReelInteractionToBloom(userId, reelId, type || 'like');
+    addReelInteractionToBloom(userId, reelId, normalizedType);
 
     const updateData = {};
-    if (type === 'view') updateData.views = { increment: 1 };
-    if (type === 'like') updateData.likes = { increment: 1 };
-    if (type === 'share') updateData.shares = { increment: 1 };
-    if (type === 'complete') updateData.completionCount = { increment: 1 };
+    if (normalizedType === 'view') updateData.views = { increment: 1 };
+    if (normalizedType === 'like') updateData.likes = { increment: 1 };
+    if (normalizedType === 'share') updateData.shares = { increment: 1 };
+    if (normalizedType === 'complete') updateData.completionCount = { increment: 1 };
 
     if (Object.keys(updateData).length > 0) {
       const updatedReel = await prisma.reel.update({
@@ -277,9 +332,14 @@ export const interactWithReel = async (req, res) => {
         data: updateData
       });
       
+      // Invalidate reels feed cache so hard refresh fetches fresh counts
+      if (normalizedType === 'like' || normalizedType === 'share') {
+        await invalidateCache('reels:feed:*');
+      }
+
       const io = getIO();
       if (io) {
-        if (type === 'like') {
+        if (normalizedType === 'like') {
           io.emit(SOCKET.REEL_LIKED, { reelId, likes: updatedReel.likes });
         }
       }
@@ -317,12 +377,35 @@ export const addComment = async (req, res) => {
       data: { comments: { increment: 1 } }
     });
 
+    // Invalidate reels feed cache so hard refresh fetches fresh counts
+    await invalidateCache('reels:feed:*');
+
     const io = getIO();
     if (io) {
       io.emit(SOCKET.REEL_COMMENTED, { reelId, comment });
     }
 
     res.status(201).json({ success: true, comment });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+/**
+ * Get Comments for a Reel
+ */
+export const getReelComments = async (req, res) => {
+  try {
+    const { reelId } = req.params;
+    const comments = await prisma.reelComment.findMany({
+      where: { reelId, parentId: null },
+      include: {
+        user: { select: { id: true, name: true, username: true, profilePicture: true } }
+      },
+      orderBy: { createdAt: 'desc' },
+      take: 50
+    });
+    res.status(200).json({ success: true, comments });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
   }
@@ -482,6 +565,9 @@ export const deleteReel = async (req, res) => {
     // 2. Delete from DB (Cascade handles interactions/comments)
     await prisma.reel.delete({ where: { id: reelId } });
 
+    // Invalidate reels feed cache
+    await invalidateCache('reels:feed:*');
+
     // Socket Broadcast
     const io = getIO();
     if (io) {
@@ -494,3 +580,49 @@ export const deleteReel = async (req, res) => {
     res.status(500).json({ success: false, message: error.message });
   }
 };
+
+/**
+ * Report a Reel
+ */
+export const reportReel = async (req, res) => {
+  try {
+    const { reelId } = req.params;
+    const { reason } = req.body;
+    const userId = req.user.id;
+
+    const report = await prisma.reelReport.create({
+      data: {
+        reelId,
+        reportedById: userId,
+        reason: reason || "Inappropriate content"
+      }
+    });
+
+    res.status(201).json({ success: true, report });
+  } catch (error) {
+    logger.error('[REELS] Report Error:', error);
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+/**
+ * Get Reel Reports
+ */
+export const getReelReports = async (req, res) => {
+  try {
+    const reports = await prisma.reelReport.findMany({
+      include: {
+        reportedBy: { select: { name: true, username: true } },
+        reel: { select: { id: true, caption: true, creator: { select: { name: true, username: true } } } }
+      },
+      orderBy: { createdAt: 'desc' }
+    });
+
+    res.status(200).json({ success: true, reports });
+  } catch (error) {
+    logger.error('[REELS] Get Reports Error:', error);
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+// Nodemon restart trigger
+

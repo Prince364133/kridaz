@@ -49,12 +49,16 @@ export const setupScoringGameSchema = z.object({
     teamAPlayers: z.array(z.any()).optional(),
     teamBPlayers: z.array(z.any()).optional(),
     venueId: z.string().optional().nullable(),
+    customVenue: z.string().optional().nullable(),
     sportType: z.string().optional(),
     professionals: z.array(z.any()).optional(),
+    customProfessionals: z.array(z.any()).optional(),
     tossWinner: z.string().optional(),
     tossDecision: z.string().optional(),
     scoringPassword: z.string().min(4, "Password must be at least 4 characters").optional().nullable().or(z.literal('')),
     youtubeLiveUrl: z.string().url().optional().nullable().or(z.literal('')),
+    customDays: z.number().int().min(1).max(10).optional(),
+    customOversPerDay: z.number().int().min(1).max(100).optional(),
   })
 });
 
@@ -83,5 +87,6 @@ export const setPlayersSchema = z.object({
     strikerId: z.string().min(1).optional().nullable(),
     nonStrikerId: z.string().min(1).optional().nullable(),
     bowlerId: z.string().min(1).optional().nullable(),
+    wicketKeeperId: z.string().min(1).optional().nullable(),
   }),
 });

@@ -53,6 +53,22 @@ describe("Auth Module API", () => {
   // ── 1. Registration ───────────────────────────────────────────────────────
   describe("POST /api/user/auth/register", () => {
     it("should register a new user successfully", async () => {
+      // 1. Verify OTP first to get registration token
+      const otpRes = await request(app)
+        .post("/api/user/auth/verify-otp")
+        .send({
+          email: testEmail,
+          phone: testPhone,
+          otp: "123456"
+        });
+
+      expect(otpRes.statusCode).toBe(200);
+      expect(otpRes.body.success).toBe(true);
+      expect(otpRes.body).toHaveProperty("registrationToken");
+
+      const registrationToken = otpRes.body.registrationToken;
+
+      // 2. Perform registration using registrationToken
       const res = await request(app)
         .post("/api/user/auth/register")
         .send({
@@ -66,6 +82,7 @@ describe("Auth Module API", () => {
           confirmPassword: "Password@123",
           otp:             "123456",
           phoneOtp:        "123456",
+          registrationToken: registrationToken,
         });
 
       if (res.statusCode !== 201) logger.info("[register]", res.body);
@@ -84,6 +101,16 @@ describe("Auth Module API", () => {
         },
       }).catch(() => {});
 
+      const otpRes = await request(app)
+        .post("/api/user/auth/verify-otp")
+        .send({
+          email: testEmail,
+          phone: testPhone,
+          otp: "123456"
+        });
+
+      const registrationToken = otpRes.body.registrationToken || "fake-token";
+
       const res = await request(app)
         .post("/api/user/auth/register")
         .send({
@@ -97,6 +124,7 @@ describe("Auth Module API", () => {
           confirmPassword: "Password@123",
           otp:             "123456",
           phoneOtp:        "123456",
+          registrationToken: registrationToken,
         });
 
       expect(res.statusCode).not.toBe(201);

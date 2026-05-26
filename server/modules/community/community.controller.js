@@ -6,6 +6,7 @@ import { getIO } from '../../config/socket.js';
 import { SOCKET } from "@kridaz/shared-constants/socketEvents";
 import path from 'path';
 import { v4 as uuidv4 } from 'uuid';
+import { findNearby } from '../../utils/geo.util.js';
 
 const resolveUserId = async (id) => {
   if (!id) return null;
@@ -220,11 +221,21 @@ export const getPosts = async (req, res) => {
     const rawId = req.user?.id || req.admin?.id;
     const userId = await resolveUserId(rawId);
 
-    const { search, page = 1, limit = 10, following } = req.query;
+    const { search, page = 1, limit = 10, following, lat, lng } = req.query;
     const skip = (parseInt(page) - 1) * parseInt(limit);
     const take = parseInt(limit);
 
     let authorFilter = null;
+    
+    // 1. Nearby Users fallback (if lat/lng is passed)
+    if (lat && lng) {
+      const nearbyUsers = await findNearby('User', parseFloat(lat), parseFloat(lng), 1000000, { take: 50 });
+      if (nearbyUsers.length > 0) {
+        authorFilter = { authorId: { in: nearbyUsers.map(u => u.id) } };
+      }
+    }
+
+    // 2. Following Override (if authenticated and requested)
     if (userId && following === 'true') {
       const follows = await prisma.userRelationship.findMany({
         where: {
@@ -254,10 +265,6 @@ export const getPosts = async (req, res) => {
       conditions.push(authorFilter);
     }
 
-    if (!userId) {
-      conditions.push({ author: { role: 'ADMIN' } });
-    }
-
     if (search) {
       conditions.push({
         OR: [
@@ -277,10 +284,11 @@ export const getPosts = async (req, res) => {
 
     where.AND = conditions;
 
-    const posts = await prisma.post.findMany({
+    let posts = await prisma.post.findMany({
       where,
       include: {
         author: { select: { id: true, name: true, profilePicture: true, username: true } },
+        likes: { select: { id: true, name: true, profilePicture: true, username: true } },
         _count: {
           select: { likes: true, comments: true }
         },
@@ -296,6 +304,32 @@ export const getPosts = async (req, res) => {
       skip,
       take
     });
+
+    // Fallback: If nearby filtering was applied but returned no posts, fetch global posts instead of showing empty screen
+    if (posts.length === 0 && authorFilter) {
+      const conditionsWithoutAuthor = conditions.filter(c => c !== authorFilter);
+      where.AND = conditionsWithoutAuthor;
+      posts = await prisma.post.findMany({
+        where,
+        include: {
+          author: { select: { id: true, name: true, profilePicture: true, username: true } },
+          likes: { select: { id: true, name: true, profilePicture: true, username: true } },
+          _count: {
+            select: { likes: true, comments: true }
+          },
+          comments: {
+            include: {
+              user: { select: { id: true, name: true, profilePicture: true, username: true } }
+            },
+            orderBy: { createdAt: 'desc' },
+            take: 3
+          }
+        },
+        orderBy: { createdAt: 'desc' },
+        skip,
+        take
+      });
+    }
 
     // Map to legacy format
     const formattedPosts = posts.map(post => {
@@ -403,6 +437,82 @@ export const deletePost = async (req, res) => {
     if (io) io.emit(SOCKET.COMMUNITY_POST_DELETED, id);
 
     res.status(200).json({ success: true, message: 'Post deleted successfully' });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+export const reportPost = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { reason } = req.body;
+    const rawId = req.user?.id || req.admin?.id;
+    const userId = await resolveUserId(rawId);
+
+    if (!userId) {
+      return res.status(401).json({ success: false, message: 'Unauthorized' });
+    }
+
+    const post = await prisma.post.findUnique({ where: { id } });
+    if (!post) {
+      return res.status(404).json({ success: false, message: 'Post not found' });
+    }
+
+    const report = await prisma.postReport.create({
+      data: {
+        postId: id,
+        userId,
+        reason
+      }
+    });
+
+    res.status(201).json({ success: true, message: 'Post reported successfully', report });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+// ==========================================
+// GET POST REPORTS (ADMIN)
+// ==========================================
+export const getPostReports = async (req, res) => {
+  try {
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 20;
+    const skip = (page - 1) * limit;
+
+    const [reports, total] = await Promise.all([
+      prisma.postReport.findMany({
+        skip,
+        take: limit,
+        orderBy: { createdAt: 'desc' },
+        include: {
+          post: {
+            select: {
+              id: true,
+              content: true,
+              mediaUrls: true,
+              mediaType: true,
+              createdAt: true,
+              author: { select: { id: true, name: true, profilePicture: true, email: true } }
+            }
+          },
+          user: { select: { id: true, name: true, profilePicture: true, email: true } }
+        }
+      }),
+      prisma.postReport.count()
+    ]);
+
+    res.status(200).json({
+      success: true,
+      data: reports,
+      pagination: {
+        total,
+        page,
+        limit,
+        totalPages: Math.ceil(total / limit)
+      }
+    });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
   }
@@ -724,3 +834,5 @@ export const getUserStories = async (req, res) => {
     res.status(500).json({ success: false, message: error.message });
   }
 };
+// Nodemon trigger
+

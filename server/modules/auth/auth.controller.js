@@ -23,17 +23,20 @@ const issueTokens = async (res, userId, token) => {
     const clientIp = res.req.ip || res.req.headers['x-forwarded-for'] || res.req.socket?.remoteAddress || null;
     const refreshToken = await generateRefreshToken(userId, clientIp);
     
+    const isProd = process.env.NODE_ENV === "production" || !!process.env.RAILWAY_ENVIRONMENT || !!process.env.RAILWAY_ENVIRONMENT_NAME || !!process.env.RAILWAY_PROJECT_ID;
+    
     res.cookie("auth_token", token, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "lax",
+      secure: isProd,
+      sameSite: isProd ? "none" : "lax",
       maxAge: 15 * 60 * 1000, // 15 mins
+      path: "/"
     });
 
     res.cookie("refresh_token", refreshToken, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "lax",
+      secure: isProd,
+      sameSite: isProd ? "none" : "lax",
       maxAge: 30 * 24 * 60 * 60 * 1000, // 30 days
       path: "/" 
     });
@@ -76,7 +79,7 @@ export const checkUsername = async (req, res) => {
     const available = await checkUsernameBloom(username);
     return res.status(200).json({ success: true, available });
   } catch (err) {
-    return res.status(500).json({ success: false, message: err.message });
+    return res.status(500).json({ success: false, message: "Internal Server Error" });
   }
 };
 
@@ -137,7 +140,7 @@ export const sendOtp = async (req, res) => {
     return res.status(200).json({ 
       success: true, 
       message: "OTPs sent to your email and WhatsApp successfully",
-      testOtp: { email: emailOtp, phone: phoneOtp }
+      ...(process.env.NODE_ENV === 'development' || process.env.NODE_ENV === 'test' ? { testOtp: { email: emailOtp, phone: phoneOtp } } : {})
     });
   } catch (err) {
     logger.error(err.message);
@@ -172,7 +175,7 @@ export const verifyOtp = async (req, res) => {
         verifiedPhone: phone || otpRecord?.phone,
         otpVerified: true 
       },
-      process.env.JWT_SECRET || "default_jwt_secret",
+      process.env.JWT_SECRET,
       { expiresIn: '30m' }
     );
 
@@ -188,7 +191,7 @@ export const verifyOtp = async (req, res) => {
     });
   } catch (err) {
     logger.error("verifyOtp error:", err);
-    return res.status(500).json({ success: false, message: err.message });
+    return res.status(500).json({ success: false, message: "Internal Server Error" });
   }
 };
 
@@ -216,7 +219,7 @@ export const getUmpireInviteDetails = async (req, res) => {
       } 
     });
   } catch (err) {
-    return res.status(500).json({ success: false, message: err.message });
+    return res.status(500).json({ success: false, message: "Internal Server Error" });
   }
 };
 
@@ -313,7 +316,7 @@ export const registerUser = async (req, res) => {
     }
 
     try {
-      jwt.verify(registrationToken, process.env.JWT_SECRET || "default_jwt_secret");
+      jwt.verify(registrationToken, process.env.JWT_SECRET);
     } catch (err) {
       return res.status(400).json({ success: false, message: "Registration token is invalid or expired. Please start over." });
     }
@@ -321,7 +324,7 @@ export const registerUser = async (req, res) => {
     // If phoneRegistrationToken is provided (for email signups), verify it too
     if (phoneRegistrationToken) {
       try {
-        jwt.verify(phoneRegistrationToken, process.env.JWT_SECRET || "default_jwt_secret");
+        jwt.verify(phoneRegistrationToken, process.env.JWT_SECRET);
       } catch (err) {
         return res.status(400).json({ success: false, message: "Phone verification token is invalid or expired. Please verify your phone again." });
       }
@@ -443,7 +446,7 @@ export const registerUser = async (req, res) => {
       });
   } catch (err) {
     logger.error("RegisterUser Error:", err.message);
-    return res.status(500).json({ success: false, message: err.message });
+    return res.status(500).json({ success: false, message: "Internal Server Error" });
   }
 };
 
@@ -467,14 +470,14 @@ export const registerOwner = async (req, res) => {
     }
 
     try {
-      jwt.verify(registrationToken, process.env.JWT_SECRET || "default_jwt_secret");
+      jwt.verify(registrationToken, process.env.JWT_SECRET);
     } catch (err) {
       return res.status(400).json({ success: false, message: "Registration token is invalid or expired. Please start over." });
     }
 
     if (phoneRegistrationToken) {
       try {
-        jwt.verify(phoneRegistrationToken, process.env.JWT_SECRET || "default_jwt_secret");
+        jwt.verify(phoneRegistrationToken, process.env.JWT_SECRET);
       } catch (err) {
         return res.status(400).json({ success: false, message: "Phone verification token is invalid or expired. Please verify your phone again." });
       }
@@ -538,7 +541,7 @@ export const registerOwner = async (req, res) => {
     });
   } catch (err) {
     logger.error("RegisterOwner Error:", err.message);
-    return res.status(500).json({ success: false, message: err.message });
+    return res.status(500).json({ success: false, message: "Internal Server Error" });
   }
 };
 
@@ -827,7 +830,7 @@ export const loginWithRecoveryToken = async (req, res) => {
 
 // Google Auth
 export const googleAuth = async (req, res) => {
-  console.log("GOOGLE AUTH REQ BODY:", req.body);
+  // console.log("GOOGLE AUTH REQ BODY:", { ...req.body, credential: "[REDACTED]", password: "[REDACTED]" });
   const { credential, accessToken, role: requestedRole, umpireInvite, inviteToken, password } = req.body;
   try {
     let payload;
@@ -1030,15 +1033,17 @@ export const logout = async (req, res) => {
         });
     }
     
+    const isProd = process.env.NODE_ENV === "production" || !!process.env.RAILWAY_ENVIRONMENT || !!process.env.RAILWAY_ENVIRONMENT_NAME || !!process.env.RAILWAY_PROJECT_ID;
     res.clearCookie("auth_token", {
       httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "lax",
+      secure: isProd,
+      sameSite: isProd ? "none" : "lax",
+      path: "/"
     });
     res.clearCookie("refresh_token", {
       httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "lax",
+      secure: isProd,
+      sameSite: isProd ? "none" : "lax",
       path: "/"
     });
     return res.status(200).json({ success: true, message: "Logged out successfully" });
@@ -1071,12 +1076,62 @@ export const refreshToken = async (req, res) => {
 
       // 2. REUSE DETECTION: If token is already revoked, someone might be attempting an attack
       if (tokenDoc.revokedAt) {
-          // Revoke all tokens for this user for safety
-          await prisma.refreshToken.updateMany({
-              where: { userId: tokenDoc.userId },
-              data: { revokedAt: new Date() }
+          const gracePeriodMs = 15000; // 15 seconds grace period
+          const timeSinceRevocation = new Date().getTime() - new Date(tokenDoc.revokedAt).getTime();
+          
+          if (timeSinceRevocation > gracePeriodMs) {
+              // Revoke all tokens for this user for safety
+              await prisma.refreshToken.updateMany({
+                  where: { userId: tokenDoc.userId },
+                  data: { revokedAt: new Date() }
+              });
+              return res.status(401).json({ success: false, message: "Token compromise detected. Please login again." });
+          }
+
+          // Within the grace period, let's find the user and issue a new access token (no new refresh token needed)
+          const user = await prisma.user.findUnique({
+            where: { id: tokenDoc.userId },
+            include: { ownerProfile: true }
           });
-          return res.status(401).json({ success: false, message: "Token compromise detected. Please login again." });
+
+          if (!user || user.status === "blocked") {
+              return res.status(401).json({ success: false, message: "User status invalid" });
+          }
+
+          let role = user.role;
+          let newToken;
+          let account = user;
+          
+          const isSuperAdmin = user.role?.toUpperCase() === "ADMIN";
+          
+          if (isSuperAdmin) {
+              role = user.role;
+              newToken = generateUserToken(user.id, role, user.ownerProfile?.id || null);
+              if (user.ownerProfile) account = { ...user, ...user.ownerProfile };
+          } else if (user.ownerProfile) {
+              role = user.role;
+              newToken = generateOwnerToken(user.id, role, user.ownerProfile.id);
+              account = { ...user, ...user.ownerProfile };
+          } else {
+              newToken = generateUserToken(user.id, user.role);
+          }
+
+          // Update auth_token cookie with new token
+          const isProd = process.env.NODE_ENV === "production" || !!process.env.RAILWAY_ENVIRONMENT || !!process.env.RAILWAY_ENVIRONMENT_NAME || !!process.env.RAILWAY_PROJECT_ID;
+          res.cookie("auth_token", newToken, {
+            httpOnly: true,
+            secure: isProd,
+            sameSite: isProd ? "none" : "lax",
+            maxAge: 15 * 60 * 1000, // 15 mins
+            path: "/"
+          });
+
+          return res.status(200).json({ 
+              success: true, 
+              token: newToken,
+              role,
+              user: account
+          });
       }
 
       // 3. Check expiration
@@ -1175,7 +1230,7 @@ export const ownerRequest = async (req, res) => {
       .json({ success: true, message: "Owner request created successfully" });
   } catch (err) {
     logger.info(err.message);
-    return res.status(500).json({ success: false, message: err.message });
+    return res.status(500).json({ success: false, message: "Internal Server Error" });
   }
 };
 
@@ -1288,7 +1343,7 @@ export const upgradeRequest = async (req, res) => {
     logger.error("Upgrade Request Error:", err);
     return res.status(500).json({ 
       success: false, 
-      message: err.message || "Internal server error" 
+      message: "Internal server error" 
     });
   }
 };
@@ -1481,7 +1536,7 @@ export const updateInterests = async (req, res) => {
     
     return res.status(200).json({ success: true, message: "Interests updated", sportTypes });
   } catch (err) {
-    return res.status(500).json({ success: false, message: err.message });
+    return res.status(500).json({ success: false, message: "Internal Server Error" });
   }
 };
 
@@ -1592,7 +1647,7 @@ export const updateProfile = async (req, res) => {
     });
   } catch (err) {
     logger.error("updateProfile Error:", err);
-    return res.status(500).json({ success: false, message: err.message });
+    return res.status(500).json({ success: false, message: "Internal Server Error" });
   }
 };
 
@@ -1663,11 +1718,11 @@ export const sendPhoneVerificationOtp = async (req, res) => {
     return res.status(200).json({
       success: true,
       message: "Verification OTP sent to your phone/WhatsApp successfully",
-      testOtp: { phone: phoneOtp }
+      ...(process.env.NODE_ENV === 'development' || process.env.NODE_ENV === 'test' ? { testOtp: { phone: phoneOtp } } : {})
     });
   } catch (err) {
     logger.error("sendPhoneVerificationOtp error:", err);
-    return res.status(500).json({ success: false, message: err.message });
+    return res.status(500).json({ success: false, message: "Internal Server Error" });
   }
 };
 
@@ -1694,7 +1749,7 @@ export const verifyPhoneOtp = async (req, res) => {
       return res.status(400).json({ success: false, message: "OTP has expired" });
     }
 
-    const isValid = (otp === otpRecord.phoneOtp) || (otp === "123456");
+    const isValid = (otp === otpRecord.phoneOtp) || ((process.env.NODE_ENV === 'test' && otp === "123456"));
     if (!isValid) {
       return res.status(400).json({ success: false, message: "Invalid verification code" });
     }
@@ -1710,7 +1765,7 @@ export const verifyPhoneOtp = async (req, res) => {
     });
   } catch (err) {
     logger.error("verifyPhoneOtp error:", err);
-    return res.status(500).json({ success: false, message: err.message });
+    return res.status(500).json({ success: false, message: "Internal Server Error" });
   }
 };
 
@@ -1755,17 +1810,17 @@ export const forgotPasswordOtp = async (req, res) => {
 
     if (isPhone && user.phone) {
       NotificationService.sendWhatsApp(user.phone, `Your password reset code is ${emailOtp}. It will expire in 10 minutes.`);
-      return res.status(200).json({ success: true, message: 'OTP sent to your phone number', testOtp: { phone: emailOtp } });
+      return res.status(200).json({ success: true, message: 'OTP sent to your phone number', ...(process.env.NODE_ENV === 'development' || process.env.NODE_ENV === 'test' ? { testOtp: { phone: emailOtp } } : {}) });
     } else {
       NotificationService.sendEmail({
         to: user.email,
         subject: 'Your Password Reset Code',
         html: `<p>Your password reset code is <strong>${emailOtp}</strong>. It will expire in 10 minutes.</p>`
       });
-      return res.status(200).json({ success: true, message: 'OTP sent to your email', testOtp: { email: emailOtp } });
+      return res.status(200).json({ success: true, message: 'OTP sent to your email', ...(process.env.NODE_ENV === 'development' || process.env.NODE_ENV === 'test' ? { testOtp: { email: emailOtp } } : {}) });
     }
   } catch (err) {
-    return res.status(500).json({ success: false, message: err.message });
+    return res.status(500).json({ success: false, message: "Internal Server Error" });
   }
 };
 
@@ -1826,6 +1881,6 @@ export const resetPassword = async (req, res) => {
     return res.status(200).json({ success: true, message: 'Password updated successfully' });
   } catch (err) {
     logger.error("Reset Password Error:", err);
-    return res.status(500).json({ success: false, message: err.message });
+    return res.status(500).json({ success: false, message: "Internal Server Error" });
   }
 };

@@ -4,6 +4,7 @@ import WalletService from "../../services/wallet.service.js";
 import { findNearby, updateGeoPoint } from "../../utils/geo.util.js";
 import logger from "../../utils/logger.js";
 import { getUserRecommendations } from "../../services/recommendation.service.js";
+import redisClient from "../../config/redis.js";
 
 
 const resolveUserId = async (id) => {
@@ -48,6 +49,31 @@ export const getPublicPlayers = async (req, res) => {
         }
       });
       
+      // Get real-time online users from Redis (who might not be in Postgres yet)
+      let onlineUserIds = [];
+      try {
+        onlineUserIds = await redisClient.georadius("kridaz:geo:online", lng, lat, radius / 1000, "km") || [];
+      } catch (err) {
+        logger.error("Redis georadius error", err);
+      }
+      
+      const postgresUserIds = new Set(nearbyUsers.map(u => u.id.toString()));
+      if (currentUserId) postgresUserIds.add(currentUserId.toString());
+      
+      const missingUserIds = onlineUserIds.filter(id => !postgresUserIds.has(id));
+      
+      if (missingUserIds.length > 0) {
+        const missingUsers = await prisma.user.findMany({
+          where: { ...where, id: { in: missingUserIds } },
+          include: { _count: { select: { bookings: true } } }
+        });
+        
+        missingUsers.forEach(u => {
+          u.distance = 0; // approximate distance for real-time users
+          nearbyUsers.push(u);
+        });
+      }
+      
       // If we used findNearby, we already have the users
       if (nearbyUsers.length > 0) {
         const userIds = nearbyUsers.map(u => u.id);
@@ -64,11 +90,15 @@ export const getPublicPlayers = async (req, res) => {
         ]);
         const storyUserIds = new Set(activeStories.map(s => s.userId));
         
+        // Collect IDs the current user is following
+        const currentUserFollowingIds = [];
+
         const players = nearbyUsers.map((u) => {
           const uIdStr = u.id;
           const stats = networkStats.get(uIdStr) || { followerIds: [], followingIds: [] };
           const isFollowing = currentUserId ? stats.followerIds.includes(currentUserId) : false;
           const isFollowedBy = currentUserId ? stats.followingIds.includes(currentUserId) : false;
+          if (isFollowing) currentUserFollowingIds.push(uIdStr);
           return {
             id: u.id,
             name: u.name,
@@ -80,11 +110,12 @@ export const getPublicPlayers = async (req, res) => {
             city: u.city,
             state: u.state,
             sportTypes: u.sportTypes || [],
+            followersCount: stats.followerIds.length,
             hasActiveStory: storyUserIds.has(uIdStr) && (req.user ? (isFollowing || isFollowedBy) : false),
             isFollowing
           };
         });
-        return res.status(200).json({ success: true, players });
+        return res.status(200).json({ success: true, players, followingIds: currentUserFollowingIds });
       }
     }
 
@@ -116,12 +147,16 @@ export const getPublicPlayers = async (req, res) => {
 
     const storyUserIds = new Set(activeStories.map(s => s.userId));
     
+    // Collect IDs the current user is following
+    const currentUserFollowingIds = [];
+
     const players = users.map((u) => {
       const uIdStr = u.id;
       const stats = networkStats.get(uIdStr) || { followerIds: [], followingIds: [] };
       
       const isFollowing = currentUserId ? stats.followerIds.includes(currentUserId) : false;
       const isFollowedBy = currentUserId ? stats.followingIds.includes(currentUserId) : false;
+      if (isFollowing) currentUserFollowingIds.push(uIdStr);
 
       return {
         id: u.id,
@@ -134,6 +169,7 @@ export const getPublicPlayers = async (req, res) => {
         city: u.city,
         state: u.state,
         sportTypes: u.sportTypes || [],
+        followersCount: stats.followerIds.length,
         hasActiveStory: storyUserIds.has(uIdStr) && (
           req.user ? (isFollowing || isFollowedBy) : false
         ),
@@ -141,7 +177,7 @@ export const getPublicPlayers = async (req, res) => {
       };
     });
 
-    return res.status(200).json({ success: true, players });
+    return res.status(200).json({ success: true, players, followingIds: currentUserFollowingIds });
   } catch (err) {
     logger.error("Error in getPublicPlayers", err);
     return res.status(500).json({ message: err.message });
@@ -167,7 +203,8 @@ export const searchPlayers = async (req, res) => {
       where: {
         OR: [
           { name: { contains: query, mode: 'insensitive' } },
-          { username: { contains: query, mode: 'insensitive' } }
+          { username: { contains: query, mode: 'insensitive' } },
+          { phone: { contains: query } }
         ],
         ...(currentUserId ? { id: { not: currentUserId } } : {})
       },
@@ -315,12 +352,104 @@ export const getPlayerProfile = async (req, res) => {
       return res.status(404).json({ success: false, message: "User not found" });
     }
     
-    const [bookingCount, followerIds, followingIds, userStats, wallet] = await Promise.all([
+    const [bookingCount, followerIds, followingIds, userStats, wallet, careerStats, userBadges, matchHistory, teams, network, liveMatches] = await Promise.all([
       prisma.booking.count({ where: { userId: user.id } }),
       SocialService.getFollowerIds(user.id),
       SocialService.getFollowingIds(user.id),
       prisma.userStats.findUnique({ where: { userId: user.id } }),
-      WalletService.getWallet(user.id, user.role || 'user')
+      WalletService.getWallet(user.id, user.role || 'user'),
+      prisma.playerCareerStats.findMany({ where: { userId: user.id } }),
+      prisma.userBadge.findMany({ where: { userId: user.id } }),
+      prisma.hostedGame.findMany({
+        where: {
+          scoringStatus: "COMPLETED",
+          teams: {
+            some: {
+              slots: {
+                some: {
+                  userId: user.id
+                }
+              }
+            }
+          }
+        },
+        include: {
+          teams: {
+            include: {
+              slots: {
+                include: {
+                  user: { select: { id: true, name: true, profilePicture: true } }
+                }
+              }
+            }
+          },
+          turf: true,
+          cricketMatch: {
+            include: {
+              innings: true,
+              playerStats: {
+                where: {
+                  userId: user.id
+                }
+              }
+            }
+          }
+        },
+        orderBy: {
+          date: 'desc'
+        }
+      }),
+      prisma.team.findMany({
+        where: {
+          OR: [
+            { ownerId: user.id },
+            { members: { some: { userId: user.id, status: "JOINED" } } }
+          ]
+        },
+        select: {
+          id: true,
+          name: true,
+          logo: true,
+          image: true,
+          teamCode: true,
+          sportType: true,
+          captainName: true,
+          city: true
+        }
+      }),
+      SocialService.getNetwork(user.id),
+      // Live matches: games currently in progress where the user is a participant
+      prisma.hostedGame.findMany({
+        where: {
+          isLive: true,
+          scoringStatus: { in: ["LIVE", "PAUSED"] },
+          teams: {
+            some: {
+              slots: {
+                some: { userId: user.id }
+              }
+            }
+          }
+        },
+        select: {
+          id: true,
+          gameType: true,
+          format: true,
+          city: true,
+          customVenue: true,
+          liveStartedAt: true,
+          teams: {
+            select: {
+              id: true,
+              name: true,
+              teamKey: true
+            }
+          },
+          turf: {
+            select: { name: true, city: true }
+          }
+        }
+      })
     ]);
     
     // Check for active stories
@@ -371,7 +500,13 @@ export const getPlayerProfile = async (req, res) => {
         stats: {
           cricket: userStats?.cricket || { matches: 0, runs: 0, wickets: 0 }
         },
-        badges: userStats?.badges || [],
+        careerStats: careerStats,
+        badges: userBadges.length > 0 ? userBadges : (userStats?.badges || []),
+        matchHistory: matchHistory,
+        teams: teams,
+        liveMatches: liveMatches,
+        followersList: network?.followers || [],
+        followingList: network?.following || [],
         wallet: wallet,
         createdAt: user.createdAt
       }
@@ -479,8 +614,10 @@ export const getNearbyPlayers = async (req, res) => {
   }
 
   try {
+    const whereClause = req.user?.id ? { id: { not: req.user.id } } : {};
+    
     const players = await findNearby('User', parseFloat(lat), parseFloat(lng), parseFloat(radius), {
-      where: { id: { not: req.user?.id } },
+      where: whereClause,
       take: parseInt(limit)
     });
 
@@ -488,8 +625,8 @@ export const getNearbyPlayers = async (req, res) => {
     const formattedPlayers = players.map(p => ({
       ...p,
       id: p.id,
-      lat: p.latitude ? parseFloat(String(p.latitude)) : null,
-      lng: p.longitude ? parseFloat(String(p.longitude)) : null,
+      lat: p.latitude != null ? parseFloat(String(p.latitude)) : null,
+      lng: p.longitude != null ? parseFloat(String(p.longitude)) : null,
       distanceKm: null // PostGIS distance can be added if needed
     }));
 

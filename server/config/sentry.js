@@ -29,7 +29,9 @@ export const initSentry = () => {
     });
     logger.info("[SENTRY] Initialized successfully with advanced integrations.");
   } else {
-    logger.warn("[SENTRY] DSN not found. Sentry is disabled.");
+    if (process.env.NODE_ENV === "production") {
+      logger.warn("[SENTRY] DSN not found. Sentry is disabled in production.");
+    }
   }
 };
 

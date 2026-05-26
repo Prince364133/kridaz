@@ -40,7 +40,7 @@ const GameCard = ({ game, onSelect, actionButton }) => {
   const fillPercentage = totalSlots > 0 ? (filledSlots / totalSlots) * 100 : 0;
 
   return (
-    <div className="group relative overflow-hidden rounded-2xl border border-white/5 bg-slate-900/60 backdrop-blur-xl transition-all duration-300 hover:-translate-y-1 hover:border-violet-500/30 hover:shadow-[0_8px_30px_rgb(0,0,0,0.5)]">
+    <div className="group relative overflow-hidden rounded-[8px] border border-white/5 bg-slate-900/60 backdrop-blur-xl transition-all duration-300 hover:-translate-y-1 hover:border-violet-500/30 hover:shadow-[0_8px_30px_rgb(0,0,0,0.5)]">
       {/* Decorative gradient header based on sport */}
       <div className={`h-2 bg-gradient-to-r ${getSportColor(game.gameType)}`} />
 
@@ -48,14 +48,10 @@ const GameCard = ({ game, onSelect, actionButton }) => {
         {/* Top bar with tags */}
         <div className="flex items-center justify-between gap-3 mb-4">
           <div className="flex items-center gap-2">
-            <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-gradient-to-r ${getSportColor(game.gameType)} text-white shadow-sm`}>
+            <span className={`inline-flex items-center px-3 py-1 rounded-[6px] text-xs font-semibold bg-gradient-to-r ${getSportColor(game.gameType)} text-white shadow-sm`}>
               {game.gameType}
             </span>
-            <span className={`text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded ${
-              game.gameMode === 'QUICK' 
-                ? 'bg-gradient-to-r from-[#55DEE8]/10 to-[#BFF367]/10 text-transparent bg-clip-text bg-gradient-to-r from-[#55DEE8] to-[#BFF367] border border-[#55DEE8]/20' 
-                : 'bg-violet-500/10 text-violet-400 border border-violet-500/20'
-            }`}>
+            <span className={`text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded ${ game.gameMode === 'QUICK' ? 'bg-amber-500/10 text-amber-400 border border-amber-500/20' : 'bg-violet-500/10 text-violet-400 border border-violet-500/20' }`}>
               {game.gameMode}
             </span>
           </div>
@@ -103,24 +99,38 @@ const GameCard = ({ game, onSelect, actionButton }) => {
             </div>
           </div>
 
-          {/* Roster & Slot Progress */}
-          <div className="space-y-2">
-            <div className="flex justify-between items-center text-xs">
-              <span className="text-slate-400 flex items-center gap-1">
-                <Users className="h-3.5 w-3.5" />
-                Roster Spots
-              </span>
-              <span className="font-semibold text-slate-200">
-                {filledSlots} / {totalSlots} Filled
-              </span>
+          {/* Roster & Slot Progress or Teams */}
+          {game.gameMode === 'PROFESSIONAL' ? (
+            <div className="flex items-center justify-between mt-2 pt-3 border-t border-white/5">
+              <div className="flex items-center gap-2 max-w-[40%]">
+                <img src={game.teamA?.image || "https://ui-avatars.com/api/?name=A&background=random"} className="w-8 h-8 rounded-full border border-white/10 shrink-0 object-cover" alt="Team A" />
+                <span className="text-xs font-bold text-white truncate">{game.teamA?.name || 'TBD'}</span>
+              </div>
+              <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest shrink-0 px-2">VS</span>
+              <div className="flex items-center gap-2 max-w-[40%] flex-row-reverse">
+                <img src={game.teamB?.image || "https://ui-avatars.com/api/?name=B&background=random"} className="w-8 h-8 rounded-full border border-white/10 shrink-0 object-cover" alt="Team B" />
+                <span className="text-xs font-bold text-white truncate text-right">{game.teamB?.name || 'TBD'}</span>
+              </div>
             </div>
-            <div className="h-2 w-full bg-slate-800 rounded-full overflow-hidden">
-              <div 
-                className={`h-full bg-gradient-to-r ${getSportColor(game.gameType)} transition-all duration-500`}
-                style={{ width: `${fillPercentage}%` }}
-              />
+          ) : (
+            <div className="space-y-2 mt-2 pt-1">
+              <div className="flex justify-between items-center text-xs">
+                <span className="text-slate-400 flex items-center gap-1">
+                  <Users className="h-3.5 w-3.5" />
+                  Roster Spots
+                </span>
+                <span className="font-semibold text-slate-200">
+                  {filledSlots} / {totalSlots} Filled
+                </span>
+              </div>
+              <div className="h-2 w-full bg-slate-800 rounded-full overflow-hidden">
+                <div 
+                  className={`h-full bg-gradient-to-r ${getSportColor(game.gameType)} transition-all duration-500`}
+                  style={{ width: `${fillPercentage}%` }}
+                />
+              </div>
             </div>
-          </div>
+          )}
 
           {/* Professional Assets requested */}
           <div className="flex gap-2">
@@ -143,7 +153,7 @@ const GameCard = ({ game, onSelect, actionButton }) => {
             {onSelect && (
               <button 
                 onClick={() => onSelect(game)}
-                className="flex-1 px-4 py-2 text-xs font-semibold rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 border border-white/5 hover:border-white/10 transition-all text-center"
+                className="flex-1 px-4 py-2 text-xs font-semibold rounded-[8px] bg-slate-800 hover:bg-slate-700 text-slate-200 border border-white/5 hover:border-white/10 transition-all text-center"
               >
                 Inspect Match
               </button>

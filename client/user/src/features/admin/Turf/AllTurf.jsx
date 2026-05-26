@@ -108,16 +108,12 @@ export const AllTurf = () => {
           </div>
 
           {/* Filters */}
-          <div className="flex flex-wrap gap-2 p-1 bg-white/5 rounded-2xl border border-white/5">
+          <div className="flex flex-wrap gap-2 p-1 bg-white/5 rounded-[8px] border border-white/5">
             {filters.map((filter) => (
               <button
                 key={filter.id}
                 onClick={() => setActiveFilter(filter.id)}
-                className={`px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${
-                  activeFilter === filter.id 
-                    ? "bg-[#CCFF00] text-black shadow-lg shadow-[#CCFF00]/20" 
-                    : "text-gray-500 hover:text-white hover:bg-white/5"
-                }`}
+                className={`px-4 py-2 rounded-[8px] text-[10px] font-black uppercase tracking-widest transition-all ${ activeFilter === filter.id ? "bg-[#CCFF00] text-black shadow-lg shadow-[#CCFF00]/20" : "text-gray-500 hover:text-white hover:bg-white/5" }`}
               >
                 {filter.label}
               </button>
@@ -126,7 +122,7 @@ export const AllTurf = () => {
         </div>
 
         {!filteredTurfs || filteredTurfs.length === 0 ? (
-          <div className="relative p-20 rounded-[32px] border border-white/5 bg-white/[0.02] text-center overflow-hidden">
+          <div className="relative p-20 rounded-[8px] border border-white/5 bg-white/[0.02] text-center overflow-hidden">
             <div className="absolute top-0 left-0 w-full h-full bg-[#CCFF00]/5 blur-[100px]"></div>
             <div className="relative space-y-6">
                <PackageOpen size={80} className="mx-auto text-gray-800" />

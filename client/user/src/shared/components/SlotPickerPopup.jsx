@@ -125,7 +125,7 @@ const SlotPickerPopup = ({ isOpen, onClose, onSelect, gameId, slotId }) => {
             initial={{ opacity: 0, scale: 0.9, y: 20 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.9, y: 20 }}
-            className="relative w-full max-w-lg bg-neutral-900 border border-white/10 rounded-[40px] shadow-2xl overflow-hidden"
+            className="relative w-full max-w-lg bg-neutral-900 border border-white/10 rounded-[8px] shadow-2xl overflow-hidden"
           >
             {/* Header */}
             <div className="p-8 border-b border-white/5 flex items-center justify-between">
@@ -133,34 +133,28 @@ const SlotPickerPopup = ({ isOpen, onClose, onSelect, gameId, slotId }) => {
                 <h2 className="text-2xl font-black tracking-tight">Assign Slot</h2>
                 <p className="text-sm text-neutral-500 font-medium">Choose a player or invite someone new</p>
               </div>
-              <button onClick={onClose} className="p-3 bg-neutral-800 rounded-2xl text-neutral-400 hover:text-white transition-colors">
+              <button onClick={onClose} className="p-3 bg-neutral-800 rounded-[8px] text-neutral-400 hover:text-white transition-colors">
                 <X size={20} />
               </button>
             </div>
 
             {/* Tabs */}
-            <div className="flex p-2 bg-black/40 mx-8 mt-6 rounded-2xl border border-white/5">
+            <div className="flex p-2 bg-black/40 mx-8 mt-6 rounded-[8px] border border-white/5">
               <button
                 onClick={() => setActiveTab('followers')}
-                className={`flex-1 py-3 rounded-xl flex items-center justify-center gap-2 text-[10px] font-black transition-all ${
-                  activeTab === 'followers' ? 'bg-gradient-to-r from-[#55DEE8] to-[#BFF367] text-black' : 'text-neutral-500 hover:text-white'
-                }`}
+                className={`flex-1 py-3 rounded-[8px] flex items-center justify-center gap-2 text-[10px] font-black transition-all ${ activeTab === 'followers' ? 'bg-yellow-500 text-black' : 'text-neutral-500 hover:text-white' }`}
               >
                 <Users size={14} /> Followers
               </button>
               <button
                 onClick={() => setActiveTab('teams')}
-                className={`flex-1 py-3 rounded-xl flex items-center justify-center gap-2 text-[10px] font-black transition-all ${
-                  activeTab === 'teams' ? 'bg-gradient-to-r from-[#55DEE8] to-[#BFF367] text-black' : 'text-neutral-500 hover:text-white'
-                }`}
+                className={`flex-1 py-3 rounded-[8px] flex items-center justify-center gap-2 text-[10px] font-black transition-all ${ activeTab === 'teams' ? 'bg-yellow-500 text-black' : 'text-neutral-500 hover:text-white' }`}
               >
                 <ShieldCheck size={14} /> My Teams
               </button>
               <button
                 onClick={() => setActiveTab('email')}
-                className={`flex-1 py-3 rounded-xl flex items-center justify-center gap-2 text-[10px] font-black transition-all ${
-                  activeTab === 'email' ? 'bg-gradient-to-r from-[#55DEE8] to-[#BFF367] text-black' : 'text-neutral-500 hover:text-white'
-                }`}
+                className={`flex-1 py-3 rounded-[8px] flex items-center justify-center gap-2 text-[10px] font-black transition-all ${ activeTab === 'email' ? 'bg-yellow-500 text-black' : 'text-neutral-500 hover:text-white' }`}
               >
                 <Mail size={14} /> Email
               </button>
@@ -176,7 +170,7 @@ const SlotPickerPopup = ({ isOpen, onClose, onSelect, gameId, slotId }) => {
                       placeholder="Search followers..."
                       value={searchTerm}
                       onChange={(e) => setSearchTerm(e.target.value)}
-                      className="w-full bg-black/40 border border-white/5 rounded-2xl py-4 pl-12 pr-4 text-sm font-medium focus:border-[#55DEE8]/50 outline-none transition-all"
+                      className="w-full bg-black/40 border border-white/5 rounded-[8px] py-4 pl-12 pr-4 text-sm font-medium focus:border-yellow-500/50 outline-none transition-all"
                     />
                   </div>
 
@@ -190,10 +184,10 @@ const SlotPickerPopup = ({ isOpen, onClose, onSelect, gameId, slotId }) => {
                       filteredFollowers.map(follower => (
                         <div 
                           key={follower._id}
-                          className="group p-4 bg-black/20 border border-white/5 rounded-2xl flex items-center justify-between hover:border-[#55DEE8]/30 transition-all"
+                          className="group p-4 bg-black/20 border border-white/5 rounded-[8px] flex items-center justify-between hover:border-yellow-500/30 transition-all"
                         >
                           <div className="flex items-center gap-4">
-                            <div className="w-12 h-12 rounded-xl bg-neutral-800 border border-white/5 overflow-hidden">
+                            <div className="w-12 h-12 rounded-[8px] bg-neutral-800 border border-white/5 overflow-hidden">
                               <img src={follower.profilePicture || `https://api.dicebear.com/7.x/avataaars/svg?seed=${follower.name}`} alt={follower.name} className="w-full h-full object-cover" />
                             </div>
                             <div>
@@ -204,7 +198,7 @@ const SlotPickerPopup = ({ isOpen, onClose, onSelect, gameId, slotId }) => {
                           <button
                             disabled={sending}
                             onClick={() => handleInvitePlayer(follower)}
-                            className="p-3 bg-gradient-to-r from-[#55DEE8] to-[#BFF367] text-black rounded-xl hover:bg-gradient-to-r from-[#55DEE8] to-[#BFF367] transition-all disabled:opacity-50"
+                            className="p-3 bg-yellow-500 text-black rounded-[8px] hover:bg-yellow-400 transition-all disabled:opacity-50"
                           >
                             <Gift size={18} />
                           </button>
@@ -224,15 +218,15 @@ const SlotPickerPopup = ({ isOpen, onClose, onSelect, gameId, slotId }) => {
                     {teams.length > 0 ? (
                       teams.map(team => (
                         <div key={team._id} className="space-y-2">
-                          <div className="px-4 py-2 bg-neutral-800/50 rounded-xl flex items-center gap-2">
-                            <ShieldCheck size={14} className="text-transparent bg-clip-text bg-gradient-to-r from-[#55DEE8] to-[#BFF367]" />
+                          <div className="px-4 py-2 bg-neutral-800/50 rounded-[8px] flex items-center gap-2">
+                            <ShieldCheck size={14} className="text-yellow-500" />
                             <span className="text-[10px] font-black uppercase tracking-widest text-neutral-400">{team.name} Members</span>
                           </div>
                           <div className="grid grid-cols-1 gap-2">
                             {team.members?.map(member => (
                               <div 
                                 key={member.user?._id || member._id}
-                                className="group p-3 bg-black/20 border border-white/5 rounded-2xl flex items-center justify-between hover:border-[#55DEE8]/30 transition-all"
+                                className="group p-3 bg-black/20 border border-white/5 rounded-[8px] flex items-center justify-between hover:border-yellow-500/30 transition-all"
                               >
                                 <div className="flex items-center gap-3">
                                   <div className="w-10 h-10 rounded-lg bg-neutral-800 border border-white/5 overflow-hidden">
@@ -272,8 +266,8 @@ const SlotPickerPopup = ({ isOpen, onClose, onSelect, gameId, slotId }) => {
               ) : (
                 <div className="space-y-8 py-4">
                   <div className="space-y-4 text-center">
-                    <div className="w-20 h-20 bg-gradient-to-r from-[#55DEE8]/10 to-[#BFF367]/10 rounded-[32px] flex items-center justify-center mx-auto">
-                      <Mail className="text-transparent bg-clip-text bg-gradient-to-r from-[#55DEE8] to-[#BFF367]" size={32} />
+                    <div className="w-20 h-20 bg-yellow-500/10 rounded-[8px] flex items-center justify-center mx-auto">
+                      <Mail className="text-yellow-500" size={32} />
                     </div>
                     <div className="space-y-2">
                       <h3 className="text-xl font-black uppercase tracking-tight">Gift a Slot</h3>
@@ -292,7 +286,7 @@ const SlotPickerPopup = ({ isOpen, onClose, onSelect, gameId, slotId }) => {
                         placeholder="player@example.com"
                         value={email}
                         onChange={(e) => setEmail(e.target.value)}
-                        className="w-full bg-black/40 border border-white/5 rounded-2xl py-5 pl-12 pr-4 text-sm font-black focus:border-[#55DEE8] outline-none transition-all"
+                        className="w-full bg-black/40 border border-white/5 rounded-[8px] py-5 pl-12 pr-4 text-sm font-black focus:border-yellow-500 outline-none transition-all"
                       />
                     </div>
                   </div>
@@ -300,7 +294,7 @@ const SlotPickerPopup = ({ isOpen, onClose, onSelect, gameId, slotId }) => {
                   <button
                     disabled={sending || !email}
                     onClick={handleEmailInvite}
-                    className="w-full py-5 bg-gradient-to-r from-[#55DEE8] to-[#BFF367] text-black font-black rounded-2xl hover:bg-gradient-to-r from-[#55DEE8] to-[#BFF367] transition-all shadow-[0_10px_30px_rgba(85,222,232,0.2)] flex items-center justify-center gap-3 disabled:opacity-50"
+                    className="w-full py-5 bg-yellow-500 text-black font-black rounded-[8px] hover:bg-yellow-400 transition-all shadow-[0_10px_30px_rgba(234,179,8,0.2)] flex items-center justify-center gap-3 disabled:opacity-50"
                   >
                     {sending ? <Loader2 className="animate-spin" size={20} /> : <Send size={20} />}
                     SEND MAGIC INVITE

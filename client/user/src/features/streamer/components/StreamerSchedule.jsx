@@ -22,7 +22,7 @@ export default function StreamerSchedule() {
       </div>
 
       {upcomingMatches.length === 0 ? (
-        <div className="flex flex-col items-center justify-center min-h-[400px] bg-[#0A0A0A] rounded-[32px] border border-white/5 border-dashed p-12 text-center">
+        <div className="flex flex-col items-center justify-center min-h-[400px] bg-[#0A0A0A] rounded-[8px] border border-white/5 border-dashed p-12 text-center">
           <div className="w-20 h-20 bg-white/5 rounded-full flex items-center justify-center mb-6">
             <Calendar size={32} className="text-white/20" />
           </div>
@@ -32,10 +32,10 @@ export default function StreamerSchedule() {
       ) : (
         <div className="grid grid-cols-1 gap-4">
           {upcomingMatches.map((match) => (
-            <div key={match._id} className="group relative bg-[#0D0D0D] border border-white/5 rounded-[24px] p-8 hover:border-violet-500/30 transition-all duration-500">
+            <div key={match._id} className="group relative bg-[#0D0D0D] border border-white/5 rounded-[8px] p-8 hover:border-violet-500/30 transition-all duration-500">
               <div className="flex flex-col md:flex-row justify-between items-start gap-8">
                 <div className="flex gap-6 flex-1">
-                  <div className="flex flex-col items-center justify-center w-24 h-24 bg-white/5 rounded-2xl border border-white/10 text-center">
+                  <div className="flex flex-col items-center justify-center w-24 h-24 bg-white/5 rounded-[8px] border border-white/10 text-center">
                     <span className="text-violet-500 text-[10px] font-black uppercase tracking-widest mb-1">
                       {new Date(match.date).toLocaleString('default', { month: 'short' })}
                     </span>
@@ -71,10 +71,10 @@ export default function StreamerSchedule() {
                 </div>
 
                 <div className="w-full md:w-auto flex flex-col items-stretch gap-3">
-                  <button className="px-8 py-3 bg-violet-500 hover:bg-violet-600 text-white text-xs font-black uppercase tracking-widest rounded-xl transition-all shadow-lg shadow-violet-500/20">
+                  <button className="px-8 py-3 bg-violet-500 hover:bg-violet-600 text-white text-xs font-black uppercase tracking-widest rounded-[8px] transition-all shadow-lg shadow-violet-500/20">
                     Confirm Availability
                   </button>
-                  <button className="px-8 py-3 bg-white/5 hover:bg-white/10 text-white text-xs font-bold uppercase tracking-widest rounded-xl border border-white/10 transition-all">
+                  <button className="px-8 py-3 bg-white/5 hover:bg-white/10 text-white text-xs font-bold uppercase tracking-widest rounded-[8px] border border-white/10 transition-all">
                     Match Details
                   </button>
                 </div>

@@ -6,7 +6,7 @@ const BecomeOwner = () => {
   const { register, handleSubmit, errors, onSubmit, loading } =
     useBecomeOwner();
   return (
-    <div className="container mx-auto mt-20  p-2">
+    <div className="container mx-auto mt-20 p-2">
       <h1 className="text-3xl font-bold mb-8 text-center">
         Become a Turf Owner
       </h1>
@@ -42,8 +42,8 @@ const BecomeOwner = () => {
         </div>
 
         {/* content section */}
-        <div className=" ">
-          <div className=" shadow-md border p-6 rounded-lg h-full">
+        <div className="">
+          <div className="shadow-md border p-6 rounded-lg h-full">
             <h2 className="text-2xl font-semibold mb-4">
               Becoming a Turf Owner
             </h2>

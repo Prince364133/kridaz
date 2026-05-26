@@ -74,7 +74,7 @@ const ConfirmationPopup = ({
             initial={{ scale: 0.9, opacity: 0, y: 20 }}
             animate={{ scale: 1, opacity: 1, y: 0 }}
             exit={{ scale: 0.9, opacity: 0, y: 20 }}
-            className="relative w-full max-w-md bg-[#151617] border border-[#2D2D2D] rounded-2xl p-8 shadow-2xl overflow-hidden"
+            className="relative w-full max-w-md bg-[#151617] border border-[#2D2D2D] rounded-[8px] p-8 shadow-2xl overflow-hidden"
           >
             {/* Ambient background glow */}
             <div className={`absolute top-0 right-0 w-32 h-32 ${theme.bg} blur-[60px] pointer-events-none`} />
@@ -98,7 +98,7 @@ const ConfirmationPopup = ({
                       value={adminData.name}
                       onChange={(e) => setAdminData({ ...adminData, name: e.target.value })}
                       placeholder="Enter your full name"
-                      className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white text-sm focus:border-[#CCFF00]/50 outline-none transition-all placeholder:text-gray-600"
+                      className="w-full bg-white/5 border border-white/10 rounded-[8px] px-4 py-3 text-white text-sm focus:border-[#CCFF00]/50 outline-none transition-all placeholder:text-gray-600"
                     />
                   </div>
                   <div className="space-y-1.5">
@@ -108,7 +108,7 @@ const ConfirmationPopup = ({
                       value={adminData.designation}
                       onChange={(e) => setAdminData({ ...adminData, designation: e.target.value })}
                       placeholder="e.g. Platform Supervisor"
-                      className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white text-sm focus:border-[#CCFF00]/50 outline-none transition-all placeholder:text-gray-600"
+                      className="w-full bg-white/5 border border-white/10 rounded-[8px] px-4 py-3 text-white text-sm focus:border-[#CCFF00]/50 outline-none transition-all placeholder:text-gray-600"
                     />
                   </div>
                   {error && <p className="text-red-500 text-[10px] font-bold uppercase text-center">{error}</p>}
@@ -118,13 +118,13 @@ const ConfirmationPopup = ({
               <div className="flex gap-4 w-full mt-2">
                 <button 
                   onClick={onClose}
-                  className="flex-1 py-3 bg-white/5 border border-white/10 text-white font-bold uppercase text-xs tracking-widest rounded-xl hover:bg-white/10 transition-all"
+                  className="flex-1 py-3 bg-white/5 border border-white/10 text-white font-bold uppercase text-xs tracking-widest rounded-[8px] hover:bg-white/10 transition-all"
                 >
                   {cancelText}
                 </button>
                 <button 
                   onClick={handleConfirm}
-                  className={`flex-1 py-3 ${theme.btn} font-black uppercase text-xs tracking-widest rounded-xl transition-all shadow-lg shadow-black/20`}
+                  className={`flex-1 py-3 ${theme.btn} font-black uppercase text-xs tracking-widest rounded-[8px] transition-all shadow-lg shadow-black/20`}
                 >
                   {confirmText}
                 </button>

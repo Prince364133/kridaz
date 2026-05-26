@@ -1,16 +1,16 @@
-﻿import { MapContainer, TileLayer, useMap, useMapEvents, Marker, Popup } from "react-leaflet";
+import { MapContainer, TileLayer, useMap, useMapEvents, Marker, Popup } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
 import { useEffect, useRef, useMemo } from "react";
 import L from "leaflet";
-import { Activity, Users, MapPin, User } from "lucide-react";
+import { Activity, Users, MapPin, User, Navigation } from "lucide-react";
 import iconUrl from "leaflet/dist/images/marker-icon.png";
 import iconShadow from "leaflet/dist/images/marker-shadow.png";
 
 // Fix default icon issue in Leaflet with Vite
 delete L.Icon.Default.prototype._getIconUrl;
-L.Icon.Default.mergeOptions({ 
-  iconUrl, 
-  shadowUrl: iconShadow 
+L.Icon.Default.mergeOptions({
+  iconUrl,
+  shadowUrl: iconShadow
 });
 
 const mapStyles = `
@@ -30,7 +30,7 @@ const mapStyles = `
   .pulsing-marker img {
     width: 100%;
     height: 100%;
-    object-cover: cover;
+    object-fit: cover;
   }
   @keyframes pulse {
     0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(85,222,232,0.7); }
@@ -109,10 +109,16 @@ const MapController = ({ userLocation, radiusKm }) => {
   return null;
 };
 
+const getValidAvatar = (url) => {
+  const fallback = "https://pngimg.com/d/cricket_PNG102.png";
+  return (!url || url === "null" || url === "undefined") ? fallback : url;
+};
+
 const createClusterIcon = (count, previews) => {
-  const avatarsHtml = previews.map(p => 
-    `<img src="${p.profilePicture || 'https://pngimg.com/d/cricket_PNG102.png'}" 
-          style="width:14px;height:14px;border-radius:50%;object-fit:cover;border:1px solid #55DEE8" />`
+  const avatarsHtml = previews.map(p =>
+    `<img src="${getValidAvatar(p.profilePicture)}" 
+          style="width:14px;height:14px;border-radius:50%;object-fit:cover;border:1px solid #55DEE8" 
+          onerror="this.src='https://pngimg.com/d/cricket_PNG102.png'; this.onerror=null;" />`
   ).join('');
 
   const html = `
@@ -145,7 +151,6 @@ const createClusterIcon = (count, previews) => {
 };
 
 const createPlayerIcon = (profilePicture) => {
-  const fallback = "https://pngimg.com/d/cricket_PNG102.png";
   const markerHtml = `
     <div style="position:relative; cursor:pointer">
       <div style="
@@ -157,9 +162,9 @@ const createPlayerIcon = (profilePicture) => {
         box-shadow: 0 2px 8px rgba(0,0,0,0.5);
         background: #0a0a0a;
       ">
-        <img src="${profilePicture || fallback}" 
+        <img src="${getValidAvatar(profilePicture)}" 
              style="width:100%;height:100%;object-fit:cover" 
-             onerror="this.src='${fallback}'"
+             onerror="this.src='https://pngimg.com/d/cricket_PNG102.png'; this.onerror=null;"
         />
       </div>
       <div style="
@@ -191,46 +196,34 @@ const PlayerMarker = ({ player, onPlayerClick }) => {
   const icon = useMemo(() => createPlayerIcon(player.profilePicture), [player.profilePicture]);
 
   return (
-    <Marker 
+    <Marker
       ref={markerRef}
       position={[player.lat, player.lng]}
       icon={icon}
       eventHandlers={{
-        click: () => onPlayerClick?.(player._id)
+        click: () => {
+          if (onPlayerClick) onPlayerClick(player._id);
+        }
       }}
-    >
-      <Popup closeButton={false} className="premium-map-popup">
-        <div className="flex flex-col items-center gap-2 p-1 min-w-[120px]">
-          <div className="w-12 h-12 rounded-full border-2 border-[#55DEE8] overflow-hidden">
-             <img 
-               src={player.profilePicture || "https://pngimg.com/d/cricket_PNG102.png"} 
-               className="w-full h-full object-cover" 
-               alt=""
-             />
-          </div>
-          <div className="text-center">
-            <h4 className="text-white font-black uppercase text-[10px] tracking-widest leading-tight">{player.name}</h4>
-            <div className="flex items-center justify-center gap-1 mt-1">
-               <Activity size={10} className="text-[#55DEE8]" />
-               <span className="text-[#55DEE8] text-[8px] font-black uppercase tracking-tighter">
-                {player.sportTypes?.[0] || 'Active Player'}
-               </span>
-            </div>
-          </div>
-          <div className="w-full h-px bg-white/10 my-1" />
-          <div className="flex items-center gap-1.5 text-white/40 text-[7px] font-bold uppercase tracking-widest">
-            <MapPin size={8} />
-            {player.distanceKm?.toFixed(1)}km Away
-          </div>
-        </div>
-      </Popup>
-    </Marker>
+    />
   );
+};
+
+const MapResizer = () => {
+  const map = useMap();
+  useEffect(() => {
+    const observer = new ResizeObserver(() => {
+      map.invalidateSize();
+    });
+    observer.observe(map.getContainer());
+    return () => observer.disconnect();
+  }, [map]);
+  return null;
 };
 
 const MapInner = ({ nearbyPlayers, onPlayerClick, userLocation, radiusKm, onMapMove }) => {
   const map = useMap();
-  
+
   const userIcon = L.divIcon({
     className: 'pulsing-marker-container',
     html: `
@@ -244,15 +237,33 @@ const MapInner = ({ nearbyPlayers, onPlayerClick, userLocation, radiusKm, onMapM
 
   return (
     <>
+      <MapResizer />
       <TileLayer
         url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
         attribution='&copy; <a href="https://carto.com/attributions">CartoDB</a>'
         updateWhenIdle={true}
         keepBuffer={2}
       />
-      
+
       <MapController userLocation={userLocation} radiusKm={radiusKm} />
       <MapEventsHandler onMapMove={onMapMove} />
+
+      {/* Relocate Button */}
+      {userLocation && (
+        <div className="absolute bottom-[60px] right-4 z-[1000]">
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              e.preventDefault();
+              map.flyTo([userLocation.lat, userLocation.lng], 14, { duration: 1.5 });
+            }}
+            className="w-10 h-10 bg-black/80 backdrop-blur-xl border border-white/10 rounded-full flex items-center justify-center text-[#55DEE8] hover:bg-[#55DEE8]/20 transition-all shadow-[0_4px_20px_rgba(0,0,0,0.5)] cursor-pointer"
+            title="Locate me"
+          >
+            <Navigation size={18} className="-ml-0.5 mt-0.5" />
+          </button>
+        </div>
+      )}
 
       {userLocation && (
         <Marker position={[userLocation.lat, userLocation.lng]} icon={userIcon}>
@@ -263,7 +274,7 @@ const MapInner = ({ nearbyPlayers, onPlayerClick, userLocation, radiusKm, onMapM
       {nearbyPlayers.map(item => {
         if (item.type === "cluster") {
           return (
-            <Marker 
+            <Marker
               key={item._id}
               position={[item.lat, item.lng]}
               icon={createClusterIcon(item.count, item.previews)}
@@ -274,10 +285,10 @@ const MapInner = ({ nearbyPlayers, onPlayerClick, userLocation, radiusKm, onMapM
           );
         }
         return (
-          <PlayerMarker 
-            key={item._id} 
-            player={item} 
-            onPlayerClick={onPlayerClick} 
+          <PlayerMarker
+            key={item._id}
+            player={item}
+            onPlayerClick={onPlayerClick}
           />
         );
       })}
@@ -286,28 +297,29 @@ const MapInner = ({ nearbyPlayers, onPlayerClick, userLocation, radiusKm, onMapM
   );
 };
 
-const NearbyPlayersMap = ({ 
-  userLocation, 
-  nearbyPlayers = [], 
-  radiusKm, 
-  onMapMove, 
-  onPlayerClick 
+const NearbyPlayersMap = ({
+  userLocation,
+  nearbyPlayers = [],
+  radiusKm,
+  onMapMove,
+  onPlayerClick
 }) => {
   const defaultCenter = userLocation ? [userLocation.lat, userLocation.lng] : [20.5937, 78.9629];
-  
+
   return (
     <div className="w-full h-full relative">
       <style>{mapStyles}</style>
-      <MapContainer 
-        center={defaultCenter} 
-        zoom={14} 
+      <MapContainer
+        center={defaultCenter}
+        zoom={14}
         scrollWheelZoom={true}
         minZoom={10}
         maxZoom={18}
         zoomControl={false}
         preferCanvas={true}
+        attributionControl={false}
       >
-        <MapInner 
+        <MapInner
           nearbyPlayers={nearbyPlayers}
           onPlayerClick={onPlayerClick}
           userLocation={userLocation}

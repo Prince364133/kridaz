@@ -24,7 +24,7 @@ export const teamApi = baseApi.injectEndpoints({
         method: "POST",
         body,
       }),
-      invalidatesTags: (result, error, { id }) => [{ type: "Team", id }],
+      invalidatesTags: (result, error, { id }) => [{ type: "Team", id }, "Team"],
     }),
     joinTeam: builder.mutation({
       query: (token) => ({
@@ -49,7 +49,7 @@ export const teamApi = baseApi.injectEndpoints({
         method: "POST",
         body: { targetTeamId },
       }),
-      invalidatesTags: (result, error, { teamId }) => [{ type: "Team", id: teamId }],
+      invalidatesTags: (result, error, { teamId }) => [{ type: "Team", id: teamId }, "Team"],
     }),
     handleOpponentRequest: builder.mutation({
       query: ({ teamId, requestId, action }) => ({
@@ -57,7 +57,7 @@ export const teamApi = baseApi.injectEndpoints({
         method: "POST",
         body: { requestId, action },
       }),
-      invalidatesTags: (result, error, { teamId }) => [{ type: "Team", id: teamId }],
+      invalidatesTags: (result, error, { teamId }) => [{ type: "Team", id: teamId }, "Team"],
     }),
     getOpponentTeams: builder.query({
       query: () => "/api/team/opponents",
@@ -71,7 +71,7 @@ export const teamApi = baseApi.injectEndpoints({
         url: `/api/team/join-request/${id}`,
         method: "POST",
       }),
-      invalidatesTags: (result, error, id) => [{ type: "Team", id }],
+      invalidatesTags: (result, error, id) => [{ type: "Team", id }, "Team"],
     }),
     handleJoinRequest: builder.mutation({
       query: ({ teamId, userId, action }) => ({
@@ -79,7 +79,7 @@ export const teamApi = baseApi.injectEndpoints({
         method: "POST",
         body: { userId, action },
       }),
-      invalidatesTags: (result, error, { teamId }) => [{ type: "Team", id: teamId }],
+      invalidatesTags: (result, error, { teamId }) => [{ type: "Team", id: teamId }, "Team"],
     }),
     searchPlayers: builder.query({
       query: (params) => ({
@@ -93,7 +93,7 @@ export const teamApi = baseApi.injectEndpoints({
         method: "POST",
         body: { invitees: [{ userId }] },
       }),
-      invalidatesTags: (result, error, { teamId }) => [{ type: "Team", id: teamId }],
+      invalidatesTags: (result, error, { teamId }) => [{ type: "Team", id: teamId }, "Team"],
     }),
     addCustomMember: builder.mutation({
       query: ({ teamId, name, phone }) => ({
@@ -101,7 +101,7 @@ export const teamApi = baseApi.injectEndpoints({
         method: "POST",
         body: { invitees: [{ name, phone }] },
       }),
-      invalidatesTags: (result, error, { teamId }) => [{ type: "Team", id: teamId }],
+      invalidatesTags: (result, error, { teamId }) => [{ type: "Team", id: teamId }, "Team"],
     }),
   }),
 });

@@ -35,7 +35,7 @@ const checkRedisReachable = (url) => {
       const socket = net.createConnection({
         port: parseInt(port),
         host: host,
-        timeout: 1000
+        timeout: 5000 // Increased timeout to 5 seconds for cloud connections
       });
       
       socket.on('connect', () => {

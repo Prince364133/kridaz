@@ -25,14 +25,11 @@ const GuestNavbar = () => {
     { name: "Venue Owner Overview", path: "/venue-owners" },
     { name: "Venues", path: "/business/venue" },
     { name: "Professionals", path: "/business/professional" },
-    { name: "Community", path: "/community" },
     { name: "Find Players", path: "/players" },
   ];
 
   return (
-    <nav className={`fixed top-0 left-0 w-full z-50 transition-transform duration-500 ${
-      scrolled ? "bg-black/80 backdrop-blur-xl border-b border-white/5 py-2" : "bg-transparent py-4"
-    } ${scrollDirection === "down" ? "-translate-y-full" : "translate-y-0"}`}>
+    <nav className={`fixed top-0 left-0 w-full z-50 transition-transform duration-500 ${ scrolled ? "bg-black/80 backdrop-blur-xl border-b border-white/5 py-2" : "bg-transparent py-4" } ${scrollDirection === "down" ? "-translate-y-full" : "translate-y-0"}`}>
       <div className="max-w-7xl mx-auto px-6 lg:px-12 flex items-center justify-between">
         
         {/* Brand Logo Unit */}
@@ -48,16 +45,12 @@ const GuestNavbar = () => {
           <div className="dropdown dropdown-hover group">
             <div 
               tabIndex={0} 
-              className={`flex items-center gap-1 text-sm font-medium transition-all cursor-pointer ${
-                location.pathname.startsWith("/business") || location.pathname === "/venue-owners" ? "text-[#55DEE8]" : "text-white/60 hover:text-white"
-              }`}
+              className={`flex items-center gap-1 text-sm font-medium transition-all cursor-pointer ${ location.pathname.startsWith("/business") || location.pathname === "/venue-owners" ? "text-[#55DEE8]" : "text-white/60 hover:text-white" }`}
             >
               Business <ChevronDown size={14} className="group-hover:rotate-180 transition-transform duration-300" />
-              <span className={`absolute -bottom-1 left-0 h-[2px] bg-[#55DEE8] transition-all duration-300 ${
-                location.pathname.startsWith("/business") || location.pathname === "/venue-owners" ? "w-full" : "w-0 group-hover:w-full"
-              }`} />
+              <span className={`absolute -bottom-1 left-0 h-[2px] bg-[#55DEE8] transition-all duration-300 ${ location.pathname.startsWith("/business") || location.pathname === "/venue-owners" ? "w-full" : "w-0 group-hover:w-full" }`} />
             </div>
-            <ul tabIndex={0} className="dropdown-content z-[1] menu p-2 shadow-2xl bg-[#0d0d0d] border border-white/5 rounded-xl w-52 mt-0">
+            <ul tabIndex={0} className="dropdown-content z-[1] menu p-2 shadow-2xl bg-[#0d0d0d] border border-white/5 rounded-[8px] w-52 mt-0">
               <li>
                 <Link to="/venue-owners" className="flex items-center gap-3 p-3 text-sm text-white/70 hover:text-white hover:bg-white/5 rounded-lg transition-all">
                   Venue Owner Overview
@@ -78,27 +71,11 @@ const GuestNavbar = () => {
           </div>
 
           <Link
-            to="/community"
-            className={`text-sm font-medium transition-all relative group ${
-              location.pathname === "/community" ? "text-[#55DEE8]" : "text-white/60 hover:text-white"
-            }`}
-          >
-            Community
-            <span className={`absolute -bottom-1 left-0 h-[2px] bg-[#55DEE8] transition-all duration-300 ${
-              location.pathname === "/community" ? "w-full" : "w-0 group-hover:w-full"
-            }`} />
-          </Link>
-
-          <Link
             to="/players"
-            className={`text-sm font-medium transition-all relative group ${
-              location.pathname === "/players" ? "text-[#55DEE8]" : "text-white/60 hover:text-white"
-            }`}
+            className={`text-sm font-medium transition-all relative group ${ location.pathname === "/players" ? "text-[#55DEE8]" : "text-white/60 hover:text-white" }`}
           >
             Find Players
-            <span className={`absolute -bottom-1 left-0 h-[2px] bg-[#55DEE8] transition-all duration-300 ${
-              location.pathname === "/players" ? "w-full" : "w-0 group-hover:w-full"
-            }`} />
+            <span className={`absolute -bottom-1 left-0 h-[2px] bg-[#55DEE8] transition-all duration-300 ${ location.pathname === "/players" ? "w-full" : "w-0 group-hover:w-full" }`} />
           </Link>
         </div>
 
@@ -128,7 +105,7 @@ const GuestNavbar = () => {
                 <label tabIndex={0} className="w-10 h-10 border border-white/10 flex items-center justify-center bg-white/5 hover:border-[#55DEE8]/50 rounded-full transition-all cursor-pointer group">
                   <User size={20} className="text-white/60 group-hover:text-[#55DEE8] transition-colors" />
                 </label>
-                <ul tabIndex={0} className="dropdown-content mt-4 p-2 shadow-2xl bg-[#121212] border border-white/10 rounded-xl w-56 overflow-hidden backdrop-blur-xl animate-fade-in">
+                <ul tabIndex={0} className="dropdown-content mt-4 p-2 shadow-2xl bg-[#121212] border border-white/10 rounded-[8px] w-56 overflow-hidden backdrop-blur-xl animate-fade-in">
                   <li>
                     <Link 
                       to={
@@ -169,9 +146,7 @@ const GuestNavbar = () => {
       </div>
 
       {/* Mobile Menu */}
-      <div className={`lg:hidden fixed inset-0 z-40 bg-black/98 backdrop-blur-2xl transition-all duration-500 ${
-        isOpen ? "translate-x-0 opacity-100" : "translate-x-full opacity-0"
-      }`}>
+      <div className={`lg:hidden fixed inset-0 z-40 bg-black/98 backdrop-blur-2xl transition-all duration-500 ${ isOpen ? "translate-x-0 opacity-100" : "translate-x-full opacity-0" }`}>
         <div className="flex flex-col h-full pt-28 px-8 gap-8">
           {navLinks.map((link) => (
             link.isExternal ? (

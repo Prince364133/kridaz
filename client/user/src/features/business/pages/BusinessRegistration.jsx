@@ -294,7 +294,7 @@ export default function BusinessRegistration({ defaultRole }) {
 
     return (
       <div className="min-h-screen bg-black text-white flex items-center justify-center p-6 pt-20">
-        <div className="max-w-md w-full text-center space-y-6 p-8 md:p-10 rounded-[15px] border border-[#2D2D2D] bg-[#000000] relative overflow-hidden">
+        <div className="max-w-md w-full text-center space-y-6 p-8 md:p-10 rounded-[8px] border border-[#2D2D2D] bg-[#000000] relative overflow-hidden">
           <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-[#55DEE8] to-[#BFF367]" />
           <div className="w-14 h-14 bg-gradient-to-br from-[#55DEE8]/15 to-[#BFF367]/15 rounded-[12px] flex items-center justify-center mx-auto mb-4 border border-[#55DEE8]/20">
             <Clock size={32} className="text-[#55DEE8] animate-pulse" />
@@ -307,7 +307,7 @@ export default function BusinessRegistration({ defaultRole }) {
             <span className="text-white font-semibold">{formattedRole}</span>. Our admin
             team is reviewing your registration details and documents.
           </p>
-          <div className="bg-[#000000] rounded-[15px] p-4 text-[12px] text-left space-y-4 border border-[#2D2D2D]">
+          <div className="bg-[#000000] rounded-[8px] p-4 text-[12px] text-left space-y-4 border border-[#2D2D2D]">
             <div className="flex items-center gap-3 text-gray-300">
               <CheckCircle2 size={18} className="text-[#BFF367]" />
               <span>Application Received</span>
@@ -323,7 +323,7 @@ export default function BusinessRegistration({ defaultRole }) {
           </div>
           <button
             onClick={() => navigate("/")}
-            className="w-full py-4 mt-2 rounded-[15px] border border-[#2D2D2D] hover:border-[#55DEE8]/30 hover:text-[#55DEE8] transition-all font-normal uppercase tracking-widest text-[12px]"
+            className="w-full py-4 mt-2 rounded-[8px] border border-[#2D2D2D] hover:border-[#55DEE8]/30 hover:text-[#55DEE8] transition-all font-normal uppercase tracking-widest text-[12px]"
           >
             Back to Home
           </button>
@@ -431,11 +431,7 @@ export default function BusinessRegistration({ defaultRole }) {
               <button 
                 type="submit"
                 disabled={loading || hasRoleConflict}
-                className={`w-full py-4 rounded-[6px] font-bold text-xs uppercase tracking-widest transition-all active:scale-[0.98] flex items-center justify-center gap-3 disabled:opacity-50 ${
-                  hasRoleConflict 
-                    ? 'bg-[#2D2D2D] text-[#878C9F] cursor-not-allowed'
-                    : 'bg-gradient-to-r from-[#55DEE8] to-[#BFF367] hover:opacity-90 text-black '
-                }`}
+                className={`w-full py-4 rounded-[6px] font-bold text-xs uppercase tracking-widest transition-all active:scale-[0.98] flex items-center justify-center gap-3 disabled:opacity-50 ${ hasRoleConflict ? 'bg-[#2D2D2D] text-[#878C9F] cursor-not-allowed' : 'bg-gradient-to-r from-[#55DEE8] to-[#BFF367] hover:opacity-90 text-black ' }`}
               >
                 {loading ? (
                   <>
@@ -509,7 +505,7 @@ export default function BusinessRegistration({ defaultRole }) {
       {/* Agreement Modal */}
       {showAgreementModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
-          <div className="bg-[#0a0a0c] border border-[#2D2D2D] rounded-[15px] p-8 max-w-md w-full shadow-2xl relative overflow-hidden">
+          <div className="bg-[#0a0a0c] border border-[#2D2D2D] rounded-[8px] p-8 max-w-md w-full shadow-2xl relative overflow-hidden">
             <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-[#55DEE8] to-[#BFF367]" />
             <h3 className="text-xl font-black text-white uppercase tracking-wider mb-4" style={{ fontFamily: "'Open Sans', sans-serif" }}>Agreement & Confirmation</h3>
             <p className="text-gray-400 text-sm leading-relaxed mb-6" style={{ fontFamily: "'Inter', sans-serif" }}>
@@ -589,11 +585,7 @@ function DocumentUploadBox({ id, onFileSelect, selectedFile, label, multiple }) 
       />
       <label 
         htmlFor={id}
-        className={`flex flex-row items-center justify-center gap-2 py-3 px-2 border border-dashed transition-all cursor-pointer rounded-[6px] flex-1
-          ${selectedFile 
-            ? 'border-[#55DEE8] bg-[#55DEE8]/10 text-[#BFF367]' 
-            : 'border-[#2D2D2D] bg-[#0a0a0c] hover:border-[#55DEE8]/50 hover:bg-[#55DEE8]/5 text-[#55DEE8]'
-          }`}
+        className={`flex flex-row items-center justify-center gap-2 py-3 px-2 border border-dashed transition-all cursor-pointer rounded-[6px] flex-1 ${selectedFile ? 'border-[#55DEE8] bg-[#55DEE8]/10 text-[#BFF367]' : 'border-[#2D2D2D] bg-[#0a0a0c] hover:border-[#55DEE8]/50 hover:bg-[#55DEE8]/5 text-[#55DEE8]' }`}
       >
         <Upload size={14} />
         <span className="text-[10px] font-bold truncate max-w-[80px]">

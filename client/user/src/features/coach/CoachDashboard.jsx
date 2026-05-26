@@ -41,7 +41,7 @@ const CoachDashboard = () => {
         <p className="font-bold text-xl uppercase tracking-wider text-red-500">Connection Interrupted</p>
         <button
           onClick={() => window.location.reload()}
-          className="mt-6 px-8 py-3 border border-red-500/50 text-red-500 font-bold uppercase rounded-xl hover:bg-red-500/10 transition-all"
+          className="mt-6 px-8 py-3 border border-red-500/50 text-red-500 font-bold uppercase rounded-[8px] hover:bg-red-500/10 transition-all"
         >
           Try Again
         </button>
@@ -85,8 +85,8 @@ const CoachDashboard = () => {
               </p>
             </div>
 
-            <div className="flex items-center gap-4 bg-white/[0.03] border border-white/5 px-6 py-4 rounded-2xl backdrop-blur-xl">
-              <div className="w-12 h-12 bg-[#55DEE8]/10 rounded-xl flex items-center justify-center text-[#55DEE8]">
+            <div className="flex items-center gap-4 bg-white/[0.03] border border-white/5 px-6 py-4 rounded-[8px] backdrop-blur-xl">
+              <div className="w-12 h-12 bg-[#55DEE8]/10 rounded-[8px] flex items-center justify-center text-[#55DEE8]">
                 <Calendar size={24} />
               </div>
               <div className="space-y-0.5">
@@ -94,7 +94,7 @@ const CoachDashboard = () => {
                   {currentTime.toLocaleDateString("en-US", { day: "2-digit", month: "long", year: "numeric" })}
                 </p>
                 <p className="text-[#55DEE8] text-[10px] font-semibold uppercase tracking-widest opacity-80">
-                  {currentTime.toLocaleDateString("en-US", { weekday: "long" })} GÇó{" "}
+                  {currentTime.toLocaleDateString("en-US", { weekday: "long" })} Rs ï¿½{" "}
                   {currentTime.toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit", hour12: true })}
                 </p>
               </div>
@@ -128,7 +128,7 @@ const CoachDashboard = () => {
                 </div>
                 
                 <p className="text-[#999999] text-[13px] font-medium max-w-2xl">
-                  {coach.businessDetails?.specialization || "Expert Sports Consultant"} GÇó {coach.businessDetails?.experience || "N/A"} Experience
+                  {coach.businessDetails?.specialization || "Expert Sports Consultant"} Rs ï¿½ {coach.businessDetails?.experience || "N/A"} Experience
                 </p>
                 
                 <div className="flex flex-wrap justify-center md:justify-start gap-2 pt-2">
@@ -148,7 +148,7 @@ const CoachDashboard = () => {
                 <div className="text-center">
                   <p className="text-xs font-medium text-[#878C9F] uppercase tracking-wider mb-1 font-inter">Rating</p>
                   <div className="flex items-center gap-1 text-white font-bold text-2xl tracking-tight font-inter">
-                    {coach.rating || "4.9"} <span className="text-[#55DEE8] text-xl">Gÿà</span>
+                    {coach.rating || "4.9"} <span className="text-[#55DEE8] text-xl">Rs ï¿½</span>
                   </div>
                 </div>
                 <div className="text-center">
@@ -275,7 +275,7 @@ const CoachDashboard = () => {
   );
 };
 
-// GöÇGöÇ Empty State Helper GöÇGöÇ
+// Rs ï¿½Rs ï¿½ Empty State Helper Rs ï¿½Rs ï¿½
 const EmptyState = ({ height, icon: Icon, message, sub }) => (
   <div
     className="flex flex-col items-center justify-center gap-3 text-center rounded-[8px] border border-dashed border-[#2D2D2D]"
@@ -287,7 +287,7 @@ const EmptyState = ({ height, icon: Icon, message, sub }) => (
   </div>
 );
 
-// GöÇGöÇ Stats Card GöÇGöÇ
+// Rs ï¿½Rs ï¿½ Stats Card Rs ï¿½Rs ï¿½
 const StatsCard = ({ title, value, prefix = "", suffix = "", icon: Icon }) => {
   return (
     <div className="bg-[#000000] border border-[#2D2D2D] rounded-[8px] p-5 flex flex-col relative overflow-hidden group hover:border-[#55DEE8]/30 transition-all duration-500 min-h-[140px] shadow-[var(--shadow-2)]">

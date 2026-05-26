@@ -26,7 +26,7 @@ import useNotifications from "@hooks/shared/useNotifications";
 import { formatDistanceToNow } from 'date-fns';
 
 /**
- * AuthenticatedNavbar G�� Role-aware top navigation.
+ * AuthenticatedNavbar Rs � Role-aware top navigation.
  * Fully rebranded for Scorer users with Teal Green (#00C187) and Inter typography.
  */
 
@@ -179,9 +179,7 @@ const AuthenticatedNavbar = ({ toggleSidebar }) => {
           <div className="relative" ref={notificationRef}>
             <button 
               onClick={() => setShowNotifications(!showNotifications)}
-              className={`p-2.5 rounded-lg transition-all duration-300 relative border ${
-                showNotifications ? "" : "bg-[#0d0d0d] text-[#999999] border-white/5 hover:border-white/10"
-              }`}
+              className={`p-2.5 rounded-[8px] transition-all duration-300 relative border ${ showNotifications ? "" : "bg-[#0d0d0d] text-[#999999] border-white/5 hover:border-white/10" }`}
               style={{ 
                 backgroundColor: showNotifications ? themeColor : undefined, 
                 color: showNotifications ? '#000' : undefined,
@@ -217,7 +215,7 @@ const AuthenticatedNavbar = ({ toggleSidebar }) => {
                         className={`p-5 border-b border-white/5 transition-colors cursor-pointer group ${notif.isRead ? 'opacity-60' : 'bg-white/[0.02]'}`}
                       >
                         <div className="flex gap-4">
-                           <div className="mt-0.5 p-2 rounded-xl border border-white/5 flex items-center justify-center shrink-0" style={{ backgroundColor: notif.isRead ? 'rgba(255,255,255,0.05)' : themeColor + '1A', color: notif.isRead ? '#555' : themeColor }}>
+                           <div className="mt-0.5 p-2 rounded-[8px] border border-white/5 flex items-center justify-center shrink-0" style={{ backgroundColor: notif.isRead ? 'rgba(255,255,255,0.05)' : themeColor + '1A', color: notif.isRead ? '#555' : themeColor }}>
                              {getNotificationIcon(notif.type)}
                            </div>
                            <div className="flex-1 space-y-1">
@@ -252,7 +250,7 @@ const AuthenticatedNavbar = ({ toggleSidebar }) => {
           <div className="relative" ref={profileRef}>
             <button 
               onClick={() => setShowProfileMenu(!showProfileMenu)}
-              className="flex items-center gap-4 p-1.5 pr-5 bg-[#0d0d0d] border border-white/5 rounded-lg hover:bg-white/[0.03] hover:border-white/10 transition-all duration-300 group"
+              className="flex items-center gap-4 p-1.5 pr-5 bg-[#0d0d0d] border border-white/5 rounded-[8px] hover:bg-white/[0.03] hover:border-white/10 transition-all duration-300 group"
             >
               <div className="w-11 h-11 rounded-lg overflow-hidden flex items-center justify-center text-black shadow-2xl group-hover:scale-105 transition-transform" style={{ backgroundColor: themeColor }}>
                 {user?.profilePicture ? (

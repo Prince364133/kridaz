@@ -29,7 +29,7 @@ export default function UmpireSchedule() {
       </div>
 
       {upcomingMatches.length === 0 ? (
-        <div className="flex flex-col items-center justify-center min-h-[450px] bg-white/[0.03] backdrop-blur-xl rounded-lg border border-white/5 border-dashed p-12 text-center shadow-2xl relative overflow-hidden">
+        <div className="flex flex-col items-center justify-center min-h-[450px] bg-white/[0.03] backdrop-blur-xl rounded-[8px] border border-white/5 border-dashed p-12 text-center shadow-2xl relative overflow-hidden">
           <div className="absolute inset-0 bg-gradient-to-b from-transparent to-black/20 pointer-events-none" />
           <div className="w-20 h-20 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center mb-8 relative z-10 shadow-inner">
             <Calendar size={40} className="text-neutral-600" />

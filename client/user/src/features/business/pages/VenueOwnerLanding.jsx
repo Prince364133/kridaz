@@ -64,7 +64,7 @@ export default function VenueOwnerLanding() {
           {/* Paragraph (Subheading) */}
           <p 
             className="text-gray-300 leading-relaxed mb-8 max-w-2xl"
-            style={{ fontFamily: "'Inter', sans-serif", fontSize: "20px" }}
+            style={{ fontFamily: "'Inter 28pt Light', sans-serif", fontWeight: 300, fontSize: "20px" }}
           >
             Kridaz helps you automate bookings, manage operations, and connect with thousands of players looking for venues like yours.
           </p>
@@ -145,7 +145,7 @@ export default function VenueOwnerLanding() {
           <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-6 sm:gap-8">
             <Link
               to="/business/register?role=venu_owners"
-              className="inline-flex items-center justify-center gap-3 font-black text-black rounded-full px-10 py-5 hover:brightness-110 hover:shadow-[0_0_20px_rgba(85,222,232,0.4)] transition-all bg-gradient-to-r from-[#55DEE8] to-[#BFF367] uppercase tracking-widest text-xs md:text-sm"
+              className="inline-flex items-center justify-center gap-3 font-black text-black rounded-[6px] px-10 py-5 hover:brightness-110 hover:shadow-[0_0_20px_rgba(85,222,232,0.4)] transition-all bg-gradient-to-r from-[#55DEE8] to-[#BFF367] uppercase tracking-widest text-xs md:text-sm"
             >
               Register Your Venue <ArrowRight size={18} />
             </Link>

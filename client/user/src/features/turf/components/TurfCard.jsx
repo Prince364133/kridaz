@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { MapPin, Star, ChevronLeft, ChevronRight, Zap, Heart, Timer, MessageSquareShare } from "lucide-react";
 import axiosInstance from "@hooks/useAxiosInstance";
 
@@ -7,9 +7,12 @@ const TurfCard = ({ turf, featured = false, distance = "1.2km Away" }) => {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [isWishlisted, setIsWishlisted] = useState(false);
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
 
   // Ensure fallback values so we don't crash
-  const to = `/venue/${turf.id || turf._id}`;
+  const returnTo = searchParams.get('returnTo');
+  const baseTo = `/venue/${turf.id || turf._id}`;
+  const to = returnTo ? `${baseTo}?returnTo=${encodeURIComponent(returnTo)}` : baseTo;
   const images = turf.images?.length > 0 ? turf.images : [turf.image];
   const rating = turf.avgRating ?? 4.8;
   const price = turf.pricePerHour ?? 800;
@@ -65,7 +68,7 @@ const TurfCard = ({ turf, featured = false, distance = "1.2km Away" }) => {
   return (
     <div
       onClick={() => navigate(to)}
-      className="group relative h-[280px] md:h-[360px] w-full rounded-[15px] overflow-hidden cursor-pointer bg-[#0d0d0d] transition-all duration-500 hover:-translate-y-2 hover:shadow-[0_20px_50px_rgba(0,0,0,0.5)] border border-white/5 hover:border-[#BFF367]/30"
+      className="group relative h-[280px] md:h-[360px] w-full rounded-[8px] overflow-hidden cursor-pointer bg-[#0d0d0d] transition-all duration-500 hover:-translate-y-2 hover:shadow-[0_20px_50px_rgba(0,0,0,0.5)] border border-white/5 hover:border-[#BFF367]/30"
     >
       {/* ── Background Image ── */}
       <div className="absolute inset-0">
@@ -105,13 +108,11 @@ const TurfCard = ({ turf, featured = false, distance = "1.2km Away" }) => {
       <div className="absolute top-3 md:top-5 right-3 md:right-5 z-20">
         <button 
           onClick={toggleWishlist}
-          className="p-2 md:p-2.5 rounded-full bg-black/40 backdrop-blur-md border border-white/10 hover:bg-gradient-to-r hover:from-[#55DEE8] hover:to-[#BFF367] transition-all duration-300 group/heart"
+          className="p-2 md:p-2.5 rounded-[8px] bg-black/40 backdrop-blur-md border border-white/10 hover:bg-gradient-to-r hover:from-[#55DEE8] hover:to-[#BFF367] transition-all duration-300 group/heart"
         >
           <Heart 
             size={14} md:size={18} 
-            className={`transition-all duration-300 ${
-              isWishlisted ? "fill-red-500 text-red-500 scale-110" : "text-white group-hover/heart:scale-110 group-hover/heart:text-black"
-            }`} 
+            className={`transition-all duration-300 ${ isWishlisted ? "fill-red-500 text-red-500 scale-110" : "text-white group-hover/heart:scale-110 group-hover/heart:text-black" }`} 
           />
         </button>
       </div>
@@ -119,10 +120,10 @@ const TurfCard = ({ turf, featured = false, distance = "1.2km Away" }) => {
       {/* ── Carousel Controls ── */}
       {images.length > 1 && (
         <div className="absolute inset-y-0 inset-x-2 flex items-center justify-between opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-30">
-          <button onClick={prevImage} className="p-1.5 md:p-2 bg-black/40 hover:bg-[#BFF367] hover:text-black backdrop-blur-sm rounded-full text-white transition-all border border-white/10">
+          <button onClick={prevImage} className="p-1.5 md:p-2 bg-black/40 hover:bg-[#BFF367] hover:text-black backdrop-blur-sm rounded-[8px] text-white transition-all border border-white/10">
             <ChevronLeft size={14} md:size={16} />
           </button>
-          <button onClick={nextImage} className="p-1.5 md:p-2 bg-black/40 hover:bg-[#BFF367] hover:text-black backdrop-blur-sm rounded-full text-white transition-all border border-white/10">
+          <button onClick={nextImage} className="p-1.5 md:p-2 bg-black/40 hover:bg-[#BFF367] hover:text-black backdrop-blur-sm rounded-[8px] text-white transition-all border border-white/10">
             <ChevronRight size={14} md:size={16} />
           </button>
         </div>

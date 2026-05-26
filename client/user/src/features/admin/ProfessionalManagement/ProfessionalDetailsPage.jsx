@@ -55,7 +55,7 @@ const ProfessionalDetailsPage = () => {
         <p className="text-gray-500">The requested professional could not be found or you don't have access.</p>
         <button 
           onClick={() => navigate(-1)}
-          className="mt-6 px-6 py-2 bg-[#CCFF00] text-black font-bold uppercase rounded-lg hover:bg-[#65a30d] transition-colors"
+          className="mt-6 px-6 py-2 bg-[#CCFF00] text-black font-bold uppercase rounded-[6px] hover:bg-[#65a30d] transition-colors"
         >
           Go Back
         </button>
@@ -89,13 +89,13 @@ const ProfessionalDetailsPage = () => {
           <ArrowLeft size={16} /> Back to Professionals
         </button>
 
-        <div className="bg-[#000000] border border-[#2D2D2D] rounded-2xl shadow-2xl flex flex-col overflow-hidden relative">
+        <div className="bg-[#000000] border border-[#2D2D2D] rounded-[8px] shadow-2xl flex flex-col overflow-hidden relative">
           <div className="absolute top-0 right-0 w-64 h-64 bg-[#CCFF00]/5 blur-[80px] pointer-events-none" />
           
           {/* Profile Header */}
           <div className="p-8 pb-0 flex flex-col sm:flex-row gap-8 items-start sm:items-end justify-between border-b border-[#2D2D2D]">
             <div className="flex flex-col sm:flex-row items-center sm:items-start gap-6 sm:gap-8 pb-8 text-center sm:text-left">
-              <div className="w-24 h-24 sm:w-32 sm:h-32 rounded-xl bg-[#CCFF00]/10 flex items-center justify-center text-[#CCFF00] font-black text-4xl sm:text-5xl uppercase border-2 border-[#CCFF00]/20 shadow-[0_0_40px_rgba(204,255,0,0.15)] overflow-hidden shrink-0">
+              <div className="w-24 h-24 sm:w-32 sm:h-32 rounded-[8px] bg-[#CCFF00]/10 flex items-center justify-center text-[#CCFF00] font-black text-4xl sm:text-5xl uppercase border-2 border-[#CCFF00]/20 shadow-[0_0_40px_rgba(204,255,0,0.15)] overflow-hidden shrink-0">
                 {profile?.profilePicture ? (
                   <img src={profile.profilePicture} alt={profile.name} className="w-full h-full object-cover" />
                 ) : (
@@ -127,7 +127,7 @@ const ProfessionalDetailsPage = () => {
               <div className="flex gap-3 mb-8 sm:mb-0">
                 <button 
                   onClick={() => setShowDeleteModal(true)}
-                  className="px-6 py-2.5 bg-red-500/10 border border-red-500/20 text-red-400 font-black text-xs uppercase tracking-[0.15em] rounded-xl hover:bg-red-500/20 transition-all flex items-center gap-2"
+                  className="px-6 py-2.5 bg-red-500/10 border border-red-500/20 text-red-400 font-black text-xs uppercase tracking-[0.15em] rounded-[8px] hover:bg-red-500/20 transition-all flex items-center gap-2"
                 >
                   <Trash2 size={16} /> Delete Record
                 </button>
@@ -155,9 +155,7 @@ const ProfessionalDetailsPage = () => {
               <button
                 key={tab}
                 onClick={() => setActiveTab(tab)}
-                className={`px-8 py-5 text-[11px] font-black uppercase tracking-[0.2em] transition-all duration-300 relative whitespace-nowrap ${
-                  activeTab === tab ? "text-[#CCFF00]" : "text-white/40 hover:text-white"
-                }`}
+                className={`px-8 py-5 text-[11px] font-black uppercase tracking-[0.2em] transition-all duration-300 relative whitespace-nowrap ${ activeTab === tab ? "text-[#CCFF00]" : "text-white/40 hover:text-white" }`}
               >
                 {tab}
                 {activeTab === tab && (
@@ -178,7 +176,7 @@ const ProfessionalDetailsPage = () => {
                   <h3 className="text-xl font-bold text-white uppercase tracking-wider flex items-center gap-3">
                     <Mail className="text-[#CCFF00]" size={24} /> Contact Details
                   </h3>
-                  <div className="bg-white/5 border border-white/10 rounded-xl p-6 space-y-5">
+                  <div className="bg-white/5 border border-white/10 rounded-[8px] p-6 space-y-5">
                     <div className="flex justify-between items-center border-b border-white/5 pb-4">
                       <span className="text-gray-500 text-sm">Email</span>
                       <span className="text-gray-200">{profile?.email}</span>
@@ -205,7 +203,7 @@ const ProfessionalDetailsPage = () => {
                   <h3 className="text-xl font-bold text-white uppercase tracking-wider flex items-center gap-3">
                     <Briefcase className="text-[#CCFF00]" size={24} /> Professional Background
                   </h3>
-                  <div className="bg-white/5 border border-white/10 rounded-xl p-6 space-y-5">
+                  <div className="bg-white/5 border border-white/10 rounded-[8px] p-6 space-y-5">
                     <div className="flex justify-between items-center border-b border-white/5 pb-4">
                       <span className="text-gray-500 text-sm">Experience</span>
                       <span className="text-gray-200">{profile?.businessDetails?.experience || "N/A"}</span>
@@ -241,14 +239,14 @@ const ProfessionalDetailsPage = () => {
                   {profile?.certifications?.length > 0 ? (
                     <div className="flex flex-wrap gap-4">
                       {profile.certifications.map((cert, idx) => (
-                        <div key={idx} className="bg-[#1a1a1a] border border-[#CCFF00]/30 text-gray-200 px-5 py-3 rounded-lg text-sm flex items-center gap-3 shadow-[0_4px_12px_rgba(0,0,0,0.5)]">
+                        <div key={idx} className="bg-[#1a1a1a] border border-[#CCFF00]/30 text-gray-200 px-5 py-3 rounded-[6px] text-sm flex items-center gap-3 shadow-[0_4px_12px_rgba(0,0,0,0.5)]">
                           <Shield size={18} className="text-[#CCFF00]" /> 
                           <span className="font-medium tracking-wide">{cert}</span>
                         </div>
                       ))}
                     </div>
                   ) : (
-                    <div className="bg-white/5 border border-dashed border-white/20 rounded-xl p-8 text-center text-gray-500">
+                    <div className="bg-white/5 border border-dashed border-white/20 rounded-[8px] p-8 text-center text-gray-500">
                       <Award size={32} className="mx-auto mb-3 opacity-50" />
                       <p>No certifications listed for this professional.</p>
                     </div>
@@ -262,20 +260,20 @@ const ProfessionalDetailsPage = () => {
               <div className="space-y-10">
                 {/* Financial Grid */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-                  <div className="bg-gradient-to-br from-[#CCFF00]/20 to-transparent border border-[#CCFF00]/40 rounded-2xl p-6 relative overflow-hidden shadow-[0_0_30px_rgba(132,204,22,0.1)]">
+                  <div className="bg-gradient-to-br from-[#CCFF00]/20 to-transparent border border-[#CCFF00]/40 rounded-[8px] p-6 relative overflow-hidden shadow-[0_0_30px_rgba(132,204,22,0.1)]">
                     <div className="absolute -right-4 -bottom-4 opacity-20 text-[#CCFF00]"><IndianRupee size={100} /></div>
                     <p className="text-white/80 text-xs uppercase tracking-widest font-bold mb-3 relative z-10">Usable Balance</p>
                     <p className="text-4xl font-bold text-[#CCFF00] relative z-10">₹{profile?.walletBalance?.toFixed(2) || "0.00"}</p>
                   </div>
-                  <div className="bg-[#1a1a1a] border border-white/10 rounded-2xl p-6">
+                  <div className="bg-[#1a1a1a] border border-white/10 rounded-[8px] p-6">
                     <p className="text-gray-400 text-xs uppercase tracking-widest font-bold mb-3">In Progress</p>
                     <p className="text-3xl font-bold text-blue-400">₹{profile?.inProgressBalance?.toFixed(2) || "0.00"}</p>
                   </div>
-                  <div className="bg-[#1a1a1a] border border-white/10 rounded-2xl p-6">
+                  <div className="bg-[#1a1a1a] border border-white/10 rounded-[8px] p-6">
                     <p className="text-gray-400 text-xs uppercase tracking-widest font-bold mb-3">Pending</p>
                     <p className="text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-[#55DEE8] to-[#BFF367]">₹{profile?.pendingBalance?.toFixed(2) || "0.00"}</p>
                   </div>
-                  <div className="bg-[#1a1a1a] border border-white/10 rounded-2xl p-6">
+                  <div className="bg-[#1a1a1a] border border-white/10 rounded-[8px] p-6">
                     <p className="text-gray-400 text-xs uppercase tracking-widest font-bold mb-3">Total Withdrawn</p>
                     <p className="text-3xl font-bold text-gray-300">₹{profile?.withdrawnBalance?.toFixed(2) || "0.00"}</p>
                   </div>
@@ -286,20 +284,12 @@ const ProfessionalDetailsPage = () => {
                   <h3 className="text-xl font-bold text-white uppercase tracking-wider flex items-center gap-3">
                     <CreditCard className="text-[#CCFF00]" size={24} /> Banking & KYC
                   </h3>
-                  <div className="bg-white/5 border border-white/10 rounded-2xl p-8">
+                  <div className="bg-white/5 border border-white/10 rounded-[8px] p-8">
                     <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8 pb-8 border-b border-white/10">
                       <div>
                         <p className="text-gray-400 text-sm mb-2">KYC Status</p>
-                        <div className={`inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider border ${
-                          profile?.bankingDetails?.kycStatus === "VERIFIED" ? "bg-green-500/10 text-green-400 border-green-500/30" :
-                          profile?.bankingDetails?.kycStatus === "REJECTED" ? "bg-red-500/10 text-red-400 border-red-500/30" :
-                          "bg-gradient-to-r from-[#55DEE8]/10 to-[#BFF367]/10 text-transparent bg-clip-text bg-gradient-to-r from-[#55DEE8] to-[#BFF367] border-[#55DEE8]/30"
-                        }`}>
-                          <div className={`w-2 h-2 rounded-full ${
-                            profile?.bankingDetails?.kycStatus === "VERIFIED" ? "bg-green-400" :
-                            profile?.bankingDetails?.kycStatus === "REJECTED" ? "bg-red-400" :
-                            "bg-gradient-to-r from-[#55DEE8] to-[#BFF367] animate-pulse"
-                          }`}></div>
+                        <div className={`inline-flex items-center gap-2 px-4 py-1.5 rounded-[6px] text-xs font-bold uppercase tracking-wider border ${ profile?.bankingDetails?.kycStatus === "VERIFIED" ? "bg-green-500/10 text-green-400 border-green-500/30" : profile?.bankingDetails?.kycStatus === "REJECTED" ? "bg-red-500/10 text-red-400 border-red-500/30" : "bg-yellow-500/10 text-yellow-400 border-yellow-500/30" }`}>
+                          <div className={`w-2 h-2 rounded-full ${ profile?.bankingDetails?.kycStatus === "VERIFIED" ? "bg-green-400" : profile?.bankingDetails?.kycStatus === "REJECTED" ? "bg-red-400" : "bg-yellow-400 animate-pulse" }`}></div>
                           {profile?.bankingDetails?.kycStatus || "NOT SUBMITTED"}
                         </div>
                       </div>
@@ -310,25 +300,25 @@ const ProfessionalDetailsPage = () => {
                     </div>
 
                     {profile?.bankingDetails?.payoutMode === "UPI" ? (
-                      <div className="bg-[#111] p-6 rounded-xl border border-white/5 flex justify-between items-center">
+                      <div className="bg-[#111] p-6 rounded-[8px] border border-white/5 flex justify-between items-center">
                         <span className="text-gray-400 uppercase tracking-widest text-sm font-bold">UPI ID</span>
                         <span className="text-white font-mono text-lg tracking-wider">{profile?.bankingDetails?.upiId || "N/A"}</span>
                       </div>
                     ) : (
                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-8">
-                        <div className="bg-[#111] p-5 rounded-xl border border-white/5">
+                        <div className="bg-[#111] p-5 rounded-[8px] border border-white/5">
                           <p className="text-gray-500 text-xs uppercase tracking-widest font-bold mb-2">Account Name</p>
                           <p className="text-white font-medium">{profile?.bankingDetails?.accountName || "N/A"}</p>
                         </div>
-                        <div className="bg-[#111] p-5 rounded-xl border border-white/5">
+                        <div className="bg-[#111] p-5 rounded-[8px] border border-white/5">
                           <p className="text-gray-500 text-xs uppercase tracking-widest font-bold mb-2">Bank Name</p>
                           <p className="text-white font-medium">{profile?.bankingDetails?.bankName || "N/A"}</p>
                         </div>
-                        <div className="bg-[#111] p-5 rounded-xl border border-white/5">
+                        <div className="bg-[#111] p-5 rounded-[8px] border border-white/5">
                           <p className="text-gray-500 text-xs uppercase tracking-widest font-bold mb-2">Account Number</p>
                           <p className="text-white font-mono tracking-wider">{profile?.bankingDetails?.accountNumber || "N/A"}</p>
                         </div>
-                        <div className="bg-[#111] p-5 rounded-xl border border-white/5">
+                        <div className="bg-[#111] p-5 rounded-[8px] border border-white/5">
                           <p className="text-gray-500 text-xs uppercase tracking-widest font-bold mb-2">IFSC Code</p>
                           <p className="text-white font-mono tracking-wider">{profile?.bankingDetails?.ifscCode || "N/A"}</p>
                         </div>
@@ -352,7 +342,7 @@ const ProfessionalDetailsPage = () => {
                 </div>
 
                 {matches?.length === 0 ? (
-                  <div className="bg-white/5 border border-dashed border-white/20 rounded-2xl p-16 text-center">
+                  <div className="bg-white/5 border border-dashed border-white/20 rounded-[8px] p-16 text-center">
                     <Calendar size={64} className="mx-auto text-gray-700 mb-6" />
                     <p className="text-white font-bold text-2xl tracking-wide mb-2">No Match History</p>
                     <p className="text-gray-500 text-lg">This professional hasn't officiated any matches yet.</p>
@@ -360,20 +350,12 @@ const ProfessionalDetailsPage = () => {
                 ) : (
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     {matches?.map(match => (
-                      <div key={match._id} className="bg-[#1a1a1a] border border-white/10 rounded-xl p-6 hover:border-[#CCFF00]/50 hover:bg-white/5 transition-all duration-300 relative group">
+                      <div key={match._id} className="bg-[#1a1a1a] border border-white/10 rounded-[8px] p-6 hover:border-[#CCFF00]/50 hover:bg-white/5 transition-all duration-300 relative group">
                         {/* Status Indicator */}
-                        <div className={`absolute top-0 right-0 w-16 h-16 rounded-bl-3xl rounded-tr-xl opacity-20 transition-opacity group-hover:opacity-40 ${
-                           match.status === "COMPLETED" ? "bg-green-500" :
-                           match.status === "CANCELLED" ? "bg-red-500" :
-                           "bg-blue-500"
-                        }`}></div>
+                        <div className={`absolute top-0 right-0 w-16 h-16 rounded-bl-3xl rounded-tr-xl opacity-20 transition-opacity group-hover:opacity-40 ${ match.status === "COMPLETED" ? "bg-green-500" : match.status === "CANCELLED" ? "bg-red-500" : "bg-blue-500" }`}></div>
 
                         <div className="flex items-center gap-3 mb-4">
-                          <span className={`px-2.5 py-1 rounded text-[10px] font-bold uppercase tracking-widest border ${
-                            match.status === "COMPLETED" ? "bg-green-500/10 text-green-400 border-green-500/30" :
-                            match.status === "CANCELLED" ? "bg-red-500/10 text-red-400 border-red-500/30" :
-                            "bg-blue-500/10 text-blue-400 border-blue-500/30"
-                          }`}>
+                          <span className={`px-2.5 py-1 rounded text-[10px] font-bold uppercase tracking-widest border ${ match.status === "COMPLETED" ? "bg-green-500/10 text-green-400 border-green-500/30" : match.status === "CANCELLED" ? "bg-red-500/10 text-red-400 border-red-500/30" : "bg-blue-500/10 text-blue-400 border-blue-500/30" }`}>
                             {match.status}
                           </span>
                           <span className="text-[#CCFF00] text-sm font-bold uppercase tracking-wider">

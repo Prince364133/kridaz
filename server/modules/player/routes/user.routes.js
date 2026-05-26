@@ -36,6 +36,8 @@ router.get('/search', searchPlayers);
 
 // ── Authenticated Routes (Static) ───────────────────────────────────────────
 
+import { optionalUserAuth } from "../../../middleware/jwt/user.middleware.js";
+
 /**
  * @swagger
  * /player/nearby:
@@ -45,7 +47,7 @@ router.get('/search', searchPlayers);
  *     security:
  *       - BearerAuth: []
  */
-router.get('/nearby', userAuth, getNearbyPlayers);
+router.get('/nearby', optionalUserAuth, getNearbyPlayers);
 
 /**
  * @swagger

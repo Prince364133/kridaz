@@ -71,7 +71,7 @@ const HireOfficialModal = ({ isOpen, onClose, gameId, role, onInviteSent }) => {
             initial={{ opacity: 0, scale: 0.95, y: 20 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.95, y: 20 }}
-            className="relative w-full max-w-md bg-neutral-900 border border-neutral-800 rounded-3xl overflow-hidden shadow-2xl"
+            className="relative w-full max-w-md bg-neutral-900 border border-neutral-800 rounded-[8px] overflow-hidden shadow-2xl"
           >
             <div className="p-6 border-b border-neutral-800 flex justify-between items-center">
               <div>
@@ -91,7 +91,7 @@ const HireOfficialModal = ({ isOpen, onClose, gameId, role, onInviteSent }) => {
                   placeholder="Type 3+ characters to search..."
                   value={query}
                   onChange={(e) => setQuery(e.target.value)}
-                  className="w-full bg-neutral-800 border border-neutral-700 rounded-2xl py-3 pl-12 pr-4 text-sm focus:outline-none focus:border-[#55DEE8] transition-all"
+                  className="w-full bg-neutral-800 border border-neutral-700 rounded-[8px] py-3 pl-12 pr-4 text-sm focus:outline-none focus:border-yellow-500 transition-all"
                   autoFocus
                 />
               </div>
@@ -104,7 +104,7 @@ const HireOfficialModal = ({ isOpen, onClose, gameId, role, onInviteSent }) => {
                   </div>
                 ) : results.length > 0 ? (
                   results.map((user) => (
-                    <div key={user._id} className="flex items-center justify-between p-3 bg-neutral-800/40 border border-neutral-800 rounded-2xl hover:border-neutral-700 transition-all group">
+                    <div key={user._id} className="flex items-center justify-between p-3 bg-neutral-800/40 border border-neutral-800 rounded-[8px] hover:border-neutral-700 transition-all group">
                       <div className="flex items-center gap-3">
                         {user.profilePicture ? (
                           <img src={user.profilePicture} alt="" className="w-10 h-10 rounded-full border border-neutral-700" />
@@ -123,7 +123,7 @@ const HireOfficialModal = ({ isOpen, onClose, gameId, role, onInviteSent }) => {
                       <button
                         onClick={() => handleInvite(user._id)}
                         disabled={invitingId === user._id}
-                        className="px-4 py-2 bg-gradient-to-r from-[#55DEE8] to-[#BFF367] text-black text-[10px] font-black rounded-xl uppercase hover:scale-105 transition-all disabled:opacity-50 disabled:scale-100"
+                        className="px-4 py-2 bg-yellow-500 text-black text-[10px] font-black rounded-[8px] uppercase hover:scale-105 transition-all disabled:opacity-50 disabled:scale-100"
                       >
                         {invitingId === user._id ? (
                           <Loader2 size={14} className="animate-spin" />

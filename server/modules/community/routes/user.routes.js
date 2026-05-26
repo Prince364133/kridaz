@@ -13,13 +13,14 @@ import {
   getUserStories,
   getCommunityStats,
   getUploadUrl,
-  confirmPost
+  confirmPost,
+  reportPost
 } from '../community.controller.js';
 import userAuth from '../../../middleware/jwt/user.middleware.js';
 import { optionalAuth } from '../../../middleware/jwt/auth.middleware.js';
 import upload from '../../../middleware/uploads/upload.middleware.js';
 import { validate } from '../../../middleware/validate.middleware.js';
-import { getUploadUrlSchema, confirmPostSchema, commentSchema } from '../community.validator.js';
+import { getUploadUrlSchema, confirmPostSchema, commentSchema, reportPostSchema } from '../community.validator.js';
 
 const router = express.Router();
 
@@ -170,5 +171,16 @@ router.post('/', upload.single('image'), createPost);
  */
 router.put('/:id', upload.single('image'), updatePost);
 router.delete('/:id', deletePost);
+
+/**
+ * @swagger
+ * /community/{id}/report:
+ *   post:
+ *     summary: Report a post
+ *     tags: [Community]
+ *     security:
+ *       - BearerAuth: []
+ */
+router.post('/:id/report', validate(reportPostSchema), reportPost);
 
 export default router;

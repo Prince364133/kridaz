@@ -6,6 +6,7 @@ import SocialService from '../../services/social.service.js';
 import path from 'path';
 import { v4 as uuidv4 } from 'uuid';
 import logger from "../../utils/logger.js";
+import { findNearby } from '../../utils/geo.util.js';
 
 const resolveUserId = async (id) => {
   if (!id) return null;
@@ -45,26 +46,76 @@ export const getUploadUrl = async (req, res) => {
  */
 export const confirmStory = async (req, res) => {
   try {
-    const { storyId, key, mediaType, content, durationDays } = req.body;
+    const { storyId, key, mediaType, content, durationDays, mediaItems } = req.body;
     const userId = await resolveUserId(req.user.id);
     const expiresAt = new Date();
     expiresAt.setDate(expiresAt.getDate() + parseInt(durationDays || 1));
 
+    // Handle multiple items upload confirmation (array)
+    if (mediaItems && mediaItems.length > 0) {
+      const createdStories = [];
+      for (const item of mediaItems) {
+        const itemStoryId = uuidv4();
+        const itemMediaUrl = `${process.env.REELS_CDN_URL}/${item.key}`;
+        let placeholder = null;
+
+        if (item.mediaType === 'image') {
+          placeholder = await generatePlaceholder(itemMediaUrl);
+        }
+
+        const story = await prisma.story.create({
+          data: {
+            id: itemStoryId,
+            userId,
+            mediaType: item.mediaType,
+            mediaUrl: item.mediaType === 'image' ? itemMediaUrl : null,
+            rawMediaUrl: itemMediaUrl,
+            placeholder,
+            content,
+            expiresAt,
+            status: item.mediaType === 'video' ? 'pending' : 'ready',
+            durationDays: parseInt(durationDays || 1)
+          },
+          include: {
+            user: {
+              select: { id: true, name: true, username: true, profilePicture: true }
+            }
+          }
+        });
+
+        const populatedStory = { ...story, userId: story.user };
+        delete populatedStory.user;
+
+        if (item.mediaType === 'video') {
+          await mediaQueue.add('TRANSCODE_VIDEO', { 
+            mediaId: story.id,
+            mediaType: 'story'
+          });
+        }
+        createdStories.push(populatedStory);
+      }
+
+      return res.status(201).json({ 
+        success: true, 
+        stories: createdStories, 
+        story: createdStories[0] 
+      });
+    }
+
+    // Fallback/Legacy single story confirmation
     let placeholder = null;
     const mediaUrl = `${process.env.REELS_CDN_URL}/${key}`;
 
-    // 1. If image, generate instant placeholder
     if (mediaType === 'image') {
       placeholder = await generatePlaceholder(mediaUrl);
     }
 
-    // 2. Save Story using Prisma
     const story = await prisma.story.create({
       data: {
         id: storyId,
         userId,
         mediaType,
-        mediaUrl: mediaType === 'image' ? mediaUrl : null, // Images serve direct, Videos serve HLS
+        mediaUrl: mediaType === 'image' ? mediaUrl : null,
         rawMediaUrl: mediaUrl,
         placeholder,
         content,
@@ -79,11 +130,9 @@ export const confirmStory = async (req, res) => {
       }
     });
 
-    // Formatting for frontend parity (renaming user to userId)
     const populatedStory = { ...story, userId: story.user };
     delete populatedStory.user;
 
-    // 3. If video, trigger ABR transcoding pipeline
     if (mediaType === 'video') {
       await mediaQueue.add('TRANSCODE_VIDEO', { 
         mediaId: story.id,
@@ -162,7 +211,7 @@ export const createStory = async (req, res) => {
 
 export const getStories = async (req, res) => {
   try {
-    const { all } = req.query;
+    const { all, lat, lng } = req.query;
     const rawId = req.user?.id || req.admin?.id;
     const userId = rawId ? await resolveUserId(rawId) : null;
     
@@ -172,14 +221,16 @@ export const getStories = async (req, res) => {
       const networkIds = await SocialService.getNetworkIds(userId);
       userIds = [...new Set([...userIds, ...networkIds])];
       console.log('Story Feed Query Debug:', { userId, networkIds, userIds });
-    } else if (all !== 'true' && !userId) {
-      // If unauthenticated and asking for network feed, return empty or treat as all=true?
-      // Let's treat as global public feed for unauthenticated users viewing the community.
-      // We will just not filter by userIds later.
+    } else if (all !== 'true' && !userId && lat && lng) {
+      // Nearby Users fallback (if lat/lng is passed for guests)
+      const nearbyUsers = await findNearby('User', parseFloat(lat), parseFloat(lng), 1000000, { take: 50 });
+      if (nearbyUsers.length > 0) {
+        userIds = nearbyUsers.map(u => u.id);
+      }
     }
 
     const baseWhere = { expiresAt: { gt: new Date() } };
-    if (all !== 'true' && userId) {
+    if (all !== 'true' && userIds.length > 0) {
       baseWhere.userId = { in: userIds };
     }
 
@@ -260,6 +311,10 @@ export const deleteStory = async (req, res) => {
     if (story.userId !== userId && userRole?.toUpperCase() !== 'ADMIN') {
       return res.status(403).json({ success: false, message: 'Unauthorized' });
     }
+
+    // Call R2 cleanup helper!
+    const { deleteStoryFilesFromR2 } = await import('../../utils/r2.js');
+    await deleteStoryFilesFromR2(story);
 
     await prisma.story.delete({ where: { id } });
     res.status(200).json({ success: true, message: 'Story deleted successfully' });

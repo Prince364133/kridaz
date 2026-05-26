@@ -32,7 +32,13 @@ const processSocialAccounts = (accounts, action) => {
 };
 
 const connectionString = process.env.DATABASE_URL;
-const pool = new Pool({ connectionString });
+const pool = new Pool({ 
+  connectionString,
+  max: 20,
+  idleTimeoutMillis: 30000,
+  connectionTimeoutMillis: 5000,
+  allowExitOnIdle: true
+});
 const adapter = new PrismaPg(pool);
 const basePrisma = new PrismaClient({ adapter });
 

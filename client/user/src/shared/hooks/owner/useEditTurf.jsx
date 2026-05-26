@@ -176,7 +176,7 @@ export default function useEditTurf(turfId) {
       try {
         const response = await axiosInstance.get(`/api/owner/turf/owner/${turfId}/details`);
         
-        const turfData = response.data;
+        const turfData = response.data.turf || response.data;
         
         if (!turfData) {
           throw new Error("Turf not found");

@@ -72,8 +72,8 @@ export default function ProfessionalReviews() {
             </h1>
             <p className="text-neutral-500 text-[10px] font-black uppercase tracking-[0.3em] font-inter mt-2">Engage with verified clients and maintain your professional standing</p>
         </div>
-        <div className="px-6 py-3 bg-white/[0.02] border border-white/5 rounded-2xl flex items-center gap-4">
-            <div className="w-10 h-10 rounded-xl bg-white/5 flex items-center justify-center border border-white/5">
+        <div className="px-6 py-3 bg-white/[0.02] border border-white/5 rounded-[8px] flex items-center gap-4">
+            <div className="w-10 h-10 rounded-[8px] bg-white/5 flex items-center justify-center border border-white/5">
                 <Star size={20} style={{ color: themeColor, fill: themeColor }} />
             </div>
             <div>
@@ -86,7 +86,7 @@ export default function ProfessionalReviews() {
       </div>
 
       {reviews.length === 0 ? (
-        <div className="flex flex-col items-center justify-center py-32 bg-black rounded-[3rem] border-2 border-white/5 border-dashed p-12 text-center shadow-2xl relative overflow-hidden">
+        <div className="flex flex-col items-center justify-center py-32 bg-black rounded-[8px] border-2 border-white/5 border-dashed p-12 text-center shadow-2xl relative overflow-hidden">
           <div className="absolute inset-0 bg-gradient-to-b from-[#00C187]/5 to-transparent opacity-50" />
           <MessageSquare size={64} className="text-neutral-900 mb-6 relative z-10" />
           <h3 className="text-[12px] font-black text-neutral-700 uppercase tracking-[0.4em] font-inter mb-2 relative z-10">Feedback Vault Empty</h3>
@@ -95,14 +95,14 @@ export default function ProfessionalReviews() {
       ) : (
         <div className="grid grid-cols-1 gap-8">
           {reviews.map((review) => (
-            <div key={review._id} className="bg-black border border-white/5 rounded-[2.5rem] overflow-hidden group hover:border-[#00C187]/20 transition-all duration-500 shadow-2xl relative">
+            <div key={review._id} className="bg-black border border-white/5 rounded-[8px] overflow-hidden group hover:border-[#00C187]/20 transition-all duration-500 shadow-2xl relative">
               <div className="absolute top-0 right-0 w-32 h-32 bg-[#00C187]/5 blur-3xl pointer-events-none" />
               <div className="p-8 lg:p-10 relative z-10">
                 <div className="flex flex-col md:flex-row justify-between items-start mb-10 gap-6">
                   <div className="flex gap-5">
                     <div 
                       onClick={() => review.user?._id && navigate(`/profile/${review.user._id}`)}
-                      className="w-16 h-16 rounded-2xl border border-white/5 overflow-hidden cursor-pointer hover:border-[#00C187]/50 transition-all shadow-xl group-hover:scale-105"
+                      className="w-16 h-16 rounded-[8px] border border-white/5 overflow-hidden cursor-pointer hover:border-[#00C187]/50 transition-all shadow-xl group-hover:scale-105"
                     >
                       {review.user?.profilePicture ? (
                         <img src={review.user.profilePicture} className="w-full h-full object-cover" />
@@ -121,7 +121,7 @@ export default function ProfessionalReviews() {
                         {review.user?.name}
                       </h4>
                       <div className="flex items-center gap-3 mt-2">
-                         <div className="flex items-center gap-1.5 px-3 py-1 bg-[#00C187]/10 rounded-full border border-[#00C187]/20">
+                         <div className="flex items-center gap-1.5 px-3 py-1 bg-[#00C187]/10 rounded-[6px] border border-[#00C187]/20">
                             <BadgeCheck size={12} style={{ color: themeColor }} />
                             <p className="text-[9px] font-black uppercase tracking-[0.1em] font-inter" style={{ color: themeColor }}>Verified Client</p>
                          </div>
@@ -129,7 +129,7 @@ export default function ProfessionalReviews() {
                       </div>
                     </div>
                   </div>
-                  <div className="flex items-center gap-1 bg-white/[0.02] p-3 rounded-2xl border border-white/5">
+                  <div className="flex items-center gap-1 bg-white/[0.02] p-3 rounded-[8px] border border-white/5">
                     {[...Array(5)].map((_, i) => (
                       <Star key={i} size={18} className={i < review.rating ? "" : "text-neutral-800"} 
                             style={{ color: i < review.rating ? themeColor : undefined, fill: i < review.rating ? themeColor : "none" }} />
@@ -137,7 +137,7 @@ export default function ProfessionalReviews() {
                   </div>
                 </div>
 
-                <div className="relative p-8 bg-white/[0.02] border border-white/5 rounded-3xl mb-10 group-hover:border-[#00C187]/10 transition-all">
+                <div className="relative p-8 bg-white/[0.02] border border-white/5 rounded-[8px] mb-10 group-hover:border-[#00C187]/10 transition-all">
                    <p className="text-[15px] text-neutral-400 font-inter leading-relaxed italic">"{review.comment}"</p>
                 </div>
 
@@ -153,7 +153,7 @@ export default function ProfessionalReviews() {
                     <div className="relative">
                         <textarea 
                         placeholder="Draft your official response..."
-                        className="w-full bg-white/[0.03] border border-white/5 rounded-[2rem] p-6 text-[14px] text-white focus:border-[#00C187]/50 outline-none h-32 resize-none font-inter font-medium transition-all"
+                        className="w-full bg-white/[0.03] border border-white/5 rounded-[8px] p-6 text-[14px] text-white focus:border-[#00C187]/50 outline-none h-32 resize-none font-inter font-medium transition-all"
                         value={replyText}
                         onChange={(e) => setReplyText(e.target.value)}
                         />
@@ -168,14 +168,14 @@ export default function ProfessionalReviews() {
                       <button 
                         onClick={() => handleReply(review._id)}
                         disabled={actionLoading}
-                        className="flex-[2] h-14 text-black rounded-2xl font-black uppercase text-[11px] tracking-[0.2em] flex items-center justify-center gap-3 transition-all active:scale-95 shadow-2xl"
+                        className="flex-[2] h-14 text-black rounded-[8px] font-black uppercase text-[11px] tracking-[0.2em] flex items-center justify-center gap-3 transition-all active:scale-95 shadow-2xl"
                         style={{ backgroundColor: themeColor, boxShadow: `0 10px 25px ${themeColor}33` }}
                       >
                         {actionLoading ? <Loader2 className="animate-spin" size={18} /> : <Send size={18} />} Dispatch Response
                       </button>
                       <button 
                         onClick={() => setReplyingTo(null)}
-                        className="flex-1 h-14 bg-white/5 text-neutral-500 border border-white/5 rounded-2xl font-black uppercase text-[11px] tracking-[0.2em] hover:bg-white/10 hover:text-white transition-all"
+                        className="flex-1 h-14 bg-white/5 text-neutral-500 border border-white/5 rounded-[8px] font-black uppercase text-[11px] tracking-[0.2em] hover:bg-white/10 hover:text-white transition-all"
                       >
                         Cancel
                       </button>
@@ -184,7 +184,7 @@ export default function ProfessionalReviews() {
                 ) : (
                   <button 
                     onClick={() => setReplyingTo(review._id)}
-                    className="ml-6 md:ml-12 px-6 py-3 bg-white/[0.03] border border-white/5 rounded-xl text-[11px] font-black uppercase tracking-[0.2em] flex items-center gap-3 hover:bg-[#00C187]/10 hover:border-[#00C187]/30 transition-all font-inter"
+                    className="ml-6 md:ml-12 px-6 py-3 bg-white/[0.03] border border-white/5 rounded-[8px] text-[11px] font-black uppercase tracking-[0.2em] flex items-center gap-3 hover:bg-[#00C187]/10 hover:border-[#00C187]/30 transition-all font-inter"
                     style={{ color: themeColor }}
                   >
                     <MessageSquare size={16} /> Lodge Official Reply

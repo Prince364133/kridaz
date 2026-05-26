@@ -32,9 +32,8 @@ const Root = () => {
   }, [isAuthenticated, user]);
 
   const searchParams = new URLSearchParams(location.search);
-  const isPlayersPage = location.pathname === '/players';
   const isReelsPage = location.pathname.startsWith('/reels') || location.pathname.startsWith('/shorts');
-  const hideNav = isReelsPage || location.pathname.startsWith('/messages') || location.pathname.startsWith('/my-teams') || isPlayersPage;
+  const hideNav = isReelsPage || location.pathname.startsWith('/messages');
 
   return (
     <div className="flex flex-col min-h-screen">
@@ -57,7 +56,7 @@ const Root = () => {
       />
       <ScrollToTop />
       {!isReelsPage && <Navbar />}
-      <main className={`flex-grow ${isReelsPage ? 'pb-0' : 'pb-20 lg:pb-0'}`}>
+      <main className={`flex-grow ${isReelsPage ? 'pb-0' : location.pathname.startsWith('/messages') ? 'pb-0 lg:ml-64' : 'pb-20 lg:pb-0 lg:ml-64'}`}>
         <Outlet />
       </main>
       {!hideNav && <MobileBottomNav />}
