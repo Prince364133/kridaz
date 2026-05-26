@@ -107,7 +107,8 @@ export const getPublicPlayers = async (req, res) => {
             state: u.state,
             sportTypes: u.sportTypes || [],
             hasActiveStory: storyUserIds.has(uIdStr) && (req.user ? (isFollowing || isFollowedBy) : false),
-            isFollowing
+            isFollowing,
+            followersCount: stats.followerIds.length
           };
         });
         return res.status(200).json({ success: true, players });
@@ -163,7 +164,8 @@ export const getPublicPlayers = async (req, res) => {
         hasActiveStory: storyUserIds.has(uIdStr) && (
           req.user ? (isFollowing || isFollowedBy) : false
         ),
-        isFollowing
+        isFollowing,
+        followersCount: stats.followerIds.length
       };
     });
 

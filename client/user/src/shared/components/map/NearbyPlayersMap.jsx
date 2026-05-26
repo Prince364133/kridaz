@@ -110,7 +110,7 @@ const MapController = ({ userLocation, radiusKm }) => {
 };
 
 const getValidAvatar = (url) => {
-  const fallback = "https://pngimg.com/d/cricket_PNG102.png";
+  const fallback = "https://cdn-icons-png.flaticon.com/512/149/149071.png";
   return (!url || url === "null" || url === "undefined") ? fallback : url;
 };
 
@@ -228,7 +228,9 @@ const MapInner = ({ nearbyPlayers, onPlayerClick, userLocation, radiusKm, onMapM
     className: 'pulsing-marker-container',
     html: `
       <div class="pulsing-marker">
-        <img src="${userLocation?.profilePicture || 'https://pngimg.com/d/cricket_PNG102.png'}" />
+        <img src="${getValidAvatar(userLocation?.profilePicture)}" 
+             onerror="this.src='https://cdn-icons-png.flaticon.com/512/149/149071.png'; this.onerror=null;"
+             style="width:100%;height:100%;object-fit:cover" />
       </div>
     `,
     iconSize: [24, 24],
