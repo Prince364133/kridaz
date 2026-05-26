@@ -54,6 +54,9 @@ const socketConfig = (server) => {
       await redis.expire('kridaz:online:users', 86400);
       schedulePresenceBroadcast();
 
+      const onlineUserIds = await redis.smembers('kridaz:online:users');
+      io.emit('online users', onlineUserIds);
+
       socket.emit("connected");
     });
 
@@ -228,6 +231,9 @@ const socketConfig = (server) => {
 
         await redis.srem('kridaz:online:users', socket.userId.toString());
         schedulePresenceBroadcast();
+
+        const onlineUserIds = await redis.smembers('kridaz:online:users');
+        io.emit('online users', onlineUserIds);
 
         await redis.del(`kridaz:location:${socket.userId}`);
         await redis.zrem("kridaz:geo:online", socket.userId.toString());

@@ -94,7 +94,10 @@ const ChatWindow = ({ chat, onBack, onSelectChat }) => {
       const transformed = transformMessage(newMessage);
       const incomingChatId = transformed.chat?._id || transformed.chat?.id || transformed.chat;
       if (chat._id === incomingChatId) {
-        setMessages((prev) => [...prev, transformed]);
+        setMessages((prev) => {
+          if (prev.some(m => m._id === transformed._id)) return prev;
+          return [...prev, transformed];
+        });
         // Mark as read immediately since chat is open
         socket.emit('messages read', { chatId: chat._id, userId: user?._id || user?.id });
       }
@@ -170,7 +173,6 @@ const ChatWindow = ({ chat, onBack, onSelectChat }) => {
  content: messageContent
  }).unwrap();
 
- socket.emit('new message', data);
  setMessages((prev) => prev.map(m => m._id === tempId ? data : m));
  } catch (err) {
  console.error("Failed to send message:", err);
@@ -193,7 +195,7 @@ const ChatWindow = ({ chat, onBack, onSelectChat }) => {
  typingTimeoutRef.current = setTimeout(() => {
  socket.emit('stop typing', chat._id);
  setIsTyping(false);
- }, 3000);
+ }, 1200);
  };
 
  const getChatOtherUser = () => {
