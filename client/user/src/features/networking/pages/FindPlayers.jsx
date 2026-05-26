@@ -349,7 +349,13 @@ const FindPlayers = () => {
   }, [filters.state]);
 
   const [showNearbyOnly, setShowNearbyOnly] = useState(false);
-  const [userLocation, setUserLocation] = useState(null);
+  const [userLocation, setUserLocation] = useState(() => {
+    const cached = localStorage.getItem("kridaz_guest_location");
+    if (cached) {
+      try { return JSON.parse(cached); } catch(e) {}
+    }
+    return null;
+  });
   const { socket } = useSocket();
   const lastBoundsRef = useRef(null);
   const [currentZoom, setCurrentZoom] = useState(14);
@@ -453,9 +459,13 @@ const FindPlayers = () => {
         };
 
         setUserLocation(prev => {
-          if (!prev) return newLocation;
+          if (!prev) {
+            localStorage.setItem("kridaz_guest_location", JSON.stringify({ lat: newLat, lng: newLng }));
+            return newLocation;
+          }
           const dist = haversineMeters(prev.lat, prev.lng, newLat, newLng);
           if (dist > MOVEMENT_THRESHOLD_METERS) {
+            localStorage.setItem("kridaz_guest_location", JSON.stringify({ lat: newLat, lng: newLng }));
             return newLocation;
           }
           return prev;

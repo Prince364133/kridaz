@@ -15,6 +15,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import toast from "react-hot-toast";
 import StoryViewer from "@features/networking/components/StoryViewer";
 import useLoginOnDemand from "@hooks/useLoginOnDemand";
+import useGuestLocation from "@hooks/useGuestLocation";
 import {
   communityApi,
   useGetCommunityFeedQuery,
@@ -63,9 +64,12 @@ const Community = ({ children, onSearchActive }) => {
   const isAdmin = role === 'admin' || role === 'BMSP_ADMIN';
 
   // RTK Query Hooks
+  const { location } = useGuestLocation();
   const [triggerGetFeed] = useLazyGetCommunityFeedQuery();
   const [triggerSearchPlayers] = useLazySearchPlayersQuery();
-  const { data: storiesData } = useGetStoriesFeedQuery();
+  const { data: storiesData } = useGetStoriesFeedQuery(
+    location ? { lat: location.lat, lng: location.lng } : undefined
+  );
   const stories = storiesData?.stories || [];
   const { data: statsData } = useGetCommunityStatsQuery();
 
@@ -209,6 +213,10 @@ const Community = ({ children, onSearchActive }) => {
       } else {
         if (activeFilter === "Following") {
           params.following = "true";
+        }
+        if (location) {
+          params.lat = location.lat;
+          params.lng = location.lng;
         }
       }
 

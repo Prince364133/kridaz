@@ -6,6 +6,7 @@ import { getIO } from '../../config/socket.js';
 import { SOCKET } from "@kridaz/shared-constants/socketEvents";
 import path from 'path';
 import { v4 as uuidv4 } from 'uuid';
+import { findNearby } from '../../utils/geo.util.js';
 
 const resolveUserId = async (id) => {
   if (!id) return null;
@@ -220,11 +221,21 @@ export const getPosts = async (req, res) => {
     const rawId = req.user?.id || req.admin?.id;
     const userId = await resolveUserId(rawId);
 
-    const { search, page = 1, limit = 10, following } = req.query;
+    const { search, page = 1, limit = 10, following, lat, lng } = req.query;
     const skip = (parseInt(page) - 1) * parseInt(limit);
     const take = parseInt(limit);
 
     let authorFilter = null;
+    
+    // 1. Nearby Users fallback (if lat/lng is passed)
+    if (lat && lng) {
+      const nearbyUsers = await findNearby('User', parseFloat(lat), parseFloat(lng), 1000000, { take: 50 });
+      if (nearbyUsers.length > 0) {
+        authorFilter = { authorId: { in: nearbyUsers.map(u => u.id) } };
+      }
+    }
+
+    // 2. Following Override (if authenticated and requested)
     if (userId && following === 'true') {
       const follows = await prisma.userRelationship.findMany({
         where: {
@@ -252,10 +263,6 @@ export const getPosts = async (req, res) => {
 
     if (authorFilter) {
       conditions.push(authorFilter);
-    }
-
-    if (!userId) {
-      conditions.push({ author: { role: 'ADMIN' } });
     }
 
     if (search) {

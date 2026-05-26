@@ -6,6 +6,7 @@ import SocialService from '../../services/social.service.js';
 import path from 'path';
 import { v4 as uuidv4 } from 'uuid';
 import logger from "../../utils/logger.js";
+import { findNearby } from '../../utils/geo.util.js';
 
 const resolveUserId = async (id) => {
   if (!id) return null;
@@ -210,7 +211,7 @@ export const createStory = async (req, res) => {
 
 export const getStories = async (req, res) => {
   try {
-    const { all } = req.query;
+    const { all, lat, lng } = req.query;
     const rawId = req.user?.id || req.admin?.id;
     const userId = rawId ? await resolveUserId(rawId) : null;
     
@@ -220,14 +221,16 @@ export const getStories = async (req, res) => {
       const networkIds = await SocialService.getNetworkIds(userId);
       userIds = [...new Set([...userIds, ...networkIds])];
       console.log('Story Feed Query Debug:', { userId, networkIds, userIds });
-    } else if (all !== 'true' && !userId) {
-      // If unauthenticated and asking for network feed, return empty or treat as all=true?
-      // Let's treat as global public feed for unauthenticated users viewing the community.
-      // We will just not filter by userIds later.
+    } else if (all !== 'true' && !userId && lat && lng) {
+      // Nearby Users fallback (if lat/lng is passed for guests)
+      const nearbyUsers = await findNearby('User', parseFloat(lat), parseFloat(lng), 1000000, { take: 50 });
+      if (nearbyUsers.length > 0) {
+        userIds = nearbyUsers.map(u => u.id);
+      }
     }
 
     const baseWhere = { expiresAt: { gt: new Date() } };
-    if (all !== 'true' && userId) {
+    if (all !== 'true' && userIds.length > 0) {
       baseWhere.userId = { in: userIds };
     }
 

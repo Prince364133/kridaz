@@ -604,8 +604,10 @@ export const getNearbyPlayers = async (req, res) => {
   }
 
   try {
+    const whereClause = req.user?.id ? { id: { not: req.user.id } } : {};
+    
     const players = await findNearby('User', parseFloat(lat), parseFloat(lng), parseFloat(radius), {
-      where: { id: { not: req.user?.id } },
+      where: whereClause,
       take: parseInt(limit)
     });
 
