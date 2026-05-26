@@ -30,6 +30,7 @@ const issueTokens = async (res, userId, token) => {
       secure: isProd,
       sameSite: isProd ? "none" : "lax",
       maxAge: 15 * 60 * 1000, // 15 mins
+      path: "/"
     });
 
     res.cookie("refresh_token", refreshToken, {
@@ -1075,12 +1076,62 @@ export const refreshToken = async (req, res) => {
 
       // 2. REUSE DETECTION: If token is already revoked, someone might be attempting an attack
       if (tokenDoc.revokedAt) {
-          // Revoke all tokens for this user for safety
-          await prisma.refreshToken.updateMany({
-              where: { userId: tokenDoc.userId },
-              data: { revokedAt: new Date() }
+          const gracePeriodMs = 15000; // 15 seconds grace period
+          const timeSinceRevocation = new Date().getTime() - new Date(tokenDoc.revokedAt).getTime();
+          
+          if (timeSinceRevocation > gracePeriodMs) {
+              // Revoke all tokens for this user for safety
+              await prisma.refreshToken.updateMany({
+                  where: { userId: tokenDoc.userId },
+                  data: { revokedAt: new Date() }
+              });
+              return res.status(401).json({ success: false, message: "Token compromise detected. Please login again." });
+          }
+
+          // Within the grace period, let's find the user and issue a new access token (no new refresh token needed)
+          const user = await prisma.user.findUnique({
+            where: { id: tokenDoc.userId },
+            include: { ownerProfile: true }
           });
-          return res.status(401).json({ success: false, message: "Token compromise detected. Please login again." });
+
+          if (!user || user.status === "blocked") {
+              return res.status(401).json({ success: false, message: "User status invalid" });
+          }
+
+          let role = user.role;
+          let newToken;
+          let account = user;
+          
+          const isSuperAdmin = user.role?.toUpperCase() === "ADMIN";
+          
+          if (isSuperAdmin) {
+              role = user.role;
+              newToken = generateUserToken(user.id, role, user.ownerProfile?.id || null);
+              if (user.ownerProfile) account = { ...user, ...user.ownerProfile };
+          } else if (user.ownerProfile) {
+              role = user.role;
+              newToken = generateOwnerToken(user.id, role, user.ownerProfile.id);
+              account = { ...user, ...user.ownerProfile };
+          } else {
+              newToken = generateUserToken(user.id, user.role);
+          }
+
+          // Update auth_token cookie with new token
+          const isProd = process.env.NODE_ENV === "production" || !!process.env.RAILWAY_ENVIRONMENT || !!process.env.RAILWAY_ENVIRONMENT_NAME || !!process.env.RAILWAY_PROJECT_ID;
+          res.cookie("auth_token", newToken, {
+            httpOnly: true,
+            secure: isProd,
+            sameSite: isProd ? "none" : "lax",
+            maxAge: 15 * 60 * 1000, // 15 mins
+            path: "/"
+          });
+
+          return res.status(200).json({ 
+              success: true, 
+              token: newToken,
+              role,
+              user: account
+          });
       }
 
       // 3. Check expiration

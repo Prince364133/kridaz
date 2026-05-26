@@ -20,6 +20,20 @@ axiosInstance.interceptors.request.use((config) => {
   return config;
 });
 
+let isRefreshing = false;
+let failedQueue = [];
+
+const processQueue = (error, token = null) => {
+  failedQueue.forEach((prom) => {
+    if (error) {
+      prom.reject(error);
+    } else {
+      prom.resolve(token);
+    }
+  });
+  failedQueue = [];
+};
+
 // Response interceptor: dispatch logout on expired/invalid token, but ignore /getMe failures for guests
 axiosInstance.interceptors.response.use(
   (response) => response,
@@ -33,19 +47,41 @@ axiosInstance.interceptors.response.use(
       !originalRequest._retry && 
       !isAuthCheck
     ) {
+      if (isRefreshing) {
+        return new Promise((resolve, reject) => {
+          failedQueue.push({ resolve, reject });
+        })
+          .then((token) => {
+            originalRequest.headers.Authorization = `Bearer ${token}`;
+            return axiosInstance(originalRequest);
+          })
+          .catch((err) => {
+            return Promise.reject(err);
+          });
+      }
+
       originalRequest._retry = true;
+      isRefreshing = true;
+
       try {
         const refreshUrl = `${import.meta.env.VITE_API_URL || ""}/api/user/auth/refresh`;
         const { data } = await axios.post(refreshUrl, {}, { withCredentials: true });
         
         if (data.token) {
           store.dispatch(restoreAuth({ token: data.token }));
+          processQueue(null, data.token);
           originalRequest.headers.Authorization = `Bearer ${data.token}`;
           return axiosInstance(originalRequest);
+        } else {
+          store.dispatch(logout());
+          processQueue(new Error("Refresh failed"));
         }
       } catch (refreshError) {
         store.dispatch(logout());
+        processQueue(refreshError);
         return Promise.reject(refreshError);
+      } finally {
+        isRefreshing = false;
       }
     } else if (error.response?.status === 401 || error.response?.status === 403) {
       if (!isAuthCheck) {
