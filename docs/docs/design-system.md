@@ -18,7 +18,7 @@ Every design must:
 ## 2. Design Identity Rules
 **Style Definition:**
 - Dark UI
-- Neon green accent
+- Cyan and Lime gradient accent
 - Sports + SaaS hybrid
 
 **Emotional Tone:**
@@ -28,7 +28,8 @@ Every design must:
 - Clean
 
 ## 3. Color Tokens (STRICT)
-- **PRI** = `#84CC16` (Accent ONLY)
+- **PRI** = `#55DEE8` (Cyan Accent ONLY)
+- **GRAD** = `linear-gradient(90deg, #55DEE8 0%, #BFF367 100%)` (Primary Brand Gradient)
 - **BG** = `#000000` (Base background)
 - **S1** = `#111111` (Section background)
 - **S2** = `#1A1A1A` (Cards)

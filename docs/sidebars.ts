@@ -7,6 +7,37 @@ const sidebars: SidebarsConfig = {
     'intro',
     {
       type: 'category',
+      label: 'Platform Guide (Web Portal)',
+      items: [
+        'platform-guide/overview',
+        'platform-guide/auth',
+        'platform-guide/homepage',
+        'platform-guide/venues',
+        'platform-guide/ground',
+        'platform-guide/checkout',
+        'platform-guide/wallet',
+        'platform-guide/messaging-community',
+        'platform-guide/nearby-players',
+        'platform-guide/professionals',
+      ],
+    },
+    {
+      type: 'category',
+      label: 'Platform Guide (Application Portals)',
+      items: [
+        'platform-guide/user-profile',
+        'platform-guide/bookings',
+        'platform-guide/hosted-games',
+        'platform-guide/my-teams',
+        'platform-guide/leaderboard',
+        'platform-guide/scoring',
+        'platform-guide/owner-dashboard',
+        'platform-guide/umpire-analytics',
+        'platform-guide/universal-dashboard',
+      ],
+    },
+    {
+      type: 'category',
       label: 'Backend (Project Bible)',
       items: [
         'backend/onboarding',
@@ -15,6 +46,7 @@ const sidebars: SidebarsConfig = {
         'backend/security',
         'backend/recommendation-engine',
         'backend/ground-recommendation-postgres-plan',
+        'backend/professional-profiles-spec',
       ],
     },
     {
