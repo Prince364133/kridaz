@@ -72,13 +72,21 @@ const AdminSidebar = ({ isOpen, toggleSidebar, isMinimized, className }) => {
         { to: "/admin/support", label: "Tickets" },
         { to: "/admin/disputes", label: "Booking Disputes" },
         { to: "/admin/game-disputes", label: "Game Disputes" },
+        { to: "/admin/reels-reports", label: "Reel Reports" },
       ],
     },
     { to: "/admin/audit", label: "Audit Logs", icon: Shield },
     { to: "/admin/marketing", label: "Marketing", icon: Activity },
     { to: "/admin/coupons", label: "Coupons", icon: Tag },
     { to: "/admin/blogs", label: "Blogs", icon: FileText },
-    { to: "/admin/community", label: "Community", icon: Users },
+    {
+      label: "Community",
+      icon: Users,
+      subItems: [
+        { to: "/admin/community", label: "Management" },
+        { to: "/admin/community-posts", label: "Reported Posts" },
+      ],
+    },
     { to: "/admin/features", label: "Features", icon: ToggleRight },
     { to: "/admin/support", label: "Docs & Support", icon: HelpCircle },
   ];

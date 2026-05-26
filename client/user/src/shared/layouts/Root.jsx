@@ -56,7 +56,7 @@ const Root = () => {
       />
       <ScrollToTop />
       {!isReelsPage && <Navbar />}
-      <main className={`flex-grow ${isReelsPage ? 'pb-0' : 'pb-20 lg:pb-0 lg:ml-64'}`}>
+      <main className={`flex-grow ${isReelsPage ? 'pb-0' : location.pathname.startsWith('/messages') ? 'pb-0 lg:ml-64' : 'pb-20 lg:pb-0 lg:ml-64'}`}>
         <Outlet />
       </main>
       {!hideNav && <MobileBottomNav />}

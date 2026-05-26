@@ -103,6 +103,15 @@ router.post('/:reelId/interact', validate(interactSchema), reelsController.inter
 
 /**
  * @swagger
+ * /reels/{reelId}/comments:
+ *   get:
+ *     summary: Get comments for a reel
+ *     tags: [Reels]
+ */
+router.get('/:reelId/comments', reelsController.getReelComments);
+
+/**
+ * @swagger
  * /reels/{reelId}/comment:
  *   post:
  *     summary: Add a comment to a reel
@@ -133,5 +142,27 @@ router.get('/analytics', reelsController.getCreatorAnalytics);
  *       - BearerAuth: []
  */
 router.delete('/:reelId', reelsController.deleteReel);
+
+/**
+ * @swagger
+ * /reels/{reelId}/report:
+ *   post:
+ *     summary: Report a reel
+ *     tags: [Reels]
+ *     security:
+ *       - BearerAuth: []
+ */
+router.post('/:reelId/report', reelsController.reportReel);
+
+/**
+ * @swagger
+ * /reels/reports:
+ *   get:
+ *     summary: Get all reel reports
+ *     tags: [Reels]
+ *     security:
+ *       - BearerAuth: []
+ */
+router.get('/reports', reelsController.getReelReports);
 
 export default router;

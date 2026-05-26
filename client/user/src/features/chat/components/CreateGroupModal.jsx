@@ -12,7 +12,7 @@ const CreateGroupModal = ({ isOpen, onClose, onSuccess }) => {
   const connections = [
     ...(data?.followers || []),
     ...(data?.following || [])
-  ].filter((v, i, a) => a.findIndex(t => t._id === v._id) === i); // Unique users
+  ].filter((v, i, a) => a.findIndex(t => (t.id || t._id) === (v.id || v._id)) === i); // Unique users
 
   const toggleUser = (userId) => {
     if (selectedUsers.includes(userId)) {
@@ -71,26 +71,29 @@ const CreateGroupModal = ({ isOpen, onClose, onSuccess }) => {
               ) : connections.length === 0 ? (
                 <div className="text-center py-4 text-white/40 text-sm italic">No connections found. Follow users to invite them.</div>
               ) : (
-                connections.map(user => (
-                  <div 
-                    key={user._id}
-                    onClick={() => toggleUser(user._id)}
-                    className={`flex items-center gap-3 p-3 rounded-[6px] border cursor-pointer transition-all ${ selectedUsers.includes(user._id) ? 'bg-primary/20 border-primary/50' : 'bg-[#000000] border-transparent hover:border-[#2D2D2D]' }`}
-                  >
-                    <img src={user.profilePicture || "https://cdn-icons-png.flaticon.com/512/149/149071.png"} className="w-10 h-10 rounded-full" alt={user.name} />
-                    <div className="flex-1">
-                      <p className="text-white font-medium text-sm">{user.name}</p>
-                      <p className="text-white/40 text-xs">@{user.username}</p>
-                    </div>
-                    {selectedUsers.includes(user._id) && (
-                      <div className="bg-primary rounded-full p-1">
-                        <svg className="w-4 h-4 text-black" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
-                        </svg>
+                connections.map(user => {
+                  const userId = user.id || user._id;
+                  return (
+                    <div 
+                      key={userId}
+                      onClick={() => toggleUser(userId)}
+                      className={`flex items-center gap-3 p-3 rounded-[6px] border cursor-pointer transition-all ${ selectedUsers.includes(userId) ? 'bg-primary/20 border-primary/50' : 'bg-[#000000] border-transparent hover:border-[#2D2D2D]' }`}
+                    >
+                      <img src={user.profilePicture || "https://cdn-icons-png.flaticon.com/512/149/149071.png"} className="w-10 h-10 rounded-full" alt={user.name} />
+                      <div className="flex-1">
+                        <p className="text-white font-medium text-sm">{user.name}</p>
+                        <p className="text-white/40 text-xs">@{user.username}</p>
                       </div>
-                    )}
-                  </div>
-                ))
+                      {selectedUsers.includes(userId) && (
+                        <div className="bg-primary rounded-full p-1">
+                          <svg className="w-4 h-4 text-black" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+                          </svg>
+                        </div>
+                      )}
+                    </div>
+                  );
+                })
               )}
             </div>
           </div>

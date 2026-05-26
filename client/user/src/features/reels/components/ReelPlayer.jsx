@@ -7,7 +7,7 @@ const ReelPlayer = ({ reelId, hlsUrl, isVisible, poster }) => {
   const videoRef = useRef(null);
   const hlsRef = useRef(null);
   const [isPlaying, setIsPlaying] = useState(false);
-  const [isMuted, setIsMuted] = useState(true);
+  const [isMuted, setIsMuted] = useState(false);
   const [isLoaded, setIsLoaded] = useState(false);
   const [trackHeartbeat] = useTrackHeartbeatMutation();
   const watchTimeRef = useRef(0);

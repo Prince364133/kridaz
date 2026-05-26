@@ -149,6 +149,7 @@ const FeatureFlags           = lazy(() => import("@features/admin").then(m => ({
 const MarketingManagement    = lazy(() => import("@features/admin").then(m => ({ default: m.MarketingManagement })));
 const BlogManagement         = lazy(() => import("@features/admin").then(m => ({ default: m.BlogManagement })));
 const CommunityManagement    = lazy(() => import("@features/admin").then(m => ({ default: m.CommunityManagement })));
+const CommunityPosts         = lazy(() => import("@features/admin").then(m => ({ default: m.CommunityPosts })));
 const ProfessionalManagement = lazy(() => import("@features/admin").then(m => ({ default: m.ProfessionalManagement })));
 const SupportCenter          = lazy(() => import("@features/admin").then(m => ({ default: m.SupportCenter })));
 const DisputeManager         = lazy(() => import("@features/admin").then(m => ({ default: m.DisputeManager })));
@@ -158,6 +159,7 @@ const FinancialMissionControl = lazy(() => import("@features/admin").then(m => (
 const ProfessionalDetailsPage = lazy(() => import("@features/admin").then(m => ({ default: m.ProfessionalDetailsPage })));
 const HostedGamesPage         = lazy(() => import("@features/admin").then(m => ({ default: m.HostedGamesPage })));
 const CouponManagement        = lazy(() => import("@features/admin").then(m => ({ default: m.CouponManagement })));
+const ReelReports             = lazy(() => import("@features/admin").then(m => ({ default: m.ReelReports })));
 
 // Î“Ã¶Ã‡Î“Ã¶Ã‡ Shorthand wrapper Î“Ã‡Ã¶ keeps route definitions terse Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡
 const S = ({ children }) => <Suspense fallback={<PageLoader />}>{children}</Suspense>;
@@ -204,8 +206,10 @@ const router = createBrowserRouter([
       { path: "marketing",    element: <S><MarketingManagement /></S> },
       { path: "blogs",        element: <S><BlogManagement /></S> },
       { path: "community",    element: <S><CommunityManagement /></S> },
+      { path: "community-posts", element: <S><CommunityPosts /></S> },
       { path: "games",        element: <S><HostedGamesPage /></S> },
       { path: "coupons",      element: <S><CouponManagement /></S> },
+      { path: "reels-reports",element: <S><ReelReports /></S> },
       { path: "*",            element: <NotFound /> },
     ],
   },

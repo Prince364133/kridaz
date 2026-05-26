@@ -11,6 +11,7 @@ export { FeatureFlags } from "./FeatureFlags";
 export { MarketingManagement } from "./Marketing/MarketingManagement";
 export { BlogManagement } from "./Blogs/BlogManagement";
 export { default as CommunityManagement } from "./Community/CommunityManagement";
+export { default as CommunityPosts } from "./Community/CommunityPosts";
 export { default as ProfessionalManagement } from "./ProfessionalManagement/ProfessionalManagement";
 export { default as SupportCenter } from "./Resolution/SupportCenter";
 export { default as DisputeManager } from "./Resolution/DisputeManager";
@@ -20,3 +21,4 @@ export { default as ProfessionalDetailsPage } from "./ProfessionalManagement/Pro
 export { default as FinancialMissionControl } from "./Finance/FinancialMissionControl";
 export { default as HostedGamesPage } from "./HostedGames/HostedGamesPage";
 export { default as CouponManagement } from "./Coupons/CouponManagement";
+export { default as ReelReports } from "./Reels/ReelReports";

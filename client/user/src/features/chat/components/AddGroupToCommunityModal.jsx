@@ -139,29 +139,32 @@ const AddGroupToCommunityModal = ({ isOpen, onClose, communityId }) => {
                 ) : filteredGroups.length === 0 ? (
                   <p className="text-center py-6 text-white/20 text-xs italic font-medium">No available groups found.</p>
                 ) : (
-                  filteredGroups.map((group) => (
-                    <div 
-                      key={group._id}
-                      onClick={() => {
-                        if (selectedExistingGroups.includes(group._id)) {
-                          setSelectedExistingGroups(selectedExistingGroups.filter(id => id !== group._id));
-                        } else {
-                          setSelectedExistingGroups([...selectedExistingGroups, group._id]);
-                        }
-                      }}
-                      className={`flex items-center justify-between p-4 rounded-[8px] cursor-pointer transition-all border ${ selectedExistingGroups.includes(group._id) ? 'bg-[#55DEE8]/10 border-[#55DEE8]/30' : 'bg-white/[0.02] border-transparent hover:border-white/10' }`}
-                    >
-                      <div className="flex items-center gap-4">
-                        <div className="w-10 h-10 rounded-[8px] bg-white/5 flex items-center justify-center">
-                          <Users size={18} className="text-white/40" />
+                  filteredGroups.map((group) => {
+                    const groupId = group.id || group._id;
+                    return (
+                      <div 
+                        key={groupId}
+                        onClick={() => {
+                          if (selectedExistingGroups.includes(groupId)) {
+                            setSelectedExistingGroups(selectedExistingGroups.filter(id => id !== groupId));
+                          } else {
+                            setSelectedExistingGroups([...selectedExistingGroups, groupId]);
+                          }
+                        }}
+                        className={`flex items-center justify-between p-4 rounded-[8px] cursor-pointer transition-all border ${ selectedExistingGroups.includes(groupId) ? 'bg-[#55DEE8]/10 border-[#55DEE8]/30' : 'bg-white/[0.02] border-transparent hover:border-white/10' }`}
+                      >
+                        <div className="flex items-center gap-4">
+                          <div className="w-10 h-10 rounded-[8px] bg-white/5 flex items-center justify-center">
+                            <Users size={18} className="text-white/40" />
+                          </div>
+                          <span className="text-sm font-bold text-white/80">{group.chatName}</span>
                         </div>
-                        <span className="text-sm font-bold text-white/80">{group.chatName}</span>
+                        {selectedExistingGroups.includes(groupId) && (
+                          <CheckCircle2 size={20} className="text-[#55DEE8]" />
+                        )}
                       </div>
-                      {selectedExistingGroups.includes(group._id) && (
-                        <CheckCircle2 size={20} className="text-[#55DEE8]" />
-                      )}
-                    </div>
-                  ))
+                    );
+                  })
                 )}
               </div>
 

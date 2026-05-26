@@ -298,16 +298,18 @@ export const createGroupChat = async (req, res) => {
               isPending: false 
             },
             // Add other users as pending
-            ...usersList.map(u => {
-              const uid = u.user?.id || u.user || u;
-              const model = u.onModel || "User";
-              return {
-                userId: model === "User" ? uid : null,
-                ownerId: model === "Owner" ? uid : null,
-                onModel: model,
-                isPending: true
-              };
-            })
+            ...usersList
+              .filter(u => !!u)
+              .map(u => {
+                const uid = typeof u === "object" ? (u.user?.id || u.user || u.id || u._id || u) : u;
+                const model = (typeof u === "object" && u.onModel) ? u.onModel : "User";
+                return {
+                  userId: model === "User" ? uid : null,
+                  ownerId: model === "Owner" ? uid : null,
+                  onModel: model,
+                  isPending: true
+                };
+              })
           ]
         }
       },

@@ -40,6 +40,13 @@ export const communityApi = baseApi.injectEndpoints({
       }),
       invalidatesTags: ['Community'],
     }),
+    reportPost: builder.mutation({
+      query: ({ postId, reason }) => ({
+        url: `/api/user/community/${postId}/report`,
+        method: 'POST',
+        body: { reason },
+      }),
+    }),
     likePost: builder.mutation({
       query: (postId) => ({
         url: `/api/user/community/${postId}/like`,
@@ -66,7 +73,7 @@ export const communityApi = baseApi.injectEndpoints({
       },
       invalidatesTags: ['Community'],
     }),
-    addComment: builder.mutation({
+    addPostComment: builder.mutation({
       query: ({ postId, text }) => ({
         url: `/api/user/community/${postId}/comment`,
         method: 'POST',
@@ -171,6 +178,20 @@ export const communityApi = baseApi.injectEndpoints({
       }),
       invalidatesTags: ['Stories'],
     }),
+    getPostReports: builder.query({
+      query: (params) => ({
+        url: '/api/community/admin/reports',
+        params,
+      }),
+      providesTags: ['Community'],
+    }),
+    deleteAdminPost: builder.mutation({
+      query: (postId) => ({
+        url: `/api/community/admin/posts/${postId}`,
+        method: 'DELETE',
+      }),
+      invalidatesTags: ['Community'],
+    }),
   }),
 });
 
@@ -188,10 +209,13 @@ export const {
   useConfirmStoryUploadMutation,
   useUpdatePostMutation,
   useDeletePostMutation,
+  useReportPostMutation,
   useLikePostMutation,
-  useAddCommentMutation,
+  useAddPostCommentMutation,
   useDeleteCommentMutation,
   useGetUserStoriesQuery,
   useUploadStoryMutation,
   useDeleteStoryMutation,
+  useGetPostReportsQuery,
+  useDeleteAdminPostMutation,
 } = communityApi;

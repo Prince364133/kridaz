@@ -26,7 +26,7 @@ import {
   useUpdatePostMutation,
   useDeletePostMutation,
   useLikePostMutation,
-  useAddCommentMutation,
+  useAddPostCommentMutation,
   useDeleteCommentMutation,
   useUploadStoryMutation,
   useDeleteStoryMutation,
@@ -47,6 +47,7 @@ const HEADING_STYLE = { fontFamily: "'Open Sans', sans-serif" };
 const SUBHEADING_STYLE = { fontFamily: "'Inter 28pt Light', sans-serif", fontWeight: 300 };
 
 const getPostShareId = (post) => post?._id || post?.id;
+const getPostId = (post) => post?._id || post?.id;
 
 const sharePlatforms = [
   { id: "native", name: "More", icon: Share2 },
@@ -77,7 +78,7 @@ const Community = ({ children, onSearchActive }) => {
   const [updatePost] = useUpdatePostMutation();
   const [deletePost] = useDeletePostMutation();
   const [likePost] = useLikePostMutation();
-  const [addComment] = useAddCommentMutation();
+  const [addPostComment] = useAddPostCommentMutation();
   const [deleteComment] = useDeleteCommentMutation();
   const [uploadStory] = useUploadStoryMutation();
   const [deleteStory] = useDeleteStoryMutation();
@@ -180,6 +181,7 @@ const Community = ({ children, onSearchActive }) => {
   const [loadedPosts, setLoadedPosts] = useState([]);
   const [hasMorePosts, setHasMorePosts] = useState(true);
   const [postsLoading, setPostsLoading] = useState(false);
+  const [activeDropdownId, setActiveDropdownId] = useState(null);
 
   const [playersPage, setPlayersPage] = useState(1);
   const [loadedPlayers, setLoadedPlayers] = useState([]);
@@ -456,7 +458,10 @@ const Community = ({ children, onSearchActive }) => {
   const [currentStoryIndex, setCurrentStoryIndex] = useState(0);
 
   const [commentInputs, setCommentInputs] = useState({});
+  const [expandedComments, setExpandedComments] = useState({});
   const [sharePostId, setSharePostId] = useState(null);
+  const [reportPostId, setReportPostId] = useState(null);
+  const [showReportModal, setShowReportModal] = useState(false);
 
   const [showGlobalSearch, setShowGlobalSearch] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
@@ -637,7 +642,7 @@ const Community = ({ children, onSearchActive }) => {
       await deletePost(postId).unwrap();
       toast.success("Post deleted");
     } catch (error) {
-      toast.error("Failed to delete post");
+      toast.error(error?.data?.message || error.message || "Failed to delete post");
     }
   };
 
@@ -648,7 +653,7 @@ const Community = ({ children, onSearchActive }) => {
       toast.success("Story deleted");
       setSelectedStoryGroup(null);
     } catch (error) {
-      toast.error("Failed to delete story");
+      toast.error(error?.data?.message || error.message || "Failed to delete story");
     }
   };
 
@@ -656,12 +661,64 @@ const Community = ({ children, onSearchActive }) => {
     gateInteraction(async () => {
       const text = commentInputs[postId];
       if (!text || !text.trim()) return;
+
+      // Optimistic comment
+      const optimisticComment = {
+        id: `temp-${Date.now()}`,
+        _id: `temp-${Date.now()}`,
+        text: text.trim(),
+        createdAt: new Date().toISOString(),
+        userId: {
+          id: user?.id,
+          _id: user?.id,
+          name: user?.name || 'You',
+          username: user?.username || '',
+          profilePicture: user?.profilePicture || null
+        }
+      };
+
+      // Immediately add to local state
+      setLoadedPosts(prev => prev.map(post => {
+        if ((post._id || post.id) === postId) {
+          return {
+            ...post,
+            comments: [...(post.comments || []), optimisticComment],
+          };
+        }
+        return post;
+      }));
+      setCommentInputs(prev => ({ ...prev, [postId]: "" }));
+
       try {
-        await addComment({ postId, text }).unwrap();
-        setCommentInputs(prev => ({ ...prev, [postId]: "" }));
+        const res = await addPostComment({ postId, text: text.trim() }).unwrap();
+        // Replace optimistic comment with server response if available
+        if (res?.comment) {
+          setLoadedPosts(prev => prev.map(post => {
+            if ((post._id || post.id) === postId) {
+              return {
+                ...post,
+                comments: (post.comments || []).map(c =>
+                  c.id === optimisticComment.id ? { ...res.comment, userId: res.comment.user || res.comment.userId } : c
+                ),
+              };
+            }
+            return post;
+          }));
+        }
         toast.success("Comment added!");
       } catch (error) {
-        toast.error("Failed to add comment");
+        // Rollback optimistic comment
+        setLoadedPosts(prev => prev.map(post => {
+          if ((post._id || post.id) === postId) {
+            return {
+              ...post,
+              comments: (post.comments || []).filter(c => c.id !== optimisticComment.id),
+            };
+          }
+          return post;
+        }));
+        const errorMsg = error?.data?.errors?.[0]?.message || error?.data?.message || error.message || "Failed to add comment";
+        toast.error(errorMsg);
       }
     }, {
       title: "Join the Discussion",
@@ -671,10 +728,62 @@ const Community = ({ children, onSearchActive }) => {
 
   const handleLike = async (postId) => {
     gateInteraction(async () => {
+      // Optimistic like toggle with real user details
+      const userId = user?.id || user?._id;
+      setLoadedPosts(prev => prev.map(post => {
+        if ((post._id || post.id) === postId) {
+          const alreadyLiked = post.likes?.some(l => (l.id || l._id || l) === userId);
+          return {
+            ...post,
+            likes: alreadyLiked
+              ? (post.likes || []).filter(l => (l.id || l._id || l) !== userId)
+              : [...(post.likes || []), { 
+                  id: userId, 
+                  _id: userId,
+                  name: user?.name,
+                  username: user?.username,
+                  profilePicture: user?.profilePicture
+                }],
+          };
+        }
+        return post;
+      }));
+
       try {
-        await likePost(postId).unwrap();
+        const res = await likePost(postId).unwrap();
+        if (res.likes) {
+          setLoadedPosts(prev => prev.map(post => {
+            if ((post._id || post.id) === postId) {
+              return {
+                ...post,
+                likes: res.likes,
+                likesCount: res.likes.length
+              };
+            }
+            return post;
+          }));
+        }
       } catch (error) {
-        toast.error("Failed to like post");
+        // Rollback
+        setLoadedPosts(prev => prev.map(post => {
+          if ((post._id || post.id) === postId) {
+            const wasLiked = post.likes?.some(l => (l.id || l._id || l) === userId);
+            return {
+              ...post,
+              likes: wasLiked
+                ? (post.likes || []).filter(l => (l.id || l._id || l) !== userId)
+                : [...(post.likes || []), { 
+                    id: userId, 
+                    _id: userId,
+                    name: user?.name,
+                    username: user?.username,
+                    profilePicture: user?.profilePicture
+                  }],
+            };
+          }
+          return post;
+        }));
+        toast.error(error?.data?.message || error.message || "Failed to like post");
       }
     });
   };
@@ -1227,30 +1336,69 @@ const Community = ({ children, onSearchActive }) => {
             ) : (
               <div className="space-y-6">
                 {loadedPosts.map(post => (
-                  <div key={post._id} className="bg-[#0A0A0A] border border-white/5 rounded-[8px] p-5 space-y-4">
+                  <div key={getPostId(post)} className="bg-[#0A0A0A] border border-white/5 rounded-[8px] p-5 space-y-4">
                     {/* Post Header */}
                     <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-3">
+                      <Link to={`/profile/${post.adminId?.id || post.adminId?._id || post.author?.id || post.author?._id || post.authorId}`} className="flex items-center gap-3 group">
                         <img
                           src={post.adminId?.profilePicture || "/default-avatar.png"}
-                          className="w-10 h-10 rounded-full object-cover border border-white/10"
+                          className="w-10 h-10 rounded-full object-cover border border-white/10 group-hover:border-[#55DEE8]/50 transition-colors"
                         />
                         <div>
                           <div className="flex items-center gap-1.5">
-                            <span className="text-[13px] font-bold">{post.adminId?.name || "Player"}</span>
+                            <span className="text-[13px] font-bold group-hover:text-[#55DEE8] transition-colors">{post.adminId?.name || "Player"}</span>
                             <ShieldCheck size={14} className="text-[#55DEE8]" />
                           </div>
                           <div className="text-[11px] font-bold text-white/40 mt-0.5">
                             2h ago
                           </div>
                         </div>
-                      </div>
+                      </Link>
                       <div className="flex items-center gap-3">
-                        <button className="text-white/40 hover:text-white transition-colors">
-                          <MoreVertical size={18} />
-                        </button>
+                        <div className="relative">
+                          <button 
+                            onClick={() => setActiveDropdownId(activeDropdownId === getPostId(post) ? null : getPostId(post))}
+                            className="text-white/40 hover:text-white transition-colors p-2"
+                          >
+                            <MoreVertical size={18} />
+                          </button>
+                          {activeDropdownId === getPostId(post) && (
+                            <div className="absolute right-0 mt-2 w-32 bg-neutral-900 border border-white/10 rounded-[8px] shadow-lg overflow-hidden z-50">
+                              {((post.adminId?.id || post.adminId?._id) === (user?.id || user?._id) || (post.author?.id || post.author?._id) === (user?.id || user?._id) || post.authorId === (user?.id || user?._id)) ? (
+                                <button
+                                  onClick={() => {
+                                    setActiveDropdownId(null);
+                                    handleDeletePost(getPostId(post));
+                                  }}
+                                  className="w-full text-left px-4 py-2 text-[12px] font-bold text-red-500 hover:bg-white/5 transition-colors"
+                                >
+                                  Delete
+                                </button>
+                              ) : (
+                                <button
+                                  onClick={() => {
+                                    setActiveDropdownId(null);
+                                    setReportPostId(getPostId(post));
+                                    setShowReportModal(true);
+                                  }}
+                                  className="w-full text-left px-4 py-2 text-[12px] font-bold text-white hover:bg-white/5 transition-colors"
+                                >
+                                  Report
+                                </button>
+                              )}
+                            </div>
+                          )}
+                        </div>
                       </div>
                     </div>
+
+                    {/* Caption */}
+                    {(post.title || post.content) && (
+                      <div className="text-[12px] font-medium leading-relaxed">
+                        {post.title && <span className="font-bold mr-2">{post.title}</span>}
+                        <span className="text-white/90 whitespace-pre-wrap">{post.content}</span>
+                      </div>
+                    )}
 
                     {(post.image || post.imageUrl || post.mediaUrl) && (
                       <div className="relative rounded-[8px] overflow-hidden group border border-white/5 bg-[#111]">
@@ -1315,12 +1463,15 @@ const Community = ({ children, onSearchActive }) => {
                     {/* Action Bar */}
                     <div className="flex items-center justify-between pt-1">
                       <div className="flex items-center gap-5">
-                        <button onClick={() => handleLike(post._id)} className="flex items-center gap-2 group">
-                          <Heart size={20} className={`transition-colors ${post.likes?.some(l => (l._id || l) === user?._id) ? 'fill-[#55DEE8] text-[#55DEE8]' : 'text-white/70 group-hover:text-red-500'}`} />
+                        <button onClick={() => handleLike(getPostId(post))} className="flex items-center gap-2 group">
+                          <Heart size={20} className={`transition-colors ${post.likes?.some(l => (l.id || l._id || l) === (user?.id || user?._id)) ? 'fill-[#55DEE8] text-[#55DEE8]' : 'text-white/70 group-hover:text-red-500'}`} />
                           <span className="text-[12px] font-bold text-white">{post.likes?.length || 0}</span>
                         </button>
-                        <button className="flex items-center gap-2 group">
-                          <MessageCircle size={20} className="text-white/70 group-hover:text-white transition-colors" />
+                        <button
+                          onClick={() => setExpandedComments(prev => ({ ...prev, [getPostId(post)]: !prev[getPostId(post)] }))}
+                          className="flex items-center gap-2 group"
+                        >
+                          <MessageCircle size={20} className={`transition-colors ${expandedComments[getPostId(post)] ? 'text-[#55DEE8]' : 'text-white/70 group-hover:text-white'}`} />
                           <span className="text-[12px] font-bold text-white">{post.comments?.length || 0}</span>
                         </button>
                         <button
@@ -1340,49 +1491,130 @@ const Community = ({ children, onSearchActive }) => {
                           <span className="text-[12px] font-bold text-white">Share</span>
                         </button>
                       </div>
-                      <button>
-                        <Bookmark size={20} className="text-white/70 hover:text-white transition-colors" />
-                      </button>
                     </div>
 
-                    {/* Caption & Likes List */}
-                    <div className="space-y-2">
-                      <div className="text-[12px] font-medium leading-relaxed">
-                        {post.title && <span className="font-bold mr-2">{post.title}</span>}
-                        <span className="text-white/90 whitespace-pre-wrap">{post.content}</span>
-                      </div>
-
-                      {post.likes?.length > 0 && (
-                        <div className="flex items-center gap-2 text-[11px] font-medium text-white/50 pt-1">
-                          <div className="flex -space-x-1.5">
-                            {[1, 2, 3].slice(0, Math.min(3, post.likes.length)).map((_, i) => (
-                              <div key={i} className="w-5 h-5 rounded-full bg-white/20 border border-[#0A0A0A] overflow-hidden">
-                                <UserIcon size={18} className="text-white/50" />
-                              </div>
-                            ))}
-                          </div>
-                          <p>Liked by <span className="font-bold text-white">simran.s</span>, <span className="font-bold text-white">deepak_29</span> and <span className="font-bold text-white">{Math.max(0, post.likes?.length - 2)} others</span></p>
+                    {/* Likes Summary */}
+                    {post.likes?.length > 0 && (
+                      <div className="flex items-center gap-2 text-[11px] font-medium text-white/50 pt-1">
+                        <div className="flex -space-x-1.5 shrink-0">
+                          {post.likes.slice(0, 3).map((likeUser, i) => (
+                            <div key={likeUser.id || likeUser._id || i} className="w-5 h-5 rounded-full bg-zinc-800 border border-[#0A0A0A] overflow-hidden flex items-center justify-center shrink-0">
+                              {likeUser.profilePicture ? (
+                                <img src={likeUser.profilePicture} className="w-full h-full object-cover" alt="" />
+                              ) : (
+                                <div className="w-full h-full flex items-center justify-center bg-zinc-700 text-white text-[8px] font-bold">
+                                  {(likeUser.username || likeUser.name || 'U')[0].toUpperCase()}
+                                </div>
+                              )}
+                            </div>
+                          ))}
                         </div>
-                      )}
-                    </div>
+                        <p className="text-[11px] text-white/50 font-medium">
+                          {post.likes.length === 1 && (
+                            <span>
+                              Liked by{' '}
+                              <span className="font-bold text-white">
+                                {post.likes[0].username || post.likes[0].name || 'User'}
+                              </span>
+                            </span>
+                          )}
+                          {post.likes.length === 2 && (
+                            <span>
+                              Liked by{' '}
+                              <span className="font-bold text-white">
+                                {post.likes[0].username || post.likes[0].name || 'User'}
+                              </span>{' '}
+                              and{' '}
+                              <span className="font-bold text-white">
+                                {post.likes[1].username || post.likes[1].name || 'User'}
+                              </span>
+                            </span>
+                          )}
+                          {post.likes.length > 2 && (
+                            <span>
+                              Liked by{' '}
+                              <span className="font-bold text-white">
+                                {post.likes[0].username || post.likes[0].name || 'User'}
+                              </span>
+                              ,{' '}
+                              <span className="font-bold text-white">
+                                {post.likes[1].username || post.likes[1].name || 'User'}
+                              </span>{' '}
+                              and{' '}
+                              <span className="font-bold text-white">
+                                {post.likes.length - 2} {post.likes.length - 2 === 1 ? 'other' : 'others'}
+                              </span>
+                            </span>
+                          )}
+                        </p>
+                      </div>
+                    )}
 
-                    {/* Comment Input */}
-                    <div className="flex items-center gap-3 pt-3">
-                      <img src={user?.profilePicture || "/default-avatar.png"} className="w-7 h-7 rounded-full object-cover border border-white/10" />
-                      <input
-                        type="text"
-                        placeholder="Add a comment..."
-                        className="flex-1 bg-transparent text-[12px] font-medium outline-none text-white placeholder:text-white/40"
-                        value={commentInputs[post._id] || ""}
-                        onChange={(e) => setCommentInputs({ ...commentInputs, [post._id]: e.target.value })}
-                        onKeyDown={(e) => {
-                          if (e.key === 'Enter') handleAddComment(post._id);
-                        }}
-                      />
-                      <button className="text-white/40 hover:text-white">
-                        <Smile size={16} />
-                      </button>
-                    </div>
+                    {/* Expandable Comments Section */}
+                    <AnimatePresence>
+                      {expandedComments[getPostId(post)] && (
+                        <motion.div
+                          initial={{ height: 0, opacity: 0 }}
+                          animate={{ height: "auto", opacity: 1 }}
+                          exit={{ height: 0, opacity: 0 }}
+                          transition={{ duration: 0.25 }}
+                          className="overflow-hidden"
+                        >
+                          <div className="space-y-3 pt-2 border-t border-white/5">
+                            {/* Scrollable Comments List – max 4 visible */}
+                            {post.comments && post.comments.length > 0 && (
+                              <div className="max-h-[200px] overflow-y-auto space-y-2.5 pr-1 scrollbar-thin scrollbar-thumb-white/10 scrollbar-track-transparent">
+                                {post.comments.slice(0, 4).map((comment) => {
+                                  const commentUser = comment.userId || comment.user;
+                                  return (
+                                    <div key={comment.id || comment._id} className="flex items-start gap-2 text-[12px] leading-relaxed">
+                                      <Link to={`/profile/${commentUser?.id || commentUser?._id}`} className="font-bold text-white hover:text-[#55DEE8] transition-colors shrink-0">
+                                        {commentUser?.name || commentUser?.username || "Player"}
+                                      </Link>
+                                      <span className="text-white/80 break-words">{comment.text}</span>
+                                    </div>
+                                  );
+                                })}
+                                {post.comments.length > 4 && (
+                                  <button className="text-[11px] text-[#55DEE8] font-bold hover:underline">
+                                    View all {post.comments.length} comments
+                                  </button>
+                                )}
+                              </div>
+                            )}
+                            {post.comments?.length === 0 && (
+                              <p className="text-[12px] text-white/30 italic">No comments yet. Be the first!</p>
+                            )}
+
+                            {/* Comment Input */}
+                            <div className="flex items-center gap-3 pt-2 border-t border-white/5">
+                              <img src={user?.profilePicture || "/default-avatar.png"} className="w-7 h-7 rounded-full object-cover border border-white/10 shrink-0" />
+                              <input
+                                type="text"
+                                placeholder="Add a comment..."
+                                className="flex-1 bg-transparent text-[12px] font-medium outline-none text-white placeholder:text-white/40"
+                                value={commentInputs[getPostId(post)] || ""}
+                                onChange={(e) => setCommentInputs({ ...commentInputs, [getPostId(post)]: e.target.value })}
+                                onKeyDown={(e) => {
+                                  if (e.key === 'Enter') handleAddComment(getPostId(post));
+                                }}
+                              />
+                              <button
+                                onClick={() => handleAddComment(getPostId(post))}
+                                disabled={!commentInputs[getPostId(post)]?.trim()}
+                                className={`text-[12px] font-bold px-3 py-1.5 rounded-full transition-all ${
+                                  commentInputs[getPostId(post)]?.trim()
+                                    ? 'bg-[#55DEE8] text-black hover:bg-[#55DEE8]/80 cursor-pointer'
+                                    : 'bg-white/5 text-white/20 cursor-not-allowed'
+                                }`}
+                              >
+                                Post
+                              </button>
+                            </div>
+                          </div>
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
 
                   </div>
                 ))}

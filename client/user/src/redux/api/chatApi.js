@@ -139,6 +139,17 @@ export const transformChat = (chat) => {
     latestMessage = transformMessage(latestMessage);
   }
 
+  let parentCommunity = chat.parentCommunity;
+  if (chat.parentCommunity && typeof chat.parentCommunity === 'object') {
+    parentCommunity = {
+      ...chat.parentCommunity,
+      _id: chat.parentCommunity.id || chat.parentCommunity._id,
+      id: chat.parentCommunity.id || chat.parentCommunity._id,
+    };
+  } else if (chat.parentCommunityId) {
+    parentCommunity = chat.parentCommunityId;
+  }
+
   return {
     ...chat,
     _id: chat.id,
@@ -146,6 +157,7 @@ export const transformChat = (chat) => {
     groupAdmins,
     createdBy,
     latestMessage,
+    parentCommunity,
   };
 };
 
@@ -253,6 +265,33 @@ export const chatApi = baseApi.injectEndpoints({
         method: "PUT",
         body: data,
       }),
+      async onQueryStarted({ chatId }, { dispatch, getState, queryFulfilled }) {
+        // Get current user id
+        const state = /** @type {any} */ (getState());
+        const userId = state.auth?.user?._id || state.auth?.user?.id || state.auth?.user?.userId;
+        
+        // Optimistically toggle pinnedBy in cache
+        const patchResult = dispatch(
+          chatApi.util.updateQueryData('getChats', undefined, (draft) => {
+            const chats = draft?.chats || (Array.isArray(draft) ? draft : []);
+            const chat = chats.find(c => c._id === chatId || c.id === chatId);
+            if (chat) {
+              if (!chat.pinnedBy) chat.pinnedBy = [];
+              const idx = chat.pinnedBy.indexOf(userId);
+              if (idx >= 0) {
+                chat.pinnedBy.splice(idx, 1);
+              } else {
+                chat.pinnedBy.push(userId);
+              }
+            }
+          })
+        );
+        try {
+          await queryFulfilled;
+        } catch {
+          patchResult.undo();
+        }
+      },
       invalidatesTags: ["Chat"],
     }),
     deleteMessages: builder.mutation({
@@ -284,6 +323,32 @@ export const chatApi = baseApi.injectEndpoints({
         url: `/api/chat/${chatId}`,
         method: "DELETE",
       }),
+      async onQueryStarted(chatId, { dispatch, queryFulfilled }) {
+        // Optimistically remove chat from the list immediately
+        const patchResult = dispatch(
+          chatApi.util.updateQueryData('getChats', undefined, (draft) => {
+            if (draft?.chats) {
+              // Also remove child groups if it's a community
+              const chat = draft.chats.find(c => c._id === chatId || c.id === chatId);
+              if (chat?.isCommunity) {
+                draft.chats = draft.chats.filter(c => {
+                  const parentId = c.parentCommunity?._id || c.parentCommunity;
+                  return (c._id !== chatId && c.id !== chatId) && parentId !== chatId;
+                });
+              } else {
+                draft.chats = draft.chats.filter(c => c._id !== chatId && c.id !== chatId);
+              }
+            } else if (Array.isArray(draft)) {
+              return draft.filter(c => c._id !== chatId && c.id !== chatId);
+            }
+          })
+        );
+        try {
+          await queryFulfilled;
+        } catch {
+          patchResult.undo();
+        }
+      },
       invalidatesTags: ["Chat"],
     }),
     clearChat: builder.mutation({

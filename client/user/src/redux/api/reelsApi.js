@@ -114,14 +114,20 @@ export const reelsApi = baseApi.injectEndpoints({
       }),
       async onQueryStarted({ reelId, type }, { dispatch, queryFulfilled }) {
         // Optimistic update for likes — Prisma UUID is `id`, not `_id`
-        if (type === 'like') {
+        if (type === 'LIKE' || type === 'UNLIKE') {
+          const delta = type === 'LIKE' ? 1 : -1;
           const patchFeed = (queryArg) => {
             return dispatch(
               reelsApi.util.updateQueryData('getReelsFeed', queryArg, (draft) => {
                 if (!draft?.reels) return;
                 const reel = draft.reels.find((r) => r.id === reelId);
                 if (reel) {
-                  reel.stats.likes += 1;
+                  if (reel.stats) {
+                    reel.stats.likes = Math.max(0, (reel.stats.likes || 0) + delta);
+                  }
+                  reel.likes = Math.max(0, (reel.likes || 0) + delta);
+                  reel.likesCount = Math.max(0, (reel.likesCount || 0) + delta);
+                  reel.isLiked = type === 'LIKE';
                 }
               })
             );
@@ -139,12 +145,17 @@ export const reelsApi = baseApi.injectEndpoints({
         }
       },
     }),
-    addComment: builder.mutation({
+    getReelComments: builder.query({
+      query: (reelId) => `/api/reels/${reelId}/comments`,
+      providesTags: (result, error, reelId) => [{ type: 'ReelComments', id: reelId }],
+    }),
+    addReelComment: builder.mutation({
       query: ({ reelId, ...data }) => ({
         url: `/api/reels/${reelId}/comment`,
         method: 'POST',
         body: data,
       }),
+      invalidatesTags: (result, error, { reelId }) => [{ type: 'ReelComments', id: reelId }],
       async onQueryStarted({ reelId }, { dispatch, queryFulfilled }) {
         const patchFeed = (queryArg) => {
           return dispatch(
@@ -153,7 +164,8 @@ export const reelsApi = baseApi.injectEndpoints({
               // Prisma UUID is `id`, not Mongo `_id`
               const reel = draft.reels.find((r) => r.id === reelId);
               if (reel) {
-                reel.stats.comments += 1;
+                if (reel.stats) reel.stats.comments += 1;
+                if (typeof reel.comments === 'number') reel.comments += 1;
               }
             })
           );
@@ -226,6 +238,17 @@ export const reelsApi = baseApi.injectEndpoints({
         body: data,
       }),
     }),
+    reportReel: builder.mutation({
+      query: ({ reelId, reason }) => ({
+        url: `/api/reels/${reelId}/report`,
+        method: 'POST',
+        body: { reason },
+      }),
+    }),
+    getReelReports: builder.query({
+      query: () => '/api/reels/reports',
+      providesTags: ['ReelReport'],
+    }),
   }),
 });
 
@@ -237,8 +260,11 @@ export const {
   useLazyGetReelUploadUrlQuery,
   useConfirmReelUploadMutation,
   useInteractWithReelMutation,
-  useAddCommentMutation,
+  useGetReelCommentsQuery,
+  useAddReelCommentMutation,
   useDeleteReelMutation,
   useGetCreatorAnalyticsQuery,
   useTrackHeartbeatMutation,
+  useReportReelMutation,
+  useGetReelReportsQuery,
 } = reelsApi;

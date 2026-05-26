@@ -72,6 +72,7 @@ model User {
   reels                   Reel[]
   reelComments            ReelComment[]
   reelInteractions        ReelInteraction[]
+  reelReports             ReelReport[]
   refreshTokens           RefreshToken[]
   reviews                 Review[]
   stories                 Story[]
@@ -94,6 +95,7 @@ model User {
   professionalCustomers   ProfessionalCustomer[]
   careerStats             PlayerCareerStats[]
   earnedBadges            UserBadge[]
+  postReports             PostReport[]
 
   @@index([role])
 }
@@ -791,6 +793,7 @@ model Reel {
   creator         User              @relation(fields: [creatorId], references: [id])
   reelComments    ReelComment[]
   interactions    ReelInteraction[]
+  reports         ReelReport[]
 
   @@index([status, isPrivate, id])
   @@index([creatorId, status])
@@ -831,6 +834,22 @@ model ReelInteraction {
   @@index([userId])
 }
 
+model ReelReport {
+  id           String   @id @default(uuid())
+  reelId       String
+  reportedById String
+  reason       String
+  status       String   @default("PENDING")
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  reel         Reel     @relation(fields: [reelId], references: [id], onDelete: Cascade)
+  reportedBy   User     @relation(fields: [reportedById], references: [id], onDelete: Cascade)
+
+  @@index([reelId])
+  @@index([reportedById])
+  @@index([status])
+}
+
 model Post {
   id          String    @id @default(uuid())
   authorId    String    @map("creatorId")
@@ -846,6 +865,7 @@ model Post {
   comments    Comment[]
   author      User      @relation(fields: [authorId], references: [id])
   likes       User[]    @relation("PostLikes")
+  reports     PostReport[]
 
   @@index([authorId])
   @@index([status])
@@ -1323,4 +1343,20 @@ model PlayerCareerStats {
   @@unique([userId, sportType])
   @@index([userId])
 }
+
+model PostReport {
+  id        String   @id @default(uuid())
+  postId    String
+  userId    String
+  reason    String
+  status    String   @default("PENDING") // PENDING, RESOLVED, DISMISSED
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  post      Post     @relation(fields: [postId], references: [id], onDelete: Cascade)
+  user      User     @relation(fields: [userId], references: [id])
+
+  @@index([postId])
+  @@index([userId])
+}
+
 
