@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useSelector } from 'react-redux';
+import { useNavigate } from 'react-router-dom';
 import { 
   useUpdateGroupMutation, 
   useRemoveFromGroupMutation, 
@@ -13,6 +14,7 @@ import {
 
 const GroupInfoModal = ({ isOpen, onClose, chat }) => {
  const { user } = useSelector((state) => state.auth);
+ const navigate = useNavigate();
  const [groupName, setGroupName] = useState(chat?.chatName || "");
  const [isEditingName, setIsEditingName] = useState(false);
  const [searchQuery, setSearchQuery] = useState("");
@@ -266,7 +268,14 @@ const GroupInfoModal = ({ isOpen, onClose, chat }) => {
  {availableUsers
  .filter(u => u.name?.toLowerCase().includes(searchQuery.toLowerCase()))
  .map(user => (
- <div key={user._id} className="flex justify-between items-center hover:bg-white/[0.03] p-2 rounded-lg cursor-pointer transition-colors group">
+  <div 
+    key={user._id} 
+    onClick={() => {
+      navigate(`/profile/${user._id}`);
+      onClose();
+    }}
+    className="flex justify-between items-center hover:bg-white/[0.03] p-2 rounded-lg cursor-pointer transition-colors group"
+  >
  <div className="flex items-center gap-3">
  <img src={user.profilePicture || "https://cdn-icons-png.flaticon.com/512/149/149071.png"} className="w-10 h-10 rounded-full object-cover" alt="" />
  <div>
@@ -275,7 +284,10 @@ const GroupInfoModal = ({ isOpen, onClose, chat }) => {
  </div>
  </div>
  <button 
- onClick={() => handleAddUser(user._id)}
+ onClick={(e) => {
+   e.stopPropagation();
+   handleAddUser(user._id);
+ }}
  className="text-[#55DEE8] opacity-0 group-hover:opacity-100 p-1.5 rounded-full hover:bg-[#55DEE8]/10 transition-all"
  title="Add"
  >
@@ -304,7 +316,14 @@ const GroupInfoModal = ({ isOpen, onClose, chat }) => {
  const isMe = myIds.includes(uid);
 
  return (
- <div key={`active-${uid}-${i}`} className="flex justify-between items-center hover:bg-white/[0.03] px-6 py-3 cursor-pointer transition-colors group/member">
+  <div 
+    key={`active-${uid}-${i}`} 
+    onClick={() => {
+      navigate(`/profile/${uid}`);
+      onClose();
+    }}
+    className="flex justify-between items-center hover:bg-white/[0.03] px-6 py-3 cursor-pointer transition-colors group/member"
+  >
  <div className="flex items-center gap-3">
  <div className="w-10 h-10 rounded-full bg-[#1A1A1A] flex items-center justify-center overflow-hidden shrink-0">
  {u.user?.profilePicture ? (
