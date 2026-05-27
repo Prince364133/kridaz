@@ -29,7 +29,7 @@ const GuestNavbar = () => {
   ];
 
   return (
-    <nav className={`fixed top-0 left-0 w-full z-50 transition-transform duration-500 ${ scrolled ? "bg-black/80 backdrop-blur-xl border-b border-white/5 py-2" : "bg-transparent py-4" } ${scrollDirection === "down" ? "-translate-y-full" : "translate-y-0"}`}>
+    <nav className={`fixed top-0 left-0 w-full z-50 transition-all duration-300 ${ scrolled ? "bg-black/80 backdrop-blur-xl border-b border-white/5 py-2" : "bg-transparent py-4" }`}>
       <div className="max-w-7xl mx-auto px-6 lg:px-12 flex items-center justify-between">
         
         {/* Brand Logo Unit */}
