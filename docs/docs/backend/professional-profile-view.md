@@ -211,3 +211,46 @@ export const getPublicProfile = async (req, res) => {
   }
 };
 ```
+
+---
+
+## 4. Role-Specific Profile Metadata
+
+To support the diverse professional roles available on Kridaz, the user-facing profile renders specialized metadata cards. This data is stored dynamically in a JSONB column (`roleMetadata`) on the `OwnerProfile` database model and parsed by the frontend according to the professional's active role.
+
+### 4.1 Umpire Profiles
+Umpires require fields that highlight officiating authority, rules mastery, and match style.
+* **Match Formats Handled**: Arrays of supported match formats (e.g., T20, One Day, Multi-Day, Indoor).
+* **Sports Expertise**: Primary and secondary sports they are qualified to officiate (e.g., Cricket, Football).
+* **Tournament Level Covered**: Highest level of competition officiated (e.g., Club, State, National, International League).
+* **Officiating Style**: A brief description of their stance on field discipline and rules interpretation (e.g., "Proactive Communication", "Strict Rule Adherence").
+
+### 4.2 Coach Profiles
+Coaches focus on athletic growth, pedagogy, and tracking record of student success.
+* **Performance Improvement Metrics**: Specific skills they specialize in improving (e.g., Bowling Speed, Batting Stance, Agility, Tactics).
+* **Athlete Improvement Percentage**: Average statistical performance gain tracked across past students (e.g., "Average 15% increase in batting strike rate").
+* **Coaching Style**: The pedagogical methodology used (e.g., "Video Analysis Feedback", "Technical Drills", "Holistic Player Development").
+* **Sports Category**: Age and skill brackets they train (e.g., "Under-15", "Adult Beginners", "Elite Academy").
+
+### 4.3 Streamer Profiles
+Streamers need to present technological capabilities and video quality details to tournament organizers.
+* **Platforms Supported**: Direct list of destinations they can broadcast to (e.g., YouTube, Facebook Live, Twitch, Custom RTMP).
+* **Match or Event Types Covered**: Formats of sports production they handle (e.g., Local League Finals, Multi-Court Tournaments, Individual matches).
+* **Multi-Camera Support**: Maximum simultaneous camera feeds managed (e.g., Single Cam, 3-Camera Setup with switcher).
+* **Stream Quality**: Maximum transmission specifications (e.g., 1080p 60fps, 4K UHD).
+* **Live Graphics Support**: Capabilities for overlaying tickers, lower thirds, animations, and ads (e.g., "Full score overlays, animated wickets, custom sponsors").
+* **Production Type Supported**: Hardware vs Software encoding configurations (e.g., OBS Software, Blackmagic ATEM Hardware setup).
+
+### 4.4 Commentator Profiles
+Commentators showcase host presence, media delivery, and auditory samples.
+* **Match Type Covered**: Formats they commentate on (e.g., T20 Cricket, Football Derbies, League Tournaments).
+* **Hosting Experience**: Master of ceremonies (MC) and presentation roles (e.g., "Pre-match panel host", "Post-match award presenter").
+* **Live Commentary Support**: Experience doing real-time, fast-paced play-by-play commentary.
+* **Co-Commentary Experience**: Ability to work in pairs (e.g., "Analytical Color Commentator", "Main Play-by-Play").
+* **Panel Discussion Experience**: Experience leading or participating in post-match review tables.
+* **Commentary Audio Portfolio**: Audio attachments or cloud links (e.g. Soundcloud, Cloudinary MP3 links) rendering inline audio players so users can hear their voice before booking.
+
+### 4.5 Scorer Profiles
+Scorers demonstrate precision, software literacy, and calculations accuracy.
+* **Live Scoring Experience**: Years or counts of matches scored live on digital interfaces (e.g., "120+ matches using Kridaz Scorers app").
+* **Score Updating Experience**: Special rules expertise (e.g., DLS - Duckworth-Lewis-Stern method, VJD method calculations, offline sync recovery in low-network regions).
