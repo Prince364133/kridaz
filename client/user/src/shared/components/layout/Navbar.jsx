@@ -312,12 +312,7 @@ const Navbar = () => {
                         {(["bmsp_admin", "admin", "venu_owners", "venue_owners", "venue", "coach", "umpire", "streamer", "commentator", "scorer", "cheerleader"].some(r => role?.toLowerCase().includes(r)) ||
                           ["bmsp_admin", "admin", "venu_owners", "venue_owners", "venue", "coach", "umpire", "streamer", "commentator", "scorer", "cheerleader"].some(r => user?.role?.toLowerCase().includes(r))) && (
                             <>
-                              {(role?.toLowerCase() === "admin" || role?.toLowerCase().includes("bmsp_admin") || user?.role?.toLowerCase() === "admin" || user?.role?.toLowerCase().includes("bmsp_admin")) && (
-                                <Link to="/admin" onClick={() => setIsSidebarOpen(false)} className="flex items-center gap-3 p-3 rounded-[8px] hover:bg-white/5 text-white/70 hover:text-white transition-all">
-                                  <ShieldCheck size={18} className="text-white/40" />
-                                  <span className="text-sm font-medium">Admin Panel</span>
-                                </Link>
-                              )}
+
                               {(role?.toLowerCase().includes("venu_owners") || user?.role?.toLowerCase().includes("venu_owners") || role?.toLowerCase().includes("venue") || user?.role?.toLowerCase().includes("venue") || role?.toLowerCase().includes("owner") || user?.role?.toLowerCase().includes("owner")) && (
                                 <Link to="/venue-owner" onClick={() => setIsSidebarOpen(false)} className="flex items-center gap-3 p-3 rounded-[8px] hover:bg-white/5 text-white/70 hover:text-white transition-all">
                                   <Activity size={18} className="text-white/40" />

@@ -42,18 +42,16 @@ const useLoginForm = () => {
 
   const handleRoleRedirect = (role) => {
     const normalizedRole = role?.toLowerCase();
-    if (normalizedRole === "admin") {
-      navigate("/admin");
-    } else if (normalizedRole === "owner") {
+    const professionalRoles = ["coach", "umpire", "streamer", "scorer", "cheerleader", "commentator"];
+    
+    if (normalizedRole === "admin" || normalizedRole === "bmsp_admin") {
+      dispatch(logout());
+      toast.error("Administrators must log in via the Platform Admin Console.");
+      navigate("/login");
+    } else if (normalizedRole === "owner" || normalizedRole === "venue_owner" || normalizedRole === "venu_owners") {
       navigate("/venue-owner");
-    } else if (normalizedRole === "coach") {
-      navigate("/professional/coach");
-    } else if (normalizedRole === "umpire") {
-      navigate("/umpire");
-    } else if (normalizedRole === "scorer") {
-      navigate("/scorer");
-    } else if (normalizedRole === "streamer") {
-      navigate("/streamer");
+    } else if (professionalRoles.includes(normalizedRole)) {
+      navigate(`/professional/${normalizedRole}`);
     } else {
       navigate("/");
     }

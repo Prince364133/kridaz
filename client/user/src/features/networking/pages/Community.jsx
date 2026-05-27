@@ -333,6 +333,7 @@ const Community = ({ children, onSearchActive }) => {
     const handleNewPost = (newPost) => {
       const formatted = {
         ...newPost,
+        _id: newPost.id || newPost._id, // Guarantee _id exists
         adminId: newPost.author,
         mediaUrl: newPost.mediaUrls?.[0],
         image: newPost.mediaType === 'image' ? newPost.mediaUrls?.[0] : null,
@@ -346,7 +347,7 @@ const Community = ({ children, onSearchActive }) => {
       };
 
       setLoadedPosts(prev => {
-        if (prev.find(p => p._id === formatted._id)) return prev;
+        if (prev.find(p => (p._id || p.id) === (formatted._id || formatted.id))) return prev;
         return [formatted, ...prev];
       });
 
