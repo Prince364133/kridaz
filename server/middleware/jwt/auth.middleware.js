@@ -117,15 +117,7 @@ export const authorizeRoles = (...roles) => {
     }
     
     const userRole = req.user.role.toLowerCase();
-    // Support exact role match. One intentional alias: 'limited_umpire' IS an umpire role.
-    const hasRole = roles.some(r => {
-      const targetRole = r.toLowerCase();
-      // Exact match
-      if (userRole === targetRole) return true;
-      // Intentional product alias: limited_umpire satisfies umpire role checks
-      if (targetRole === 'umpire' && userRole === 'limited_umpire') return true;
-      return false;
-    });
+    const hasRole = roles.some(r => userRole === r.toLowerCase());
     
     if (!hasRole) {
       return res.status(403).json({ 

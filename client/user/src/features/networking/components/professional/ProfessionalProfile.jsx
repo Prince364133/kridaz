@@ -1,14 +1,13 @@
-﻿import { useState, useEffect } from "react";
-import { useSelector, useDispatch } from "react-redux";
+import { useState, useEffect } from "react";
+import { useSelector } from "react-redux";
 import axiosInstance from "@hooks/useAxiosInstance";
-import { User, Mail, Phone, MapPin, Award, BookOpen, Camera, Save, Loader2, Plus, Trash2, CheckCircle2, ChevronLeft, ChevronRight, FileText, Image as ImageIcon, Video, Play, Layout, X, ChevronDown, Zap, ShieldCheck, Target, Globe } from "lucide-react";
+import { 
+  User, Mail, Phone, MapPin, Award, Save, Loader2, Plus, Trash2, 
+  CheckCircle2, ChevronLeft, ChevronRight, FileText, Image as ImageIcon, 
+  Video, Play, Layout, X, ChevronDown, Zap, ShieldCheck, Target, 
+  Globe, Calendar, DollarSign, Building, Search, Map, Trophy
+} from "lucide-react";
 import toast from "react-hot-toast";
-
-/**
- * ProfessionalProfile ΓÇö The definitive dossier for professionals.
- * Compact for the Console design language (Inter font, 8px radii).
- * Fully custom-styled dropdowns for premium dark theme parity.
- */
 
 const ALL_SPORTS = [
   "Cricket", "Football", "Badminton", "Tennis", "Table Tennis", 
@@ -32,13 +31,18 @@ export default function ProfessionalProfile() {
   
   const isScorer = role?.toLowerCase().includes("scorer");
   const themeColor = isScorer ? "#00C187" : "#55DEE8";
-  const portalName = isScorer ? "SCORER" : "COACH";
+  const portalName = role?.toUpperCase() || "PROFESSIONAL";
 
   const [loading, setLoading] = useState(false);
   const [fetching, setFetching] = useState(true);
   const [currentStep, setCurrentStep] = useState(1);
+  
   const [formData, setFormData] = useState({
     name: "",
+    email: "",
+    phone: "",
+    bio: "",
+    hourlyPrice: 0,
     gameTypes: [],
     city: "",
     state: "",
@@ -52,19 +56,45 @@ export default function ProfessionalProfile() {
     coachingLevel: "Beginner",
     availabilityTimings: "",
     availabilityMode: "Both",
-    preferredLocations: "",
+    preferredLocations: { grounds: [], customLocations: [] },
     trainingTypes: [],
     ageGroups: [],
     languages: [],
     achievements: [],
-    portfolio: []
+    portfolio: [],
+    // New fields
+    profilePicture: "",
+    bannerUrl: "",
+    isOnline: false,
+    instagram: "",
+    linkedin: "",
+    youtube: "",
+    streamPlatforms: [],
+    matchesCovered: "",
+    camerasSupported: "",
+    streamQuality: "1080p",
+    liveScoringSupport: false,
+    matchFormats: [],
+    liveCommentarySupported: false,
+    panelDiscussionEnabled: false,
+    structuredAchievements: []
   });
+
+  // Supporting state for dynamic selectors
+  const [grounds, setGrounds] = useState([]);
+  const [states, setStates] = useState([]);
+  const [cities, setCities] = useState([]);
+  const [selectedState, setSelectedState] = useState("");
+  const [selectedCity, setSelectedCity] = useState("");
+  const [locationTab, setLocationTab] = useState("grounds"); // 'grounds' or 'custom'
+  const [groundSearch, setGroundSearch] = useState("");
 
   const [newGameType, setNewGameType] = useState("");
   const [newLanguage, setNewLanguage] = useState("");
   const [newAchievement, setNewAchievement] = useState("");
   const [newCert, setNewCert] = useState({ title: "", description: "", image: "" });
   const [newPortfolioItem, setNewPortfolioItem] = useState({ title: "", description: "", mediaType: "image", mediaUrl: "" });
+  const [newStructuredAchievement, setNewStructuredAchievement] = useState({ title: "", description: "" });
   
   const [showSportsDropdown, setShowSportsDropdown] = useState(false);
   const [showLanguagesDropdown, setShowLanguagesDropdown] = useState(false);
@@ -73,42 +103,174 @@ export default function ProfessionalProfile() {
 
   useEffect(() => {
     fetchProfile();
+    fetchGrounds();
+    fetchStates();
   }, []);
 
   const fetchProfile = async () => {
     try {
       setFetching(true);
-      const profId = user?._id || user?.id || user?.user;
-      if (!profId) return;
-      const res = await axiosInstance.get(`/api/professional/details/${profId}`);
+      const res = await axiosInstance.get("/api/professional/profile");
       const prof = res.data.professional;
+      
+      const preferred = prof.businessDetails?.preferredLocations || { grounds: [], customLocations: [] };
+      
       setFormData({
-        name: prof.name || "",
-        gameTypes: prof.gameTypes || [],
-        city: prof.city || "",
-        state: prof.state || "",
-        specialization: prof.businessDetails?.specialization || "",
-        experience: prof.businessDetails?.experience || "",
+        name: prof.user?.name || prof.name || "",
+        email: prof.user?.email || "",
+        phone: prof.user?.phone || "",
+        bio: prof.bio || "",
+        hourlyPrice: prof.price || 0,
+        gameTypes: prof.user?.sportTypes || prof.gameTypes || [],
+        city: prof.user?.city || prof.city || "",
+        state: prof.user?.state || prof.state || "",
+        specialization: prof.specialization || prof.businessDetails?.specialization || "",
+        experience: prof.experience || prof.businessDetails?.experience || "",
         certifications: prof.certifications || [],
         gender: prof.gender || "",
         dob: prof.dob ? new Date(prof.dob).toISOString().split('T')[0] : "",
         address: prof.businessDetails?.address || "",
         pinCode: prof.businessDetails?.pinCode || "",
         coachingLevel: prof.coachingLevel || "Beginner",
-        availabilityTimings: prof.availabilityTimings || "",
-        availabilityMode: prof.availabilityMode || "Both",
-        preferredLocations: prof.preferredLocations || "",
+        availabilityTimings: prof.businessDetails?.availabilityTimings || prof.availabilityTimings || "",
+        availabilityMode: prof.businessDetails?.availabilityMode || prof.availabilityMode || "Both",
+        preferredLocations: preferred,
         trainingTypes: prof.trainingTypes || [],
         ageGroups: prof.ageGroups || [],
         languages: prof.languages ? prof.languages.split(", ").filter(l => l) : [],
         achievements: prof.achievements ? prof.achievements.split("\n").filter(a => a) : [],
-        portfolio: prof.portfolio || []
+        portfolio: prof.portfolio || [],
+        // New columns
+        profilePicture: prof.user?.profilePicture || "",
+        bannerUrl: prof.bannerUrl || "",
+        isOnline: prof.isOnline || false,
+        instagram: prof.instagram || "",
+        linkedin: prof.linkedin || "",
+        youtube: prof.youtube || "",
+        streamPlatforms: prof.streamPlatforms || [],
+        matchesCovered: prof.matchesCovered || "",
+        camerasSupported: prof.camerasSupported !== null && prof.camerasSupported !== undefined ? String(prof.camerasSupported) : "",
+        streamQuality: prof.streamQuality || "1080p",
+        liveScoringSupport: prof.liveScoringSupport || false,
+        matchFormats: prof.matchFormats || [],
+        liveCommentarySupported: prof.liveCommentarySupported || false,
+        panelDiscussionEnabled: prof.panelDiscussionEnabled || false,
+        structuredAchievements: prof.structuredAchievements || []
       });
     } catch (error) {
-      console.error("Error fetching profile:", error);
+      console.error("Error fetching professional profile:", error);
+      toast.error("Failed to load profile data.");
     } finally {
       setFetching(false);
     }
+  };
+
+  const fetchGrounds = async () => {
+    try {
+      const res = await axiosInstance.get("/api/turf/all");
+      setGrounds(res.data.turfs || res.data || []);
+    } catch (err) {
+      console.error("Error fetching grounds:", err);
+    }
+  };
+
+  const fetchStates = async () => {
+    try {
+      const res = await axiosInstance.get("/api/location/states");
+      setStates(res.data.states || res.data || []);
+    } catch (err) {
+      console.error("Error fetching states:", err);
+    }
+  };
+
+  const handleStateChange = async (stateName) => {
+    setSelectedState(stateName);
+    setSelectedCity("");
+    if (!stateName) {
+      setCities([]);
+      return;
+    }
+    try {
+      const res = await axiosInstance.get(`/api/location/cities?state=${stateName}`);
+      setCities(res.data.cities || res.data || []);
+    } catch (err) {
+      console.error("Error fetching cities:", err);
+    }
+  };
+
+  // Toggle selection of platform listed grounds
+  const toggleGroundSelection = (groundId) => {
+    const currentGrounds = formData.preferredLocations?.grounds || [];
+    let updated;
+    if (currentGrounds.includes(groundId)) {
+      updated = currentGrounds.filter(id => id !== groundId);
+    } else {
+      updated = [...currentGrounds, groundId];
+    }
+    
+    setFormData({
+      ...formData,
+      preferredLocations: {
+        ...formData.preferredLocations,
+        grounds: updated
+      }
+    });
+  };
+
+  // Add custom locations state-city combos
+  const addCustomLocation = () => {
+    if (!selectedState || !selectedCity) {
+      toast.error("Please select both State and City");
+      return;
+    }
+
+    const currentLocs = formData.preferredLocations?.customLocations || [];
+    const stateObj = currentLocs.find(item => item.state === selectedState);
+    let updated;
+    
+    if (stateObj) {
+      if (stateObj.cities.includes(selectedCity)) {
+        toast.error("City already added under this State");
+        return;
+      }
+      updated = currentLocs.map(item => {
+        if (item.state === selectedState) {
+          return { ...item, cities: [...item.cities, selectedCity] };
+        }
+        return item;
+      });
+    } else {
+      updated = [...currentLocs, { state: selectedState, cities: [selectedCity] }];
+    }
+
+    setFormData({
+      ...formData,
+      preferredLocations: {
+        ...formData.preferredLocations,
+        customLocations: updated
+      }
+    });
+    setSelectedCity("");
+    toast.success("Service location registered");
+  };
+
+  // Remove specific city from custom locations map
+  const removeCustomCity = (stateName, cityName) => {
+    const currentLocs = formData.preferredLocations?.customLocations || [];
+    const updated = currentLocs.map(item => {
+      if (item.state === stateName) {
+        return { ...item, cities: item.cities.filter(c => c !== cityName) };
+      }
+      return item;
+    }).filter(item => item.cities.length > 0);
+
+    setFormData({
+      ...formData,
+      preferredLocations: {
+        ...formData.preferredLocations,
+        customLocations: updated
+      }
+    });
   };
 
   const handleUpdate = async () => {
@@ -120,11 +282,12 @@ export default function ProfessionalProfile() {
         achievements: formData.achievements.join("\n")
       };
       await axiosInstance.put("/api/professional/update-profile", payload);
-      toast.success("Dossier synchronized", {
-        style: { background: "#000", color: "#fff", border: `1px solid ${themeColor}`, fontSize: "10px", fontWeight: "black" }
+      toast.success("Professional Profile Updated Successfully!", {
+        style: { background: "#000", color: "#fff", border: `1px solid ${themeColor}` }
       });
     } catch (error) {
-      toast.error("Synchronization failed");
+      console.error("Error updating profile:", error);
+      toast.error(error.response?.data?.message || "Failed to update profile.");
     } finally {
       setLoading(false);
     }
@@ -208,6 +371,56 @@ export default function ProfessionalProfile() {
     }
   };
 
+  const handleProfilePicUpload = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      if (file.size > 2 * 1024 * 1024) {
+        toast.error("Avatar size must be below 2MB");
+        return;
+      }
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setFormData({ ...formData, profilePicture: reader.result });
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const handleBannerUpload = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      if (file.size > 4 * 1024 * 1024) {
+        toast.error("Banner size must be below 4MB");
+        return;
+      }
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setFormData({ ...formData, bannerUrl: reader.result });
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const addStructuredAchievement = () => {
+    if (newStructuredAchievement.title) {
+      setFormData({
+        ...formData,
+        structuredAchievements: [...(formData.structuredAchievements || []), { ...newStructuredAchievement }]
+      });
+      setNewStructuredAchievement({ title: "", description: "" });
+      toast.success("Achievement logged successfully");
+    } else {
+      toast.error("Achievement title is mandatory");
+    }
+  };
+
+  const removeStructuredAchievement = (index) => {
+    setFormData({
+      ...formData,
+      structuredAchievements: (formData.structuredAchievements || []).filter((_, i) => i !== index)
+    });
+  };
+
   const addAchievement = () => {
     if (newAchievement && !formData.achievements.includes(newAchievement)) {
       setFormData({ ...formData, achievements: [...formData.achievements, newAchievement] });
@@ -273,8 +486,13 @@ export default function ProfessionalProfile() {
     !formData.languages.includes(l)
   );
 
+  const filteredGrounds = grounds.filter(g => 
+    !groundSearch || g.name.toLowerCase().includes(groundSearch.toLowerCase()) ||
+    g.city.toLowerCase().includes(groundSearch.toLowerCase())
+  );
+
   if (fetching) return (
-    <div className="py-20 flex justify-center"><Loader2 className="animate-spin" style={{ color: themeColor }} size={48} /></div>
+    <div className="py-20 flex justify-center"><Loader2 className="animate-spin text-[#55DEE8]" size={48} /></div>
   );
 
   const StepIndicator = () => (
@@ -305,7 +523,7 @@ export default function ProfessionalProfile() {
               PHASE {step}
             </p>
             <p className={`text-[10px] font-black uppercase tracking-widest transition-colors font-inter mt-0.5 ${currentStep === step ? "text-white" : "text-neutral-700 group-hover:text-white/60"}`}>
-              {step === 1 ? "Professional" : step === 2 ? "Credentials" : "Work Portfolio"}
+              {step === 1 ? "Profile Details" : step === 2 ? "Credentials" : "Work Portfolio"}
             </p>
           </div>
           {step < 3 && <div className="w-6 h-[1px] bg-white/5" />}
@@ -315,16 +533,16 @@ export default function ProfessionalProfile() {
   );
 
   return (
-    <div className="space-y-6 animate-fade-in font-inter pb-20 h-full custom-scrollbar">
+    <div className="space-y-6 animate-fade-in font-inter pb-20 h-full custom-scrollbar text-white px-4 md:px-8 py-6">
       {/* Header */}
       <header className="flex flex-col xl:flex-row justify-between items-start xl:items-center gap-4 relative z-10 pb-4 border-b border-white/5">
           <div className="flex items-center gap-3">
             <div className="w-1 h-8 rounded-full" style={{ backgroundColor: themeColor }} />
             <div>
               <h1 className="text-2xl lg:text-3xl font-black tracking-tight font-['Open_Sans'] uppercase leading-none text-white">
-                {portalName} <span style={{ color: themeColor }}>DOSSIER</span>
+                {portalName} <span style={{ color: themeColor }}>PROFILE</span>
               </h1>
-              <p className="text-[#878C9F] text-[9px] font-black uppercase tracking-[0.2em] font-inter mt-1 ml-0.5 opacity-60">Professional presence & verified credentials</p>
+              <p className="text-[#878C9F] text-[9px] font-black uppercase tracking-[0.2em] font-inter mt-1 ml-0.5 opacity-60">Manage your professional presence and preferences</p>
             </div>
           </div>
           
@@ -334,7 +552,7 @@ export default function ProfessionalProfile() {
                 <Zap size={16} />
               </div>
               <div className="space-y-1">
-                <p className="text-[8px] font-black text-neutral-500 uppercase tracking-widest leading-none">Status</p>
+                <p className="text-[8px] font-black text-neutral-500 uppercase tracking-widest leading-none">Completion</p>
                 <div className="flex items-center gap-3">
                   <div className="w-24 h-1 bg-white/5 rounded-full overflow-hidden">
                     <div className="h-full transition-all duration-1000" style={{ width: `${(currentStep / 3) * 100}%`, backgroundColor: themeColor }} />
@@ -347,11 +565,11 @@ export default function ProfessionalProfile() {
             <button 
               onClick={handleUpdate}
               disabled={loading}
-              className="px-6 py-3 text-black rounded-lg text-[10px] font-black uppercase tracking-[0.2em] flex items-center justify-center gap-2 transition-all transform active:scale-95 shadow-xl" 
+              className="px-6 py-3 text-black rounded-lg text-[10px] font-black uppercase tracking-[0.2em] flex items-center justify-center gap-2 transition-all transform active:scale-95 shadow-xl font-bold" 
               style={{ backgroundColor: themeColor, boxShadow: `0 5px 15px ${themeColor}22` }}
             >
               {loading ? <Loader2 size={16} className="animate-spin" /> : <Save size={16} />}
-              Save
+              Save Changes
             </button>
           </div>
       </header>
@@ -361,21 +579,280 @@ export default function ProfessionalProfile() {
       <div className="w-full">
         {currentStep === 1 && (
           <div className="space-y-6 animate-in fade-in slide-in-from-bottom-2 duration-500">
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
-              {/* Left Column */}
-              <div className="lg:col-span-4 space-y-4">
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+              
+              {/* Left Column - Core Identity */}
+              <div className="lg:col-span-5 space-y-6">
+                
+                {/* Identity & Presence Card */}
+                <div className="bg-[#111111] border border-white/5 rounded-xl p-5 space-y-4">
+                  <h3 className="text-[10px] font-black uppercase tracking-[0.3em] text-[#878C9F] flex items-center gap-2">
+                    <User size={14} style={{ color: themeColor }} /> Identity & Presence
+                  </h3>
+                  
+                  <div className="space-y-4">
+                    {/* Widescreen Banner / Cover Image */}
+                    <div className="space-y-1">
+                      <label className="text-[9px] font-bold text-neutral-500 uppercase tracking-wider block mb-1">Cover Banner Image</label>
+                      <div className="relative group/banner overflow-hidden rounded-lg border border-dashed border-white/10 bg-white/[0.02] h-28 flex items-center justify-center transition-colors hover:border-white/20">
+                        <input 
+                          type="file" 
+                          accept="image/*"
+                          onChange={handleBannerUpload}
+                          className="absolute inset-0 opacity-0 cursor-pointer z-10"
+                        />
+                        {formData.bannerUrl ? (
+                          <>
+                            <img src={formData.bannerUrl} className="w-full h-full object-cover" alt="Banner Preview" />
+                            <div className="absolute inset-0 bg-black/50 opacity-0 group-hover/banner:opacity-100 transition-opacity flex items-center justify-center text-xs font-bold uppercase tracking-wider text-white">Change Cover Banner</div>
+                          </>
+                        ) : (
+                          <div className="flex flex-col items-center gap-1.5 text-neutral-600">
+                            <ImageIcon size={20} />
+                            <span className="text-[8px] font-black uppercase tracking-widest">Upload Cover Banner</span>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Profile Picture Avatar Selector & Online Toggle Row */}
+                    <div className="flex items-center justify-between gap-4 py-2 border-b border-white/5 pb-4 mb-2">
+                      <div className="flex items-center gap-3">
+                        <div className="relative group/avatar w-14 h-14 rounded-full overflow-hidden border border-white/10 bg-white/[0.02] flex items-center justify-center shrink-0">
+                          <input 
+                            type="file" 
+                            accept="image/*"
+                            onChange={handleProfilePicUpload}
+                            className="absolute inset-0 opacity-0 cursor-pointer z-10"
+                          />
+                          {formData.profilePicture ? (
+                            <img src={formData.profilePicture} className="w-full h-full object-cover" alt="Avatar" />
+                          ) : (
+                            <User className="text-neutral-600" size={20} />
+                          )}
+                          <div className="absolute inset-0 bg-black/60 opacity-0 group-hover/avatar:opacity-100 transition-opacity flex items-center justify-center text-[7px] font-bold uppercase tracking-wider text-white text-center leading-tight">Change Avatar</div>
+                        </div>
+                        <div>
+                          <p className="text-[10px] font-black text-white uppercase tracking-wider leading-none">Profile Picture</p>
+                          <p className="text-[8px] text-neutral-500 font-bold uppercase tracking-widest mt-1">Upload Base64 Avatar File</p>
+                        </div>
+                      </div>
+
+                      {/* Online/Offline Status Switch */}
+                      <div className="flex flex-col items-end">
+                        <span className="text-[8px] font-bold text-neutral-500 uppercase tracking-widest mb-1.5">Availability Status</span>
+                        <button 
+                          onClick={() => setFormData({ ...formData, isOnline: !formData.isOnline })}
+                          className="flex items-center gap-2 px-3 py-2 bg-black border border-white/5 rounded-lg select-none transition-all active:scale-95 cursor-pointer"
+                        >
+                          <span className={`w-2 h-2 rounded-full ${formData.isOnline ? 'bg-green-500 animate-pulse' : 'bg-red-500'}`} />
+                          <span className="text-[9px] font-black uppercase tracking-widest text-white">
+                            {formData.isOnline ? 'Active Online' : 'Active Offline'}
+                          </span>
+                        </button>
+                      </div>
+                    </div>
+
+                    {/* Prefilled Fields (Read-Only to preserve user creation schema) */}
+                    <div>
+                      <label className="text-[9px] font-bold text-neutral-500 uppercase tracking-wider block mb-1">Full Name (Account Profile)</label>
+                      <div className="flex items-center gap-2 bg-white/[0.02] border border-white/5 rounded-lg px-3 py-2.5 text-xs text-neutral-400 font-medium">
+                        <User size={14} className="text-neutral-600" />
+                        <span>{formData.name || "N/A"}</span>
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                      <div>
+                        <label className="text-[9px] font-bold text-neutral-500 uppercase tracking-wider block mb-1">Email Address</label>
+                        <div className="flex items-center gap-2 bg-white/[0.02] border border-white/5 rounded-lg px-3 py-2.5 text-xs text-neutral-400 font-medium overflow-hidden truncate">
+                          <Mail size={14} className="text-neutral-600 shrink-0" />
+                          <span className="truncate">{formData.email || "N/A"}</span>
+                        </div>
+                      </div>
+
+                      <div>
+                        <label className="text-[9px] font-bold text-neutral-500 uppercase tracking-wider block mb-1">Phone Number</label>
+                        <div className="flex items-center gap-2 bg-white/[0.02] border border-white/5 rounded-lg px-3 py-2.5 text-xs text-neutral-400 font-medium">
+                          <Phone size={14} className="text-neutral-600" />
+                          <span>{formData.phone || "N/A"}</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Editable Identity Sub-matrix */}
+                    <div className="grid grid-cols-2 gap-3 pt-2">
+                      <div>
+                        <label className="text-[9px] font-bold text-neutral-500 uppercase tracking-wider block mb-1">Gender</label>
+                        <select 
+                          className="w-full bg-[#1A1A1A] border border-white/5 rounded-lg px-3 py-2 text-xs text-white outline-none focus:border-white/10 transition-colors font-medium"
+                          value={formData.gender}
+                          onChange={(e) => setFormData({...formData, gender: e.target.value})}
+                        >
+                          <option value="">Select Gender</option>
+                          <option value="Male">Male</option>
+                          <option value="Female">Female</option>
+                          <option value="Other">Other</option>
+                        </select>
+                      </div>
+
+                      <div>
+                        <label className="text-[9px] font-bold text-neutral-500 uppercase tracking-wider block mb-1">Date of Birth</label>
+                        <div className="relative">
+                          <input 
+                            type="date"
+                            className="w-full bg-[#1A1A1A] border border-white/5 rounded-lg px-3 py-2 text-xs text-white outline-none focus:border-white/10 transition-colors font-medium uppercase font-mono"
+                            value={formData.dob}
+                            onChange={(e) => setFormData({...formData, dob: e.target.value})}
+                          />
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="pt-2">
+                      <label className="text-[9px] font-bold text-neutral-500 uppercase tracking-wider block mb-1">Service Pricing (₹ / Hour)</label>
+                      <div className="relative flex items-center">
+                        <DollarSign size={14} className="absolute left-3 text-neutral-500" />
+                        <input 
+                          type="number"
+                          placeholder="e.g. 500"
+                          className="w-full bg-[#1A1A1A] border border-white/5 rounded-lg pl-8 pr-3 py-2.5 text-xs text-white outline-none focus:border-white/10 transition-colors font-bold font-mono"
+                          value={formData.hourlyPrice}
+                          onChange={(e) => setFormData({...formData, hourlyPrice: parseFloat(e.target.value) || 0})}
+                        />
+                      </div>
+                    </div>
+
+                    <div className="pt-2">
+                      <label className="text-[9px] font-bold text-neutral-500 uppercase tracking-wider block mb-1">Professional Bio Description</label>
+                      <textarea 
+                        rows="3"
+                        placeholder="Describe your qualifications, history, and achievements..."
+                        className="w-full bg-[#1A1A1A] border border-white/5 rounded-lg px-3 py-2.5 text-xs text-white outline-none focus:border-white/10 transition-colors font-medium resize-none"
+                        value={formData.bio}
+                        onChange={(e) => setFormData({...formData, bio: e.target.value})}
+                      />
+                    </div>
+
+                    {/* Social Media Links */}
+                    <div className="pt-2 border-t border-white/5 space-y-2.5">
+                      <label className="text-[9px] font-black text-neutral-500 uppercase tracking-widest block">Social Media Connections</label>
+                      <div className="grid grid-cols-1 gap-2.5">
+                        <div className="flex items-center bg-[#1A1A1A] border border-white/5 rounded-lg px-3 py-2 text-xs text-white">
+                          <span className="w-20 text-[8px] font-black text-neutral-500 uppercase tracking-wider">Instagram</span>
+                          <input 
+                            type="text" 
+                            placeholder="https://instagram.com/yourprofile" 
+                            className="flex-1 bg-transparent border-0 outline-none text-xs text-white font-medium pl-2"
+                            value={formData.instagram}
+                            onChange={(e) => setFormData({ ...formData, instagram: e.target.value })}
+                          />
+                        </div>
+                        <div className="flex items-center bg-[#1A1A1A] border border-white/5 rounded-lg px-3 py-2 text-xs text-white">
+                          <span className="w-20 text-[8px] font-black text-neutral-500 uppercase tracking-wider">LinkedIn</span>
+                          <input 
+                            type="text" 
+                            placeholder="https://linkedin.com/in/yourprofile" 
+                            className="flex-1 bg-transparent border-0 outline-none text-xs text-white font-medium pl-2"
+                            value={formData.linkedin}
+                            onChange={(e) => setFormData({ ...formData, linkedin: e.target.value })}
+                          />
+                        </div>
+                        <div className="flex items-center bg-[#1A1A1A] border border-white/5 rounded-lg px-3 py-2 text-xs text-white">
+                          <span className="w-20 text-[8px] font-black text-neutral-500 uppercase tracking-wider">YouTube</span>
+                          <input 
+                            type="text" 
+                            placeholder="https://youtube.com/@yourchannel" 
+                            className="flex-1 bg-transparent border-0 outline-none text-xs text-white font-medium pl-2"
+                            value={formData.youtube}
+                            onChange={(e) => setFormData({ ...formData, youtube: e.target.value })}
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Base Location & Schedule Card */}
+                <div className="bg-[#111111] border border-white/5 rounded-xl p-5 space-y-4">
+                  <h3 className="text-[10px] font-black uppercase tracking-[0.3em] text-[#878C9F] flex items-center gap-2">
+                    <MapPin size={14} style={{ color: themeColor }} /> Base Location & Timings
+                  </h3>
+                  
+                  <div className="space-y-3">
+                    <div className="grid grid-cols-2 gap-3">
+                      <div>
+                        <label className="text-[9px] font-bold text-neutral-500 uppercase tracking-wider block mb-1">Operational State</label>
+                        <input 
+                          type="text"
+                          placeholder="e.g. Maharashtra"
+                          className="w-full bg-[#1A1A1A] border border-white/5 rounded-lg px-3 py-2 text-xs text-white outline-none focus:border-white/10 transition-colors font-medium"
+                          value={formData.state}
+                          onChange={(e) => setFormData({...formData, state: e.target.value})}
+                        />
+                      </div>
+                      
+                      <div>
+                        <label className="text-[9px] font-bold text-neutral-500 uppercase tracking-wider block mb-1">Operational City</label>
+                        <input 
+                          type="text"
+                          placeholder="e.g. Mumbai"
+                          className="w-full bg-[#1A1A1A] border border-white/5 rounded-lg px-3 py-2 text-xs text-white outline-none focus:border-white/10 transition-colors font-medium"
+                          value={formData.city}
+                          onChange={(e) => setFormData({...formData, city: e.target.value})}
+                        />
+                      </div>
+                    </div>
+
+                    <div>
+                      <label className="text-[9px] font-bold text-neutral-500 uppercase tracking-wider block mb-1">Full Service Address</label>
+                      <input 
+                        type="text"
+                        placeholder="e.g. 123 Arena Road, Sports Hub"
+                        className="w-full bg-[#1A1A1A] border border-white/5 rounded-lg px-3 py-2.5 text-xs text-white outline-none focus:border-white/10 transition-colors font-medium"
+                        value={formData.address}
+                        onChange={(e) => setFormData({...formData, address: e.target.value})}
+                      />
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-3">
+                      <div>
+                        <label className="text-[9px] font-bold text-neutral-500 uppercase tracking-wider block mb-1">Pin Code</label>
+                        <input 
+                          type="text"
+                          placeholder="e.g. 400001"
+                          className="w-full bg-[#1A1A1A] border border-white/5 rounded-lg px-3 py-2 text-xs text-white outline-none focus:border-white/10 transition-colors font-medium font-mono"
+                          value={formData.pinCode}
+                          onChange={(e) => setFormData({...formData, pinCode: e.target.value})}
+                        />
+                      </div>
+                      
+                      <div>
+                        <label className="text-[9px] font-bold text-neutral-500 uppercase tracking-wider block mb-1">Availability Timings</label>
+                        <input 
+                          type="text"
+                          placeholder="e.g. Daily 6 AM - 8 PM"
+                          className="w-full bg-[#1A1A1A] border border-white/5 rounded-lg px-3 py-2 text-xs text-white outline-none focus:border-white/10 transition-colors font-medium"
+                          value={formData.availabilityTimings}
+                          onChange={(e) => setFormData({...formData, availabilityTimings: e.target.value})}
+                        />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
                 {/* Domain Expertise */}
-                <div className={`bg-white/[0.03] border border-white/5 rounded-[8px] p-5 backdrop-blur-xl relative ${showSportsDropdown ? 'z-[100]' : 'z-10'}`}>
-                  <h3 className="text-[9px] font-black uppercase tracking-[0.3em] text-neutral-500 mb-6 flex items-center gap-2">
+                <div className={`bg-[#111111] border border-white/5 rounded-xl p-5 space-y-4 relative ${showSportsDropdown ? 'z-[100]' : 'z-10'}`}>
+                  <h3 className="text-[9px] font-black uppercase tracking-[0.3em] text-[#878C9F] flex items-center gap-2">
                     <Award size={14} style={{ color: themeColor }} /> Domain Expertise
                   </h3>
                   
-                  <div className="relative mb-4">
+                  <div className="relative">
                     <div className="flex gap-2">
                       <input 
                         type="text" 
-                        placeholder="Assign Domain..."
-                        className="flex-1 bg-white/[0.03] border border-white/5 rounded-lg px-4 py-3 text-[11px] text-white outline-none focus:border-white/10 transition-all font-inter"
+                        placeholder="Search & Add Sports..."
+                        className="flex-1 bg-[#1A1A1A] border border-white/5 rounded-lg px-4 py-2 text-xs text-white outline-none focus:border-white/10 transition-all font-medium"
                         value={newGameType}
                         onChange={(e) => {
                           setNewGameType(e.target.value);
@@ -383,7 +860,7 @@ export default function ProfessionalProfile() {
                         }}
                         onFocus={() => setShowSportsDropdown(true)}
                       />
-                      <button onClick={() => addGameType()} className="w-11 h-11 rounded-lg flex items-center justify-center transition-all shrink-0" style={{ backgroundColor: themeColor }}>
+                      <button onClick={() => addGameType()} className="w-10 h-10 rounded-lg flex items-center justify-center shrink-0 transition-transform active:scale-95" style={{ backgroundColor: themeColor }}>
                         <Plus size={18} color="#000" />
                       </button>
                     </div>
@@ -394,7 +871,7 @@ export default function ProfessionalProfile() {
                           <button 
                             key={sport}
                             onClick={() => addGameType(sport)}
-                            className="w-full px-4 py-2.5 text-left text-[10px] text-white hover:bg-white/5 transition-colors border-b border-white/5 last:border-0 font-black uppercase"
+                            className="w-full px-4 py-2.5 text-left text-[10px] text-white hover:bg-white/5 transition-colors border-b border-white/5 last:border-0 font-black uppercase tracking-wider"
                           >
                             {sport}
                           </button>
@@ -403,9 +880,9 @@ export default function ProfessionalProfile() {
                     )}
                   </div>
                   
-                  <div className="flex flex-wrap gap-1.5">
+                  <div className="flex flex-wrap gap-1.5 pt-2">
                     {formData.gameTypes.map(type => (
-                      <span key={type} className="px-3 py-1.5 bg-white/[0.05] border border-white/5 rounded-[6px] text-[8px] font-black text-white flex items-center gap-2 uppercase tracking-widest">
+                      <span key={type} className="px-3 py-1.5 bg-white/[0.04] border border-white/5 rounded-[6px] text-[8px] font-black text-white flex items-center gap-2 uppercase tracking-widest">
                         {type}
                         <button onClick={() => removeGameType(type)} className="text-neutral-600 hover:text-red-500 transition-colors"><X size={10} /></button>
                       </span>
@@ -413,256 +890,514 @@ export default function ProfessionalProfile() {
                   </div>
                 </div>
 
-                {/* Custom Engagement Mode Dropdown */}
-                <div className={`bg-white/[0.03] border border-white/5 rounded-[8px] p-5 backdrop-blur-xl relative ${showEngagementDropdown ? 'z-[100]' : 'z-10'}`}>
-                  <h3 className="text-[9px] font-black uppercase tracking-[0.3em] text-neutral-500 mb-6 flex items-center gap-2">
-                    <MapPin size={14} style={{ color: themeColor }} /> Engagement
+                {/* Linguistics */}
+                <div className={`bg-[#111111] border border-white/5 rounded-xl p-5 space-y-4 relative ${showLanguagesDropdown ? 'z-[100]' : 'z-10'}`}>
+                  <h3 className="text-[9px] font-black uppercase tracking-[0.3em] text-[#878C9F] flex items-center gap-2">
+                    <Globe size={14} style={{ color: themeColor }} /> Linguistics & Communication
                   </h3>
+                  
                   <div className="relative">
-                    <button 
-                      onClick={() => setShowEngagementDropdown(!showEngagementDropdown)}
-                      className="w-full bg-white/[0.03] border border-white/5 rounded-[8px] p-3.5 text-[11px] text-white outline-none font-black uppercase tracking-widest transition-all flex items-center justify-between"
-                    >
-                      <span>{formData.availabilityMode === 'Both' ? 'Hybrid Mode' : formData.availabilityMode === 'Offline' ? 'Physical Only' : 'Remote Only'}</span>
-                      <ChevronDown size={16} className={`transition-transform duration-300 ${showEngagementDropdown ? 'rotate-180' : ''}`} />
-                    </button>
+                    <div className="flex gap-2">
+                      <input 
+                        type="text" 
+                        placeholder="Search & Add Languages..."
+                        className="flex-1 bg-[#1A1A1A] border border-[#222] rounded-lg px-4 py-2 text-xs text-white outline-none focus:border-white/10 transition-all font-medium"
+                        value={newLanguage}
+                        onChange={(e) => {
+                          setNewLanguage(e.target.value);
+                          setShowLanguagesDropdown(true);
+                        }}
+                        onFocus={() => setShowLanguagesDropdown(true)}
+                      />
+                      <button onClick={() => addLanguage()} className="w-10 h-10 rounded-lg flex items-center justify-center shrink-0 transition-transform active:scale-95" style={{ backgroundColor: themeColor }}>
+                         <Plus size={18} color="#000" />
+                      </button>
+                    </div>
 
-                    {showEngagementDropdown && (
-                      <div className="absolute top-full left-0 right-0 mt-1 bg-[#0A0A0A] border border-white/10 rounded-[8px] shadow-2xl z-[100] overflow-hidden">
-                        {[
-                          { label: 'Physical Only', value: 'Offline' },
-                          { label: 'Remote Only', value: 'Online' },
-                          { label: 'Hybrid Mode', value: 'Both' }
-                        ].map((opt) => (
+                    {showLanguagesDropdown && filteredLanguages.length > 0 && (
+                      <div className="absolute top-full left-0 right-0 mt-1 bg-[#0A0A0A] border border-white/10 rounded-[8px] shadow-2xl z-[100] max-h-64 overflow-y-auto custom-scrollbar">
+                        {filteredLanguages.map(lang => (
                           <button 
-                            key={opt.value}
-                            onClick={() => {
-                              setFormData({ ...formData, availabilityMode: opt.value });
-                              setShowEngagementDropdown(false);
-                            }}
-                            className="w-full px-4 py-3 text-left text-[10px] text-white hover:bg-white/5 transition-colors border-b border-white/5 last:border-0 font-black uppercase tracking-widest"
+                            key={lang}
+                            onClick={() => addLanguage(lang)}
+                            className="w-full px-4 py-2.5 text-left text-[10px] text-white hover:bg-white/5 transition-colors border-b border-white/5 last:border-0 font-black uppercase tracking-wider"
                           >
-                            {opt.label}
+                            {lang}
                           </button>
                         ))}
                       </div>
                     )}
                   </div>
+                  
+                  <div className="flex flex-wrap gap-1.5 pt-2">
+                    {formData.languages.map(lang => (
+                      <span key={lang} className="px-3 py-1.5 bg-white/[0.04] border border-white/5 rounded-[6px] text-[8px] font-black text-white flex items-center gap-2 uppercase tracking-widest">
+                        {lang}
+                        <button onClick={() => removeLanguage(lang)} className="text-neutral-600 hover:text-red-500 transition-colors"><X size={10} /></button>
+                      </span>
+                    ))}
+                  </div>
                 </div>
 
-                {/* Linguistics */}
-                <div className={`bg-white/[0.03] border border-white/5 rounded-[8px] p-5 backdrop-blur-xl relative ${showLanguagesDropdown ? 'z-[100]' : 'z-10'}`}>
-                  <h3 className="text-[9px] font-black uppercase tracking-[0.3em] text-neutral-500 mb-6 flex items-center gap-2">
-                    <Globe size={14} style={{ color: themeColor }} /> Languages
-                  </h3>
-                  <div className="space-y-4">
-                    <div className="relative">
-                      <div className="flex gap-2">
-                        <input 
-                          type="text" 
-                          placeholder="Link Language..."
-                          className="flex-1 bg-white/[0.03] border border-white/5 rounded-lg px-4 py-3 text-[11px] text-white outline-none focus:border-white/10 transition-all font-inter"
-                          value={newLanguage}
-                          onChange={(e) => {
-                            setNewLanguage(e.target.value);
-                            setShowLanguagesDropdown(true);
-                          }}
-                          onFocus={() => setShowLanguagesDropdown(true)}
-                        />
-                        <button onClick={() => addLanguage()} className="w-11 h-11 rounded-lg flex items-center justify-center shrink-0" style={{ backgroundColor: themeColor }}>
-                           <Plus size={18} color="#000" />
-                        </button>
-                      </div>
+              </div>
 
-                      {showLanguagesDropdown && filteredLanguages.length > 0 && (
-                        <div className="absolute top-full left-0 right-0 mt-1 bg-[#0A0A0A] border border-white/10 rounded-[8px] shadow-2xl z-[100] max-h-64 overflow-y-auto custom-scrollbar">
-                          {filteredLanguages.map(lang => (
-                            <button 
-                              key={lang}
-                              onClick={() => addLanguage(lang)}
-                              className="w-full px-4 py-2.5 text-left text-[10px] text-white hover:bg-white/5 transition-colors border-b border-white/5 last:border-0 font-black uppercase"
+              {/* Right Column - Matrix & Locations */}
+              <div className="lg:col-span-7 space-y-6">
+                
+                {/* Professional Matrix & Engagement */}
+                <div className="bg-[#111111] border border-white/5 rounded-xl p-5 space-y-6 shadow-2xl relative overflow-hidden">
+                  <h3 className="text-[10px] font-black uppercase tracking-[0.3em] text-[#878C9F] flex items-center gap-2">
+                    <FileText size={14} style={{ color: themeColor }} /> Professional Matrix
+                  </h3>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="space-y-1.5">
+                      <label className="text-[9px] font-bold text-neutral-500 uppercase tracking-wider ml-0.5">Operational Headline</label>
+                      <input 
+                        type="text" 
+                        placeholder="e.g. Senior Scorer / Certified Coach"
+                        className="w-full bg-[#1A1A1A] border border-white/5 rounded-[8px] p-3 text-xs text-white focus:border-white/10 outline-none font-bold transition-all"
+                        value={formData.specialization}
+                        onChange={(e) => setFormData({...formData, specialization: e.target.value})}
+                      />
+                    </div>
+                    
+                    <div className={`space-y-1.5 relative ${showProficiencyDropdown ? 'z-[110]' : 'z-auto'}`}>
+                      <label className="text-[9px] font-bold text-neutral-500 uppercase tracking-wider ml-0.5">Proficiency Level</label>
+                      <div className="relative">
+                          <button 
+                            onClick={() => setShowProficiencyDropdown(!showProficiencyDropdown)}
+                            className="w-full bg-[#1A1A1A] border border-white/5 rounded-[8px] p-3 text-xs text-white focus:border-white/10 outline-none font-bold uppercase tracking-widest flex items-center justify-between"
+                          >
+                            <span>{
+                              formData.coachingLevel === 'Beginner' ? 'Junior Associate' : 
+                              formData.coachingLevel === 'Intermediate' ? 'Mid-Tier Professional' :
+                              formData.coachingLevel === 'Elite' ? 'Elite / Senior' : 'Governing Body Certified'
+                            }</span>
+                            <ChevronDown size={16} className={`transition-transform duration-300 ${showProficiencyDropdown ? 'rotate-180' : ''}`} />
+                          </button>
+
+                          {showProficiencyDropdown && (
+                            <div className="absolute top-full left-0 right-0 mt-1 bg-[#0A0A0A] border border-white/10 rounded-[8px] shadow-2xl z-[100] overflow-hidden">
+                              {[
+                                { label: 'Junior Associate', value: 'Beginner' },
+                                { label: 'Mid-Tier Professional', value: 'Intermediate' },
+                                { label: 'Elite / Senior', value: 'Elite' },
+                                { label: 'Governing Body Certified', value: 'National' }
+                              ].map((opt) => (
+                                <button 
+                                  key={opt.value}
+                                  onClick={() => {
+                                    setFormData({ ...formData, coachingLevel: opt.value });
+                                    setShowProficiencyDropdown(false);
+                                  }}
+                                  className="w-full px-4 py-3 text-left text-[10px] text-white hover:bg-white/5 transition-colors border-b border-white/5 last:border-0 font-bold uppercase tracking-wider"
+                                >
+                                  {opt.label}
+                                </button>
+                              ))}
+                            </div>
+                          )}
+                      </div>
+                    </div>
+
+                    <div className="space-y-1.5 md:col-span-2">
+                      <label className="text-[9px] font-bold text-neutral-500 uppercase tracking-wider ml-0.5">Tenure & Core Experience</label>
+                      <input 
+                        type="text" 
+                        placeholder="e.g. 5+ Years officiating regional league tournaments"
+                        className="w-full bg-[#1A1A1A] border border-white/5 rounded-[8px] p-3 text-xs text-white focus:border-white/10 outline-none font-bold transition-all"
+                        value={formData.experience}
+                        onChange={(e) => setFormData({...formData, experience: e.target.value})}
+                      />
+                    </div>
+
+                    {/* Matches Covered & Formats */}
+                    <div className="space-y-1.5 md:col-span-2">
+                      <label className="text-[9px] font-bold text-neutral-500 uppercase tracking-wider ml-0.5">Matches & Tournaments Covered</label>
+                      <input 
+                        type="text" 
+                        placeholder="e.g. 150+ Matches, 12 Leagues"
+                        className="w-full bg-[#1A1A1A] border border-white/5 rounded-[8px] p-3 text-xs text-white focus:border-white/10 outline-none font-bold transition-all"
+                        value={formData.matchesCovered}
+                        onChange={(e) => setFormData({...formData, matchesCovered: e.target.value})}
+                      />
+                    </div>
+
+                    <div className="space-y-1.5 md:col-span-2">
+                      <label className="text-[9px] font-bold text-neutral-500 uppercase tracking-wider ml-0.5 block mb-1">Supported Match Formats</label>
+                      <div className="flex flex-wrap gap-2">
+                        {["T20", "One-Day", "Test Match", "T10", "100-Ball", "Box Cricket"].map(fmt => {
+                          const isSelected = formData.matchFormats?.includes(fmt);
+                          return (
+                            <button
+                              key={fmt}
+                              type="button"
+                              onClick={() => {
+                                const current = formData.matchFormats || [];
+                                const updated = current.includes(fmt) ? current.filter(f => f !== fmt) : [...current, fmt];
+                                setFormData({ ...formData, matchFormats: updated });
+                              }}
+                              className={`px-3 py-1.5 rounded-lg border text-[9px] font-bold uppercase tracking-wider transition-colors ${isSelected ? 'border-[#55DEE8] bg-[#55DEE8]/10 text-white font-black' : 'border-white/5 bg-black/20 text-neutral-500 hover:text-white'}`}
                             >
-                              {lang}
+                              {fmt}
+                            </button>
+                          );
+                        })}
+                      </div>
+                    </div>
+
+                    {/* Role-conditioned streaming specs */}
+                    {role?.toLowerCase().includes("streamer") && (
+                      <div className="md:col-span-2 border-t border-white/5 pt-4 space-y-4">
+                        <h4 className="text-[9px] font-black uppercase tracking-widest text-[#55DEE8]">Streamer Specifications</h4>
+                        <div className="grid grid-cols-2 gap-3">
+                          <div>
+                            <label className="text-[9px] font-bold text-neutral-500 uppercase tracking-wider block mb-1">Max Stream Quality</label>
+                            <select 
+                              className="w-full bg-[#1A1A1A] border border-white/5 rounded-lg px-3 py-2 text-xs text-white outline-none"
+                              value={formData.streamQuality}
+                              onChange={(e) => setFormData({ ...formData, streamQuality: e.target.value })}
+                            >
+                              <option value="720p">720p HD</option>
+                              <option value="1080p">1080p Full HD</option>
+                              <option value="4K">4K Ultra HD</option>
+                            </select>
+                          </div>
+                          <div>
+                            <label className="text-[9px] font-bold text-[#878C9F] uppercase tracking-wider block mb-1">Cameras Supported</label>
+                            <input 
+                              type="number"
+                              placeholder="e.g. 3"
+                              className="w-full bg-[#1A1A1A] border border-white/5 rounded-lg px-3 py-2 text-xs text-white outline-none"
+                              value={formData.camerasSupported}
+                              onChange={(e) => setFormData({ ...formData, camerasSupported: e.target.value })}
+                            />
+                          </div>
+                        </div>
+                        <div>
+                          <label className="text-[9px] font-bold text-[#878C9F] uppercase tracking-wider block mb-1">Stream Support Platforms</label>
+                          <div className="flex flex-wrap gap-2">
+                            {["YouTube", "Facebook Live", "Twitch", "Kick", "Custom RTMP"].map(platform => {
+                              const isSelected = formData.streamPlatforms?.includes(platform);
+                              return (
+                                <button
+                                  key={platform}
+                                  type="button"
+                                  onClick={() => {
+                                    const current = formData.streamPlatforms || [];
+                                    const updated = current.includes(platform) ? current.filter(p => p !== platform) : [...current, platform];
+                                    setFormData({ ...formData, streamPlatforms: updated });
+                                  }}
+                                  className={`px-2.5 py-1.5 rounded border text-[9px] font-bold uppercase tracking-wider transition-colors ${isSelected ? 'border-[#55DEE8] bg-[#55DEE8]/10 text-white font-black' : 'border-white/5 bg-black/20 text-neutral-500 hover:text-white'}`}
+                                >
+                                  {platform}
+                                </button>
+                              );
+                            })}
+                          </div>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Role-conditioned scoring specs */}
+                    {(role?.toLowerCase().includes("scorer") || role?.toLowerCase().includes("umpire")) && (
+                      <div className="md:col-span-2 border-t border-white/5 pt-4 space-y-3">
+                        <h4 className="text-[9px] font-black uppercase tracking-widest text-[#55DEE8]">Scoring Integration</h4>
+                        <label className="flex items-center gap-2.5 cursor-pointer group">
+                          <input 
+                            type="checkbox" 
+                            className="peer appearance-none w-4 h-4 border border-white/10 rounded checked:bg-[#55DEE8] checked:border-[#55DEE8] cursor-pointer"
+                            checked={formData.liveScoringSupport}
+                            onChange={(e) => setFormData({ ...formData, liveScoringSupport: e.target.checked })}
+                          />
+                          <span className="text-xs text-neutral-400 group-hover:text-white transition-colors uppercase tracking-wide font-bold">Supports Live Scoring via Kridaz Scorer App</span>
+                        </label>
+                      </div>
+                    )}
+
+                    {/* Role-conditioned commentator specs */}
+                    {role?.toLowerCase().includes("commentator") && (
+                      <div className="md:col-span-2 border-t border-white/5 pt-4 space-y-3">
+                        <h4 className="text-[9px] font-black uppercase tracking-widest text-[#55DEE8]">Commentary Features</h4>
+                        <div className="flex flex-col gap-2">
+                          <label className="flex items-center gap-2.5 cursor-pointer group">
+                            <input 
+                              type="checkbox" 
+                              className="peer appearance-none w-4 h-4 border border-white/10 rounded checked:bg-[#55DEE8] checked:border-[#55DEE8] cursor-pointer"
+                              checked={formData.liveCommentarySupported}
+                              onChange={(e) => setFormData({ ...formData, liveCommentarySupported: e.target.checked })}
+                            />
+                            <span className="text-xs text-neutral-400 group-hover:text-white transition-colors uppercase tracking-wide font-bold">Live commentary supported</span>
+                          </label>
+                          <label className="flex items-center gap-2.5 cursor-pointer group">
+                            <input 
+                              type="checkbox" 
+                              className="peer appearance-none w-4 h-4 border border-white/10 rounded checked:bg-[#55DEE8] checked:border-[#55DEE8] cursor-pointer"
+                              checked={formData.panelDiscussionEnabled}
+                              onChange={(e) => setFormData({ ...formData, panelDiscussionEnabled: e.target.checked })}
+                            />
+                            <span className="text-xs text-neutral-400 group-hover:text-white transition-colors uppercase tracking-wide font-bold">Panel discussion engagement enabled</span>
+                          </label>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Engagement Mode Selector */}
+                  <div className={`space-y-1.5 relative ${showEngagementDropdown ? 'z-[100]' : 'z-auto'} pt-2`}>
+                    <label className="text-[9px] font-bold text-neutral-500 uppercase tracking-wider ml-0.5">Availability / Engagement Mode</label>
+                    <div className="relative">
+                      <button 
+                        onClick={() => setShowEngagementDropdown(!showEngagementDropdown)}
+                        className="w-full bg-[#1A1A1A] border border-white/5 rounded-[8px] p-3.5 text-xs text-white outline-none font-bold uppercase tracking-widest transition-all flex items-center justify-between"
+                      >
+                        <span>{formData.availabilityMode === 'Both' ? 'Hybrid Mode (Online & Physical)' : formData.availabilityMode === 'Offline' ? 'Physical Presence Only' : 'Remote Services Only'}</span>
+                        <ChevronDown size={16} className={`transition-transform duration-300 ${showEngagementDropdown ? 'rotate-180' : ''}`} />
+                      </button>
+
+                      {showEngagementDropdown && (
+                        <div className="absolute top-full left-0 right-0 mt-1 bg-[#0A0A0A] border border-white/10 rounded-[8px] shadow-2xl z-[100] overflow-hidden">
+                          {[
+                            { label: 'Physical Presence Only', value: 'Offline' },
+                            { label: 'Remote Services Only', value: 'Online' },
+                            { label: 'Hybrid Mode (Both)', value: 'Both' }
+                          ].map((opt) => (
+                            <button 
+                              key={opt.value}
+                              onClick={() => {
+                                setFormData({ ...formData, availabilityMode: opt.value });
+                                setShowEngagementDropdown(false);
+                              }}
+                              className="w-full px-4 py-3 text-left text-[10px] text-white hover:bg-white/5 transition-colors border-b border-white/5 last:border-0 font-bold uppercase tracking-wider"
+                            >
+                              {opt.label}
                             </button>
                           ))}
                         </div>
                       )}
                     </div>
-                    
-                    <div className="flex flex-wrap gap-1.5">
-                      {formData.languages.map(lang => (
-                        <span key={lang} className="px-3 py-1.5 bg-white/[0.05] border border-white/5 rounded-[6px] text-[8px] font-black text-white flex items-center gap-2 uppercase tracking-widest">
-                          {lang}
-                          <button onClick={() => removeLanguage(lang)} className="text-neutral-600 hover:text-red-500 transition-colors"><X size={10} /></button>
-                        </span>
-                      ))}
-                    </div>
                   </div>
                 </div>
-              </div>
 
-              {/* Right Column */}
-              <div className="lg:col-span-8 space-y-4">
-                <div className="bg-white/[0.03] border border-white/5 rounded-[8px] p-6 backdrop-blur-xl space-y-8 shadow-2xl relative overflow-hidden">
-                  {/* Professional Matrix */}
-                  <div className="space-y-6 relative z-10">
-                    <h3 className="text-[10px] font-black uppercase tracking-[0.3em] text-white flex items-center gap-3">
-                      <FileText size={16} style={{ color: themeColor }} /> Professional Matrix
+                {/* PREFERRED SERVICE LOCATIONS CARD (Dynamic Selector) */}
+                <div className="bg-[#111111] border border-white/5 rounded-xl p-5 space-y-4">
+                  <div>
+                    <h3 className="text-[10px] font-black uppercase tracking-[0.3em] text-white flex items-center gap-2">
+                      <MapPin size={14} style={{ color: themeColor }} /> Preferred Service Locations
                     </h3>
+                    <p className="text-[8px] font-bold text-neutral-500 uppercase tracking-widest mt-1">Specify where you want to offer your services ( grounds or custom city coordinates )</p>
+                  </div>
 
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <div className="space-y-1.5">
-                        <label className="text-[8px] font-black text-neutral-600 uppercase tracking-widest ml-0.5">Operational Headline</label>
+                  {/* Tabs */}
+                  <div className="flex bg-black p-1 rounded-lg border border-white/5">
+                    <button 
+                      onClick={() => setLocationTab("grounds")}
+                      className={`flex-1 py-2 text-[9px] font-black uppercase tracking-widest rounded-md transition-all flex items-center justify-center gap-2 ${locationTab === 'grounds' ? 'text-black' : 'text-neutral-500 hover:text-white'}`}
+                      style={{ backgroundColor: locationTab === 'grounds' ? themeColor : 'transparent' }}
+                    >
+                      <Building size={12} /> Platform Grounds
+                    </button>
+                    <button 
+                      onClick={() => setLocationTab("custom")}
+                      className={`flex-1 py-2 text-[9px] font-black uppercase tracking-widest rounded-md transition-all flex items-center justify-center gap-2 ${locationTab === 'custom' ? 'text-black' : 'text-neutral-500 hover:text-white'}`}
+                      style={{ backgroundColor: locationTab === 'custom' ? themeColor : 'transparent' }}
+                    >
+                      <Globe size={12} /> Custom Cities
+                    </button>
+                  </div>
+
+                  {/* Platform Grounds Panel */}
+                  {locationTab === "grounds" && (
+                    <div className="space-y-3">
+                      <div className="relative flex items-center">
+                        <Search size={14} className="absolute left-3 text-neutral-500" />
                         <input 
-                          type="text" 
-                          placeholder="e.g. Senior Scorer"
-                          className="w-full bg-white/[0.03] border border-white/5 rounded-[8px] p-3.5 text-[12px] text-white focus:border-white/10 outline-none font-inter font-black transition-all"
-                          value={formData.specialization}
-                          onChange={(e) => setFormData({...formData, specialization: e.target.value})}
+                          type="text"
+                          placeholder="Search listed grounds on the platform..."
+                          className="w-full bg-[#1A1A1A] border border-white/5 rounded-lg pl-9 pr-3 py-2 text-xs text-white outline-none focus:border-white/10"
+                          value={groundSearch}
+                          onChange={(e) => setGroundSearch(e.target.value)}
                         />
                       </div>
-                      <div className={`space-y-1.5 relative ${showProficiencyDropdown ? 'z-[110]' : 'z-auto'}`}>
-                        <label className="text-[8px] font-black text-neutral-600 uppercase tracking-widest ml-0.5">Proficiency Level</label>
-                        <div className="relative">
-                            <button 
-                              onClick={() => setShowProficiencyDropdown(!showProficiencyDropdown)}
-                              className="w-full bg-white/[0.03] border border-white/5 rounded-[8px] p-3.5 text-[12px] text-white focus:border-white/10 outline-none font-black uppercase tracking-widest flex items-center justify-between"
-                            >
-                              <span>{
-                                formData.coachingLevel === 'Beginner' ? 'Junior Associate' : 
-                                formData.coachingLevel === 'Intermediate' ? 'Mid-Tier Professional' :
-                                formData.coachingLevel === 'Elite' ? 'Elite / Senior' : 'Governing Body Certified'
-                              }</span>
-                              <ChevronDown size={16} className={`transition-transform duration-300 ${showProficiencyDropdown ? 'rotate-180' : ''}`} />
-                            </button>
 
-                            {showProficiencyDropdown && (
-                              <div className="absolute top-full left-0 right-0 mt-1 bg-[#0A0A0A] border border-white/10 rounded-[8px] shadow-2xl z-[100] overflow-hidden">
-                                {[
-                                  { label: 'Junior Associate', value: 'Beginner' },
-                                  { label: 'Mid-Tier Professional', value: 'Intermediate' },
-                                  { label: 'Elite / Senior', value: 'Elite' },
-                                  { label: 'Governing Body Certified', value: 'National' }
-                                ].map((opt) => (
-                                  <button 
-                                    key={opt.value}
-                                    onClick={() => {
-                                      setFormData({ ...formData, coachingLevel: opt.value });
-                                      setShowProficiencyDropdown(false);
-                                    }}
-                                    className="w-full px-4 py-3 text-left text-[11px] text-white hover:bg-white/5 transition-colors border-b border-white/5 last:border-0 font-black uppercase tracking-widest"
-                                  >
-                                    {opt.label}
-                                  </button>
+                      {/* Filtered Grounds Options */}
+                      {groundSearch && filteredGrounds.length > 0 && (
+                        <div className="max-h-48 overflow-y-auto border border-white/5 bg-[#181818] rounded-lg p-1.5 custom-scrollbar space-y-1">
+                          {filteredGrounds.map(ground => {
+                            const isSelected = formData.preferredLocations?.grounds?.includes(ground.id);
+                            return (
+                              <button 
+                                key={ground.id}
+                                onClick={() => {
+                                  toggleGroundSelection(ground.id);
+                                  setGroundSearch("");
+                                }}
+                                className="w-full flex justify-between items-center px-3 py-2 text-left text-xs rounded hover:bg-white/[0.04] transition-colors"
+                              >
+                                <div>
+                                  <p className="font-bold text-white uppercase tracking-wide">{ground.name}</p>
+                                  <p className="text-[9px] text-neutral-500 uppercase tracking-widest">{ground.city}, {ground.state}</p>
+                                </div>
+                                <span className={`text-[8px] font-black px-2 py-0.5 rounded uppercase tracking-widest ${isSelected ? 'bg-red-500/10 text-red-400' : 'bg-[#55DEE8]/10 text-[#55DEE8]'}`}>
+                                  {isSelected ? 'Remove' : 'Select'}
+                                </span>
+                              </button>
+                            );
+                          })}
+                        </div>
+                      )}
+
+                      {/* Display Selected Grounds Chips */}
+                      <div className="space-y-1.5">
+                        <label className="text-[8px] font-bold text-neutral-600 uppercase tracking-widest">Active Covered Grounds</label>
+                        <div className="flex flex-wrap gap-1.5">
+                          {formData.preferredLocations?.grounds?.map(groundId => {
+                            const gObj = grounds.find(g => g.id === groundId);
+                            if (!gObj) return null;
+                            return (
+                              <span key={groundId} className="px-3 py-1.5 bg-white/[0.04] border border-white/5 rounded-lg text-[8px] font-black uppercase tracking-wider text-white flex items-center gap-2">
+                                <Building size={10} className="text-neutral-500" />
+                                <span>{gObj.name} ({gObj.city})</span>
+                                <button onClick={() => toggleGroundSelection(groundId)} className="text-neutral-600 hover:text-red-400">
+                                  <X size={10} />
+                                </button>
+                              </span>
+                            );
+                          })}
+                          {(!formData.preferredLocations?.grounds || formData.preferredLocations.grounds.length === 0) && (
+                            <p className="text-[9px] font-medium text-neutral-700 italic">No specific grounds selected. Search above to link grounds.</p>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Custom Cities Panel */}
+                  {locationTab === "custom" && (
+                    <div className="space-y-4">
+                      <div className="grid grid-cols-2 gap-3">
+                        <div>
+                          <label className="text-[8px] font-black text-neutral-500 uppercase tracking-widest block mb-1">State</label>
+                          <select 
+                            className="w-full bg-[#1A1A1A] border border-white/5 rounded-lg px-3 py-2 text-xs text-white outline-none"
+                            value={selectedState}
+                            onChange={(e) => handleStateChange(e.target.value)}
+                          >
+                            <option value="">Select State</option>
+                            {states.map(st => (
+                              <option key={st} value={st}>{st}</option>
+                            ))}
+                          </select>
+                        </div>
+
+                        <div>
+                          <label className="text-[8px] font-black text-neutral-500 uppercase tracking-widest block mb-1">City</label>
+                          <select 
+                            className="w-full bg-[#1A1A1A] border border-white/5 rounded-lg px-3 py-2 text-xs text-white outline-none"
+                            value={selectedCity}
+                            onChange={(e) => setSelectedCity(e.target.value)}
+                            disabled={!selectedState}
+                          >
+                            <option value="">Select City</option>
+                            {cities.map(ct => (
+                              <option key={ct} value={ct}>{ct}</option>
+                            ))}
+                          </select>
+                        </div>
+                      </div>
+
+                      <button 
+                        onClick={addCustomLocation}
+                        disabled={!selectedState || !selectedCity}
+                        className="w-full py-2.5 rounded-lg text-[9px] font-black uppercase tracking-widest flex items-center justify-center gap-1.5 transition-transform active:scale-95"
+                        style={{ backgroundColor: selectedState && selectedCity ? themeColor : '#222', color: selectedState && selectedCity ? '#000' : '#444' }}
+                      >
+                        <Plus size={14} /> Link Custom Location
+                      </button>
+
+                      {/* Grouped Selected States & Cities */}
+                      <div className="space-y-3">
+                        <label className="text-[8px] font-bold text-neutral-600 uppercase tracking-widest block border-b border-white/5 pb-1">Covered Custom States & Cities</label>
+                        <div className="space-y-3 max-h-48 overflow-y-auto pr-1 custom-scrollbar">
+                          {formData.preferredLocations?.customLocations?.map((item, idx) => (
+                            <div key={idx} className="bg-white/[0.02] border border-white/5 rounded-lg p-3 space-y-2">
+                              <p className="text-[9px] font-black uppercase tracking-widest text-[#55DEE8] flex items-center gap-1.5 leading-none">
+                                <Map size={10} /> {item.state}
+                              </p>
+                              <div className="flex flex-wrap gap-1.5">
+                                {item.cities.map(cityName => (
+                                  <span key={cityName} className="px-2 py-1 bg-black border border-white/5 rounded text-[8px] font-bold text-white uppercase tracking-wider flex items-center gap-1.5">
+                                    {cityName}
+                                    <button onClick={() => removeCustomCity(item.state, cityName)} className="text-neutral-600 hover:text-red-400">
+                                      <X size={10} />
+                                    </button>
+                                  </span>
                                 ))}
                               </div>
-                            )}
-                        </div>
-                      </div>
-                      <div className="space-y-1.5 md:col-span-2">
-                        <label className="text-[8px] font-black text-neutral-600 uppercase tracking-widest ml-0.5">Industry Tenure</label>
-                        <input 
-                          type="text" 
-                          placeholder="e.g. 12+ Professional Seasons"
-                          className="w-full bg-white/[0.03] border border-white/5 rounded-[8px] p-3.5 text-[12px] text-white focus:border-white/10 outline-none font-black transition-all"
-                          value={formData.experience}
-                          onChange={(e) => setFormData({...formData, experience: e.target.value})}
-                        />
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Specialization Scopes */}
-                  <div className="space-y-6 relative z-10">
-                    <h3 className="text-[10px] font-black uppercase tracking-[0.3em] text-white flex items-center gap-3">
-                      <Target size={16} style={{ color: themeColor }} /> Specialization Scopes
-                    </h3>
-
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                      <div className="space-y-4">
-                        <label className="text-[8px] font-black text-neutral-600 uppercase tracking-widest">Operational Types</label>
-                        <div className="flex flex-wrap gap-1.5">
-                          {["Individual", "Group", "Team", "Online", "Clinic"].map(type => (
-                            <button 
-                              key={type}
-                              onClick={() => toggleArrayItem("trainingTypes", type)}
-                              className={`px-4 py-2.5 rounded-lg text-[8px] font-black uppercase tracking-widest transition-all ${ formData.trainingTypes.includes(type) ? "text-black" : "bg-white/[0.03] border border-white/5 text-neutral-600 hover:text-white" }`}
-                              style={{ backgroundColor: formData.trainingTypes.includes(type) ? themeColor : 'transparent' }}
-                            >
-                              {type}
-                            </button>
+                            </div>
                           ))}
-                        </div>
-                      </div>
-                      <div className="space-y-4">
-                        <label className="text-[8px] font-black text-neutral-600 uppercase tracking-widest">Target Demographics</label>
-                        <div className="flex flex-wrap gap-1.5">
-                          {["Kids (<12)", "Teens (13-19)", "Adults (20+)", "Seniors"].map(age => (
-                            <button 
-                              key={age}
-                              onClick={() => toggleArrayItem("ageGroups", age)}
-                              className={`px-4 py-2.5 rounded-lg text-[8px] font-black uppercase tracking-widest transition-all ${ formData.ageGroups.includes(age) ? "text-black" : "bg-white/[0.03] border border-white/5 text-neutral-600 hover:text-white" }`}
-                              style={{ backgroundColor: formData.ageGroups.includes(age) ? themeColor : 'transparent' }}
-                            >
-                              {age}
-                            </button>
-                          ))}
+                          {(!formData.preferredLocations?.customLocations || formData.preferredLocations.customLocations.length === 0) && (
+                            <p className="text-[9px] font-medium text-neutral-700 italic">No custom state-city scopes mapped yet.</p>
+                          )}
                         </div>
                       </div>
                     </div>
-                  </div>
+                  )}
                 </div>
+
               </div>
+
             </div>
 
-            {/* Career Milestones ΓÇö Full Width */}
-            <div className="bg-white/[0.03] border border-white/5 rounded-[8px] p-6 backdrop-blur-xl relative overflow-hidden">
-                <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-6 mb-8">
-                <div className="space-y-1">
-                    <h3 className="text-[20px] font-black text-white uppercase tracking-widest flex items-center gap-3 font-inter">
-                    <Award size={28} style={{ color: themeColor }} /> CAREER MILESTONES
-                    </h3>
-                    <p className="text-[8px] text-neutral-500 font-black uppercase tracking-[0.5em] opacity-50">Establish your professional legacy</p>
-                </div>
-                <div className="flex gap-2 w-full lg:w-auto lg:min-w-[350px]">
-                    <input 
-                    type="text" 
-                    placeholder="Log Industry Milestone..."
-                    className="flex-1 bg-white/[0.03] border border-white/5 rounded-lg px-4 py-3 text-[12px] text-white outline-none font-black transition-all"
-                    value={newAchievement}
-                    onChange={(e) => setNewAchievement(e.target.value)}
-                    onKeyPress={(e) => e.key === 'Enter' && addAchievement()}
-                    />
-                    <button onClick={addAchievement} className="w-11 h-11 rounded-lg shadow-xl flex items-center justify-center shrink-0 transition-all" style={{ backgroundColor: themeColor }}>
-                    <Plus size={24} color="#000" />
-                    </button>
-                </div>
+            {/* Career Milestones */}
+            <div className="bg-[#111111] border border-white/5 rounded-xl p-5 space-y-6 relative overflow-hidden">
+                <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-6 border-b border-white/5 pb-4">
+                  <div>
+                      <h3 className="text-lg font-black text-white uppercase tracking-widest flex items-center gap-3">
+                        <Award size={20} style={{ color: themeColor }} /> CAREER MILESTONES
+                      </h3>
+                      <p className="text-[8px] text-neutral-500 font-bold uppercase tracking-[0.3em] mt-1">Record and publish your industry achievements & benchmarks</p>
+                  </div>
+                  <div className="flex gap-2 w-full lg:w-auto lg:min-w-[320px]">
+                      <input 
+                        type="text" 
+                        placeholder="Log Industry Milestone..."
+                        className="flex-1 bg-[#1A1A1A] border border-white/5 rounded-lg px-4 py-2.5 text-xs text-white outline-none font-bold"
+                        value={newAchievement}
+                        onChange={(e) => setNewAchievement(e.target.value)}
+                        onKeyPress={(e) => e.key === 'Enter' && addAchievement()}
+                      />
+                      <button onClick={addAchievement} className="w-10 h-10 rounded-lg shadow-xl flex items-center justify-center shrink-0 transition-transform active:scale-95" style={{ backgroundColor: themeColor }}>
+                        <Plus size={20} color="#000" />
+                      </button>
+                  </div>
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-3">
                 {formData.achievements.map((ach, idx) => (
-                    <div key={idx} className="flex items-start justify-between p-4 bg-white/[0.03] border border-white/5 rounded-[8px] group/item transition-all hover:border-white/10">
-                    <div className="flex items-start gap-3">
-                        <CheckCircle2 size={14} style={{ color: themeColor }} className="mt-0.5 shrink-0" />
-                        <span className="text-[11px] text-neutral-300 font-black uppercase tracking-tight leading-snug">{ach}</span>
-                    </div>
-                    <button onClick={() => removeAchievement(ach)} className="text-neutral-700 hover:text-red-500 transition-colors shrink-0 ml-2"><Trash2 size={14} /></button>
+                    <div key={idx} className="flex items-start justify-between p-3.5 bg-white/[0.02] border border-white/5 rounded-lg group/item transition-all hover:border-white/10">
+                      <div className="flex items-start gap-3">
+                          <CheckCircle2 size={14} style={{ color: themeColor }} className="mt-0.5 shrink-0" />
+                          <span className="text-[10px] text-neutral-300 font-black uppercase tracking-tight leading-normal">{ach}</span>
+                      </div>
+                      <button onClick={() => removeAchievement(ach)} className="text-neutral-700 hover:text-red-500 transition-colors shrink-0 ml-2"><Trash2 size={13} /></button>
                     </div>
                 ))}
                 {formData.achievements.length === 0 && (
                     <div className="col-span-full py-10 bg-white/[0.01] rounded-lg border border-dashed border-white/5 flex flex-col items-center justify-center space-y-2">
-                    <p className="text-[8px] text-neutral-800 font-black uppercase tracking-[0.5em]">Timeline Node Empty</p>
+                      <p className="text-[8px] text-neutral-800 font-black uppercase tracking-[0.5em]">No milestones registered yet</p>
                     </div>
                 )}
                 </div>
             </div>
 
-            {/* Adjusted Navigation */}
-            <div className="flex items-center justify-end gap-3 pt-6">
+            {/* Navigation Buttons */}
+            <div className="flex items-center justify-end gap-3 pt-6 border-t border-white/5">
               {currentStep > 1 && (
                 <button 
                   onClick={prevStep}
-                  className="px-5 h-10 bg-white/5 border border-white/10 rounded-[8px] text-[8px] font-black uppercase tracking-[0.2em] hover:bg-white/10 transition-all flex items-center justify-center gap-2 text-neutral-400 active:scale-95"
+                  className="px-5 h-10 bg-white/5 border border-white/10 rounded-lg text-[8px] font-black uppercase tracking-[0.2em] hover:bg-white/10 transition-all flex items-center justify-center gap-2 text-neutral-400 active:scale-95"
                 >
                   <ChevronLeft size={14} /> Previous
                 </button>
@@ -673,9 +1408,9 @@ export default function ProfessionalProfile() {
                 style={{ backgroundColor: themeColor, color: '#000' }}
               >
                 {currentStep === 3 ? (
-                  <><CheckCircle2 size={14} /> Finalize</>
+                  <><CheckCircle2 size={14} /> Finalize Profile</>
                 ) : (
-                  <><Zap size={14} /> Phase {currentStep + 1} <ChevronRight size={14} /></>
+                  <><Zap size={14} /> Next Phase (PHASE {currentStep + 1}) <ChevronRight size={14} /></>
                 )}
               </button>
             </div>
@@ -684,45 +1419,45 @@ export default function ProfessionalProfile() {
 
         {currentStep === 2 && (
           <div className="space-y-6 animate-in fade-in slide-in-from-right-2 duration-500">
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
                 {/* Add Certification */}
                 <div className="lg:col-span-4 space-y-4">
-                <div className="bg-white/[0.03] border border-white/5 rounded-[8px] p-5 backdrop-blur-xl space-y-6 shadow-2xl relative overflow-hidden group">
+                <div className="bg-[#111111] border border-white/5 rounded-xl p-5 space-y-6 shadow-2xl relative overflow-hidden group">
                     <div className="flex items-center gap-4 border-b border-white/5 pb-4">
-                    <div className="w-10 h-10 rounded-lg flex items-center justify-center text-black" style={{ backgroundColor: themeColor }}>
-                        <Award size={20} />
-                    </div>
-                    <div>
-                        <h3 className="text-[9px] font-black uppercase tracking-[0.3em] text-neutral-500">Verification</h3>
-                        <p className="text-white text-[12px] font-black uppercase tracking-tight">Add Credential</p>
-                    </div>
+                      <div className="w-10 h-10 rounded-lg flex items-center justify-center text-black" style={{ backgroundColor: themeColor }}>
+                          <Award size={20} />
+                      </div>
+                      <div>
+                          <h3 className="text-[9px] font-black uppercase tracking-[0.3em] text-neutral-500">Verification</h3>
+                          <p className="text-white text-[12px] font-black uppercase tracking-tight">Add Credential</p>
+                      </div>
                     </div>
 
                     <div className="space-y-4">
                     <div className="space-y-1.5">
                         <label className="text-[8px] font-black text-neutral-600 uppercase tracking-widest ml-0.5">Credential Title</label>
                         <input 
-                        type="text" 
-                        placeholder="e.g. Master Scorer"
-                        className="w-full bg-white/[0.03] border border-white/5 rounded-[8px] p-3.5 text-[11px] text-white focus:border-white/10 outline-none font-black transition-all"
-                        value={newCert.title}
-                        onChange={(e) => setNewCert({...newCert, title: e.target.value})}
+                          type="text" 
+                          placeholder="e.g. ICC Certified Umpire"
+                          className="w-full bg-[#1A1A1A] border border-white/5 rounded-lg p-3.5 text-[11px] text-white focus:border-white/10 outline-none font-bold transition-all"
+                          value={newCert.title}
+                          onChange={(e) => setNewCert({...newCert, title: e.target.value})}
                         />
                     </div>
 
                     <div className="space-y-1.5">
-                        <label className="text-[8px] font-black text-neutral-600 uppercase tracking-widest ml-0.5">Description</label>
+                        <label className="text-[8px] font-black text-neutral-600 uppercase tracking-widest ml-0.5">Description / Scope</label>
                         <textarea 
-                        rows="3"
-                        placeholder="Detail scope..."
-                        className="w-full bg-white/[0.03] border border-white/5 rounded-[8px] p-3.5 text-[11px] text-white focus:border-white/10 outline-none font-black transition-all resize-none"
-                        value={newCert.description}
-                        onChange={(e) => setNewCert({...newCert, description: e.target.value})}
+                          rows="3"
+                          placeholder="Add validating description..."
+                          className="w-full bg-[#1A1A1A] border border-white/5 rounded-lg p-3.5 text-[11px] text-white focus:border-white/10 outline-none font-bold transition-all resize-none"
+                          value={newCert.description}
+                          onChange={(e) => setNewCert({...newCert, description: e.target.value})}
                         />
                     </div>
 
                     <div className="space-y-1.5">
-                        <label className="text-[8px] font-black text-neutral-600 uppercase tracking-widest ml-0.5">Digital Proof</label>
+                        <label className="text-[8px] font-black text-neutral-600 uppercase tracking-widest ml-0.5">Digital Proof Image</label>
                         <div className="relative group/upload">
                         <input 
                             type="file" 
@@ -745,10 +1480,10 @@ export default function ProfessionalProfile() {
 
                     <button 
                         onClick={addCertification}
-                        className="w-full h-12 text-black font-black uppercase tracking-[0.2em] text-[10px] rounded-lg transition-all flex items-center justify-center gap-2 active:scale-95"
+                        className="w-full h-12 text-black font-black uppercase tracking-[0.2em] text-[10px] rounded-lg transition-transform active:scale-95 flex items-center justify-center gap-2"
                         style={{ backgroundColor: themeColor }}
-                    >
-                        <Plus size={16} /> Integrate
+                      >
+                        <Plus size={16} /> Integrate credential
                     </button>
                     </div>
                 </div>
@@ -756,17 +1491,17 @@ export default function ProfessionalProfile() {
 
                 {/* Right: Credentials List */}
                 <div className="lg:col-span-8 space-y-4">
-                <div className="bg-white/[0.03] border border-white/5 rounded-[8px] p-6 backdrop-blur-xl space-y-6 min-h-[500px] relative overflow-hidden">
+                <div className="bg-[#111111] border border-white/5 rounded-xl p-5 space-y-6 min-h-[500px] relative overflow-hidden">
                     <div className="flex items-center justify-between border-b border-white/5 pb-4 relative z-10">
                     <h3 className="text-[10px] font-black uppercase tracking-[0.3em] text-white flex items-center gap-3 font-['Open_Sans']">
                         <ShieldCheck size={16} style={{ color: themeColor }} /> Verified Stack
                     </h3>
-                    <span className="text-[8px] font-black text-neutral-600 uppercase tracking-widest px-3 py-1 bg-white/5 rounded-full border border-white/5">{formData.certifications.length} Creds</span>
+                    <span className="text-[8px] font-black text-neutral-600 uppercase tracking-widest px-3 py-1 bg-white/5 rounded-full border border-white/5">{formData.certifications.length} Credentials</span>
                     </div>
 
                     <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3 relative z-10">
                     {formData.certifications.map((cert, idx) => (
-                        <div key={idx} className="bg-white/[0.03] border border-white/5 rounded-lg overflow-hidden group/item transition-all hover:border-white/10">
+                        <div key={idx} className="bg-white/[0.02] border border-white/5 rounded-lg overflow-hidden group/item transition-all hover:border-white/10">
                         <div className="h-24 bg-white/[0.02] relative overflow-hidden flex items-center justify-center border-b border-white/5">
                             {cert.image ? (
                             <img src={cert.image} className="w-full h-full object-cover transition-transform duration-700 group-hover/item:scale-110" alt={cert.title} />
@@ -787,19 +1522,80 @@ export default function ProfessionalProfile() {
                     {formData.certifications.length === 0 && (
                         <div className="col-span-full py-16 flex flex-col items-center justify-center space-y-4 bg-white/[0.01] rounded-lg border border-dashed border-white/5">
                         <ShieldCheck size={32} className="text-neutral-900" />
-                        <p className="text-[8px] text-neutral-800 font-black uppercase tracking-[0.5em]">Stack Empty</p>
+                        <p className="text-[8px] text-neutral-800 font-black uppercase tracking-[0.5em]">No credentials verified yet</p>
                         </div>
                     )}
                     </div>
                 </div>
                 </div>
+                </div>
+
+            {/* Structured Achievements Section */}
+            <div className="bg-[#111111] border border-white/5 rounded-xl p-5 space-y-6 relative overflow-hidden mt-6">
+              <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-6 border-b border-white/5 pb-4">
+                <div>
+                  <h3 className="text-lg font-black text-white uppercase tracking-widest flex items-center gap-3">
+                    <Trophy size={20} style={{ color: themeColor }} /> Career Achievements
+                  </h3>
+                  <p className="text-[8px] text-neutral-500 font-bold uppercase tracking-[0.3em] mt-1">Log your verified career awards, titles, and milestones with rich details</p>
+                </div>
+                <div className="flex flex-col sm:flex-row gap-3 w-full lg:w-auto lg:min-w-[450px]">
+                  <input 
+                    type="text" 
+                    placeholder="Achievement Title (e.g. Best Scorer 2025)"
+                    className="flex-1 bg-[#1A1A1A] border border-white/5 rounded-lg px-4 py-2.5 text-xs text-white outline-none font-bold"
+                    value={newStructuredAchievement.title}
+                    onChange={(e) => setNewStructuredAchievement({ ...newStructuredAchievement, title: e.target.value })}
+                  />
+                  <input 
+                    type="text" 
+                    placeholder="Brief description / scope"
+                    className="flex-1 bg-[#1A1A1A] border border-white/5 rounded-lg px-4 py-2.5 text-xs text-white outline-none"
+                    value={newStructuredAchievement.description}
+                    onChange={(e) => setNewStructuredAchievement({ ...newStructuredAchievement, description: e.target.value })}
+                  />
+                  <button 
+                    onClick={addStructuredAchievement} 
+                    className="w-10 h-10 rounded-lg shadow-xl flex items-center justify-center shrink-0 transition-transform active:scale-95 mx-auto sm:mx-0" 
+                    style={{ backgroundColor: themeColor }}
+                  >
+                    <Plus size={20} color="#000" />
+                  </button>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+                {(formData.structuredAchievements || []).map((ach, idx) => (
+                  <div key={idx} className="p-4 bg-white/[0.02] border border-white/5 rounded-lg flex items-start justify-between hover:border-white/10 transition-all">
+                    <div className="space-y-1">
+                      <div className="flex items-center gap-2">
+                        <Trophy size={14} style={{ color: themeColor }} className="shrink-0" />
+                        <h4 className="text-[11px] font-black text-white uppercase tracking-tight">{ach.title}</h4>
+                      </div>
+                      <p className="text-[9px] text-neutral-500 font-medium leading-relaxed">{ach.description}</p>
+                    </div>
+                    <button 
+                      onClick={() => removeStructuredAchievement(idx)} 
+                      className="text-neutral-700 hover:text-red-500 transition-colors shrink-0 ml-2"
+                    >
+                      <Trash2 size={13} />
+                    </button>
+                  </div>
+                ))}
+                {(!formData.structuredAchievements || formData.structuredAchievements.length === 0) && (
+                  <div className="col-span-full py-10 bg-white/[0.01] rounded-lg border border-dashed border-white/5 flex flex-col items-center justify-center space-y-2">
+                    <Trophy size={24} className="text-neutral-800" />
+                    <p className="text-[8px] text-neutral-500 font-black uppercase tracking-[0.5em]">No career achievements logged yet</p>
+                  </div>
+                )}
+              </div>
             </div>
 
             {/* Adjusted Navigation */}
-            <div className="flex items-center justify-end gap-3 pt-6">
+            <div className="flex items-center justify-end gap-3 pt-6 border-t border-white/5">
               <button 
                 onClick={prevStep}
-                className="px-5 h-10 bg-white/5 border border-white/10 rounded-[8px] text-[8px] font-black uppercase tracking-[0.2em] hover:bg-white/10 transition-all flex items-center justify-center gap-2 text-neutral-400 active:scale-95"
+                className="px-5 h-10 bg-white/5 border border-white/10 rounded-lg text-[8px] font-black uppercase tracking-[0.2em] hover:bg-white/10 transition-all flex items-center justify-center gap-2 text-neutral-400 active:scale-95"
               >
                 <ChevronLeft size={14} /> Previous
               </button>
@@ -808,7 +1604,7 @@ export default function ProfessionalProfile() {
                 className="px-8 h-10 rounded-lg text-[9px] font-black uppercase tracking-[0.3em] transition-all transform active:scale-95 shadow-lg flex items-center justify-center gap-2 hover:brightness-110"
                 style={{ backgroundColor: themeColor, color: '#000' }}
               >
-                <Zap size={14} /> Phase 3 <ChevronRight size={14} />
+                <Zap size={14} /> Next Phase (PHASE 3) <ChevronRight size={14} />
               </button>
             </div>
           </div>
@@ -816,10 +1612,10 @@ export default function ProfessionalProfile() {
 
         {currentStep === 3 && (
           <div className="space-y-6 animate-in fade-in slide-in-from-right-2 duration-500">
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
                 {/* Gallery Form */}
                 <div className="lg:col-span-4 space-y-4">
-                <div className="bg-white/[0.03] border border-white/5 rounded-[8px] p-5 backdrop-blur-xl space-y-6 shadow-2xl relative overflow-hidden group">
+                <div className="bg-[#111111] border border-white/5 rounded-xl p-5 space-y-6 shadow-2xl relative overflow-hidden group">
                     <div className="flex items-center gap-4 border-b border-white/5 pb-4">
                         <div className="w-10 h-10 rounded-lg flex items-center justify-center text-black" style={{ backgroundColor: themeColor }}>
                         <Layout size={20} />
@@ -831,17 +1627,17 @@ export default function ProfessionalProfile() {
                     </div>
 
                     <div className="space-y-6">
-                        <div className="flex bg-white/[0.03] p-1 rounded-[8px] border border-white/5">
+                        <div className="flex bg-black p-1 rounded-lg border border-white/5">
                         <button 
                             onClick={() => setNewPortfolioItem({...newPortfolioItem, mediaType: 'image', mediaUrl: ''})}
-                            className={`flex-1 py-2 text-[8px] font-black uppercase tracking-widest rounded-md transition-all ${newPortfolioItem.mediaType === 'image' ? "text-black" : "text-neutral-600"}`}
+                            className={`flex-1 py-2 text-[8px] font-black uppercase tracking-widest rounded-md transition-all ${newPortfolioItem.mediaType === 'image' ? "text-black" : "text-neutral-500"}`}
                             style={{ backgroundColor: newPortfolioItem.mediaType === 'image' ? themeColor : 'transparent' }}
                         >
                             Photography
                         </button>
                         <button 
                             onClick={() => setNewPortfolioItem({...newPortfolioItem, mediaType: 'video', mediaUrl: ''})}
-                            className={`flex-1 py-2 text-[8px] font-black uppercase tracking-widest rounded-md transition-all ${newPortfolioItem.mediaType === 'video' ? "text-black" : "text-neutral-600"}`}
+                            className={`flex-1 py-2 text-[8px] font-black uppercase tracking-widest rounded-md transition-all ${newPortfolioItem.mediaType === 'video' ? "text-black" : "text-neutral-500"}`}
                             style={{ backgroundColor: newPortfolioItem.mediaType === 'video' ? themeColor : 'transparent' }}
                         >
                             Broadcasting
@@ -849,29 +1645,49 @@ export default function ProfessionalProfile() {
                         </div>
 
                         <div className="space-y-1.5">
-                        <label className="text-[8px] font-black text-neutral-600 uppercase tracking-widest ml-0.5">Project Title</label>
+                        <label className="text-[8px] font-black text-neutral-600 uppercase tracking-widest ml-0.5">Project Title Scope</label>
                         <input 
                             type="text" 
-                            placeholder="e.g. IPL Regional"
-                            className="w-full bg-white/[0.03] border border-white/5 rounded-[8px] p-3.5 text-[11px] text-white outline-none font-black transition-all"
+                            placeholder="e.g. Local Premier League"
+                            className="w-full bg-[#1A1A1A] border border-white/5 rounded-lg p-3.5 text-[11px] text-white outline-none font-bold transition-all"
                             value={newPortfolioItem.title}
                             onChange={(e) => setNewPortfolioItem({...newPortfolioItem, title: e.target.value})}
                         />
                         </div>
 
                         <div className="space-y-1.5">
-                        <label className="text-[8px] font-black text-neutral-600 uppercase tracking-widest ml-0.5">Brief</label>
+                        <label className="text-[8px] font-black text-neutral-600 uppercase tracking-widest ml-0.5">Brief details</label>
                         <textarea 
                             rows="3"
-                            placeholder="Impact..."
-                            className="w-full bg-white/[0.03] border border-white/5 rounded-[8px] p-3.5 text-[11px] text-white outline-none font-black transition-all resize-none"
+                            placeholder="Add brief role info..."
+                            className="w-full bg-[#1A1A1A] border border-white/5 rounded-lg p-3.5 text-[11px] text-white outline-none font-bold transition-all resize-none"
                             value={newPortfolioItem.description}
                             onChange={(e) => setNewPortfolioItem({...newPortfolioItem, description: e.target.value})}
                         />
                         </div>
 
+                        {newPortfolioItem.mediaType === 'video' && (
+                          <div className="space-y-1.5 pt-1">
+                            <label className="text-[8px] font-black text-neutral-600 uppercase tracking-widest ml-0.5">YouTube Video URL</label>
+                            <input 
+                              type="text" 
+                              placeholder="e.g. https://www.youtube.com/watch?v=..."
+                              className="w-full bg-[#1A1A1A] border border-white/5 rounded-lg p-3 text-[11px] text-white outline-none font-bold transition-all focus:border-white/10"
+                              value={newPortfolioItem.mediaUrl && (newPortfolioItem.mediaUrl.includes('youtube.com') || newPortfolioItem.mediaUrl.includes('youtu.be')) ? newPortfolioItem.mediaUrl : ''}
+                              onChange={(e) => setNewPortfolioItem({...newPortfolioItem, mediaUrl: e.target.value})}
+                            />
+                            <div className="flex items-center justify-center gap-2 py-1">
+                              <div className="h-[1px] bg-white/5 flex-1" />
+                              <span className="text-[8px] font-bold text-neutral-600 uppercase tracking-widest">OR</span>
+                              <div className="h-[1px] bg-white/5 flex-1" />
+                            </div>
+                          </div>
+                        )}
+
                         <div className="space-y-1.5">
-                        <label className="text-[8px] font-black text-neutral-600 uppercase tracking-widest ml-0.5">Upload</label>
+                        <label className="text-[8px] font-black text-neutral-600 uppercase tracking-widest ml-0.5">
+                          {newPortfolioItem.mediaType === 'image' ? 'Upload Asset' : 'Upload Local Video file'}
+                        </label>
                         <div className="relative group/upload">
                             <input 
                             type="file" 
@@ -884,15 +1700,18 @@ export default function ProfessionalProfile() {
                                 newPortfolioItem.mediaType === 'image' ? (
                                     <img src={newPortfolioItem.mediaUrl} className="w-full h-full object-contain p-2" alt="Preview" />
                                 ) : (
-                                    <div className="flex flex-col items-center gap-1">
+                                    <div className="flex flex-col items-center gap-1 px-4 text-center">
                                     <Play size={24} style={{ color: themeColor }} />
-                                    <span className="text-[8px] font-black text-white uppercase tracking-widest">Node Ready</span>
+                                    <span className="text-[8px] font-black text-white uppercase tracking-widest truncate max-w-full">
+                                      {newPortfolioItem.mediaUrl.includes('youtube.com') || newPortfolioItem.mediaUrl.includes('youtu.be') ? 'YouTube Link Attached' : 'Video File Attached'}
+                                    </span>
+                                    <span className="text-[7px] text-neutral-500 font-bold uppercase tracking-wider line-clamp-1 max-w-full">{newPortfolioItem.mediaUrl}</span>
                                     </div>
                                 )
                             ) : (
                                 <>
                                 {newPortfolioItem.mediaType === 'image' ? <ImageIcon size={24} className="text-neutral-900" /> : <Video size={24} className="text-neutral-900" />}
-                                <span className="text-[8px] font-black text-neutral-800 uppercase tracking-widest">Visual Asset</span>
+                                <span className="text-[8px] font-black text-neutral-800 uppercase tracking-widest">Select Visual Asset</span>
                                 </>
                             )}
                             </div>
@@ -900,11 +1719,11 @@ export default function ProfessionalProfile() {
                         </div>
 
                         <button 
-                        onClick={addPortfolioItem}
-                        className="w-full h-12 text-black font-black uppercase tracking-[0.2em] text-[10px] rounded-lg transition-all flex items-center justify-center gap-2 active:scale-95"
-                        style={{ backgroundColor: themeColor }}
+                          onClick={addPortfolioItem}
+                          className="w-full h-12 text-black font-black uppercase tracking-[0.2em] text-[10px] rounded-lg transition-transform active:scale-95 flex items-center justify-center gap-2"
+                          style={{ backgroundColor: themeColor }}
                         >
-                        <Plus size={16} /> Publish
+                        <Plus size={16} /> Integrate portfolio
                         </button>
                     </div>
                 </div>
@@ -912,24 +1731,24 @@ export default function ProfessionalProfile() {
 
                 {/* Right: Exhibition Gallery */}
                 <div className="lg:col-span-8 space-y-4">
-                <div className="bg-white/[0.03] border border-white/5 rounded-[8px] p-6 backdrop-blur-xl space-y-6 min-h-[500px] relative overflow-hidden">
+                <div className="bg-[#111111] border border-white/5 rounded-xl p-5 space-y-6 min-h-[500px] relative overflow-hidden">
                     <div className="flex items-center justify-between border-b border-white/5 pb-4 relative z-10">
                     <h3 className="text-[10px] font-black uppercase tracking-[0.3em] text-white flex items-center gap-3 font-['Open_Sans']">
-                        <Layout size={16} style={{ color: themeColor }} /> Exhibition
+                        <Layout size={16} style={{ color: themeColor }} /> Exhibition Showcase
                     </h3>
-                    <span className="text-[8px] font-black text-neutral-600 uppercase tracking-widest px-3 py-1 bg-white/5 rounded-full border border-white/5">{formData.portfolio?.length || 0} Assets</span>
+                    <span className="text-[8px] font-black text-neutral-600 uppercase tracking-widest px-3 py-1 bg-white/5 rounded-full border border-white/5">{formData.portfolio?.length || 0} Assets Linked</span>
                     </div>
 
                     <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3 relative z-10">
                     {formData.portfolio?.map((item, idx) => (
-                        <div key={idx} className="bg-white/[0.03] border border-white/5 rounded-lg overflow-hidden group/item transition-all hover:border-white/10">
-                        <div className="h-28 bg-white/[0.02] relative overflow-hidden flex items-center justify-center border-b border-white/5">
+                        <div key={idx} className="bg-white/[0.02] border border-white/5 rounded-lg overflow-hidden group/item transition-all hover:border-white/10">
+                        <div className="h-28 bg-[#111] relative overflow-hidden flex items-center justify-center border-b border-white/5">
                             {item.mediaType === 'image' ? (
                             <img src={item.mediaUrl} className="w-full h-full object-cover transition-transform duration-700 group-hover/item:scale-110" alt={item.title} />
                             ) : (
                             <div className="w-full h-full bg-[#111] flex flex-col items-center justify-center gap-2">
                                 <Play size={20} style={{ color: themeColor }} />
-                                <span className="text-[7px] font-black text-neutral-700 uppercase tracking-[0.3em]">Motion</span>
+                                <span className="text-[7px] font-black text-neutral-700 uppercase tracking-[0.3em]">Motion Media</span>
                             </div>
                             )}
                             <div className="absolute inset-0 bg-black/60 opacity-0 group-hover/item:opacity-100 transition-opacity flex items-center justify-center backdrop-blur-sm">
@@ -938,7 +1757,7 @@ export default function ProfessionalProfile() {
                         </div>
                         <div className="p-3 space-y-1">
                             <h4 className="text-[11px] font-black text-white uppercase tracking-tight line-clamp-1">{item.title}</h4>
-                            <p className="text-[9px] text-neutral-500 font-medium line-clamp-2 leading-relaxed">{item.description || "Pending."}</p>
+                            <p className="text-[9px] text-neutral-500 font-medium line-clamp-2 leading-relaxed">{item.description || "No description."}</p>
                         </div>
                         </div>
                     ))}
@@ -946,7 +1765,7 @@ export default function ProfessionalProfile() {
                     {(!formData.portfolio || formData.portfolio.length === 0) && (
                         <div className="col-span-full py-16 flex flex-col items-center justify-center space-y-4 bg-white/[0.01] rounded-lg border border-dashed border-white/5">
                         <Layout size={32} className="text-neutral-900" />
-                        <p className="text-[8px] text-neutral-800 font-black uppercase tracking-[0.5em]">Empty</p>
+                        <p className="text-[8px] text-neutral-800 font-black uppercase tracking-[0.5em]">No showcase items loaded</p>
                         </div>
                     )}
                     </div>
@@ -955,19 +1774,20 @@ export default function ProfessionalProfile() {
             </div>
 
             {/* Adjusted Navigation */}
-            <div className="flex items-center justify-end gap-3 pt-6">
+            <div className="flex items-center justify-end gap-3 pt-6 border-t border-white/5">
               <button 
                 onClick={prevStep}
-                className="px-5 h-10 bg-white/5 border border-white/10 rounded-[8px] text-[8px] font-black uppercase tracking-[0.2em] hover:bg-white/10 transition-all flex items-center justify-center gap-2 text-neutral-400 active:scale-95"
+                className="px-5 h-10 bg-white/5 border border-white/10 rounded-lg text-[8px] font-black uppercase tracking-[0.2em] hover:bg-white/10 transition-all flex items-center justify-center gap-2 text-neutral-400 active:scale-95"
               >
                 <ChevronLeft size={14} /> Previous
               </button>
               <button 
                 onClick={handleUpdate}
-                className="px-8 h-10 rounded-lg text-[9px] font-black uppercase tracking-[0.3em] transition-all transform active:scale-95 shadow-lg flex items-center justify-center gap-2 hover:brightness-110"
+                disabled={loading}
+                className="px-8 h-10 rounded-lg text-[9px] font-black uppercase tracking-[0.3em] transition-all transform active:scale-95 shadow-lg flex items-center justify-center gap-2 hover:brightness-110 font-bold"
                 style={{ backgroundColor: themeColor, color: '#000' }}
               >
-                <CheckCircle2 size={14} /> Finalize
+                {loading ? <Loader2 size={14} className="animate-spin" /> : <CheckCircle2 size={14} />} Finalize Profile
               </button>
             </div>
           </div>

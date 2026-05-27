@@ -342,7 +342,7 @@ export const registerUser = async (req, res) => {
         where: { customUmpireInviteToken: umpireInvite }
       });
       if (inviteGame) {
-        role = "LIMITED_UMPIRE";
+        role = "UMPIRE";
       }
     }
 
@@ -374,7 +374,7 @@ export const registerUser = async (req, res) => {
       let ownerProfileId = null;
 
       // 2. If it's an umpire invite, create OwnerProfile
-      if (role === "LIMITED_UMPIRE") {
+      if (role === "UMPIRE") {
         const owner = await tx.ownerProfile.create({
           data: {
             userId: user.id,
@@ -489,7 +489,7 @@ export const registerOwner = async (req, res) => {
     const professionalRoles = ["COACH", "UMPIRE", "coach", "umpire"];
     if (professionalRoles.includes(role)) {
       const count = await prisma.ownerProfile.count({
-        where: { user: { role: { in: ["coach", "umpire", "COACH", "UMPIRE"] } } }
+        where: { user: { role: { in: ["COACH", "UMPIRE"] } } }
       });
       waitlistPosition = count + 1;
     }
@@ -540,8 +540,8 @@ export const registerOwner = async (req, res) => {
       waitlistNumber: waitlistPosition,
     });
   } catch (err) {
-    logger.error("RegisterOwner Error:", err.message);
-    return res.status(500).json({ success: false, message: "Internal Server Error" });
+    logger.error("RegisterOwner Error:", err);
+    return res.status(500).json({ success: false, message: "Internal Server Error", error: err.message });
   }
 };
 
@@ -904,7 +904,7 @@ export const googleAuth = async (req, res) => {
 
         if (requestedRole && requestedRole !== "user") {
           const count = await tx.ownerProfile.count({
-            where: { user: { role: { in: ["coach", "umpire", "COACH", "UMPIRE"] } } }
+            where: { user: { role: { in: ["COACH", "UMPIRE"] } } }
           });
           const owner = await tx.ownerProfile.create({
             data: {
@@ -980,7 +980,7 @@ export const googleAuth = async (req, res) => {
 
             await prisma.user.update({
               where: { id: user.id },
-              data: { role: "LIMITED_UMPIRE" }
+              data: { role: "UMPIRE" }
             });
           }
 
@@ -993,7 +993,7 @@ export const googleAuth = async (req, res) => {
             }
           });
 
-          roleToReturn = "LIMITED_UMPIRE";
+          roleToReturn = "UMPIRE";
           token = generateOwnerToken(user.id, roleToReturn, targetOwner.id);
         }
       }

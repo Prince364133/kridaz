@@ -10,12 +10,20 @@ import {
   addProfessionalReview, 
   replyToReview,
   updateProfessionalProfile,
+  getMyProfessionalProfile,
   getProfessionalTasks,
   createProfessionalTask,
   getProfessionalCustomers,
   createProfessionalCustomer,
   updateWorkingHours,
-  getUserProfessionalBookings
+  getUserProfessionalBookings,
+  toggleOnlineStatus,
+  createMatchRequest,
+  acceptMatchOffer,
+  rejectMatchOffer,
+  verifyOTPCheckIn,
+  getMyOnDemandBookings,
+  getUserOnDemandBookings
 } from "../professional.controller.js";
 import protect from "../../../middleware/jwt/auth.middleware.js";
 
@@ -204,6 +212,7 @@ router.post("/review/reply", protect, replyToReview);
  *         description: Profile updated
  */
 router.put("/update-profile", protect, updateProfessionalProfile);
+router.get("/profile", protect, getMyProfessionalProfile);
 
 /**
  * @swagger
@@ -274,5 +283,14 @@ router.post("/customers", protect, createProfessionalCustomer);
  *         description: Working hours updated
  */
 router.put("/working-hours", protect, updateWorkingHours);
+
+// On-Demand Matching Routes
+router.put("/toggle-online", protect, toggleOnlineStatus);
+router.post("/match-request", protect, createMatchRequest);
+router.post("/offers/:offerId/accept", protect, acceptMatchOffer);
+router.post("/offers/:offerId/reject", protect, rejectMatchOffer);
+router.post("/bookings/:bookingId/verify-otp", protect, verifyOTPCheckIn);
+router.get("/on-demand-bookings", protect, getMyOnDemandBookings);
+router.get("/user-on-demand-bookings", protect, getUserOnDemandBookings);
 
 export default router;

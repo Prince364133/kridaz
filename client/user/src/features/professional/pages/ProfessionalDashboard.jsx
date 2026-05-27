@@ -1,25 +1,18 @@
 import React from "react";
 import { useParams } from "react-router-dom";
-import { CoachDashboard } from "@features/coach";
-import { UmpireDashboard } from "@features/umpire";
-import { StreamerDashboard } from "@features/streamer";
-import { CommentatorDashboard } from "@features/commentator";
+import { useSelector } from "react-redux";
+import OverviewTab from "./OverviewTab";
 
 const ProfessionalDashboard = () => {
   const { role } = useParams();
+  const user = useSelector((state) => state.auth?.user);
+  const profile = user?.ownerProfile || null;
 
-  switch (role) {
-    case "coach":
-      return <CoachDashboard />;
-    case "umpire":
-      return <UmpireDashboard />;
-    case "streamer":
-      return <StreamerDashboard />;
-    case "commentator":
-      return <CommentatorDashboard />;
-    default:
-      return <div className="text-white p-8">Unified Professional Dashboard</div>;
-  }
+  return (
+    <div className="min-h-screen bg-black">
+      <OverviewTab role={role} profile={profile} />
+    </div>
+  );
 };
 
 export default ProfessionalDashboard;

@@ -19,6 +19,10 @@ const RedirectToAnalytics = () => {
 };
 
 const ProfessionalDashboard = lazy(() => import("@features/professional/pages/ProfessionalDashboard"));
+const BookingsTab = lazy(() => import("@features/professional/pages/BookingsTab"));
+const PayoutsTab  = lazy(() => import("@features/professional/pages/PayoutsTab"));
+const ReviewsTab  = lazy(() => import("@features/professional/pages/ReviewsTab"));
+const SupportTab  = lazy(() => import("@features/professional/pages/SupportTab"));
 
 // Î“Ã¶Ã‡Î“Ã¶Ã‡ Lazy: User Portal Pages Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡
 const UserHome               = lazy(() => import("@user/pages/Home"));
@@ -80,15 +84,7 @@ const FAQ                        = lazy(() => import("@features/legal").then(m =
 
 // â”€â”€ Lazy: Streamer Components â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 const StreamSetup    = lazy(() => import("@features/streamer").then(m => ({ default: m.StreamSetup })));
-const ManageStream   = lazy(() => import("@features/streamer").then(m => ({ default: m.ManageStream })));
-const TickerGallery  = lazy(() => import("@features/streamer").then(m => ({ default: m.TickerGallery })));
 
-// â”€â”€ Lazy: YouTube / Facebook Auth Status â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-// Named exports â€” use .then() to map to default for lazy()
-const YouTubeConnected  = lazy(() => import("@features/streamer").then(m => ({ default: m.YouTubeConnected })));
-const YouTubeError      = lazy(() => import("@features/streamer").then(m => ({ default: m.YouTubeError })));
-const FacebookConnected = lazy(() => import("@features/streamer").then(m => ({ default: m.FacebookConnected })));
-const FacebookError     = lazy(() => import("@features/streamer").then(m => ({ default: m.FacebookError })));
 
 // Î“Ã¶Ã‡Î“Ã¶Ã‡ Lazy: Owner (Partner) Portal Components Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡
 const AddTurf            = lazy(() => import("@features/venue-owner").then(m => ({ default: m.AddTurf })));
@@ -106,26 +102,16 @@ const VenueBanking       = lazy(() => import("@features/venue-owner").then(m => 
 const PartnerSupport     = lazy(() => import("@features/venue-owner").then(m => ({ default: m.PartnerSupport })));
 
 // Î“Ã¶Ã‡Î“Ã¶Ã‡ Lazy: Coach Portal Components Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡
-const CoachDashboard   = lazy(() => import("@features/coach").then(m => ({ default: m.CoachDashboard })));
-const CoachStudents    = lazy(() => import("@features/coach").then(m => ({ default: m.CoachStudents })));
-const CoachSessions    = lazy(() => import("@features/coach").then(m => ({ default: m.CoachSessions })));
-const CoachMasterclass = lazy(() => import("@features/coach").then(m => ({ default: m.CoachMasterclass })));
+
 
 // Î“Ã¶Ã‡Î“Ã¶Ã‡ Lazy: Umpire Portal Components Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡
-const UmpireDashboard = lazy(() => import("@features/umpire").then(m => ({ default: m.UmpireDashboard })));
-const UmpireMatches   = lazy(() => import("@features/umpire").then(m => ({ default: m.UmpireMatches })));
-const UmpireSchedule  = lazy(() => import("@features/umpire").then(m => ({ default: m.UmpireSchedule })));
-const UmpireFeedback  = lazy(() => import("@features/umpire").then(m => ({ default: m.UmpireFeedback })));
+
 
 // â”€â”€ Lazy: Streamer Portal Components â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-const StreamerDashboard = lazy(() => import("@features/streamer").then(m => ({ default: m.StreamerDashboard })));
-const StreamerMatches   = lazy(() => import("@features/streamer").then(m => ({ default: m.StreamerMatches })));
-const StreamerSchedule= lazy(() => import("@features/streamer").then(m => ({ default: m.StreamerSchedule })));
-const CreateStream    = lazy(() => import("@features/streamer/pages/CreateStream"));
+
 
 // Î“Ã¶Ã‡Î“Ã¶Ã‡ Lazy: Scorer Portal Components Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡
-const ScorerDashboard = lazy(() => import("@features/scorer").then(m => ({ default: m.ScorerDashboard })));
-const ScorerMatches   = lazy(() => import("@features/scorer").then(m => ({ default: m.ScorerMatches })));
+
 
 // Î“Ã¶Ã‡Î“Ã¶Ã‡ Lazy: Shared Professional Components Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡
 const ProfessionalAvailability = lazy(() => import("@features/networking").then(m => ({ default: m.ProfessionalAvailability })));
@@ -245,28 +231,16 @@ const router = createBrowserRouter([
   {
     path: "/professional/:role",
     element: (
-      <ProtectedRoute requiredRole={["coach", "umpire", "streamer", "commentator", "limited_umpire", "limited_streamer"]}>
+      <ProtectedRoute requiredRole={["coach", "umpire", "streamer", "commentator", "scorer", "cheerleader"]}>
         <ProfessionalLayout />
       </ProtectedRoute>
     ),
     children: [
       { index: true,                        element: <S><ProfessionalDashboard /></S> },
-      // Umpire Specific
-      { path: "umpire-matches",             element: <S><UmpireMatches /></S> },
-      // Streamer Specific
-      { path: "streamer-matches",           element: <S><StreamerMatches /></S> },
-      { path: "manage/:matchId",            element: <S><ManageStream /></S> },
-      { path: "ticker-gallery/:matchId?",   element: <S><TickerGallery /></S> },
-      { path: "create-stream",              element: <S><CreateStream /></S> },
-      // Common
-      { path: "availability",               element: <S><ProfessionalAvailability /></S> },
-      { path: "practice-scheduling",        element: <S><PracticeScheduling /></S> },
-      { path: "customers",                  element: <S><ProfessionalCustomers /></S> },
-      { path: "bookings",                   element: <S><ProfessionalBookings /></S> },
-      { path: "reviews",                    element: <S><ProfessionalReviews /></S> },
-      { path: "revenue",                    element: <S><OwnerRevenue /></S> },
-      { path: "support",                    element: <S><PartnerSupport /></S> },
-      { path: "banking",                    element: <S><VenueBanking /></S> },
+      { path: "bookings",                   element: <S><BookingsTab /></S> },
+      { path: "payouts",                    element: <S><PayoutsTab /></S> },
+      { path: "reviews",                    element: <S><ReviewsTab /></S> },
+      { path: "support",                    element: <S><SupportTab /></S> },
       { path: "profile",                    element: <S><ProfessionalProfile /></S> },
       { path: "*",                          element: <NotFound /> },
     ],
@@ -322,10 +296,10 @@ const router = createBrowserRouter([
       { path: "host-game",    element: <ProtectedRoute><S><HostGame /></S></ProtectedRoute> },
       { path: "join-games",   element: <S><JoinGames /></S> },
       { path: "matches/:matchId/stream-setup", element: <ProtectedRoute><S><StreamSetup /></S></ProtectedRoute> },
-      { path: "youtube-connected",  element: <S><YouTubeConnected /></S> },
-      { path: "youtube-error",      element: <S><YouTubeError /></S> },
-      { path: "facebook-connected", element: <S><FacebookConnected /></S> },
-      { path: "facebook-error",     element: <S><FacebookError /></S> },
+      { path: "youtube-connected",  element: <Navigate to="/" replace /> },
+      { path: "youtube-error",      element: <Navigate to="/" replace /> },
+      { path: "facebook-connected", element: <Navigate to="/" replace /> },
+      { path: "facebook-error",     element: <Navigate to="/" replace /> },
       { path: "my-hosted-games",    element: <ProtectedRoute><S><MyHostedGames /></S></ProtectedRoute> },
       { path: "my-joined-games",    element: <ProtectedRoute><S><MyJoinedGames /></S></ProtectedRoute> },
       { path: "match/:matchId",     element: <ProtectedRoute><S><MatchDetails /></S></ProtectedRoute> },

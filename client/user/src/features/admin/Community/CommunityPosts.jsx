@@ -3,7 +3,7 @@ import { motion } from 'framer-motion';
 import { ShieldAlert, Trash2, Search, ExternalLink } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import { useGetPostReportsQuery, useDeleteAdminPostMutation } from '@redux/api/communityApi';
-import moment from 'moment';
+import { format } from 'date-fns';
 
 const CommunityPosts = () => {
   const [page, setPage] = useState(1);
@@ -90,7 +90,7 @@ const CommunityPosts = () => {
                   </div>
                   <div className="col-span-2">
                     <span className="text-white/40 block mb-0.5">Date</span>
-                    <span className="font-medium text-white/60">{moment(report.createdAt).format('MMM D, YYYY - h:mm A')}</span>
+                    <span className="font-medium text-white/60">{report.createdAt ? format(new Date(report.createdAt), 'MMM d, yyyy - h:mm a') : 'N/A'}</span>
                   </div>
                 </div>
 
