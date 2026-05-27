@@ -14,13 +14,13 @@ import { authorizeRoles } from "../../../middleware/jwt/auth.middleware.js";
 
 const dashboardRouter = express.Router();
 
-dashboardRouter.get("/", verifyOwnerToken, authorizeRoles("venu_owners", "venue_owner", "owner"), getDashboardData);
+dashboardRouter.get("/", verifyOwnerToken, authorizeRoles("venue_owner"), getDashboardData);
 dashboardRouter.get("/coach", verifyOwnerToken, authorizeRoles("coach"), getCoachDashboardData);
-dashboardRouter.get("/umpire", verifyOwnerToken, authorizeRoles("umpire", "limited_umpire"), getUmpireDashboardData);
+dashboardRouter.get("/umpire", verifyOwnerToken, authorizeRoles("umpire"), getUmpireDashboardData);
 dashboardRouter.get("/streamer", verifyOwnerToken, authorizeRoles("streamer"), getStreamerDashboardData);
 dashboardRouter.get("/scorer", verifyOwnerToken, authorizeRoles("scorer"), getScorerDashboardData);
-dashboardRouter.get("/calendar", verifyOwnerToken, authorizeRoles("venu_owners", "venue_owner", "owner"), getOwnerCalendarData);
-dashboardRouter.get("/occupancy", verifyOwnerToken, authorizeRoles("venu_owners", "venue_owner", "owner"), getDetailedOccupancyStats);
-dashboardRouter.get("/customers", verifyOwnerToken, authorizeRoles("venu_owners", "venue_owner", "owner"), getOwnerCustomers);
+dashboardRouter.get("/calendar", verifyOwnerToken, authorizeRoles("venue_owner"), getOwnerCalendarData);
+dashboardRouter.get("/occupancy", verifyOwnerToken, authorizeRoles("venue_owner"), getDetailedOccupancyStats);
+dashboardRouter.get("/customers", verifyOwnerToken, authorizeRoles("venue_owner"), getOwnerCustomers);
 
 export default dashboardRouter;

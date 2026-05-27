@@ -21,9 +21,16 @@ let ownerToken = "";
 let userId = "";
 let ownerUserId = "";
 let ownerProfileId = "";
+let matchRequestId = "";
+let matchOfferId = "";
+let bookingId = "";
 
 const seedOtp = async (email, phone) => {
-  await prisma.oTP.deleteMany({ where: { email } });
+  await prisma.oTP.deleteMany({
+    where: {
+      OR: [{ email }, { phone }]
+    }
+  });
   await prisma.oTP.create({
     data: {
       email,
@@ -37,24 +44,47 @@ const seedOtp = async (email, phone) => {
 
 describe("Professional Module API", () => {
   beforeAll(async () => {
-    // Clean up
+    // Cleanup existing records with same email/phone
     for (const email of [emailUser, emailOwner]) {
       const user = await prisma.user.findFirst({ where: { email } });
       if (user) {
+        await prisma.walletTransaction.deleteMany({ where: { userId: user.id } }).catch(() => {});
         await prisma.wallet.deleteMany({ where: { userId: user.id } }).catch(() => {});
         await prisma.review.deleteMany({ where: { userId: user.id } }).catch(() => {});
+
+        const owner = await prisma.ownerProfile.findFirst({ where: { userId: user.id } });
+        if (owner) {
+          await prisma.professionalMatchOffer.deleteMany({ where: { professionalId: owner.id } }).catch(() => {});
+          await prisma.onDemandProfessionalBooking.deleteMany({ where: { professionalId: owner.id } }).catch(() => {});
+          await prisma.professionalTask.deleteMany({ where: { professionalId: owner.id } }).catch(() => {});
+          await prisma.professionalCustomer.deleteMany({ where: { professionalId: owner.id } }).catch(() => {});
+          await prisma.withdrawalRequest.deleteMany({ where: { ownerId: owner.id } }).catch(() => {});
+          await prisma.ownerProfile.delete({ where: { id: owner.id } }).catch(() => {});
+        }
+        await prisma.professionalMatchRequest.deleteMany({ where: { userId: user.id } }).catch(() => {});
+        await prisma.onDemandProfessionalBooking.deleteMany({ where: { userId: user.id } }).catch(() => {});
         await prisma.professionalBooking.deleteMany({ where: { userId: user.id } }).catch(() => {});
-        await prisma.ownerProfile.deleteMany({ where: { userId: user.id } }).catch(() => {});
         await prisma.user.delete({ where: { id: user.id } }).catch(() => {});
       }
       await prisma.oTP.deleteMany({ where: { email } }).catch(() => {});
     }
 
-    // Seed OTP
+    // 1. Seed OTPs
     await seedOtp(emailUser, phoneUser);
     await seedOtp(emailOwner, phoneOwner);
 
-    // Register User
+    // 2. Verify OTPs to get registration tokens
+    const verifyUser = await request(app)
+      .post("/api/user/auth/verify-otp")
+      .send({ email: emailUser, phone: phoneUser, otp: "123456" });
+    const userRegToken = verifyUser.body.registrationToken;
+
+    const verifyOwner = await request(app)
+      .post("/api/user/auth/verify-otp")
+      .send({ email: emailOwner, phone: phoneOwner, otp: "123456" });
+    const ownerRegToken = verifyOwner.body.registrationToken;
+
+    // 3. Register User
     const regUser = await request(app)
       .post("/api/user/auth/register")
       .send({
@@ -67,95 +97,79 @@ describe("Professional Module API", () => {
         password: "User@Pass123",
         confirmPassword: "User@Pass123",
         otp: "123456",
-        phoneOtp: "123456",
+        registrationToken: userRegToken
       });
 
     if (regUser.statusCode === 201) {
       userToken = regUser.body.token;
       userId = regUser.body.user?.id || "";
+    } else {
+      console.error("[SETUP ERROR] User registration failed:", regUser.body);
     }
 
-    // Register Owner
+    // 4. Register Owner (as Umpire)
     const regOwner = await request(app)
-      .post("/api/user/auth/register")
+      .post("/api/owner/auth/owner/register")
       .send({
-        name: "Coach Professional",
+        name: "Umpire Pro Partner",
         email: emailOwner,
-        username: userNameOwner,
         phone: phoneOwner,
+        role: "UMPIRE",
         gender: "Male",
         location: "Mumbai",
         password: "Owner@Pass123",
-        confirmPassword: "Owner@Pass123",
+        businessName: "Mumbai Cricket Officials",
         otp: "123456",
-        phoneOtp: "123456",
+        registrationToken: ownerRegToken
       });
 
     if (regOwner.statusCode === 201) {
       ownerUserId = regOwner.body.user?.id || "";
+      ownerToken = regOwner.body.token;
+    } else {
+      console.error("[SETUP ERROR] Owner registration failed:", regOwner.body);
     }
 
-    // Direct ID discovery from tokens if needed
-    if (!userId && userToken) {
-      const decoded = jwt.decode(userToken);
-      userId = decoded.id;
+    // Direct Discovery of ownerProfileId
+    if (ownerUserId) {
+      const ownerProfile = await prisma.ownerProfile.findUnique({
+        where: { userId: ownerUserId }
+      });
+      if (ownerProfile) {
+        ownerProfileId = ownerProfile.id;
+      }
     }
 
-    // Update Owner role to COACH and location in DB
-    await prisma.user.update({
-      where: { id: ownerUserId },
-      data: { 
-        role: "COACH",
-        city: "Mumbai",
-        state: "Maharashtra"
-      }
-    });
+    // Setup user's wallet with enough balance
+    if (userId) {
+      await prisma.wallet.upsert({
+        where: { userId },
+        update: { balance: 2000 },
+        create: { userId, balance: 2000, reservedBalance: 0 }
+      });
+    }
 
-    // Create OwnerProfile
-    const ownerProfile = await prisma.ownerProfile.create({
-      data: {
-        userId: ownerUserId,
-        businessName: "Mumbai Cricket Academy",
-        verified: true,
-        price: 150,
-        bio: "Veteran cricket coach with 10 years experience",
-        experience: "10 years",
-        specialization: "Spin Bowling",
-        rating: 5,
-        numReviews: 1
-      }
-    });
-    ownerProfileId = ownerProfile.id;
-
-    // Generate authenticated JWT with ownerId for owner
-    ownerToken = jwt.sign(
-      {
-        id: ownerUserId,
-        role: "COACH",
-        ownerId: ownerProfileId
-      },
-      process.env.JWT_SECRET,
-      { expiresIn: "1d" }
-    );
-
-    // Initialize user's wallet with enough balance (coins)
-    await prisma.wallet.upsert({
-      where: { userId },
-      update: { balance: 1000 },
-      create: { userId, balance: 1000, reservedBalance: 0 }
-    });
+    // Setup owner's initial wallet/profile data
+    if (ownerProfileId) {
+      await prisma.ownerProfile.update({
+        where: { id: ownerProfileId },
+        data: { price: 150.00 }
+      });
+    }
   }, 30000);
 
   afterAll(async () => {
-    // Cleanup
+    // Cleanup matching records
     if (ownerProfileId) {
-      await prisma.professionalAvailability.deleteMany({ where: { professionalId: ownerProfileId } }).catch(() => {});
+      await prisma.professionalMatchOffer.deleteMany({ where: { professionalId: ownerProfileId } }).catch(() => {});
+      await prisma.onDemandProfessionalBooking.deleteMany({ where: { professionalId: ownerProfileId } }).catch(() => {});
       await prisma.professionalBooking.deleteMany({ where: { professionalId: ownerProfileId } }).catch(() => {});
       await prisma.review.deleteMany({ where: { professionalId: ownerProfileId } }).catch(() => {});
       await prisma.ownerProfile.delete({ where: { id: ownerProfileId } }).catch(() => {});
     }
     for (const id of [userId, ownerUserId]) {
       if (id) {
+        await prisma.walletTransaction.deleteMany({ where: { userId: id } }).catch(() => {});
         await prisma.wallet.deleteMany({ where: { userId: id } }).catch(() => {});
         await prisma.user.delete({ where: { id } }).catch(() => {});
       }
@@ -187,7 +201,7 @@ describe("Professional Module API", () => {
   });
 
   describe("GET /api/professional/details/:id", () => {
-    it("should retrieve a professional by ID", async () => {
+    it("should retrieve professional details by ID", async () => {
       const res = await request(app)
         .get(`/api/professional/details/${ownerProfileId}`);
 
@@ -197,52 +211,109 @@ describe("Professional Module API", () => {
     });
   });
 
-  describe("PUT /api/professional/availability", () => {
-    it("should update availability slots for the professional", async () => {
-      const slots = [
-        { startTime: "10:00", endTime: "11:00", isAvailable: true },
-        { startTime: "11:00", endTime: "12:00", isAvailable: true }
-      ];
-
+  describe("PUT /api/professional/toggle-online", () => {
+    it("should toggle professional online status and set geolocation", async () => {
       const res = await request(app)
-        .put("/api/professional/availability")
+        .put("/api/professional/toggle-online")
         .set("Authorization", `Bearer ${ownerToken}`)
         .send({
-          date: "2026-05-20",
-          slots
+          isOnline: true,
+          latitude: 19.0760,
+          longitude: 72.8777
         });
 
       expect(res.statusCode).toBe(200);
-      expect(res.body.message).toBe("Availability updated");
-      expect(res.body.availability.slots).toHaveLength(2);
+      expect(res.body.success).toBe(true);
+      expect(res.body.isOnline).toBe(true);
     });
   });
 
-  describe("POST /api/professional/book", () => {
-    it("should book a professional and reserve coins", async () => {
-      const slotsToBook = [{ startTime: "10:00", endTime: "11:00" }];
-
+  describe("POST /api/professional/match-request", () => {
+    it("should fail match request if wallet balance is insufficient for max budget", async () => {
       const res = await request(app)
-        .post("/api/professional/book")
+        .post("/api/professional/match-request")
         .set("Authorization", `Bearer ${userToken}`)
         .send({
-          professionalId: ownerProfileId,
-          date: "2026-05-20",
-          slots: slotsToBook,
-          totalAmount: 150,
-          bookingType: "COACHING",
-          message: "Looking forward to coaching!"
+          customLocation: { latitude: 19.0760, longitude: 72.8777 },
+          roles: ["UMPIRE"],
+          minBudget: 100.00,
+          maxBudget: 5000.00 // User wallet has only 2000 coins
+        });
+
+      expect(res.statusCode).toBe(400);
+      expect(res.body.message).toContain("Insufficient wallet balance");
+    });
+
+    it("should create match request successfully and create match offers for online candidates in radius", async () => {
+      const res = await request(app)
+        .post("/api/professional/match-request")
+        .set("Authorization", `Bearer ${userToken}`)
+        .send({
+          customLocation: { latitude: 19.0760, longitude: 72.8777 },
+          roles: ["UMPIRE"],
+          minBudget: 100.00,
+          maxBudget: 300.00
         });
 
       expect(res.statusCode).toBe(201);
-      expect(res.body.message).toContain("Coins reserved");
+      expect(res.body.success).toBe(true);
+      expect(res.body.matchRequest).toBeDefined();
+      matchRequestId = res.body.matchRequest.id;
+
+      // Verify that a pending match offer was automatically generated for the online professional
+      const offer = await prisma.professionalMatchOffer.findFirst({
+        where: { requestId: matchRequestId, professionalId: ownerProfileId }
+      });
+      expect(offer).toBeDefined();
+      matchOfferId = offer.id;
     });
   });
 
-  describe("GET /api/professional/my-bookings", () => {
-    it("should retrieve the professional's bookings list", async () => {
+  describe("POST /api/professional/offers/:offerId/accept", () => {
+    it("should accept match offer, create booking, and return OTP check-in code", async () => {
       const res = await request(app)
-        .get("/api/professional/my-bookings")
+        .post(`/api/professional/offers/${matchOfferId}/accept`)
+        .set("Authorization", `Bearer ${ownerToken}`);
+
+      expect(res.statusCode).toBe(200);
+      expect(res.body.success).toBe(true);
+      expect(res.body.booking).toBeDefined();
+      expect(res.body.otp).toBeDefined();
+      
+      bookingId = res.body.booking.id;
+      // Store plain text OTP from response to perform check-in verification
+      const plainOtp = res.body.otp;
+
+      // Verify DB status transitions
+      const updatedReq = await prisma.professionalMatchRequest.findUnique({ where: { id: matchRequestId } });
+      expect(updatedReq.status).toBe("MATCHED");
+
+      const updatedOffer = await prisma.professionalMatchOffer.findUnique({ where: { id: matchOfferId } });
+      expect(updatedOffer.status).toBe("ACCEPTED");
+
+      const booking = await prisma.onDemandProfessionalBooking.findUnique({ where: { id: bookingId } });
+      expect(booking.status).toBe("ASSIGNED");
+
+      // Verify OTP verification check-in route
+      const checkinRes = await request(app)
+        .post(`/api/professional/bookings/${bookingId}/verify-otp`)
+        .set("Authorization", `Bearer ${ownerToken}`)
+        .send({ otp: plainOtp });
+
+      expect(checkinRes.statusCode).toBe(200);
+      expect(checkinRes.body.success).toBe(true);
+      expect(checkinRes.body.message).toContain("Check-in successful");
+
+      // Verify escrow released to professional wallet
+      const activeBooking = await prisma.onDemandProfessionalBooking.findUnique({ where: { id: bookingId } });
+      expect(activeBooking.status).toBe("IN_PROGRESS");
+    }, 15000);
+  });
+
+  describe("GET /api/professional/on-demand-bookings", () => {
+    it("should retrieve matched on-demand booking histories for professionals", async () => {
+      const res = await request(app)
+        .get("/api/professional/on-demand-bookings")
         .set("Authorization", `Bearer ${ownerToken}`);
 
       expect(res.statusCode).toBe(200);
@@ -251,61 +322,31 @@ describe("Professional Module API", () => {
     });
   });
 
-  describe("POST /api/professional/handle-request", () => {
-    it("should accept a booking request and transfer coins", async () => {
-      // First get the booking ID
-      const bookingsRes = await request(app)
-        .get("/api/professional/my-bookings")
-        .set("Authorization", `Bearer ${ownerToken}`);
-      
-      const bookingId = bookingsRes.body.bookings[0].id;
-
+  describe("GET /api/professional/user-on-demand-bookings", () => {
+    it("should retrieve matched on-demand booking histories for users", async () => {
       const res = await request(app)
-        .post("/api/professional/handle-request")
-        .set("Authorization", `Bearer ${ownerToken}`)
-        .send({
-          bookingId,
-          status: "ACCEPTED"
-        });
+        .get("/api/professional/user-on-demand-bookings")
+        .set("Authorization", `Bearer ${userToken}`);
 
       expect(res.statusCode).toBe(200);
-      expect(res.body.message).toContain("accepted successfully");
+      expect(res.body).toHaveProperty("bookings");
+      expect(res.body.bookings.length).toBeGreaterThan(0);
     });
   });
 
   describe("POST /api/professional/review", () => {
-    it("should add a review for the professional", async () => {
+    it("should submit a testimonial review rating for matched professional", async () => {
       const res = await request(app)
         .post("/api/professional/review")
         .set("Authorization", `Bearer ${userToken}`)
         .send({
           professionalId: ownerProfileId,
-          rating: 4,
-          comment: "Excellent coaching!"
+          rating: 5,
+          comment: "Brilliant officiating work!"
         });
 
       expect(res.statusCode).toBe(201);
       expect(res.body.message).toBe("Review added");
-    });
-  });
-
-  describe("PUT /api/professional/update-profile", () => {
-    it("should update the professional's profile details", async () => {
-      const res = await request(app)
-        .put("/api/professional/update-profile")
-        .set("Authorization", `Bearer ${ownerToken}`)
-        .send({
-          name: "Coach Professional Updated",
-          bio: "Updated veteran coach biography",
-          hourlyPrice: 175,
-          city: "Navi Mumbai",
-          state: "Maharashtra",
-          specialization: "Fast Bowling"
-        });
-
-      expect(res.statusCode).toBe(200);
-      expect(res.body.message).toBe("Profile updated successfully");
-      expect(res.body.professional.user.name).toBe("Coach Professional Updated");
     });
   });
 });

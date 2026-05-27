@@ -184,7 +184,7 @@ const SupportCenter = () => {
                       </div>
 
                      {/* Replies */}
-                     {selectedTicket.replies.map((reply, idx) => (
+                     {(selectedTicket.replies || []).map((reply, idx) => (
                        <div key={idx} className={`flex flex-col ${reply.sender === 'ADMIN' ? 'items-end' : 'items-start'} max-w-[80%] ${reply.sender === 'ADMIN' ? 'ml-auto' : ''}`}>
                           <div className={`p-4 rounded-[8px] border shadow-xl ${ reply.sender === 'ADMIN' ? 'bg-[#55DEE8]/10 border-[#55DEE8]/20 rounded-tr-none' : 'bg-[#1a1a1a] border-white/5 rounded-tl-none' }`}>
                              <p className="text-sm leading-relaxed">{reply.message}</p>

@@ -68,6 +68,8 @@ model User {
   ownerRequests           OwnerRequest[]
   posts                   Post[]
   professionalBookings    ProfessionalBooking[]
+  matchRequests           ProfessionalMatchRequest[]
+  onDemandBookings        OnDemandProfessionalBooking[]
   recoveryToken           RecoveryToken?
   reels                   Reel[]
   reelComments            ReelComment[]
@@ -192,9 +194,10 @@ model OwnerProfile {
   gender              String?
   bio                 String?
   coachingLevel       String?
-  availabilityTimings String?
-  availabilityMode    String?
-  preferredLocations  String?
+  isOnline            Boolean                    @default(false)
+  latitude            Decimal?                   @db.Decimal(10, 8)
+  longitude           Decimal?                   @db.Decimal(11, 8)
+  lastLocationUpdate  DateTime?
   trainingTypes       String[]
   ageGroups           String[]
   languages           String?
@@ -202,6 +205,20 @@ model OwnerProfile {
   experience          String?
   specialization      String?
   certifications      String[]
+  bannerUrl           String?
+  instagram           String?
+  linkedin            String?
+  youtube             String?
+  streamPlatforms     String[]
+  matchesCovered      String?
+  camerasSupported    Int?
+  streamQuality       String?
+  liveScoringSupport  Boolean?                   @default(false)
+  matchFormats        String[]
+  liveCommentarySupported Boolean?               @default(false)
+  panelDiscussionEnabled Boolean?                @default(false)
+  structuredAchievements Json?
+  portfolio           Json?
   rating              Float                      @default(0)
   numReviews          Int                        @default(0)
   businessDetails     Json?
@@ -210,7 +227,6 @@ model OwnerProfile {
   notificationPrefs   Json?
   createdAt           DateTime                   @default(now())
   updatedAt           DateTime                   @updatedAt
-  workingHours        Json?
   createdChats        Chat[]                     @relation("ChatCreatorOwner")
   chatMemberships     ChatParticipant[]          @relation("OwnerChatMemberships")
   coupons             Coupon[]
@@ -218,8 +234,9 @@ model OwnerProfile {
   sentMessages        Message[]                  @relation("MessageSenderOwner")
   notifications       Notification[]
   user                User                       @relation(fields: [userId], references: [id])
-  availabilities      ProfessionalAvailability[]
   profBookings        ProfessionalBooking[]
+  matchOffers         ProfessionalMatchOffer[]
+  onDemandBookings    OnDemandProfessionalBooking[]
   sessions            ProfessionalSession[]
   reviews             Review[]                   @relation("ProfessionalReview")
   turfs               Turf[]
@@ -288,6 +305,8 @@ model Turf {
   timeSlots           TimeSlot[]
   turfLikes           TurfLike[]
   turfInteractions    TurfInteraction[]
+  matchRequests       ProfessionalMatchRequest[]
+  onDemandBookings    OnDemandProfessionalBooking[]
   owner               OwnerProfile @relation(fields: [ownerId], references: [id])
 
   @@index([ownerId])
@@ -1171,16 +1190,91 @@ model ProfessionalSession {
   students  User[]       @relation("SessionStudents")
 }
 
-model ProfessionalAvailability {
-  id             String       @id @default(uuid())
-  professionalId String
-  date           String
-  slots          Json
-  createdAt      DateTime     @default(now())
-  updatedAt      DateTime     @updatedAt
-  professional   OwnerProfile @relation(fields: [professionalId], references: [id])
+model ProfessionalMatchRequest {
+  id             String                   @id @default(uuid())
+  userId         String
+  groundId       String?
+  customLocation Json?
+  latitude       Decimal                  @db.Decimal(10, 8)
+  longitude      Decimal                  @db.Decimal(11, 8)
+  roles          Role[]
+  minBudget      Decimal                  @db.Decimal(10, 2)
+  maxBudget      Decimal                  @db.Decimal(10, 2)
+  
+  matchDate       String?
+  matchStartTime  String?
+  matchEndTime    String?
+  
+  queuePositions       Json?
+  currentPositionIndex Int?                     @default(0)
+  lastRoutedAt         DateTime?
 
-  @@unique([professionalId, date])
+  status         MatchRequestStatus       @default(SEARCHING)
+  createdAt      DateTime                 @default(now())
+  expiresAt      DateTime
+  user           User                     @relation(fields: [userId], references: [id])
+  ground         Turf?                    @relation(fields: [groundId], references: [id])
+  offers         ProfessionalMatchOffer[]
+}
+
+model ProfessionalMatchOffer {
+  id             String                   @id @default(uuid())
+  requestId      String
+  professionalId String
+  status         OfferStatus              @default(PENDING)
+  createdAt      DateTime                 @default(now())
+  request        ProfessionalMatchRequest @relation(fields: [requestId], references: [id], onDelete: Cascade)
+  professional   OwnerProfile             @relation(fields: [professionalId], references: [id])
+}
+
+model OnDemandProfessionalBooking {
+  id             String                @id @default(uuid())
+  requestId      String                @unique
+  userId         String
+  professionalId String
+  role           Role
+  groundId       String?
+  customLocation Json?
+  latitude       Decimal               @db.Decimal(10, 8)
+  longitude      Decimal               @db.Decimal(11, 8)
+  hourlyRate     Decimal               @db.Decimal(10, 2)
+  
+  matchDate       String?
+  matchStartTime  String?
+  matchEndTime    String?
+  matchEndParsed  DateTime?
+
+  otpHash        String
+  status         OnDemandBookingStatus @default(ASSIGNED)
+  verifiedAt     DateTime?
+  createdAt      DateTime              @default(now())
+  updatedAt      DateTime              @updatedAt
+  user           User                  @relation(fields: [userId], references: [id])
+  professional   OwnerProfile          @relation(fields: [professionalId], references: [id])
+  ground         Turf?                 @relation(fields: [groundId], references: [id])
+}
+
+enum MatchRequestStatus {
+  SEARCHING
+  MATCHED
+  EXPIRED
+  CANCELLED
+  EXHAUSTED
+}
+
+enum OfferStatus {
+  PENDING
+  ACCEPTED
+  REJECTED
+  EXPIRED
+}
+
+enum OnDemandBookingStatus {
+  ASSIGNED
+  IN_PROGRESS
+  COMPLETED
+  CANCELLED
+  NO_SHOW
 }
 
 model ProfessionalBooking {
@@ -1212,6 +1306,8 @@ enum Role {
   STREAMER
   SYSTEM
   ANONYMOUS
+  COMMENTATOR
+  CHEERLEADER
 }
 
 enum BookingStatus {

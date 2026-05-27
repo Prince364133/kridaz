@@ -1908,7 +1908,7 @@ export const claimInviteSlot = async (req, res) => {
                 name: userDetails.name || inviteData.name,
                 email: userDetails.email || inviteData.email,
                 phone: userDetails.phone || inviteData.phone || "",
-                role: "LIMITED_UMPIRE",
+                role: "UMPIRE",
                 businessName: userDetails.name || inviteData.name || "Independent Partner"
               }
             });
@@ -1916,25 +1916,25 @@ export const claimInviteSlot = async (req, res) => {
             await tx.user.update({
               where: { id: userId },
               data: {
-                role: "LIMITED_UMPIRE",
+                role: "UMPIRE",
                 ownerDetailsId: owner.id
               }
             });
 
-            updatedRole = "LIMITED_UMPIRE";
+            updatedRole = "UMPIRE";
             updatedOwnerId = owner.id;
           }
-        } else if (["VENUE_OWNER", "OWNER", "USER"].includes(owner.role)) {
+        } else if (["VENUE_OWNER", "USER"].includes(owner.role)) {
           await tx.ownerProfile.update({
             where: { id: owner.id },
-            data: { role: "LIMITED_UMPIRE" }
+            data: { role: "UMPIRE" }
           });
           await tx.user.update({
             where: { id: userId },
-            data: { role: "LIMITED_UMPIRE" }
+            data: { role: "UMPIRE" }
           });
 
-          updatedRole = "LIMITED_UMPIRE";
+          updatedRole = "UMPIRE";
           updatedOwnerId = owner.id;
         }
 

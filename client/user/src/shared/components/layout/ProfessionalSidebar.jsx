@@ -35,18 +35,12 @@ const ProfessionalSidebar = ({ isOpen, toggleSidebar, isMinimized, className }) 
 
   const mainNavItems = [
     { to: `/professional/${role}`, label: "Overview", icon: LayoutDashboard },
-    { to: `/professional/${role}/umpire-matches`, label: "Matches (Umpire)", icon: Trophy, roles: ["umpire"] },
-    { to: `/professional/${role}/streamer-matches`, label: "Stream Matches", icon: Video, roles: ["streamer"] },
-    { to: `/professional/${role}/availability`, label: "Availability", icon: Clock },
-    { to: `/professional/${role}/practice-scheduling`, label: "Practice Scheduling", icon: Calendar },
-    { to: `/professional/${role}/customers`, label: "Customers", icon: Users },
-    { to: `/professional/${role}/bookings`, label: "Bookings", icon: Activity },
-    { to: `/professional/${role}/revenue`, label: "Earnings", icon: IndianRupee },
-    { to: `/professional/${role}/banking`, label: "Payout & Banking", icon: Landmark },
-    { to: `/professional/${role}/reviews`, label: "Ratings & Reviews", icon: Star },
     { to: `/professional/${role}/profile`, label: "Profile", icon: User },
-    { to: `/professional/${role}/support`, label: "Docs & Support", icon: HelpCircle },
-  ].filter(item => !item.roles || item.roles.includes(role));
+    { to: `/professional/${role}/bookings`, label: "Bookings", icon: Activity },
+    { to: `/professional/${role}/payouts`, label: "Payouts & Earnings", icon: IndianRupee },
+    { to: `/professional/${role}/reviews`, label: "Reviews & Feedback", icon: Star },
+    { to: `/professional/${role}/support`, label: "Support & Dispute", icon: HelpCircle },
+  ];
 
   const bottomNavItems = [];
 
