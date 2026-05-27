@@ -64,6 +64,7 @@ const sidebars: SidebarsConfig = {
           ],
         },
         'backend/voice-rooms',
+        'backend/professional-profile-view',
       ],
     },
     {
