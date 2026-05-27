@@ -59,7 +59,7 @@ export default function FindProfessionals() {
   const [matchDate, setMatchDate] = useState("");
   const [matchStartTime, setMatchStartTime] = useState("");
   const [matchEndTime, setMatchEndTime] = useState("");
-  const [expiresInSeconds, setExpiresInSeconds] = useState(60);
+  const [expiresInSeconds, setExpiresInSeconds] = useState(40);
   const [grounds, setGrounds] = useState([]);
   const [loadingGrounds, setLoadingGrounds] = useState(false);
 
@@ -705,26 +705,7 @@ export default function FindProfessionals() {
                 </div>
               </div>
 
-              {/* Timeout — compact inline */}
-              <div className="flex items-center justify-between bg-white/[0.03] border border-white/5 rounded-lg px-4 py-3">
-                <div>
-                  <span className="text-[10px] font-black uppercase text-white/50 tracking-wider">Request Timeout</span>
-                  <p className="text-[9px] text-white/30 mt-0.5">How long pros can see your request</p>
-                </div>
-                <div className="flex items-center gap-2 bg-black border border-white/10 rounded-lg px-2 py-1">
-                  <button
-                    type="button"
-                    onClick={() => setExpiresInSeconds(Math.max(30, expiresInSeconds - 30))}
-                    className="w-6 h-6 flex items-center justify-center rounded bg-white/5 text-white/60 hover:bg-white/10 hover:text-white text-sm font-bold transition-colors"
-                  >−</button>
-                  <span className="text-sm font-black text-white w-10 text-center tabular-nums">{expiresInSeconds}s</span>
-                  <button
-                    type="button"
-                    onClick={() => setExpiresInSeconds(Math.min(300, expiresInSeconds + 30))}
-                    className="w-6 h-6 flex items-center justify-center rounded bg-white/5 text-white/60 hover:bg-white/10 hover:text-white text-sm font-bold transition-colors"
-                  >+</button>
-                </div>
-              </div>
+
 
               {/* Submit Button */}
               <button
