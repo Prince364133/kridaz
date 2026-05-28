@@ -65,10 +65,7 @@ const ReelPlayer = ({ reelId, hlsUrl, isVisible, poster }) => {
       if (Hls.isSupported()) {
         const hls = new Hls({
           capLevelToPlayerSize: true,
-          autoStartLoad: true,
-          xhrSetup: (xhr) => {
-            xhr.withCredentials = true;
-          }
+          autoStartLoad: true
         });
         hlsRef.current = hls;
         hls.loadSource(src);
