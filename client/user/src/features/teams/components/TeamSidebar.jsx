@@ -64,7 +64,16 @@ const TeamSidebar = ({ onSelectTeam, selectedTeamId, onCreateTeam }) => {
               {activeTab === 'myTeams' ? 'Manage your squads' : activeTab === 'opponentTeams' ? 'Rival discovery' : 'Manage your scoring matches'}
             </p>
           </div>
-          <div className="relative">
+          <div className="flex items-center gap-2">
+            <button 
+              onClick={() => setIsStartScoringOpen(true)}
+              className="flex items-center gap-1.5 px-3 h-8 bg-[#BFF367]/10 border border-[#BFF367]/20 text-[#BFF367] rounded-[8px] hover:bg-[#BFF367]/20 hover:scale-105 transition-all duration-300 shrink-0"
+              title="Start Scoring"
+            >
+              <Trophy size={14} strokeWidth={2.5} />
+              <span className="text-[9px] font-black uppercase tracking-widest hidden sm:inline">Score</span>
+            </button>
+            <div className="relative">
             <button 
               onClick={() => setIsDropdownOpen(!isDropdownOpen)}
               className="w-8 h-8 flex items-center justify-center bg-gradient-to-r from-[#55DEE8] to-[#BFF367] text-black rounded-[8px] shadow-lg shadow-[#55DEE8]/10 hover:shadow-[#BFF367]/15 hover:scale-105 transition-all duration-300 shrink-0"
@@ -113,9 +122,8 @@ const TeamSidebar = ({ onSelectTeam, selectedTeamId, onCreateTeam }) => {
               )}
             </AnimatePresence>
           </div>
+          </div>
         </div>
-
-
 
         {/* Search */}
         <div className="mb-4">

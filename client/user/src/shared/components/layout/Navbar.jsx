@@ -216,7 +216,11 @@ const Navbar = () => {
                   </label>
                   <ul tabIndex={0} className="dropdown-content z-[100] mt-1 p-1 shadow-2xl bg-[#0A0A0A] border border-white/10 rounded-[8px] w-48 overflow-hidden backdrop-blur-xl">
                     <li>
-                      <Link to="/host-game" className="flex items-center gap-3 p-4 text-sm font-medium text-white/60 hover:text-[#84CC16] hover:bg-white/5 transition-all">
+                      <Link 
+                        to="/my-teams" 
+                        state={{ openStartScoringModal: true }}
+                        className="flex items-center gap-3 p-4 text-sm font-medium text-white/60 hover:text-[#84CC16] hover:bg-white/5 transition-all"
+                      >
                         Score Match
                       </Link>
                     </li>
