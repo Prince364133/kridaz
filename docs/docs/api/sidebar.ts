@@ -78,6 +78,68 @@ const sidebar: SidebarsConfig = {
     },
     {
       type: "category",
+      label: "Turf",
+      link: {
+        type: "doc",
+        id: "api/turf",
+      },
+      items: [
+        {
+          type: "doc",
+          id: "api/get-all-turfs",
+          label: "Get all turfs",
+          className: "api-method get",
+        },
+        {
+          type: "doc",
+          id: "api/get-unique-turf-locations",
+          label: "Get unique turf locations",
+          className: "api-method get",
+        },
+        {
+          type: "doc",
+          id: "api/get-turf-details",
+          label: "Get turf details",
+          className: "api-method get",
+        },
+        {
+          type: "doc",
+          id: "api/get-availability-time-slots",
+          label: "Get availability time slots",
+          className: "api-method get",
+        },
+      ],
+    },
+    {
+      type: "category",
+      label: "Wallet",
+      link: {
+        type: "doc",
+        id: "api/wallet",
+      },
+      items: [
+        {
+          type: "doc",
+          id: "api/get-wallet-balance-and-transactions",
+          label: "Get wallet balance and transactions",
+          className: "api-method get",
+        },
+        {
+          type: "doc",
+          id: "api/create-wallet-top-up-order",
+          label: "Create wallet top-up order",
+          className: "api-method post",
+        },
+        {
+          type: "doc",
+          id: "api/verify-wallet-top-up-payment",
+          label: "Verify wallet top-up payment",
+          className: "api-method post",
+        },
+      ],
+    },
+    {
+      type: "category",
       label: "Booking",
       link: {
         type: "doc",
@@ -118,29 +180,59 @@ const sidebar: SidebarsConfig = {
     },
     {
       type: "category",
-      label: "Wallet",
+      label: "Player",
       link: {
         type: "doc",
-        id: "api/wallet",
+        id: "api/player",
       },
       items: [
         {
           type: "doc",
-          id: "api/get-wallet-balance-and-transactions",
-          label: "Get wallet balance and transactions",
+          id: "api/search-for-players",
+          label: "Search for players",
           className: "api-method get",
         },
         {
           type: "doc",
-          id: "api/create-wallet-top-up-order",
-          label: "Create wallet top-up order",
+          id: "api/get-nearby-players",
+          label: "Get nearby players",
+          className: "api-method get",
+        },
+        {
+          type: "doc",
+          id: "api/update-user-location",
+          label: "Update user location",
           className: "api-method post",
         },
         {
           type: "doc",
-          id: "api/verify-wallet-top-up-payment",
-          label: "Verify wallet top-up payment",
+          id: "api/get-current-users-network",
+          label: "Get current user's network",
+          className: "api-method get",
+        },
+        {
+          type: "doc",
+          id: "api/get-player-profile",
+          label: "Get player profile",
+          className: "api-method get",
+        },
+        {
+          type: "doc",
+          id: "api/follow-a-player",
+          label: "Follow a player",
           className: "api-method post",
+        },
+        {
+          type: "doc",
+          id: "api/unfollow-a-player",
+          label: "Unfollow a player",
+          className: "api-method post",
+        },
+        {
+          type: "doc",
+          id: "api/get-players-network-by-id",
+          label: "Get player's network by ID",
+          className: "api-method get",
         },
       ],
     },
@@ -193,40 +285,6 @@ const sidebar: SidebarsConfig = {
           id: "api/delete-a-reel",
           label: "Delete a reel",
           className: "api-method delete",
-        },
-      ],
-    },
-    {
-      type: "category",
-      label: "Turf",
-      link: {
-        type: "doc",
-        id: "api/turf",
-      },
-      items: [
-        {
-          type: "doc",
-          id: "api/get-all-turfs",
-          label: "Get all turfs",
-          className: "api-method get",
-        },
-        {
-          type: "doc",
-          id: "api/get-unique-turf-locations",
-          label: "Get unique turf locations",
-          className: "api-method get",
-        },
-        {
-          type: "doc",
-          id: "api/get-turf-details",
-          label: "Get turf details",
-          className: "api-method get",
-        },
-        {
-          type: "doc",
-          id: "api/get-availability-time-slots",
-          label: "Get availability time slots",
-          className: "api-method get",
         },
       ],
     },
@@ -313,64 +371,6 @@ const sidebar: SidebarsConfig = {
           id: "api/hard-delete-a-turf",
           label: "Hard delete a turf",
           className: "api-method delete",
-        },
-      ],
-    },
-    {
-      type: "category",
-      label: "Player",
-      link: {
-        type: "doc",
-        id: "api/player",
-      },
-      items: [
-        {
-          type: "doc",
-          id: "api/search-for-players",
-          label: "Search for players",
-          className: "api-method get",
-        },
-        {
-          type: "doc",
-          id: "api/get-nearby-players",
-          label: "Get nearby players",
-          className: "api-method get",
-        },
-        {
-          type: "doc",
-          id: "api/update-user-location",
-          label: "Update user location",
-          className: "api-method post",
-        },
-        {
-          type: "doc",
-          id: "api/get-current-users-network",
-          label: "Get current user's network",
-          className: "api-method get",
-        },
-        {
-          type: "doc",
-          id: "api/get-player-profile",
-          label: "Get player profile",
-          className: "api-method get",
-        },
-        {
-          type: "doc",
-          id: "api/follow-a-player",
-          label: "Follow a player",
-          className: "api-method post",
-        },
-        {
-          type: "doc",
-          id: "api/unfollow-a-player",
-          label: "Unfollow a player",
-          className: "api-method post",
-        },
-        {
-          type: "doc",
-          id: "api/get-players-network-by-id",
-          label: "Get player's network by ID",
-          className: "api-method get",
         },
       ],
     },
