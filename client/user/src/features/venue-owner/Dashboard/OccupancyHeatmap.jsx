@@ -55,16 +55,16 @@ const OccupancyHeatmap = () => {
 
   return (
     <div className="bg-[#000000] p-6 rounded-[8px] border border-[#2D2D2D] shadow-[var(--shadow-2)]">
-      <div className="flex items-center justify-between mb-6">
+      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 mb-6">
         <div>
-          <h2 className="text-[14px] font-semibold text-white uppercase tracking-wider">Weekly Occupancy Calendar</h2>
+          <h2 className="text-[14px] font-black text-white uppercase tracking-tighter whitespace-nowrap" style={{ fontFamily: "'Open Sans', sans-serif" }}>Weekly Occupancy Calendar</h2>
           <p className="text-[10px] font-normal text-[#878C9F] uppercase tracking-widest mt-1">Real-time weekly booking density</p>
         </div>
         <div className="flex items-center gap-4">
           <select 
             value={selectedTurf} 
             onChange={(e) => setSelectedTurf(e.target.value)}
-            className="bg-[#151617] border border-[#2D2D2D] text-white text-[10px] font-bold uppercase tracking-widest rounded-[6px] px-3 py-1.5 focus:outline-none focus:border-[#55DEE8]/50 transition-all cursor-pointer hover:border-[#55DEE8]/30"
+            className="bg-[#151617] border border-[#2D2D2D] text-white text-[7px] font-black uppercase tracking-widest rounded-[4px] px-1.5 py-0.5 focus:outline-none focus:border-[#BFF367]/50 transition-all cursor-pointer hover:border-[#BFF367]/30"
           >
             <option value="" disabled>Select Facility</option>
             {turfs.map(turf => (
@@ -72,13 +72,13 @@ const OccupancyHeatmap = () => {
             ))}
           </select>
 
-          <div className="flex items-center gap-4 ml-2">
+          <div className="flex flex-wrap items-center gap-4 lg:ml-2 mt-2 lg:mt-0">
             <div className="flex items-center gap-1.5">
               <div className="w-3 h-3 rounded-[2px] bg-[#2D2D2D]" />
               <span className="text-[10px] text-[#999999] font-medium uppercase tracking-wider">Empty</span>
             </div>
             <div className="flex items-center gap-1.5">
-              <div className="w-3 h-3 rounded-[2px] bg-[#55DEE8]" />
+              <div className="w-3 h-3 rounded-[2px] bg-[#BFF367]" />
               <span className="text-[10px] text-[#999999] font-medium uppercase tracking-wider">Booked</span>
             </div>
           </div>
@@ -129,10 +129,10 @@ const OccupancyHeatmap = () => {
           <div className="bg-[#151617] border border-[#2D2D2D] rounded-[12px] w-full max-w-lg overflow-hidden shadow-2xl">
             <div className="p-6 border-b border-[#2D2D2D] flex items-center justify-between bg-black/40">
               <div>
-                <h3 className="text-xl font-black text-white uppercase tracking-tight">
+                <h3 className="text-xl font-black font-inter text-white uppercase tracking-tight">
                   {days[selectedSlot.day]} @ {selectedSlot.hour === 0 ? '12 AM' : selectedSlot.hour < 12 ? `${selectedSlot.hour} AM` : selectedSlot.hour === 12 ? '12 PM' : `${selectedSlot.hour-12} PM`}
                 </h3>
-                <p className="text-sm text-[#55DEE8] font-medium uppercase tracking-widest mt-1">
+                <p className="text-sm text-[#BFF367] font-medium uppercase tracking-widest mt-1">
                   {selectedSlot.count} ACTIVE BOOKINGS
                 </p>
               </div>
@@ -147,14 +147,14 @@ const OccupancyHeatmap = () => {
             <div className="max-h-[60vh] overflow-y-auto p-6 space-y-4 no-scrollbar">
               {selectedSlot.details.length > 0 ? (
                 selectedSlot.details.map((b, idx) => (
-                  <div key={idx} className="bg-[#000000] p-5 rounded-[8px] border border-[#2D2D2D] hover:border-[#55DEE8]/30 transition-all group">
+                  <div key={idx} className="bg-[#000000] p-5 rounded-[8px] border border-[#2D2D2D] hover:border-[#BFF367]/30 transition-all group">
                     <div className="flex items-center justify-between mb-4">
                        <div className="flex items-center gap-3">
-                          <div className="w-10 h-10 rounded-[6px] bg-[#55DEE8] flex items-center justify-center text-black font-black text-lg">
+                          <div className="w-10 h-10 rounded-[6px] bg-[#BFF367] flex items-center justify-center text-black font-black text-lg">
                              {b.user?.[0] || 'G'}
                           </div>
                           <div>
-                             <h4 className="text-white font-bold uppercase tracking-tight group-hover:text-[#55DEE8] transition-colors">{b.user || 'Guest'}</h4>
+                             <h4 className="text-white font-bold uppercase tracking-tight group-hover:text-[#BFF367] transition-colors">{b.user || 'Guest'}</h4>
                              <p className="text-[10px] text-[#999999] uppercase tracking-widest">{b.turf}</p>
                           </div>
                        </div>
@@ -167,17 +167,17 @@ const OccupancyHeatmap = () => {
                     <div className="grid grid-cols-2 gap-4 pt-4 border-t border-[#2D2D2D]">
                        <div className="space-y-2">
                           <div className="flex items-center gap-2 text-[#999999]">
-                             <Phone size={12} className="text-[#55DEE8]" />
+                             <Phone size={12} className="text-[#BFF367]" />
                              <span className="text-[11px] font-medium">{b.phone || 'N/A'}</span>
                           </div>
                           <div className="flex items-center gap-2 text-[#999999]">
-                             <Mail size={12} className="text-[#55DEE8]" />
+                             <Mail size={12} className="text-[#BFF367]" />
                              <span className="text-[11px] font-medium truncate">{b.email || 'N/A'}</span>
                           </div>
                        </div>
                        <div className="space-y-2">
                           <div className="flex items-center gap-2 text-[#999999]">
-                             <Clock size={12} className="text-[#55DEE8]" />
+                             <Clock size={12} className="text-[#BFF367]" />
                              <span className="text-[11px] font-medium">{b.time}</span>
                           </div>
                        </div>

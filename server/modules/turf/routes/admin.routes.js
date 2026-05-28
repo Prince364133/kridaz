@@ -7,6 +7,7 @@ import {
   adminSoftDeleteTurf, 
   adminHardDeleteTurf 
 } from "../turf.controller.js";
+import verifyAdminToken from "../../../middleware/jwt/admin.middleware.js";
 
 const router = Router();
 
@@ -29,7 +30,7 @@ const router = Router();
  *       200:
  *         description: List of turfs retrieved
  */
-router.get("/all", adminGetAllTurfs);
+router.get("/all", verifyAdminToken, adminGetAllTurfs);
 
 /**
  * @swagger
@@ -49,7 +50,7 @@ router.get("/all", adminGetAllTurfs);
  *       200:
  *         description: Turf approved
  */
-router.put("/:id/approve", adminApproveTurf);
+router.put("/:id/approve", verifyAdminToken, adminApproveTurf);
 
 /**
  * @swagger
@@ -69,7 +70,7 @@ router.put("/:id/approve", adminApproveTurf);
  *       200:
  *         description: Turf rejected
  */
-router.put("/:id/reject", adminRejectTurf);
+router.put("/:id/reject", verifyAdminToken, adminRejectTurf);
 
 /**
  * @swagger
@@ -89,7 +90,7 @@ router.put("/:id/reject", adminRejectTurf);
  *       200:
  *         description: Turf decommissioned
  */
-router.put("/:id/decommission", adminDecommissionTurf);
+router.put("/:id/decommission", verifyAdminToken, adminDecommissionTurf);
 
 /**
  * @swagger
@@ -109,7 +110,7 @@ router.put("/:id/decommission", adminDecommissionTurf);
  *       200:
  *         description: Turf soft deleted
  */
-router.put("/:id/soft-delete", adminSoftDeleteTurf);
+router.put("/:id/soft-delete", verifyAdminToken, adminSoftDeleteTurf);
 
 /**
  * @swagger
@@ -129,6 +130,6 @@ router.put("/:id/soft-delete", adminSoftDeleteTurf);
  *       200:
  *         description: Turf permanently deleted
  */
-router.delete("/:id/hard-delete", adminHardDeleteTurf);
+router.delete("/:id/hard-delete", verifyAdminToken, adminHardDeleteTurf);
 
 export default router;

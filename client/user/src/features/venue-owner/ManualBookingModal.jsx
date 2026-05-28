@@ -137,9 +137,9 @@ const ManualBookingModal = ({ isOpen, onClose }) => {
         {/* Header */}
         <div className="px-6 py-5 border-b border-[#2D2D2D] flex items-center justify-between bg-[#000000]">
           <div className="flex items-center gap-3">
-             <div className="w-1 h-6 bg-[#55DEE8] rounded-full" />
+             <div className="w-1 h-6 bg-[#BFF367] rounded-full" />
              <div>
-               <h2 className="text-[20px] font-bold uppercase tracking-tight text-white font-open-sans">Manual <span className="text-[#55DEE8]">Booking</span></h2>
+               <h2 className="text-[20px] font-bold uppercase tracking-tight text-white font-open-sans">Manual <span className="text-[#BFF367]">Booking</span></h2>
                <p className="text-[10px] font-medium text-[#878C9F] uppercase tracking-[0.2em] mt-0.5 font-inter">Console Step {step} of 3</p>
              </div>
           </div>
@@ -156,15 +156,15 @@ const ManualBookingModal = ({ isOpen, onClose }) => {
                 <button 
                   key={turf._id}
                   onClick={() => { setSelectedTurf(turf); setStep(2); }}
-                  className={`flex items-start gap-4 p-4 rounded-[6px] border transition-all text-left group ${selectedTurf?._id === turf._id ? 'bg-[#55DEE8]/5 border-[#55DEE8]' : 'bg-[#000000] border-[#2D2D2D] hover:border-[#55DEE8]/30'}`}
+                  className={`flex items-start gap-4 p-4 rounded-[6px] border transition-all text-left group ${selectedTurf?._id === turf._id ? 'bg-[#BFF367]/5 border-[#BFF367]' : 'bg-[#000000] border-[#2D2D2D] hover:border-[#BFF367]/30'}`}
                 >
                   <div className="w-14 h-14 rounded-[4px] bg-[#1A1A1A] overflow-hidden flex-shrink-0 border border-[#2D2D2D]">
                     <img src={turf.images[0]} alt={turf.name} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
                   </div>
                   <div>
                     <h3 className="font-bold text-[13px] uppercase tracking-wider text-white font-inter">{turf.name}</h3>
-                    <p className="text-[9px] text-[#878C9F] flex items-center gap-1 mt-1 uppercase font-bold tracking-widest"><MapPin size={10} className="text-[#55DEE8]" /> {turf.location}</p>
-                    <p className="text-[12px] font-black text-[#55DEE8] mt-2 tracking-widest font-inter">Rs {turf.pricePerHour}</p>
+                    <p className="text-[9px] text-[#878C9F] flex items-center gap-1 mt-1 uppercase font-bold tracking-widest"><MapPin size={10} className="text-[#BFF367]" /> {turf.location}</p>
+                    <p className="text-[12px] font-black text-[#BFF367] mt-2 tracking-widest font-inter">Rs {turf.pricePerHour}</p>
                   </div>
                 </button>
               ))}
@@ -177,11 +177,11 @@ const ManualBookingModal = ({ isOpen, onClose }) => {
                  <div className="space-y-2">
                     <label className="text-[11px] font-bold text-[#878C9F] uppercase tracking-[0.15em] ml-1 font-inter">Booking Date</label>
                     <div className="relative">
-                       <Calendar className="absolute left-4 top-1/2 -translate-y-1/2 text-[#55DEE8]" size={16} />
+                       <Calendar className="absolute left-4 top-1/2 -translate-y-1/2 text-[#BFF367]" size={16} />
                        <input 
                          type="date" 
                          min={format(new Date(), "yyyy-MM-dd")}
-                         className="w-full bg-[#1A1A1A] border border-[#2D2D2D] rounded-[6px] py-3 pl-11 pr-4 text-[13px] focus:outline-none focus:border-[#55DEE8] font-bold text-white font-inter appearance-none"
+                         className="w-full bg-[#1A1A1A] border border-[#2D2D2D] rounded-[6px] py-3 pl-11 pr-4 text-[13px] focus:outline-none focus:border-[#BFF367] font-bold text-white font-inter appearance-none"
                          value={selectedDate}
                          onChange={e => setSelectedDate(e.target.value)}
                        />
@@ -191,7 +191,7 @@ const ManualBookingModal = ({ isOpen, onClose }) => {
                     <label className="text-[11px] font-bold text-[#878C9F] uppercase tracking-[0.15em] ml-1 font-inter">Active Facility</label>
                     <div className="w-full bg-[#1A1A1A] border border-[#2D2D2D] rounded-[6px] py-3 px-4 text-[13px] font-bold flex justify-between items-center text-white font-inter">
                        <span className="uppercase truncate max-w-[120px]">{selectedTurf?.name}</span>
-                       <button onClick={() => setStep(1)} className="text-[#55DEE8] text-[10px] hover:underline font-black tracking-widest">SWITCH</button>
+                       <button onClick={() => setStep(1)} className="text-[#BFF367] text-[10px] hover:underline font-black tracking-widest">SWITCH</button>
                     </div>
                  </div>
               </div>
@@ -207,7 +207,7 @@ const ManualBookingModal = ({ isOpen, onClose }) => {
                             key={i}
                             disabled={slot.isBooked}
                             onClick={() => setSelectedSlot(slot)}
-                            className={`py-2.5 rounded-[4px] border text-[10px] font-black tracking-tighter transition-all font-inter ${ selectedSlot === slot ? 'bg-[#55DEE8] text-black border-[#55DEE8]' : slot.isBooked ? 'bg-red-500/10 border-red-500/20 text-red-500 cursor-not-allowed opacity-50' : 'bg-[#1A1A1A] border-[#2D2D2D] hover:border-[#55DEE8]/50 text-[#878C9F] hover:text-white' }`}
+                            className={`py-2.5 rounded-[4px] border text-[10px] font-black tracking-tighter transition-all font-inter ${ selectedSlot === slot ? 'bg-[#BFF367] text-black border-[#BFF367]' : slot.isBooked ? 'bg-red-500/10 border-red-500/20 text-red-500 cursor-not-allowed opacity-50' : 'bg-[#1A1A1A] border-[#2D2D2D] hover:border-[#BFF367]/50 text-[#878C9F] hover:text-white' }`}
                           >
                              {slot.startTime}
                           </button>
@@ -227,7 +227,7 @@ const ManualBookingModal = ({ isOpen, onClose }) => {
                         <User className="absolute left-4 top-1/2 -translate-y-1/2 text-[#878C9F]" size={16} />
                         <input 
                           type="text" 
-                          className="w-full bg-[#1A1A1A] border border-[#2D2D2D] rounded-[6px] py-3 pl-11 pr-4 text-[13px] focus:outline-none focus:border-[#55DEE8] font-bold text-white font-inter"
+                          className="w-full bg-[#1A1A1A] border border-[#2D2D2D] rounded-[6px] py-3 pl-11 pr-4 text-[13px] focus:outline-none focus:border-[#BFF367] font-bold text-white font-inter"
                           placeholder="ENTER FULL NAME"
                           value={customerData.name}
                           onChange={e => setCustomerData({...customerData, name: e.target.value})}
@@ -240,7 +240,7 @@ const ManualBookingModal = ({ isOpen, onClose }) => {
                         <Phone className="absolute left-4 top-1/2 -translate-y-1/2 text-[#878C9F]" size={16} />
                         <input 
                           type="tel" 
-                          className="w-full bg-[#1A1A1A] border border-[#2D2D2D] rounded-[6px] py-3 pl-11 pr-4 text-[13px] focus:outline-none focus:border-[#55DEE8] font-bold text-white font-inter"
+                          className="w-full bg-[#1A1A1A] border border-[#2D2D2D] rounded-[6px] py-3 pl-11 pr-4 text-[13px] focus:outline-none focus:border-[#BFF367] font-bold text-white font-inter"
                           placeholder="+91 XXXXX XXXXX"
                           value={customerData.phone}
                           onChange={e => setCustomerData({...customerData, phone: e.target.value})}
@@ -253,7 +253,7 @@ const ManualBookingModal = ({ isOpen, onClose }) => {
                         <Mail className="absolute left-4 top-1/2 -translate-y-1/2 text-[#878C9F]" size={16} />
                         <input 
                           type="email" 
-                          className="w-full bg-[#1A1A1A] border border-[#2D2D2D] rounded-[6px] py-3 pl-11 pr-4 text-[13px] focus:outline-none focus:border-[#55DEE8] font-bold text-white font-inter"
+                          className="w-full bg-[#1A1A1A] border border-[#2D2D2D] rounded-[6px] py-3 pl-11 pr-4 text-[13px] focus:outline-none focus:border-[#BFF367] font-bold text-white font-inter"
                           placeholder="PLAYER@EXAMPLE.COM"
                           value={customerData.email}
                           onChange={e => setCustomerData({...customerData, email: e.target.value})}
@@ -267,18 +267,18 @@ const ManualBookingModal = ({ isOpen, onClose }) => {
                   <div className="grid grid-cols-2 gap-3">
                      <button 
                        onClick={() => setCustomerData({...customerData, paymentMethod: "CASH"})}
-                       className={`flex items-center gap-3 p-3 rounded-[6px] border transition-all ${customerData.paymentMethod === "CASH" ? 'bg-[#55DEE8]/5 border-[#55DEE8]' : 'bg-[#1A1A1A] border-[#2D2D2D] hover:border-[#55DEE8]/30'}`}
+                       className={`flex items-center gap-3 p-3 rounded-[6px] border transition-all ${customerData.paymentMethod === "CASH" ? 'bg-[#BFF367]/5 border-[#BFF367]' : 'bg-[#1A1A1A] border-[#2D2D2D] hover:border-[#BFF367]/30'}`}
                      >
-                        <Banknote size={18} className={customerData.paymentMethod === "CASH" ? 'text-[#55DEE8]' : 'text-[#878C9F]'} />
+                        <Banknote size={18} className={customerData.paymentMethod === "CASH" ? 'text-[#BFF367]' : 'text-[#878C9F]'} />
                         <div className="text-left">
                            <p className="text-[11px] font-black uppercase tracking-widest text-white font-inter">CASH / OFFLINE</p>
                         </div>
                      </button>
                      <button 
                        onClick={() => setCustomerData({...customerData, paymentMethod: "ONLINE"})}
-                       className={`flex items-center gap-3 p-3 rounded-[6px] border transition-all ${customerData.paymentMethod === "ONLINE" ? 'bg-[#55DEE8]/5 border-[#55DEE8]' : 'bg-[#1A1A1A] border-[#2D2D2D] hover:border-[#55DEE8]/30'}`}
+                       className={`flex items-center gap-3 p-3 rounded-[6px] border transition-all ${customerData.paymentMethod === "ONLINE" ? 'bg-[#BFF367]/5 border-[#BFF367]' : 'bg-[#1A1A1A] border-[#2D2D2D] hover:border-[#BFF367]/30'}`}
                      >
-                        <CreditCard size={18} className={customerData.paymentMethod === "ONLINE" ? 'text-[#55DEE8]' : 'text-[#878C9F]'} />
+                        <CreditCard size={18} className={customerData.paymentMethod === "ONLINE" ? 'text-[#BFF367]' : 'text-[#878C9F]'} />
                         <div className="text-left">
                            <p className="text-[11px] font-black uppercase tracking-widest text-white font-inter">ONLINE / UPI</p>
                         </div>
@@ -295,7 +295,7 @@ const ManualBookingModal = ({ isOpen, onClose }) => {
               {selectedTurf && (
                  <div className="space-y-0.5">
                     <p className="text-[9px] font-bold text-[#878C9F] uppercase tracking-[0.2em] font-inter">Total Settlement</p>
-                    <p className="text-[20px] font-bold text-[#55DEE8] font-open-sans">Rs {selectedTurf.pricePerHour}</p>
+                    <p className="text-[20px] font-bold text-[#BFF367] font-open-sans">Rs {selectedTurf.pricePerHour}</p>
                  </div>
               )}
            </div>
@@ -313,7 +313,7 @@ const ManualBookingModal = ({ isOpen, onClose }) => {
                  <button 
                    disabled={!selectedTurf || (step === 2 && !selectedSlot)}
                    onClick={() => setStep(step + 1)}
-                   className="flex-1 sm:flex-none px-6 py-2.5 rounded-[6px] bg-white text-black font-bold uppercase tracking-widest text-[11px] hover:bg-[#55DEE8] transition-all disabled:opacity-20 font-inter"
+                   className="flex-1 sm:flex-none px-6 py-2.5 rounded-[6px] bg-white text-black font-bold uppercase tracking-widest text-[11px] hover:bg-[#BFF367] transition-all disabled:opacity-20 font-inter"
                  >
                     Continue
                  </button>
@@ -321,7 +321,7 @@ const ManualBookingModal = ({ isOpen, onClose }) => {
                  <button 
                    disabled={loading || !customerData.name}
                    onClick={handleSubmit}
-                   className="flex-1 sm:flex-none px-6 py-2.5 rounded-[6px] bg-[#55DEE8] text-black font-bold uppercase tracking-widest text-[11px] hover:bg-[#b3ff00] transition-all shadow-[0_0_20px_rgba(204,255,0,0.15)] disabled:opacity-50 font-inter"
+                   className="flex-1 sm:flex-none px-6 py-2.5 rounded-[6px] bg-[#BFF367] text-black font-bold uppercase tracking-widest text-[11px] hover:bg-[#b3ff00] transition-all shadow-[0_0_20px_rgba(204,255,0,0.15)] disabled:opacity-50 font-inter"
                  >
                     {loading ? 'Processing...' : 'Confirm Booking'}
                  </button>

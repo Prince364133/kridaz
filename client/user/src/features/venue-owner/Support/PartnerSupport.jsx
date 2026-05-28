@@ -11,7 +11,7 @@ import { useSelector } from "react-redux";
 const PartnerSupport = () => {
   const { role } = useSelector((state) => state.auth);
   const isScorer = role?.toLowerCase().includes("scorer");
-  const themeColor = isScorer ? "#00C187" : "#55DEE8";
+  const themeColor = "#BFF367";
   const portalTitle = isScorer ? "Scorer Help Center" : "Help & Support";
 
   const [tickets, setTickets] = useState([]);
@@ -34,7 +34,7 @@ const PartnerSupport = () => {
   // Update selected ticket data when tickets list changes
   useEffect(() => {
     if (selectedTicket) {
-      const updated = tickets.find(t => t._id === selectedTicket._id);
+      const updated = tickets.find(t => t.id === selectedTicket.id);
       if (updated) setSelectedTicket(updated);
     }
   }, [tickets]);
@@ -43,7 +43,7 @@ const PartnerSupport = () => {
     if (!replyText.trim() || !selectedTicket) return;
     setLoading(true);
     try {
-      const res = await axiosInstance.post(`/api/owner/support/tickets/${selectedTicket._id}/reply`, {
+      const res = await axiosInstance.post(`/api/owner/support/tickets/${selectedTicket.id}/reply`, {
         message: replyText
       });
       setReplyText("");
@@ -129,8 +129,8 @@ const PartnerSupport = () => {
         <header className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 relative z-10 border-b border-white/5 pb-6">
           <div className="space-y-1">
             <div className="flex items-center gap-3">
-              <div className="w-1.5 h-8 rounded-full" style={{ backgroundColor: themeColor }} />
-              <h1 className="text-[28px] lg:text-[32px] font-bold font-inter text-white tracking-tight leading-none uppercase">
+              
+              <h1 className="text-[28px] lg:text-[32px] font-bold font-['Open_Sans'] text-white tracking-tight leading-none uppercase">
                 {portalTitle.split(' ')[0]} {portalTitle.split(' ')[1]} <span style={{ color: themeColor }}>{portalTitle.split(' ').slice(2).join(' ')}</span>
               </h1>
             </div>
@@ -349,7 +349,7 @@ const PartnerSupport = () => {
               ) : (
                 tickets.map(ticket => (
                   <div 
-                    key={ticket._id} 
+                    key={ticket.id} 
                     onClick={() => setSelectedTicket(ticket)}
                     className="p-5 bg-[#111111] border border-[#2D2D2D] rounded-[8px] transition-all group cursor-pointer"
                     style={{ '--hover-border': themeColor }}
@@ -373,7 +373,7 @@ const PartnerSupport = () => {
                       </div>
                       <span className="text-[10px] text-[#555] font-bold uppercase tracking-widest">{new Date(ticket.createdAt).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })}</span>
                     </div>
-                    <h3 className="font-bold text-white text-[15px] mb-2 uppercase tracking-tight transition-colors" style={{ color: selectedTicket?._id === ticket._id ? themeColor : 'white' }}>{ticket.subject}</h3>
+                    <h3 className="font-bold text-white text-[15px] mb-2 uppercase tracking-tight transition-colors" style={{ color: selectedTicket?.id === ticket.id ? themeColor : 'white' }}>{ticket.subject}</h3>
                     <p className="text-[13px] text-[#878C9F] leading-relaxed line-clamp-1">{ticket.message}</p>
 
                     <div className="mt-4 pt-4 border-t border-[#2D2D2D] flex items-center justify-between">
@@ -381,7 +381,7 @@ const PartnerSupport = () => {
                         <span className="flex items-center gap-1"><MessageSquare size={12} /> {ticket.replies?.length || 0} Replies</span>
                         {ticket.images?.length > 0 && <span className="flex items-center gap-1"><Shield size={12} /> {ticket.images.length} Attachments</span>}
                       </div>
-                      <button className="text-[10px] font-bold uppercase tracking-widest hover:text-white transition-colors" style={{ color: themeColor }}>Enter Chat Γåù</button>
+                      <button className="text-[10px] font-bold font-inter uppercase tracking-widest hover:text-white transition-colors" style={{ color: themeColor }}>Enter Chat -></button>
                     </div>
                   </div>
                 ))
@@ -405,3 +405,8 @@ const PartnerSupport = () => {
 };
 
 export default PartnerSupport;
+
+
+
+
+

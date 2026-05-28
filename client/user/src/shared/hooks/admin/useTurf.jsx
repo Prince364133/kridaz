@@ -11,7 +11,7 @@ const useTurfData = () => {
     setLoading(true);
     try {
       const response = await axiosInstance.get(
-        `/api/admin/turfs/all`
+        `/api/admin/turfs/admin/all`
       );
       const result = await response.data;
        setTurfData(result.turfs);
@@ -28,7 +28,7 @@ const useTurfData = () => {
 
   const approveTurf = async (id, adminData) => {
     try {
-      await axiosInstance.put(`/api/admin/turfs/${id}/approve`, adminData);
+      await axiosInstance.put(`/api/admin/turfs/admin/${id}/approve`, adminData);
       await fetchTurfData();
       return true;
     } catch (err) {
@@ -39,7 +39,7 @@ const useTurfData = () => {
 
   const rejectTurf = async (id, adminData) => {
     try {
-      await axiosInstance.put(`/api/admin/turfs/${id}/reject`, adminData);
+      await axiosInstance.put(`/api/admin/turfs/admin/${id}/reject`, adminData);
       await fetchTurfData();
       return true;
     } catch (err) {
@@ -50,7 +50,7 @@ const useTurfData = () => {
 
   const decommissionTurf = async (id, adminData) => {
     try {
-      await axiosInstance.put(`/api/admin/turfs/${id}/decommission`, adminData);
+      await axiosInstance.put(`/api/admin/turfs/admin/${id}/decommission`, adminData);
       await fetchTurfData();
       return true;
     } catch (err) {
@@ -61,7 +61,7 @@ const useTurfData = () => {
 
   const softDeleteTurf = async (id, adminData) => {
     try {
-      await axiosInstance.put(`/api/admin/turfs/${id}/soft-delete`, adminData);
+      await axiosInstance.put(`/api/admin/turfs/admin/${id}/soft-delete`, adminData);
       await fetchTurfData();
       return true;
     } catch (err) {
@@ -72,7 +72,7 @@ const useTurfData = () => {
 
   const hardDeleteTurf = async (id) => {
     try {
-      await axiosInstance.delete(`/api/admin/turfs/${id}/hard-delete`);
+      await axiosInstance.delete(`/api/admin/turfs/admin/${id}/hard-delete`);
       await fetchTurfData();
       return true;
     } catch (err) {

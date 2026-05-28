@@ -1,11 +1,11 @@
-import { prisma } from "../../config/prisma.js";
+﻿import { prisma } from "../../config/prisma.js";
 import logger from "../../utils/logger.js";
 
 // Create a new promotion/coupon
 export const createPromotion = async (req, res) => {
   try {
     const { code, discountType, discountValue, validUntil, usageLimit, turfId } = req.body;
-    const { id: ownerId } = req.owner;
+    const { ownerId } = req.owner;
 
     // Check if code already exists
     const existingCoupon = await prisma.coupon.findUnique({ where: { code: code.toUpperCase() } });
@@ -43,7 +43,7 @@ export const createPromotion = async (req, res) => {
 // Get all promotions for the logged-in owner
 export const getPromotions = async (req, res) => {
   try {
-    const { id: ownerId } = req.owner;
+    const { ownerId } = req.owner;
     const coupons = await prisma.coupon.findMany({
       where: { ownerId },
       include: { turf: { select: { name: true } } },
@@ -74,7 +74,7 @@ export const getPromotions = async (req, res) => {
 export const deletePromotion = async (req, res) => {
   try {
     const { id } = req.params;
-    const { id: ownerId } = req.owner;
+    const { ownerId } = req.owner;
 
     const coupon = await prisma.coupon.findFirst({ where: { id, ownerId } });
     if (!coupon) {
@@ -94,7 +94,7 @@ export const deletePromotion = async (req, res) => {
 export const togglePromotionStatus = async (req, res) => {
   try {
     const { id } = req.params;
-    const { id: ownerId } = req.owner;
+    const { ownerId } = req.owner;
 
     const coupon = await prisma.coupon.findFirst({ where: { id, ownerId } });
     if (!coupon) {
@@ -112,4 +112,5 @@ export const togglePromotionStatus = async (req, res) => {
     res.status(500).json({ message: "Internal server error" });
   }
 };
+
 

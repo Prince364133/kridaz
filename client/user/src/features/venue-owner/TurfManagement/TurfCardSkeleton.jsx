@@ -1,4 +1,4 @@
-﻿const TurfCardSkeleton = () => {
+const TurfCardSkeleton = () => {
   return (
     <div className="bg-[#000000] border border-[#2D2D2D] rounded-[8px] overflow-hidden animate-pulse h-full flex flex-col">
       <div className="h-40 bg-[#0A0A0A] relative overflow-hidden">

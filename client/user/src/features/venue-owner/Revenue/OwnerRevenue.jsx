@@ -20,7 +20,7 @@ import { useSelector } from "react-redux";
 export default function OwnerRevenue() {
   const { role } = useSelector((state) => state.auth);
   const isScorer = role?.toLowerCase().includes("scorer");
-  const themeColor = isScorer ? "#00C187" : "#55DEE8";
+  const themeColor = isScorer ? "#00C187" : "#BFF367";
   const portalTitle = isScorer ? "Earnings Dossier" : "Revenue Engine";
 
   const { revenueData, loading: revenueLoading } = useOwnerRevenue();
@@ -64,7 +64,6 @@ export default function OwnerRevenue() {
       {/* Header Section */}
       <div className="flex flex-col xl:flex-row justify-between items-start xl:items-center gap-8 relative z-10 pb-6 border-b border-white/5">
         <div className="flex items-center gap-4">
-          <div className="w-1.5 h-10 rounded-full" style={{ backgroundColor: themeColor }} />
           <div>
             <h1 className="text-3xl lg:text-4xl font-black tracking-tight font-inter uppercase leading-none">
               <span className="text-white">{portalTitle.split(" ")[0]}</span>{" "}
@@ -97,43 +96,43 @@ export default function OwnerRevenue() {
           <div className="w-10 h-10 rounded-lg flex items-center justify-center mb-5 border border-white/10 bg-white/[0.05] group-hover:border-[#00C187]/30 transition-all shadow-inner" style={{ color: themeColor }}>
              <CheckCircle2 size={18} />
           </div>
-          <p className="text-[8px] font-black text-neutral-500 uppercase tracking-widest mb-1">Usable Assets</p>
-          <h3 className="text-2xl font-black font-inter tracking-tighter" style={{ color: themeColor }}>Rs {(balances?.usable || 0).toLocaleString()}</h3>
-          <p className="text-[7px] text-neutral-700 mt-3 uppercase font-black tracking-widest">Liquid / Available</p>
+          <p className="text-[11px] font-black text-neutral-500 uppercase tracking-widest mb-1">Usable Assets</p>
+          <h3 className="text-[28px] font-black font-inter tracking-tighter" style={{ color: themeColor }}>Rs {(balances?.usable || 0).toLocaleString()}</h3>
+          <p className="text-[9px] text-neutral-700 mt-3 uppercase font-black tracking-widest">Liquid / Available</p>
         </div>
 
         <div className="bg-white/[0.03] backdrop-blur-xl border border-white/5 rounded-[8px] p-5 flex flex-col relative overflow-hidden shadow-2xl hover:border-amber-500/20 transition-all duration-500 group">
           <div className="w-10 h-10 bg-amber-500/10 rounded-lg flex items-center justify-center mb-5 border border-white/10 group-hover:border-amber-500/30 transition-all text-amber-500 shadow-inner">
              <Hourglass size={18} />
           </div>
-          <p className="text-[8px] font-black text-neutral-500 uppercase tracking-widest mb-1">Review Pipeline</p>
-          <h3 className="text-2xl font-black font-inter tracking-tighter text-amber-500">Rs {(balances?.inProgress || 0).toLocaleString()}</h3>
-          <p className="text-[7px] text-neutral-700 mt-3 uppercase font-black tracking-widest">Escrow Window</p>
+          <p className="text-[11px] font-black text-neutral-500 uppercase tracking-widest mb-1">Review Pipeline</p>
+          <h3 className="text-[28px] font-black font-inter tracking-tighter text-amber-500">Rs {(balances?.inProgress || 0).toLocaleString()}</h3>
+          <p className="text-[9px] text-neutral-700 mt-3 uppercase font-black tracking-widest">Escrow Window</p>
         </div>
 
         <div className="bg-white/[0.03] backdrop-blur-xl border border-white/5 rounded-[8px] p-5 flex flex-col relative overflow-hidden shadow-2xl hover:border-red-500/20 transition-all duration-500 group">
           <div className="w-10 h-10 bg-red-500/10 rounded-lg flex items-center justify-center mb-5 border border-white/10 group-hover:border-red-500/30 transition-all text-red-500 shadow-inner">
              <AlertOctagon size={18} />
           </div>
-          <p className="text-[8px] font-black text-neutral-500 uppercase tracking-widest mb-1">Disputed Assets</p>
-          <h3 className="text-2xl font-black font-inter tracking-tighter text-red-500">Rs {(balances?.dispute || 0).toLocaleString()}</h3>
-          <p className="text-[7px] text-neutral-700 mt-3 uppercase font-black tracking-widest">Frozen Assets</p>
+          <p className="text-[11px] font-black text-neutral-500 uppercase tracking-widest mb-1">Disputed Assets</p>
+          <h3 className="text-[28px] font-black font-inter tracking-tighter text-red-500">Rs {(balances?.dispute || 0).toLocaleString()}</h3>
+          <p className="text-[9px] text-neutral-700 mt-3 uppercase font-black tracking-widest">Frozen Assets</p>
         </div>
 
         <div className="bg-white/[0.03] backdrop-blur-xl border border-white/5 rounded-[8px] p-5 flex flex-col relative overflow-hidden shadow-2xl transition-all duration-500 hover:border-white/10 group">
           <div className="w-10 h-10 bg-white/5 rounded-lg flex items-center justify-center mb-5 border border-white/10 group-hover:border-white/20 transition-all text-neutral-500 shadow-inner">
              <TrendingUp size={18} />
           </div>
-          <p className="text-[8px] font-black text-neutral-500 uppercase tracking-widest mb-1">Lifetime Total</p>
-          <h3 className="text-2xl font-black font-inter tracking-tighter text-white">Rs {(balances?.totalRevenue || 0).toLocaleString()}</h3>
+          <p className="text-[11px] font-black text-neutral-500 uppercase tracking-widest mb-1">Lifetime Total</p>
+          <h3 className="text-[28px] font-black font-inter tracking-tighter text-white">Rs {(balances?.totalRevenue || 0).toLocaleString()}</h3>
         </div>
 
         <div className="bg-white/[0.03] backdrop-blur-xl border border-white/5 rounded-[8px] p-5 flex flex-col relative overflow-hidden shadow-2xl transition-all duration-500 hover:border-white/10 group">
           <div className="w-10 h-10 bg-white/5 rounded-lg flex items-center justify-center mb-5 border border-white/10 group-hover:border-white/20 transition-all text-neutral-500 shadow-inner">
              <Landmark size={18} />
           </div>
-          <p className="text-[8px] font-black text-neutral-500 uppercase tracking-widest mb-1">Total Dispatched</p>
-          <h3 className="text-2xl font-black font-inter tracking-tighter text-white">Rs {(balances?.withdrawn || 0).toLocaleString()}</h3>
+          <p className="text-[11px] font-black text-neutral-500 uppercase tracking-widest mb-1">Total Dispatched</p>
+          <h3 className="text-[28px] font-black font-inter tracking-tighter text-white">Rs {(balances?.withdrawn || 0).toLocaleString()}</h3>
         </div>
 
         <div className="bg-white/[0.03] backdrop-blur-xl border border-white/5 rounded-[8px] p-5 flex flex-col relative overflow-hidden shadow-2xl transition-all duration-500 group hover:border-blue-500/20">
@@ -152,8 +151,7 @@ export default function OwnerRevenue() {
         <div className="bg-white/[0.03] backdrop-blur-xl border border-white/5 rounded-[8px] p-8 lg:p-10 shadow-2xl flex flex-col max-h-[600px] group overflow-hidden relative">
            <div className="flex justify-between items-center mb-8 border-b border-white/5 pb-6 relative z-10">
               <div className="flex items-center gap-4">
-                 <div className="w-1.5 h-8 bg-amber-500 rounded-full shadow-[0_0_10px_rgba(245,158,11,0.3)]" />
-                 <h2 className="text-[12px] font-black text-white uppercase tracking-[0.2em] flex items-center gap-3">
+                 <h2 className="text-[12px] font-black font-inter text-white uppercase tracking-[0.2em] flex items-center gap-3">
                     Escrow Pipeline
                  </h2>
               </div>
@@ -195,8 +193,7 @@ export default function OwnerRevenue() {
         <div className="bg-white/[0.03] backdrop-blur-xl border border-white/5 rounded-[8px] p-8 lg:p-10 shadow-2xl flex flex-col max-h-[600px] group overflow-hidden relative">
            <div className="flex justify-between items-center mb-8 border-b border-white/5 pb-6 relative z-10">
                <div className="flex items-center gap-4">
-                  <div className="w-1.5 h-8 rounded-full shadow-[0_0_10px_rgba(0,193,135,0.3)]" style={{ backgroundColor: themeColor }} />
-                  <h2 className="text-[12px] font-black text-white uppercase tracking-[0.2em] flex items-center gap-3">
+                  <h2 className="text-[12px] font-black font-inter text-white uppercase tracking-[0.2em] flex items-center gap-3">
                      Transaction History
                   </h2>
                </div>

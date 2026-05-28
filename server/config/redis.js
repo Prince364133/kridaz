@@ -109,6 +109,11 @@ class MockRedis {
     return set && set.has(String(member)) ? 1 : 0;
   }
 
+  async smembers(key) {
+    const set = this.sets.get(key);
+    return set ? Array.from(set) : [];
+  }
+
   async srem(key, ...members) {
     const set = this.sets.get(key);
     if (!set) return 0;
