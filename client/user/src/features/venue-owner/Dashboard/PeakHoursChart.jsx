@@ -66,7 +66,7 @@ const PeakHoursChart = () => {
         <div className="bg-[#151617] border border-[#2D2D2D] p-3 rounded-[6px] shadow-2xl">
           <p className="text-[10px] text-[#878C9F] uppercase tracking-widest font-bold mb-1">{payload[0].payload.time}</p>
           <p className="text-white font-black flex items-center gap-2">
-            <span className="w-2 h-2 rounded-full bg-[#55DEE8]" />
+            <span className="w-2 h-2 rounded-full bg-[#BFF367]" />
             {payload[0].value} Bookings
           </p>
         </div>
@@ -80,17 +80,17 @@ const PeakHoursChart = () => {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
         <div>
           <div className="flex items-center gap-2 mb-1">
-             <h2 className="text-[14px] font-semibold text-white uppercase tracking-wider">Peak Booking Hours</h2>
-             <div className="px-1.5 py-0.5 bg-[#55DEE8]/10 text-[#55DEE8] rounded text-[8px] font-black uppercase tracking-widest border border-[#55DEE8]/20">Live</div>
+             <h2 className="text-[14px] font-black text-white uppercase tracking-tighter whitespace-nowrap" style={{ fontFamily: "'Open Sans', sans-serif" }}>Peak Booking Hours</h2>
+             <div className="px-1.5 py-0.5 bg-[#BFF367]/10 text-[#BFF367] rounded text-[8px] font-black uppercase tracking-widest border border-[#BFF367]/20">Live</div>
           </div>
           <p className="text-[10px] font-normal text-[#878C9F] uppercase tracking-widest">Time distribution analysis</p>
         </div>
 
-        <div className="flex flex-wrap items-center gap-3">
+        <div className="flex flex-nowrap shrink-0 items-center gap-1 mt-3 sm:mt-0">
           <select 
             value={selectedTurf} 
             onChange={(e) => setSelectedTurf(e.target.value)}
-            className="bg-[#151617] border border-[#2D2D2D] text-white text-[10px] font-bold uppercase tracking-widest rounded-[6px] px-3 py-1.5 focus:outline-none focus:border-[#55DEE8]/50 transition-all cursor-pointer hover:border-[#55DEE8]/30"
+            className="bg-[#151617] border border-[#2D2D2D] text-white text-[7px] font-black uppercase tracking-widest rounded-[4px] px-1.5 py-0.5 focus:outline-none focus:border-[#BFF367]/50 transition-all cursor-pointer hover:border-[#BFF367]/30"
           >
             <option value="" disabled>Select Facility</option>
             {turfs.map(turf => (
@@ -98,17 +98,16 @@ const PeakHoursChart = () => {
             ))}
           </select>
 
-          <div className="flex items-center gap-2 bg-[#151617] p-1 rounded-[8px] border border-[#2D2D2D]">
-            {['day', 'week', 'month', 'year'].map((f) => (
-              <button
-                key={f}
-                onClick={() => setFilter(f)}
-                className={`px-3 py-1.5 text-[10px] font-bold uppercase tracking-widest rounded-[6px] transition-all ${ filter === f ? 'bg-[#55DEE8] text-black shadow-lg shadow-[#55DEE8]/10' : 'text-[#999999] hover:text-white hover:bg-[#2D2D2D]' }`}
-              >
-                {f}
-              </button>
-            ))}
-          </div>
+          <select 
+            value={filter} 
+            onChange={(e) => setFilter(e.target.value)}
+            className="bg-[#151617] border border-[#2D2D2D] text-white text-[7px] font-black uppercase tracking-widest rounded-[4px] px-1.5 py-0.5 focus:outline-none focus:border-[#BFF367]/50 transition-all cursor-pointer hover:border-[#BFF367]/30"
+          >
+            <option value="day">Day</option>
+            <option value="week">Week</option>
+            <option value="month">Month</option>
+            <option value="year">Year</option>
+          </select>
         </div>
       </div>
 
@@ -117,8 +116,8 @@ const PeakHoursChart = () => {
           <AreaChart data={data} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
             <defs>
               <linearGradient id="colorCount" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="5%" stopColor="#55DEE8" stopOpacity={0.3}/>
-                <stop offset="95%" stopColor="#55DEE8" stopOpacity={0}/>
+                <stop offset="5%" stopColor="#BFF367" stopOpacity={0.3}/>
+                <stop offset="95%" stopColor="#BFF367" stopOpacity={0}/>
               </linearGradient>
             </defs>
             <CartesianGrid strokeDasharray="3 3" stroke="#2D2D2D" vertical={false} />
@@ -134,11 +133,11 @@ const PeakHoursChart = () => {
               tickLine={false} 
               tick={{ fill: '#878C9F', fontSize: 10, fontWeight: 500 }} 
             />
-            <Tooltip content={<CustomTooltip />} cursor={{ stroke: '#55DEE8', strokeWidth: 1 }} />
+            <Tooltip content={<CustomTooltip />} cursor={{ stroke: '#BFF367', strokeWidth: 1 }} />
             <Area 
               type="monotone" 
               dataKey="count" 
-              stroke="#55DEE8" 
+              stroke="#BFF367" 
               strokeWidth={3}
               fillOpacity={1} 
               fill="url(#colorCount)" 
@@ -148,23 +147,23 @@ const PeakHoursChart = () => {
         </ResponsiveContainer>
       </div>
 
-      <div className="mt-8 grid grid-cols-2 gap-4">
-         <div className="bg-[#151617] p-4 rounded-[8px] border border-[#2D2D2D] flex items-center gap-4 group hover:border-[#55DEE8]/30 transition-all">
-            <div className="p-2.5 bg-[#55DEE8]/10 text-[#55DEE8] rounded-[6px] group-hover:scale-110 transition-transform">
-               <TrendingUp size={18} />
+      <div className="mt-4 grid grid-cols-2 gap-2">
+         <div className="bg-[#151617] p-2.5 rounded-[6px] border border-[#2D2D2D] flex items-center gap-2.5 group hover:border-[#BFF367]/30 transition-all">
+            <div className="p-1.5 bg-[#BFF367]/10 text-[#BFF367] rounded-[4px] group-hover:scale-110 transition-transform">
+               <TrendingUp size={14} />
             </div>
             <div>
-               <p className="text-[10px] text-[#878C9F] uppercase font-black tracking-widest mb-1">Peak Time</p>
-               <p className="text-white font-black text-lg uppercase tracking-tight">{summary.peakTime}</p>
+               <p className="text-[8px] text-[#878C9F] uppercase font-black tracking-widest mb-0.5">Peak Time</p>
+               <p className="text-white font-black text-sm uppercase tracking-tight">{summary.peakTime}</p>
             </div>
          </div>
-         <div className="bg-[#151617] p-4 rounded-[8px] border border-[#2D2D2D] flex items-center gap-4 group hover:border-[#55DEE8]/30 transition-all">
-            <div className="p-2.5 bg-[#55DEE8]/10 text-[#55DEE8] rounded-[6px] group-hover:scale-110 transition-transform">
-               <Calendar size={18} />
+         <div className="bg-[#151617] p-2.5 rounded-[6px] border border-[#2D2D2D] flex items-center gap-2.5 group hover:border-[#BFF367]/30 transition-all">
+            <div className="p-1.5 bg-[#BFF367]/10 text-[#BFF367] rounded-[4px] group-hover:scale-110 transition-transform">
+               <Calendar size={14} />
             </div>
             <div>
-               <p className="text-[10px] text-[#878C9F] uppercase font-black tracking-widest mb-1">Total Vol.</p>
-               <p className="text-white font-black text-lg uppercase tracking-tight">{data.reduce((acc, curr) => acc + curr.count, 0)}</p>
+               <p className="text-[8px] text-[#878C9F] uppercase font-black tracking-widest mb-0.5">Total Vol.</p>
+               <p className="text-white font-black text-sm uppercase tracking-tight">{data.reduce((acc, curr) => acc + curr.count, 0)}</p>
             </div>
          </div>
       </div>

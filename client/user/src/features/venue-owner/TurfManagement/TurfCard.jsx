@@ -1,9 +1,9 @@
-﻿import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { Edit2, Trash2, Clock, MapPin, Tag, Star, LayoutDashboard, Eye, EyeOff } from "lucide-react";
 
 const TurfCard = ({ turf, onEdit, onDelete, onToggleVisibility }) => {
   return (
-    <div className="bg-[#000000] border border-[#2D2D2D] rounded-[8px] overflow-hidden group hover:border-[#55DEE8]/30 transition-all duration-500 h-full flex flex-col shadow-[var(--shadow-2)] relative">
+    <div className="bg-[#000000] border border-[#2D2D2D] rounded-[8px] overflow-hidden group hover:border-[#BFF367]/30 transition-all duration-500 h-full flex flex-col shadow-[var(--shadow-2)] relative">
       <Link to={`/venue-owner/turf/${turf._id}`} className="block h-40 relative overflow-hidden">
         <img
           src={turf.image}
@@ -26,14 +26,14 @@ const TurfCard = ({ turf, onEdit, onDelete, onToggleVisibility }) => {
         <Link to={`/venue-owner/turf/${turf._id}`} className="block group/title">
            <div className="flex justify-between items-start mb-3">
               <div className="space-y-1">
-                <h2 className="text-[15px] font-bold text-white uppercase tracking-widest group-hover/title:text-[#55DEE8] transition-colors font-open-sans">
+                <h2 className="text-[15px] font-bold text-white uppercase tracking-widest group-hover/title:text-[#BFF367] transition-colors font-open-sans">
                   {turf.name}
                 </h2>
                 <div className="flex items-center gap-2">
-                  <div className={`px-2 py-0.5 rounded-[4px] text-[9px] font-bold uppercase tracking-widest border ${ turf.status === 'approved' ? 'bg-[#55DEE8]/10 border-[#55DEE8]/20 text-[#55DEE8]' : turf.status === 'rejected' ? 'bg-red-500/10 border-red-500/20 text-red-500' : turf.status === 'decommissioned' ? 'bg-orange-500/10 border-orange-500/20 text-orange-500' : turf.status === 'deleted' ? 'bg-zinc-800 border-zinc-700 text-zinc-500' : 'bg-[#1A1A1A] border-[#2D2D2D] text-yellow-500' }`}>
+                  <div className={`px-2 py-0.5 rounded-[4px] text-[9px] font-bold uppercase tracking-widest border ${ turf.status === 'approved' ? 'bg-[#BFF367]/10 border-[#BFF367]/20 text-[#BFF367]' : turf.status === 'rejected' ? 'bg-red-500/10 border-red-500/20 text-red-500' : turf.status === 'decommissioned' ? 'bg-orange-500/10 border-orange-500/20 text-orange-500' : turf.status === 'deleted' ? 'bg-zinc-800 border-zinc-700 text-zinc-500' : 'bg-[#1A1A1A] border-[#2D2D2D] text-yellow-500' }`}>
                      {turf.status}
                   </div>
-                  <span className="text-[10px] text-[#444] font-medium uppercase tracking-widest">ΓÇó</span>
+                  <span className="text-[10px] text-[#444] font-medium uppercase tracking-widest">G��</span>
                   <div className="flex items-center text-[#878C9F] text-[9px] font-bold uppercase tracking-widest">
                     {turf.status === 'decommissioned' ? (
                       <span className="text-orange-500/80 animate-pulse">Action Required: Re-apply</span>
@@ -43,7 +43,7 @@ const TurfCard = ({ turf, onEdit, onDelete, onToggleVisibility }) => {
               </div>
               
               <div className="flex items-center bg-[#111] px-2 py-0.5 rounded-[4px] border border-[#2D2D2D]">
-                <Star size={9} className="text-[#55DEE8] mr-1 fill-[#55DEE8]" />
+                <Star size={9} className="text-[#BFF367] mr-1 fill-[#BFF367]" />
                 <span className="text-[9px] font-bold text-white font-open-sans">
                   {turf.avgRating ? turf.avgRating.toFixed(1) : "NEW"}
                 </span>
@@ -57,13 +57,13 @@ const TurfCard = ({ turf, onEdit, onDelete, onToggleVisibility }) => {
 
         <div className="mt-auto space-y-4">
           <div className="flex flex-wrap gap-1.5">
-              <div className="flex items-center gap-2 px-3 py-1 bg-[#55DEE8]/5 border border-[#55DEE8]/20 rounded-[4px] text-[10px] font-black text-[#55DEE8] uppercase tracking-widest">
+              <div className="flex items-center gap-2 px-3 py-1 bg-[#BFF367]/5 border border-[#BFF367]/20 rounded-[4px] text-[10px] font-black text-[#BFF367] uppercase tracking-widest">
                  Rs {turf.pricePerHour} <span className="opacity-40 font-normal">SETTLEMENT</span>
               </div>
           </div>
 
           <div className="flex items-center justify-between pt-4 border-t border-[#2D2D2D]/50">
-             <button className="flex items-center gap-2 px-4 py-1.5 bg-[#55DEE8] hover:bg-white text-black rounded-[4px] text-[9px] font-black uppercase tracking-widest transition-all shadow-[0_5px_15px_rgba(204,255,0,0.1)]">
+             <button className="flex items-center gap-2 px-4 py-1.5 bg-[#BFF367] hover:bg-white text-black rounded-[4px] text-[9px] font-black uppercase tracking-widest transition-all shadow-[0_5px_15px_rgba(204,255,0,0.1)]">
                 <Tag size={10} />
                 Promotion
              </button>
@@ -71,14 +71,14 @@ const TurfCard = ({ turf, onEdit, onDelete, onToggleVisibility }) => {
             <div className="flex items-center gap-1.5">
               <button
                 onClick={onEdit}
-                className="w-8 h-8 bg-[#111] border border-[#2D2D2D] hover:border-[#55DEE8]/40 text-[#878C9F] hover:text-[#55DEE8] rounded-[6px] transition-all flex items-center justify-center group/btn"
+                className="w-8 h-8 bg-[#111] border border-[#2D2D2D] hover:border-[#BFF367]/40 text-[#878C9F] hover:text-[#BFF367] rounded-[6px] transition-all flex items-center justify-center group/btn"
               >
                 <Edit2 size={12} />
               </button>
 
               <button
                 onClick={onToggleVisibility}
-                className={`w-8 h-8 rounded-[6px] transition-all flex items-center justify-center border ${ turf.isActive ? "bg-[#55DEE8]/5 border-[#55DEE8]/20 text-[#55DEE8] hover:bg-[#55DEE8]/10" : "bg-black border-[#2D2D2D] text-[#444] hover:text-white" }`}
+                className={`w-8 h-8 rounded-[6px] transition-all flex items-center justify-center border ${ turf.isActive ? "bg-[#BFF367]/5 border-[#BFF367]/20 text-[#BFF367] hover:bg-[#BFF367]/10" : "bg-black border-[#2D2D2D] text-[#444] hover:text-white" }`}
               >
                 {turf.isActive ? <Eye size={12} /> : <EyeOff size={12} />}
               </button>

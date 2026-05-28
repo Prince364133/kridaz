@@ -19,7 +19,7 @@ import { useSelector } from "react-redux";
 const VenueBanking = () => {
   const { role } = useSelector((state) => state.auth);
   const isScorer = role?.toLowerCase().includes("scorer");
-  const themeColor = isScorer ? "#00C187" : "#55DEE8";
+  const themeColor = isScorer ? "#00C187" : "#BFF367";
   const vaultTitle = isScorer ? "Payout & Settlement" : "Marketplace Vault";
 
   const { bankingDetails, walletBalance, payoutSettings, loading: bankingLoading, isPayoutDay, updateBanking, requestPayout, verifyPassword } = useBanking();
@@ -146,9 +146,8 @@ const VenueBanking = () => {
         {/* Header Section */}
         <div className="flex flex-col xl:flex-row justify-between items-start xl:items-center gap-8 relative z-10 pb-6 border-b border-white/5">
           <div className="flex items-center gap-4">
-            <div className="w-1.5 h-10 rounded-full" style={{ backgroundColor: themeColor }} />
             <div>
-              <h1 className="text-3xl lg:text-4xl font-black tracking-tight font-inter uppercase leading-none">
+              <h1 className="text-3xl lg:text-4xl font-bold tracking-tight font-['Open_Sans'] uppercase leading-none">
                 <span className="text-white">{vaultTitle.split(" ")[0]}</span>{" "}
                 <span style={{ color: themeColor }}>{vaultTitle.split(" ").slice(1).join(" ")}</span>
               </h1>
@@ -185,9 +184,9 @@ const VenueBanking = () => {
                    <div className="space-y-4 text-center md:text-left">
                       <div className="flex items-center justify-center md:justify-start gap-2">
                          <ShieldCheck style={{ color: themeColor }} size={16} />
-                         <span className="text-[10px] font-black uppercase tracking-[0.4em]" style={{ color: themeColor }}>Settlement Node Active</span>
+                         <span className="text-[10px] font-bold font-['Open_Sans'] uppercase tracking-[0.4em]" style={{ color: themeColor }}>Settlement Node Active</span>
                       </div>
-                      <h3 className="text-3xl font-black uppercase tracking-[0.15em] font-inter">
+                      <h3 className="text-[18px] lg:text-2xl font-black uppercase tracking-[0.15em] font-inter whitespace-nowrap">
                         <span className="text-white/40">Balance</span> <span className="text-white">Available:</span> <span style={{ color: themeColor }}>Rs {numericTotalCoins.toLocaleString()}</span>
                       </h3>
                       <p className="text-[9px] text-neutral-500 font-black uppercase tracking-widest">Next Automated Settlement: Every Friday</p>
@@ -195,7 +194,7 @@ const VenueBanking = () => {
                    <button 
                      onClick={handleOpenPayoutModal}
                      className="px-10 py-5 text-black rounded-lg font-black uppercase tracking-[0.2em] text-[11px] transition-all transform active:scale-95 shadow-2xl w-full md:w-auto"
-                     style={{ backgroundColor: themeColor, boxShadow: `0 10px 30px ${themeColor}4d` }}
+                     style={{ backgroundColor: themeColor }}
                    >
                       Request Settlement
                    </button>
@@ -206,8 +205,7 @@ const VenueBanking = () => {
              <div className="bg-white/[0.03] backdrop-blur-xl border border-white/5 rounded-[8px] overflow-hidden shadow-2xl">
                 <div className="p-8 border-b border-white/5 flex justify-between items-center">
                    <div className="flex items-center gap-4">
-                      <div className="w-1.5 h-6 rounded-full" style={{ backgroundColor: themeColor }} />
-                      <h3 className="text-[12px] font-black uppercase tracking-[0.2em]">Financial Ledger</h3>
+                      <h3 className="text-[12px] font-bold font-['Open_Sans'] uppercase tracking-[0.2em]">Financial Ledger</h3>
                    </div>
                    <button className="text-[9px] font-black uppercase tracking-widest flex items-center gap-2 text-neutral-500 hover:text-white transition-all">
                       <Download size={14} /> Download Audit CSV
@@ -268,8 +266,7 @@ const VenueBanking = () => {
              <div className="bg-white/[0.03] backdrop-blur-xl border border-white/5 rounded-[8px] p-8 space-y-8 shadow-2xl relative overflow-hidden">
                 <div className="flex justify-between items-center">
                    <div className="flex items-center gap-3">
-                      <div className="w-1.5 h-6 rounded-full" style={{ backgroundColor: themeColor }} />
-                      <h3 className="text-[12px] font-black uppercase tracking-[0.2em]">Banking Info</h3>
+                      <h3 className="text-[12px] font-bold font-['Open_Sans'] uppercase tracking-[0.2em]">Banking Info</h3>
                    </div>
                    <button 
                      onClick={() => setIsEditingBank(!isEditingBank)}
@@ -393,8 +390,7 @@ const VenueBanking = () => {
              {/* Recent Settlements */}
              <div className="bg-white/[0.03] backdrop-blur-xl border border-white/5 rounded-[8px] p-8 shadow-2xl">
                 <div className="flex items-center gap-3 mb-8">
-                   <div className="w-1.5 h-6 rounded-full" style={{ backgroundColor: themeColor }} />
-                   <h3 className="text-[12px] font-black uppercase tracking-[0.2em]">Recent Records</h3>
+                   <h3 className="text-[12px] font-bold font-['Open_Sans'] uppercase tracking-[0.2em]">Recent Records</h3>
                 </div>
                  <div className="space-y-4">
                    {withdrawals && withdrawals.length > 0 ? (

@@ -40,7 +40,7 @@ const OwnerDashboard = () => {
   const { dashboardData, loading, error } = useOwnerDashboard();
   const { role, user } = useSelector((state) => state.auth);
   const isScorer = role?.toLowerCase().includes("scorer");
-  const themeColor = isScorer ? "#00C187" : "#55DEE8";
+  const themeColor = isScorer ? "#00C187" : "#BFF367";
   const dashboardTitle = isScorer ? "SCORER Dashboard" : "Dashboard Overview";
 
   const [timeFilter, setTimeFilter] = useState("Month");
@@ -110,7 +110,7 @@ const OwnerDashboard = () => {
     })),
   };
 
-  const COLORS = [themeColor, "#10B981", "#3B82F6", "#6366F1", "#55DEE8", "#EF4444"];
+  const COLORS = [themeColor, "#10B981", "#3B82F6", "#6366F1", "#F59E0B", "#EF4444"];
 
   const getTimeGreeting = () => {
     const hour = currentTime.getHours();
@@ -127,30 +127,11 @@ const OwnerDashboard = () => {
       <div className="p-4 lg:px-10 lg:pt-8 lg:pb-12 space-y-8 lg:space-y-10 animate-fade-in pt-0 pb-24 h-full relative">
         <div className="space-y-8 lg:space-y-10 relative z-10">
 
-          {/* Dashboard Header */}
-          <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 pb-2 border-b border-white/5">
-            <div className="space-y-1">
-              <h1 className="text-3xl lg:text-4xl font-black text-white uppercase tracking-tight font-inter">
-                {dashboardTitle.split(' ')[0]} <span style={{ color: themeColor }}>{dashboardTitle.split(' ').slice(1).join(' ')}</span>
-              </h1>
-              <p className="text-gray-500 text-[10px] font-bold uppercase tracking-[0.2em]">
-                {getTimeGreeting()}, {user?.name || "Partner"} ΓÇó Your venue's heartbeat
-              </p>
-            </div>
-
-            <div className="flex items-center gap-4 bg-white/[0.03] border border-white/5 px-6 py-4 rounded-[8px] backdrop-blur-xl">
-              <div className="w-12 h-12 rounded-[8px] flex items-center justify-center" style={{ backgroundColor: `${themeColor}1A`, color: themeColor }}>
-                <Calendar size={24} />
-              </div>
-              <div className="space-y-0.5">
-                <p className="text-white text-lg font-black leading-none font-inter">
-                  {currentTime.toLocaleDateString("en-US", { day: "2-digit", month: "long", year: "numeric" })}
-                </p>
-                <p className="text-[10px] font-black uppercase tracking-widest opacity-80 font-inter" style={{ color: themeColor }}>
-                  {currentTime.toLocaleDateString("en-US", { weekday: "long" })} ΓÇó{" "}
-                  {currentTime.toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit", hour12: true })}
-                </p>
-              </div>
+          <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 pb-4 border-b border-white/5">
+            <div>
+              <h2 className="text-2xl lg:text-3xl font-black text-white uppercase tracking-tighter" style={{ fontFamily: "'Open Sans', sans-serif" }}>
+                {getTimeGreeting()}, <span style={{ color: themeColor }}>{user?.name || "PARTNER"}</span>
+              </h2>
             </div>
           </div>
 
@@ -178,7 +159,7 @@ const OwnerDashboard = () => {
                       <button
                         key={filter}
                         onClick={() => setRevenueFilter(filter === "Weekly" ? "Week" : "Month")}
-                        className={`px-4 py-1.5 rounded-[4px] text-[11px] font-normal uppercase tracking-wider transition-all font-inter ${ (revenueFilter === "Week" && filter === "Weekly") || (revenueFilter === "Month" && filter === "Monthly") ? "bg-[#55DEE8] text-black" : "text-[#999999] hover:text-[#FFFFFF]" }`}
+                        className={`px-4 py-1.5 rounded-[4px] text-[11px] font-normal uppercase tracking-wider transition-all font-inter ${ (revenueFilter === "Week" && filter === "Weekly") || (revenueFilter === "Month" && filter === "Monthly") ? "bg-gradient-to-r from-[#BFF367] to-[#BFF367] text-black" : "text-[#999999] hover:text-[#FFFFFF]" }`}
                       >
                         {filter}
                       </button>
@@ -265,8 +246,8 @@ const OwnerDashboard = () => {
               <div className="bg-[#000000] p-6 rounded-[8px] border border-[#2D2D2D] shadow-[var(--shadow-2)]">
                 <div className="flex items-center justify-between mb-8">
                   <div>
-                    <h2 className="text-xl font-semibold text-white uppercase tracking-tight">Recent Bookings</h2>
-                    <p className="text-[12px] font-normal text-[#999999] uppercase tracking-widest mt-1">Manage active sessions</p>
+                    <h2 className="text-xl font-black text-white uppercase tracking-tighter" style={{ fontFamily: "'Open Sans', sans-serif" }}>Recent Bookings</h2>
+                    <p className="text-[#999999] uppercase mt-1 global-subheading font-inter font-light">Manage active sessions</p>
                   </div>
                   <div className="flex items-center gap-3">
                     <div className="relative">
@@ -311,8 +292,8 @@ const OwnerDashboard = () => {
                               </td>
                               <td className="py-4">
                                 <div>
-                                  <p className="text-[14px] font-semibold text-white uppercase tracking-tight">{booking?.turf?.category || "ΓÇö"}</p>
-                                  <p className="text-[12px] font-normal text-[#999999] uppercase">{booking?.turf?.name || "ΓÇö"}</p>
+                                  <p className="text-[14px] font-semibold text-white uppercase tracking-tight">{booking?.turf?.category || "-"}</p>
+                                  <p className="text-[12px] font-normal text-[#999999] uppercase">{booking?.turf?.name || "-"}</p>
                                 </div>
                               </td>
                               <td className="py-4">
@@ -355,7 +336,7 @@ const OwnerDashboard = () => {
                 {/* Live Feed */}
                 <div className="bg-[#000000] p-6 rounded-[8px] border border-[#2D2D2D] shadow-[var(--shadow-2)] flex-1">
                   <div className="flex items-center justify-between mb-6">
-                    <h2 className="text-[14px] font-semibold text-white uppercase tracking-wider">Live Feed</h2>
+                    <h2 className="text-[14px] font-black text-white uppercase tracking-wider" style={{ fontFamily: "'Open Sans', sans-serif" }}>Live Feed</h2>
                     <div className="flex items-center gap-1.5 px-2 py-0.5 rounded-[6px] text-[10px] font-medium uppercase tracking-widest animate-pulse border"
                          style={{ backgroundColor: `${themeColor}1A`, color: themeColor, borderColor: `${themeColor}33` }}>
                       <span className="w-1 h-1 rounded-full" style={{ backgroundColor: themeColor }} /> Live
@@ -443,12 +424,12 @@ const StatsCard = ({ title, value, prefix = "", suffix = "", icon: Icon, themeCo
 
 const ChartCard = ({ title, subtitle, children, action, className = "h-full" }) => (
   <div className={`bg-[#000000] p-6 lg:p-8 rounded-[8px] border border-[#2D2D2D] shadow-[var(--shadow-2)] relative overflow-hidden group flex flex-col ${className}`}>
-    <div className="absolute top-0 right-0 w-32 h-32 bg-[#55DEE8]/5 blur-[60px] group-hover:bg-[#55DEE8]/10 transition-colors"></div>
+    <div className="absolute top-0 right-0 w-32 h-32 bg-[#BFF367]/5 blur-[60px] group-hover:bg-[#BFF367]/10 transition-colors"></div>
     <div className="flex flex-col gap-2 mb-6 relative z-10 shrink-0">
       <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-2">
         <div>
-          <h2 className="text-lg font-semibold text-white tracking-[-0.3px] leading-none mb-2">{title}</h2>
-          <p className="text-[12px] text-[#999999] tracking-normal">{subtitle}</p>
+          <h2 className="text-lg font-black text-white tracking-tighter leading-none mb-2 uppercase" style={{ fontFamily: "'Open Sans', sans-serif" }}>{title}</h2>
+          <p className="text-[#999999] tracking-normal uppercase global-subheading font-inter font-light">{subtitle}</p>
         </div>
         {action && <div className="z-20 self-start sm:self-auto">{action}</div>}
       </div>

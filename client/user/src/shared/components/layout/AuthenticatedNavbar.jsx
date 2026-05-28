@@ -16,7 +16,8 @@ import {
   MessageSquare,
   AlertTriangle,
   History,
-  ShieldAlert
+  ShieldAlert,
+  ExternalLink
 } from "lucide-react";
 import { useDispatch, useSelector } from "react-redux";
 import { logout } from "@redux/slices/authSlice.js";
@@ -24,6 +25,7 @@ import axiosInstance from "@hooks/useAxiosInstance";
 import ManualBookingModal from "@features/venue-owner/ManualBookingModal";
 import useNotifications from "@hooks/shared/useNotifications";
 import { formatDistanceToNow } from 'date-fns';
+import toast from "react-hot-toast";
 
 /**
  * AuthenticatedNavbar Rs � Role-aware top navigation.
@@ -42,7 +44,7 @@ const AuthenticatedNavbar = ({ toggleSidebar }) => {
   const user = useSelector((state) => state?.auth?.user);
   const role = useSelector((state) => state?.auth?.role);
   const isScorer = role?.toLowerCase().includes("scorer");
-  const themeColor = isScorer ? "#00C187" : "#55DEE8";
+  const themeColor = isScorer ? "#00C187" : "#BFF367";
 
   const { notifications, loading, unreadCount, markRead, markAllRead, clearAll } = useNotifications();
 
@@ -84,6 +86,20 @@ const AuthenticatedNavbar = ({ toggleSidebar }) => {
     }
   };
 
+  const handleCheckVenue = async () => {
+    try {
+      const response = await axiosInstance.get("/api/owner/turf/owner/all");
+      const turfs = response.data;
+      if (turfs && turfs.length > 0) {
+        navigate(`/venue/${turfs[0]._id}`);
+      } else {
+        toast.error("You don't have any venues yet!");
+      }
+    } catch (err) {
+      toast.error("Failed to load your venue");
+    }
+  };
+
   const getTimeGreeting = () => {
     const hour = new Date().getHours();
     if (hour < 12) return "Good Morning";
@@ -97,7 +113,7 @@ const AuthenticatedNavbar = ({ toggleSidebar }) => {
       case 'PAYMENT': return <CreditCard size={14} className="text-green-500" />;
       case 'SUPPORT': return <MessageSquare size={14} className="text-blue-500" />;
       case 'WITHDRAWAL': return <AlertTriangle size={14} className="text-orange-500" />;
-      case 'REVIEW': return <ShieldAlert size={14} className="text-transparent bg-clip-text bg-gradient-to-r from-[#55DEE8] to-[#BFF367]" />;
+      case 'REVIEW': return <ShieldAlert size={14} className="text-yellow-500" />;
       default: return <Bell size={14} style={{ color: themeColor }} />;
     }
   };
@@ -130,25 +146,6 @@ const AuthenticatedNavbar = ({ toggleSidebar }) => {
 
         
         <div className="hidden xl:flex flex-1 items-center justify-center gap-6 max-w-4xl px-8">
-          <div className="relative flex-1 group">
-            <div className="absolute inset-y-0 left-4 flex items-center pointer-events-none text-white/40 transition-colors" style={{ color: themeColor + '66' }}>
-              <Search size={18} />
-            </div>
-            <input 
-              type="text" 
-              placeholder="Search bookings, players, or reports..."
-              className="w-full bg-[#0d0d0d] border border-white/5 rounded-lg py-2.5 pl-12 pr-16 text-sm text-white placeholder:text-white/20 focus:outline-none transition-all font-inter shadow-inner"
-              style={{ borderColor: 'rgba(255,255,255,0.05)' }}
-              onFocus={(e) => e.target.style.borderColor = themeColor + '80'}
-              onBlur={(e) => e.target.style.borderColor = 'rgba(255,255,255,0.05)'}
-            />
-            <div className="absolute inset-y-0 right-4 flex items-center gap-1.5">
-              <div className="flex items-center justify-center w-5 h-5 rounded bg-white/5 text-[10px] text-white/30 border border-white/5"><Command size={10} /></div>
-              <div className="flex items-center justify-center w-5 h-5 rounded bg-white/5 text-[10px] text-white/30 border border-white/5 font-bold">K</div>
-            </div>
-          </div>
-
-
         </div>
 
 
@@ -160,9 +157,16 @@ const AuthenticatedNavbar = ({ toggleSidebar }) => {
           {["venu_owners", "owner", "venue_owner", "verified_venue_owner", "bmsp_owner"].some(r => role?.toLowerCase()?.includes(r)) && (
             <>
               <button 
+                onClick={handleCheckVenue}
+                className="hidden md:flex items-center gap-2 px-6 py-2.5 rounded-lg font-black text-[10px] uppercase tracking-widest transition-all shadow-xl active:scale-95 border border-[#BFF367] text-[#BFF367] hover:bg-[#BFF367]/10"
+              >
+                <ExternalLink size={14} strokeWidth={3} />
+                <span>Check Venue</span>
+              </button>
+              <button 
                 onClick={() => setIsManualBookingOpen(true)}
                 className="hidden md:flex items-center gap-2 px-6 py-2.5 rounded-lg font-black text-[10px] uppercase tracking-widest transition-all shadow-xl active:scale-95"
-                style={{ backgroundColor: themeColor, color: '#000', boxShadow: `0 5px 15px ${themeColor}33` }}
+                style={{ background: 'linear-gradient(90deg, #55DEE8 0%, #BFF367 100%)', color: '#000', boxShadow: `0 5px 15px ${themeColor}33` }}
               >
                 <Plus size={14} strokeWidth={3} />
                 <span>Manual Booking</span>
@@ -247,43 +251,14 @@ const AuthenticatedNavbar = ({ toggleSidebar }) => {
 
 
           
-          <div className="relative" ref={profileRef}>
+          <div className="relative">
             <button 
-              onClick={() => setShowProfileMenu(!showProfileMenu)}
-              className="flex items-center gap-4 p-1.5 pr-5 bg-[#0d0d0d] border border-white/5 rounded-[8px] hover:bg-white/[0.03] hover:border-white/10 transition-all duration-300 group"
+              onClick={handleLogout}
+              className="flex items-center justify-center p-2.5 bg-[#0d0d0d] border border-white/5 hover:border-red-500/30 rounded-[8px] hover:bg-red-500/10 hover:text-red-500 text-[#999999] transition-all duration-300"
+              title="Logout"
             >
-              <div className="w-11 h-11 rounded-lg overflow-hidden flex items-center justify-center text-black shadow-2xl group-hover:scale-105 transition-transform" style={{ backgroundColor: themeColor }}>
-                {user?.profilePicture ? (
-                  <img src={user.profilePicture} alt={user.name} className="w-full h-full object-cover" />
-                ) : (
-                  <span className="text-[15px] font-black uppercase tracking-tighter">
-                    {user?.name?.split(" ").map(w => w[0]).join("").toUpperCase().slice(0, 2) || "U"}
-                  </span>
-                )}
-              </div>
-              <div className="hidden sm:flex flex-col items-start">
-                <span className="text-[13px] font-black text-white tracking-tight uppercase leading-none mb-1.5">{user?.name || user?.fullName || "User"}</span>
-                <span className="text-[9px] font-black text-neutral-500 uppercase tracking-[0.2em] leading-none">{role?.replace("BMSP_", "") || "OWNER"}</span>
-              </div>
-              <ChevronDown size={14} className={`text-neutral-500 transition-transform duration-300 ${showProfileMenu ? "rotate-180 text-white" : ""}`} />
+              <LogOut size={20} strokeWidth={2.5} />
             </button>
-
-            {showProfileMenu && (
-              <div className="absolute right-0 mt-4 w-52 bg-[#000000] border border-white/10 rounded-lg shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-200">
-                <div className="py-2">
-                  <button 
-                    onClick={() => {
-                      setShowProfileMenu(false);
-                      handleLogout();
-                    }}
-                    className="w-full flex items-center gap-3 px-5 py-3.5 text-[11px] font-black uppercase tracking-widest text-red-500/70 hover:bg-red-500/10 hover:text-red-500 transition-all"
-                  >
-                    <LogOut size={16} />
-                    Logout
-                  </button>
-                </div>
-              </div>
-            )}
           </div>
         </div>
       </nav>

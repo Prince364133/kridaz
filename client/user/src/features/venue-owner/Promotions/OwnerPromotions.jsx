@@ -1,4 +1,4 @@
-﻿import React, { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { 
   Tag, Plus, Calendar, Clock, Percent, 
   IndianRupee, CheckCircle2, XCircle, Search, Trash2 
@@ -104,14 +104,13 @@ export default function OwnerPromotions() {
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 relative z-10 border-b border-[#2D2D2D] pb-6">
         <div>
           <div className="flex items-center gap-3">
-             <Tag className="text-[#55DEE8]" size={32} />
              <h1 className="text-[28px] lg:text-[32px] font-bold font-['Open_Sans'] tracking-tight uppercase">Promotion Engine</h1>
           </div>
-          <p className="text-[#878C9F] font-inter text-[20px] mt-1 ml-11">Generate and monitor discount campaigns</p>
+          <p className="text-[#878C9F] font-inter text-[20px] mt-1">Generate and monitor discount campaigns</p>
         </div>
         <button 
           onClick={() => setIsModalOpen(true)}
-          className="flex items-center justify-center gap-2 px-4 py-2 bg-[#55DEE8] hover:bg-[#b3ff00] text-black rounded-[8px] text-[13px] font-bold uppercase tracking-widest transition-all w-full md:w-auto shadow-[0_0_15px_rgba(204,255,0,0.15)] font-inter"
+          className="flex items-center justify-center gap-2 px-4 py-2 bg-[#BFF367] hover:bg-[#b3ff00] text-black rounded-[8px] text-[13px] font-bold uppercase tracking-widest transition-all w-full md:w-auto shadow-[0_0_15px_rgba(204,255,0,0.15)] font-inter"
         >
           <Plus size={18} />
           Create Promotion
@@ -120,16 +119,16 @@ export default function OwnerPromotions() {
 
       {/* Top Metrics */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 lg:gap-5">
-        <div className="bg-[#000000] border border-[#2D2D2D] rounded-[8px] p-5 flex flex-col relative overflow-hidden shadow-[var(--shadow-2)] hover:border-[#55DEE8]/30 transition-all duration-500">
+        <div className="bg-[#000000] border border-[#2D2D2D] rounded-[8px] p-5 flex flex-col relative overflow-hidden shadow-[var(--shadow-2)] hover:border-[#BFF367]/30 transition-all duration-500">
           <div className="w-10 h-10 bg-[#2D2D2D]/50 rounded-full flex items-center justify-center mb-4 text-[#878C9F] group-hover:text-white transition-colors">
              <CheckCircle2 size={20} />
           </div>
           <p className="text-[12px] font-normal text-[#878C9F] uppercase tracking-[0.5px] mb-1">Active Campaigns</p>
-          <h3 className="text-2xl font-semibold text-[#55DEE8] tracking-tight">
+          <h3 className="text-2xl font-semibold text-[#BFF367] tracking-tight">
              {isLoading ? "..." : activeCount}
           </h3>
         </div>
-        <div className="bg-[#000000] border border-[#2D2D2D] rounded-[8px] p-5 flex flex-col relative overflow-hidden shadow-[var(--shadow-2)] hover:border-[#55DEE8]/30 transition-all duration-500">
+        <div className="bg-[#000000] border border-[#2D2D2D] rounded-[8px] p-5 flex flex-col relative overflow-hidden shadow-[var(--shadow-2)] hover:border-[#BFF367]/30 transition-all duration-500">
           <div className="w-10 h-10 bg-[#2D2D2D]/50 rounded-full flex items-center justify-center mb-4 text-[#878C9F] group-hover:text-white transition-colors">
              <Tag size={20} />
           </div>
@@ -138,7 +137,7 @@ export default function OwnerPromotions() {
              {isLoading ? "..." : promotions.length}
           </h3>
         </div>
-        <div className="bg-[#000000] border border-[#2D2D2D] rounded-[8px] p-5 flex flex-col relative overflow-hidden shadow-[var(--shadow-2)] hover:border-[#55DEE8]/30 transition-all duration-500">
+        <div className="bg-[#000000] border border-[#2D2D2D] rounded-[8px] p-5 flex flex-col relative overflow-hidden shadow-[var(--shadow-2)] hover:border-[#BFF367]/30 transition-all duration-500">
           <div className="w-10 h-10 bg-[#2D2D2D]/50 rounded-full flex items-center justify-center mb-4 text-[#878C9F] group-hover:text-white transition-colors">
              <Clock size={20} />
           </div>
@@ -157,7 +156,7 @@ export default function OwnerPromotions() {
             <input
               type="text"
               placeholder="Search campaigns..."
-              className="w-full bg-[#1A1A1A] border border-[#2D2D2D] text-white pl-10 pr-4 py-2 rounded-[8px] text-[13px] focus:outline-none focus:border-[#55DEE8]/50 transition-colors font-inter"
+              className="w-full bg-[#1A1A1A] border border-[#2D2D2D] text-white pl-10 pr-4 py-2 rounded-[8px] text-[13px] focus:outline-none focus:border-[#BFF367]/50 transition-colors font-inter"
             />
           </div>
         </div>
@@ -189,7 +188,7 @@ export default function OwnerPromotions() {
                     <span className="text-xs text-[#878C9F]">{promo.turfName || "All Grounds"}</span>
                   </td>
                   <td className="px-6 py-4">
-                    <div className="flex items-center gap-1.5 text-sm font-bold text-[#55DEE8]">
+                    <div className="flex items-center gap-1.5 text-sm font-bold text-[#BFF367]">
                       {promo.discountType === 'PERCENTAGE' ? <Percent size={14} /> : <IndianRupee size={14} />}
                       {promo.discountValue}{promo.discountType === 'PERCENTAGE' ? '%' : ' OFF'}
                     </div>
@@ -200,7 +199,7 @@ export default function OwnerPromotions() {
                        {promo.usageLimit > 0 && (
                          <div className="w-24 h-1.5 bg-[#2D2D2D] rounded-full overflow-hidden">
                             <div 
-                              className={`h-full ${promo.timesUsed >= promo.usageLimit ? 'bg-red-500' : 'bg-[#55DEE8]'}`} 
+                              className={`h-full ${promo.timesUsed >= promo.usageLimit ? 'bg-red-500' : 'bg-[#BFF367]'}`} 
                               style={{ width: `${Math.min((promo.timesUsed / promo.usageLimit) * 100, 100)}%` }} 
                             />
                          </div>
@@ -253,12 +252,12 @@ export default function OwnerPromotions() {
           <div className="bg-[#000000] border border-[#2D2D2D] rounded-[8px] w-full max-w-md overflow-hidden shadow-[var(--shadow-2)]">
             <div className="p-6 border-b border-[#2D2D2D] flex justify-between items-center bg-[#1A1A1A]">
               <h2 className="text-lg font-bold font-['Open_Sans'] uppercase tracking-tight text-white flex items-center gap-2">
-                <Tag size={18} className="text-[#55DEE8]" />
+                <Tag size={18} className="text-[#BFF367]" />
                 Initialize Campaign
               </h2>
               <button 
                 onClick={() => setIsModalOpen(false)}
-                className="text-[#878C9F] hover:text-[#55DEE8] transition-colors"
+                className="text-[#878C9F] hover:text-[#BFF367] transition-colors"
               >
                 <XCircle size={20} />
               </button>
@@ -272,7 +271,7 @@ export default function OwnerPromotions() {
                   required
                   value={newPromo.code}
                   onChange={(e) => setNewPromo({...newPromo, code: e.target.value.toUpperCase()})}
-                  className="w-full bg-[#1A1A1A] border border-[#2D2D2D] text-white px-4 py-2.5 rounded-[6px] text-sm focus:outline-none focus:border-[#55DEE8]/50 uppercase"
+                  className="w-full bg-[#1A1A1A] border border-[#2D2D2D] text-white px-4 py-2.5 rounded-[6px] text-sm focus:outline-none focus:border-[#BFF367]/50 uppercase"
                   placeholder="e.g. SUMMER25"
                 />
               </div>
@@ -282,7 +281,7 @@ export default function OwnerPromotions() {
                 <select 
                   value={newPromo.turfId}
                   onChange={(e) => setNewPromo({...newPromo, turfId: e.target.value})}
-                  className="w-full bg-[#1A1A1A] border border-[#2D2D2D] text-white px-4 py-2.5 rounded-[6px] text-sm focus:outline-none focus:border-[#55DEE8]/50"
+                  className="w-full bg-[#1A1A1A] border border-[#2D2D2D] text-white px-4 py-2.5 rounded-[6px] text-sm focus:outline-none focus:border-[#BFF367]/50"
                 >
                   <option value="all">Universal (All My Grounds)</option>
                   {turfs.map(t => (
@@ -297,7 +296,7 @@ export default function OwnerPromotions() {
                   <select 
                     value={newPromo.type}
                     onChange={(e) => setNewPromo({...newPromo, type: e.target.value})}
-                    className="w-full bg-[#1A1A1A] border border-[#2D2D2D] text-white px-4 py-2.5 rounded-[6px] text-sm focus:outline-none focus:border-[#55DEE8]/50"
+                    className="w-full bg-[#1A1A1A] border border-[#2D2D2D] text-white px-4 py-2.5 rounded-[6px] text-sm focus:outline-none focus:border-[#BFF367]/50"
                   >
                     <option value="PERCENTAGE">Percentage (%)</option>
                     <option value="FLAT">Flat Amount (Rs)</option>
@@ -311,7 +310,7 @@ export default function OwnerPromotions() {
                     min="1"
                     value={newPromo.value}
                     onChange={(e) => setNewPromo({...newPromo, value: e.target.value})}
-                    className="w-full bg-[#1A1A1A] border border-[#2D2D2D] text-white px-4 py-2.5 rounded-[6px] text-sm focus:outline-none focus:border-[#55DEE8]/50"
+                    className="w-full bg-[#1A1A1A] border border-[#2D2D2D] text-white px-4 py-2.5 rounded-[6px] text-sm focus:outline-none focus:border-[#BFF367]/50"
                     placeholder="e.g. 25"
                   />
                 </div>
@@ -326,7 +325,7 @@ export default function OwnerPromotions() {
                     min={new Date().toISOString().split('T')[0]}
                     value={newPromo.validUntil}
                     onChange={(e) => setNewPromo({...newPromo, validUntil: e.target.value})}
-                    className="w-full bg-[#1A1A1A] border border-[#2D2D2D] text-[#878C9F] px-4 py-2.5 rounded-[6px] text-sm focus:outline-none focus:border-[#55DEE8]/50 [color-scheme:dark]"
+                    className="w-full bg-[#1A1A1A] border border-[#2D2D2D] text-[#878C9F] px-4 py-2.5 rounded-[6px] text-sm focus:outline-none focus:border-[#BFF367]/50 [color-scheme:dark]"
                   />
                 </div>
                 <div>
@@ -336,7 +335,7 @@ export default function OwnerPromotions() {
                     min="1"
                     value={newPromo.usageLimit}
                     onChange={(e) => setNewPromo({...newPromo, usageLimit: e.target.value})}
-                    className="w-full bg-[#1A1A1A] border border-[#2D2D2D] text-white px-4 py-2.5 rounded-[6px] text-sm focus:outline-none focus:border-[#55DEE8]/50"
+                    className="w-full bg-[#1A1A1A] border border-[#2D2D2D] text-white px-4 py-2.5 rounded-[6px] text-sm focus:outline-none focus:border-[#BFF367]/50"
                     placeholder="Unlimited"
                   />
                 </div>
@@ -354,7 +353,7 @@ export default function OwnerPromotions() {
                 <button 
                   type="submit"
                   disabled={isSubmitting}
-                  className="flex-1 px-4 py-2.5 bg-[#55DEE8] text-black rounded-[8px] text-[13px] uppercase tracking-widest font-bold hover:bg-[#b3ff00] transition-colors shadow-[0_0_15px_rgba(204,255,0,0.15)] disabled:opacity-50"
+                  className="flex-1 px-4 py-2.5 bg-[#BFF367] text-black rounded-[8px] text-[13px] uppercase tracking-widest font-bold hover:bg-[#b3ff00] transition-colors shadow-[0_0_15px_rgba(204,255,0,0.15)] disabled:opacity-50"
                 >
                   {isSubmitting ? "Deploying..." : "Deploy Campaign"}
                 </button>
@@ -368,3 +367,7 @@ export default function OwnerPromotions() {
     </div>
   );
 }
+
+
+
+

@@ -79,7 +79,7 @@ const EditTurf = () => {
   if (fetching) return <DashboardSkeleton />;
 
   const FieldStatus = ({ isPending }) => isPending ? (
-    <span className="ml-2 px-1.5 py-0.5 bg-gradient-to-r from-[#55DEE8]/10 to-[#BFF367]/10 border border-[#55DEE8]/20 text-transparent bg-clip-text bg-gradient-to-r from-[#55DEE8] to-[#BFF367] text-[7px] font-bold uppercase tracking-widest rounded-[2px] animate-pulse">
+    <span className="ml-2 px-1.5 py-0.5 bg-amber-500/10 border border-amber-500/20 text-amber-500 text-[7px] font-bold uppercase tracking-widest rounded-[2px] animate-pulse">
       Pending Review
     </span>
   ) : null;
@@ -92,15 +92,15 @@ const EditTurf = () => {
             <div className="flex items-center gap-4">
               <button 
                 onClick={() => navigate(-1)}
-                className="w-10 h-10 flex items-center justify-center bg-[#111] border border-[#2D2D2D] text-[#878C9F] hover:text-[#55DEE8] hover:border-[#55DEE8]/40 rounded-full transition-all group"
+                className="w-10 h-10 flex items-center justify-center bg-[#111] border border-[#2D2D2D] text-[#878C9F] hover:text-[#BFF367] hover:border-[#BFF367]/40 rounded-full transition-all group"
                 title="Cancel Changes"
               >
                 <ArrowLeft size={18} className="group-hover:-translate-x-0.5 transition-transform" />
               </button>
               <div className="flex items-center gap-3">
-                <div className="w-1.5 h-8 bg-[#55DEE8] rounded-full" />
+                
                 <h1 className="text-[28px] lg:text-[32px] font-bold font-open-sans text-white tracking-tight leading-none uppercase">
-                  EDIT <span className="text-[#55DEE8]">FACILITY</span>
+                  EDIT <span className="text-[#BFF367]">FACILITY</span>
                 </h1>
               </div>
             </div>
@@ -114,10 +114,10 @@ const EditTurf = () => {
           onSubmit={handleSubmit(onSubmit)}
           className="grid grid-cols-1 md:grid-cols-2 gap-12 bg-[#000000] p-8 md:p-12 rounded-[8px] border border-[#2D2D2D] shadow-[var(--shadow-2)] relative overflow-hidden"
         >
-          <div className="absolute top-0 right-0 w-64 h-64 bg-[#55DEE8]/5 blur-[100px] pointer-events-none" />
+          <div className="absolute top-0 right-0 w-64 h-64 bg-[#BFF367]/5 blur-[100px] pointer-events-none" />
           
           <div className="space-y-8 relative z-10">
-            <h3 className="text-[14px] font-bold text-[#55DEE8] border-b border-[#2D2D2D] pb-3 mb-8 uppercase tracking-[3px] font-open-sans">General Information</h3>
+            <h3 className="text-[14px] font-bold text-[#BFF367] border-b border-[#2D2D2D] pb-3 mb-8 uppercase tracking-[3px] font-open-sans">General Information</h3>
             
             <div className="space-y-2">
               <label className="text-[11px] font-bold text-[#878C9F] uppercase tracking-widest ml-1 flex items-center">
@@ -126,10 +126,10 @@ const EditTurf = () => {
               <input
                 {...register("name")}
                 type="text"
-                className={`w-full bg-[#111111] border ${pendingUpdates?.name ? 'border-[#55DEE8]/40' : 'border-[#2D2D2D]'} text-white px-4 py-3 rounded-[8px] focus:border-[#55DEE8]/60 focus:outline-none transition-all text-sm font-medium placeholder-[#333]`}
+                className={`w-full bg-[#111111] border ${pendingUpdates?.name ? 'border-amber-500/40' : 'border-[#2D2D2D]'} text-white px-4 py-3 rounded-[8px] focus:border-[#BFF367]/60 focus:outline-none transition-all text-sm font-medium placeholder-[#333]`}
                 placeholder="Enter arena identity..."
               />
-              {errors.name && <p className="text-[#55DEE8] text-[10px] font-bold uppercase mt-2 block ml-1">{errors.name.message}</p>}
+              {errors.name && <p className="text-[#BFF367] text-[10px] font-bold uppercase mt-2 block ml-1">{errors.name.message}</p>}
             </div>
             
             <div className="form-control">
@@ -140,11 +140,11 @@ const EditTurf = () => {
               </label>
               <textarea
                 {...register("description")}
-                className={`w-full bg-[#111111] border ${pendingUpdates?.description ? 'border-[#55DEE8]/40' : 'border-[#2D2D2D]'} text-white focus:border-[#55DEE8]/60 focus:outline-none text-sm h-32 rounded-[8px] p-4 transition-all resize-none`}
+                className={`w-full bg-[#111111] border ${pendingUpdates?.description ? 'border-amber-500/40' : 'border-[#2D2D2D]'} text-white focus:border-[#BFF367]/60 focus:outline-none text-sm h-32 rounded-[8px] p-4 transition-all resize-none`}
                 placeholder="Describe your facility's features and amenities..."
               ></textarea>
               {errors.description && (
-                <span className="text-[#55DEE8] text-[10px] font-bold uppercase mt-2 block ml-1">
+                <span className="text-[#BFF367] text-[10px] font-bold uppercase mt-2 block ml-1">
                   {errors.description.message}
                 </span>
               )}
@@ -159,12 +159,12 @@ const EditTurf = () => {
               <textarea
                 {...register("policies")}
                 maxLength={1000}
-                className={`w-full bg-[#111111] border ${pendingUpdates?.policies ? 'border-[#55DEE8]/40' : 'border-[#2D2D2D]'} text-white focus:border-[#55DEE8]/60 focus:outline-none text-sm h-48 rounded-[8px] p-4 transition-all resize-none`}
+                className={`w-full bg-[#111111] border ${pendingUpdates?.policies ? 'border-amber-500/40' : 'border-[#2D2D2D]'} text-white focus:border-[#BFF367]/60 focus:outline-none text-sm h-48 rounded-[8px] p-4 transition-all resize-none`}
                 placeholder="Define your facility's rules, cancellation policies, and safety guidelines (Minimum 200 characters)..."
               ></textarea>
               <div className="flex justify-between mt-2 ml-1">
                 {errors.policies ? (
-                  <span className="text-[#55DEE8] text-[10px] font-bold uppercase">
+                  <span className="text-[#BFF367] text-[10px] font-bold uppercase">
                     {errors.policies.message}
                   </span>
                 ) : (
@@ -183,9 +183,9 @@ const EditTurf = () => {
                 {...register("location")}
                 type="text"
                 placeholder="Full Street Address..."
-                className={`w-full bg-[#111111] border ${pendingUpdates?.location ? 'border-[#55DEE8]/40' : 'border-[#2D2D2D]'} text-white px-4 py-3 rounded-[8px] focus:border-[#55DEE8]/60 focus:outline-none text-sm font-medium placeholder-[#333]`}
+                className={`w-full bg-[#111111] border ${pendingUpdates?.location ? 'border-amber-500/40' : 'border-[#2D2D2D]'} text-white px-4 py-3 rounded-[8px] focus:border-[#BFF367]/60 focus:outline-none text-sm font-medium placeholder-[#333]`}
               />
-              {errors.location && <p className="text-[#55DEE8] text-[10px] font-bold uppercase mt-2 block ml-1">{errors.location.message}</p>}
+              {errors.location && <p className="text-[#BFF367] text-[10px] font-bold uppercase mt-2 block ml-1">{errors.location.message}</p>}
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -197,7 +197,7 @@ const EditTurf = () => {
                   {...register("city")}
                   type="text"
                   placeholder="City"
-                  className="w-full bg-[#111111] border border-[#2D2D2D] text-white px-4 py-3 rounded-[8px] focus:border-[#55DEE8]/60 focus:outline-none text-sm font-medium placeholder-[#333]"
+                  className="w-full bg-[#111111] border border-[#2D2D2D] text-white px-4 py-3 rounded-[8px] focus:border-[#BFF367]/60 focus:outline-none text-sm font-medium placeholder-[#333]"
                 />
               </div>
 
@@ -209,7 +209,7 @@ const EditTurf = () => {
                   {...register("state")}
                   type="text"
                   placeholder="State"
-                  className="w-full bg-[#111111] border border-[#2D2D2D] text-white px-4 py-3 rounded-[8px] focus:border-[#55DEE8]/60 focus:outline-none text-sm font-medium placeholder-[#333]"
+                  className="w-full bg-[#111111] border border-[#2D2D2D] text-white px-4 py-3 rounded-[8px] focus:border-[#BFF367]/60 focus:outline-none text-sm font-medium placeholder-[#333]"
                 />
               </div>
             </div>
@@ -217,7 +217,7 @@ const EditTurf = () => {
             <div className="form-control">
               <label className="label mb-4">
                 <span className="text-[11px] font-bold text-[#878C9F] uppercase tracking-widest ml-1 flex items-center gap-2">
-                   ≡ƒôì Venue Coordinates & Map Preview
+                   =��� Venue Coordinates & Map Preview
                 </span>
               </label>
 
@@ -225,19 +225,19 @@ const EditTurf = () => {
                 <input
                   {...register("latitude")}
                   placeholder="Latitude"
-                  className="w-full bg-[#111111] border border-[#2D2D2D] text-white text-xs h-12 rounded-[8px] px-4 focus:outline-none focus:border-[#55DEE8]/60 transition-all font-mono"
+                  className="w-full bg-[#111111] border border-[#2D2D2D] text-white text-xs h-12 rounded-[8px] px-4 focus:outline-none focus:border-[#BFF367]/60 transition-all font-mono"
                 />
                 <input
                   {...register("longitude")}
                   placeholder="Longitude"
-                  className="w-full bg-[#111111] border border-[#2D2D2D] text-white text-xs h-12 rounded-[8px] px-4 focus:outline-none focus:border-[#55DEE8]/60 transition-all font-mono"
+                  className="w-full bg-[#111111] border border-[#2D2D2D] text-white text-xs h-12 rounded-[8px] px-4 focus:outline-none focus:border-[#BFF367]/60 transition-all font-mono"
                 />
                 <button
                   type="button"
                   onClick={getMyLocation}
-                  className={`shrink-0 px-6 rounded-[8px] bg-[#55DEE8]/10 text-[#55DEE8] border border-[#55DEE8]/20 hover:bg-[#55DEE8] hover:text-black transition-all flex items-center gap-2 text-[11px] font-bold uppercase tracking-widest ${isLocating ? 'animate-pulse' : ''}`}
+                  className={`shrink-0 px-6 rounded-[8px] bg-[#BFF367]/10 text-[#BFF367] border border-[#BFF367]/20 hover:bg-[#BFF367] hover:text-black transition-all flex items-center gap-2 text-[11px] font-bold uppercase tracking-widest ${isLocating ? 'animate-pulse' : ''}`}
                 >
-                  {isLocating ? "LocatingΓÇª" : "≡ƒôí GPS"}
+                  {isLocating ? "LocatingGǪ" : "=��� GPS"}
                 </button>
               </div>
 
@@ -251,19 +251,19 @@ const EditTurf = () => {
                 Hourly Rate (INR) <FieldStatus isPending={!!pendingUpdates?.pricePerHour} />
               </label>
               <div className="relative">
-                <span className="absolute left-4 top-1/2 -translate-y-1/2 text-[#55DEE8] font-bold text-sm">Γé╣</span>
+                <span className="absolute left-4 top-1/2 -translate-y-1/2 text-[#BFF367] font-bold text-sm">G�</span>
                 <input
                   {...register("pricePerHour")}
                   type="number"
-                  className={`w-full bg-[#111111] border ${pendingUpdates?.pricePerHour ? 'border-[#55DEE8]/40' : 'border-[#2D2D2D]'} text-white pl-10 pr-4 py-3 rounded-[8px] focus:border-[#55DEE8]/60 focus:outline-none text-sm font-medium`}
+                  className={`w-full bg-[#111111] border ${pendingUpdates?.pricePerHour ? 'border-amber-500/40' : 'border-[#2D2D2D]'} text-white pl-10 pr-4 py-3 rounded-[8px] focus:border-[#BFF367]/60 focus:outline-none text-sm font-medium`}
                 />
               </div>
-              {errors.pricePerHour && <p className="text-[#55DEE8] text-[10px] font-bold uppercase mt-2 block ml-1">{errors.pricePerHour.message}</p>}
+              {errors.pricePerHour && <p className="text-[#BFF367] text-[10px] font-bold uppercase mt-2 block ml-1">{errors.pricePerHour.message}</p>}
             </div>
           </div>
 
           <div className="space-y-8 relative z-10">
-            <h3 className="text-[14px] font-bold text-[#55DEE8] border-b border-[#2D2D2D] pb-3 mb-8 uppercase tracking-[3px] font-open-sans">Operational Details</h3>
+            <h3 className="text-[14px] font-bold text-[#BFF367] border-b border-[#2D2D2D] pb-3 mb-8 uppercase tracking-[3px] font-open-sans">Operational Details</h3>
             
             <div className="space-y-2">
               <label className="text-[11px] font-bold text-[#878C9F] uppercase tracking-widest ml-1 flex items-center">
@@ -272,7 +272,7 @@ const EditTurf = () => {
               <input
                 {...register("youtubeUrl")}
                 type="text"
-                className={`w-full bg-[#111111] border ${pendingUpdates?.youtubeUrl ? 'border-[#55DEE8]/40' : 'border-[#2D2D2D]'} text-white px-4 py-3 rounded-[8px] focus:border-[#55DEE8]/60 focus:outline-none text-sm font-medium placeholder-[#333]`}
+                className={`w-full bg-[#111111] border ${pendingUpdates?.youtubeUrl ? 'border-amber-500/40' : 'border-[#2D2D2D]'} text-white px-4 py-3 rounded-[8px] focus:border-[#BFF367]/60 focus:outline-none text-sm font-medium placeholder-[#333]`}
                 placeholder="https://www.youtube.com/watch?v=..."
               />
             </div>
@@ -310,7 +310,7 @@ const EditTurf = () => {
                 </span>
               </label>
               <select
-                className="w-full bg-[#111111] border border-[#2D2D2D] text-white focus:border-[#55DEE8]/60 focus:outline-none text-sm h-12 rounded-[8px] px-4 transition-all appearance-none"
+                className="w-full bg-[#111111] border border-[#2D2D2D] text-white focus:border-[#BFF367]/60 focus:outline-none text-sm h-12 rounded-[8px] px-4 transition-all appearance-none"
                 onChange={(e) => addSportType(e.target.value)}
                 value=""
               >
@@ -321,7 +321,7 @@ const EditTurf = () => {
               </select>
               <div className="mt-4 flex flex-wrap gap-2 min-h-[40px]">
                 {sportTypes.map((type, index) => (
-                  <span key={index} className="px-3 py-1.5 bg-[#55DEE8] text-black font-bold rounded-[4px] text-[10px] flex items-center gap-2 uppercase tracking-widest">
+                  <span key={index} className="px-3 py-1.5 bg-[#BFF367] text-black font-bold rounded-[4px] text-[10px] flex items-center gap-2 uppercase tracking-widest">
                     {type}
                     <button type="button" onClick={() => removeSportType(type)} className="hover:text-white transition-colors">
                       <X size={12} />
@@ -338,7 +338,7 @@ const EditTurf = () => {
                 </span>
               </label>
               <select
-                className="w-full bg-[#111111] border border-[#2D2D2D] text-white focus:border-[#55DEE8]/60 focus:outline-none text-sm h-12 rounded-[8px] px-4 transition-all appearance-none"
+                className="w-full bg-[#111111] border border-[#2D2D2D] text-white focus:border-[#BFF367]/60 focus:outline-none text-sm h-12 rounded-[8px] px-4 transition-all appearance-none"
                 onChange={(e) => addGroundType(e.target.value)}
                 value=""
               >
@@ -351,7 +351,7 @@ const EditTurf = () => {
                 {groundTypes.map((type, index) => (
                   <span key={index} className="px-3 py-1.5 bg-[#1A1A1A] border border-[#2D2D2D] text-white font-bold rounded-[4px] text-[10px] flex items-center gap-2 uppercase tracking-widest">
                     {type}
-                    <button type="button" onClick={() => removeGroundType(type)} className="hover:text-[#55DEE8] transition-colors">
+                    <button type="button" onClick={() => removeGroundType(type)} className="hover:text-[#BFF367] transition-colors">
                       <X size={12} />
                     </button>
                   </span>
@@ -364,7 +364,7 @@ const EditTurf = () => {
                 <span className="text-[11px] font-bold text-[#878C9F] uppercase tracking-widest ml-1">Integrated Facilities</span>
               </label>
               <select
-                className="w-full bg-[#111111] border border-[#2D2D2D] text-white focus:border-[#55DEE8]/60 focus:outline-none text-sm h-12 rounded-[8px] px-4 transition-all appearance-none"
+                className="w-full bg-[#111111] border border-[#2D2D2D] text-white focus:border-[#BFF367]/60 focus:outline-none text-sm h-12 rounded-[8px] px-4 transition-all appearance-none"
                 onChange={(e) => addFacility(e.target.value)}
                 value=""
               >
@@ -375,7 +375,7 @@ const EditTurf = () => {
               </select>
               <div className="mt-4 flex flex-wrap gap-2 min-h-[40px]">
                 {facilities.map((type, index) => (
-                  <span key={index} className="px-3 py-1.5 bg-[#1A1A1A] border border-[#2D2D2D] text-[#55DEE8] font-bold rounded-[4px] text-[10px] flex items-center gap-2 uppercase tracking-widest">
+                  <span key={index} className="px-3 py-1.5 bg-[#1A1A1A] border border-[#2D2D2D] text-[#BFF367] font-bold rounded-[4px] text-[10px] flex items-center gap-2 uppercase tracking-widest">
                     {type}
                     <button type="button" onClick={() => removeFacility(type)} className="hover:text-white transition-colors">
                       <X size={12} />
@@ -385,7 +385,7 @@ const EditTurf = () => {
               </div>
             </div>
 
-            <h3 className="text-[14px] font-bold text-[#55DEE8] border-b border-[#2D2D2D] pb-3 mb-8 uppercase tracking-[3px] font-open-sans mt-12">Support & Navigation</h3>
+            <h3 className="text-[14px] font-bold text-[#BFF367] border-b border-[#2D2D2D] pb-3 mb-8 uppercase tracking-[3px] font-open-sans mt-12">Support & Navigation</h3>
             
             <div className="space-y-2">
               <label className="text-[11px] font-bold text-[#878C9F] uppercase tracking-widest ml-1 flex items-center">
@@ -395,7 +395,7 @@ const EditTurf = () => {
                 {...register("mapUrl")}
                 type="text"
                 placeholder="https://maps.app.goo.gl/..."
-                className={`w-full bg-[#111111] border ${pendingUpdates?.mapUrl ? 'border-[#55DEE8]/40' : 'border-[#2D2D2D]'} text-white px-4 py-3 rounded-[8px] focus:border-[#55DEE8]/60 focus:outline-none text-sm font-medium`}
+                className={`w-full bg-[#111111] border ${pendingUpdates?.mapUrl ? 'border-amber-500/40' : 'border-[#2D2D2D]'} text-white px-4 py-3 rounded-[8px] focus:border-[#BFF367]/60 focus:outline-none text-sm font-medium`}
               />
             </div>
 
@@ -422,7 +422,7 @@ const EditTurf = () => {
                 <button
                   type="button"
                   onClick={addManagerContact}
-                  className="shrink-0 px-8 rounded-[8px] bg-white text-black hover:bg-[#55DEE8] transition-all text-[11px] font-bold uppercase tracking-widest"
+                  className="shrink-0 px-8 rounded-[8px] bg-white text-black hover:bg-[#BFF367] transition-all text-[11px] font-bold uppercase tracking-widest"
                 >
                   Add
                 </button>
@@ -430,12 +430,12 @@ const EditTurf = () => {
 
               <div className="space-y-3 max-h-[150px] overflow-y-auto custom-scrollbar pr-2">
                 {managerContacts.map((manager, index) => (
-                  <div key={index} className="flex items-center justify-between bg-[#111111] p-4 rounded-[8px] border border-[#2D2D2D] hover:border-[#55DEE8]/30 transition-all">
+                  <div key={index} className="flex items-center justify-between bg-[#111111] p-4 rounded-[8px] border border-[#2D2D2D] hover:border-[#BFF367]/30 transition-all">
                     <div className="flex flex-col">
                       <span className="text-white text-[13px] font-bold uppercase tracking-tight">{manager.name}</span>
                       <span className="text-[#878C9F] text-[11px] font-mono mt-0.5">{manager.phone}</span>
                     </div>
-                    <button type="button" onClick={() => removeManagerContact(index)} className="text-[#444] hover:text-[#55DEE8] transition-colors uppercase text-[10px] font-bold tracking-widest">
+                    <button type="button" onClick={() => removeManagerContact(index)} className="text-[#444] hover:text-[#BFF367] transition-colors uppercase text-[10px] font-bold tracking-widest">
                       Remove
                     </button>
                   </div>
@@ -447,7 +447,7 @@ const EditTurf = () => {
           <div className="md:col-span-2 space-y-12 pt-12 border-t border-[#2D2D2D] relative z-10">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
               <div className="space-y-10">
-                <h3 className="text-[14px] font-bold text-[#55DEE8] border-b border-[#2D2D2D] pb-3 mb-6 uppercase tracking-[3px] font-open-sans">Slot Architecture</h3>
+                <h3 className="text-[14px] font-bold text-[#BFF367] border-b border-[#2D2D2D] pb-3 mb-6 uppercase tracking-[3px] font-open-sans">Slot Architecture</h3>
                 <div className="grid grid-cols-2 gap-6">
                   <div className="form-control">
                     <label className="label mb-2">
@@ -455,7 +455,7 @@ const EditTurf = () => {
                     </label>
                     <select
                       {...register("slotDuration")}
-                      className="w-full bg-[#111111] border border-[#2D2D2D] text-white focus:border-[#55DEE8]/60 focus:outline-none text-sm h-12 rounded-[8px] px-4 appearance-none"
+                      className="w-full bg-[#111111] border border-[#2D2D2D] text-white focus:border-[#BFF367]/60 focus:outline-none text-sm h-12 rounded-[8px] px-4 appearance-none"
                     >
                       <option value={30}>30 Minutes</option>
                       <option value={60}>60 Minutes</option>
@@ -470,7 +470,7 @@ const EditTurf = () => {
                     </label>
                     <select
                       {...register("breakTime")}
-                      className="w-full bg-[#111111] border border-[#2D2D2D] text-white focus:border-[#55DEE8]/60 focus:outline-none text-sm h-12 rounded-[8px] px-4 appearance-none"
+                      className="w-full bg-[#111111] border border-[#2D2D2D] text-white focus:border-[#BFF367]/60 focus:outline-none text-sm h-12 rounded-[8px] px-4 appearance-none"
                     >
                       <option value={0}>No Break</option>
                       <option value={10}>10 Minutes</option>
@@ -498,7 +498,7 @@ const EditTurf = () => {
                         />
                       )}
                     />
-                    {errors.openTime && <p className="text-[#55DEE8] text-[10px] font-bold uppercase mt-2 block ml-1">{errors.openTime.message}</p>}
+                    {errors.openTime && <p className="text-[#BFF367] text-[10px] font-bold uppercase mt-2 block ml-1">{errors.openTime.message}</p>}
                   </div>
 
                   <div className="form-control">
@@ -517,7 +517,7 @@ const EditTurf = () => {
                         />
                       )}
                     />
-                    {errors.closeTime && <p className="text-[#55DEE8] text-[10px] font-bold uppercase mt-2 block ml-1">{errors.closeTime.message}</p>}
+                    {errors.closeTime && <p className="text-[#BFF367] text-[10px] font-bold uppercase mt-2 block ml-1">{errors.closeTime.message}</p>}
                   </div>
                 </div>
 
@@ -533,7 +533,7 @@ const EditTurf = () => {
                           key={day}
                           type="button"
                           onClick={() => toggleDay(day)}
-                          className={`px-5 py-3 rounded-[8px] text-[11px] font-black uppercase tracking-widest transition-all border ${ isActive ? "bg-[#55DEE8] text-black border-[#55DEE8] shadow-[0_5px_15px_rgba(204,255,0,0.2)]" : "bg-[#111111] text-[#444] border-[#2D2D2D] hover:border-[#55DEE8]/40" }`}
+                          className={`px-5 py-3 rounded-[8px] text-[11px] font-black uppercase tracking-widest transition-all border ${ isActive ? "bg-[#BFF367] text-black border-[#BFF367] shadow-[0_5px_15px_rgba(204,255,0,0.2)]" : "bg-[#111111] text-[#444] border-[#2D2D2D] hover:border-[#BFF367]/40" }`}
                         >
                           {day.substring(0, 3)}
                         </button>
@@ -545,7 +545,7 @@ const EditTurf = () => {
 
               <div className="space-y-10">
                 <div className="flex items-center justify-between border-b border-[#2D2D2D] pb-3 mb-6">
-                  <h3 className="text-[14px] font-bold text-[#55DEE8] uppercase tracking-[3px] font-open-sans">Configuration Lifespan</h3>
+                  <h3 className="text-[14px] font-bold text-[#BFF367] uppercase tracking-[3px] font-open-sans">Configuration Lifespan</h3>
                 </div>
                 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -555,7 +555,7 @@ const EditTurf = () => {
                     </label>
                     <select
                       {...register("slotsConfigDuration")}
-                      className="w-full bg-[#111111] border border-[#2D2D2D] text-white focus:border-[#55DEE8]/60 focus:outline-none text-sm h-12 rounded-[8px] px-4 appearance-none"
+                      className="w-full bg-[#111111] border border-[#2D2D2D] text-white focus:border-[#BFF367]/60 focus:outline-none text-sm h-12 rounded-[8px] px-4 appearance-none"
                     >
                       <option value="Until Changed">Until Manual Update</option>
                       <option value="Fixed Weeks">Fixed Duration (Weekly)</option>
@@ -573,17 +573,17 @@ const EditTurf = () => {
                           type="number"
                           min="1"
                           max="52"
-                          className="w-full bg-[#111111] border border-[#2D2D2D] text-white px-4 py-3 rounded-[8px] focus:border-[#55DEE8]/60 focus:outline-none text-sm font-medium"
+                          className="w-full bg-[#111111] border border-[#2D2D2D] text-white px-4 py-3 rounded-[8px] focus:border-[#BFF367]/60 focus:outline-none text-sm font-medium"
                         />
                       </div>
                       
-                      <div className="md:col-span-2 mt-4 p-4 bg-[#55DEE8]/5 border border-[#55DEE8]/20 rounded-[8px] space-y-2">
-                        <div className="flex items-center gap-2 text-[#55DEE8]">
-                          <div className="w-1.5 h-1.5 rounded-full bg-[#55DEE8] animate-pulse" />
+                      <div className="md:col-span-2 mt-4 p-4 bg-[#BFF367]/5 border border-[#BFF367]/20 rounded-[8px] space-y-2">
+                        <div className="flex items-center gap-2 text-[#BFF367]">
+                          <div className="w-1.5 h-1.5 rounded-full bg-[#BFF367] animate-pulse" />
                           <span className="text-[10px] font-bold uppercase tracking-widest">Availability Expiry Preview</span>
                         </div>
                         <p className="text-[13px] text-white/90 font-medium">
-                          Your venue slots will be bookable until <span className="text-[#55DEE8] font-bold underline decoration-wavy underline-offset-4">
+                          Your venue slots will be bookable until <span className="text-[#BFF367] font-bold underline decoration-wavy underline-offset-4">
                             {(() => {
                               const weeks = watch("slotsConfigWeeks") || 1;
                               const date = new Date();
@@ -602,13 +602,13 @@ const EditTurf = () => {
 
                 <div className="flex items-center justify-between border-b border-[#2D2D2D] pb-3 mb-6 mt-12">
                   <div className="space-y-1">
-                    <h3 className="text-[14px] font-bold text-[#55DEE8] uppercase tracking-[3px] font-open-sans">Matrix Projection</h3>
+                    <h3 className="text-[14px] font-bold text-[#BFF367] uppercase tracking-[3px] font-open-sans">Matrix Projection</h3>
                     <p className="text-[9px] text-[#444] uppercase tracking-widest font-bold">Override individual slot pricing below</p>
                     <p className="text-[8px] text-[#878C9F] uppercase tracking-widest font-medium mt-1">
                       * After 5% service charge (Includes payment gateway charges and GST)
                     </p>
                   </div>
-                  <span className="text-[10px] font-bold text-[#55DEE8] uppercase bg-[#55DEE8]/10 border border-[#55DEE8]/20 px-4 py-1 rounded-full">
+                  <span className="text-[10px] font-bold text-[#BFF367] uppercase bg-[#BFF367]/10 border border-[#BFF367]/20 px-4 py-1 rounded-full">
                     {generatedSlots.length} Active Slots
                   </span>
                 </div>
@@ -623,7 +623,7 @@ const EditTurf = () => {
                       return (
                         <div
                           key={index}
-                          className={`p-4 rounded-[8px] border transition-all flex flex-col gap-4 ${ slot.isActive ? "bg-[#111111] border-[#2D2D2D] hover:border-[#55DEE8]/20" : "bg-black/50 border-[#1A1A1A] opacity-40" }`}
+                          className={`p-4 rounded-[8px] border transition-all flex flex-col gap-4 ${ slot.isActive ? "bg-[#111111] border-[#2D2D2D] hover:border-[#BFF367]/20" : "bg-black/50 border-[#1A1A1A] opacity-40" }`}
                         >
                           <div className="flex justify-between items-center">
                             <button
@@ -631,31 +631,31 @@ const EditTurf = () => {
                               onClick={() => toggleSlotActive(index)}
                               className="flex items-center gap-2 group"
                             >
-                              <div className={`w-3 h-3 rounded-full border border-[#2D2D2D] ${slot.isActive ? 'bg-[#55DEE8]' : 'bg-[#111]'}`} />
+                              <div className={`w-3 h-3 rounded-full border border-[#2D2D2D] ${slot.isActive ? 'bg-[#BFF367]' : 'bg-[#111]'}`} />
                               <span className={`text-[11px] font-bold tracking-widest uppercase ${slot.isActive ? 'text-white' : 'text-[#444] line-through'}`}>
                                 {slot.startTime} - {slot.endTime}
                               </span>
                             </button>
                             {slot.isActive && (
-                              <span className="text-[9px] font-black text-[#55DEE8] uppercase tracking-tighter bg-[#55DEE8]/5 px-2 py-0.5 rounded">Active</span>
+                              <span className="text-[9px] font-black text-[#BFF367] uppercase tracking-tighter bg-[#BFF367]/5 px-2 py-0.5 rounded">Active</span>
                             )}
                           </div>
 
                           {slot.isActive && (
                             <div className="space-y-3 pt-2 border-t border-[#1A1A1A]">
                               <div className="relative">
-                                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-[#55DEE8] font-bold text-[10px]">Γé╣</span>
+                                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-[#BFF367] font-bold text-[10px]">G�</span>
                                 <input
                                   type="number"
                                   value={slot.price}
                                   onChange={(e) => updateSlotPrice(index, e.target.value)}
-                                  className="w-full bg-black border border-[#1A1A1A] text-white text-xs py-2 pl-7 pr-3 rounded focus:outline-none focus:border-[#55DEE8]/40 transition-all font-mono"
+                                  className="w-full bg-black border border-[#1A1A1A] text-white text-xs py-2 pl-7 pr-3 rounded focus:outline-none focus:border-[#BFF367]/40 transition-all font-mono"
                                   placeholder="Slot Price"
                                 />
                               </div>
                               <div className="flex flex-col items-end px-1">
-                                <span className="text-[8px] font-black text-[#55DEE8] uppercase tracking-[2px] mb-1">Your Net</span>
-                                <span className="text-[10px] font-bold text-[#55DEE8] font-mono">Rs {netRevenue}</span>
+                                <span className="text-[8px] font-black text-[#BFF367] uppercase tracking-[2px] mb-1">Your Net</span>
+                                <span className="text-[10px] font-bold text-[#BFF367] font-mono">Rs {netRevenue}</span>
                               </div>
                             </div>
                           )}
@@ -675,7 +675,7 @@ const EditTurf = () => {
           <div className="md:col-span-2 pt-12 border-t border-[#2D2D2D] relative z-10 pb-12">
             <button 
               type="submit" 
-              className={`w-full py-5 bg-[#55DEE8] text-black font-bold text-[16px] uppercase tracking-[6px] font-open-sans hover:bg-white transition-all transform hover:scale-[1.01] active:scale-[0.99] rounded-[8px] shadow-[0_10px_30px_rgba(204,255,0,0.15)] ${loading ? 'opacity-50 cursor-not-allowed' : ''}`}
+              className={`w-full py-5 bg-[#BFF367] text-black font-bold text-[16px] uppercase tracking-[6px] font-open-sans hover:bg-white transition-all transform hover:scale-[1.01] active:scale-[0.99] rounded-[8px] shadow-[0_10px_30px_rgba(204,255,0,0.15)] ${loading ? 'opacity-50 cursor-not-allowed' : ''}`}
               disabled={loading}
             >
               {loading ? "SYNCHRONIZING..." : "COMMIT OPERATIONAL CHANGES"}
