@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Star, Heart } from "lucide-react";
+import { Star, Heart, MapPin } from "lucide-react";
 import axiosInstance from "@hooks/useAxiosInstance";
 
 const TurfCardMobile = ({ turf, distance = "1.2km Away" }) => {
@@ -38,19 +38,22 @@ const TurfCardMobile = ({ turf, distance = "1.2km Away" }) => {
       onClick={() => navigate(to)}
       className="group relative h-[320px] md:h-[400px] w-full rounded-[12px] overflow-hidden cursor-pointer bg-black transition-all duration-500 hover:-translate-y-1 hover:shadow-2xl"
     >
-      {/* ── Background Image ── */}
-      <div className="absolute inset-0">
-        <img
-          src={images[0] || "https://images.unsplash.com/photo-1551958219-acbc608c6377?w=800&q=80"}
-          alt={turf.name}
-          className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
-        />
-        {/* Darkening gradient overlay at the bottom for text contrast */}
-        <div className="absolute inset-0 bg-gradient-to-t from-black via-black/50 to-transparent opacity-90" />
+      {/* ── Background Images (Scrollable) ── */}
+      <div className="absolute inset-0 flex overflow-x-auto snap-x snap-mandatory no-scrollbar">
+        {images.map((img, idx) => (
+          <img
+            key={idx}
+            src={img || "https://images.unsplash.com/photo-1551958219-acbc608c6377?w=800&q=80"}
+            alt={`${turf.name} - ${idx + 1}`}
+            className="w-full h-full object-cover shrink-0 snap-center transition-transform duration-700 group-hover:scale-105"
+          />
+        ))}
       </div>
+      {/* Darkening gradient overlay at the bottom for text contrast */}
+      <div className="absolute inset-0 bg-gradient-to-t from-black via-black/50 to-transparent opacity-90 pointer-events-none" />
 
       {/* ── Top Left Area: Slots and Game Type ── */}
-      <div className="absolute top-4 left-4 z-20 flex flex-col gap-2 items-start">
+      <div className="absolute top-4 left-4 z-20 flex flex-row gap-2 items-center">
         <span className="bg-black/60 backdrop-blur-md text-[#55DEE8] border border-white/10 text-[10px] font-black px-2.5 py-1 rounded-full uppercase tracking-widest">
           {gameTypesDisplay}
         </span>
@@ -85,15 +88,21 @@ const TurfCardMobile = ({ turf, distance = "1.2km Away" }) => {
         </p>
         
         {/* Pricing & Rating Row */}
-        <div className="flex items-center justify-between mt-1">
-          <div className="flex items-baseline gap-1">
+        <div className="flex items-start justify-between mt-1">
+          <div className="flex items-baseline gap-1 mt-1">
             <span className="text-xl md:text-2xl font-black text-[#55DEE8]">₹{price}</span>
             <span className="text-xs md:text-sm text-white/70 font-medium">/ hr</span>
           </div>
 
-          <div className="flex items-center gap-1.5 text-[#BFF367]">
-            <Star size={16} className="fill-[#BFF367]" />
-            <span className="text-base md:text-lg font-bold font-inter">{rating.toFixed(1)}</span>
+          <div className="flex flex-col items-end gap-1">
+            <div className="flex items-center gap-1.5 text-[#BFF367]">
+              <Star size={16} className="fill-[#BFF367]" />
+              <span className="text-base md:text-lg font-bold font-inter">{rating.toFixed(1)}</span>
+            </div>
+            <div className="flex items-center gap-1 text-white/60">
+              <MapPin size={10} className="text-white/40" />
+              <span className="text-[9px] font-bold tracking-widest uppercase">{turf.city || 'Hyderabad'}</span>
+            </div>
           </div>
         </div>
       </div>

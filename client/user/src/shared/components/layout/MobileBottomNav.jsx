@@ -33,7 +33,7 @@ const MobileBottomNav = () => {
   });
 
   return (
-    <div className="lg:hidden fixed bottom-0 left-0 right-0 z-[100] bg-black/80 backdrop-blur-2xl border-t border-white/10 px-4 pb-safe-area-inset-bottom transition-transform duration-500 translate-y-0">
+    <div className="lg:hidden fixed bottom-0 left-0 right-0 z-[100] bg-black/40 backdrop-blur-3xl border-t border-white/10 rounded-t-[24px] px-4 pb-safe-area-inset-bottom transition-transform duration-500 translate-y-0 shadow-2xl">
       <div className="flex justify-between items-center h-16 max-w-md mx-auto">
         {visibleItems.slice(0, 5).map((item) => {
           const isActive = location.pathname === item.path;

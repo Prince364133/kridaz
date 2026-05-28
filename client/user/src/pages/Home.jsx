@@ -497,7 +497,7 @@ export default function Home() {
  <div className="relative flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6 border-b border-white/5 pb-4">
  <div className="relative">
  <h2 className="text-3xl md:text-5xl lg:text-6xl font-black text-white uppercase tracking-tighter leading-none" style={{ fontFamily: "'Open Sans', sans-serif" }}>
- {userLocation?.city ? `Grounds In ${userLocation.city}` : userLocation?.state ? `Grounds In ${userLocation.state}` : 'Grounds Near You'}
+ {userLocation?.city ? `Venues In ${userLocation.city}` : userLocation?.state ? `Venues In ${userLocation.state}` : 'Venues Near You'}
  </h2>
  <p className="text-xs md:text-sm font-bold text-white/40 uppercase tracking-[0.15em] mt-4" style={{ fontFamily: "'Inter 28pt Light', sans-serif" }}>
  Premium Venue Discovery • Elite Sports Infrastructure
@@ -513,9 +513,10 @@ export default function Home() {
       <input 
         type="text" 
         placeholder="Search arenas..." 
-        className="bg-transparent outline-none text-sm text-white w-full placeholder:text-gray-500"
-        value={turfFilters.searchTerm || ""}
-        onChange={(e) => setTurfFilters(prev => ({...prev, searchTerm: e.target.value}))}
+        className="bg-transparent outline-none text-sm text-white w-full placeholder:text-gray-500 cursor-pointer"
+        value=""
+        readOnly
+        onClick={() => navigate('/search')}
       />
     </div>
  </div>
