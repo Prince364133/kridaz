@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import TurfCard from "./TurfCard.jsx";
+import TurfCardMobile from "./TurfCardMobile.jsx";
 import TurfCardSkeleton from "@components/ui/TurfCardSkeleton.jsx";
 import useTurfData from "../hooks/useTurfData.jsx";
 import SearchTurf from "@components/search/SearchTurf.jsx";
@@ -137,20 +137,20 @@ const Turf = () => {
 
         {/* ── Cards Grid ───────────────────────────────────────────── */}
         {loading ? (
-          <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-8">
             {Array.from({ length: 6 }).map((_, i) => (
               <TurfCardSkeleton key={`skeleton-${i}`} />
             ))}
           </div>
         ) : turfs.length > 0 ? (
-          <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-8">
             {turfs.map((turf, idx) => (
               <div
                 key={turf._id}
                 className="animate-fade-in-up"
                 style={{ animationDelay: `${idx * 80}ms` }}
               >
-                <TurfCard
+                <TurfCardMobile
                   turf={turf}
                   featured={idx === 0 && locationStatus === "granted"}
                   distance={
@@ -195,15 +195,15 @@ const Turf = () => {
                 </div>
 
                 {recsLoading ? (
-                  <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-8">
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-8">
                     {Array.from({ length: 4 }).map((_, i) => (
                       <TurfCardSkeleton key={`recs-skeleton-${i}`} />
                     ))}
                   </div>
                 ) : (
-                  <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-8">
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-8">
                     {recommendations.map((t) => (
-                      <TurfCard 
+                      <TurfCardMobile 
                         key={t.id || t._id} 
                         turf={t} 
                         distance={t.distance ? `${(t.distance / 1000).toFixed(1)} km Away` : "Nearby"}

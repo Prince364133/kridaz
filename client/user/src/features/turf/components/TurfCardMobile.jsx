@@ -1,9 +1,22 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { Star, Heart, MapPin } from "lucide-react";
+import { Star, Heart, MapPin, Navigation } from "lucide-react";
 import axiosInstance from "@hooks/useAxiosInstance";
 
-const TurfCardMobile = ({ turf, distance = "1.2km Away" }) => {
+/** Haversine distance in km */
+const haversineKm = (lat1, lon1, lat2, lon2) => {
+  const R = 6371;
+  const dLat = ((lat2 - lat1) * Math.PI) / 180;
+  const dLon = ((lon2 - lon1) * Math.PI) / 180;
+  const a =
+    Math.sin(dLat / 2) ** 2 +
+    Math.cos((lat1 * Math.PI) / 180) *
+      Math.cos((lat2 * Math.PI) / 180) *
+      Math.sin(dLon / 2) ** 2;
+  return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+};
+
+const TurfCardMobile = ({ turf, distance: distanceProp }) => {
   const [isWishlisted, setIsWishlisted] = useState(false);
   const navigate = useNavigate();
 
@@ -19,6 +32,27 @@ const TurfCardMobile = ({ turf, distance = "1.2km Away" }) => {
   // Extract sports
   const sportTypes = turf.sportTypes || ["SPORTS"];
   const gameTypesDisplay = sportTypes.slice(0, 2).join(", "); // Show up to 2 sports
+
+  // ── Distance calculation ──
+  const [calcDistance, setCalcDistance] = useState(null);
+  useEffect(() => {
+    if (distanceProp) return; // already have it from parent
+    const venueLat = turf.location?.coordinates?.[1] ?? turf.latitude ?? turf.lat;
+    const venueLng = turf.location?.coordinates?.[0] ?? turf.longitude ?? turf.lng;
+    if (!venueLat || !venueLng) return;
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (pos) => {
+          const km = haversineKm(pos.coords.latitude, pos.coords.longitude, venueLat, venueLng);
+          setCalcDistance(km < 1 ? `${Math.round(km * 1000)} m` : `${km.toFixed(1)} km`);
+        },
+        () => {},
+        { timeout: 5000, maximumAge: 300000 }
+      );
+    }
+  }, [turf, distanceProp]);
+
+  const distance = distanceProp || calcDistance;
 
   const toggleWishlist = async (e) => {
     e.preventDefault();
@@ -82,10 +116,13 @@ const TurfCardMobile = ({ turf, distance = "1.2km Away" }) => {
           {turf.name}
         </h3>
         
-        {/* Distance */}
-        <p className="text-xs md:text-sm text-white/70 font-medium font-inter mb-2">
-          {distance}
-        </p>
+        {/* Location */}
+        <div className="flex items-center gap-1.5 mb-2">
+          <MapPin size={12} className="text-[#55DEE8]" />
+          <p className="text-xs md:text-sm text-white/70 font-medium font-inter">
+            {turf.location || turf.city || 'Hyderabad'}
+          </p>
+        </div>
         
         {/* Pricing & Rating Row */}
         <div className="flex items-start justify-between mt-1">
@@ -99,10 +136,18 @@ const TurfCardMobile = ({ turf, distance = "1.2km Away" }) => {
               <Star size={16} className="fill-[#BFF367]" />
               <span className="text-base md:text-lg font-bold font-inter">{rating.toFixed(1)}</span>
             </div>
-            <div className="flex items-center gap-1 text-white/60">
-              <MapPin size={10} className="text-white/40" />
-              <span className="text-[9px] font-bold tracking-widest uppercase">{turf.city || 'Hyderabad'}</span>
-            </div>
+            {distance ? (
+              <div className="flex items-center gap-1 text-white/50">
+                <Navigation size={9} className="text-[#55DEE8]" />
+                <span className="text-[9px] font-bold tracking-widest uppercase">
+                  {distance}
+                </span>
+              </div>
+            ) : (
+              <span className="text-[9px] font-bold tracking-widest uppercase text-white/20">
+                --
+              </span>
+            )}
           </div>
         </div>
       </div>
