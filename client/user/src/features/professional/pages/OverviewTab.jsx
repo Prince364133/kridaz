@@ -135,7 +135,17 @@ const OverviewTab = ({ role, profile }) => {
   // const [acceptOfferApi] = useAcceptOfferMutation();
   // const [rejectOfferApi] = useRejectOfferMutation();
 
-
+  // Fallback declarations for commented-out hooks
+  const isToggling = false;
+  const isVerifying = false;
+  const toggleOnlineApi = async () => ({ unwrap: () => Promise.resolve() });
+  const verifyOtpApi = async () => ({ unwrap: () => Promise.resolve() });
+  const acceptOfferApi = async () => ({ unwrap: () => Promise.resolve() });
+  const rejectOfferApi = async () => ({ unwrap: () => Promise.resolve() });
+  const refetchBookings = () => {};
+  const [otp, setOtp] = useState("");
+  const [errorMsg, setErrorMsg] = useState("");
+  const [successMsg, setSuccessMsg] = useState("");
   // Load profile online state
   useEffect(() => {
     if (profile) {
