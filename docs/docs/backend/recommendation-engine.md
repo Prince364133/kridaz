@@ -1,4 +1,4 @@
-# Industrial-Grade Recommendation Engine
+# Recommendation Engine
 
 Welcome to the Technical Blueprint and Integration Specification for the **Kridaz Unified Recommendation Platform**. 
 
