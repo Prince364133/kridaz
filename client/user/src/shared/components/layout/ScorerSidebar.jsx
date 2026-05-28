@@ -116,11 +116,11 @@ const ScorerSidebar = ({ isOpen, toggleSidebar, isMinimized, className }) => {
 
         <div className={`px-4 py-6 border-b border-white/5 transition-all duration-300 ${isMinimized ? "items-center" : ""}`}>
           <div className="flex items-center gap-3">
-             <div className={`flex-shrink-0 w-2 h-2 rounded-full ${isLimitedScorer ? "bg-amber-500 animate-pulse" : "bg-[#00C187] shadow-[0_0_10px_rgba(0,193,135,0.5)]"}`} />
+             <div className={`flex-shrink-0 w-2 h-2 rounded-full ${isLimitedScorer ? "bg-gradient-to-r from-[#55DEE8] to-[#BFF367] animate-pulse" : "bg-[#00C187] shadow-[0_0_10px_rgba(0,193,135,0.5)]"}`} />
              {!isMinimized && (
                <div className="animate-in fade-in slide-in-from-left-2 duration-300">
                   <p className="text-[9px] font-bold uppercase tracking-[0.2em] text-[#878C9F] leading-none mb-1">Professional Status</p>
-                  <p className={`text-[10px] font-black uppercase tracking-tight ${isLimitedScorer ? "text-amber-500" : "text-[#00C187]"}`}>
+                  <p className={`text-[10px] font-black uppercase tracking-tight ${isLimitedScorer ? "text-transparent bg-clip-text bg-gradient-to-r from-[#55DEE8] to-[#BFF367]" : "text-[#00C187]"}`}>
                     {isLimitedScorer ? "Limited Access" : "Verified Scorer"}
                   </p>
                </div>

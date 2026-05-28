@@ -231,7 +231,7 @@ const ChatSidebar = ({ onSelectChat, selectedChatId, onCreateGroup, onCreateComm
       const groupImg = chat.groupImage;
       return (
         <div className="relative">
-          <div className="w-12 h-12 rounded-full border border-white/10 bg-[#55DEE8]/10 flex items-center justify-center overflow-hidden shadow-lg">
+          <div className="w-10 h-10 rounded-full border border-white/10 bg-[#BFF367]/10 flex items-center justify-center overflow-hidden shadow-lg">
             {groupImg ? (
               <img 
                 src={groupImg} 
@@ -244,10 +244,10 @@ const ChatSidebar = ({ onSelectChat, selectedChatId, onCreateGroup, onCreateComm
               />
             ) : null}
             <div 
-              className="w-full h-full flex items-center justify-center bg-gradient-to-br from-[#55DEE8]/20 to-[#55DEE8]/5"
+              className="w-full h-full flex items-center justify-center bg-gradient-to-br from-[#BFF367]/20 to-[#BFF367]/5"
               style={{ display: groupImg ? 'none' : 'flex' }}
             >
-              <Users size={22} className="text-[#55DEE8] opacity-80" />
+              <Users size={19} className="text-[#BFF367] opacity-80" />
             </div>
           </div>
         </div>
@@ -258,7 +258,7 @@ const ChatSidebar = ({ onSelectChat, selectedChatId, onCreateGroup, onCreateComm
 
     return (
       <div className="relative">
-        <div className="w-12 h-12 rounded-full border border-white/10 bg-white/5 flex items-center justify-center overflow-hidden shadow-lg group-hover/chat:border-[#55DEE8]/30 transition-all">
+        <div className="w-10 h-10 rounded-full border border-white/10 bg-white/5 flex items-center justify-center overflow-hidden shadow-lg group-hover/chat:border-[#BFF367]/30 transition-all">
           {imageUrl ? (
             <img 
               src={imageUrl} 
@@ -274,14 +274,14 @@ const ChatSidebar = ({ onSelectChat, selectedChatId, onCreateGroup, onCreateComm
             className="w-full h-full flex items-center justify-center bg-gradient-to-br from-white/10 to-white/5"
             style={{ display: imageUrl ? 'none' : 'flex' }}
           >
-            <span className="text-[#55DEE8] font-black text-sm tracking-tighter">
+              <span className="text-[#BFF367] font-black text-xs tracking-tighter">
               {getInitials(otherUser?.name)}
             </span>
           </div>
         </div>
         {/* Online dot */}
         {online && (
-          <div className="absolute bottom-0 right-0 w-3.5 h-3.5 bg-[#55DEE8] rounded-full border-[3px] border-[#0a0a0a] shadow-sm animate-pulse" />
+          <div className="absolute bottom-0 right-0 w-3.5 h-3.5 bg-[#BFF367] rounded-full border-[3px] border-[#0a0a0a] shadow-sm animate-pulse" />
         )}
       </div>
     );
@@ -311,21 +311,21 @@ const ChatSidebar = ({ onSelectChat, selectedChatId, onCreateGroup, onCreateComm
 
   if (isLoading) {
     return (
-      <div className="w-full md:w-80 h-full border-r border-white/10 bg-black/20 flex flex-col items-center justify-center">
-        <Loader2 className="w-8 h-8 text-[#55DEE8] animate-spin mb-4 opacity-20" />
-        <p className="text-white/20 text-xs font-bold uppercase tracking-widest">Loading Chats</p>
+      <div className="w-full md:w-[340px] h-full border-r border-white/10 bg-black/20 flex flex-col items-center justify-center">
+        <Loader2 className="w-8 h-8 text-[#BFF367] animate-spin mb-4 opacity-20" />
+        <p className="chat-subheading text-white/20 font-bold uppercase">Loading Chats</p>
       </div>
     );
   }
 
   if (error) {
     return (
-      <div className="w-full md:w-80 h-full border-r border-white/10 bg-black/20 flex flex-col items-center justify-center p-8 text-center">
+      <div className="w-full md:w-[340px] h-full border-r border-white/10 bg-black/20 flex flex-col items-center justify-center p-8 text-center">
         <div className="w-16 h-16 rounded-full bg-red-500/10 flex items-center justify-center mb-4">
           <AlertCircle className="w-8 h-8 text-red-500" />
         </div>
         <h3 className="text-white font-bold mb-2">Sync Failed</h3>
-        <p className="text-white/40 text-xs mb-6">We couldn't load your conversations. Please try again.</p>
+        <p className="chat-subheading text-white/40 mb-6">We couldn't load your conversations. Please try again.</p>
         <button 
           onClick={() => window.location.reload()}
           className="px-6 py-2 bg-white/5 hover:bg-white/10 text-white rounded-[8px] text-xs font-bold transition-all"
@@ -340,16 +340,16 @@ const ChatSidebar = ({ onSelectChat, selectedChatId, onCreateGroup, onCreateComm
   const invitations = data?.invitations || [];
 
   return (
-    <div className="w-full md:w-80 h-full border-r border-white/10 bg-black/20 flex flex-col overflow-hidden">
+    <div className="w-full md:w-[340px] h-full border-r border-white/10 bg-black/20 flex flex-col overflow-hidden">
       <div className="p-5 border-b border-white/10 flex justify-between items-center bg-black/40">
         <div>
-          <h2 className="text-xl font-black text-white tracking-tight italic uppercase">Messages</h2>
-          <p className="text-[10px] text-white/40 font-bold uppercase tracking-[0.2em] mt-0.5">Inbox & Groups</p>
+          <h2 className="text-xl font-black text-white tracking-tight uppercase">Messages</h2>
+          <p className="chat-subheading text-white/40 font-bold uppercase mt-0.5">Inbox & Groups</p>
         </div>
         <div className="relative" ref={addMenuRef}>
           <button 
             onClick={() => setIsAddMenuOpen(!isAddMenuOpen)}
-            className={`w-10 h-10 ${isAddMenuOpen ? 'bg-[#55DEE8] text-black' : 'bg-[#55DEE8]/10 text-[#55DEE8]'} hover:bg-[#55DEE8] hover:text-black rounded-[8px] transition-all flex items-center justify-center group`}
+            className={`w-10 h-10 ${isAddMenuOpen ? 'bg-[#BFF367] text-black' : 'bg-[#BFF367]/10 text-[#BFF367]'} hover:bg-[#BFF367] hover:text-black rounded-[8px] transition-all flex items-center justify-center group`}
             title="Add New"
           >
             <Plus size={20} className={`${isAddMenuOpen ? 'rotate-45' : ''} transition-transform duration-300`} />
@@ -362,14 +362,14 @@ const ChatSidebar = ({ onSelectChat, selectedChatId, onCreateGroup, onCreateComm
                   setIsAddMenuOpen(false);
                   onCreateGroup();
                 }}
-                className="w-full px-4 py-3 text-left text-sm text-white/80 hover:bg-[#55DEE8] hover:text-black flex items-center gap-3 transition-colors"
+                className="w-full px-4 py-3 text-left text-sm text-white hover:bg-white/[0.04] flex items-center gap-3 transition-colors group/menu"
               >
-                <div className="w-8 h-8 rounded-lg bg-white/5 flex items-center justify-center group-hover:bg-black/10">
+                <div className="w-8 h-8 rounded-lg bg-white/[0.04] border border-white/10 flex items-center justify-center text-[#BFF367] group-hover/menu:border-[#BFF367]/40">
                   <Users size={16} />
                 </div>
                 <div className="flex flex-col">
-                  <span className="font-bold">Create Group</span>
-                  <span className="text-[10px] opacity-60">Chat with multiple people</span>
+                  <span className="font-bold text-white">Create Group</span>
+                  <span className="text-[10px] text-white/45">Chat with multiple people</span>
                 </div>
               </button>
 
@@ -379,14 +379,14 @@ const ChatSidebar = ({ onSelectChat, selectedChatId, onCreateGroup, onCreateComm
                   // Trigger community creation
                   if (typeof onCreateCommunity === 'function') onCreateCommunity();
                 }}
-                className="w-full px-4 py-3 text-left text-sm text-white/80 hover:bg-[#55DEE8] hover:text-black flex items-center gap-3 transition-colors"
+                className="w-full px-4 py-3 text-left text-sm text-white hover:bg-white/[0.04] flex items-center gap-3 transition-colors group/menu"
               >
-                <div className="w-8 h-8 rounded-lg bg-white/5 flex items-center justify-center group-hover:bg-black/10">
+                <div className="w-8 h-8 rounded-lg bg-white/[0.04] border border-white/10 flex items-center justify-center text-[#BFF367] group-hover/menu:border-[#BFF367]/40">
                   <MessageSquare size={16} />
                 </div>
                 <div className="flex flex-col">
-                  <span className="font-bold">Create Community</span>
-                  <span className="text-[10px] opacity-60">Organize related groups</span>
+                  <span className="font-bold text-white">Create Community</span>
+                  <span className="text-[10px] text-white/45">Organize related groups</span>
                 </div>
               </button>
             </div>
@@ -399,7 +399,7 @@ const ChatSidebar = ({ onSelectChat, selectedChatId, onCreateGroup, onCreateComm
         {/* Invitations Section */}
         {invitations.length > 0 && (
           <div className="p-3 space-y-2">
-            <h3 className="px-3 py-2 text-[10px] font-black text-[#55DEE8] uppercase tracking-[0.2em]">Pending Invitations</h3>
+            <h3 className="px-3 py-2 text-[10px] font-black text-[#BFF367] uppercase">Pending Invitations</h3>
             {invitations.map((chat) => (
               <div key={chat._id} className="bg-white/[0.03] border border-white/5 rounded-[8px] p-4">
                 <div className="flex items-center gap-3 mb-3">
@@ -411,14 +411,14 @@ const ChatSidebar = ({ onSelectChat, selectedChatId, onCreateGroup, onCreateComm
                     )}
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className="text-white font-bold text-sm truncate">{chat.chatName}</p>
-                    <p className="text-white/40 text-[10px] font-medium uppercase tracking-wider">Group Invitation</p>
+                    <p className="chat-heading text-white font-bold text-sm truncate">{chat.chatName}</p>
+                    <p className="chat-subheading text-white/40 font-medium uppercase">Group Invitation</p>
                   </div>
                 </div>
                 <div className="flex gap-2">
                   <button 
                     onClick={() => handleRespond(chat._id, 'accepted')}
-                    className="flex-1 h-9 bg-[#55DEE8] text-black text-[10px] font-black uppercase tracking-widest rounded-[8px] hover:scale-[1.02] active:scale-[0.98] transition-all"
+                    className="flex-1 h-9 bg-[#BFF367] text-black text-[10px] font-black uppercase tracking-widest rounded-[8px] hover:scale-[1.02] active:scale-[0.98] transition-all"
                   >
                     Accept
                   </button>
@@ -435,7 +435,7 @@ const ChatSidebar = ({ onSelectChat, selectedChatId, onCreateGroup, onCreateComm
         )}
 
         {/* All Chats Section */}
-        <div className="px-2 py-1">
+        <div className="px-4 py-3 space-y-2.5">
           {chats.filter(chat => !chat.parentCommunity)
             .sort((a, b) => {
               const myId = user?._id || user?.id || user?.userId;
@@ -478,34 +478,34 @@ const ChatSidebar = ({ onSelectChat, selectedChatId, onCreateGroup, onCreateComm
                       onSelectChat(chat);
                     }
                   }}
-                  className={`w-full flex items-center gap-3 px-3 py-3 rounded-[8px] transition-all ${chat.isCommunity ? 'pr-20' : 'pr-12'} ${ isSelected || (chat.isCommunity && isChildSelected) ? 'bg-[#55DEE8]/10 border border-[#55DEE8]/20' : 'hover:bg-white/[0.03] border border-transparent' }`}
+                  className={`w-full flex items-center gap-3 px-3 py-3 rounded-[8px] transition-all ${chat.isCommunity ? 'pr-20' : 'pr-12'} ${ isSelected || (chat.isCommunity && isChildSelected) ? 'bg-[#BFF367]/10 border border-[#BFF367]/20' : 'hover:bg-white/[0.03] border border-transparent' }`}
                 >
                   <div className="relative shrink-0">
                     {renderAvatar(chat)}
                     {chat.isCommunity ? (
-                      <div className="absolute -bottom-1 -right-1 bg-[#55DEE8] text-black text-[7px] px-1 py-0.5 rounded font-black uppercase">Com</div>
+                      <div className="absolute -bottom-1 -right-1 bg-[#BFF367] text-black text-[6px] px-1 py-0.5 rounded font-black uppercase">Com</div>
                     ) : chat.isGroupChat ? (
-                      <div className="absolute -bottom-1 -right-1 bg-[#55DEE8] text-black text-[7px] px-1 py-0.5 rounded font-black uppercase">Grp</div>
+                      <div className="absolute -bottom-1 -right-1 bg-[#BFF367] text-black text-[6px] px-1 py-0.5 rounded font-black uppercase">Grp</div>
                     ) : null}
                   </div>
                   <div className="flex-1 text-left overflow-hidden min-w-0">
                     <div className="flex justify-between items-center mb-0.5">
                       <div className="flex items-center gap-1.5 min-w-0">
-                        <p className={`font-bold truncate text-sm transition-colors ${ isSelected || (chat.isCommunity && isChildSelected) ? 'text-[#55DEE8]' : unreadCount > 0 ? 'text-white' : 'text-white/80 group-hover/chat:text-white' }`}>
-                          {isPinned && <Pin size={10} className="inline mr-1 text-[#55DEE8]" />}
+                        <p className={`font-bold truncate text-sm transition-colors ${ isSelected || (chat.isCommunity && isChildSelected) ? 'text-[#BFF367]' : unreadCount > 0 ? 'text-white' : 'text-white/80 group-hover/chat:text-white' }`}>
+                          {isPinned && <Pin size={10} className="inline mr-1 text-[#BFF367]" />}
                           {getChatName(chat)}
                         </p>
                       </div>
-                      <span className={`text-[10px] font-medium shrink-0 ml-2 ${ unreadCount > 0 ? 'text-[#55DEE8]' : 'text-white/20' }`}>
+                      <span className={`text-[10px] font-medium shrink-0 ml-2 ${ unreadCount > 0 ? 'text-[#BFF367]' : 'text-white/20' }`}>
                         {chat.latestMessage ? formatTime(chat.latestMessage.createdAt) : ""}
                       </span>
                     </div>
                     <div className="flex items-center gap-2">
                       <div className="flex items-center gap-1 flex-1 min-w-0">
                         {isMySentMessage && !isTypingInChat && (
-                          <CheckCheck size={14} className="text-[#55DEE8]/40 shrink-0" />
+                          <CheckCheck size={14} className="text-[#BFF367]/40 shrink-0" />
                         )}
-                        <p className={`text-xs truncate ${ isTypingInChat ? 'text-[#55DEE8] font-medium italic' : isSelected ? 'text-[#55DEE8]/60' : unreadCount > 0 ? 'text-white/70 font-medium' : 'text-white/40 group-hover:text-white/60' }`}>
+                        <p className={`text-xs truncate ${ isTypingInChat ? 'text-[#BFF367] font-medium italic' : isSelected ? 'text-[#BFF367]/60' : unreadCount > 0 ? 'text-white/70 font-medium' : 'text-white/40 group-hover:text-white/60' }`}>
                           {isTypingInChat 
                             ? 'typing...' 
                             : chat.latestMessage 
@@ -515,7 +515,7 @@ const ChatSidebar = ({ onSelectChat, selectedChatId, onCreateGroup, onCreateComm
                         </p>
                       </div>
                       {unreadCount > 0 && (
-                        <div className="shrink-0 min-w-[20px] h-5 bg-[#55DEE8] text-black text-[10px] font-black rounded-full flex items-center justify-center px-1.5">
+                        <div className="shrink-0 min-w-[20px] h-5 bg-[#BFF367] text-black text-[10px] font-black rounded-full flex items-center justify-center px-1.5">
                           {unreadCount > 99 ? '99+' : unreadCount}
                         </div>
                       )}
@@ -534,7 +534,7 @@ const ChatSidebar = ({ onSelectChat, selectedChatId, onCreateGroup, onCreateComm
                           [chat._id]: !prev[chat._id]
                         }));
                       }}
-                      className="text-white/60 hover:text-[#55DEE8] w-7 h-7 rounded-full hover:bg-white/10 transition-all flex items-center justify-center"
+                      className="text-white/60 hover:text-[#BFF367] w-7 h-7 rounded-full hover:bg-white/10 transition-all flex items-center justify-center"
                       title={isExpanded ? "Collapse" : "Expand"}
                     >
                       <ChevronDown 
@@ -663,7 +663,7 @@ const ChatSidebar = ({ onSelectChat, selectedChatId, onCreateGroup, onCreateComm
                                 setActiveMenu(null);
                                 handleOpenAddGroup(chat._id, e);
                               }}
-                              className="w-full px-3 py-2 text-left text-sm text-white/80 hover:bg-[#55DEE8] hover:text-black flex items-center gap-2.5 transition-colors font-bold"
+                              className="w-full px-3 py-2 text-left text-sm text-white/80 hover:bg-[#BFF367] hover:text-black flex items-center gap-2.5 transition-colors font-bold"
                             >
                               <Plus size={14} /> Add group
                             </button>
@@ -675,7 +675,7 @@ const ChatSidebar = ({ onSelectChat, selectedChatId, onCreateGroup, onCreateComm
                                 setActiveMenu(null);
                                 handleOpenManageAdmins(chat, e);
                               }}
-                              className="w-full px-3 py-2 text-left text-sm text-white/80 hover:bg-[#55DEE8] hover:text-black flex items-center gap-2.5 transition-colors font-bold"
+                              className="w-full px-3 py-2 text-left text-sm text-white/80 hover:bg-[#BFF367] hover:text-black flex items-center gap-2.5 transition-colors font-bold"
                             >
                               <Crown size={14} /> Manage admins
                             </button>
@@ -731,10 +731,10 @@ const ChatSidebar = ({ onSelectChat, selectedChatId, onCreateGroup, onCreateComm
                         <button
                           key={group._id}
                           onClick={() => onSelectChat(group)}
-                          className={`w-full flex items-center gap-2.5 px-3 py-2 rounded-[8px] transition-all ${ isGroupSelected ? 'bg-[#55DEE8]/10 text-[#55DEE8] border border-[#55DEE8]/20' : 'text-white/60 hover:text-white hover:bg-white/[0.03] border border-transparent' }`}
+                          className={`w-full flex items-center gap-2.5 px-3 py-2 rounded-[8px] transition-all ${ isGroupSelected ? 'bg-[#BFF367]/10 text-[#BFF367] border border-[#BFF367]/20' : 'text-white/60 hover:text-white hover:bg-white/[0.03] border border-transparent' }`}
                         >
                           {isAnnouncement ? (
-                            <Megaphone size={13} className="text-[#55DEE8] shrink-0" />
+                            <Megaphone size={13} className="text-[#BFF367] shrink-0" />
                           ) : (
                             <Users size={13} className="text-white/40 shrink-0" />
                           )}
@@ -742,7 +742,7 @@ const ChatSidebar = ({ onSelectChat, selectedChatId, onCreateGroup, onCreateComm
                             {group.chatName}
                           </span>
                           {childUnreadCount > 0 && (
-                            <div className="shrink-0 min-w-[16px] h-4 bg-[#55DEE8] text-black text-[9px] font-black rounded-full flex items-center justify-center px-1">
+                            <div className="shrink-0 min-w-[16px] h-4 bg-[#BFF367] text-black text-[9px] font-black rounded-full flex items-center justify-center px-1">
                               {childUnreadCount}
                             </div>
                           )}
@@ -752,7 +752,7 @@ const ChatSidebar = ({ onSelectChat, selectedChatId, onCreateGroup, onCreateComm
                     {isCommunityAdmin(chat) && (
                       <button
                         onClick={(e) => handleOpenAddGroup(chat._id, e)}
-                        className="w-full flex items-center gap-2 px-3 py-2 rounded-[8px] border border-dashed border-white/10 hover:border-[#55DEE8]/30 hover:bg-[#55DEE8]/5 text-white/40 hover:text-[#55DEE8] transition-all text-xs font-bold mt-1"
+                        className="w-full flex items-center gap-2 px-3 py-2 rounded-[8px] border border-dashed border-white/10 hover:border-[#BFF367]/30 hover:bg-[#BFF367]/5 text-white/40 hover:text-[#BFF367] transition-all text-xs font-bold mt-1"
                       >
                         <Plus size={14} className="shrink-0" />
                         <span>Add more group</span>

@@ -56,7 +56,7 @@ const GameDetailsModal = ({ game, onClose, onJoinSlot, currentUserId }) => {
               <span className="text-[10px] text-amber-400/80 uppercase tracking-wider">{slot.role}</span>
             </div>
           </div>
-          <span className="text-[10px] font-bold uppercase bg-amber-500/20 text-amber-400 border border-amber-500/30 px-2 py-0.5 rounded">
+          <span className="text-[10px] font-bold uppercase bg-gradient-to-r from-[#55DEE8]/20 to-[#BFF367]/20 text-transparent bg-clip-text bg-gradient-to-r from-[#55DEE8] to-[#BFF367] border border-[#55DEE8]/30 px-2 py-0.5 rounded">
             Pending
           </span>
         </div>

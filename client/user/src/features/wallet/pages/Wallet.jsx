@@ -235,7 +235,7 @@ const WalletPage = () => {
                           <p className="font-bold text-sm text-zinc-200 font-inter">
                             {tx.description || tx.type}
                             {tx.description?.toLowerCase().includes("bonus") && (
-                              <span className="ml-2 px-2 py-0.5 bg-yellow-500/10 text-yellow-500 text-[8px] font-black uppercase rounded-md border border-yellow-500/20 font-inter">
+                              <span className="ml-2 px-2 py-0.5 bg-gradient-to-r from-[#55DEE8]/10 to-[#BFF367]/10 text-transparent bg-clip-text bg-gradient-to-r from-[#55DEE8] to-[#BFF367] text-[8px] font-black uppercase rounded-md border border-[#55DEE8]/20 font-inter">
                                 Platform Offer
                               </span>
                             )}

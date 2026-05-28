@@ -34,8 +34,8 @@ const NOTIF_CONFIG = {
   },
   BOOKING: {
     icon: Calendar,
-    color: "#F59E0B",
-    bgColor: "rgba(245,158,11,0.08)",
+    color: "#55DEE8",
+    bgColor: "rgba(85,222,232,0.08)",
     getRoute: (notif) => notif.link || `/booking-pass/${notif.metadata?.bookingId || ""}`,
   },
   LIKE: {
@@ -58,7 +58,7 @@ const NOTIF_CONFIG = {
   },
   REVIEW: {
     icon: Star,
-    color: "#FBBF24",
+    color: "#55DEE8",
     bgColor: "rgba(251,191,36,0.08)",
     getRoute: (notif) => notif.link || "/profile",
   },

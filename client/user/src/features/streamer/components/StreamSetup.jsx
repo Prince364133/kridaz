@@ -61,7 +61,7 @@ export default function StreamSetup() {
     { id: "classic", name: "Classic Pro", color: "bg-blue-600" },
     { id: "modern", name: "Modern Dark", color: "bg-gray-800" },
     { id: "neon", name: "Neon Pulse", color: "bg-fuchsia-600" },
-    { id: "premium", name: "Gold Premium", color: "bg-amber-500" }
+    { id: "premium", name: "Gold Premium", color: "bg-gradient-to-r from-[#55DEE8] to-[#BFF367]" }
   ];
   
   // Form states
@@ -450,8 +450,8 @@ export default function StreamSetup() {
             <div className="px-6 py-4 bg-amber-500/10 border border-amber-500/20 rounded-[8px] flex items-center gap-4 animate-pulse">
               <AlertCircle className="text-amber-500" size={24} />
               <div>
-                <p className="text-[10px] font-black uppercase tracking-widest text-amber-500">Requirements Missing</p>
-                <p className="text-xs text-amber-500/70 font-bold uppercase tracking-tight">Venue, Umpire & Scorer are required to stream.</p>
+                <p className="text-[10px] font-black uppercase tracking-widest text-transparent bg-clip-text bg-gradient-to-r from-[#55DEE8] to-[#BFF367]">Requirements Missing</p>
+                <p className="text-xs text-transparent bg-clip-text bg-gradient-to-r from-[#55DEE8]/70 to-[#BFF367]/70 font-bold uppercase tracking-tight">Venue, Umpire & Scorer are required to stream.</p>
               </div>
             </div>
           )}

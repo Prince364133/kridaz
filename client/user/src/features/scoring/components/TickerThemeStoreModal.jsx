@@ -144,9 +144,9 @@ const TickerThemeStoreModal = ({ activeTheme = 'neon_classic', matchId, onClose,
                       {theme.id === 'premium_glass' && (
                         <>
                           <div className="flex items-center gap-2">
-                            <span className="text-[10px] font-black text-amber-400 uppercase tracking-tighter">KRI 168/4</span>
+                            <span className="text-[10px] font-black text-transparent bg-clip-text bg-gradient-to-r from-[#55DEE8] to-[#BFF367] uppercase tracking-tighter">KRI 168/4</span>
                           </div>
-                          <div className="text-[8px] font-black uppercase text-amber-500/80 tracking-widest bg-amber-500/5 px-2 py-0.5 rounded border border-amber-500/10">Gold overlay</div>
+                          <div className="text-[8px] font-black uppercase text-transparent bg-clip-text bg-gradient-to-r from-[#55DEE8]/80 to-[#BFF367]/80 tracking-widest bg-gradient-to-r from-[#55DEE8]/5 to-[#BFF367]/5 px-2 py-0.5 rounded border border-[#55DEE8]/10">Gold overlay</div>
                         </>
                       )}
 

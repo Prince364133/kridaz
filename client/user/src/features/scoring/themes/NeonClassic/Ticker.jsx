@@ -5,7 +5,7 @@ const BALL_STYLES = {
   boundary: { bg: '#22c55e', color: '#000' },
   six: { bg: '#a855f7', color: '#fff' },
   four: { bg: '#3b82f6', color: '#fff' },
-  wide: { bg: '#eab308', color: '#000' },
+  wide: { bg: '#55DEE8', color: '#000' },
   no_ball: { bg: '#f97316', color: '#000' },
   dot: { bg: '#374151', color: '#9ca3af' },
   run: { bg: '#1f2937', color: '#fff' },
@@ -47,7 +47,7 @@ const BADGE_CFG = {
   six: { label: '6', bg: 'linear-gradient(135deg,#7c3aed,#a855f7)', color: '#fff', dur: 2800, size: 96 },
   four: { label: '4', bg: 'linear-gradient(135deg,#1d4ed8,#3b82f6)', color: '#fff', dur: 2400, size: 80 },
   wicket: { label: 'W!', bg: 'linear-gradient(135deg,#991b1b,#dc2626)', color: '#fff', dur: 3200, size: 80 },
-  wide: { label: 'WD', bg: 'linear-gradient(135deg,#854d0e,#eab308)', color: '#000', dur: 1600, size: 56 },
+  wide: { label: 'WD', bg: 'linear-gradient(135deg,#854d0e,#55DEE8)', color: '#000', dur: 1600, size: 56 },
   no_ball: { label: 'NB', bg: 'linear-gradient(135deg,#9a3412,#f97316)', color: '#fff', dur: 1600, size: 56 },
 };
 

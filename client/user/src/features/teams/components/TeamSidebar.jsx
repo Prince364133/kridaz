@@ -15,6 +15,7 @@ const TeamSidebar = ({ onSelectTeam, selectedTeamId, onCreateTeam }) => {
   const [isAddOpponentOpen, setIsAddOpponentOpen] = useState(false);
   const [isStartScoringOpen, setIsStartScoringOpen] = useState(false);
   const [startScoringInitialData, setStartScoringInitialData] = useState(null);
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
   React.useEffect(() => {
     if (location.state?.openStartScoringModal) {
@@ -63,28 +64,58 @@ const TeamSidebar = ({ onSelectTeam, selectedTeamId, onCreateTeam }) => {
               {activeTab === 'myTeams' ? 'Manage your squads' : activeTab === 'opponentTeams' ? 'Rival discovery' : 'Manage your scoring matches'}
             </p>
           </div>
-          {activeTab !== 'scoringMatches' && (
+          <div className="relative">
             <button 
-              onClick={activeTab === 'myTeams' ? onCreateTeam : () => setIsAddOpponentOpen(true)}
+              onClick={() => setIsDropdownOpen(!isDropdownOpen)}
               className="w-8 h-8 flex items-center justify-center bg-gradient-to-r from-[#55DEE8] to-[#BFF367] text-black rounded-[8px] shadow-lg shadow-[#55DEE8]/10 hover:shadow-[#BFF367]/15 hover:scale-105 transition-all duration-300 shrink-0"
-              title={activeTab === 'myTeams' ? 'Create Team' : 'Add Opponent'}
+              title="Add New"
             >
-              <Plus size={18} strokeWidth={3} />
+              <Plus size={18} strokeWidth={3} className={`transition-transform duration-300 ${isDropdownOpen ? 'rotate-45' : ''}`} />
             </button>
-          )}
+            <AnimatePresence>
+              {isDropdownOpen && (
+                <>
+                  <div className="fixed inset-0 z-40" onClick={() => setIsDropdownOpen(false)} />
+                  <motion.div 
+                    initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                    animate={{ opacity: 1, y: 0, scale: 1 }}
+                    exit={{ opacity: 0, y: 10, scale: 0.95 }}
+                    transition={{ duration: 0.15 }}
+                    className="absolute right-0 top-full mt-2 w-48 bg-[#1A1A1A] border border-white/10 rounded-[8px] shadow-2xl overflow-hidden z-50"
+                  >
+                    <div className="flex flex-col py-1">
+                      <button 
+                        onClick={() => { onCreateTeam(); setIsDropdownOpen(false); }}
+                        className="px-4 py-2.5 text-left text-sm text-white/80 hover:text-white hover:bg-white/5 font-medium transition-colors"
+                      >
+                        <span className="text-[#55DEE8] font-bold text-[10px] uppercase tracking-wider block mb-0.5">My Teams</span>
+                        Create New Squad
+                      </button>
+                      <div className="h-px bg-white/5 w-full" />
+                      <button 
+                        onClick={() => { setIsAddOpponentOpen(true); setIsDropdownOpen(false); }}
+                        className="px-4 py-2.5 text-left text-sm text-white/80 hover:text-white hover:bg-white/5 font-medium transition-colors"
+                      >
+                        <span className="text-[#BFF367] font-bold text-[10px] uppercase tracking-wider block mb-0.5">Opponents</span>
+                        Add Rival Team
+                      </button>
+                      <div className="h-px bg-white/5 w-full" />
+                      <button 
+                        onClick={() => { setIsStartScoringOpen(true); setIsDropdownOpen(false); }}
+                        className="px-4 py-2.5 text-left text-sm text-white/80 hover:text-white hover:bg-white/5 font-medium transition-colors"
+                      >
+                        <span className="text-white/60 font-bold text-[10px] uppercase tracking-wider block mb-0.5">Matches</span>
+                        Start Scoring Match
+                      </button>
+                    </div>
+                  </motion.div>
+                </>
+              )}
+            </AnimatePresence>
+          </div>
         </div>
 
-        {/* Start Scoring Button */}
-        <div className="mb-4">
-          <button
-            onClick={() => setIsStartScoringOpen(true)}
-            className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-gradient-to-r from-[#55DEE8] to-[#BFF367] text-black font-black uppercase tracking-widest text-sm rounded-[8px] shadow-lg shadow-[#55DEE8]/10 hover:shadow-[#BFF367]/15 hover:scale-[1.02] hover:-translate-y-0.5 transition-all duration-300"
-            style={{ fontFamily: "'Inter', sans-serif" }}
-          >
-            <Trophy size={16} />
-            Start Scoring Match
-          </button>
-        </div>
+
 
         {/* Search */}
         <div className="mb-4">

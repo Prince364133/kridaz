@@ -1,4 +1,4 @@
-﻿import React, { useState } from "react";
+import React, { useState } from "react";
 import { format } from "date-fns";
 import { useParams, useNavigate } from "react-router-dom";
 import { 
@@ -172,7 +172,7 @@ export default function TurfDetails() {
   const pending = turf.pendingUpdates || {};
 
   const PendingBadge = ({ label = "Pending Update" }) => (
-    <span className="ml-2 px-2 py-0.5 bg-amber-500/10 border border-amber-500/20 text-amber-500 text-[8px] font-bold uppercase tracking-widest rounded-[2px] animate-pulse">
+    <span className="ml-2 px-2 py-0.5 bg-gradient-to-r from-[#55DEE8]/10 to-[#BFF367]/10 border border-[#55DEE8]/20 text-transparent bg-clip-text bg-gradient-to-r from-[#55DEE8] to-[#BFF367] text-[8px] font-bold uppercase tracking-widest rounded-[2px] animate-pulse">
       {label}
     </span>
   );
@@ -235,7 +235,7 @@ export default function TurfDetails() {
           <div className="flex flex-col md:flex-row gap-8 items-start">
              <div className="w-32 h-32 rounded-[8px] overflow-hidden border border-[#2D2D2D] shrink-0 shadow-2xl relative">
                 <img src={pending.image || turf.image} alt={turf.name} className="w-full h-full object-cover opacity-80" />
-                {pending.image && <div className="absolute top-2 right-2 p-1 bg-amber-500 rounded-full animate-pulse" title="New Image Pending" />}
+                {pending.image && <div className="absolute top-2 right-2 p-1 bg-gradient-to-r from-[#55DEE8] to-[#BFF367] rounded-full animate-pulse" title="New Image Pending" />}
                 <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
              </div>
              <div className="space-y-3">
@@ -245,7 +245,7 @@ export default function TurfDetails() {
                          {turf.name}
                       </h1>
                       {pending.name && (
-                         <p className="text-amber-500 text-[10px] font-bold uppercase tracking-widest flex items-center gap-2">
+                         <p className="text-transparent bg-clip-text bg-gradient-to-r from-[#55DEE8] to-[#BFF367] text-[10px] font-bold uppercase tracking-widest flex items-center gap-2">
                             <span className="opacity-40">Update to:</span> {pending.name} <PendingBadge />
                          </p>
                       )}
@@ -266,7 +266,7 @@ export default function TurfDetails() {
                          {turf.location}{turf.city ? `, ${turf.city}` : ""}{turf.state ? `, ${turf.state}` : ""}
                       </div>
                       {pending.location && (
-                         <p className="text-amber-500/80 text-[8px] font-bold lowercase tracking-widest flex items-center gap-2 pl-5">
+                         <p className="text-transparent bg-clip-text bg-gradient-to-r from-[#55DEE8]/80 to-[#BFF367]/80 text-[8px] font-bold lowercase tracking-widest flex items-center gap-2 pl-5">
                             ΓåÆ {pending.location} <PendingBadge label="Loc" />
                          </p>
                       )}
@@ -277,7 +277,7 @@ export default function TurfDetails() {
                          {turf.openTime} - {turf.closeTime}
                       </div>
                       {(pending.openTime || pending.closeTime) && (
-                         <p className="text-amber-500/80 text-[8px] font-bold lowercase tracking-widest flex items-center gap-2 pl-5">
+                         <p className="text-transparent bg-clip-text bg-gradient-to-r from-[#55DEE8]/80 to-[#BFF367]/80 text-[8px] font-bold lowercase tracking-widest flex items-center gap-2 pl-5">
                             ΓåÆ {pending.openTime || turf.openTime} - {pending.closeTime || turf.closeTime} <PendingBadge label="Time" />
                          </p>
                       )}
@@ -288,7 +288,7 @@ export default function TurfDetails() {
                          {turf.pricePerHour}/hr base
                       </div>
                       {pending.pricePerHour && (
-                         <p className="text-amber-500/80 text-[8px] font-bold lowercase tracking-widest flex items-center gap-2 pl-5">
+                         <p className="text-transparent bg-clip-text bg-gradient-to-r from-[#55DEE8]/80 to-[#BFF367]/80 text-[8px] font-bold lowercase tracking-widest flex items-center gap-2 pl-5">
                             ΓåÆ Rs {pending.pricePerHour}/hr <PendingBadge label="Price" />
                          </p>
                       )}
@@ -372,12 +372,12 @@ export default function TurfDetails() {
                   </div>
                ))}
                {pending.images && Array.from(pending.images).map((img, i) => (
-                  <div key={`p-${i}`} className="min-w-[280px] h-[180px] rounded-[6px] border-2 border-amber-500/40 overflow-hidden relative group/img snap-start">
+                  <div key={`p-${i}`} className="min-w-[280px] h-[180px] rounded-[6px] border-2 border-[#55DEE8]/40 overflow-hidden relative group/img snap-start">
                      <div className="absolute top-3 left-3 z-10">
                         <PendingBadge label="New Upload" />
                      </div>
                      <img src={typeof img === 'string' ? img : URL.createObjectURL(img)} className="w-full h-full object-cover opacity-90" />
-                     <div className="absolute inset-0 bg-gradient-to-t from-amber-900/20 to-transparent" />
+                     <div className="absolute inset-0 bg-gradient-to-t from-[#55DEE8]/20 to-transparent" />
                   </div>
                ))}
             </div>
@@ -391,7 +391,7 @@ export default function TurfDetails() {
             </div>
             
             {(pending.youtubeUrl || turf.youtubeUrl) ? (
-               <div className={`relative aspect-video rounded-[6px] overflow-hidden border ${pending.youtubeUrl ? 'border-amber-500/40' : 'border-[#2D2D2D]'}`}>
+               <div className={`relative aspect-video rounded-[6px] overflow-hidden border ${pending.youtubeUrl ? 'border-[#55DEE8]/40' : 'border-[#2D2D2D]'}`}>
                   {pending.youtubeUrl && (
                      <div className="absolute top-3 right-3 z-10">
                         <PendingBadge label="Stream Update" />
@@ -442,7 +442,7 @@ export default function TurfDetails() {
                   <h4 className="text-3xl font-bold text-white font-['Open_Sans'] uppercase flex items-baseline gap-2">
                     Rs {filteredBookings.filter(s => s.isBooked).reduce((acc, b) => acc + (b.bookingDetails?.totalPrice || 0), 0)}
                     {pending.pricePerHour && (
-                       <span className="text-amber-500 text-sm font-bold opacity-80">ΓåÆ Rs {pending.pricePerHour}/hr <PendingBadge label="Rate" /></span>
+                       <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#55DEE8] to-[#BFF367] text-sm font-bold opacity-80">ΓåÆ Rs {pending.pricePerHour}/hr <PendingBadge label="Rate" /></span>
                     )}
                   </h4>
                   <p className="text-[9px] text-[#55DEE8] font-bold uppercase tracking-widest mt-1">Daily Yield</p>

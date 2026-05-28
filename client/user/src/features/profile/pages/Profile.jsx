@@ -43,7 +43,7 @@ const QuickStatCard = ({ icon: Icon, label, value, showDivider }) => (
 const AchievementCard = ({ icon: Icon, title, rarity, year }) => {
   const rarityColors = {
     platinum: 'from-cyan-400 to-blue-400',
-    gold: 'from-yellow-400 to-orange-400',
+    gold: 'from-[#55DEE8] to-[#BFF367]',
     silver: 'from-gray-300 to-gray-400',
   };
   return (

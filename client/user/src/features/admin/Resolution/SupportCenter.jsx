@@ -26,7 +26,7 @@ const SupportCenter = () => {
     switch (priority) {
       case "URGENT": return "text-red-500 bg-red-500/10";
       case "HIGH": return "text-orange-500 bg-orange-500/10";
-      case "MEDIUM": return "text-yellow-500 bg-yellow-500/10";
+      case "MEDIUM": return "text-transparent bg-clip-text bg-gradient-to-r from-[#55DEE8] to-[#BFF367] bg-gradient-to-r from-[#55DEE8]/10 to-[#BFF367]/10";
       default: return "text-blue-500 bg-blue-500/10";
     }
   };
@@ -36,7 +36,7 @@ const SupportCenter = () => {
       case "RESOLVED": return "text-green-500 bg-green-500/10";
       case "IN_PROGRESS": return "text-blue-500 bg-blue-500/10";
       case "CLOSED": return "text-gray-500 bg-gray-500/10";
-      default: return "text-yellow-500 bg-yellow-500/10";
+      default: return "text-transparent bg-clip-text bg-gradient-to-r from-[#55DEE8] to-[#BFF367] bg-gradient-to-r from-[#55DEE8]/10 to-[#BFF367]/10";
     }
   };
 

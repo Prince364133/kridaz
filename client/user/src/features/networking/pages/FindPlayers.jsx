@@ -35,8 +35,8 @@ import NearbyPlayersMap from "@components/map/NearbyPlayersMap";
 import { useSocket } from "@context/SocketContext";
 import { haversineMeters } from "@utils/geoUtils";
 
-const PRI = "#55DEE8";
-const GRAD = "linear-gradient(90deg, #55DEE8 0%, #BFF367 100%)";
+const PRI = "#BFF367";
+const GRAD = "linear-gradient(90deg, #BFF367 0%, #BFF367 100%)";
 const HEADING_STYLE = { fontFamily: '"Outfit", sans-serif' };
 const SUBHEADING_STYLE = { fontFamily: "'Inter 28pt Light', sans-serif", fontWeight: 300 };
 const SNAP_STATES = { COLLAPSED: 0, HALF: 33, EXPANDED: 85 };
@@ -61,7 +61,7 @@ const PlayerCard = ({ player, followingIds, handleFollowToggle, handleAvatarClic
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true }}
       transition={{ duration: 0.25 }}
-      className="flex items-center gap-3 bg-[#0D0D0D] border border-white/[0.07] rounded-2xl px-4 py-3 group hover:border-[#55DEE8]/20 transition-all duration-300"
+      className="flex items-center gap-3 bg-[#0D0D0D] border border-white/[0.07] rounded-2xl px-4 py-3 group hover:border-[#BFF367]/20 transition-all duration-300"
       style={{ boxShadow: '0 4px 20px rgba(0,0,0,0.4)' }}
     >
       {/* Avatar */}
@@ -71,12 +71,12 @@ const PlayerCard = ({ player, followingIds, handleFollowToggle, handleAvatarClic
       >
         <div
           className="w-14 h-14 rounded-2xl overflow-hidden bg-[#111] flex items-center justify-center border-2 border-transparent"
-          style={{ boxShadow: '0 0 0 2px rgba(85,222,232,0.4)' }}
+          style={{ boxShadow: '0 0 0 2px rgba(191,243,103,0.4)' }}
         >
           {player.profilePicture ? (
             <img src={player.profilePicture} alt="" className="w-full h-full object-cover" />
           ) : (
-            <span className="text-[#55DEE8] font-black text-xl leading-none">
+            <span className="text-[#BFF367] font-black text-xl leading-none">
               {player.name?.charAt(0).toUpperCase()}
             </span>
           )}
@@ -90,14 +90,14 @@ const PlayerCard = ({ player, followingIds, handleFollowToggle, handleAvatarClic
         {/* Name row */}
         <div className="flex items-center gap-2 mb-0.5">
           <h3
-            className="text-sm font-black text-white uppercase tracking-tight truncate cursor-pointer hover:text-[#55DEE8] transition-colors"
+            className="text-sm font-black text-white uppercase tracking-tight truncate cursor-pointer hover:text-[#BFF367] transition-colors"
             style={HEADING_STYLE}
             onClick={() => navigate(`/profile/${playerId}`)}
           >
             {player.name}
           </h3>
           {player.isVerified && (
-            <ShieldCheck size={12} className="text-[#55DEE8] shrink-0" />
+            <ShieldCheck size={12} className="text-[#BFF367] shrink-0" />
           )}
         </div>
 
@@ -131,7 +131,7 @@ const PlayerCard = ({ player, followingIds, handleFollowToggle, handleAvatarClic
         {/* Location */}
         {locationParts.length > 0 && (
           <div className="flex items-center gap-1 text-[9px] text-white/30 font-semibold">
-            <MapPin size={9} className="text-[#55DEE8] shrink-0" />
+            <MapPin size={9} className="text-[#BFF367] shrink-0" />
             <span className="truncate">{locationParts.join(', ')}</span>
           </div>
         )}
@@ -150,7 +150,7 @@ const PlayerCard = ({ player, followingIds, handleFollowToggle, handleAvatarClic
         ) : (
           <button
             onClick={() => handleFollowToggle(playerId)}
-            className="px-4 py-1.5 rounded-xl text-[9px] font-black uppercase tracking-widest text-black active:scale-95 transition-all whitespace-nowrap shadow-[0_4px_14px_rgba(85,222,232,0.25)]"
+            className="px-4 py-1.5 rounded-xl text-[9px] font-black uppercase tracking-widest text-black active:scale-95 transition-all whitespace-nowrap shadow-[0_4px_14px_rgba(191,243,103,0.25)]"
             style={{ background: GRAD }}
           >
             Follow
@@ -193,7 +193,7 @@ const TeamCard = ({ team, navigate }) => {
 
         {/* Verified pill – top-right */}
         <div className="absolute top-3 right-3 flex items-center gap-1 bg-black/50 backdrop-blur-md px-2 py-1 rounded-full border border-white/10">
-          <ShieldCheck size={9} className="text-[#55DEE8]" />
+          <ShieldCheck size={9} className="text-[#BFF367]" />
           <span className="text-[7px] font-black uppercase tracking-widest text-white/80">Verified</span>
         </div>
 
@@ -212,12 +212,12 @@ const TeamCard = ({ team, navigate }) => {
         <div className="relative">
           <div
             className="w-12 h-12 rounded-xl border-2 border-[#0D0D0D] overflow-hidden bg-[#111] flex items-center justify-center"
-            style={{ boxShadow: '0 0 0 2px #55DEE8, 0 0 16px rgba(85,222,232,0.35)' }}
+            style={{ boxShadow: '0 0 0 2px #BFF367, 0 0 16px rgba(191,243,103,0.35)' }}
           >
             {team.logo ? (
               <img src={team.logo} alt="" className="w-full h-full object-cover" />
             ) : (
-              <span className="text-[#55DEE8] font-black text-lg leading-none">
+              <span className="text-[#BFF367] font-black text-lg leading-none">
                 {team.name?.charAt(0).toUpperCase()}
               </span>
             )}
@@ -239,17 +239,17 @@ const TeamCard = ({ team, navigate }) => {
             {team.name}
           </h3>
           <p className="text-[9px] font-semibold text-white/30 mt-0.5 flex items-center gap-1">
-            <MapPin size={8} className="text-[#55DEE8]" />
+            <MapPin size={8} className="text-[#BFF367]" />
             {team.city || 'Global'}
           </p>
         </div>
 
         {/* Stats inline row */}
         <div className="flex items-center gap-2 text-[10px] font-bold text-white/40">
-          <Users size={10} className="text-[#55DEE8] shrink-0" />
+          <Users size={10} className="text-[#BFF367] shrink-0" />
           <span><span className="text-white font-black">{team.memberCount || 1}</span> Members</span>
           <span className="text-white/15">·</span>
-          <Target size={10} className="text-[#55DEE8] shrink-0" />
+          <Target size={10} className="text-[#BFF367] shrink-0" />
           <span><span className="text-white font-black">{team.matchesPlayed || 0}</span> Matches</span>
         </div>
 
@@ -259,7 +259,7 @@ const TeamCard = ({ team, navigate }) => {
             to={`/team/${team._id}`}
             onClick={e => e.stopPropagation()}
             className="h-9 text-black rounded-xl font-black uppercase tracking-widest text-[9px] flex items-center justify-center gap-1.5 active:scale-95 transition-all"
-            style={{ background: GRAD, boxShadow: '0 4px 14px rgba(85,222,232,0.25)' }}
+            style={{ background: GRAD, boxShadow: '0 4px 14px rgba(191,243,103,0.25)' }}
           >
             <UserPlus size={12} strokeWidth={3} />
             Join
@@ -278,7 +278,7 @@ const TeamCard = ({ team, navigate }) => {
         <Link
           to={`/team-pass/${team._id}`}
           onClick={e => e.stopPropagation()}
-          className="flex items-center justify-center gap-1 text-white/20 hover:text-[#55DEE8] text-[8px] font-black uppercase tracking-[0.2em] transition-all group/pass"
+          className="flex items-center justify-center gap-1 text-white/20 hover:text-[#BFF367] text-[8px] font-black uppercase tracking-[0.2em] transition-all group/pass"
         >
           <span>View Team Pass</span>
           <ChevronRight size={10} className="group-hover/pass:translate-x-0.5 transition-transform" />
@@ -287,7 +287,7 @@ const TeamCard = ({ team, navigate }) => {
 
       {/* Subtle glow border on hover */}
       <div className="absolute inset-0 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none"
-        style={{ boxShadow: 'inset 0 0 0 1px rgba(85,222,232,0.2)' }}
+        style={{ boxShadow: 'inset 0 0 0 1px rgba(191,243,103,0.2)' }}
       />
     </motion.div>
   );
@@ -827,9 +827,9 @@ const FindPlayers = () => {
     const element = document.getElementById(`player-card-${id}`);
     if (element) {
       element.scrollIntoView({ behavior: "smooth", block: "center" });
-      element.classList.add("ring-2", "ring-[#55DEE8]", "ring-offset-4", "ring-offset-black");
+      element.classList.add("ring-2", "ring-[#BFF367]", "ring-offset-4", "ring-offset-black");
       setTimeout(() => {
-        element.classList.remove("ring-2", "ring-[#55DEE8]", "ring-offset-4", "ring-offset-black");
+        element.classList.remove("ring-2", "ring-[#BFF367]", "ring-offset-4", "ring-offset-black");
       }, 3000);
     }
   };
@@ -860,7 +860,7 @@ const FindPlayers = () => {
           <motion.div 
             animate={{ height: `${SNAP_STATES[snapState]}vh` }}
             transition={{ type: "spring", damping: 25, stiffness: 150 }}
-            className="relative w-full bg-[#0a0a0a] border-b border-[#55DEE8]/30 overflow-hidden lg:hidden"
+            className="relative w-full bg-[#0a0a0a] border-b border-[#BFF367]/30 overflow-hidden lg:hidden"
           >
             <AnimatePresence>
               {snapState !== "COLLAPSED" && (
@@ -881,13 +881,13 @@ const FindPlayers = () => {
                   {/* HEADER STATUS BAR */}
                   <div className="absolute top-4 left-4 z-[1000] flex items-center gap-2 pointer-events-auto">
                     <div className="flex items-center gap-1.5 bg-black/60 backdrop-blur-xl border border-white/10 p-1.5 px-2.5 rounded-[8px] shadow-2xl">
-                      <Users size={14} className="text-[#55DEE8]" />
-                      <span className="text-[#55DEE8] text-[12px] font-black">{allNearbyPlayers.length}</span>
+                      <Users size={14} className="text-[#BFF367]" />
+                      <span className="text-[#BFF367] text-[12px] font-black">{allNearbyPlayers.length}</span>
                     </div>
 
                     <button 
                       onClick={toggleLocationSharing}
-                      className={`flex items-center justify-center p-1.5 w-8 h-8 rounded-[8px] border transition-all duration-300 backdrop-blur-xl shadow-2xl ${ isLocationSharing ? "bg-[#55DEE8]/20 border-[#55DEE8]/30 text-[#55DEE8]" : "bg-red-500/10 border-red-500/20 text-red-500" }`}
+                      className={`flex items-center justify-center p-1.5 w-8 h-8 rounded-[8px] border transition-all duration-300 backdrop-blur-xl shadow-2xl ${ isLocationSharing ? "bg-[#BFF367]/20 border-[#BFF367]/30 text-[#BFF367]" : "bg-red-500/10 border-red-500/20 text-red-500" }`}
                     >
                       {isLocationSharing ? <Eye size={16} /> : <EyeOff size={16} />}
                     </button>
@@ -898,15 +898,15 @@ const FindPlayers = () => {
                     <div className="absolute inset-0 z-[2000] bg-[#0A0A0A] flex flex-col items-center justify-center">
                       <div className="w-full h-full relative opacity-20">
                         <div className="absolute inset-0" style={{ 
-                            backgroundImage: 'radial-gradient(#55DEE8 1px, transparent 1px)', 
+                            backgroundImage: 'radial-gradient(#BFF367 1px, transparent 1px)', 
                             backgroundSize: '40px 40px' 
                         }} />
                       </div>
                       <div className="absolute flex flex-col items-center gap-4">
                         <div className="relative">
-                          <div className="w-16 h-16 border-2 border-[#55DEE8]/20 rounded-full animate-ping absolute inset-0" />
-                          <div className="w-16 h-16 border-2 border-[#55DEE8] rounded-full flex items-center justify-center bg-black">
-                            <MapPin className="text-[#55DEE8] animate-bounce" size={24} />
+                          <div className="w-16 h-16 border-2 border-[#BFF367]/20 rounded-full animate-ping absolute inset-0" />
+                          <div className="w-16 h-16 border-2 border-[#BFF367] rounded-full flex items-center justify-center bg-black">
+                            <MapPin className="text-[#BFF367] animate-bounce" size={24} />
                           </div>
                         </div>
                         <div className="text-center">
@@ -944,7 +944,7 @@ const FindPlayers = () => {
                         exit={{ opacity: 0 }}
                         className="absolute inset-0 z-[1500] bg-black/40 backdrop-blur-sm flex items-center justify-center"
                       >
-                        <Loader2 className="text-[#55DEE8] animate-spin" size={32} />
+                        <Loader2 className="text-[#BFF367] animate-spin" size={32} />
                       </motion.div>
                     )}
                   </AnimatePresence>
@@ -961,9 +961,9 @@ const FindPlayers = () => {
                             e.stopPropagation();
                             setSelectedRadius(Number(e.target.value));
                           }}
-                          className="flex-1 h-1 bg-white/20 rounded-lg appearance-none cursor-pointer accent-[#55DEE8]"
+                          className="flex-1 h-1 bg-white/20 rounded-lg appearance-none cursor-pointer accent-[#BFF367]"
                         />
-                        <span className="text-[#55DEE8] text-[10px] font-black min-w-[40px] text-right">{selectedRadius} KM</span>
+                        <span className="text-[#BFF367] text-[10px] font-black min-w-[40px] text-right">{selectedRadius} KM</span>
                     </div>
                   </div>
                 </motion.div>
@@ -979,8 +979,8 @@ const FindPlayers = () => {
             onDragEnd={handleDragEnd}
             className="w-full h-10 flex flex-col items-center justify-center cursor-grab active:cursor-grabbing bg-black z-50 group border-b border-white/5 lg:hidden"
           >
-            <div className="w-12 h-1.5 bg-white/10 rounded-full group-hover:bg-[#55DEE8]/40 transition-colors" />
-            <div className="text-[8px] font-bold text-white/10 uppercase tracking-[0.3em] mt-1 group-hover:text-[#55DEE8]/40 transition-colors">
+            <div className="w-12 h-1.5 bg-white/10 rounded-full group-hover:bg-[#BFF367]/40 transition-colors" />
+            <div className="text-[8px] font-bold text-white/10 uppercase tracking-[0.3em] mt-1 group-hover:text-[#BFF367]/40 transition-colors">
                 Slide to Discover
             </div>
           </motion.div>
@@ -995,17 +995,17 @@ const FindPlayers = () => {
           <div className="flex items-center gap-4 border-b border-white/5 pb-1">
             <button 
               onClick={() => setActiveTab("players")}
-              className={`pb-4 px-2 text-[10px] md:text-xs font-black uppercase tracking-[0.2em] transition-all relative ${activeTab === "players" ? "text-[#55DEE8]" : "text-white/20 hover:text-white/40"}`}
+              className={`pb-4 px-2 text-[10px] md:text-xs font-black uppercase tracking-[0.2em] transition-all relative ${activeTab === "players" ? "text-[#BFF367]" : "text-white/20 hover:text-white/40"}`}
             >
               Players
-              {activeTab === "players" && <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-[#55DEE8]" />}
+              {activeTab === "players" && <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-[#BFF367]" />}
             </button>
             <button 
               onClick={() => setActiveTab("teams")}
-              className={`pb-4 px-2 text-[10px] md:text-xs font-black uppercase tracking-[0.2em] transition-all relative ${activeTab === "teams" ? "text-[#55DEE8]" : "text-white/20 hover:text-white/40"}`}
+              className={`pb-4 px-2 text-[10px] md:text-xs font-black uppercase tracking-[0.2em] transition-all relative ${activeTab === "teams" ? "text-[#BFF367]" : "text-white/20 hover:text-white/40"}`}
             >
               Teams
-              {activeTab === "teams" && <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-[#55DEE8]" />}
+              {activeTab === "teams" && <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-[#BFF367]" />}
             </button>
           </div>
 
@@ -1013,13 +1013,13 @@ const FindPlayers = () => {
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white/[0.02] border border-white/5 rounded-[8px] p-3 md:p-4">
             <div className="flex items-center gap-4 flex-1">
               <div className="relative flex-1 max-w-md group">
-                <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-white/20 group-focus-within:text-[#55DEE8] transition-colors" size={16} />
+                <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-white/20 group-focus-within:text-[#BFF367] transition-colors" size={16} />
                 <input 
                   type="text" 
                   value={searchQuery}
                   onChange={handleSearch}
                   placeholder="SEARCH..."
-                  className="w-full bg-white/[0.03] hover:bg-white/[0.05] border border-white/10 focus:border-[#55DEE8]/50 rounded-[8px] h-10 pl-11 pr-4 text-white text-[10px] md:text-xs placeholder:text-white/20 outline-none transition-all uppercase tracking-widest font-bold"
+                  className="w-full bg-white/[0.03] hover:bg-white/[0.05] border border-white/10 focus:border-[#BFF367]/50 rounded-[8px] h-10 pl-11 pr-4 text-white text-[10px] md:text-xs placeholder:text-white/20 outline-none transition-all uppercase tracking-widest font-bold"
                 />
               </div>
             </div>
@@ -1028,88 +1028,88 @@ const FindPlayers = () => {
               <select 
                 value={filters.sport}
                 onChange={(e) => handleFilterChange("sport", e.target.value)}
-                className="bg-white/5 border border-white/10 rounded-[6px] px-3 py-1.5 text-[9px] md:text-[10px] font-bold uppercase tracking-widest text-white/60 focus:text-[#55DEE8] focus:border-[#55DEE8]/50 outline-none cursor-pointer hover:bg-white/10 transition-all"
+                className="bg-transparent px-3 py-1.5 text-[9px] md:text-[10px] font-bold uppercase tracking-widest text-white/60 focus:text-[#BFF367] outline-none cursor-pointer hover:text-white transition-all"
               >
-                <option value="">All Sports</option>
-                {sports.map(s => <option key={s} value={s}>{s}</option>)}
+                <option value="" className="bg-[#0a0a0a] text-white">All Sports</option>
+                {sports.map(s => <option key={s} value={s} className="bg-[#0a0a0a] text-white">{s}</option>)}
               </select>
               
               {/* PC View Filters (Hidden on Mobile/Tab) */}
               <div className="hidden lg:flex items-center gap-2">
                 <div className="relative group">
-                  <MapPin className="absolute left-2.5 top-1/2 -translate-y-1/2 text-white/20 group-focus-within:text-[#55DEE8]" size={10} />
+                  <MapPin className="absolute left-2.5 top-1/2 -translate-y-1/2 text-white/20 group-focus-within:text-[#BFF367]" size={10} />
                   <select 
                     value={filters.state || ""}
                     onChange={(e) => {
                       handleFilterChange("state", e.target.value);
                       handleFilterChange("city", "");
                     }}
-                    className="bg-white/5 border border-white/10 rounded-lg pl-7 pr-3 py-1.5 text-[9px] md:text-[10px] font-bold uppercase tracking-widest text-white/60 focus:text-[#55DEE8] focus:border-[#55DEE8]/50 outline-none w-24 md:w-28 cursor-pointer hover:bg-white/10 transition-all appearance-none"
+                    className="bg-transparent pl-7 pr-3 py-1.5 text-[9px] md:text-[10px] font-bold uppercase tracking-widest text-white/60 focus:text-[#BFF367] outline-none w-24 md:w-28 cursor-pointer hover:text-white transition-all appearance-none"
                   >
-                    <option value="">STATE...</option>
-                    {statesList.map(s => <option key={s} value={s}>{s}</option>)}
+                    <option value="" className="bg-[#0a0a0a] text-white">STATE...</option>
+                    {statesList.map(s => <option key={s} value={s} className="bg-[#0a0a0a] text-white">{s}</option>)}
                   </select>
                 </div>
                 <div className="relative group">
-                  <MapPin className="absolute left-2.5 top-1/2 -translate-y-1/2 text-white/20 group-focus-within:text-[#55DEE8]" size={10} />
+                  <MapPin className="absolute left-2.5 top-1/2 -translate-y-1/2 text-white/20 group-focus-within:text-[#BFF367]" size={10} />
                   <select 
                     value={filters.city || ""}
                     onChange={(e) => handleFilterChange("city", e.target.value)}
-                    className="bg-white/5 border border-white/10 rounded-lg pl-7 pr-3 py-1.5 text-[9px] md:text-[10px] font-bold uppercase tracking-widest text-white/60 focus:text-[#55DEE8] focus:border-[#55DEE8]/50 outline-none w-24 md:w-28 cursor-pointer hover:bg-white/10 transition-all appearance-none"
+                    className="bg-transparent pl-7 pr-3 py-1.5 text-[9px] md:text-[10px] font-bold uppercase tracking-widest text-white/60 focus:text-[#BFF367] outline-none w-24 md:w-28 cursor-pointer hover:text-white transition-all appearance-none"
                     disabled={!filters.state}
                   >
-                    <option value="">CITY...</option>
-                    {citiesList.map(c => <option key={c} value={c}>{c}</option>)}
+                    <option value="" className="bg-[#0a0a0a] text-white">CITY...</option>
+                    {citiesList.map(c => <option key={c} value={c} className="bg-[#0a0a0a] text-white">{c}</option>)}
                   </select>
                 </div>
                 <div className="relative group">
-                  <Navigation className="absolute left-2.5 top-1/2 -translate-y-1/2 text-white/20 group-focus-within:text-[#55DEE8]" size={10} />
+                  <Navigation className="absolute left-2.5 top-1/2 -translate-y-1/2 text-white/20 group-focus-within:text-[#BFF367]" size={10} />
                   <select 
                     value={selectedRadius}
                     onChange={(e) => setSelectedRadius(Number(e.target.value))}
-                    className="bg-white/5 border border-white/10 rounded-lg pl-7 pr-3 py-1.5 text-[9px] md:text-[10px] font-bold uppercase tracking-widest text-white/60 focus:text-[#55DEE8] focus:border-[#55DEE8]/50 outline-none cursor-pointer hover:bg-white/10 transition-all appearance-none w-24 md:w-28"
+                    className="bg-transparent pl-7 pr-3 py-1.5 text-[9px] md:text-[10px] font-bold uppercase tracking-widest text-white/60 focus:text-[#BFF367] outline-none cursor-pointer hover:text-white transition-all appearance-none w-24 md:w-28"
                   >
-                    <option value="5">5 KM</option>
-                    <option value="10">10 KM</option>
-                    <option value="20">20 KM</option>
-                    <option value="50">50 KM</option>
-                    <option value="100">100 KM</option>
+                    <option value="5" className="bg-[#0a0a0a] text-white">5 KM</option>
+                    <option value="10" className="bg-[#0a0a0a] text-white">10 KM</option>
+                    <option value="20" className="bg-[#0a0a0a] text-white">20 KM</option>
+                    <option value="50" className="bg-[#0a0a0a] text-white">50 KM</option>
+                    <option value="100" className="bg-[#0a0a0a] text-white">100 KM</option>
                   </select>
                 </div>
               </div>
 
               {/* Mobile/Tab Location Filters */}
               <div className="relative group lg:hidden">
-                <MapPin className="absolute left-2.5 top-1/2 -translate-y-1/2 text-white/20 group-focus-within:text-[#55DEE8]" size={10} />
+                <MapPin className="absolute left-2.5 top-1/2 -translate-y-1/2 text-white/20 group-focus-within:text-[#BFF367]" size={10} />
                 <select
                   value={filters.state || ""}
                   onChange={(e) => {
                     handleFilterChange("state", e.target.value);
                     handleFilterChange("city", "");
                   }}
-                  className="bg-white/5 border border-white/10 rounded-lg pl-7 pr-3 py-1.5 text-[9px] md:text-[10px] font-bold uppercase tracking-widest text-white/60 focus:text-[#55DEE8] focus:border-[#55DEE8]/50 outline-none w-24 md:w-28 cursor-pointer hover:bg-white/10 transition-all appearance-none"
+                  className="bg-transparent pl-7 pr-3 py-1.5 text-[9px] md:text-[10px] font-bold uppercase tracking-widest text-white/60 focus:text-[#BFF367] outline-none w-24 md:w-28 cursor-pointer hover:text-white transition-all appearance-none"
                 >
-                  <option value="">STATE...</option>
-                  {statesList.map(s => <option key={s} value={s}>{s}</option>)}
+                  <option value="" className="bg-[#0a0a0a] text-white">STATE...</option>
+                  {statesList.map(s => <option key={s} value={s} className="bg-[#0a0a0a] text-white">{s}</option>)}
                 </select>
               </div>
               <div className="relative group lg:hidden">
-                <MapPin className="absolute left-2.5 top-1/2 -translate-y-1/2 text-white/20 group-focus-within:text-[#55DEE8]" size={10} />
+                <MapPin className="absolute left-2.5 top-1/2 -translate-y-1/2 text-white/20 group-focus-within:text-[#BFF367]" size={10} />
                 <select
                   value={filters.city || ""}
                   onChange={(e) => handleFilterChange("city", e.target.value)}
                   disabled={!filters.state}
-                  className="bg-white/5 border border-white/10 rounded-lg pl-7 pr-3 py-1.5 text-[9px] md:text-[10px] font-bold uppercase tracking-widest text-white/60 focus:text-[#55DEE8] focus:border-[#55DEE8]/50 outline-none w-24 md:w-28 cursor-pointer hover:bg-white/10 transition-all appearance-none disabled:opacity-40"
+                  className="bg-transparent pl-7 pr-3 py-1.5 text-[9px] md:text-[10px] font-bold uppercase tracking-widest text-white/60 focus:text-[#BFF367] outline-none w-24 md:w-28 cursor-pointer hover:text-white transition-all appearance-none disabled:opacity-40"
                 >
-                  <option value="">CITY...</option>
-                  {citiesList.map(c => <option key={c} value={c}>{c}</option>)}
+                  <option value="" className="bg-[#0a0a0a] text-white">CITY...</option>
+                  {citiesList.map(c => <option key={c} value={c} className="bg-[#0a0a0a] text-white">{c}</option>)}
                 </select>
               </div>
 
               {activeTab === "players" && (
                 <button 
                   onClick={() => setShowNearbyOnly(!showNearbyOnly)}
-                  className={`flex items-center gap-2 px-3 py-1.5 rounded-[6px] border transition-all text-[9px] font-black uppercase tracking-widest ${ showNearbyOnly ? "bg-[#55DEE8] border-[#55DEE8] text-black shadow-[0_0_15px_rgba(85,222,232,0.4)]" : "bg-white/5 border-white/10 text-white/60 hover:bg-white/10" }`}
+                  className={`flex items-center gap-2 px-3 py-1.5 rounded-[6px] border transition-all text-[9px] font-black uppercase tracking-widest ${ showNearbyOnly ? "bg-[#BFF367] border-[#BFF367] text-black shadow-[0_0_15px_rgba(191,243,103,0.4)]" : "bg-transparent border-transparent text-white/60 hover:text-white" }`}
                 >
                   <Navigation size={10} className={showNearbyOnly ? "animate-pulse" : ""} />
                   Nearby

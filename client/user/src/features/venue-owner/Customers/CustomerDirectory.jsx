@@ -8,7 +8,7 @@ const getStatusColor = (status) => {
     case "ELITE":
       return "bg-[#55DEE8]/10 text-[#55DEE8] border-[#55DEE8]/20";
     case "GOLD":
-      return "bg-amber-500/10 text-amber-500 border-amber-500/20";
+      return "bg-gradient-to-r from-[#55DEE8]/10 to-[#BFF367]/10 text-transparent bg-clip-text bg-gradient-to-r from-[#55DEE8] to-[#BFF367] border-[#55DEE8]/20";
     case "SILVER":
       return "bg-gray-400/10 text-gray-400 border-gray-400/20";
     case "PLATINUM":

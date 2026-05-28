@@ -43,12 +43,7 @@ export const handlePayment = async (order, user) => {
       name: "Kridaz",
       description: "Book a spot for your next adventure",
       handler: function (response) {
-        if (response.error) {
-          toast.error(response.error.message);
-          reject(response.error);
-        } else {
-          resolve(response);
-        }
+        resolve(response);
       },
       prefill: {
         name: user?.name || "",
@@ -58,8 +53,19 @@ export const handlePayment = async (order, user) => {
       theme: {
         color: "#55DEE8",
       },
+      modal: {
+        ondismiss: function() {
+          reject(new Error("Payment cancelled by user."));
+        }
+      }
     };
     const rzp1 = new window.Razorpay(options);
+    
+    rzp1.on('payment.failed', function (response) {
+      toast.error(response.error.description || "Payment failed");
+      reject(response.error);
+    });
+
     rzp1.open();
   });
 };

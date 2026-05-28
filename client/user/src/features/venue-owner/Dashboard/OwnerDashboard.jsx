@@ -110,7 +110,7 @@ const OwnerDashboard = () => {
     })),
   };
 
-  const COLORS = [themeColor, "#10B981", "#3B82F6", "#6366F1", "#F59E0B", "#EF4444"];
+  const COLORS = [themeColor, "#10B981", "#3B82F6", "#6366F1", "#55DEE8", "#EF4444"];
 
   const getTimeGreeting = () => {
     const hour = currentTime.getHours();

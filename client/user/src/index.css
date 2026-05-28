@@ -85,13 +85,13 @@
 
 :root {
   /* Unified Primary - Main Branch Official */
-  --primary:       #55DEE8; /* Updated to Match requested brand Cyan */
-  --primary-glow:  rgba(85, 222, 232, 0.4);
-  --primary-dark:  #00b4c2;
+  --primary:       #BFF367; /* Updated to Match requested brand Green */
+  --primary-glow:  rgba(191, 243, 103, 0.4);
+  --primary-dark:  #a2d152;
   
   /* Legacy/Sunny specific names pointing to unified color */
-  --action-green:  #55DEE8;
-  --neon-lime:     #55DEE8;
+  --action-green:  #BFF367;
+  --neon-lime:     #BFF367;
   
   /* Backgrounds & Surfaces */
   --bg-base:       #000000;
@@ -167,7 +167,7 @@ h2, h3, .font-display {
 .admin-panel h4, 
 .admin-panel h5, 
 .admin-panel h6 {
-  font-family: 'Open Sans', sans-serif !important;
+  font-family: 'Open Sans' !important;
   text-transform: uppercase;
   letter-spacing: -0.02em;
 }
@@ -180,11 +180,11 @@ h2, h3, .font-display {
 }
 
 .admin-panel .subtitle {
-  font-family: 'Inter', sans-serif !important;
+  font-family: 'Inter' !important;
 }
 
 .font-open-sans {
-  font-family: "Open Sans", sans-serif !important;
+  font-family: "Open Sans" !important;
 }
 
 .font-script {
@@ -195,7 +195,7 @@ h2, h3, .font-display {
 }
 
 .font-secondary {
-  font-family: "Bayon", sans-serif !important;
+  font-family: "Bayon" !important;
 }
 
 .font-mono {
@@ -203,7 +203,88 @@ h2, h3, .font-display {
 }
 
 .font-inter {
-  font-family: "Inter", sans-serif !important;
+  font-family: "Inter" !important;
+}
+
+.messages-page h1,
+.messages-page h2,
+.messages-page h3,
+.messages-page .chat-heading {
+  font-family: "Open Sans" !important;
+  letter-spacing: 0;
+  line-height: 1.25;
+}
+
+.messages-page .chat-subheading {
+  font-family: "Inter" !important;
+  font-size: 20px !important;
+  line-height: 1.45;
+  letter-spacing: 0;
+}
+
+.messages-page .chat-preview {
+  font-family: "Inter" !important;
+  font-size: 13px !important;
+  line-height: 1.35;
+  letter-spacing: 0;
+}
+
+.messages-page .chat-header-status {
+  font-family: "Inter" !important;
+  font-size: 14px !important;
+  line-height: 1.3;
+  letter-spacing: 0;
+}
+
+.messages-page .community-copy {
+  font-family: "Inter" !important;
+  font-size: 14px !important;
+  line-height: 1.35;
+  letter-spacing: 0;
+}
+
+.messages-page {
+  --messages-gradient: linear-gradient(90deg, #55DEE8 0%, #BFF367 100%);
+  --messages-gradient-soft: linear-gradient(90deg, rgba(85, 222, 232, 0.1) 0%, rgba(191, 243, 103, 0.12) 100%);
+  --messages-gradient-border: rgba(191, 243, 103, 0.45);
+}
+
+.messages-page :not(svg):not(path)[class*="text-[#55DEE8]"] {
+  background: var(--messages-gradient) !important;
+  background-clip: text !important;
+  -webkit-background-clip: text !important;
+  color: transparent !important;
+  -webkit-text-fill-color: transparent !important;
+}
+
+.messages-page svg[class*="text-[#55DEE8]"],
+.messages-page [class*="text-[#55DEE8]"] svg {
+  color: #BFF367 !important;
+}
+
+.messages-page [class*="bg-[#55DEE8]"] {
+  background: var(--messages-gradient) !important;
+}
+
+.messages-page [class*="bg-[#55DEE8]/10"],
+.messages-page [class*="bg-[#55DEE8]/20"] {
+  background: var(--messages-gradient-soft) !important;
+}
+
+.messages-page [class*="border-[#55DEE8]"],
+.messages-page [class*="border-[#55DEE8]/20"],
+.messages-page [class*="border-[#55DEE8]/30"],
+.messages-page [class*="border-[#55DEE8]/40"],
+.messages-page [class*="border-[#55DEE8]/50"] {
+  border-color: var(--messages-gradient-border) !important;
+}
+
+.messages-page [class*="hover:bg-[#55DEE8]"]:hover {
+  background: var(--messages-gradient) !important;
+}
+
+.messages-page [class*="hover:border-[#55DEE8]"]:hover {
+  border-color: #BFF367 !important;
 }
 
 body {
@@ -249,6 +330,33 @@ body {
 }
 ::-webkit-scrollbar-thumb:hover {
   background: var(--primary);
+}
+
+/* Force native select elements and options to look dark and use green accent */
+select {
+  color-scheme: dark !important;
+  accent-color: #BFF367 !important;
+}
+
+select::-webkit-scrollbar-thumb {
+  background: var(--surface-2) !important;
+  border-radius: 10px !important;
+}
+
+select::-webkit-scrollbar-thumb:hover {
+  background: #BFF367 !important;
+}
+
+select option:checked {
+  background-color: #BFF367 !important;
+  color: #000000 !important;
+}
+
+select option:hover,
+select option:focus,
+select option:active {
+  background-color: #BFF367 !important;
+  color: #000000 !important;
 }
 
 /* Reels Feed System */
@@ -298,7 +406,7 @@ body {
   gap: 8px;
   background-color: var(--primary);
   color: #000;
-  font-family: "Inter", sans-serif;
+  font-family: "Inter";
   font-weight: 700;
   font-size: 14px;
   text-transform: uppercase;
@@ -322,7 +430,7 @@ body {
   gap: 8px;
   background-color: transparent;
   color: var(--fg);
-  font-family: "Inter", sans-serif;
+  font-family: "Inter";
   font-weight: 700;
   font-size: 14px;
   text-transform: uppercase;
@@ -437,7 +545,7 @@ body {
   background-color: #111111 !important;
   border: 1px solid #2D2D2D !important;
   border-radius: 8px !important;
-  font-family: 'Inter', sans-serif !important;
+  font-family: 'Inter' !important;
   box-shadow: 0 10px 30px rgba(0,0,0,0.5) !important;
   overflow: hidden !important;
 }
@@ -480,12 +588,12 @@ body {
 }
 
 .datepicker-dark .react-datepicker__time-list-item:hover {
-  background-color: #55DEE8 !important;
+  background-color: #BFF367 !important;
   color: black !important;
 }
 
 .datepicker-dark .react-datepicker__time-list-item--selected {
-  background-color: #55DEE8 !important;
+  background-color: #BFF367 !important;
   color: black !important;
 }
 
@@ -495,7 +603,7 @@ body {
 
 .datepicker-dark .react-datepicker__current-month, 
 .datepicker-dark .react-datepicker-time__header {
-  color: #55DEE8 !important;
+  color: #BFF367 !important;
   font-size: 11px !important;
   font-weight: 800 !important;
   text-transform: uppercase !important;

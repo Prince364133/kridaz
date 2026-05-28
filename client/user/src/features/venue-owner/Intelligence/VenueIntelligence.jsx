@@ -209,7 +209,7 @@ export default function VenueIntelligence() {
            {!isDNASufficient && (
              <div className="absolute inset-0 flex flex-col items-center justify-center z-10">
                  <div className="bg-[#111] border border-[#2D2D2D] p-4 rounded-[8px] text-center shadow-2xl">
-                    <AlertCircle size={24} className="text-amber-500 mx-auto mb-2" />
+                    <AlertCircle size={24} className="text-transparent bg-clip-text bg-gradient-to-r from-[#55DEE8] to-[#BFF367] mx-auto mb-2" />
                     <p className="text-[10px] font-bold text-white uppercase tracking-widest">Vector Calculation Pending</p>
                     <p className="text-[9px] text-[#878C9F] mt-1 max-w-[150px]">More operational data required to map venue DNA.</p>
                  </div>

@@ -152,12 +152,12 @@ export default function OwnerRevenue() {
         <div className="bg-white/[0.03] backdrop-blur-xl border border-white/5 rounded-[8px] p-8 lg:p-10 shadow-2xl flex flex-col max-h-[600px] group overflow-hidden relative">
            <div className="flex justify-between items-center mb-8 border-b border-white/5 pb-6 relative z-10">
               <div className="flex items-center gap-4">
-                 <div className="w-1.5 h-8 bg-amber-500 rounded-full shadow-[0_0_10px_rgba(245,158,11,0.3)]" />
+                 <div className="w-1.5 h-8 bg-gradient-to-r from-[#55DEE8] to-[#BFF367] rounded-full shadow-[0_0_10px_rgba(85,222,232,0.3)]" />
                  <h2 className="text-[12px] font-black text-white uppercase tracking-[0.2em] flex items-center gap-3">
                     Escrow Pipeline
                  </h2>
               </div>
-              <span className="text-[10px] font-black text-amber-500/60 uppercase tracking-widest">Active Reviews</span>
+              <span className="text-[10px] font-black text-transparent bg-clip-text bg-gradient-to-r from-[#55DEE8]/60 to-[#BFF367]/60 uppercase tracking-widest">Active Reviews</span>
            </div>
            
            <div className="overflow-y-auto no-scrollbar flex-1 pr-2 relative z-10">
@@ -168,8 +168,8 @@ export default function OwnerRevenue() {
                         <div className="space-y-1.5">
                            <p className="text-[14px] font-black text-white uppercase tracking-tight">{booking.turf?.name || 'Arena Node'}</p>
                            <div className="flex items-center gap-2">
-                             <Clock size={12} className="text-amber-500/50" />
-                             <p className="text-[10px] text-amber-500/80 font-black uppercase tracking-widest">
+                             <Clock size={12} className="text-transparent bg-clip-text bg-gradient-to-r from-[#55DEE8]/50 to-[#BFF367]/50" />
+                             <p className="text-[10px] text-transparent bg-clip-text bg-gradient-to-r from-[#55DEE8]/80 to-[#BFF367]/80 font-black uppercase tracking-widest">
                                Release: {new Date(booking.reviewWindowEndsAt).toLocaleDateString()}
                              </p>
                            </div>
@@ -221,7 +221,7 @@ export default function OwnerRevenue() {
                         sign = "-";
                         icon = <ArrowDownLeft size={14} />;
                       } else if (tx.type === "DISPUTE_FREEZE") {
-                        colorClass = "text-amber-500";
+                        colorClass = "text-transparent bg-clip-text bg-gradient-to-r from-[#55DEE8] to-[#BFF367]";
                         sign = "";
                         icon = <AlertOctagon size={14} />;
                       }

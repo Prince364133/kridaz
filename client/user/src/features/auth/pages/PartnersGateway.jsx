@@ -35,7 +35,7 @@ const partners = [
     icon: Shield,
     stat: "Verified Official",
     id: "UMPIRE-03",
-    accent: "#F59E0B",
+    accent: "#55DEE8",
     status: "Coming Soon",
   },
   {

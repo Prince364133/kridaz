@@ -271,7 +271,7 @@ const ProfessionalDetailsPage = () => {
                   </div>
                   <div className="bg-[#1a1a1a] border border-white/10 rounded-[8px] p-6">
                     <p className="text-gray-400 text-xs uppercase tracking-widest font-bold mb-3">Pending</p>
-                    <p className="text-3xl font-bold text-yellow-400">₹{profile?.pendingBalance?.toFixed(2) || "0.00"}</p>
+                    <p className="text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-[#55DEE8] to-[#BFF367]">₹{profile?.pendingBalance?.toFixed(2) || "0.00"}</p>
                   </div>
                   <div className="bg-[#1a1a1a] border border-white/10 rounded-[8px] p-6">
                     <p className="text-gray-400 text-xs uppercase tracking-widest font-bold mb-3">Total Withdrawn</p>

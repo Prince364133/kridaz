@@ -1,6 +1,6 @@
-﻿import React from 'react';
+import React from 'react';
 import { useGetCreatorAnalyticsQuery } from '@redux/api/reelsApi';
-import { ChevronLeft, TrendingUp, Users, Play, Heart, MessageCircle, Share2 } from 'lucide-react';
+import { ChevronLeft, TrendingUp, Users, Play, ThumbsUp, MessageCircle, Share2 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
 const ReelAnalytics = () => {
@@ -23,7 +23,7 @@ const ReelAnalytics = () => {
       {/* Overview Cards */}
       <div className="grid grid-cols-2 gap-4 mb-8">
         <StatCard icon={<Play size={20} />} label="Total Views" value={stats.views} color="blue" />
-        <StatCard icon={<Heart size={20} />} label="Likes" value={stats.likes} color="red" />
+        <StatCard icon={<ThumbsUp size={20} />} label="Likes" value={stats.likes} color="#55DEE8" />
         <StatCard icon={<MessageCircle size={20} />} label="Comments" value={stats.comments} color="green" />
         <StatCard icon={<Share2 size={20} />} label="Shares" value={stats.shares} color="purple" />
       </div>

@@ -21,10 +21,10 @@ const ComingSoon = () => {
     },
     umpire: {
       label: "Official",
-      accent: "#F59E0B",
-      accentLight: "text-amber-400",
-      accentBg: "bg-amber-500/10",
-      accentBorder: "border-amber-500/20",
+      accent: "#55DEE8",
+      accentLight: "text-transparent bg-clip-text bg-gradient-to-r from-[#55DEE8] to-[#BFF367]",
+      accentBg: "bg-gradient-to-r from-[#55DEE8]/10 to-[#BFF367]/10",
+      accentBorder: "border-[#55DEE8]/20",
       description: "The Officials module will match you with events, manage your schedule, and help you build a verified track record.",
     },
   };
