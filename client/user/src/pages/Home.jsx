@@ -389,9 +389,9 @@ export default function Home() {
         />
       </Link>
 
-      {/* Shop Here */}
-      <div 
-        onClick={() => toast.success("🛒 Marketplace coming soon! Stay tuned.")}
+      {/* Scorer */}
+      <Link 
+        to="/professionals?role=scorer"
         className="relative rounded-[6px] px-3.5 py-2 overflow-visible force-overflow-visible flex flex-col justify-center h-[72px] cursor-pointer group hover:scale-[1.02] transition-all duration-300 shadow-xl border border-[#EBEBEB]/15"
         style={{ 
           background: "radial-gradient(circle at 80% 50%, rgba(255, 255, 255, 0.3) 0%, rgba(255, 255, 255, 0) 50%), radial-gradient(circle at 80% 50%, #FFA2FF 0%, #A726E2 50%, #220038 100%)",
@@ -400,14 +400,15 @@ export default function Home() {
       >
         <div className="absolute inset-0 bg-white/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500 rounded-[6px]" />
         <span className="relative z-20 text-white font-bold text-xs sm:text-sm tracking-tight leading-tight max-w-[55%] font-open-sans">
-          Shop Here
+          Scorer
         </span>
         <img 
-          src="/3d_shopping_bag.svg" 
-          alt="Shop Here Bag Icon" 
-          className="absolute -right-2 -top-[14px] w-[94px] h-[94px] object-contain pointer-events-none transform group-hover:scale-105 group-hover:-translate-y-0.5 transition-all duration-300 z-10" 
+          src="/3d_scoreboard.png" 
+          alt="Scorer Icon" 
+          className="absolute -right-2 -top-[14px] w-[94px] h-[94px] object-contain pointer-events-none transform group-hover:scale-105 group-hover:-translate-y-0.5 transition-all duration-300 z-10"
+          style={{ mixBlendMode: "screen" }}
         />
-      </div>
+      </Link>
 
       {/* Host & Join Games */}
       <Link 
@@ -429,9 +430,9 @@ export default function Home() {
         />
       </Link>
 
-      {/* Tournaments */}
-      <div 
-        onClick={() => toast.success("🏆 Tournaments coming soon! Stay tuned.")}
+      {/* Pros */}
+      <Link 
+        to="/professionals"
         className="relative rounded-[6px] px-3.5 py-2 overflow-visible force-overflow-visible flex flex-col justify-center h-[72px] cursor-pointer group hover:scale-[1.02] transition-all duration-300 shadow-xl border border-[#EBEBEB]/15"
         style={{ 
           background: "radial-gradient(circle at 80% 50%, rgba(255, 255, 255, 0.3) 0%, rgba(255, 255, 255, 0) 50%), radial-gradient(circle at 80% 50%, #FF9800 0%, #E65100 45%, #3E1700 100%)",
@@ -440,14 +441,15 @@ export default function Home() {
       >
         <div className="absolute inset-0 bg-white/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500 rounded-[6px]" />
         <span className="relative z-20 text-white font-bold text-xs sm:text-sm tracking-tight leading-tight max-w-[55%] font-open-sans">
-          Tournaments
+          Pros
         </span>
         <img 
-          src="/3d_stadium.svg" 
-          alt="Tournaments Stadium Icon" 
-          className="absolute -right-2 -top-[16px] w-[94px] h-[94px] object-contain pointer-events-none transform group-hover:scale-105 group-hover:-translate-y-0.5 transition-all duration-300 z-10" 
+          src="/3d_professional.png" 
+          alt="Pros Icon" 
+          className="absolute -right-2 -top-[16px] w-[94px] h-[94px] object-contain pointer-events-none transform group-hover:scale-105 group-hover:-translate-y-0.5 transition-all duration-300 z-10"
+          style={{ mixBlendMode: "screen" }}
         />
-      </div>
+      </Link>
         </div>
 
   {/* ── FIND YOUR ARENA ── */}
@@ -653,20 +655,26 @@ export default function Home() {
  <div className="mb-8">
  <h3 className="text-lg md:text-xl font-bold text-white/80 mb-4 tracking-wide">REELS</h3>
  <div className="flex gap-4 overflow-x-auto pb-4 scrollbar-hide snap-x">
- {(reelsFeed.length > 0 ? reelsFeed : socialPosts).map((reel, idx) => (
- <div key={`reel-${idx}`} className="w-[140px] md:w-[160px] aspect-[9/16] shrink-0 bg-[#0A0A0A] border rounded-[12px] overflow-hidden snap-start group transition-all relative cursor-pointer" style={{ borderColor: BDR }} onClick={(e) => { e.preventDefault(); navigate(`/?tab=shots&id=${reel.id || reel._id || ''}`); }}>
- <img
- src={reel.thumbnailUrl || reel.image || reel.mediaUrl || ''}
- alt="Reel thumbnail"
- className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
- />
- <div className="absolute inset-0 flex items-center justify-center bg-black/20 group-hover:bg-black/40 transition-colors">
- <div className="w-10 h-10 rounded-full bg-white/20 backdrop-blur-md flex items-center justify-center border border-white/40">
- <Play size={16} className="text-white fill-white ml-1" />
- </div>
- </div>
- </div>
- ))}
+ {reelsFeed.length === 0 ? (
+   <div className="w-full py-12 flex items-center justify-center border border-white/5 bg-white/5 rounded-[12px]">
+     <p className="text-white/30 text-xs font-bold uppercase tracking-[0.2em]">No reels available</p>
+   </div>
+ ) : (
+   reelsFeed.map((reel, idx) => (
+     <div key={`reel-${idx}`} className="w-[140px] md:w-[160px] aspect-[9/16] shrink-0 bg-[#0A0A0A] border rounded-[12px] overflow-hidden snap-start group transition-all relative cursor-pointer" style={{ borderColor: BDR }} onClick={(e) => { e.preventDefault(); navigate(`/?tab=shots&id=${reel.id || reel._id || ''}`); }}>
+       <img
+         src={reel.thumbnailUrl || reel.image || reel.mediaUrl || ''}
+         alt="Reel thumbnail"
+         className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+       />
+       <div className="absolute inset-0 flex items-center justify-center bg-black/20 group-hover:bg-black/40 transition-colors">
+         <div className="w-10 h-10 rounded-full bg-white/20 backdrop-blur-md flex items-center justify-center border border-white/40">
+           <Play size={16} className="text-white fill-white ml-1" />
+         </div>
+       </div>
+     </div>
+   ))
+ )}
  </div>
  </div>
  </div>

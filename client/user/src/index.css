@@ -85,13 +85,13 @@
 
 :root {
   /* Unified Primary - Main Branch Official */
-  --primary:       #55DEE8; /* Updated to Match requested brand Cyan */
-  --primary-glow:  rgba(85, 222, 232, 0.4);
-  --primary-dark:  #00b4c2;
+  --primary:       #BFF367; /* Updated to Match requested brand Green */
+  --primary-glow:  rgba(191, 243, 103, 0.4);
+  --primary-dark:  #a2d152;
   
   /* Legacy/Sunny specific names pointing to unified color */
-  --action-green:  #55DEE8;
-  --neon-lime:     #55DEE8;
+  --action-green:  #BFF367;
+  --neon-lime:     #BFF367;
   
   /* Backgrounds & Surfaces */
   --bg-base:       #000000;
@@ -332,6 +332,33 @@ body {
   background: var(--primary);
 }
 
+/* Force native select elements and options to look dark and use green accent */
+select {
+  color-scheme: dark !important;
+  accent-color: #BFF367 !important;
+}
+
+select::-webkit-scrollbar-thumb {
+  background: var(--surface-2) !important;
+  border-radius: 10px !important;
+}
+
+select::-webkit-scrollbar-thumb:hover {
+  background: #BFF367 !important;
+}
+
+select option:checked {
+  background-color: #BFF367 !important;
+  color: #000000 !important;
+}
+
+select option:hover,
+select option:focus,
+select option:active {
+  background-color: #BFF367 !important;
+  color: #000000 !important;
+}
+
 /* Reels Feed System */
 .reels-feed-container {
   height: 100vh;
@@ -561,12 +588,12 @@ body {
 }
 
 .datepicker-dark .react-datepicker__time-list-item:hover {
-  background-color: #55DEE8 !important;
+  background-color: #BFF367 !important;
   color: black !important;
 }
 
 .datepicker-dark .react-datepicker__time-list-item--selected {
-  background-color: #55DEE8 !important;
+  background-color: #BFF367 !important;
   color: black !important;
 }
 
@@ -576,7 +603,7 @@ body {
 
 .datepicker-dark .react-datepicker__current-month, 
 .datepicker-dark .react-datepicker-time__header {
-  color: #55DEE8 !important;
+  color: #BFF367 !important;
   font-size: 11px !important;
   font-weight: 800 !important;
   text-transform: uppercase !important;

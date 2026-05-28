@@ -1706,7 +1706,7 @@ const HostGame = () => {
         {showConfirm && (
           <div className="fixed inset-0 z-[100] flex items-center justify-center p-6">
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setShowConfirm(false)} className="absolute inset-0 bg-black/90 backdrop-blur-md" />
-            <motion.div initial={{ scale: 0.9, y: 30 }} animate={{ scale: 1, y: 0 }} exit={{ scale: 0.9, y: 30 }} className="relative bg-neutral-900 border border-neutral-800 p-10 rounded-[8px] max-w-sm w-full text-center shadow-2xl">
+            <motion.div initial={{ scale: 0.9, y: 30 }} animate={{ scale: 1, y: 0 }} exit={{ scale: 0.9, y: 30 }} className="relative bg-black border border-neutral-800 p-10 rounded-[8px] max-w-sm w-full text-center shadow-2xl">
               <div className="w-24 h-24 bg-yellow-500/10 rounded-[8px] flex items-center justify-center mx-auto mb-8">
                 <Coins size={48} className="text-yellow-500" />
               </div>
@@ -1721,7 +1721,7 @@ const HostGame = () => {
                     setShowConfirm(false);
                     handleCreateGame();
                   }}
-                  className="flex-1 py-4 bg-yellow-500 text-black font-black rounded-[8px] shadow-lg shadow-yellow-500/20 text-xs uppercase tracking-widest"
+                  className="flex-1 py-4 bg-gradient-to-r from-[#55DEE8] to-[#BFF367] text-black font-black rounded-[8px] shadow-[0_10px_25px_rgba(85,222,232,0.25)] text-xs uppercase tracking-widest hover:scale-[1.02] transition-all"
                 >
                   Confirm
                 </button>

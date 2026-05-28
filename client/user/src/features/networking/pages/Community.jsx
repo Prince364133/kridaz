@@ -4,7 +4,7 @@ import { followUser, unfollowUser } from "@redux/slices/authSlice";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import axiosInstance from "@hooks/useAxiosInstance";
 import {
-  Heart, MessageCircle, Share2, Plus, Image as ImageIcon, X, MoreVertical, Send,
+  ThumbsUp, MessageCircle, Share2, Plus, Image as ImageIcon, X, MoreVertical, Send,
   Loader2, Trash2, Clock, User as UserIcon, Trophy, Edit, Edit3, Twitter, Facebook,
   Eye, ChevronDown, TrendingUp, Target, BarChart3, Users, Zap,
   ChevronRight, ShieldCheck, Calendar, Mail, ArrowRight, MonitorPlay, FileText,
@@ -1347,7 +1347,7 @@ const Community = ({ children, onSearchActive }) => {
                         />
                         <div>
                           <div className="flex items-center gap-1.5">
-                            <span className="text-[13px] font-bold group-hover:text-[#55DEE8] transition-colors">{post.adminId?.name || "Player"}</span>
+                            <span className="text-[13px] font-bold text-white transition-colors">{post.adminId?.name || "Player"}</span>
                             <ShieldCheck size={14} className="text-[#55DEE8]" />
                           </div>
                           <div className="text-[11px] font-bold text-white/40 mt-0.5">
@@ -1465,14 +1465,14 @@ const Community = ({ children, onSearchActive }) => {
                     <div className="flex items-center justify-between pt-1">
                       <div className="flex items-center gap-5">
                         <button onClick={() => handleLike(getPostId(post))} className="flex items-center gap-2 group">
-                          <Heart size={20} className={`transition-colors ${post.likes?.some(l => (l.id || l._id || l) === (user?.id || user?._id)) ? 'fill-[#55DEE8] text-[#55DEE8]' : 'text-white/70 group-hover:text-red-500'}`} />
+                          <ThumbsUp size={20} className={`transition-colors ${post.likes?.some(l => (l.id || l._id || l) === (user?.id || user?._id)) ? 'fill-[#BFF367] text-[#BFF367]' : 'text-white/70 group-hover:text-[#BFF367]'}`} />
                           <span className="text-[12px] font-bold text-white">{post.likes?.length || 0}</span>
                         </button>
                         <button
                           onClick={() => setExpandedComments(prev => ({ ...prev, [getPostId(post)]: !prev[getPostId(post)] }))}
                           className="flex items-center gap-2 group"
                         >
-                          <MessageCircle size={20} className={`transition-colors ${expandedComments[getPostId(post)] ? 'text-[#55DEE8]' : 'text-white/70 group-hover:text-white'}`} />
+                          <MessageCircle size={20} className={`transition-colors ${expandedComments[getPostId(post)] ? 'text-[#BFF367]' : 'text-white/70 group-hover:text-[#BFF367]'}`} />
                           <span className="text-[12px] font-bold text-white">{post.comments?.length || 0}</span>
                         </button>
                         <button
@@ -1488,7 +1488,7 @@ const Community = ({ children, onSearchActive }) => {
                           }}
                           className="flex items-center gap-2 group"
                         >
-                          <Send size={18} className="text-white/70 group-hover:text-white transition-colors" />
+                          <Send size={18} className="text-white/70 group-hover:text-[#BFF367] transition-colors" />
                           <span className="text-[12px] font-bold text-white">Share</span>
                         </button>
                       </div>
@@ -1569,7 +1569,7 @@ const Community = ({ children, onSearchActive }) => {
                                   const commentUser = comment.userId || comment.user;
                                   return (
                                     <div key={comment.id || comment._id} className="flex items-start gap-2 text-[12px] leading-relaxed">
-                                      <Link to={`/profile/${commentUser?.id || commentUser?._id}`} className="font-bold text-white hover:text-[#55DEE8] transition-colors shrink-0">
+                                      <Link to={`/profile/${commentUser?.id || commentUser?._id}`} className="font-bold text-white hover:text-[#BFF367] transition-colors shrink-0">
                                         {commentUser?.name || commentUser?.username || "Player"}
                                       </Link>
                                       <span className="text-white/80 break-words">{comment.text}</span>
@@ -1605,7 +1605,7 @@ const Community = ({ children, onSearchActive }) => {
                                 disabled={!commentInputs[getPostId(post)]?.trim()}
                                 className={`text-[12px] font-bold px-3 py-1.5 rounded-full transition-all ${
                                   commentInputs[getPostId(post)]?.trim()
-                                    ? 'bg-[#55DEE8] text-black hover:bg-[#55DEE8]/80 cursor-pointer'
+                                    ? 'bg-[#BFF367] text-black hover:bg-[#BFF367]/80 cursor-pointer'
                                     : 'bg-white/5 text-white/20 cursor-not-allowed'
                                 }`}
                               >

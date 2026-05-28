@@ -28,7 +28,14 @@ export default function FindProfessionals() {
   const [professionals, setProfessionals] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selectedSport, setSelectedSport] = useState("ALL SPORTS");
-  const [selectedRole, setSelectedRole] = useState("All");
+  const [selectedRole, setSelectedRole] = useState(() => {
+    const roleParam = searchParams.get("role");
+    if (roleParam) {
+      const found = roles.find(r => r.toLowerCase() === roleParam.toLowerCase());
+      if (found) return found;
+    }
+    return "All";
+  });
   const [searchTerm, setSearchTerm] = useState("");
   const [cityFilter, setCityFilter] = useState("All");
   const [stateFilter, setStateFilter] = useState("All");
@@ -324,7 +331,7 @@ export default function FindProfessionals() {
       
       {/* Header Section */}
       <div className="max-w-7xl mx-auto pt-6 pb-6 text-center relative px-4">
-        <h1 className="font-['Open_Sans'] font-extrabold text-6xl lg:text-[72px] uppercase tracking-tighter text-transparent bg-clip-text bg-gradient-to-r from-[#55DEE8] to-[#BFF367] mb-2 leading-[0.9]">
+        <h1 className="font-['Open_Sans'] font-extrabold text-6xl lg:text-[72px] uppercase tracking-tighter text-transparent bg-clip-text bg-gradient-to-r from-[#BFF367] to-[#BFF367] mb-2 leading-[0.9]">
           PROS DIRECTORY
         </h1>
         <p className="hidden md:block text-[16px] text-white/60 uppercase tracking-[0.15em] leading-relaxed" style={SUBHEADING_STYLE}>
@@ -335,7 +342,7 @@ export default function FindProfessionals() {
       {/* Search & Filters */}
       <div className="max-w-7xl mx-auto">
         <div className="max-w-5xl mx-auto mb-12 px-4">
-          <div className="w-full bg-[#0a0a0c]/80 backdrop-blur-2xl border border-white/10 rounded-[8px] p-1.5 shadow-2xl flex flex-col xl:flex-row items-stretch xl:items-center min-h-[56px] md:min-h-[64px] transition-all duration-500 hover:border-[#55DEE8]/30">
+          <div className="w-full bg-[#0a0a0c]/80 backdrop-blur-2xl border border-white/10 rounded-[8px] p-1.5 shadow-2xl flex flex-col xl:flex-row items-stretch xl:items-center min-h-[56px] md:min-h-[64px] transition-all duration-500 hover:border-[#BFF367]/30">
             {/* Search Input */}
             <div className="flex-[2] relative xl:border-r border-white/5 flex items-center px-4 py-3 md:py-0 min-h-[56px] md:min-h-full">
               <Search className="text-gray-500 mr-3" size={16} />
@@ -352,7 +359,7 @@ export default function FindProfessionals() {
             <div className="flex flex-col sm:flex-row flex-[3] xl:flex-[2.4]">
               {/* Sport Filter */}
               <div className="flex-1 relative sm:border-r border-t sm:border-t-0 border-white/5 flex items-center group">
-                <div className="absolute left-3 p-1.5 bg-white/5 rounded-lg pointer-events-none hidden sm:block">
+                <div className="absolute left-4 pointer-events-none hidden sm:block">
                   <Dribbble size={14} className="text-gray-500" />
                 </div>
                 <select 
@@ -369,7 +376,7 @@ export default function FindProfessionals() {
 
               {/* Role Filter */}
               <div className="flex-1 relative border-t sm:border-t-0 border-white/5 flex items-center group xl:border-r">
-                <div className="absolute left-3 p-1.5 bg-white/5 rounded-lg pointer-events-none hidden sm:block">
+                <div className="absolute left-4 pointer-events-none hidden sm:block">
                   <Filter size={14} className="text-gray-500" />
                 </div>
                 <select 
@@ -388,7 +395,7 @@ export default function FindProfessionals() {
             <div className="flex flex-col sm:flex-row flex-[3] xl:flex-[2.4]">
               {/* State Filter */}
               <div className="flex-1 relative sm:border-r border-t xl:border-t-0 border-white/5 flex items-center group">
-                <div className="absolute left-3 p-1.5 bg-white/5 rounded-lg pointer-events-none hidden sm:block">
+                <div className="absolute left-4 pointer-events-none hidden sm:block">
                   <MapPin size={14} className="text-gray-500" />
                 </div>
                 <select
@@ -406,7 +413,7 @@ export default function FindProfessionals() {
 
               {/* City Filter */}
               <div className="flex-1 relative border-t xl:border-t-0 sm:border-t-0 border-white/5 flex items-center group">
-                <div className="absolute left-3 p-1.5 bg-white/5 rounded-lg pointer-events-none hidden sm:block">
+                <div className="absolute left-4 pointer-events-none hidden sm:block">
                   <MapPin size={14} className="text-gray-500" />
                 </div>
                 <select

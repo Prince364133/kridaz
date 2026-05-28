@@ -336,9 +336,9 @@ const ChatWindow = ({ chat, onBack, onSelectChat }) => {
  }
  }}
  >
- <div className="w-10 h-10 rounded-full border border-white/20 overflow-hidden bg-[#55DEE8]/10 flex items-center justify-center">
+ <div className="w-10 h-10 rounded-full border border-white/20 overflow-hidden bg-[#BFF367]/10 flex items-center justify-center">
  {chat.isGroupChat ? (
- <svg className="w-5 h-5 text-[#55DEE8]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+ <svg className="w-5 h-5 text-[#BFF367]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
  </svg>
  ) : (
@@ -358,7 +358,7 @@ const ChatWindow = ({ chat, onBack, onSelectChat }) => {
  className="w-full h-full flex items-center justify-center"
  style={{ display: imageUrl ? 'none' : 'flex' }}
  >
- <span className="text-[#55DEE8] font-black text-xs">
+ <span className="text-[#BFF367] font-black text-xs">
  {otherUserObj?.name ? otherUserObj.name.split(" ").map(w => w[0]).join("").toUpperCase().slice(0, 2) : "U"}
  </span>
  </div>
@@ -382,7 +382,7 @@ const ChatWindow = ({ chat, onBack, onSelectChat }) => {
  }}
  >
  <h3 className="text-white font-bold text-sm truncate hover:underline">{getChatName()}</h3>
- <p className={`text-[11px] transition-colors ${ showTypingIndicator ? 'text-[#55DEE8] font-medium' : otherOnline ? 'text-green-400' : 'text-white/40' }`}>
+ <p className={`text-[11px] transition-colors ${ showTypingIndicator ? 'text-[#BFF367] font-medium' : otherOnline ? 'text-green-400' : 'text-white/40' }`}>
  {showTypingIndicator ? 'typing...' : getStatusText()}
  </p>
  </div>
@@ -392,7 +392,7 @@ const ChatWindow = ({ chat, onBack, onSelectChat }) => {
  {chat.isCommunity && !isSelectionMode && (
  <button 
  onClick={() => setIsAddGroupToCommunityOpen(true)}
- className="flex items-center gap-2 px-3 py-1.5 bg-[#55DEE8]/10 text-[#55DEE8] hover:bg-[#55DEE8] hover:text-black rounded-[6px] transition-all text-[11px] font-black uppercase tracking-wider shadow-sm"
+ className="flex items-center gap-2 px-3 py-1.5 bg-[#BFF367]/10 text-[#BFF367] hover:bg-[#BFF367] hover:text-black rounded-[6px] transition-all text-[11px] font-black uppercase tracking-wider shadow-sm"
  >
  <Plus size={14} />
  <span>Add Group</span>
@@ -458,7 +458,7 @@ const ChatWindow = ({ chat, onBack, onSelectChat }) => {
  setIsDropdownOpen(false);
  setIsAddGroupToCommunityOpen(true);
  }}
- className="w-full text-left px-4 py-2 text-sm text-[#55DEE8] hover:bg-white/[0.05] transition-colors"
+ className="w-full text-left px-4 py-2 text-sm text-[#BFF367] hover:bg-white/[0.05] transition-colors"
  >
  Add group to community
  </button>
@@ -555,7 +555,7 @@ const ChatWindow = ({ chat, onBack, onSelectChat }) => {
 
  {/* Contextual Action Bar for Selection Mode */}
  {isSelectionMode && (
- <div className="absolute top-0 left-0 right-0 h-[68px] bg-[#55DEE8] z-20 flex items-center justify-between px-4 shadow-lg animate-fade-in">
+ <div className="absolute top-0 left-0 right-0 h-[68px] bg-[#BFF367] z-20 flex items-center justify-between px-4 shadow-lg animate-fade-in">
  <div className="flex items-center gap-4">
  <button 
  onClick={() => {
@@ -583,7 +583,7 @@ const ChatWindow = ({ chat, onBack, onSelectChat }) => {
  {/* Inline Search Bar */}
  {isSearchOpen && (
  <div className="bg-[#111111] px-4 py-2 border-b border-white/10 flex items-center gap-3 shadow-md z-10 animate-fade-in relative">
- <div className="flex-1 bg-white/[0.05] rounded-lg flex items-center px-3 border border-white/10 focus-within:border-[#55DEE8]/40 transition-colors">
+ <div className="flex-1 bg-white/[0.05] rounded-lg flex items-center px-3 border border-white/10 focus-within:border-[#BFF367]/40 transition-colors">
  <svg className="w-4 h-4 text-white/40" fill="none" stroke="currentColor" viewBox="0 0 24 24">
  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
  </svg>
@@ -618,7 +618,7 @@ const ChatWindow = ({ chat, onBack, onSelectChat }) => {
  {/* Scrollable Messages Content */}
  <div className="absolute inset-0 overflow-y-auto overflow-x-hidden custom-scrollbar z-0 flex flex-col px-4 py-4 space-y-1">
  {isLoading ? (
- <div className="flex justify-center py-10"><div className="animate-spin rounded-full h-8 w-8 border-t-2 border-[#55DEE8]"></div></div>
+ <div className="flex justify-center py-10"><div className="animate-spin rounded-full h-8 w-8 border-t-2 border-[#BFF367]"></div></div>
  ) : (
  (() => {
  const filteredMessages = messageSearchQuery.trim()
@@ -646,8 +646,8 @@ const ChatWindow = ({ chat, onBack, onSelectChat }) => {
  <div className="flex-1 flex flex-col px-6 pt-5 pb-8 animate-fade-in">
  {/* Dashboard Header */}
  <div className="flex flex-col items-center text-center mb-10">
- <div className="w-24 h-24 rounded-[8px] bg-[#55DEE8]/10 flex items-center justify-center mb-4 border border-[#55DEE8]/20 shadow-[0_0_40px_-10px_rgba(85,222,232,0.2)]">
- <Globe size={48} className="text-[#55DEE8]" />
+ <div className="w-24 h-24 rounded-[8px] bg-[#BFF367]/10 flex items-center justify-center mb-4 border border-[#BFF367]/20 shadow-[0_0_40px_-10px_rgba(85,222,232,0.2)]">
+ <Globe size={48} className="text-[#BFF367]" />
  </div>
  <h2 className="text-xl font-black text-white uppercase tracking-tight">{chat.chatName}</h2>
  <p className="community-copy text-white/40 mt-1.5 max-w-md">{chat.description || "Welcome to our community! Add groups below to get started."}</p>
@@ -656,7 +656,7 @@ const ChatWindow = ({ chat, onBack, onSelectChat }) => {
  {/* Groups Section */}
  <div className="max-w-2xl mx-auto w-full space-y-3">
  <div className="flex items-center justify-between px-2">
- <h3 className="text-[10px] font-black text-[#55DEE8] uppercase">Groups in this community</h3>
+ <h3 className="text-[10px] font-black text-[#BFF367] uppercase">Groups in this community</h3>
  <span className="text-[10px] font-black text-white/20 uppercase tracking-[0.2em]">{childGroups.length} Groups</span>
  </div>
 
@@ -664,9 +664,9 @@ const ChatWindow = ({ chat, onBack, onSelectChat }) => {
  {/* Add Group Action */}
  <button 
  onClick={() => setIsAddGroupToCommunityOpen(true)}
- className="w-full flex items-center gap-4 p-4 bg-white/[0.03] border border-white/5 rounded-[8px] hover:bg-[#55DEE8]/10 hover:border-[#55DEE8]/30 transition-all group"
+ className="w-full flex items-center gap-4 p-4 bg-white/[0.03] border border-white/5 rounded-[8px] hover:bg-[#BFF367]/10 hover:border-[#BFF367]/30 transition-all group"
  >
- <div className="w-12 h-12 rounded-[8px] bg-[#55DEE8] text-black flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform">
+ <div className="w-12 h-12 rounded-[8px] bg-[#BFF367] text-black flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform">
  <Plus size={24} />
  </div>
  <div className="text-left">
@@ -682,12 +682,12 @@ const ChatWindow = ({ chat, onBack, onSelectChat }) => {
  className="w-full flex items-center gap-4 p-4 bg-white/[0.03] border border-white/5 rounded-[8px] hover:bg-white/[0.05] transition-all"
  >
  <div className="w-12 h-12 rounded-[8px] bg-white/5 flex items-center justify-center">
- <MessageSquare size={20} className="text-[#55DEE8]" />
+ <MessageSquare size={20} className="text-[#BFF367]" />
  </div>
  <div className="text-left flex-1">
  <div className="flex justify-between">
  <p className="chat-heading text-white font-bold text-sm">Announcements</p>
- <span className="text-[10px] bg-[#55DEE8]/20 text-[#55DEE8] px-2 py-0.5 rounded font-black uppercase">System</span>
+ <span className="text-[10px] bg-[#BFF367]/20 text-[#BFF367] px-2 py-0.5 rounded font-black uppercase">System</span>
  </div>
  <p className="community-copy text-white/40 mt-0.5">Only admins can post messages here</p>
  </div>
@@ -695,12 +695,12 @@ const ChatWindow = ({ chat, onBack, onSelectChat }) => {
  ) : (
  <div className="w-full flex items-center gap-4 p-4 bg-white/[0.03] border border-white/5 rounded-[8px] cursor-default opacity-80">
  <div className="w-12 h-12 rounded-[8px] bg-white/5 flex items-center justify-center">
- <MessageSquare size={20} className="text-[#55DEE8]" />
+ <MessageSquare size={20} className="text-[#BFF367]" />
  </div>
  <div className="text-left flex-1">
  <div className="flex justify-between">
  <p className="chat-heading text-white font-bold text-sm">Announcements</p>
- <span className="text-[10px] bg-[#55DEE8]/20 text-[#55DEE8] px-2 py-0.5 rounded font-black uppercase">System</span>
+ <span className="text-[10px] bg-[#BFF367]/20 text-[#BFF367] px-2 py-0.5 rounded font-black uppercase">System</span>
  </div>
  <p className="community-copy text-white/40 mt-0.5">Only admins can post messages here</p>
  </div>
@@ -734,7 +734,7 @@ const ChatWindow = ({ chat, onBack, onSelectChat }) => {
  {/* Community Members Section */}
  <div className="max-w-2xl mx-auto w-full pt-7 pb-16 space-y-4">
  <div className="flex items-center justify-between px-2">
- <h3 className="text-[10px] font-black text-[#55DEE8] uppercase">Community Members</h3>
+ <h3 className="text-[10px] font-black text-[#BFF367] uppercase">Community Members</h3>
  <span className="text-[10px] font-black text-white/20 uppercase tracking-[0.2em]">{chat.users?.length || 0} Members</span>
  </div>
  
@@ -757,7 +757,7 @@ const ChatWindow = ({ chat, onBack, onSelectChat }) => {
  <div className="flex items-center gap-2">
  <p className="chat-subheading text-white/30 truncate">@{member.username || "user"}</p>
  {isMemberAdmin && (
- <span className="text-[8px] bg-[#55DEE8]/20 text-[#55DEE8] px-1.5 py-0.5 rounded font-black uppercase tracking-wider">Admin</span>
+ <span className="text-[8px] bg-[#BFF367]/20 text-[#BFF367] px-1.5 py-0.5 rounded font-black uppercase tracking-wider">Admin</span>
  )}
  </div>
  </div>
@@ -842,7 +842,7 @@ const ChatWindow = ({ chat, onBack, onSelectChat }) => {
  <div className="flex items-start group">
  {/* Receiver Tail */}
  {!isMine && !isSameDirection && (
- <div className="absolute top-0 -left-1.5 text-[#55DEE8]/20">
+ <div className="absolute top-0 -left-1.5 text-[#BFF367]/20">
  <svg viewBox="0 0 8 13" width="8" height="13" fill="currentColor">
  <path d="M2.812 1H8v11.193L1.533 3.568C.474 2.156 1.042 1 2.812 1z" />
  </svg>
@@ -850,19 +850,19 @@ const ChatWindow = ({ chat, onBack, onSelectChat }) => {
  )}
  
  {/* Message Bubble */}
- <div className={`relative px-3 py-1.5 shadow-md border bg-[#55DEE8]/10 border-[#55DEE8]/30 text-[#55DEE8] rounded-[8px] ${ isMine ? (!isSameDirection ? 'rounded-tr-none' : '') : (!isSameDirection ? 'rounded-tl-none' : '') }`}>
+ <div className={`relative px-3 py-1.5 shadow-md border bg-[#BFF367]/10 border-[#BFF367]/30 text-[#BFF367] rounded-[8px] ${ isMine ? (!isSameDirection ? 'rounded-tr-none' : '') : (!isSameDirection ? 'rounded-tl-none' : '') }`}>
  <p className="text-[14.2px] leading-[19px] break-words whitespace-pre-wrap">{m.content}</p>
- <div className="flex items-center justify-end gap-1 mt-1 -mb-1 float-right ml-4 text-[#55DEE8]/60">
+ <div className="flex items-center justify-end gap-1 mt-1 -mb-1 float-right ml-4 text-[#BFF367]/60">
  <span className="text-[11px]">
  {new Date(m.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
  </span>
  {isMine && (
  m.isOptimistic ? (
- <svg className="w-3 h-3 text-[#55DEE8]/60" viewBox="0 0 24 24" fill="none">
+ <svg className="w-3 h-3 text-[#BFF367]/60" viewBox="0 0 24 24" fill="none">
  <path d="M5 13l4 4L19 7" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
  </svg>
  ) : (
- <svg className={`w-4 h-[11px] ${isRead ? 'text-[#34B7F1]' : 'text-[#55DEE8]/60'}`} viewBox="0 0 20 12" fill="none">
+ <svg className={`w-4 h-[11px] ${isRead ? 'text-[#34B7F1]' : 'text-[#BFF367]/60'}`} viewBox="0 0 20 12" fill="none">
  <path d="M1 6l4 4L13 2" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
  <path d="M7 6l4 4L19 2" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" opacity={isRead ? "1" : "0.6"}/>
  </svg>
@@ -873,7 +873,7 @@ const ChatWindow = ({ chat, onBack, onSelectChat }) => {
 
  {/* Sender Tail */}
  {isMine && !isSameDirection && (
- <div className="absolute top-0 -right-1.5 text-[#55DEE8]/20">
+ <div className="absolute top-0 -right-1.5 text-[#BFF367]/20">
  <svg viewBox="0 0 8 13" width="8" height="13" fill="currentColor">
  <path d="M5.188 1H0v11.193l6.467-8.625C7.526 2.156 6.958 1 5.188 1z" />
  </svg>
@@ -884,7 +884,7 @@ const ChatWindow = ({ chat, onBack, onSelectChat }) => {
 
  {/* Selection Checkbox for Sent Messages */}
  {isSelectionMode && isMine && (
- <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center shrink-0 cursor-pointer transition-colors ${ selectedMessages.includes(m._id) ? 'bg-[#55DEE8] border-[#55DEE8]' : 'border-white/30' }`}>
+ <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center shrink-0 cursor-pointer transition-colors ${ selectedMessages.includes(m._id) ? 'bg-[#BFF367] border-[#BFF367]' : 'border-white/30' }`}>
  {selectedMessages.includes(m._id) && <svg className="w-3 h-3 text-black" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>}
  </div>
  )}
@@ -953,7 +953,7 @@ const ChatWindow = ({ chat, onBack, onSelectChat }) => {
 
     return canMessage ? (
       <form onSubmit={handleSendMessage} className="p-3 bg-black/60 border-t border-white/10 z-10 relative">
-        <div className="flex items-center gap-2 bg-white/[0.04] border border-white/10 rounded-[8px] px-4 py-1 focus-within:border-[#55DEE8]/40 transition-all">
+        <div className="flex items-center gap-2 bg-white/[0.04] border border-white/10 rounded-[8px] px-4 py-1 focus-within:border-[#BFF367]/40 transition-all">
           <input
             type="text"
             value={message}
@@ -964,7 +964,7 @@ const ChatWindow = ({ chat, onBack, onSelectChat }) => {
           <button
             type="submit"
             disabled={!message.trim()}
-            className="p-2 bg-[#55DEE8] text-black rounded-[8px] hover:scale-105 active:scale-95 transition-all disabled:opacity-30 disabled:scale-100 disabled:bg-white/10 disabled:text-white/30"
+            className="p-2 bg-[#BFF367] text-black rounded-[8px] hover:scale-105 active:scale-95 transition-all disabled:opacity-30 disabled:scale-100 disabled:bg-white/10 disabled:text-white/30"
           >
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
@@ -974,7 +974,7 @@ const ChatWindow = ({ chat, onBack, onSelectChat }) => {
       </form>
     ) : (
       <div className="p-6 bg-black/60 border-t border-white/10 text-center relative z-10">
-        <p className="text-xs text-[#55DEE8]/60 font-bold uppercase tracking-widest">
+        <p className="text-xs text-[#BFF367]/60 font-bold uppercase tracking-widest">
           Only admins can send messages to this group
         </p>
       </div>
@@ -1019,7 +1019,7 @@ const ChatWindow = ({ chat, onBack, onSelectChat }) => {
  console.error(err);
  }
  }}
- className="w-full py-3 bg-[#55DEE8] text-black font-bold rounded-[8px] hover:scale-[1.02] active:scale-[0.98] transition-all"
+ className="w-full py-3 bg-[#BFF367] text-black font-bold rounded-[8px] hover:scale-[1.02] active:scale-[0.98] transition-all"
  >
  Delete for everyone
  </button>

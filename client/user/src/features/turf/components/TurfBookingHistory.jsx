@@ -172,35 +172,49 @@ const TurfBookingHistory = () => {
   if (loading) return <TurfBookingHistorySkeleton />;
 
   return (
-    <div className="max-w-7xl mx-auto px-6 py-8">
+    <div className="max-w-7xl mx-auto px-6 py-8 booking-history-container" style={{ fontFamily: "'Open Sans'" }}>
+      <style>{`
+        .booking-history-container h1,
+        .booking-history-container h2,
+        .booking-history-container h3,
+        .booking-history-container h4,
+        .booking-history-container h5,
+        .booking-history-container h6,
+        .booking-history-container p,
+        .booking-history-container span,
+        .booking-history-container div,
+        .booking-history-container button,
+        .booking-history-container a {
+          font-family: 'Open Sans' !important;
+        }
+      `}</style>
       <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
         
         {/* Header and Sub-Tabs */}
-        <div className="flex flex-col md:flex-row md:items-center justify-between mb-8 pb-6 border-b border-white/10 gap-4">
-          <div>
-            <h1 className="text-3xl font-black uppercase tracking-tight text-white flex items-center gap-3">
-              <Calendar className="w-8 h-8 text-[#CCFF00]" />
+        <div className="flex flex-col xl:flex-row xl:items-center justify-between mb-8 pb-6 border-b border-white/10 gap-6">
+          <div className="min-w-0">
+            <h2 className="text-sm sm:text-lg md:text-xl lg:text-2xl font-black uppercase tracking-tighter text-white whitespace-nowrap" style={{ fontFamily: "'Open Sans'" }}>
               Booking & Game History
-            </h1>
-            <p className="text-xs font-bold text-gray-500 uppercase tracking-widest mt-1">Manage your turf reservations, joined matches, and hired professionals</p>
+            </h2>
+            <p className="text-[10px] sm:text-xs md:text-sm font-light text-gray-500 uppercase tracking-widest mt-1" style={{ fontFamily: "'Open Sans'", fontWeight: 300 }}>Manage your turf reservations, joined matches, and hired professionals</p>
           </div>
           
-          <div className="flex flex-wrap gap-2">
+          <div className="flex flex-nowrap overflow-x-auto scrollbar-hide gap-2 pb-1 max-w-full shrink-0">
             <button 
               onClick={() => setBookingSubTab('venues')}
-              className={`px-4 py-2.5 rounded-[6px] font-black uppercase tracking-wider text-[10px] border transition-all ${ bookingSubTab === 'venues' ? 'bg-[#CCFF00] text-black border-[#CCFF00] shadow-[0_4px_12px_rgba(204,255,0,0.2)]' : 'bg-white/5 text-gray-400 border-white/10 hover:text-white hover:bg-white/10' }`}
+              className={`px-3 py-2 shrink-0 rounded-[6px] font-black uppercase tracking-wider text-[9px] sm:text-[10px] border transition-all ${ bookingSubTab === 'venues' ? 'bg-[#CCFF00] text-black border-[#CCFF00] shadow-[0_4px_12px_rgba(204,255,0,0.2)]' : 'bg-white/5 text-gray-400 border-white/10 hover:text-white hover:bg-white/10' }`}
             >
               Venue Bookings
             </button>
             <button 
               onClick={() => setBookingSubTab('games')}
-              className={`px-4 py-2.5 rounded-[6px] font-black uppercase tracking-wider text-[10px] border transition-all ${ bookingSubTab === 'games' ? 'bg-[#CCFF00] text-black border-[#CCFF00] shadow-[0_4px_12px_rgba(204,255,0,0.2)]' : 'bg-white/5 text-gray-400 border-white/10 hover:text-white hover:bg-white/10' }`}
+              className={`px-3 py-2 shrink-0 rounded-[6px] font-black uppercase tracking-wider text-[9px] sm:text-[10px] border transition-all ${ bookingSubTab === 'games' ? 'bg-[#CCFF00] text-black border-[#CCFF00] shadow-[0_4px_12px_rgba(204,255,0,0.2)]' : 'bg-white/5 text-gray-400 border-white/10 hover:text-white hover:bg-white/10' }`}
             >
               Joined Games
             </button>
             <button 
               onClick={() => setBookingSubTab('professionals')}
-              className={`px-4 py-2.5 rounded-[6px] font-black uppercase tracking-wider text-[10px] border transition-all ${ bookingSubTab === 'professionals' ? 'bg-[#CCFF00] text-black border-[#CCFF00] shadow-[0_4px_12px_rgba(204,255,0,0.2)]' : 'bg-white/5 text-gray-400 border-white/10 hover:text-white hover:bg-white/10' }`}
+              className={`px-3 py-2 shrink-0 rounded-[6px] font-black uppercase tracking-wider text-[9px] sm:text-[10px] border transition-all ${ bookingSubTab === 'professionals' ? 'bg-[#CCFF00] text-black border-[#CCFF00] shadow-[0_4px_12px_rgba(204,255,0,0.2)]' : 'bg-white/5 text-gray-400 border-white/10 hover:text-white hover:bg-white/10' }`}
             >
               Hired Professionals
             </button>

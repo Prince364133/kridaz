@@ -271,7 +271,7 @@ const JoinGames = () => {
  return (
  <div className="min-h-screen bg-[#000000] text-white p-6 lg:p-10 pb-24 relative overflow-hidden font-inter">
   {/* Dynamic Background Glow */}
-  <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-[#55DEE8]/5 blur-[150px] pointer-events-none" />
+  <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-[#BFF367]/5 blur-[150px] pointer-events-none" />
   <div className="absolute bottom-0 left-0 w-[500px] h-[500px] bg-[#BFF367]/5 blur-[150px] pointer-events-none" />
 
   <div className="max-w-7xl mx-auto relative z-10">
@@ -280,11 +280,11 @@ const JoinGames = () => {
   <div className="relative w-full lg:w-auto">
   <div className="flex items-center justify-between lg:justify-start gap-4 mb-4 w-full">
     <h1 className="text-4xl md:text-6xl font-black text-white uppercase tracking-tighter leading-none font-open-sans">
-    Join <span className="bg-gradient-to-r from-[#55DEE8] to-[#BFF367] bg-clip-text text-transparent">Games</span>
+    Join <span className="bg-gradient-to-r from-[#BFF367] to-[#BFF367] bg-clip-text text-transparent">Games</span>
     </h1>
     <button 
     onClick={() => gateInteraction(() => navigate('/host-game'))}
-    className="lg:hidden px-4 py-2.5 bg-gradient-to-r from-[#55DEE8] to-[#BFF367] text-black font-black text-[10px] uppercase tracking-widest rounded-[8px] flex items-center gap-2 hover:scale-105 transition-all duration-500 shadow-[0_0_20px_rgba(85,222,232,0.25)] hover:shadow-[0_0_30px_rgba(191,243,103,0.35)] whitespace-nowrap"
+    className="lg:hidden px-4 py-2.5 bg-gradient-to-r from-[#BFF367] to-[#BFF367] text-black font-black text-[10px] uppercase tracking-widest rounded-[8px] flex items-center gap-2 hover:scale-105 transition-all duration-500 shadow-[0_0_20px_rgba(191,243,103,0.25)] hover:shadow-[0_0_30px_rgba(191,243,103,0.35)] whitespace-nowrap"
     >
     <Trophy size={14} /> Host Match
     </button>
@@ -298,7 +298,7 @@ const JoinGames = () => {
   <div className="hidden lg:flex flex-wrap items-center gap-4">
     <button 
     onClick={() => gateInteraction(() => navigate('/host-game'))}
-    className="px-6 py-3.5 bg-gradient-to-r from-[#55DEE8] to-[#BFF367] text-black font-black text-[9px] md:text-[11px] uppercase tracking-widest rounded-[8px] flex items-center gap-2.5 hover:scale-105 transition-all duration-500 shadow-[0_0_30px_rgba(85,222,232,0.25)] hover:shadow-[0_0_40px_rgba(191,243,103,0.35)] whitespace-nowrap"
+    className="px-6 py-3.5 bg-gradient-to-r from-[#BFF367] to-[#BFF367] text-black font-black text-[9px] md:text-[11px] uppercase tracking-widest rounded-[8px] flex items-center gap-2.5 hover:scale-105 transition-all duration-500 shadow-[0_0_30px_rgba(191,243,103,0.25)] hover:shadow-[0_0_40px_rgba(191,243,103,0.35)] whitespace-nowrap"
     >
     <Trophy size={16} /> Host Match
     </button>
@@ -307,10 +307,10 @@ const JoinGames = () => {
 
 
   {/* Search & Filters Container */}
-  <div className="w-full mb-12 flex flex-col md:flex-row md:items-center gap-3 md:gap-0 md:bg-[#0a0a0c]/80 md:backdrop-blur-2xl md:border md:border-white/10 md:rounded-[8px] md:p-1.5 md:shadow-2xl transition-all duration-500 hover:border-[#55DEE8]/30">
+  <div className="w-full mb-12 flex flex-col md:flex-row md:items-center gap-3 md:gap-0 md:bg-[#0a0a0c]/80 md:backdrop-blur-2xl md:border md:border-white/10 md:rounded-[8px] md:p-1.5 md:shadow-2xl transition-all duration-500 hover:border-[#BFF367]/30">
     
     {/* Search Input Container */}
-    <div className="w-full md:w-auto md:flex-[2] relative flex items-center min-h-[56px] md:min-h-full bg-[#0a0a0c]/80 md:bg-transparent backdrop-blur-2xl md:backdrop-blur-none border border-white/10 md:border-none md:border-r md:border-white/5 rounded-[8px] md:rounded-[6px] px-4 py-3 md:py-0 shadow-2xl md:shadow-none transition-all hover:border-[#55DEE8]/30 md:hover:border-transparent">
+    <div className="w-full md:w-auto md:flex-[2] relative flex items-center min-h-[56px] md:min-h-full bg-[#0a0a0c]/80 md:bg-transparent backdrop-blur-2xl md:backdrop-blur-none border border-white/10 md:border-none md:border-r md:border-white/5 rounded-[8px] md:rounded-[6px] px-4 py-3 md:py-0 shadow-2xl md:shadow-none transition-all hover:border-[#BFF367]/30 md:hover:border-transparent">
       <Search className="text-gray-500 mr-3" size={16} />
       <input 
         className="w-full h-full bg-transparent text-white outline-none text-xs font-bold placeholder-gray-500 tracking-wide" 
@@ -322,15 +322,15 @@ const JoinGames = () => {
     </div>
 
     {/* Filters Scrollable Container */}
-    <div className="w-full md:w-auto md:flex-[2.5] flex flex-row items-stretch overflow-x-auto hide-scrollbar bg-[#0a0a0c]/80 md:bg-transparent backdrop-blur-2xl md:backdrop-blur-none border border-white/10 md:border-none rounded-[8px] md:rounded-[8px] min-h-[56px] md:min-h-full shadow-2xl md:shadow-none transition-all hover:border-[#55DEE8]/30 md:hover:border-transparent">
+    <div className="w-full md:w-auto md:flex-[2.5] flex flex-row items-stretch overflow-x-auto hide-scrollbar bg-[#0a0a0c]/80 md:bg-transparent backdrop-blur-2xl md:backdrop-blur-none border border-white/10 md:border-none rounded-[8px] md:rounded-[8px] min-h-[56px] md:min-h-full shadow-2xl md:shadow-none transition-all hover:border-[#BFF367]/30 md:hover:border-transparent">
       
       {/* Sport Filter */}
-      <div className="flex-1 md:w-auto md:flex-[0.6] relative border-r border-white/5 flex items-center group min-h-[56px] md:min-h-full flex-shrink-0 min-w-[80px] md:min-w-[130px]">
-        <div className="absolute left-3 p-1.5 bg-white/5 rounded-lg group-hover:bg-[#55DEE8]/10 transition-colors pointer-events-none hidden sm:block">
-          <Trophy size={14} className="text-gray-500 group-focus-within:text-[#55DEE8]" />
+      <div className="flex-1 md:w-auto md:flex-[0.6] relative border-r border-white/5 flex items-center group min-h-[56px] md:min-h-full flex-shrink-0 min-w-[80px] md:min-w-[150px]">
+        <div className="absolute left-4 pointer-events-none hidden sm:block">
+          <Trophy size={14} className="text-gray-500 group-focus-within:text-[#BFF367]" />
         </div>
         <select 
-          className="w-full h-full bg-transparent appearance-none text-[9px] md:text-[11px] font-bold text-white uppercase tracking-tight pl-2 md:pl-4 sm:pl-11 pr-5 md:pr-8 py-4 outline-none cursor-pointer"
+          className="w-full h-full bg-transparent appearance-none text-[9px] md:text-[11px] font-bold text-white uppercase tracking-tight pl-3 sm:pl-10 pr-8 md:pr-12 py-4 outline-none cursor-pointer"
           value={sportFilter}
           onChange={(e) => {
             setSportFilter(e.target.value);
@@ -345,16 +345,16 @@ const JoinGames = () => {
           <option className="bg-[#0a0a0a] text-white" value="Tennis">Tennis</option>
           <option className="bg-[#0a0a0a] text-white" value="Volleyball">Volleyball</option>
         </select>
-        <ChevronDown size={12} className="absolute right-2 md:right-4 text-gray-500 pointer-events-none group-focus-within:text-[#55DEE8]" />
+        <ChevronDown size={12} className="absolute right-2 md:right-4 text-gray-500 pointer-events-none group-focus-within:text-[#BFF367]" />
       </div>
 
       {/* State Filter */}
-      <div className="flex-1 md:w-auto md:flex-[0.5] relative border-r border-white/5 flex items-center group min-h-[56px] md:min-h-full flex-shrink-0 min-w-[80px] md:min-w-[120px]">
-        <div className="absolute left-3 p-1.5 bg-white/5 rounded-lg group-hover:bg-[#55DEE8]/10 transition-colors pointer-events-none hidden sm:block">
-          <MapPin size={14} className="text-gray-500 group-focus-within:text-[#55DEE8]" />
+      <div className="flex-1 md:w-auto md:flex-[0.5] relative border-r border-white/5 flex items-center group min-h-[56px] md:min-h-full flex-shrink-0 min-w-[80px] md:min-w-[140px]">
+        <div className="absolute left-4 pointer-events-none hidden sm:block">
+          <MapPin size={14} className="text-gray-500 group-focus-within:text-[#BFF367]" />
         </div>
         <select
-          className="w-full h-full bg-transparent appearance-none text-[9px] md:text-[11px] font-bold text-white uppercase tracking-tight pl-2 md:pl-4 sm:pl-11 pr-5 md:pr-8 py-4 outline-none cursor-pointer disabled:text-gray-500 disabled:opacity-100 disabled:cursor-not-allowed"
+          className="w-full h-full bg-transparent appearance-none text-[9px] md:text-[11px] font-bold text-white uppercase tracking-tight pl-3 sm:pl-10 pr-8 md:pr-12 py-4 outline-none cursor-pointer disabled:text-gray-500 disabled:opacity-100 disabled:cursor-not-allowed"
           value={selectedState}
           onChange={(e) => handleStateChange(e.target.value)}
           disabled={loadingStates}
@@ -364,16 +364,16 @@ const JoinGames = () => {
             <option className="bg-[#0a0a0a] text-white" key={s} value={s}>{s}</option>
           ))}
         </select>
-        <ChevronDown size={12} className="absolute right-2 md:right-4 text-gray-500 pointer-events-none group-focus-within:text-[#55DEE8]" />
+        <ChevronDown size={12} className="absolute right-2 md:right-4 text-gray-500 pointer-events-none group-focus-within:text-[#BFF367]" />
       </div>
 
       {/* City Filter */}
-      <div className="flex-1 md:w-auto md:flex-[0.5] relative border-r border-white/5 flex items-center group min-h-[56px] md:min-h-full flex-shrink-0 min-w-[80px] md:min-w-[120px]">
-        <div className="absolute left-3 p-1.5 bg-white/5 rounded-lg group-hover:bg-[#55DEE8]/10 transition-colors pointer-events-none hidden sm:block">
-          <MapPin size={14} className="text-gray-500 group-focus-within:text-[#55DEE8]" />
+      <div className="flex-1 md:w-auto md:flex-[0.5] relative border-r border-white/5 flex items-center group min-h-[56px] md:min-h-full flex-shrink-0 min-w-[80px] md:min-w-[140px]">
+        <div className="absolute left-4 pointer-events-none hidden sm:block">
+          <MapPin size={14} className="text-gray-500 group-focus-within:text-[#BFF367]" />
         </div>
         <select
-          className="w-full h-full bg-transparent appearance-none text-[9px] md:text-[11px] font-bold text-white uppercase tracking-tight pl-2 md:pl-4 sm:pl-11 pr-5 md:pr-8 py-4 outline-none cursor-pointer disabled:text-gray-500 disabled:opacity-100 disabled:cursor-not-allowed"
+          className="w-full h-full bg-transparent appearance-none text-[9px] md:text-[11px] font-bold text-white uppercase tracking-tight pl-3 sm:pl-10 pr-8 md:pr-12 py-4 outline-none cursor-pointer disabled:text-gray-500 disabled:opacity-100 disabled:cursor-not-allowed"
           value={selectedCity}
           onChange={(e) => handleCityChange(e.target.value)}
           disabled={!selectedState || loadingCities}
@@ -383,16 +383,16 @@ const JoinGames = () => {
             <option className="bg-[#0a0a0a] text-white" key={c} value={c}>{c}</option>
           ))}
         </select>
-        <ChevronDown size={12} className="absolute right-2 md:right-4 text-gray-500 pointer-events-none group-focus-within:text-[#55DEE8]" />
+        <ChevronDown size={12} className="absolute right-2 md:right-4 text-gray-500 pointer-events-none group-focus-within:text-[#BFF367]" />
       </div>
 
       {/* Match Type Filter */}
-      <div className="flex-1 md:w-auto md:flex-[0.5] relative border-white/5 flex items-center group min-h-[56px] md:min-h-full flex-shrink-0 min-w-[80px] md:min-w-[130px]">
-        <div className="absolute left-3 p-1.5 bg-white/5 rounded-lg group-hover:bg-[#55DEE8]/10 transition-colors pointer-events-none hidden sm:block">
-          <Zap size={14} className="text-gray-500 group-focus-within:text-[#55DEE8]" />
+      <div className="flex-1 md:w-auto md:flex-[0.5] relative border-white/5 flex items-center group min-h-[56px] md:min-h-full flex-shrink-0 min-w-[80px] md:min-w-[150px]">
+        <div className="absolute left-4 pointer-events-none hidden sm:block">
+          <Zap size={14} className="text-gray-500 group-focus-within:text-[#BFF367]" />
         </div>
         <select
-          className="w-full h-full bg-transparent appearance-none text-[9px] md:text-[11px] font-bold text-white uppercase tracking-tight pl-2 md:pl-4 sm:pl-11 pr-5 md:pr-8 py-4 outline-none cursor-pointer"
+          className="w-full h-full bg-transparent appearance-none text-[9px] md:text-[11px] font-bold text-white uppercase tracking-tight pl-3 sm:pl-10 pr-8 md:pr-12 py-4 outline-none cursor-pointer"
           value={matchTypeFilter}
           onChange={(e) => setMatchTypeFilter(e.target.value)}
         >
@@ -402,7 +402,7 @@ const JoinGames = () => {
           <option className="bg-[#0a0a0a] text-white" value="Quick">Quick Matches</option>
           <option className="bg-[#0a0a0a] text-white" value="Professional">Professional</option>
         </select>
-        <ChevronDown size={12} className="absolute right-2 md:right-4 text-gray-500 pointer-events-none group-focus-within:text-[#55DEE8]" />
+        <ChevronDown size={12} className="absolute right-2 md:right-4 text-gray-500 pointer-events-none group-focus-within:text-[#BFF367]" />
       </div>
     </div>
   </div>
@@ -415,10 +415,10 @@ const JoinGames = () => {
  ))
  ) : filteredGames.length === 0 ? (
  <div className="col-span-full py-32 text-center bg-[#0d0d0d] rounded-[8px] border border-[#2D2D2D] relative overflow-hidden">
- <div className="absolute inset-0 bg-[#55DEE8]/5 blur-[100px]" />
+ <div className="absolute inset-0 bg-[#BFF367]/5 blur-[100px]" />
  <div className="relative z-10 space-y-6">
  <div className="w-24 h-24 bg-white/5 border border-white/5 rounded-full flex items-center justify-center mx-auto shadow-2xl">
- <Info className="text-[#55DEE8]/40" size={48} />
+ <Info className="text-[#BFF367]/40" size={48} />
  </div>
  <div className="space-y-2">
  <h3 className="text-3xl font-black text-white uppercase tracking-tighter font-open-sans">No Active Matches</h3>
@@ -428,7 +428,7 @@ const JoinGames = () => {
  </div>
  <button 
  onClick={() => navigate('/host-game')}
- className="px-10 py-4 bg-gradient-to-r from-[#55DEE8] to-[#BFF367] text-black font-black text-xs uppercase tracking-[0.2em] rounded-full shadow-[0_0_20px_rgba(85,222,232,0.25)] hover:scale-105 transition-all"
+ className="px-10 py-4 bg-gradient-to-r from-[#BFF367] to-[#BFF367] text-black font-black text-xs uppercase tracking-[0.2em] rounded-full shadow-[0_0_20px_rgba(191,243,103,0.25)] hover:scale-105 transition-all"
  >
  Create Match
  </button>
@@ -452,7 +452,7 @@ const JoinGames = () => {
    animate={{ opacity: 1, y: 0 }}
    whileHover={{ y: -6, scale: 1.01 }}
    transition={{ duration: 0.3 }}
-   className="group relative rounded-[8px] overflow-hidden cursor-pointer bg-black border border-white/5 hover:border-[#55DEE8]/30 transition-all duration-500 flex flex-col aspect-square w-full shadow-2xl"
+   className="group relative rounded-[8px] overflow-hidden cursor-pointer bg-black border border-white/5 hover:border-[#BFF367]/30 transition-all duration-500 flex flex-col aspect-square w-full shadow-2xl"
    onClick={() => setSelectedGame(game)}
    >
    {/* ── Background: Split Team Images (Full Height cover with steep 65% slant) ── */}
@@ -492,14 +492,14 @@ const JoinGames = () => {
    {/* Top Row Badging (Transparent Backgrounds) */}
    <div className="flex items-center justify-between w-full bg-transparent">
    {/* Left side: Sport badge */}
-   <div className="px-2 md:px-3 py-0.5 md:py-1 bg-black/40 border border-[#55DEE8]/20 rounded-[6px] backdrop-blur-sm flex items-center gap-1 md:gap-1.5">
-   <Trophy className="w-2.5 h-2.5 md:w-3 md:h-3 text-[#55DEE8]" />
-   <span className="text-[7px] md:text-[10px] font-black text-[#55DEE8] uppercase tracking-wider">{game.gameType}</span>
+   <div className="px-2 md:px-3 py-0.5 md:py-1 bg-black/40 border border-[#BFF367]/20 rounded-[6px] backdrop-blur-sm flex items-center gap-1 md:gap-1.5">
+   <Trophy className="w-2.5 h-2.5 md:w-3 md:h-3 text-[#BFF367]" />
+   <span className="text-[7px] md:text-[10px] font-black text-[#BFF367] uppercase tracking-wider">{game.gameType}</span>
    </div>
 
    {/* Right side: Ticket Price badge */}
    <div className="px-2 md:px-3 py-0.5 md:py-1 bg-black/40 border border-white/10 rounded-[6px] backdrop-blur-sm flex items-center gap-1 md:gap-1.5">
-   <Coins className="w-2.5 h-2.5 md:w-3 md:h-3 text-[#55DEE8]" />
+   <Coins className="w-2.5 h-2.5 md:w-3 md:h-3 text-[#BFF367]" />
    <span className="text-[7px] md:text-[10px] font-black text-white uppercase tracking-wider">{game.perPlayerCharge || 'FREE'}</span>
    </div>
    </div>
@@ -509,7 +509,7 @@ const JoinGames = () => {
    {/* Main Match Title */}
    <h3 className="text-[11px] md:text-[16px] font-black uppercase leading-tight tracking-tight text-white font-open-sans px-2 drop-shadow-[0_2px_8px_rgba(0,0,0,0.9)]">
    {game.gameMode === 'QUICK' ? (
-   <>Casual <span className="text-[#55DEE8]">{game.gameType}</span> Match</>
+   <>Casual <span className="text-[#BFF367]">{game.gameType}</span> Match</>
    ) : (
    <span className="flex items-center justify-center flex-wrap gap-x-1.5 md:gap-x-2">
    <span>{game.teams?.teamA?.name}</span>
@@ -530,7 +530,7 @@ const JoinGames = () => {
    setSelectedGame(game);
    }
    }}
-   className={`px-6 py-1.5 rounded-[6px] font-black text-[9px] uppercase tracking-wider transition-all duration-300 flex items-center justify-center gap-1 backdrop-blur-sm bg-transparent ${ game.isLive || game.scoringStatus === 'IN_PROGRESS' ? 'border border-red-500/30 text-red-400 hover:bg-red-500/10 hover:border-red-500/50 hover:text-white shadow-[0_0_15px_rgba(239,68,68,0.1)]' : 'border border-white/10 text-white hover:bg-[#55DEE8]/10 hover:border-[#55DEE8]/40 hover:text-[#55DEE8] hover:shadow-[0_0_15px_rgba(85,222,232,0.15)]' }`}
+   className={`px-6 py-1.5 rounded-[6px] font-black text-[9px] uppercase tracking-wider transition-all duration-300 flex items-center justify-center gap-1 backdrop-blur-sm bg-transparent ${ game.isLive || game.scoringStatus === 'IN_PROGRESS' ? 'border border-red-500/30 text-red-400 hover:bg-red-500/10 hover:border-red-500/50 hover:text-white shadow-[0_0_15px_rgba(239,68,68,0.1)]' : 'border border-white/10 text-white hover:bg-[#BFF367]/10 hover:border-[#BFF367]/40 hover:text-[#BFF367] hover:shadow-[0_0_15px_rgba(191,243,103,0.15)]' }`}
    >
    {game.isLive || game.scoringStatus === 'IN_PROGRESS' ? 'WATCH' : 'JOIN'} <ChevronRight size={9} strokeWidth={3} />
    </button>
@@ -543,7 +543,7 @@ const JoinGames = () => {
    <div className="grid grid-cols-2 bg-transparent">
    {/* Date & Time */}
    <div className="flex items-center gap-1 md:gap-2 pr-1 md:pr-2 bg-transparent justify-center">
-   <Calendar className="w-3 h-3 md:w-4 md:h-4 text-[#55DEE8] shrink-0" />
+   <Calendar className="w-3 h-3 md:w-4 md:h-4 text-[#BFF367] shrink-0" />
    <div className="flex flex-col min-w-0 bg-transparent text-left">
    <span className="text-[6px] md:text-[8px] font-bold text-white/40 uppercase tracking-wider">DATE & TIME</span>
    <span className="text-[8px] md:text-[10px] font-black text-white mt-0.5 truncate">
@@ -554,7 +554,7 @@ const JoinGames = () => {
 
    {/* Capacity */}
    <div className="flex items-center gap-1 md:gap-2 pl-1 md:pl-2 bg-transparent justify-center">
-   <Users className="w-3 h-3 md:w-4 md:h-4 text-[#55DEE8] shrink-0" />
+   <Users className="w-3 h-3 md:w-4 md:h-4 text-[#BFF367] shrink-0" />
    <div className="flex flex-col min-w-0 bg-transparent text-left">
    <span className="text-[6px] md:text-[8px] font-bold text-white/40 uppercase tracking-wider">CAPACITY</span>
    <div className="flex items-center gap-1 mt-0.5 bg-transparent">
@@ -567,11 +567,11 @@ const JoinGames = () => {
    return (
    <div 
    key={idx} 
-   className={`w-1.5 h-1.5 rounded-full ${ isFilled ? 'bg-[#55DEE8]' : 'border border-[#55DEE8] bg-transparent' }`} 
+   className={`w-1.5 h-1.5 rounded-full ${ isFilled ? 'bg-[#BFF367]' : 'border border-[#BFF367] bg-transparent' }`} 
    />
    );
    })}
-   {totalCapacity > 5 && <span className="text-[8px] font-bold text-[#55DEE8]/60 ml-0.5 bg-transparent">+</span>}
+   {totalCapacity > 5 && <span className="text-[8px] font-bold text-[#BFF367]/60 ml-0.5 bg-transparent">+</span>}
    </div>
    </div>
    </div>
@@ -627,13 +627,13 @@ const JoinGames = () => {
   >
   <div className="sticky top-0 z-20 bg-[#060608]/90 backdrop-blur-xl border-b border-white/[0.06] px-8 py-5 flex items-center justify-between">
   <div className="flex items-center gap-3 flex-wrap">
-  <div className="px-4 py-1.5 bg-gradient-to-r from-[#55DEE8] to-[#BFF367] text-black text-[10px] font-black uppercase tracking-wider rounded-full font-open-sans">
+  <div className="px-4 py-1.5 bg-gradient-to-r from-[#BFF367] to-[#BFF367] text-black text-[10px] font-black uppercase tracking-wider rounded-full font-open-sans">
   {selectedGame.gameType} Elite
   </div>
   {selectedGame.shortId && (
   <button
   onClick={() => { navigator.clipboard?.writeText(selectedGame.shortId); toast.success('Game ID copied!'); }}
-  className="px-3 py-1.5 bg-white/5 border border-white/10 hover:border-[#55DEE8]/40 text-[#55DEE8] rounded-[6px] flex items-center gap-1.5 transition-all"
+  className="px-3 py-1.5 bg-white/5 border border-white/10 hover:border-[#BFF367]/40 text-[#BFF367] rounded-[6px] flex items-center gap-1.5 transition-all"
   >
   <Info size={11} />
   <span className="font-inter text-[10px] font-bold uppercase tracking-widest">ID: {selectedGame.shortId}</span>
@@ -643,7 +643,7 @@ const JoinGames = () => {
   </div>
   <button
   onClick={() => setSelectedGame(null)}
-  className="w-8 h-8 rounded-full border border-white/10 hover:border-[#55DEE8]/40 flex items-center justify-center text-white/50 hover:text-white hover:bg-[#55DEE8]/10 transition-all duration-300"
+  className="w-8 h-8 rounded-full border border-white/10 hover:border-[#BFF367]/40 flex items-center justify-center text-white/50 hover:text-white hover:bg-[#BFF367]/10 transition-all duration-300"
   >✕</button>
   </div>
 
@@ -660,7 +660,7 @@ const JoinGames = () => {
   <div key={i} className="flex items-center">
   <div className="px-4 py-1 text-center">
   <span className="text-[9px] text-white/30 uppercase tracking-widest block mb-0.5">{stat.label}</span>
-  <span className={`text-[13px] font-black uppercase ${stat.label === 'Fee' && stat.value === 'Free' ? 'bg-gradient-to-r from-[#55DEE8] to-[#BFF367] bg-clip-text text-transparent' : 'text-white'}`}>
+  <span className={`text-[13px] font-black uppercase ${stat.label === 'Fee' && stat.value === 'Free' ? 'bg-gradient-to-r from-[#BFF367] to-[#BFF367] bg-clip-text text-transparent' : 'text-white'}`}>
   {stat.value}
   </span>
   </div>
@@ -674,7 +674,7 @@ const JoinGames = () => {
   <div className="space-y-4">
   <div className="flex items-center justify-between pb-2 border-b border-white/[0.08]">
   <h3 className="font-open-sans text-base font-black text-white uppercase tracking-tight">Casual Match Pool</h3>
-  <span className="font-inter text-[9px] md:text-[11px] font-bold bg-gradient-to-r from-[#55DEE8] to-[#BFF367] bg-clip-text text-transparent border border-white/10 px-2.5 py-0.5 rounded-[8px]">
+  <span className="font-inter text-[9px] md:text-[11px] font-bold bg-gradient-to-r from-[#BFF367] to-[#BFF367] bg-clip-text text-transparent border border-white/10 px-2.5 py-0.5 rounded-[8px]">
   {selectedGame.quickSlots.filter(s => s.status !== 'OPEN').length}/{selectedGame.quickSlots.length}
   </span>
   </div>
@@ -697,14 +697,14 @@ const JoinGames = () => {
   setJoiningSlot({ team: 'QUICK', index: sIdx, role: slot.role });
   setShowConfirm(true);
   }}
-  className={`relative w-12 h-12 rounded-full border-2 flex items-center justify-center transition-all duration-300 bg-black ${ isJoined ? 'border-white/15 cursor-not-allowed' : 'border-white/10 hover:border-[#55DEE8] hover:shadow-[0_0_12px_rgba(85,222,232,0.35)]' }`}>
+  className={`relative w-12 h-12 rounded-full border-2 flex items-center justify-center transition-all duration-300 bg-black ${ isJoined ? 'border-white/15 cursor-not-allowed' : 'border-white/10 hover:border-[#BFF367] hover:shadow-[0_0_12px_rgba(191,243,103,0.35)]' }`}>
   {isJoined ? (
   slot.user?.profilePicture
   ? <img src={slot.user.profilePicture} alt="" className="w-full h-full rounded-full object-cover" />
   : <div className="w-full h-full rounded-full flex items-center justify-center font-inter text-[9px] md:text-[11px] font-bold text-white">{(slot.user?.name || slot.customPlayer?.name)?.[0]?.toUpperCase() || 'P'}</div>
   ) : <span className="text-white/25 text-lg font-bold">+</span>}
   <div className="absolute -bottom-0.5 -right-0.5 w-4 h-4 rounded-full bg-[#08080a] border border-white/10 flex items-center justify-center">
-  <RoleIcon size={8} className="text-[#55DEE8]" />
+  <RoleIcon size={8} className="text-[#BFF367]" />
   </div>
   </button>
   <span className="font-inter text-[8px] text-white/40 uppercase tracking-wide text-center truncate w-full">
@@ -721,7 +721,7 @@ const JoinGames = () => {
   <div key={teamKey} className="space-y-3">
   <div className="flex items-center justify-between pb-2 border-b border-white/[0.08]">
   <h3 className="font-open-sans text-base font-black text-white uppercase tracking-tight">{selectedGame.teams[teamKey].name}</h3>
-  <span className="font-inter text-[9px] md:text-[11px] font-bold bg-gradient-to-r from-[#55DEE8] to-[#BFF367] bg-clip-text text-transparent border border-white/10 px-2.5 py-0.5 rounded-[8px]">
+  <span className="font-inter text-[9px] md:text-[11px] font-bold bg-gradient-to-r from-[#BFF367] to-[#BFF367] bg-clip-text text-transparent border border-white/10 px-2.5 py-0.5 rounded-[8px]">
   {selectedGame.teams[teamKey].slots.filter(s => s.status !== 'OPEN').length}/{selectedGame.teams[teamKey].slots.length}
   </span>
   </div>
@@ -745,14 +745,14 @@ const JoinGames = () => {
   setJoiningSlot({ team: teamKey === 'teamA' ? 'A' : 'B', index: sIdx, role: slot.role });
   setShowConfirm(true);
   }}
-  className={`relative w-12 h-12 rounded-full border-2 flex items-center justify-center transition-all duration-300 bg-black ${ isJoined ? 'border-white/15 cursor-not-allowed' : 'border-white/10 hover:border-[#55DEE8] hover:shadow-[0_0_12px_rgba(85,222,232,0.35)]' }`}>
+  className={`relative w-12 h-12 rounded-full border-2 flex items-center justify-center transition-all duration-300 bg-black ${ isJoined ? 'border-white/15 cursor-not-allowed' : 'border-white/10 hover:border-[#BFF367] hover:shadow-[0_0_12px_rgba(191,243,103,0.35)]' }`}>
   {isJoined ? (
   slot.user?.profilePicture
   ? <img src={slot.user.profilePicture} alt="" className="w-full h-full rounded-full object-cover" />
   : <div className="w-full h-full rounded-full flex items-center justify-center font-inter text-[10px] font-bold text-white">{(slot.user?.name || slot.customPlayer?.name)?.[0]?.toUpperCase() || 'P'}</div>
   ) : <span className="text-white/25 text-base font-bold">+</span>}
   <div className="absolute -bottom-0.5 -right-0.5 w-4 h-4 rounded-full bg-[#08080a] border border-white/10 flex items-center justify-center">
-  <RoleIcon size={8} className="text-[#55DEE8]" />
+  <RoleIcon size={8} className="text-[#BFF367]" />
   </div>
   </button>
   <span className="font-inter text-[8px] text-white/40 uppercase tracking-wide text-center truncate w-full">
@@ -769,7 +769,7 @@ const JoinGames = () => {
 
   {/* Bottom hint */}
   <div className="flex items-center justify-center gap-1.5 pt-6 mt-8 border-t border-white/[0.06]">
-  <Info size={11} className="text-[#55DEE8]" />
+  <Info size={11} className="text-[#BFF367]" />
   <span className="font-inter text-[9px] text-white/30 uppercase tracking-widest">Tap an available slot to join</span>
   </div>
   </div>
@@ -790,12 +790,12 @@ const JoinGames = () => {
   exit={{ scale: 0.9, opacity: 0, y: 20 }}
   className="relative bg-[#000000] border border-[#2D2D2D] p-10 rounded-[8px] max-w-md w-full text-center shadow-2xl"
   >
-  <div className="w-20 h-20 bg-[#55DEE8]/10 border border-[#55DEE8]/20 rounded-full flex items-center justify-center mx-auto mb-8 shadow-[0_0_30px_rgba(85,222,232,0.1)]">
-  <Coins size={40} className="text-[#55DEE8]" />
+  <div className="w-20 h-20 bg-[#BFF367]/10 border border-[#BFF367]/20 rounded-full flex items-center justify-center mx-auto mb-8 shadow-[0_0_30px_rgba(191,243,103,0.1)]">
+  <Coins size={40} className="text-[#BFF367]" />
   </div>
   <h2 className="text-3xl font-black text-white uppercase tracking-tighter leading-none mb-4 font-open-sans">Join Protocol</h2>
   <p className="text-[#999999] mb-10 text-sm leading-relaxed">
-  Participation requires <span className="text-[#55DEE8] font-black">{selectedGame?.perPlayerCharge || 0} Coins</span>. These will be securely escrowed until match confirmation.
+  Participation requires <span className="text-[#BFF367] font-black">{selectedGame?.perPlayerCharge || 0} Coins</span>. These will be securely escrowed until match confirmation.
   </p>
   <div className="flex gap-4">
  <button onClick={() => setShowConfirm(false)} className="flex-1 py-4 bg-[#121212] border border-[#2D2D2D] rounded-[8px] font-black text-[9px] md:text-[11px] uppercase tracking-widest hover:bg-white hover:text-black transition-all">Abort</button>
@@ -804,7 +804,7 @@ const JoinGames = () => {
  setShowConfirm(false);
  handleJoinGame();
  }}
- className="flex-1 py-4 bg-gradient-to-r from-[#55DEE8] to-[#BFF367] text-black font-black rounded-[8px] text-[9px] md:text-[11px] uppercase tracking-widest shadow-[0_0_20px_rgba(85,222,232,0.25)] hover:scale-105 transition-all"
+ className="flex-1 py-4 bg-gradient-to-r from-[#BFF367] to-[#BFF367] text-black font-black rounded-[8px] text-[9px] md:text-[11px] uppercase tracking-widest shadow-[0_0_20px_rgba(191,243,103,0.25)] hover:scale-105 transition-all"
  >
  Confirm
  </button>
@@ -834,14 +834,14 @@ const JoinGames = () => {
  initial={{ scale: 0.9, opacity: 0, y: 20 }}
  animate={{ scale: 1, opacity: 1, y: 0 }}
  exit={{ scale: 0.9, opacity: 0, y: 20 }}
- className="relative bg-[#000000] border border-[#55DEE8]/20 p-8 rounded-[8px] max-w-md w-full shadow-[0_0_50px_rgba(85,222,232,0.15)]"
+ className="relative bg-[#000000] border border-[#BFF367]/20 p-8 rounded-[8px] max-w-md w-full shadow-[0_0_50px_rgba(191,243,103,0.15)]"
  >
- <div className="w-20 h-20 bg-[#55DEE8]/10 border border-[#55DEE8]/20 rounded-full flex items-center justify-center mx-auto mb-6">
- <Trophy size={40} className="text-[#55DEE8]" />
+ <div className="w-20 h-20 bg-[#BFF367]/10 border border-[#BFF367]/20 rounded-full flex items-center justify-center mx-auto mb-6">
+ <Trophy size={40} className="text-[#BFF367]" />
  </div>
  
  <h2 className="text-3xl font-black text-white uppercase tracking-tighter text-center mb-2">Claim Your Slot</h2>
- <p className="text-[#55DEE8] text-[10px] font-black uppercase tracking-[0.3em] text-center mb-6">Reserved For You</p>
+ <p className="text-[#BFF367] text-[10px] font-black uppercase tracking-[0.3em] text-center mb-6">Reserved For You</p>
  
  <div className="bg-[#121212] border border-white/5 rounded-[8px] p-5 mb-8 space-y-4">
  <div className="flex items-center justify-between">
@@ -857,8 +857,8 @@ const JoinGames = () => {
  <span className="text-sm font-black text-white uppercase truncate ml-4">{inviteData.game.city}, {inviteData.game.state}</span>
  </div>
  <div className="pt-3 border-t border-white/5 flex items-center justify-between">
- <span className="text-[10px] font-bold text-[#55DEE8] uppercase">Cost</span>
- <span className="text-lg font-black text-[#55DEE8]">{inviteData.mustPay ? `${inviteData.perPlayerCharge} Coins` : 'FREE'}</span>
+ <span className="text-[10px] font-bold text-[#BFF367] uppercase">Cost</span>
+ <span className="text-lg font-black text-[#BFF367]">{inviteData.mustPay ? `${inviteData.perPlayerCharge} Coins` : 'FREE'}</span>
  </div>
  </div>
 
@@ -866,7 +866,7 @@ const JoinGames = () => {
  <button onClick={() => setShowInvitePopup(false)} className="flex-1 py-4 bg-[#121212] border border-[#2D2D2D] rounded-[8px] font-black text-[9px] md:text-[11px] uppercase tracking-widest hover:bg-white hover:text-black transition-all">Ignore</button>
  <button
  onClick={handleClaimSlot}
- className="flex-1 py-4 bg-gradient-to-r from-[#55DEE8] to-[#BFF367] text-black font-black rounded-[8px] text-[9px] md:text-[11px] uppercase tracking-widest shadow-[0_0_20px_rgba(85,222,232,0.25)] hover:scale-105 transition-all"
+ className="flex-1 py-4 bg-gradient-to-r from-[#BFF367] to-[#BFF367] text-black font-black rounded-[8px] text-[9px] md:text-[11px] uppercase tracking-widest shadow-[0_0_20px_rgba(191,243,103,0.25)] hover:scale-105 transition-all"
  >
  Join Match
  </button>

@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import ReelPlayer from './ReelPlayer';
-import { Heart, MessageCircle, Share2, Bookmark, MoreVertical, Music } from 'lucide-react';
+import { ThumbsUp, MessageCircle, Share2, Bookmark, MoreVertical, Music } from 'lucide-react';
 import { useInteractWithReelMutation, useDeleteReelMutation, useAddReelCommentMutation, useReportReelMutation, useGetReelCommentsQuery } from '@redux/api/reelsApi';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useSelector } from 'react-redux';
@@ -240,7 +240,7 @@ const ReelItem = ({ reel, isVisible }) => {
             exit={{ scale: 2, opacity: 0 }}
             className="absolute inset-0 flex items-center justify-center pointer-events-none z-20"
           >
-            <Heart size={100} fill="#ef4444" className="text-[#ef4444] drop-shadow-lg" />
+            <ThumbsUp size={100} fill="#BFF367" className="text-[#BFF367] drop-shadow-lg" />
           </motion.div>
         )}
       </AnimatePresence>
@@ -253,7 +253,7 @@ const ReelItem = ({ reel, isVisible }) => {
           onClick={handleLike}
         >
           <div className="p-1 drop-shadow-[0_2px_8px_rgba(0,0,0,0.8)]">
-            <Heart size={34} fill={isLiked ? "#ef4444" : "white"} color={isLiked ? "#ef4444" : "white"} strokeWidth={1.5} />
+            <ThumbsUp size={34} className={`transition-colors ${isLiked ? 'fill-[#BFF367] text-[#BFF367]' : 'text-white fill-transparent group-hover:text-[#BFF367]'}`} strokeWidth={1.5} />
           </div>
           <span className="text-white text-[13px] font-bold drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">{localLikeCount}</span>
         </button>
@@ -263,7 +263,7 @@ const ReelItem = ({ reel, isVisible }) => {
           onClick={() => setShowComments(!showComments)}
         >
           <div className="p-1 drop-shadow-[0_2px_8px_rgba(0,0,0,0.8)]">
-            <MessageCircle size={34} color="white" strokeWidth={2.5} />
+            <MessageCircle size={34} className={`transition-colors ${showComments ? 'text-[#BFF367]' : 'text-white group-hover:text-[#BFF367]'}`} strokeWidth={2.5} />
           </div>
           <span className="text-white text-[13px] font-bold drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">{localCommentCount}</span>
         </button>
@@ -273,7 +273,7 @@ const ReelItem = ({ reel, isVisible }) => {
           onClick={handleShare}
         >
           <div className="p-1 drop-shadow-[0_2px_8px_rgba(0,0,0,0.8)]">
-            <Share2 size={34} fill="white" color="white" strokeWidth={2} />
+            <Share2 size={34} className="text-white fill-transparent group-hover:text-[#BFF367] transition-colors" strokeWidth={2} />
           </div>
         </button>
 
@@ -304,7 +304,7 @@ const ReelItem = ({ reel, isVisible }) => {
                       className="w-full px-4 py-3 text-left text-red-500 hover:bg-red-500/10 font-bold text-sm flex items-center gap-3 transition-colors"
                     >
                       <div className="w-7 h-7 rounded-lg bg-red-500/20 flex items-center justify-center">
-                        <Heart size={14} fill="currentColor" />
+                        <ThumbsUp size={14} fill="currentColor" />
                       </div>
                       Delete Reel
                     </button>
@@ -443,12 +443,12 @@ const ReelItem = ({ reel, isVisible }) => {
                   value={commentText}
                   onChange={(e) => setCommentText(e.target.value)}
                   placeholder="Add a comment..."
-                  className="w-full bg-white/5 border border-white/10 rounded-[8px] px-5 py-4 text-white text-sm focus:outline-none focus:border-[#55DEE8] transition-colors pr-14"
+                  className="w-full bg-white/5 border border-white/10 rounded-[8px] px-5 py-4 text-white text-sm focus:outline-none focus:border-[#BFF367] transition-colors pr-14"
                 />
                 <button 
                   type="submit"
                   disabled={!commentText.trim()}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-[#55DEE8] font-bold text-sm px-3 py-2 disabled:opacity-30 transition-opacity"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-[#BFF367] font-bold text-sm px-3 py-2 disabled:opacity-30 transition-opacity"
                 >
                   Post
                 </button>
