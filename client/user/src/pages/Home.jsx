@@ -403,7 +403,7 @@ export default function Home() {
           Scorer
         </span>
         <img 
-          src="/3d_scoreboard.png" 
+          src="/3d_professional.png" 
           alt="Scorer Icon" 
           className="absolute -right-2 -top-[14px] w-[94px] h-[94px] object-contain pointer-events-none transform group-hover:scale-105 group-hover:-translate-y-0.5 transition-all duration-300 z-10"
           style={{ mixBlendMode: "screen" }}
