@@ -1,0 +1,34 @@
+{
+  "compilerOptions": {
+    "target": "ESNext",
+    "module": "ESNext",
+    "moduleResolution": "Node",
+    "jsx": "react-jsx",
+    "allowSyntheticDefaultImports": true,
+    "checkJs": true,
+    "baseUrl": ".",
+    "types": ["vite/client"],
+    "paths": {
+      "@/*": ["src/*"],
+      "@app/*": ["src/app/*"],
+      "@components/layout/*": ["src/shared/components/layout/*"],
+      "@components/*": ["../user/src/shared/components/*"],
+      "@hooks/useAxiosInstance": ["../user/src/infrastructure/axios.js"],
+      "@user/hooks/useAxiosInstance": ["../user/src/infrastructure/axios.js"],
+      "@hooks/*": ["../user/src/shared/hooks/*"],
+      "@utils/*": ["../user/src/shared/utils/*"],
+      "@layouts/*": ["src/shared/layouts/*"],
+      "@services/*": ["../user/src/shared/services/*"],
+      "@infrastructure/*": ["../user/src/infrastructure/*"],
+      "@lib/*": ["../user/src/shared/lib/*"],
+      "@redux/api/*": ["../user/src/redux/api/*"],
+      "@redux/*": ["src/redux/*"],
+      "@pages/*": ["../user/src/pages/*"],
+      "@features/admin/*": ["src/features/admin/*"],
+      "@features/auth/*": ["src/features/auth/*"],
+      "@features/*": ["../user/src/features/*"],
+      "@context/*": ["../user/src/context/*"]
+    }
+  },
+  "exclude": ["node_modules", "dist"]
+}

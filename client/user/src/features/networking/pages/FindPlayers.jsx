@@ -41,12 +41,7 @@ const HEADING_STYLE = { fontFamily: '"Outfit", sans-serif' };
 const SUBHEADING_STYLE = { fontFamily: "'Inter 28pt Light', sans-serif", fontWeight: 300 };
 const SNAP_STATES = { COLLAPSED: 0, HALF: 33, EXPANDED: 85 };
 
-const MOCK_PLAYERS = [
-  { _id: "m1", name: "Simulated Virat", latOffset: 0.015, lngOffset: 0.015, sport: "Cricket" },
-  { _id: "m2", name: "Simulated MSD", latOffset: -0.012, lngOffset: 0.018, sport: "Cricket" },
-  { _id: "m3", name: "Simulated Rohit", latOffset: 0.018, lngOffset: -0.012, sport: "Cricket" },
-  { _id: "m4", name: "Simulated Rahul", latOffset: -0.015, lngOffset: -0.015, sport: "Cricket" }
-];
+
 
 const PlayerCard = ({ player, followingIds, handleFollowToggle, handleAvatarClick, currentUser, navigate, gateInteraction }) => {
   const isFollowing = followingIds.includes(player.id || player._id);
@@ -609,16 +604,7 @@ const FindPlayers = () => {
           }))
           .filter(p => p.lat != null && p.lng != null);
 
-        const mocks = userLocation ? MOCK_PLAYERS.map(m => ({
-          ...m,
-          lat: userLocation.lat + m.latOffset,
-          lng: userLocation.lng + m.lngOffset,
-          profilePicture: "https://pngimg.com/d/cricket_PNG102.png",
-          distanceKm: 0.5,
-          sportTypes: [m.sport]
-        })).filter(m => m.lat != null && m.lng != null) : [];
-
-        setAllNearbyPlayers([...mapPlayers, ...mocks]);
+        setAllNearbyPlayers(mapPlayers);
       }
     } catch (err) {
       console.error("Failed to fetch nearby players:", err);

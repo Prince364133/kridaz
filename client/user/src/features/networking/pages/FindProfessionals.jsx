@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { useSelector } from "react-redux";
 import axiosInstance from "@hooks/useAxiosInstance";
@@ -41,6 +41,15 @@ export default function FindProfessionals() {
   // Matchmaking Form State
   const [selectedGroundId, setSelectedGroundId] = useState("");
   const [customLocation, setCustomLocation] = useState({ latitude: "", longitude: "", address: "" });
+
+  // Location Auto-Search State
+  const [locationQuery, setLocationQuery] = useState("");
+  const [locationResults, setLocationResults] = useState([]);
+  const [locationSearching, setLocationSearching] = useState(false);
+  const [showLocationDropdown, setShowLocationDropdown] = useState(false);
+  const [showLocationSearchModal, setShowLocationSearchModal] = useState(false);
+  const locationSearchRef = useRef(null);
+  const searchTimeoutRef = useRef(null);
   const [selectedRoles, setSelectedRoles] = useState(() => {
     const validRoles = ["COACH", "UMPIRE", "STREAMER", "COMMENTATOR", "SCORER", "CHEERLEADER"];
     const queryRole = searchParams.get("role")?.toUpperCase();
@@ -50,7 +59,7 @@ export default function FindProfessionals() {
   const [matchDate, setMatchDate] = useState("");
   const [matchStartTime, setMatchStartTime] = useState("");
   const [matchEndTime, setMatchEndTime] = useState("");
-  const [expiresInSeconds, setExpiresInSeconds] = useState(60);
+  const [expiresInSeconds, setExpiresInSeconds] = useState(40);
   const [grounds, setGrounds] = useState([]);
   const [loadingGrounds, setLoadingGrounds] = useState(false);
 
@@ -167,20 +176,77 @@ export default function FindProfessionals() {
       return;
     }
     navigator.geolocation.getCurrentPosition(
-      (pos) => {
-        setCustomLocation({
-          latitude: pos.coords.latitude.toString(),
-          longitude: pos.coords.longitude.toString(),
-          address: "Current Geolocation Coordinates"
-        });
+      async (pos) => {
+        const lat = pos.coords.latitude.toString();
+        const lon = pos.coords.longitude.toString();
+        let address = "Current Geolocation Coordinates";
+        try {
+          const res = await fetch(
+            `https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lon}&format=json`,
+            { headers: { "Accept-Language": "en" } }
+          );
+          const data = await res.json();
+          if (data.display_name) address = data.display_name;
+        } catch {}
+        setCustomLocation({ latitude: lat, longitude: lon, address });
+        setLocationQuery(address);
         setSelectedGroundId("custom");
-        toast.success("Location coordinates loaded!");
+        setShowLocationSearchModal(false);
+        toast.success("Location detected!");
       },
       (err) => {
         toast.error("Failed to detect location: " + err.message);
       }
     );
   };
+
+  const handleLocationSearch = useCallback((query) => {
+    setLocationQuery(query);
+    if (searchTimeoutRef.current) clearTimeout(searchTimeoutRef.current);
+    if (!query || query.length < 3) {
+      setLocationResults([]);
+      setShowLocationDropdown(false);
+      return;
+    }
+    setLocationSearching(true);
+    searchTimeoutRef.current = setTimeout(async () => {
+      try {
+        const res = await fetch(
+          `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(query)}&format=json&limit=6&countrycodes=in&addressdetails=1`,
+          { headers: { "Accept-Language": "en" } }
+        );
+        const data = await res.json();
+        setLocationResults(data || []);
+        setShowLocationDropdown(data.length > 0);
+      } catch {
+        setLocationResults([]);
+      } finally {
+        setLocationSearching(false);
+      }
+    }, 400);
+  }, []);
+
+  const handleSelectLocation = (place) => {
+    setCustomLocation({
+      latitude: place.lat,
+      longitude: place.lon,
+      address: place.display_name
+    });
+    setLocationQuery(place.display_name);
+    setShowLocationDropdown(false);
+    setLocationResults([]);
+    setShowLocationSearchModal(false);
+  };
+
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (locationSearchRef.current && !locationSearchRef.current.contains(e.target)) {
+        setShowLocationDropdown(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
 
   const handleToggleRole = (roleVal) => {
     if (selectedRoles.includes(roleVal)) {
@@ -530,9 +596,12 @@ export default function FindProfessionals() {
                   <select
                     value={selectedGroundId}
                     onChange={(e) => {
-                      setSelectedGroundId(e.target.value);
-                      if (e.target.value !== "custom") {
+                      const val = e.target.value;
+                      setSelectedGroundId(val);
+                      if (val !== "custom") {
                         setCustomLocation({ latitude: "", longitude: "", address: "" });
+                      } else {
+                        setShowLocationSearchModal(true);
                       }
                     }}
                     className="w-full bg-black border border-white/10 rounded-lg p-3 text-xs font-bold text-white focus:border-[#55DEE8] outline-none"
@@ -543,44 +612,33 @@ export default function FindProfessionals() {
                         {g.name} - {g.city}, {g.state}
                       </option>
                     ))}
-                    <option value="custom">📍 Use Custom Coordinates (lat, lon)</option>
+                    <option value="custom">📍 Search by Location</option>
                   </select>
 
                   {selectedGroundId === "custom" && (
                     <div className="p-4 rounded-lg bg-black border border-white/5 space-y-3 animate-in fade-in duration-200">
-                      <div className="flex justify-between items-center gap-2">
-                        <span className="text-[10px] text-white/50 font-bold uppercase">Location Telemetry</span>
+                      {customLocation.latitude && customLocation.longitude ? (
+                        <div className="flex items-center gap-2 px-3 py-2 bg-[#55DEE8]/5 border border-[#55DEE8]/15 rounded-lg">
+                          <CheckCircle size={14} className="text-[#55DEE8] shrink-0" />
+                          <p className="text-[11px] text-white/70 truncate flex-1">{customLocation.address || "Location Selected"}</p>
+                          <button
+                            type="button"
+                            onClick={() => setShowLocationSearchModal(true)}
+                            className="text-[9px] font-bold text-[#55DEE8] hover:text-white px-2 py-1 rounded bg-[#55DEE8]/10 hover:bg-[#55DEE8]/20 transition-colors"
+                          >
+                            CHANGE
+                          </button>
+                        </div>
+                      ) : (
                         <button
                           type="button"
-                          onClick={handleDetectLocation}
-                          className="px-2.5 py-1 bg-white/5 hover:bg-white/10 text-[9px] font-bold text-[#55DEE8] border border-[#55DEE8]/20 rounded flex items-center gap-1.5 transition-all"
+                          onClick={() => setShowLocationSearchModal(true)}
+                          className="w-full py-3 bg-white/5 hover:bg-white/10 border border-white/10 rounded-lg text-xs font-bold text-white transition-colors flex items-center justify-center gap-2"
                         >
-                          <Navigation size={10} />
-                          Detect GPS
+                          <MapPin size={14} className="text-[#55DEE8]" />
+                          Open Location Search
                         </button>
-                      </div>
-                      <div className="grid grid-cols-2 gap-3">
-                        <input
-                          placeholder="Latitude"
-                          value={customLocation.latitude}
-                          onChange={(e) => setCustomLocation({ ...customLocation, latitude: e.target.value })}
-                          className="w-full bg-neutral-900 border border-white/10 rounded p-2.5 text-xs text-white outline-none focus:border-[#55DEE8]"
-                          required
-                        />
-                        <input
-                          placeholder="Longitude"
-                          value={customLocation.longitude}
-                          onChange={(e) => setCustomLocation({ ...customLocation, longitude: e.target.value })}
-                          className="w-full bg-neutral-900 border border-white/10 rounded p-2.5 text-xs text-white outline-none focus:border-[#55DEE8]"
-                          required
-                        />
-                      </div>
-                      <input
-                        placeholder="Address / Venue Description (Optional)"
-                        value={customLocation.address}
-                        onChange={(e) => setCustomLocation({ ...customLocation, address: e.target.value })}
-                        className="w-full bg-neutral-900 border border-white/10 rounded p-2.5 text-xs text-white outline-none focus:border-[#55DEE8]"
-                      />
+                      )}
                     </div>
                   )}
                 </div>
@@ -647,26 +705,7 @@ export default function FindProfessionals() {
                 </div>
               </div>
 
-              {/* Timeout — compact inline */}
-              <div className="flex items-center justify-between bg-white/[0.03] border border-white/5 rounded-lg px-4 py-3">
-                <div>
-                  <span className="text-[10px] font-black uppercase text-white/50 tracking-wider">Request Timeout</span>
-                  <p className="text-[9px] text-white/30 mt-0.5">How long pros can see your request</p>
-                </div>
-                <div className="flex items-center gap-2 bg-black border border-white/10 rounded-lg px-2 py-1">
-                  <button
-                    type="button"
-                    onClick={() => setExpiresInSeconds(Math.max(30, expiresInSeconds - 30))}
-                    className="w-6 h-6 flex items-center justify-center rounded bg-white/5 text-white/60 hover:bg-white/10 hover:text-white text-sm font-bold transition-colors"
-                  >−</button>
-                  <span className="text-sm font-black text-white w-10 text-center tabular-nums">{expiresInSeconds}s</span>
-                  <button
-                    type="button"
-                    onClick={() => setExpiresInSeconds(Math.min(300, expiresInSeconds + 30))}
-                    className="w-6 h-6 flex items-center justify-center rounded bg-white/5 text-white/60 hover:bg-white/10 hover:text-white text-sm font-bold transition-colors"
-                  >+</button>
-                </div>
-              </div>
+
 
               {/* Submit Button */}
               <button
@@ -697,6 +736,99 @@ export default function FindProfessionals() {
         </div>
       )}
 
+      {/* Location Search Modal */}
+      {showLocationSearchModal && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6">
+          <div className="absolute inset-0 bg-black/80 backdrop-blur-sm" onClick={() => setShowLocationSearchModal(false)} />
+          <div className="relative w-full max-w-md bg-[#0a0a0a] border border-white/10 rounded-2xl shadow-2xl flex flex-col overflow-hidden animate-in fade-in zoom-in-95 duration-200">
+            {/* Header */}
+            <div className="p-4 border-b border-white/5 flex items-center justify-between bg-black">
+              <div className="flex items-center gap-2">
+                <MapPin size={16} className="text-[#55DEE8]" />
+                <h3 className="text-sm font-bold text-white uppercase tracking-wider">Search Location</h3>
+              </div>
+              <button
+                onClick={() => setShowLocationSearchModal(false)}
+                className="p-1.5 rounded-full hover:bg-white/10 text-white/50 hover:text-white transition-colors"
+              >
+                <X size={16} />
+              </button>
+            </div>
+
+            {/* Content */}
+            <div className="p-4 flex flex-col min-h-[300px]">
+              <div ref={locationSearchRef} className="relative">
+                <div className="flex justify-end mb-3">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      handleDetectLocation();
+                    }}
+                    className="px-3 py-1.5 bg-[#55DEE8]/10 hover:bg-[#55DEE8]/20 text-[10px] font-bold text-[#55DEE8] border border-[#55DEE8]/20 rounded flex items-center gap-1.5 transition-all"
+                  >
+                    <Navigation size={12} />
+                    Detect My GPS Location
+                  </button>
+                </div>
+                <div className="relative z-10">
+                  <MapPin size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-white/30" />
+                  <input
+                    type="text"
+                    placeholder="Search for a place, city, or area..."
+                    value={locationQuery}
+                    onChange={(e) => handleLocationSearch(e.target.value)}
+                    onFocus={() => locationResults.length > 0 && setShowLocationDropdown(true)}
+                    className="w-full bg-neutral-900 border border-white/10 rounded-xl pl-10 pr-10 py-3.5 text-sm text-white outline-none focus:border-[#55DEE8] transition-colors placeholder-white/30 shadow-inner"
+                    autoComplete="off"
+                    autoFocus
+                  />
+                  {locationSearching && (
+                    <Loader2 size={16} className="absolute right-3.5 top-1/2 -translate-y-1/2 text-[#55DEE8] animate-spin" />
+                  )}
+                </div>
+
+                {/* Search Results Dropdown inside Modal */}
+                {showLocationDropdown && locationResults.length > 0 && (
+                  <div className="absolute top-full left-0 right-0 z-50 mt-2 bg-[#111] border border-white/10 rounded-xl shadow-[0_16px_48px_rgba(0,0,0,0.6)] overflow-hidden max-h-60 overflow-y-auto">
+                    {locationResults.map((place, idx) => {
+                      const parts = place.display_name.split(", ");
+                      const primary = parts[0];
+                      const secondary = parts.slice(1, 3).join(", ");
+                      return (
+                        <button
+                          key={place.place_id || idx}
+                          type="button"
+                          onClick={() => handleSelectLocation(place)}
+                          className="w-full flex items-start gap-3 px-4 py-3 hover:bg-white/5 text-left transition-colors border-b border-white/5 last:border-b-0 group"
+                        >
+                          <MapPin size={16} className="text-[#55DEE8]/60 mt-0.5 shrink-0 group-hover:text-[#55DEE8]" />
+                          <div className="min-w-0 flex-1">
+                            <p className="text-sm font-bold text-white truncate group-hover:text-[#55DEE8] transition-colors">{primary}</p>
+                            <p className="text-[11px] text-white/40 truncate mt-0.5">{secondary}</p>
+                          </div>
+                        </button>
+                      );
+                    })}
+                  </div>
+                )}
+                
+                {locationQuery.length >= 3 && !locationSearching && locationResults.length === 0 && (
+                  <div className="mt-4 p-4 rounded-lg bg-white/5 border border-white/10 text-center">
+                    <p className="text-xs text-white/50">No locations found. Try a different search term.</p>
+                  </div>
+                )}
+                
+                {locationQuery.length < 3 && (
+                  <div className="mt-6 flex flex-col items-center justify-center opacity-30 text-center px-6">
+                    <MapPin size={32} className="mb-3 text-white" />
+                    <p className="text-xs text-white/70">Type at least 3 characters to search for a location anywhere in India.</p>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

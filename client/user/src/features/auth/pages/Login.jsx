@@ -1,6 +1,8 @@
 import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import toast from "react-hot-toast";
 import { useDispatch, useSelector } from "react-redux";
+import { logout } from "@redux/slices/authSlice";
 import useLoginForm from "../hooks/useLoginForm";
 import GoogleAuthButton from "../components/GoogleAuthButton";
 import OnboardingModal from "@components/modals/OnboardingModal";
@@ -49,15 +51,20 @@ const Login = () => {
     setMounted(true);
     if (isLoggedIn && !showOnboarding) {
       const normalizedRole = role?.toLowerCase();
-      if (normalizedRole === "admin" || normalizedRole === "bmsp_admin") navigate("/admin");
-      else if (normalizedRole === "venu_owners" || normalizedRole === "owner") navigate("/venue-owner");
-      else if (normalizedRole === "coach") navigate("/professional/coach");
-      else if (normalizedRole === "umpire") navigate("/umpire");
-      else if (normalizedRole === "scorer") navigate("/scorer");
-      else if (normalizedRole === "streamer") navigate("/streamer");
-      else navigate("/");
+      const professionalRoles = ["coach", "umpire", "streamer", "scorer", "cheerleader", "commentator"];
+      
+      if (normalizedRole === "admin" || normalizedRole === "bmsp_admin") {
+        dispatch(logout());
+        toast.error("Administrators must log in via the Platform Admin Console.");
+      } else if (normalizedRole === "venu_owners" || normalizedRole === "owner" || normalizedRole === "venue_owner") {
+        navigate("/venue-owner");
+      } else if (professionalRoles.includes(normalizedRole)) {
+        navigate(`/professional/${normalizedRole}`);
+      } else {
+        navigate("/");
+      }
     }
-  }, [isLoggedIn, role, navigate, showOnboarding]);
+  }, [isLoggedIn, role, navigate, showOnboarding, dispatch]);
 
   return (
     <div className="min-h-screen bg-[#000] relative flex flex-col items-center justify-start pt-4 lg:pt-10 pb-12 font-sans">

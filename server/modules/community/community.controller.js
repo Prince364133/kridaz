@@ -87,6 +87,9 @@ export const confirmPost = async (req, res) => {
       videoUrl: post.mediaType === 'video' ? post.mediaUrls?.[0] : null
     };
 
+    const io = getIO();
+    if (io) io.emit(SOCKET.NEW_COMMUNITY_POST, formattedPost);
+
     res.status(201).json({ success: true, post: formattedPost });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
