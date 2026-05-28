@@ -1,4 +1,4 @@
-﻿import { prisma } from "../../config/prisma.js";
+import { prisma } from "../../config/prisma.js";
 import { logAdminAction } from "../../utils/auditLogger.js";
 import NotificationService from "../../services/notification.service.js";
 import logger from "../../utils/logger.js";
@@ -743,14 +743,31 @@ export const getAllWithdrawalRequests = async (req, res) => {
   try {
     const requests = await prisma.withdrawalRequest.findMany({
       include: {
-        owner: { select: { name: true, email: true, role: true, walletBalance: true, reservedBalance: true, profilePicture: true } }
+        owner: {
+          include: {
+            user: {
+              select: { name: true, email: true, role: true, profilePicture: true }
+            }
+          }
+        }
       },
       orderBy: { createdAt: 'desc' }
     });
     
+    const formattedRequests = requests.map(req => ({
+      ...req,
+      owner: {
+        ...req.owner,
+        name: req.owner.user?.name || req.owner.businessName,
+        email: req.owner.user?.email,
+        role: req.owner.user?.role,
+        profilePicture: req.owner.user?.profilePicture
+      }
+    }));
+    
     res.status(200).json({
       success: true,
-      requests: requests
+      requests: formattedRequests
     });
   } catch (error) {
     logger.error("Error in getAllWithdrawalRequests: ", error);

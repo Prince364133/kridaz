@@ -301,7 +301,7 @@ export const turfRegister = async (req, res) => {
     const ownerProfile = await prisma.ownerProfile.findFirst({
       where: {
         OR: [
-          { id: ownerData.ownerId },
+          ...(ownerData.ownerId ? [{ id: ownerData.ownerId }] : []),
           { userId: ownerData.id }
         ]
       }
@@ -419,7 +419,7 @@ export const getTurfByOwner = async (req, res) => {
     const ownerProfile = await prisma.ownerProfile.findFirst({
       where: {
         OR: [
-          { id: ownerData.ownerId },
+          ...(ownerData.ownerId ? [{ id: ownerData.ownerId }] : []),
           { userId: ownerData.id }
         ]
       }
@@ -476,7 +476,7 @@ export const editTurfById = async (req, res) => {
     const ownerProfile = await prisma.ownerProfile.findFirst({
       where: {
         OR: [
-          { id: ownerData.ownerId },
+          ...(ownerData.ownerId ? [{ id: ownerData.ownerId }] : []),
           { userId: ownerData.id }
         ]
       }
@@ -960,7 +960,7 @@ export const toggleTurfVisibility = async (req, res) => {
     const ownerProfile = await prisma.ownerProfile.findFirst({
       where: {
         OR: [
-          { id: ownerData.ownerId },
+          ...(ownerData.ownerId ? [{ id: ownerData.ownerId }] : []),
           { userId: ownerData.id }
         ]
       }
@@ -1003,7 +1003,7 @@ export const deleteTurf = async (req, res) => {
     const ownerProfile = await prisma.ownerProfile.findFirst({
       where: {
         OR: [
-          { id: ownerData.ownerId },
+          ...(ownerData.ownerId ? [{ id: ownerData.ownerId }] : []),
           { userId: ownerData.id }
         ]
       }

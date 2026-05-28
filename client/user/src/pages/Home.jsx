@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
 import axiosInstance from "@hooks/useAxiosInstance";
@@ -9,6 +9,7 @@ import { AdBannerSection } from "../shared/components/Marketing/AdBannerSection"
 import { VideoSection } from "../shared/components/Marketing/VideoSection";
 import BlogSection from "../shared/components/Blogs/BlogSection";
 import TurfCard from "../features/turf/components/TurfCard";
+import TurfCardMobile from "../features/turf/components/TurfCardMobile";
 import SearchPlayers from "../shared/components/search/SearchPlayers";
 import SearchTurf from "../shared/components/search/SearchTurf";
 import InterestsModal from "../shared/components/modals/InterestsModal";
@@ -91,8 +92,47 @@ export default function Home() {
  const [turfFilters, setTurfFilters] = useState({});
  const [playerFilters, setPlayerFilters] = useState({});
  const [userLocation, setUserLocation] = useState(null);
- const { turfs, loading: turfLoading, error } = useTurfData(turfFilters);
  const [locationStatus, setLocationStatus] = useState("detecting");
+
+  const combinedTurfFilters = useMemo(() => {
+    if (locationStatus === "detecting") return { _skip: true };
+    const base = { ...turfFilters };
+    if (userLocation && userLocation.lat && userLocation.lng) {
+      base.lat = userLocation.lat;
+      base.lng = userLocation.lng;
+    } else if (locationStatus === "denied") {
+      base.lat = 17.3850;
+      base.lng = 78.4867;
+      base.city = "Hyderabad";
+      base.state = "Telangana";
+    }
+    return base;
+  }, [turfFilters, userLocation, locationStatus]);
+
+  const { turfs, loading: turfLoading, error } = useTurfData(combinedTurfFilters);
+
+  // Geolocation fallback logic
+  const displayTurfs = useMemo(() => {
+    if (!turfs || turfs.length === 0) return [];
+    
+    // Sort all turfs by rating first
+    const sortedAll = [...turfs].sort((a, b) => (b.averageRating ?? b.rating ?? 0) - (a.averageRating ?? a.rating ?? 0));
+    
+    if (!userLocation || (!userLocation.city && !userLocation.state)) {
+      return sortedAll;
+    }
+    
+    // Level 1: City
+    const cityTurfs = sortedAll.filter(t => t.city?.toLowerCase() === userLocation.city?.toLowerCase());
+    if (cityTurfs.length >= 2) return cityTurfs;
+    
+    // Level 2: State
+    const stateOnlyTurfs = sortedAll.filter(t => t.state?.toLowerCase() === userLocation.state?.toLowerCase());
+    if (stateOnlyTurfs.length >= 2) return stateOnlyTurfs;
+    
+    // Level 3: All
+    return sortedAll;
+  }, [turfs, userLocation]);
  const [marketing, setMarketing] = useState({ banners: [], videos: [] });
  const [loading, setLoading] = useState(true);
  const [featureFlags, setFeatureFlags] = useState({});
@@ -457,7 +497,7 @@ export default function Home() {
  <div className="relative flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6 border-b border-white/5 pb-4">
  <div className="relative">
  <h2 className="text-3xl md:text-5xl lg:text-6xl font-black text-white uppercase tracking-tighter leading-none" style={{ fontFamily: "'Open Sans', sans-serif" }}>
- Find Your <span style={{ background: GRAD, WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>Arena</span>
+ {userLocation?.city ? `Grounds In ${userLocation.city}` : userLocation?.state ? `Grounds In ${userLocation.state}` : 'Grounds Near You'}
  </h2>
  <p className="text-xs md:text-sm font-bold text-white/40 uppercase tracking-[0.15em] mt-4" style={{ fontFamily: "'Inter 28pt Light', sans-serif" }}>
  Premium Venue Discovery • Elite Sports Infrastructure
@@ -468,18 +508,27 @@ export default function Home() {
  {/* Search Row */}
  <div className="flex flex-col gap-6 mb-10 w-full">
  <div className="w-full animate-fade-in relative z-20">
- <SearchTurf onSearch={handleTurfSearch} userLocation={userLocation} />
+    <div className="flex items-center gap-2 bg-[#111] border border-white/10 rounded-full px-4 py-2 w-full md:w-1/2">
+      <Search size={18} className="text-[#55DEE8]" />
+      <input 
+        type="text" 
+        placeholder="Search arenas..." 
+        className="bg-transparent outline-none text-sm text-white w-full placeholder:text-gray-500"
+        value={turfFilters.searchTerm || ""}
+        onChange={(e) => setTurfFilters(prev => ({...prev, searchTerm: e.target.value}))}
+      />
+    </div>
  </div>
  </div>
 
- {/* Venue grid — 4 per row, 2 rows max, sorted by highest rating */}
+ {/* Venue scroll — 1.8 cards on mobile */}
   {loading || turfLoading ? (
-  <div className="grid grid-rows-2 grid-flow-col gap-3 overflow-x-auto no-scrollbar pb-2 md:grid-rows-none md:grid-flow-row md:grid-cols-3 md:overflow-visible">
-  {[...Array(6)].map((_, i) => (
-  <div key={i} className="w-[42vw] sm:w-[200px] md:w-auto shrink-0 rounded-[8px] border animate-pulse" style={{ height: 260, backgroundColor: "#111", borderColor: BDR }} />
+  <div className="flex gap-4 overflow-x-auto snap-x snap-mandatory no-scrollbar pb-2">
+  {[...Array(3)].map((_, i) => (
+  <div key={i} className="w-[85vw] md:w-[400px] shrink-0 snap-center rounded-[12px] border animate-pulse" style={{ height: 320, backgroundColor: "#111", borderColor: BDR }} />
   ))}
   </div>
- ) : (error || (turfs || []).length === 0) ? (
+ ) : (error || displayTurfs.length === 0) ? (
  <div className="text-center py-24 animate-fadeIn">
  <div className="w-20 h-20 bg-white/5 border border-white/10 rounded-full flex items-center justify-center mx-auto mb-6">
  <Search size={32} className="text-gray-600" />
@@ -494,15 +543,12 @@ export default function Home() {
  </button>
  </div>
   ) : (
-  <div className="grid grid-rows-2 grid-flow-col gap-3 overflow-x-auto no-scrollbar pb-2 md:grid-rows-none md:grid-flow-row md:grid-cols-3 md:overflow-visible">
-  {[...(turfs || [])]
-  .sort((a, b) => (b.averageRating ?? b.rating ?? 0) - (a.averageRating ?? a.rating ?? 0))
-  .slice(0, 10)
-  .map((t) => (
-  <div key={t._id} className="w-[42vw] sm:w-[200px] md:w-auto shrink-0">
-    <TurfCard 
-    turf={t} 
-    distance={t.distance ? `${t.distance} km` : "1.2 km"}
+  <div className="flex gap-4 overflow-x-auto snap-x snap-mandatory no-scrollbar pb-4 pr-4">
+  {displayTurfs.slice(0, 10).map((t) => (
+  <div key={t._id} className="w-[85vw] md:w-[400px] shrink-0 snap-start">
+    <TurfCardMobile 
+      turf={t} 
+      distance={t.distance ? `${t.distance} km` : "1.2 km"}
     />
   </div>
   ))}

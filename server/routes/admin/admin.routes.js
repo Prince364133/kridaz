@@ -8,7 +8,7 @@ import userManagementRouter from "../../modules/player/routes/admin.routes.js"
 import ownerRequestRouter from "../../modules/owner/routes/partnerRequest.routes.js"
 import ownerManagementRouter from "../../modules/owner/routes/admin.routes.js"
 import featureFlagRouter from "../../modules/feature/feature.routes.js"
-import marketingRouter from "../../modules/marketing/marketing.routes.js"
+import adminMarketingRouter from "../../modules/marketing/routes/admin.routes.js"
 import blogRouter from "../../modules/blog/blog.routes.js"
 import professionalRouter from "../../modules/professional/professional.routes.js"
 import withdrawalRouter from "../../modules/wallet/routes/admin.routes.js"
@@ -23,7 +23,7 @@ import verifyAdminToken from "../../middleware/jwt/admin.middleware.js"
 const adminRouter = Router()
 
 adminRouter.use("/blogs", verifyAdminToken, blogRouter);
-adminRouter.use("/marketing", verifyAdminToken, marketingRouter);
+adminRouter.use("/marketing", verifyAdminToken, adminMarketingRouter);
 adminRouter.use("/features", verifyAdminToken, featureFlagRouter);
 adminRouter.use("/venue-owner-requests", verifyAdminToken, ownerRequestRouter);
 adminRouter.use("/professionals", verifyAdminToken, professionalRouter);

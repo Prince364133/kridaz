@@ -348,6 +348,19 @@ const TurfDetails = () => {
           {/* VenueOverviewSection */}
           <div className="w-full lg:w-[813px] flex-none space-y-6 lg:space-y-8">
 
+            {/* Back Button */}
+            <button 
+              onClick={() => navigate(-1)}
+              className="flex items-center gap-1.5 text-zinc-400 hover:text-[#BFF367] transition-colors font-bold uppercase tracking-widest text-[11px] mb-[-10px] px-2"
+            >
+              <ChevronLeft className="w-4 h-4" /> Back
+            </button>
+
+            {/* Venue Big Heading */}
+            <h1 className="text-3xl md:text-5xl lg:text-6xl font-inter font-black uppercase tracking-tight text-white leading-tight px-2">
+              {turf.name}
+            </h1>
+
             {/* Quick Info Bar */}
             <div className="flex flex-wrap items-center justify-start md:justify-between gap-y-3 gap-x-4 text-[10px] md:text-[12px] font-bold uppercase tracking-widest px-2 font-inter w-full">
               <div className="flex items-center gap-2 shrink-0">
@@ -456,9 +469,6 @@ const TurfDetails = () => {
               {/* Title & Stats */}
               <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 sm:gap-0">
                 <div className="space-y-3">
-                  <h1 className="text-2xl md:text-4xl font-inter font-bold uppercase tracking-tight text-white leading-tight">
-                    {turf.name} , {turf.city || turf.location.split(',')[0]}
-                  </h1>
                   <div className="flex flex-wrap items-center gap-4 md:gap-6">
                     <div className="flex items-baseline gap-2">
                       <span className="bg-gradient-to-r from-[#55DEE8] to-[#BFF367] inline-block text-transparent bg-clip-text text-2xl md:text-3xl font-inter font-bold">₹{turf.pricePerHour}</span>

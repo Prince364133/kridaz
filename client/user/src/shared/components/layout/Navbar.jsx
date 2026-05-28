@@ -1,6 +1,6 @@
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
-import { User, Users, Menu, X, LogOut, Activity, ShieldCheck, Zap, ArrowRight, Clock, Trophy, Target, MessageCircle, MapPin, ChevronRight, Bell, UserSearch } from "lucide-react";
+import { User, Users, Menu, X, LogOut, Activity, ShieldCheck, Zap, ArrowRight, Clock, Trophy, Target, MessageCircle, MapPin, ChevronRight, Bell, UserSearch, Search, Plus, Bookmark } from "lucide-react";
 import { useState, useEffect, useCallback } from "react";
 import { createPortal } from "react-dom";
 import { logout } from "@redux/slices/authSlice";
@@ -198,6 +198,36 @@ const Navbar = () => {
             ) : (
               <div className="flex items-center gap-2 sm:gap-4">
 
+                {/* Search Icon */}
+                <Link
+                  to="/search"
+                  className="relative w-10 sm:w-11 h-10 sm:h-11 border border-white/10 flex items-center justify-center bg-white/5 hover:border-[#84CC16]/50 transition-all cursor-pointer rounded-full group"
+                >
+                  <Search size={20} className="text-white/40 group-hover:text-[#84CC16] transition-colors" />
+                </Link>
+
+                {/* Plus Dropdown */}
+                <div className="dropdown dropdown-end">
+                  <label
+                    tabIndex={0}
+                    className="relative w-10 sm:w-11 h-10 sm:h-11 border border-white/10 flex items-center justify-center bg-white/5 hover:border-[#84CC16]/50 transition-all cursor-pointer rounded-full group"
+                  >
+                    <Plus size={20} className="text-white/40 group-hover:text-[#84CC16] transition-colors" />
+                  </label>
+                  <ul tabIndex={0} className="dropdown-content z-[100] mt-1 p-1 shadow-2xl bg-[#0A0A0A] border border-white/10 rounded-[8px] w-48 overflow-hidden backdrop-blur-xl">
+                    <li>
+                      <Link to="/host-game" className="flex items-center gap-3 p-4 text-sm font-medium text-white/60 hover:text-[#84CC16] hover:bg-white/5 transition-all">
+                        Score Match
+                      </Link>
+                    </li>
+                    <li>
+                      <Link to="/?createPost=true" className="flex items-center gap-3 p-4 text-sm font-medium text-white/60 hover:text-[#84CC16] hover:bg-white/5 transition-all">
+                        Share Post
+                      </Link>
+                    </li>
+                  </ul>
+                </div>
+
                 {/* Notification Bell */}
                 <Link
                   to="/notifications"
@@ -373,6 +403,15 @@ const Navbar = () => {
                         >
                           <Trophy size={18} className="text-white/40" />
                           <span className="text-sm font-medium">My Joined Matches</span>
+                        </Link>
+
+                        <Link
+                          to="/saved"
+                          onClick={() => setIsSidebarOpen(false)}
+                          className="flex items-center gap-3 p-3 rounded-[8px] hover:bg-white/5 text-white/70 hover:text-white transition-all"
+                        >
+                          <Bookmark size={18} className="text-white/40" />
+                          <span className="text-sm font-medium">Saved Items</span>
                         </Link>
 
                         <Link

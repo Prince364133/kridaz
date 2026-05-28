@@ -38,6 +38,7 @@ const UserBlogDetail         = lazy(() => import("@features/blogs").then(m => ({
 const Community              = lazy(() => import("@features/networking").then(m => ({ default: m.Community })));
 const FindPlayers            = lazy(() => import("@features/networking").then(m => ({ default: m.FindPlayers })));
 const UserWallet             = lazy(() => import("@features/wallet").then(m => ({ default: m.Wallet })));
+const GlobalSearch           = lazy(() => import("@user/pages/GlobalSearch"));
 const BookingPass            = lazy(() => import("@features/turf").then(m => ({ default: m.BookingPass })));
 const BookingInvoice         = lazy(() => import("@features/turf").then(m => ({ default: m.BookingInvoice })));
 const HostGame               = lazy(() => import("@features/games").then(m => ({ default: m.HostGame })));
@@ -61,7 +62,7 @@ const ReelsFeed              = lazy(() => import("@features/reels").then(m => ({
 const UploadReel             = lazy(() => import("@features/reels").then(m => ({ default: m.UploadReel })));
 const ReelAnalytics          = lazy(() => import("@features/reels").then(m => ({ default: m.ReelAnalytics })));
 const NotificationsPage      = lazy(() => import("@features/notifications").then(m => ({ default: m.NotificationsPage })));
-
+const SavedPage              = lazy(() => import("@features/saved/pages/SavedPage"));
 
 
 // â”€â”€ Lazy: Business Landing Pages â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
@@ -216,6 +217,7 @@ const router = createBrowserRouter([
       { path: "blogs",        element: <S><UserBlogs /></S> },
       { path: "blogs/:id",    element: <S><UserBlogDetail /></S> },
       { path: "community",    element: <Navigate to="/" replace /> },
+      { path: "search",       element: <S><GlobalSearch /></S> },
       { path: "players",      element: <S><FindPlayers /></S> },
       { path: "host-game",    element: <ProtectedRoute><S><HostGame /></S></ProtectedRoute> },
       { path: "join-games",   element: <S><JoinGames /></S> },
@@ -232,6 +234,7 @@ const router = createBrowserRouter([
       { path: "messages",           element: <ProtectedRoute><S><Messages /></S></ProtectedRoute> },
       { path: "notifications",      element: <ProtectedRoute><S><NotificationsPage /></S></ProtectedRoute> },
       { path: "my-teams",           element: <ProtectedRoute><S><MyTeams /></S></ProtectedRoute> },
+      { path: "saved",              element: <ProtectedRoute><S><SavedPage /></S></ProtectedRoute> },
 
       // Business Landings
       { path: "business/venue",     element: <S><UserVenueOwnerLanding /></S> },

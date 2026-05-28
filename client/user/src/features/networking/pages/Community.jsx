@@ -981,52 +981,6 @@ const Community = ({ children, onSearchActive }) => {
             {activeFilter !== "Reels" && (
               <div className="space-y-3 mb-2">
 
-                {/* Search, Post, and Message Header Row */}
-                <div className="relative z-10 flex items-center gap-3">
-
-                  {/* Search input field styled with theme */}
-                  <div className="relative flex-1">
-                    <Search size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-white/40" />
-                    <input
-                      type="text"
-                      placeholder="Search community posts or players..."
-                      className="w-full bg-[#0A0A0A] border border-white/10 rounded-[8px] py-3 pl-11 pr-4 text-sm font-bold text-white outline-none focus:border-[#55DEE8]/50 focus:ring-1 focus:ring-[#55DEE8]/20 transition-all placeholder:text-white/30"
-                      value={feedSearchQuery}
-                      onChange={(e) => setFeedSearchQuery(e.target.value)}
-                    />
-                    {feedSearchQuery && (
-                      <button
-                        onClick={() => setFeedSearchQuery("")}
-                        className="absolute right-4 top-1/2 -translate-y-1/2 text-white/40 hover:text-white transition-colors"
-                      >
-                        <X size={16} />
-                      </button>
-                    )}
-                  </div>
-
-                  {/* Post Button */}
-                  <motion.button
-                    onClick={() => gateInteraction(() => setShowPostModal(true))}
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
-                    title="New Post"
-                    className="relative flex items-center justify-center w-11 h-11 rounded-full shrink-0 group z-10"
-                  >
-                    <svg className="absolute inset-0 w-full h-full pointer-events-none z-[-1]" viewBox="0 0 100 100">
-                      <defs>
-                        <linearGradient id="post-btn-grad" x1="0%" y1="0%" x2="100%" y2="0%">
-                          <stop stopColor="#55DEE8" offset="0%" />
-                          <stop stopColor="#BFF367" offset="100%" />
-                        </linearGradient>
-                      </defs>
-                      <circle cx="50" cy="50" r="47" fill="none" stroke="url(#post-btn-grad)" strokeWidth="4" pathLength="100" strokeDasharray="4 6" strokeLinecap="round" />
-                    </svg>
-                    <div className="absolute inset-0 rounded-full bg-gradient-to-r from-[#55DEE8] to-[#BFF367] opacity-0 group-hover:opacity-100 transition-opacity z-[-1]" />
-                    <Plus size={20} strokeWidth={2.5} className="relative z-10 text-white group-hover:text-black transition-colors" />
-                  </motion.button>
-
-                  {/* Removed Message Button */}
-                </div>
 
 
 

@@ -452,75 +452,77 @@ const JoinGames = () => {
    animate={{ opacity: 1, y: 0 }}
    whileHover={{ y: -6, scale: 1.01 }}
    transition={{ duration: 0.3 }}
-   className="group relative rounded-[8px] overflow-hidden cursor-pointer bg-black border border-white/5 hover:border-[#BFF367]/30 transition-all duration-500 flex flex-col aspect-square w-full shadow-2xl"
+   className="group relative rounded-[8px] overflow-hidden cursor-pointer bg-black border border-white/5 hover:border-[#BFF367]/30 transition-all duration-500 flex flex-col w-full shadow-md hover:shadow-lg"
    onClick={() => setSelectedGame(game)}
    >
-   {/* ── Background: Split Team Images (Full Height cover with steep 65% slant) ── */}
+   {/* ── Image Area (Square) ── */}
+   <div className="relative w-full aspect-square overflow-hidden bg-black shrink-0">
+   {/* Background: Split Team Images */}
    <div className="absolute inset-0 z-0 overflow-hidden bg-transparent">
-   {/* Team A — Left Half Slanted */}
+   {/* Team A */}
    <div className="absolute inset-y-0 left-0 w-[60%] overflow-hidden" style={{ clipPath: 'polygon(0 0, 100% 0, 65% 100%, 0 100%)' }}>
-   <img
-   src={game.teams?.teamA?.image || "https://images.unsplash.com/photo-1522778119026-d647f0596c20?w=800&q=80"}
-   alt="Team A"
-   className="w-full h-full object-cover object-right scale-110 group-hover:scale-125 transition-transform duration-700"
-   />
+   <img src={game.teams?.teamA?.image || "https://images.unsplash.com/photo-1522778119026-d647f0596c20?w=800&q=80"} alt="Team A" className="w-full h-full object-cover object-right scale-110 group-hover:scale-125 transition-transform duration-700" />
    </div>
-   {/* Team B — Right Half Slanted (Creates a perfect steeper 1% parallel gap meeting) */}
+   {/* Team B */}
    <div className="absolute inset-y-0 right-0 w-[60%] overflow-hidden" style={{ clipPath: 'polygon(35% 0, 100% 0, 100% 100%, 0 100%)' }}>
-   <img
-   src={game.teams?.teamB?.image || "https://images.unsplash.com/photo-1575361204480-aadea25e6e68?w=800&q=80"}
-   alt="Team B"
-   className="w-full h-full object-cover object-left scale-110 group-hover:scale-125 transition-transform duration-700"
-   />
+   <img src={game.teams?.teamB?.image || "https://images.unsplash.com/photo-1575361204480-aadea25e6e68?w=800&q=80"} alt="Team B" className="w-full h-full object-cover object-left scale-110 group-hover:scale-125 transition-transform duration-700" />
+   </div>
+   {/* Overlay */}
+   <div className="absolute inset-0 bg-black/40 z-10" />
    </div>
 
-   {/* Center vignette — vintage blend where images meet */}
-   <div className="absolute inset-y-0 left-1/2 -translate-x-1/2 w-28 bg-gradient-to-r from-transparent via-black to-transparent opacity-90" />
-   {/* Edge vignettes (left + right) */}
-   <div className="absolute inset-y-0 left-0 w-12 bg-gradient-to-r from-black/70 to-transparent" />
-   <div className="absolute inset-y-0 right-0 w-12 bg-gradient-to-l from-black/70 to-transparent" />
+   {/* Content over image */}
+   <div className="relative z-25 flex flex-col h-full p-4 justify-center bg-transparent">
 
-   {/* Top-to-bottom dark overlay for readability */}
-   <div className="absolute inset-0 bg-gradient-to-b from-black/55 via-black/15 to-black/85" />
-   
-   {/* Bottom-to-top cinematic dark overlay to fade the turf into black for text legibility */}
-   <div className="absolute inset-x-0 bottom-0 h-48 bg-gradient-to-t from-black via-black/85 to-transparent z-10" />
-   </div>
 
-   {/* ── Content (Floats relative z-10 directly over the full cover image) ── */}
-   <div className="relative z-25 flex flex-col h-full p-4 justify-between bg-transparent">
-   {/* Top Row Badging (Transparent Backgrounds) */}
-   <div className="flex items-center justify-between w-full bg-transparent">
-   {/* Left side: Sport badge */}
-   <div className="px-2 md:px-3 py-0.5 md:py-1 bg-black/40 border border-[#BFF367]/20 rounded-[6px] backdrop-blur-sm flex items-center gap-1 md:gap-1.5">
-   <Trophy className="w-2.5 h-2.5 md:w-3 md:h-3 text-[#BFF367]" />
-   <span className="text-[7px] md:text-[10px] font-black text-[#BFF367] uppercase tracking-wider">{game.gameType}</span>
-   </div>
-
-   {/* Right side: Ticket Price badge */}
-   <div className="px-2 md:px-3 py-0.5 md:py-1 bg-black/40 border border-white/10 rounded-[6px] backdrop-blur-sm flex items-center gap-1 md:gap-1.5">
-   <Coins className="w-2.5 h-2.5 md:w-3 md:h-3 text-[#BFF367]" />
-   <span className="text-[7px] md:text-[10px] font-black text-white uppercase tracking-wider">{game.perPlayerCharge || 'FREE'}</span>
-   </div>
-   </div>
-
-   {/* Center: Title + JOIN/WATCH Button (Perfect vertical centering using grow + flex center) ── */}
-   <div className="flex-grow flex flex-col justify-center items-center text-center bg-transparent py-2">
-   {/* Main Match Title */}
+   {/* Center Title */}
+   <div className="flex-grow flex flex-col justify-center items-center text-center bg-transparent mt-8">
    <h3 className="text-[11px] md:text-[16px] font-black uppercase leading-tight tracking-tight text-white font-open-sans px-2 drop-shadow-[0_2px_8px_rgba(0,0,0,0.9)]">
    {game.gameMode === 'QUICK' ? (
    <>Casual <span className="text-[#BFF367]">{game.gameType}</span> Match</>
    ) : (
    <span className="flex items-center justify-center flex-wrap gap-x-1.5 md:gap-x-2">
-   <span>{game.teams?.teamA?.name}</span>
+   <span>{game.teams?.teamA?.name?.length > 11 ? game.teams.teamA.name.substring(0, 11) + '...' : game.teams?.teamA?.name}</span>
    <span className="text-[9px] md:text-xs italic text-[#BFF367] font-bold">vs</span>
-   <span>{game.teams?.teamB?.name}</span>
+   <span>{game.teams?.teamB?.name?.length > 11 ? game.teams.teamB.name.substring(0, 11) + '...' : game.teams?.teamB?.name}</span>
    </span>
    )}
    </h3>
+   </div>
+   </div>
+   </div>
 
-   {/* Small Centered Pill CTA Action Button (Positioned perfectly directly below the title) */}
-   <div className="w-full pt-3 flex justify-center bg-transparent">
+   {/* ── Bottom Info Panel (Below Image) ── */}
+   <div className="flex flex-col gap-2 md:gap-2.5 p-2.5 md:p-3 bg-[#0a0a0c] border-t border-white/5">
+   
+   {/* Row 1: Date & Capacity */}
+   <div className="flex justify-between items-center w-full">
+   <span className="text-[10px] md:text-[12px] font-black text-white shrink-0">
+   {new Date(game.date).toLocaleDateString('en-GB', { day: '2-digit', month: 'short' })} • {game.time}
+   </span>
+   <div className="flex items-center gap-1 md:gap-1.5 bg-transparent shrink-0">
+   <Users className="w-3.5 h-3.5 md:w-4 md:h-4 text-[#BFF367]" />
+   <span className="text-[10px] md:text-[12px] font-black text-white">
+   {filledSlots}/{totalCapacity}
+   </span>
+   </div>
+   </div>
+
+   {/* Row 2: Tags & CTA */}
+   <div className="flex items-center w-full overflow-x-auto no-scrollbar gap-1.5">
+   <div className="flex gap-1.5 items-center shrink-0">
+   {/* Game Tag */}
+   <span className="px-1.5 py-0.5 md:px-2 md:py-1 rounded-[4px] bg-[#BFF367]/10 text-[#BFF367] text-[7.5px] md:text-[9px] font-black uppercase tracking-widest border border-[#BFF367]/20">
+   {game.gameType || 'MATCH'}
+   </span>
+   {/* Coins Tag */}
+   <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 md:px-2 md:py-1 rounded-[4px] bg-white/5 text-white text-[7.5px] md:text-[9px] font-black uppercase tracking-widest border border-white/10">
+   <Coins className="w-2 h-2 md:w-2.5 md:h-2.5 text-[#BFF367]" />
+   {game.perPlayerCharge || 'FREE'}
+   </span>
+   </div>
+
+   {/* CTA Button */}
    <button 
    onClick={(e) => {
    if (game.isLive || game.scoringStatus === 'IN_PROGRESS') {
@@ -530,61 +532,18 @@ const JoinGames = () => {
    setSelectedGame(game);
    }
    }}
-   className={`px-6 py-1.5 rounded-[6px] font-black text-[9px] uppercase tracking-wider transition-all duration-300 flex items-center justify-center gap-1 backdrop-blur-sm bg-transparent ${ game.isLive || game.scoringStatus === 'IN_PROGRESS' ? 'border border-red-500/30 text-red-400 hover:bg-red-500/10 hover:border-red-500/50 hover:text-white shadow-[0_0_15px_rgba(239,68,68,0.1)]' : 'border border-white/10 text-white hover:bg-[#BFF367]/10 hover:border-[#BFF367]/40 hover:text-[#BFF367] hover:shadow-[0_0_15px_rgba(191,243,103,0.15)]' }`}
+   className={`px-3 md:px-4 py-1.5 rounded-[6px] font-black text-[8px] md:text-[10px] uppercase tracking-wider transition-all duration-300 flex items-center justify-center gap-1 backdrop-blur-sm bg-transparent ${ game.isLive || game.scoringStatus === 'IN_PROGRESS' ? 'border border-red-500/30 text-red-400 hover:bg-red-500/10 hover:border-red-500/50 hover:text-white' : 'border border-white/10 text-white hover:bg-[#BFF367]/10 hover:border-[#BFF367]/40 hover:text-[#BFF367]' }`}
    >
    {game.isLive || game.scoringStatus === 'IN_PROGRESS' ? 'WATCH' : 'JOIN'} <ChevronRight size={9} strokeWidth={3} />
    </button>
-   </div>
-   </div>
-
-   {/* Bottom Info Panel (Transparent Background rendering at the bottom, without borders) */}
-   <div className="flex flex-col mt-auto pb-1 bg-transparent">
-   {/* Row 1: Date & Time + Capacity (Clean layout, no dividers) */}
-   <div className="grid grid-cols-2 bg-transparent">
-   {/* Date & Time */}
-   <div className="flex items-center gap-1 md:gap-2 pr-1 md:pr-2 bg-transparent justify-center">
-   <Calendar className="w-3 h-3 md:w-4 md:h-4 text-[#BFF367] shrink-0" />
-   <div className="flex flex-col min-w-0 bg-transparent text-left">
-   <span className="text-[6px] md:text-[8px] font-bold text-white/40 uppercase tracking-wider">DATE & TIME</span>
-   <span className="text-[8px] md:text-[10px] font-black text-white mt-0.5 truncate">
-   {new Date(game.date).toLocaleDateString('en-GB', { day: '2-digit', month: 'short' })} • {game.time}
-   </span>
-   </div>
-   </div>
-
-   {/* Capacity */}
-   <div className="flex items-center gap-1 md:gap-2 pl-1 md:pl-2 bg-transparent justify-center">
-   <Users className="w-3 h-3 md:w-4 md:h-4 text-[#BFF367] shrink-0" />
-   <div className="flex flex-col min-w-0 bg-transparent text-left">
-   <span className="text-[6px] md:text-[8px] font-bold text-white/40 uppercase tracking-wider">CAPACITY</span>
-   <div className="flex items-center gap-1 mt-0.5 bg-transparent">
-   <span className="text-[8px] md:text-[10px] font-black text-white">
-   {filledSlots}/{totalCapacity}
-   </span>
-   <div className="flex gap-0.5 bg-transparent">
-   {[...Array(Math.min(totalCapacity, 5))].map((_, idx) => {
-   const isFilled = idx < filledSlots;
-   return (
-   <div 
-   key={idx} 
-   className={`w-1.5 h-1.5 rounded-full ${ isFilled ? 'bg-[#BFF367]' : 'border border-[#BFF367] bg-transparent' }`} 
-   />
-   );
-   })}
-   {totalCapacity > 5 && <span className="text-[8px] font-bold text-[#BFF367]/60 ml-0.5 bg-transparent">+</span>}
-   </div>
-   </div>
-   </div>
-   </div>
-   </div>
    </div>
    </div>
    </motion.div>
   );
  })
  )}
-</div>
-</div>
+ </div>
+ </div>
 
 
   {/* Game Details Modal */}

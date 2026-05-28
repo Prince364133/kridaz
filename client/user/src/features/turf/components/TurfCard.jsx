@@ -148,12 +148,6 @@ const TurfCard = ({ turf, featured = false, distance = "1.2km Away" }) => {
                     {turf.city || turf.location || "Nearby Venue"}
                   </p>
                 </div>
-                <button
-                  onClick={handleShare}
-                  className="p-1 hover:bg-white/10 rounded-full transition-all duration-300"
-                >
-                  <MessageSquareShare size={14} className="text-[#84CC16] hover:scale-110 transition-transform cursor-pointer shrink-0" />
-                </button>
               </div>
             </div>
 

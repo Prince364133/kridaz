@@ -68,8 +68,13 @@ export const getOwnerTurfReviews = async (req, res) => {
   const ownerId = req.owner.ownerId || req.owner.id;
 
   try {
-    const owner = await prisma.ownerProfile.findUnique({
-      where: { id: ownerId },
+    const owner = await prisma.ownerProfile.findFirst({
+      where: {
+        OR: [
+          ...(ownerId ? [{ id: ownerId }] : []),
+          { userId: ownerId }
+        ]
+      },
       include: {
         turfs: {
           include: {

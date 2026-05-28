@@ -37,6 +37,7 @@ const useTurfData = (filters = {}) => {
   };
 
   useEffect(() => {
+    if (filters._skip) return;
     fetchTurfData();
   }, [JSON.stringify(filters)]);
 

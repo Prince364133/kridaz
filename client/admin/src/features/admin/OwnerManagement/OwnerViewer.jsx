@@ -31,7 +31,7 @@ const OwnerViewer = () => {
   useEffect(() => {
     const fetchStats = async () => {
       try {
-        const response = await axiosInstance.get("/api/admin/dashboard-data");
+        const response = await axiosInstance.get("/api/admin/dashboard");
         setStats({
           totalOwners: response.data.totalOwners || 0,
           activeOwners: owners.length,

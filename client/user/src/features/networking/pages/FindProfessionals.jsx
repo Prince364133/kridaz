@@ -2,17 +2,17 @@ import { useState, useEffect, useRef, useCallback } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { useSelector } from "react-redux";
 import axiosInstance from "@hooks/useAxiosInstance";
-import { 
-  Search, MapPin, Star, Users, User, Shield, Trophy, 
-  Activity, CheckCircle, Filter, Loader2, Check, X, 
-  Video, Dribbble, ChevronDown, Sparkles, Navigation, Zap
+import {
+  Search, MapPin, Star, Users, User, Shield, Trophy,
+  Activity, CheckCircle, Filter, Loader2, Check, X,
+  Video, Dribbble, ChevronDown, Sparkles, Navigation, Zap, Calendar, Clock
 } from "lucide-react";
 import toast from "react-hot-toast";
 import { fetchStates, fetchCities } from "@utils/locationService";
 import { useSocket } from "@context/SocketContext";
-import { 
-  useCreateMatchRequestMutation, 
-  useGetUserOnDemandBookingsQuery 
+import {
+  useCreateMatchRequestMutation,
+  useGetUserOnDemandBookingsQuery
 } from "../../../redux/api/professionalApi";
 
 const SUBHEADING_STYLE = { fontFamily: "'Inter 28pt Light', sans-serif", fontWeight: 300 };
@@ -177,6 +177,20 @@ export default function FindProfessionals() {
     fetchProfessionals();
   };
 
+  const formatDisplayDate = (dateStr) => {
+    if (!dateStr) return "Select Date";
+    return new Date(dateStr).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+  };
+
+  const formatDisplayTime = (timeStr) => {
+    if (!timeStr) return "Select Time";
+    const [h, m] = timeStr.split(':');
+    const d = new Date();
+    d.setHours(h);
+    d.setMinutes(m);
+    return d.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
+  };
+
   const handleDetectLocation = () => {
     if (!navigator.geolocation) {
       toast.error("Geolocation is not supported by your browser");
@@ -194,7 +208,7 @@ export default function FindProfessionals() {
           );
           const data = await res.json();
           if (data.display_name) address = data.display_name;
-        } catch {}
+        } catch { }
         setCustomLocation({ latitude: lat, longitude: lon, address });
         setLocationQuery(address);
         setSelectedGroundId("custom");
@@ -309,13 +323,12 @@ export default function FindProfessionals() {
     try {
       const res = await createMatchRequest(payload).unwrap();
       if (res.success) {
-        toast.success("Match request placed! Check your Booking History for updates.");
+        toast.success("Match request placed! We'll notify you once a pro accepts.");
         setSelectedRoles([]);
         setSelectedGroundId("");
         setCustomLocation({ latitude: "", longitude: "", address: "" });
         setShowMatchModal(false);
         refetchBookings();
-        navigate("/booking-history?subTab=professionals");
       }
     } catch (err) {
       toast.error(err.data?.message || "Failed to create match request");
@@ -328,11 +341,11 @@ export default function FindProfessionals() {
 
   return (
     <div className="min-h-screen bg-black text-white pb-20 px-6 md:px-10 font-sans">
-      
+
       {/* Header Section */}
       <div className="max-w-7xl mx-auto pt-6 pb-6 text-center relative px-4">
-        <h1 className="font-['Open_Sans'] font-extrabold text-6xl lg:text-[72px] uppercase tracking-tighter text-transparent bg-clip-text bg-gradient-to-r from-[#BFF367] to-[#BFF367] mb-2 leading-[0.9]">
-          PROS DIRECTORY
+        <h1 className="font-['Open_Sans'] font-extrabold text-5xl lg:text-[64px] uppercase tracking-tighter text-transparent bg-clip-text bg-gradient-to-r from-[#BFF367] to-[#BFF367] mb-2 leading-[1]">
+          FIND PROFESSIONALS
         </h1>
         <p className="hidden md:block text-[16px] text-white/60 uppercase tracking-[0.15em] leading-relaxed" style={SUBHEADING_STYLE}>
           Coaching • Officiating • Scorers • Live Streaming
@@ -340,98 +353,66 @@ export default function FindProfessionals() {
       </div>
 
       {/* Search & Filters */}
-      <div className="max-w-7xl mx-auto">
-        <div className="max-w-5xl mx-auto mb-12 px-4">
-          <div className="w-full bg-[#0a0a0c]/80 backdrop-blur-2xl border border-white/10 rounded-[8px] p-1.5 shadow-2xl flex flex-col xl:flex-row items-stretch xl:items-center min-h-[56px] md:min-h-[64px] transition-all duration-500 hover:border-[#BFF367]/30">
-            {/* Search Input */}
-            <div className="flex-[2] relative xl:border-r border-white/5 flex items-center px-4 py-3 md:py-0 min-h-[56px] md:min-h-full">
-              <Search className="text-gray-500 mr-3" size={16} />
-              <form onSubmit={handleSearch} className="w-full h-full flex items-center">
-                <input 
-                  className="w-full h-full bg-transparent text-white outline-none text-xs font-bold placeholder-gray-500 tracking-wide" 
-                  placeholder="Search by name or specialty..." 
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                />
-              </form>
-            </div>
-
-            <div className="flex flex-col sm:flex-row flex-[3] xl:flex-[2.4]">
-              {/* Sport Filter */}
-              <div className="flex-1 relative sm:border-r border-t sm:border-t-0 border-white/5 flex items-center group">
-                <div className="absolute left-4 pointer-events-none hidden sm:block">
-                  <Dribbble size={14} className="text-gray-500" />
-                </div>
-                <select 
-                  className="w-full h-full bg-transparent appearance-none text-[11px] font-bold text-white uppercase tracking-tight pl-4 sm:pl-11 pr-8 py-4 outline-none cursor-pointer"
-                  value={selectedSport}
-                  onChange={(e) => setSelectedSport(e.target.value)}
-                >
-                  {sports.map(sport => (
-                    <option className="bg-[#0a0a0a] text-white" key={sport} value={sport}>{sport}</option>
-                  ))}
-                </select>
-                <ChevronDown size={12} className="absolute right-4 text-gray-500 pointer-events-none" />
-              </div>
-
-              {/* Role Filter */}
-              <div className="flex-1 relative border-t sm:border-t-0 border-white/5 flex items-center group xl:border-r">
-                <div className="absolute left-4 pointer-events-none hidden sm:block">
-                  <Filter size={14} className="text-gray-500" />
-                </div>
-                <select 
-                  className="w-full h-full bg-transparent appearance-none text-[11px] font-bold text-white uppercase tracking-tight pl-4 sm:pl-11 pr-8 py-4 outline-none cursor-pointer"
-                  value={selectedRole}
-                  onChange={(e) => setSelectedRole(e.target.value)}
-                >
-                  {roles.map(role => (
-                    <option className="bg-[#0a0a0a] text-white" key={role} value={role}>{role === "All" ? "All Roles" : role + "s"}</option>
-                  ))}
-                </select>
-                <ChevronDown size={12} className="absolute right-4 text-gray-500 pointer-events-none" />
-              </div>
-            </div>
-
-            <div className="flex flex-col sm:flex-row flex-[3] xl:flex-[2.4]">
-              {/* State Filter */}
-              <div className="flex-1 relative sm:border-r border-t xl:border-t-0 border-white/5 flex items-center group">
-                <div className="absolute left-4 pointer-events-none hidden sm:block">
-                  <MapPin size={14} className="text-gray-500" />
-                </div>
-                <select
-                  className="w-full h-full bg-transparent appearance-none text-[11px] font-bold text-white uppercase tracking-tight pl-4 sm:pl-11 pr-8 py-4 outline-none cursor-pointer"
-                  value={stateFilter}
-                  onChange={(e) => setStateFilter(e.target.value)}
-                >
-                  <option className="bg-[#0a0a0a] text-white" value="All">All States</option>
-                  {availableStates.map(state => (
-                    <option className="bg-[#0a0a0a] text-white" key={state} value={state}>{state}</option>
-                  ))}
-                </select>
-                <ChevronDown size={12} className="absolute right-4 text-gray-500 pointer-events-none" />
-              </div>
-
-              {/* City Filter */}
-              <div className="flex-1 relative border-t xl:border-t-0 sm:border-t-0 border-white/5 flex items-center group">
-                <div className="absolute left-4 pointer-events-none hidden sm:block">
-                  <MapPin size={14} className="text-gray-500" />
-                </div>
-                <select
-                  className="w-full h-full bg-transparent appearance-none text-[11px] font-bold text-white uppercase tracking-tight pl-4 sm:pl-11 pr-8 py-4 outline-none cursor-pointer disabled:opacity-40"
-                  value={cityFilter}
-                  onChange={(e) => setCityFilter(e.target.value)}
-                  disabled={stateFilter === "All" || availableCities.length === 0}
-                >
-                  <option className="bg-[#0a0a0a] text-white" value="All">All Cities</option>
-                  {availableCities.map(city => (
-                    <option className="bg-[#0a0a0a] text-white" key={city} value={city}>{city}</option>
-                  ))}
-                </select>
-                <ChevronDown size={12} className="absolute right-4 text-gray-500 pointer-events-none" />
-              </div>
+      {/* Search & Filters */}
+      <div className="max-w-7xl mx-auto px-4 mb-8">
+        <div className="max-w-5xl mx-auto">
+          {/* Search Input */}
+          <div 
+            onClick={() => navigate('/search')}
+            className="w-full bg-[#1A1A1A] rounded-[10px] p-1.5 flex items-center mb-6 shadow-lg border border-white/5 cursor-pointer hover:bg-white/5 transition-colors"
+          >
+            <Search className="text-gray-400 ml-4 mr-2" size={20} />
+            <div className="w-full text-white/50 text-[15px] py-3 tracking-wide select-none">
+              Search community posts or players...
             </div>
           </div>
-        </div>
+
+          {/* Filters Pills */}
+          <div className="flex gap-3 overflow-x-auto no-scrollbar mb-8 pb-2">
+            {roles.map((role) => (
+              <button
+                key={role}
+                onClick={() => setSelectedRole(role)}
+                className={`px-6 py-2 rounded-[8px] text-[13px] font-medium whitespace-nowrap transition-colors border ${selectedRole === role
+                    ? "bg-[#BFF367] text-black border-[#BFF367]"
+                    : "bg-[#222222] text-white/80 border-white/5 hover:bg-[#333333]"
+                  }`}
+              >
+                {role === "All" ? "All Roles" : role + "s"}
+              </button>
+            ))}
+          </div>
+
+          {/* Categories Horizontal Scroll */}
+          <div className="flex gap-4 overflow-x-auto no-scrollbar mb-12 pb-4">
+            {[
+              { name: "ALL SPORTS", emoji: "🏆" },
+              { name: "FOOTBALL", emoji: "⚽" },
+              { name: "CRICKET", emoji: "🏏" },
+              { name: "BADMINTON", emoji: "🏸" },
+              { name: "TENNIS", emoji: "🎾" },
+              { name: "PICKLEBALL", emoji: "🏓" }
+            ].map((sport) => (
+              <div
+                key={sport.name}
+                onClick={() => setSelectedSport(sport.name)}
+                className={`min-w-[80px] h-[80px] rounded-2xl flex flex-col items-center justify-center p-2 cursor-pointer shadow-md transition-all shrink-0 ${selectedSport === sport.name
+                    ? "bg-[#BFF367] scale-105 ring-2 ring-[#BFF367]/50"
+                    : "bg-white hover:scale-105"
+                  }`}
+              >
+                <span className="text-4xl">{sport.emoji}</span>
+              </div>
+            ))}
+          </div>
+
+          {/* Ads Space */}
+          <div className="w-full h-[180px] sm:h-[240px] rounded-xl overflow-hidden mb-8 relative cursor-pointer group bg-[#111]">
+            <img src="/banner-1.png" alt="Advertisement" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 opacity-80" onError={(e) => { e.target.onerror = null; e.target.src = 'https://images.unsplash.com/photo-1593341646782-e0b495cff86d?q=80&w=1200&auto=format&fit=crop'; }} />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent flex flex-col justify-end p-6">
+              <h3 className="text-white font-bold text-2xl sm:text-3xl max-w-[250px] leading-tight">20% Off Coaching Packages</h3>
+            </div>
+          </div>
 
         {/* Grid Content */}
         {loading ? (
@@ -449,8 +430,8 @@ export default function FindProfessionals() {
         ) : (
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 xl:grid-cols-6 gap-3 md:gap-4">
             {professionals.map((pro) => (
-              <div 
-                key={pro.id || pro._id} 
+              <div
+                key={pro.id || pro._id}
                 className="group cursor-pointer"
                 onClick={() => navigate(`/professionals/${pro.id || pro._id}`)}
               >
@@ -458,9 +439,9 @@ export default function FindProfessionals() {
                   {/* Image Box */}
                   <div className="relative aspect-[1/1.2] rounded-md overflow-hidden block mb-3 bg-[#161618]">
                     {pro.profilePicture ? (
-                      <img 
-                        src={pro.profilePicture} 
-                        alt={pro.name} 
+                      <img
+                        src={pro.profilePicture}
+                        alt={pro.name}
                         className="w-full h-full object-cover"
                       />
                     ) : (
@@ -482,10 +463,10 @@ export default function FindProfessionals() {
                     {/* Role Badges */}
                     <div className="absolute top-2 left-2">
                       <div className="px-1.5 py-0.5 rounded-[4px] bg-black/85 border border-white/10 flex items-center justify-center text-[#55DEE8] text-[9px] font-black tracking-wider gap-1">
-                        {pro.role === 'umpire' ? <Shield size={8} /> : 
-                         pro.role === 'streamer' ? <Video size={8} /> : 
-                         pro.role === 'scorer' ? <Activity size={8} /> : 
-                         <Trophy size={8} />}
+                        {pro.role === 'umpire' ? <Shield size={8} /> :
+                          pro.role === 'streamer' ? <Video size={8} /> :
+                            pro.role === 'scorer' ? <Activity size={8} /> :
+                              <Trophy size={8} />}
                         <span className="uppercase">{pro.role}</span>
                       </div>
                     </div>
@@ -501,7 +482,7 @@ export default function FindProfessionals() {
                         <Check size={6} strokeWidth={4} className="text-white" />
                       </div>
                     </div>
-                    
+
                     <p className="text-white/40 text-[9px] font-medium truncate mb-2">
                       {pro.businessDetails?.specialization || "Generalist"} • {pro.businessDetails?.experience || "3+ yrs"}
                     </p>
@@ -521,33 +502,36 @@ export default function FindProfessionals() {
             ))}
           </div>
         )}
+        </div>
       </div>
 
       {/* ── Floating Request Match CTA Button ────────────────────────── */}
-      <button
-        onClick={() => {
-          if (!isLoggedIn) {
-            toast.error("Please login to request matchmaking");
-            navigate("/login");
-            return;
-          }
-          setShowMatchModal(true);
-        }}
-        className="fixed bottom-8 right-8 z-40 flex items-center gap-2.5 px-6 py-3.5 rounded-full bg-gradient-to-r from-[#55DEE8] to-[#BFF367] text-black font-black text-xs uppercase tracking-widest shadow-[0_8px_32px_rgba(85,222,232,0.3)] hover:shadow-[0_8px_40px_rgba(85,222,232,0.5)] hover:scale-105 active:scale-95 transition-all duration-300 group"
-      >
-        <Zap size={16} className="group-hover:animate-pulse" />
-        Request Match
-      </button>
+      {!showMatchModal && (
+        <button
+          onClick={() => {
+            if (!isLoggedIn) {
+              toast.error("Please login to request matchmaking");
+              navigate("/login");
+              return;
+            }
+            setShowMatchModal(true);
+          }}
+          className="fixed bottom-24 md:bottom-8 left-1/2 -translate-x-1/2 z-[60] flex items-center gap-2.5 px-6 py-3.5 rounded-full bg-gradient-to-r from-[#55DEE8] to-[#BFF367] text-black font-black text-xs uppercase tracking-widest shadow-[0_8px_32px_rgba(85,222,232,0.3)] hover:shadow-[0_8px_40px_rgba(85,222,232,0.5)] hover:scale-105 active:scale-95 transition-all duration-300 group"
+        >
+          <Zap size={16} className="group-hover:animate-pulse" />
+          Request Match
+        </button>
+      )}
 
       {/* ── Match Request Modal ──────────────────────────────────────── */}
       {showMatchModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
           {/* Backdrop */}
-          <div 
+          <div
             className="absolute inset-0 bg-black/80 backdrop-blur-sm"
             onClick={() => !isCreatingRequest && setShowMatchModal(false)}
           />
-          
+
           {/* Modal Content */}
           <div className="relative w-full max-w-lg max-h-[90vh] overflow-y-auto bg-[#0a0a0c] border border-white/10 rounded-2xl shadow-[0_24px_80px_rgba(85,222,232,0.1)] animate-in fade-in zoom-in-95 duration-300">
             {/* Modal Header */}
@@ -561,8 +545,8 @@ export default function FindProfessionals() {
                   <p className="text-[10px] text-white/50">On-demand matching for coaches, umpires & scorers.</p>
                 </div>
               </div>
-              <button 
-                onClick={() => !isCreatingRequest && setShowMatchModal(false)} 
+              <button
+                onClick={() => !isCreatingRequest && setShowMatchModal(false)}
                 className="p-2 rounded-lg hover:bg-white/5 text-white/40 hover:text-white transition-colors"
               >
                 <X size={18} />
@@ -570,7 +554,23 @@ export default function FindProfessionals() {
             </div>
 
             {/* Modal Body */}
-            <form onSubmit={handleRequestMatch} className="p-5 sm:p-6 space-y-5">
+            {isCreatingRequest ? (
+              <div className="p-10 sm:p-16 flex flex-col items-center justify-center space-y-8 animate-in fade-in zoom-in duration-300 min-h-[400px]">
+                <div className="relative flex items-center justify-center w-32 h-32">
+                  <div className="absolute inset-0 border-[3px] border-[#55DEE8] rounded-full animate-ping opacity-75"></div>
+                  <div className="absolute inset-2 border-[3px] border-[#BFF367] rounded-full animate-ping opacity-60" style={{ animationDelay: '0.2s' }}></div>
+                  <div className="absolute inset-4 border-[3px] border-white/20 rounded-full animate-ping opacity-50" style={{ animationDelay: '0.4s' }}></div>
+                  <div className="relative bg-[#0d0d0e] rounded-full p-5 border border-white/10 z-10 shadow-[0_0_40px_rgba(85,222,232,0.4)]">
+                    <Search size={40} className="text-[#55DEE8] animate-pulse" />
+                  </div>
+                </div>
+                <div className="text-center space-y-3">
+                  <h3 className="text-xl sm:text-2xl font-black text-white uppercase tracking-widest animate-pulse">Finding Pro's...</h3>
+                  <p className="text-xs sm:text-sm text-white/50 max-w-[280px] mx-auto leading-relaxed">Analyzing your request and matching with the best professionals nearby</p>
+                </div>
+              </div>
+            ) : (
+              <form onSubmit={handleRequestMatch} className="p-5 sm:p-6 space-y-5">
               {/* Roles Selection — Compact Inline Chips */}
               <div>
                 <label className="text-[10px] font-black uppercase text-white/50 tracking-wider block mb-2">Roles</label>
@@ -582,11 +582,10 @@ export default function FindProfessionals() {
                         key={roleVal}
                         type="button"
                         onClick={() => handleToggleRole(roleVal)}
-                        className={`px-3.5 py-1.5 rounded-full text-[10px] font-bold uppercase tracking-wider transition-all flex items-center gap-1.5 ${
-                          isSelected 
-                            ? "bg-[#55DEE8]/15 border border-[#55DEE8] text-[#55DEE8]" 
+                        className={`px-3.5 py-1.5 rounded-full text-[10px] font-bold uppercase tracking-wider transition-all flex items-center gap-1.5 ${isSelected
+                            ? "bg-[#55DEE8]/15 border border-[#55DEE8] text-[#55DEE8]"
                             : "bg-white/5 border border-white/10 text-white/50 hover:border-white/25 hover:text-white/70"
-                        }`}
+                          }`}
                       >
                         {isSelected && <Check size={10} strokeWidth={3} />}
                         {roleVal}
@@ -599,7 +598,7 @@ export default function FindProfessionals() {
               {/* Venue Selector */}
               <div>
                 <label className="text-[10px] font-black uppercase text-white/50 tracking-wider block mb-2">Venue / Location</label>
-                <div className="space-y-3">
+                <div className="space-y-3 relative">
                   <select
                     value={selectedGroundId}
                     onChange={(e) => {
@@ -611,7 +610,7 @@ export default function FindProfessionals() {
                         setShowLocationSearchModal(true);
                       }
                     }}
-                    className="w-full bg-black border border-white/10 rounded-lg p-3 text-xs font-bold text-white focus:border-[#55DEE8] outline-none"
+                    className="w-full bg-black border border-white/10 rounded-lg p-3 pr-24 text-xs font-bold text-white focus:border-[#55DEE8] outline-none appearance-none"
                   >
                     <option value="">-- Choose Venue/Ground --</option>
                     {grounds.map((g) => (
@@ -619,33 +618,37 @@ export default function FindProfessionals() {
                         {g.name} - {g.city}, {g.state}
                       </option>
                     ))}
-                    <option value="custom">📍 Search by Location</option>
+                    <option value="custom">
+                      {customLocation.address ? `📍 ${customLocation.address.substring(0, 45)}${customLocation.address.length > 45 ? '...' : ''}` : "📍 Search by Location"}
+                    </option>
                   </select>
 
-                  {selectedGroundId === "custom" && (
+                  <div className="absolute right-3 top-0 bottom-0 flex items-center pointer-events-none">
+                    {selectedGroundId === "custom" && customLocation.address ? (
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setShowLocationSearchModal(true);
+                        }}
+                        className="text-[9px] font-bold text-[#55DEE8] hover:text-white px-3 py-1.5 rounded bg-[#55DEE8]/10 hover:bg-[#55DEE8]/20 transition-colors pointer-events-auto mr-3"
+                      >
+                        CHANGE
+                      </button>
+                    ) : null}
+                    <ChevronDown size={16} className="text-white/50" />
+                  </div>
+
+                  {selectedGroundId === "custom" && !customLocation.address && (
                     <div className="p-4 rounded-lg bg-black border border-white/5 space-y-3 animate-in fade-in duration-200">
-                      {customLocation.latitude && customLocation.longitude ? (
-                        <div className="flex items-center gap-2 px-3 py-2 bg-[#55DEE8]/5 border border-[#55DEE8]/15 rounded-lg">
-                          <CheckCircle size={14} className="text-[#55DEE8] shrink-0" />
-                          <p className="text-[11px] text-white/70 truncate flex-1">{customLocation.address || "Location Selected"}</p>
-                          <button
-                            type="button"
-                            onClick={() => setShowLocationSearchModal(true)}
-                            className="text-[9px] font-bold text-[#55DEE8] hover:text-white px-2 py-1 rounded bg-[#55DEE8]/10 hover:bg-[#55DEE8]/20 transition-colors"
-                          >
-                            CHANGE
-                          </button>
-                        </div>
-                      ) : (
-                        <button
-                          type="button"
-                          onClick={() => setShowLocationSearchModal(true)}
-                          className="w-full py-3 bg-white/5 hover:bg-white/10 border border-white/10 rounded-lg text-xs font-bold text-white transition-colors flex items-center justify-center gap-2"
-                        >
-                          <MapPin size={14} className="text-[#55DEE8]" />
-                          Open Location Search
-                        </button>
-                      )}
+                      <button
+                        type="button"
+                        onClick={() => setShowLocationSearchModal(true)}
+                        className="w-full py-3 bg-white/5 hover:bg-white/10 border border-white/10 rounded-lg text-xs font-bold text-white transition-colors flex items-center justify-center gap-2"
+                      >
+                        <MapPin size={14} className="text-[#55DEE8]" />
+                        Open Location Search
+                      </button>
                     </div>
                   )}
                 </div>
@@ -654,34 +657,52 @@ export default function FindProfessionals() {
               {/* Schedule / Timing Selection */}
               <div>
                 <label className="text-[10px] font-black uppercase text-white/50 tracking-wider block mb-2">Match Schedule</label>
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                  <div>
-                    <span className="text-[9px] text-white/40 font-bold uppercase mb-1 block">Date</span>
+                <div className="flex items-center bg-[#111] border border-white/10 rounded-lg divide-x divide-white/10 overflow-hidden">
+                  <div className="flex-[1.2] p-2.5 relative group hover:bg-white/5 transition-colors">
+                    <span className="text-[8px] text-[#55DEE8] font-bold uppercase mb-1 flex items-center gap-1">
+                      <Calendar size={10} /> Date
+                    </span>
+                    <div className="text-[11px] sm:text-xs font-bold text-white group-hover:text-[#55DEE8] transition-colors truncate">
+                      {formatDisplayDate(matchDate)}
+                    </div>
                     <input
                       type="date"
                       value={matchDate}
                       onChange={(e) => setMatchDate(e.target.value)}
-                      className="w-full bg-black border border-white/10 rounded-lg p-2.5 text-xs font-bold text-white focus:border-[#55DEE8] outline-none [color-scheme:dark]"
+                      onClick={(e) => e.target.showPicker && e.target.showPicker()}
+                      className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
                       required
                     />
                   </div>
-                  <div>
-                    <span className="text-[9px] text-white/40 font-bold uppercase mb-1 block">Start Time</span>
+                  <div className="flex-1 p-2.5 relative group hover:bg-white/5 transition-colors">
+                    <span className="text-[8px] text-white/40 font-bold uppercase mb-1 flex items-center gap-1">
+                      <Clock size={10} /> Start
+                    </span>
+                    <div className="text-[11px] sm:text-xs font-bold text-white truncate">
+                      {formatDisplayTime(matchStartTime)}
+                    </div>
                     <input
                       type="time"
                       value={matchStartTime}
                       onChange={(e) => setMatchStartTime(e.target.value)}
-                      className="w-full bg-black border border-white/10 rounded-lg p-2.5 text-xs font-bold text-white focus:border-[#55DEE8] outline-none [color-scheme:dark]"
+                      onClick={(e) => e.target.showPicker && e.target.showPicker()}
+                      className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
                       required
                     />
                   </div>
-                  <div>
-                    <span className="text-[9px] text-white/40 font-bold uppercase mb-1 block">End Time</span>
+                  <div className="flex-1 p-2.5 relative group hover:bg-white/5 transition-colors">
+                    <span className="text-[8px] text-white/40 font-bold uppercase mb-1 flex items-center gap-1">
+                      <Clock size={10} /> End
+                    </span>
+                    <div className="text-[11px] sm:text-xs font-bold text-white truncate">
+                      {formatDisplayTime(matchEndTime)}
+                    </div>
                     <input
                       type="time"
                       value={matchEndTime}
                       onChange={(e) => setMatchEndTime(e.target.value)}
-                      className="w-full bg-black border border-white/10 rounded-lg p-2.5 text-xs font-bold text-white focus:border-[#55DEE8] outline-none [color-scheme:dark]"
+                      onClick={(e) => e.target.showPicker && e.target.showPicker()}
+                      className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
                       required
                     />
                   </div>
@@ -718,7 +739,7 @@ export default function FindProfessionals() {
               <button
                 type="submit"
                 disabled={isCreatingRequest}
-                className="w-full py-4 rounded-lg bg-gradient-to-r from-[#55DEE8] to-[#BFF367] text-black font-black text-xs uppercase tracking-widest hover:opacity-90 active:scale-[0.98] transition-all flex items-center justify-center gap-2"
+                className="w-full py-4 rounded-lg bg-gradient-to-r from-[#55DEE8] to-[#BFF367] text-black font-black text-xs uppercase tracking-widest hover:opacity-90 active:scale-[0.98] transition-all flex items-center justify-center gap-2 shadow-[0_4px_20px_rgba(85,222,232,0.2)] hover:shadow-[0_4px_25px_rgba(85,222,232,0.4)]"
               >
                 {isCreatingRequest ? (
                   <>
@@ -726,7 +747,7 @@ export default function FindProfessionals() {
                     Initiating Match...
                   </>
                 ) : (
-                  "⚡ REQUEST PROFESSIONAL NOW"
+                  "⚡ FIND PRO'S"
                 )}
               </button>
 
@@ -739,6 +760,7 @@ export default function FindProfessionals() {
                 for OTP verification and status updates.
               </p>
             </form>
+            )}
           </div>
         </div>
       )}
@@ -818,13 +840,13 @@ export default function FindProfessionals() {
                     })}
                   </div>
                 )}
-                
+
                 {locationQuery.length >= 3 && !locationSearching && locationResults.length === 0 && (
                   <div className="mt-4 p-4 rounded-lg bg-white/5 border border-white/10 text-center">
                     <p className="text-xs text-white/50">No locations found. Try a different search term.</p>
                   </div>
                 )}
-                
+
                 {locationQuery.length < 3 && (
                   <div className="mt-6 flex flex-col items-center justify-center opacity-30 text-center px-6">
                     <MapPin size={32} className="mb-3 text-white" />

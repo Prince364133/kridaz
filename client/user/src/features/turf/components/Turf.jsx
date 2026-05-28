@@ -116,8 +116,8 @@ const Turf = () => {
     <div className="min-h-screen bg-black text-white pb-20 overflow-x-hidden">
       <div className="max-w-screen-2xl mx-auto px-6 pt-0 relative z-10">
 
-        {/* ── Sticky Header (Search) ──────────────────────── */}
-        <div className="sticky z-40 bg-black/95 backdrop-blur-md pt-3 pb-4 -mx-6 px-6 mb-4 border-b border-white/5 top-16 sm:top-20">
+        {/* ── Search Bar (Non-Sticky) ──────────────────────── */}
+        <div className="pt-3 pb-4 mb-4">
           <SearchTurf onSearch={handleSearch} userLocation={userLocation} />
         </div>
 
