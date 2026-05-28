@@ -394,7 +394,7 @@ export default function Home() {
         to="/professionals?role=scorer"
         className="relative rounded-[6px] px-3.5 py-2 overflow-visible force-overflow-visible flex flex-col justify-center h-[72px] cursor-pointer group hover:scale-[1.02] transition-all duration-300 shadow-xl border border-[#EBEBEB]/15"
         style={{ 
-          background: "radial-gradient(circle at 80% 50%, rgba(255, 255, 255, 0.3) 0%, rgba(255, 255, 255, 0) 50%), radial-gradient(circle at 80% 50%, #FFA2FF 0%, #A726E2 50%, #220038 100%)",
+          background: "radial-gradient(circle at 80% 50%, rgba(255, 255, 255, 0.3) 0%, rgba(255, 255, 255, 0) 50%), radial-gradient(circle at 80% 50%, #FF9800 0%, #E65100 45%, #3E1700 100%)",
           overflow: "visible"
         }}
       >
@@ -403,7 +403,7 @@ export default function Home() {
           Scorer
         </span>
         <img 
-          src="/3d_scorer.png" 
+          src="/3d_scoreboard_v2.png" 
           alt="Scorer Icon" 
           className="absolute -right-2 -top-[14px] w-[94px] h-[94px] object-contain pointer-events-none transform group-hover:scale-105 group-hover:-translate-y-0.5 transition-all duration-300 z-10"
           style={{ mixBlendMode: "screen" }}
@@ -435,7 +435,7 @@ export default function Home() {
         to="/professionals"
         className="relative rounded-[6px] px-3.5 py-2 overflow-visible force-overflow-visible flex flex-col justify-center h-[72px] cursor-pointer group hover:scale-[1.02] transition-all duration-300 shadow-xl border border-[#EBEBEB]/15"
         style={{ 
-          background: "radial-gradient(circle at 80% 50%, rgba(255, 255, 255, 0.3) 0%, rgba(255, 255, 255, 0) 50%), radial-gradient(circle at 80% 50%, #FF9800 0%, #E65100 45%, #3E1700 100%)",
+          background: "radial-gradient(circle at 80% 50%, rgba(255, 255, 255, 0.3) 0%, rgba(255, 255, 255, 0) 50%), radial-gradient(circle at 80% 50%, #FFA2FF 0%, #A726E2 50%, #220038 100%)",
           overflow: "visible"
         }}
       >
@@ -444,7 +444,7 @@ export default function Home() {
           Pros
         </span>
         <img 
-          src="/3d_professional.png" 
+          src="/3d_professional_v2.png" 
           alt="Pros Icon" 
           className="absolute -right-2 -top-[16px] w-[94px] h-[94px] object-contain pointer-events-none transform group-hover:scale-105 group-hover:-translate-y-0.5 transition-all duration-300 z-10"
           style={{ mixBlendMode: "screen" }}
