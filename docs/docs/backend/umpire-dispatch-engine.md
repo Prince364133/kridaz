@@ -100,8 +100,8 @@ Umpire reliability is tracked via a points system. High points translate to high
 | **Booking Accepted** | `+1` | Applied upon successful session checkout. |
 | **Review Received** | `+1` | Applied when customer rating is $\ge 4.0$ stars. |
 | **Skip Booking** | `-0.5` | Applied on 30-second notification timeout. |
-| **Cancellation (>72 Hrs)**| `-0.5` | Allowed only outside the 72-hour match window. |
-| **Cancellation (<72 Hrs)**| *Blocked* | Umpires cannot cancel matches within 72 hours of kick-off. |
+| **Cancellation (More than 72 Hrs)**| `-0.5` | Allowed only outside the 72-hour match window. |
+| **Cancellation (Less than 72 Hrs)**| *Blocked* | Umpires cannot cancel matches within 72 hours of kick-off. |
 | **Rescheduling Exemption**| `0` | If the match host reschedules, the 72-hour window resets. Umpires are not penalized for schedule changes they did not cause. |
 | **No-Show** | `-5` | Flagged if the host reports a referee no-show. |
 | **Double Skip (Forced Offline)**| *Auto-Offline*| Skipping 2 bookings in a row sets status to `offline`. |
