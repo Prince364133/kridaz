@@ -134,11 +134,10 @@ const socketConfig = (server) => {
         );
 
         if (!socket.lastDbLocationWrite || now - socket.lastDbLocationWrite > 30000) {
-          // Update PostGIS location in Postgres
+          // Update location in Postgres
           await prisma.$executeRaw`
               UPDATE "User" 
-              SET "geoPoint" = ST_GeomFromText(${`POINT(${lng} ${lat})`}, 4326)::geography,
-                  latitude = ${lat},
+              SET latitude = ${lat},
                   longitude = ${lng}
               WHERE id = ${socket.userId}
             `;
