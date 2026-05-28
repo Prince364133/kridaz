@@ -228,7 +228,7 @@ const MapInner = ({ nearbyPlayers, onPlayerClick, userLocation, radiusKm, onMapM
     className: 'pulsing-marker-container',
     html: `
       <div class="pulsing-marker">
-        <img src="${userLocation?.profilePicture || 'https://pngimg.com/d/cricket_PNG102.png'}" />
+        <img src="${getValidAvatar(userLocation?.profilePicture)}" onerror="this.src='https://pngimg.com/d/cricket_PNG102.png'; this.onerror=null;" />
       </div>
     `,
     iconSize: [24, 24],
