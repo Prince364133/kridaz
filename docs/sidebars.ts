@@ -47,6 +47,7 @@ const sidebars: SidebarsConfig = {
         'backend/recommendation-engine',
         'backend/ground-recommendation-postgres-plan',
         'backend/professional-profiles-spec',
+        'backend/umpire-dispatch-engine',
       ],
     },
     {
