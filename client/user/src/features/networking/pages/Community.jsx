@@ -972,7 +972,8 @@ const Community = ({ children, onSearchActive }) => {
       <div className="max-w-[1500px] mx-auto w-full">
         <div className="grid grid-cols-1 gap-6">
 
-          {!debouncedSearchQuery.trim() && children}
+
+
 
           {/* ================= FEED (centered, full-width on desktop) ================= */}
           <div className={`max-w-3xl mx-auto w-full transition-all duration-300 ${activeFilter === 'Reels' ? 'h-[calc(100vh-100px)] sticky top-[80px] max-w-none' : 'space-y-2'}`}>
@@ -985,7 +986,7 @@ const Community = ({ children, onSearchActive }) => {
 
                 {/* Stories Section */}
                 {!debouncedSearchQuery.trim() && (
-                  <div className="bg-[#0A0A0A] border border-white/5 rounded-[8px] p-5">
+                  <div className="py-2 px-1">
                     <div className="flex gap-4 overflow-x-auto no-scrollbar scroll-smooth items-center pb-2">
 
                       {/* Add Story */}
@@ -1043,6 +1044,8 @@ const Community = ({ children, onSearchActive }) => {
                     </div>
                   </div>
                 )}
+
+                {!debouncedSearchQuery.trim() && children}
 
                 {/* Filters Row */}
                 {!debouncedSearchQuery.trim() && (
