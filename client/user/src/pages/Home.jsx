@@ -569,7 +569,7 @@ export default function Home() {
  <section className="py-6 mb-6 w-full">
  <div className="w-full">
  {/* Refined Section Header */}
- <div className="relative flex flex-col md:flex-row md:items-center justify-between gap-8 mb-12 border-b border-white/5 pb-8">
+ <div className="relative flex flex-col md:flex-row md:items-center justify-between gap-8 mb-6 border-b border-white/5 pb-4">
  <div className="relative">
  <div className="absolute -left-6 top-1/2 -translate-y-1/2 w-1.5 h-12 rounded-full shadow-[0_0_20px_rgba(85,222,232,0.4)] hidden md:block" style={{ background: GRAD }}></div>
  <h2 className="text-2xl md:text-4xl font-black text-white uppercase tracking-tighter leading-none" style={{ fontFamily: "'Open Sans', sans-serif" }}>
@@ -734,7 +734,7 @@ export default function Home() {
  {featureFlags['join_games'] && (
  <section className="py-6 mb-6 w-full">
  <div className="w-full">
- <div className="relative flex flex-col md:flex-row md:items-center justify-between gap-8 mb-12 border-b border-white/5 pb-10">
+ <div className="relative flex flex-col md:flex-row md:items-center justify-between gap-8 mb-6 border-b border-white/5 pb-4">
  <div className="relative">
  <div className="absolute -left-6 top-1/2 -translate-y-1/2 w-1.5 h-16 rounded-full shadow-[0_0_25px_rgba(85,222,232,0.5)] hidden md:block" style={{ background: GRAD }}></div>
  <h2 className="text-3xl md:text-5xl lg:text-6xl font-black text-white uppercase tracking-tighter leading-none" style={{ fontFamily: "'Open Sans', sans-serif" }}>
