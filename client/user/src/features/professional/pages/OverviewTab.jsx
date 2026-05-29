@@ -349,7 +349,8 @@ const OverviewTab = ({ role, profile }) => {
                 onChange={(update) => setCustomDates(prev => ({...prev, bookings: update}))}
                 isClearable={true}
                 placeholderText="Select date range"
-                className="bg-[#1A1D27] text-[10px] text-white border border-[#2D2D2D] rounded px-2 py-1 outline-none w-full z-50 focus:border-[#BFF367] transition-colors"
+                className="bg-black text-xs text-white border border-[#2D2D2D] rounded-lg px-3 py-1.5 outline-none w-full z-50 focus:border-[#BFF367] transition-colors shadow-lg"
+                withPortal
               />
             </div>
           )}
@@ -391,7 +392,8 @@ const OverviewTab = ({ role, profile }) => {
                 onChange={(update) => setCustomDates(prev => ({...prev, earnings: update}))}
                 isClearable={true}
                 placeholderText="Select date range"
-                className="bg-[#1A1D27] text-[10px] text-white border border-[#2D2D2D] rounded px-2 py-1 outline-none w-full z-50 focus:border-[#BFF367] transition-colors"
+                className="bg-black text-xs text-white border border-[#2D2D2D] rounded-lg px-3 py-1.5 outline-none w-full z-50 focus:border-[#BFF367] transition-colors shadow-lg"
+                withPortal
               />
             </div>
           )}
@@ -433,7 +435,8 @@ const OverviewTab = ({ role, profile }) => {
                 onChange={(update) => setCustomDates(prev => ({...prev, time: update}))}
                 isClearable={true}
                 placeholderText="Select date range"
-                className="bg-[#1A1D27] text-[10px] text-white border border-[#2D2D2D] rounded px-2 py-1 outline-none w-full z-50 focus:border-[#BFF367] transition-colors"
+                className="bg-black text-xs text-white border border-[#2D2D2D] rounded-lg px-3 py-1.5 outline-none w-full z-50 focus:border-[#BFF367] transition-colors shadow-lg"
+                withPortal
               />
             </div>
           )}
@@ -476,7 +479,8 @@ const OverviewTab = ({ role, profile }) => {
                 onChange={(update) => setCustomDates(prev => ({...prev, rating: update}))}
                 isClearable={true}
                 placeholderText="Select date range"
-                className="bg-[#1A1D27] text-[10px] text-white border border-[#2D2D2D] rounded px-2 py-1 outline-none w-full z-50 focus:border-[#BFF367] transition-colors"
+                className="bg-black text-xs text-white border border-[#2D2D2D] rounded-lg px-3 py-1.5 outline-none w-full z-50 focus:border-[#BFF367] transition-colors shadow-lg"
+                withPortal
               />
             </div>
           )}
