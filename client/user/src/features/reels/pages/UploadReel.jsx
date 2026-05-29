@@ -1,10 +1,11 @@
-﻿import React, { useState } from 'react';
-import { ChevronLeft, Upload, X, AlertCircle } from 'lucide-react';
+import React, { useState } from 'react';
+import { ChevronLeft, Upload, X, AlertCircle, Hash, Globe, MapPin, Video, Music } from 'lucide-react';
 import { useDispatch } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { startUpload } from '@redux/slices/mediaUploadSlice';
+
 const UploadReel = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
@@ -13,6 +14,7 @@ const UploadReel = () => {
   const [caption, setCaption] = useState('');
   const [hashtags, setHashtags] = useState('');
   const [isPreparing, setIsPreparing] = useState(false);
+  const [privacy, setPrivacy] = useState('Public');
 
   const handleFileChange = (e) => {
     const selectedFile = e.target.files[0];
@@ -44,81 +46,194 @@ const UploadReel = () => {
     navigate('/reels');
   };
 
+  const clearForm = () => {
+    setFile(null);
+    setPreview(null);
+    setCaption('');
+    setHashtags('');
+  };
+
   return (
-    <div className="min-h-screen bg-black text-white flex flex-col relative overflow-hidden">
+    <div className="min-h-screen bg-[#050505] text-white flex flex-col relative">
+      {/* Dynamic Background Blur (When preview exists) */}
+      <AnimatePresence>
+        {preview && (
+          <motion.div 
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="absolute inset-0 z-0 overflow-hidden pointer-events-none"
+          >
+            <div className="absolute inset-0 bg-black/80 z-10 backdrop-blur-3xl" />
+            <video src={preview} className="w-full h-full object-cover opacity-30 blur-3xl scale-110" muted loop autoPlay />
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       {/* Header */}
-      <div className="p-4 flex items-center gap-4 border-b border-white/10">
-        <button onClick={() => navigate(-1)} className="p-1">
-          <ChevronLeft size={28} />
+      <div className="relative z-10 px-4 md:px-8 h-20 flex items-center gap-4 border-b border-white/5 bg-[#0A0A0A]/80 backdrop-blur-xl">
+        <button onClick={() => navigate(-1)} className="p-2 bg-white/5 hover:bg-white/10 rounded-full transition-colors">
+          <ChevronLeft size={24} />
         </button>
-        <h1 className="text-xl font-bold">New Reel</h1>
+        <h1 className="text-xl font-black tracking-tight">Upload Short</h1>
       </div>
 
-      <div className="flex-1 p-6 flex flex-col gap-6 overflow-y-auto">
-        {/* Video Preview / Upload Area */}
-        <div className="relative aspect-[9/16] w-full max-w-sm mx-auto bg-white/5 rounded-[8px] border-2 border-dashed border-white/20 flex flex-col items-center justify-center overflow-hidden group">
-          {preview ? (
-            <>
-              <video src={preview} className="w-full h-full object-cover" controls={false} autoPlay muted loop />
-              <button 
-                onClick={() => { setFile(null); setPreview(null); }}
-                className="absolute top-4 right-4 p-2 bg-black/60 rounded-full hover:bg-black/80 transition-colors z-10"
+      <div className="relative z-10 flex-1 flex flex-col overflow-y-auto no-scrollbar">
+        {!preview ? (
+          /* Step 1: Upload Zone */
+          <motion.div 
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="flex-1 flex flex-col items-center justify-center p-6"
+          >
+            <label className="cursor-pointer group relative flex flex-col items-center justify-center w-full max-w-2xl aspect-[4/3] md:aspect-[21/9] border-2 border-dashed border-white/10 hover:border-[#BFF367]/50 rounded-[24px] bg-white/5 hover:bg-[#BFF367]/5 transition-all overflow-hidden shadow-2xl">
+              <div className="absolute inset-0 bg-gradient-to-br from-[#BFF367]/10 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+              
+              <motion.div 
+                whileHover={{ scale: 1.1 }}
+                whileTap={{ scale: 0.95 }}
+                className="p-6 bg-[#BFF367]/20 rounded-full text-[#BFF367] mb-6 shadow-[0_0_30px_rgba(191,243,103,0.2)]"
               >
-                <X size={20} />
-              </button>
-            </>
-          ) : (
-            <label className="cursor-pointer flex flex-col items-center gap-4 p-12 text-center w-full h-full justify-center">
-              <div className="p-4 bg-[#BFF367]/20 rounded-full text-[#BFF367]">
-                <Upload size={40} />
+                <Upload size={40} strokeWidth={2} />
+              </motion.div>
+              
+              <h3 className="text-2xl md:text-3xl font-black text-white mb-3">Select video to upload</h3>
+              <p className="text-white/50 text-sm md:text-base mb-6">Or drag and drop a file</p>
+              
+              <div className="flex gap-4 text-xs font-bold text-white/40 uppercase tracking-wider">
+                <span className="flex items-center gap-1.5"><Video size={14} /> MP4 or WebM</span>
+                <span className="flex items-center gap-1.5">•</span>
+                <span>Up to 100MB</span>
               </div>
-              <div>
-                <p className="font-bold text-lg">Select vertical video</p>
-                <p className="text-sm text-gray-400 mt-1">MP4 or WebM (Max 100MB)</p>
-              </div>
+              
               <input type="file" accept="video/*" className="hidden" onChange={handleFileChange} />
             </label>
-          )}
-        </div>
-
-        {/* Form Fields */}
-        <div className="flex flex-col gap-4 max-w-sm mx-auto w-full">
-          <div>
-            <label className="text-sm font-semibold text-gray-400 mb-1 block">Caption</label>
-            <textarea 
-              value={caption}
-              onChange={(e) => setCaption(e.target.value)}
-              placeholder="Write a catchy caption..."
-              className="w-full bg-white/5 border border-white/10 rounded-[8px] p-4 focus:outline-none focus:border-[#BFF367] transition-colors resize-none h-24"
-            />
-          </div>
-
-          <div>
-            <label className="text-sm font-semibold text-gray-400 mb-1 block">Hashtags</label>
-            <input 
-              type="text"
-              value={hashtags}
-              onChange={(e) => setHashtags(e.target.value)}
-              placeholder="#sports #kridaz #goals"
-              className="w-full bg-white/5 border border-white/10 rounded-[8px] p-4 focus:outline-none focus:border-[#BFF367] transition-colors"
-            />
-          </div>
-
-          <div className="bg-blue-500/10 border border-blue-500/20 rounded-[8px] p-4 flex gap-3">
-            <AlertCircle size={20} className="text-blue-400 shrink-0" />
-            <p className="text-xs text-blue-100 leading-relaxed">
-              Your video will be automatically optimized for mobile streaming. This might take a few minutes.
-            </p>
-          </div>
-
-          <button 
-            onClick={handleUpload}
-            disabled={!file || isPreparing}
-            className="w-full py-4 bg-[#BFF367] text-black font-bold rounded-[8px] disabled:opacity-50 disabled:cursor-not-allowed hover:bg-[#74b314] transition-colors mt-4"
+          </motion.div>
+        ) : (
+          /* Step 2: Details & Preview */
+          <motion.div 
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="flex-1 p-4 md:p-8"
           >
-            {isPreparing ? 'Preparing...' : 'Share Reel'}
-          </button>
-        </div>
+            <div className="max-w-5xl mx-auto grid grid-cols-1 md:grid-cols-[300px_1fr] lg:grid-cols-[340px_1fr] gap-6 md:gap-10">
+              
+              {/* Left: Video Preview */}
+              <div className="flex flex-col gap-4">
+                <div className="relative aspect-[9/16] w-full max-w-[280px] md:max-w-none mx-auto bg-black rounded-[20px] overflow-hidden shadow-2xl border border-white/10 group">
+                  <video src={preview} className="w-full h-full object-cover" controls autoPlay loop playsInline />
+                  
+                  {/* Remove Button */}
+                  <button 
+                    onClick={clearForm}
+                    className="absolute top-4 right-4 p-2 bg-black/60 rounded-full text-white/80 hover:text-white hover:bg-red-500/80 transition-all z-10 backdrop-blur-md opacity-100 md:opacity-0 md:group-hover:opacity-100"
+                    title="Remove video"
+                  >
+                    <X size={18} strokeWidth={2.5} />
+                  </button>
+                  
+                  {/* Overlay decorative gradient */}
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 md:group-hover:opacity-100 transition-opacity pointer-events-none flex items-end p-4">
+                    <div className="flex items-center gap-2">
+                      <Music size={14} className="text-white" />
+                      <span className="text-white text-xs font-semibold">Original Audio</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Right: Form Details */}
+              <div className="flex flex-col gap-6">
+                <div className="bg-[#0A0A0A]/80 border border-white/5 rounded-[24px] p-6 md:p-8 shadow-xl backdrop-blur-md">
+                  <h2 className="text-xl font-bold text-white mb-6">Short Details</h2>
+                  
+                  <div className="space-y-6">
+                    {/* Caption */}
+                    <div>
+                      <label className="text-sm font-bold text-white/70 mb-2 flex items-center gap-2 uppercase tracking-wider">
+                        Caption
+                      </label>
+                      <textarea 
+                        value={caption}
+                        onChange={(e) => setCaption(e.target.value)}
+                        placeholder="Write a catchy caption..."
+                        className="w-full bg-black/50 border border-white/10 rounded-[12px] p-4 text-white placeholder:text-white/20 focus:outline-none focus:border-[#BFF367] focus:ring-1 focus:ring-[#BFF367] transition-all resize-none h-32 text-sm"
+                      />
+                    </div>
+
+                    {/* Hashtags */}
+                    <div>
+                      <label className="text-sm font-bold text-white/70 mb-2 flex items-center gap-2 uppercase tracking-wider">
+                        <Hash size={16} className="text-[#BFF367]" />
+                        Hashtags
+                      </label>
+                      <input 
+                        type="text"
+                        value={hashtags}
+                        onChange={(e) => setHashtags(e.target.value)}
+                        placeholder="#sports #kridaz #goals"
+                        className="w-full bg-black/50 border border-white/10 rounded-[12px] p-4 text-white placeholder:text-white/20 focus:outline-none focus:border-[#BFF367] focus:ring-1 focus:ring-[#BFF367] transition-all text-sm"
+                      />
+                    </div>
+                    
+                    {/* Preferences */}
+                    <div className="grid grid-cols-2 gap-4 pt-2">
+                      <button 
+                        onClick={() => setPrivacy(privacy === 'Public' ? 'Private' : 'Public')}
+                        className="bg-black/50 border border-white/10 rounded-[12px] p-4 flex items-center gap-3 hover:border-white/30 transition-colors text-left"
+                      >
+                        <div className="p-2 bg-white/5 rounded-full shrink-0">
+                          <Globe size={18} className={privacy === 'Public' ? 'text-[#BFF367]' : 'text-white/50'} />
+                        </div>
+                        <div className="flex flex-col min-w-0">
+                          <span className="text-sm font-bold text-white truncate">{privacy}</span>
+                          <span className="text-xs text-white/40 truncate">
+                            {privacy === 'Public' ? 'Anyone can see' : 'Only you'}
+                          </span>
+                        </div>
+                      </button>
+                      
+                      <button className="bg-black/50 border border-white/10 rounded-[12px] p-4 flex items-center gap-3 hover:border-white/30 transition-colors text-left">
+                        <div className="p-2 bg-white/5 rounded-full shrink-0">
+                          <MapPin size={18} className="text-white/50" />
+                        </div>
+                        <div className="flex flex-col min-w-0">
+                          <span className="text-sm font-bold text-white truncate">Location</span>
+                          <span className="text-xs text-white/40 truncate">Add location</span>
+                        </div>
+                      </button>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Info Note */}
+                <div className="bg-[#BFF367]/5 border border-[#BFF367]/20 rounded-[16px] p-4 flex gap-4 items-start">
+                  <AlertCircle size={20} className="text-[#BFF367] shrink-0 mt-0.5" />
+                  <p className="text-sm text-[#BFF367]/80 leading-relaxed font-medium">
+                    Your video will be automatically optimized for streaming. High-quality encoding happens in the background.
+                  </p>
+                </div>
+
+                {/* Actions */}
+                <div className="flex gap-4 mt-auto pt-4 md:pt-0">
+                  <button 
+                    onClick={clearForm}
+                    className="flex-1 py-4 bg-white/5 hover:bg-white/10 text-white font-bold rounded-[12px] transition-colors"
+                  >
+                    Discard
+                  </button>
+                  <button 
+                    onClick={handleUpload}
+                    disabled={!file || isPreparing}
+                    className="flex-[2] py-4 bg-[#BFF367] text-black font-black uppercase tracking-wider rounded-[12px] disabled:opacity-50 disabled:cursor-not-allowed hover:bg-[#a6d855] transition-colors shadow-[0_0_20px_rgba(191,243,103,0.15)] hover:shadow-[0_0_30px_rgba(191,243,103,0.3)]"
+                  >
+                    {isPreparing ? 'Preparing...' : 'Share Short'}
+                  </button>
+                </div>
+              </div>
+            </div>
+          </motion.div>
+        )}
       </div>
     </div>
   );
