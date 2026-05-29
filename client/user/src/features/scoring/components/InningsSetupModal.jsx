@@ -62,22 +62,22 @@ const InningsSetupModal = ({
 
   return (
     <AnimatePresence>
-      <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center px-4 pb-6 sm:pb-0">
+      <div className="fixed inset-0 z-[100] flex items-end sm:items-center justify-center px-4 pb-6 sm:pb-0 font-inter">
         {/* Backdrop */}
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          className="absolute inset-0 bg-black/80 backdrop-blur-sm"
+          className="absolute inset-0 bg-black/90 backdrop-blur-md"
           onClick={onClose}
         />
 
         <motion.div
-          initial={{ y: 80, opacity: 0 }}
+          initial={{ y: '100%', opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
-          exit={{ y: 80, opacity: 0 }}
-          transition={{ type: 'spring', damping: 22 }}
-          className="relative w-full max-w-md bg-[#111] rounded-[8px] border border-white/10 overflow-hidden z-10"
+          exit={{ y: '100%', opacity: 0 }}
+          transition={{ type: 'spring', damping: 24 }}
+          className="relative w-full max-w-md bg-[#000] rounded-[12px] border border-white/5 overflow-hidden z-10 shadow-2xl"
         >
           {/* Header */}
           <div className="px-6 pt-6 pb-4 border-b border-white/10">
@@ -89,7 +89,7 @@ const InningsSetupModal = ({
                 </button>
               )}
             </div>
-            <h2 className="text-xl font-black tracking-tight text-white">{currentStep.label}</h2>
+            <h2 className="font-inter text-[24px] font-semibold tracking-tight uppercase text-white leading-tight">{currentStep.label}</h2>
 
             {/* Step dots */}
             <div className="flex gap-2 mt-4">
@@ -112,14 +112,14 @@ const InningsSetupModal = ({
               <button
                 key={player.userId}
                 onClick={() => handleSelect(player)}
-                className="w-full flex items-center gap-4 px-4 py-3.5 rounded-[8px] border border-white/8 bg-white/4 hover:border-yellow-500/50 hover:bg-yellow-500/8 transition-all group text-left"
+                className="w-full flex items-center gap-4 px-4 py-3.5 rounded-[8px] bg-white/5 hover:bg-yellow-500/10 transition-all group text-left"
               >
                 {/* Avatar */}
                 <div className="w-10 h-10 rounded-[8px] bg-neutral-800 flex items-center justify-center text-sm font-black text-yellow-500 shrink-0">
                   {player.name?.charAt(0)?.toUpperCase() || '?'}
                 </div>
                 <span className="flex-1 font-bold text-white text-sm">{player.name || 'Unnamed'}</span>
-                <ChevronRight size={16} className="text-neutral-600 group-hover:text-transparent bg-clip-text bg-gradient-to-r from-[#BFF367] to-[#BFF367] transition-colors" />
+                <ChevronRight size={16} className="text-neutral-600 group-hover:text-yellow-500 transition-colors" />
               </button>
             ))}
           </div>

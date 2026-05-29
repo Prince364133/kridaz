@@ -6,7 +6,7 @@ const ScoringPasswordModal = ({ matchId, actionLabel = 'Unlock Scoring App', onC
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
-  const THEME_COLOR = '#BFF367';
+  const THEME_COLOR = '#00C187';
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -47,7 +47,7 @@ const ScoringPasswordModal = ({ matchId, actionLabel = 'Unlock Scoring App', onC
   return (
     <div className="fixed inset-0 z-[200] bg-black/95 backdrop-blur-3xl flex items-center justify-center p-6 animate-in fade-in duration-500">
       <div className="w-full max-w-sm bg-[#000] border border-white/10 rounded-[8px] p-10 space-y-8 relative overflow-hidden shadow-2xl">
-        <div className="absolute top-0 right-0 w-32 h-32 bg-[#BFF367]/10 blur-3xl pointer-events-none" />
+        <div className="absolute top-0 right-0 w-32 h-32 bg-[#00C187]/10 blur-3xl pointer-events-none" />
         
         <div className="flex justify-between items-center relative z-10">
           <h3 className="text-2xl font-black uppercase tracking-tighter text-white flex items-center gap-3">
@@ -74,7 +74,7 @@ const ScoringPasswordModal = ({ matchId, actionLabel = 'Unlock Scoring App', onC
               placeholder="Enter Password..."
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="w-full bg-white/[0.02] border border-white/10 rounded-[8px] px-6 py-5 text-sm focus:border-[#BFF367] outline-none text-white font-bold tracking-widest transition-all"
+              className="w-full bg-white/[0.02] border border-white/10 rounded-[8px] px-6 py-5 text-sm focus:border-[#00C187] outline-none text-white font-bold tracking-widest transition-all"
             />
             {error && (
               <p className="text-[10px] text-red-500 font-black uppercase tracking-widest pl-2 animate-in slide-in-from-top-1">
@@ -88,7 +88,7 @@ const ScoringPasswordModal = ({ matchId, actionLabel = 'Unlock Scoring App', onC
             disabled={loading}
             className="w-full py-5 rounded-[8px] font-black uppercase text-[11px] tracking-[0.2em] transition-all transform active:scale-95 shadow-xl flex items-center justify-center gap-2"
             style={{ 
-              backgroundColor: loading ? '#BFF36780' : THEME_COLOR, 
+              backgroundColor: loading ? '#00C18780' : THEME_COLOR, 
               color: '#000', 
               boxShadow: `0 10px 30px ${THEME_COLOR}33` 
             }}

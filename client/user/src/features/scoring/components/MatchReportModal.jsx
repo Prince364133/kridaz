@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { X, FileText, Clock, User, ShieldAlert, Zap } from 'lucide-react';
-const THEME_COLOR = '#BFF367';
+const THEME_COLOR = '#00C187';
 export default function MatchReportModal({ matchId, fetchMatchReport, onClose }) {
   const [report, setReport] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -38,7 +38,7 @@ export default function MatchReportModal({ matchId, fetchMatchReport, onClose })
             </div>
             <div>
               <h3 className="text-lg font-black uppercase tracking-widest text-white">Match Report</h3>
-              <p className="text-[11px] text-[#BFF367] uppercase tracking-[0.2em] font-black">Detailed Metrics & Timers</p>
+              <p className="text-[11px] text-[#00C187] uppercase tracking-[0.2em] font-black">Detailed Metrics & Timers</p>
             </div>
           </div>
           <button onClick={onClose} className="p-3 bg-white/5 rounded-[8px] text-neutral-400 hover:text-white transition-all border border-white/5 hover:border-white/20">
@@ -48,7 +48,7 @@ export default function MatchReportModal({ matchId, fetchMatchReport, onClose })
 
         {loading ? (
           <div className="flex-1 flex items-center justify-center min-h-[300px]">
-            <div className="w-8 h-8 border-4 border-[#BFF367] border-t-transparent rounded-full animate-spin" />
+            <div className="w-8 h-8 border-4 border-[#00C187] border-t-transparent rounded-full animate-spin" />
           </div>
         ) : (
           <div className="flex-1 overflow-y-auto pr-2 space-y-6 custom-scrollbar">
@@ -70,7 +70,7 @@ export default function MatchReportModal({ matchId, fetchMatchReport, onClose })
                       <div className="flex flex-wrap gap-2">
                         {report.game.customProfessionals.map((prof, idx) => (
                           <div key={idx} className="bg-white/5 border border-white/10 rounded-[6px] px-2 py-1 flex items-center gap-2">
-                            <span className="text-[10px] font-black text-[#BFF367] uppercase">{prof.role}:</span>
+                            <span className="text-[10px] font-black text-[#00C187] uppercase">{prof.role}:</span>
                             <span className="text-xs font-bold text-white">{prof.name}</span>
                           </div>
                         ))}
@@ -91,7 +91,7 @@ export default function MatchReportModal({ matchId, fetchMatchReport, onClose })
               <div className="bg-white/[0.02] border border-white/5 rounded-[8px] p-4 flex flex-col justify-center items-center text-center">
                 <ShieldAlert size={20} className="text-neutral-500 mb-2" />
                 <p className="text-[10px] text-neutral-500 font-black uppercase tracking-widest mb-1">Match Status</p>
-                <p className="text-sm font-black text-[#BFF367]">{report?.match?.status}</p>
+                <p className="text-sm font-black text-[#00C187]">{report?.match?.status}</p>
               </div>
               <div className="bg-white/[0.02] border border-white/5 rounded-[8px] p-4 flex flex-col justify-center items-center text-center">
                 <Zap size={20} className="text-red-500 mb-2" />
@@ -132,7 +132,7 @@ export default function MatchReportModal({ matchId, fetchMatchReport, onClose })
                     </div>
                     <div>
                       <p className="text-[9px] text-neutral-500 font-black uppercase tracking-widest mb-0.5">Bowling</p>
-                      <p className="text-sm font-black text-white">{player.bowling?.wickets || 0}<span className="text-[#BFF367] mx-1">-</span>{player.bowling?.runs || 0}</p>
+                      <p className="text-sm font-black text-white">{player.bowling?.wickets || 0}<span className="text-[#00C187] mx-1">-</span>{player.bowling?.runs || 0}</p>
                     </div>
                     <div>
                       <p className="text-[9px] text-neutral-500 font-black uppercase tracking-widest mb-0.5">Status</p>

@@ -68,7 +68,7 @@ const TeamBadge = ({ team, fallbackName, size = 'md' }) => {
   }
 
   return (
-    <div className={`${cls} bg-gradient-to-br from-[#BFF367]/20 to-blue-500/10 text-[#BFF367]`}>
+    <div className={`${cls} bg-gradient-to-br from-[#00C187]/20 to-blue-500/10 text-[#00C187]`}>
       {initial}
     </div>
   );
@@ -82,8 +82,8 @@ const PlayerAvatar = ({ src, name, active, size = 'sm', isBowler = false }) => {
     md: 'w-8 h-8',
   };
 
-  const bgCls = isBowler ? 'bg-blue-500/10' : (active ? 'bg-[#BFF367]/10' : 'bg-white/5');
-  const iconCls = isBowler ? 'text-blue-400' : (active ? 'text-[#BFF367]' : 'text-gray-500');
+  const bgCls = isBowler ? 'bg-blue-500/10' : (active ? 'bg-[#00C187]/10' : 'bg-white/5');
+  const iconCls = isBowler ? 'text-blue-400' : (active ? 'text-[#00C187]' : 'text-gray-500');
 
   return (
     <div className={`${sizeClasses[size]} rounded-full flex items-center justify-center overflow-hidden shrink-0 ${bgCls}`}>
@@ -216,13 +216,13 @@ const MatchAnalytics = () => {
       ctx.fillRect(0, 0, W, H);
 
       // Top accent bar
-      ctx.fillStyle = '#BFF367';
+      ctx.fillStyle = '#00C187';
       ctx.fillRect(0, 0, W, 5);
 
       let y = 30;
 
       // Brand title
-      ctx.fillStyle = '#BFF367';
+      ctx.fillStyle = '#00C187';
       ctx.font = 'bold 38px Arial, sans-serif';
       ctx.textAlign = 'center';
       ctx.fillText('KRIDAZ', W / 2, y + 38);
@@ -261,7 +261,7 @@ const MatchAnalytics = () => {
         ctx.textAlign = 'center';
         ctx.fillText(label, tx + tileW / 2, y + 26);
         // Value
-        ctx.fillStyle = '#BFF367';
+        ctx.fillStyle = '#00C187';
         ctx.font = 'bold 26px Arial, sans-serif';
         ctx.fillText(value, tx + tileW / 2, y + 72);
       });
@@ -310,7 +310,7 @@ const MatchAnalytics = () => {
           ctx.textAlign = 'left';
           ctx.fillText((s.user?.name || '\u2014').toUpperCase(), cols.name, ry + 26);
           // Stats
-          ctx.fillStyle = '#BFF367';
+          ctx.fillStyle = '#00C187';
           ctx.font = 'bold 16px Arial, sans-serif';
           ctx.textAlign = 'center';
           ctx.fillText(s.runs ?? 0, cols.runs, ry + 26);
@@ -340,7 +340,7 @@ const MatchAnalytics = () => {
       ctx.fillText(`kridaz.com  \u2022  ${new Date().toLocaleDateString()}`, W / 2, y + 24);
 
       // Bottom accent
-      ctx.fillStyle = '#BFF367';
+      ctx.fillStyle = '#00C187';
       ctx.fillRect(0, H - 4, W, 4);
 
       // Export
@@ -432,7 +432,7 @@ const MatchAnalytics = () => {
     return (
       <div className="min-h-screen bg-black flex items-center justify-center">
         <div className="animate-pulse flex flex-col items-center">
-          <div className="w-12 h-12 rounded-full border-2 border-[#BFF367] border-t-transparent animate-spin mb-4" />
+          <div className="w-12 h-12 rounded-full border-2 border-[#00C187] border-t-transparent animate-spin mb-4" />
           <p className="text-gray-500 uppercase tracking-widest text-[10px] font-bold">Analyzing Match Data...</p>
         </div>
       </div>
@@ -461,22 +461,22 @@ const MatchAnalytics = () => {
           <ArrowLeft size={24} />
         </button>
         
-        <div className="w-full max-w-2xl bg-[#0A0A0A] border border-white/5 rounded-[8px] p-10 text-center space-y-8 relative overflow-hidden">
+        <div className="w-full max-w-2xl bg-black/60 backdrop-blur-xl border border-white/10 rounded-[8px] p-10 text-center space-y-8 relative overflow-hidden">
           {/* Background elements */}
-          <div className="absolute top-0 left-0 w-full h-full bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-[#BFF367]/10 via-black to-black opacity-50 pointer-events-none" />
+          <div className="absolute top-0 left-0 w-full h-full bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-[#00C187]/10 via-black to-black opacity-50 pointer-events-none" />
           
           <div className="relative z-10">
-            <div className="w-20 h-20 bg-[#BFF367]/10 rounded-full flex items-center justify-center mx-auto mb-6 border-2 border-[#BFF367]/20">
-              <Calendar size={32} className="text-[#BFF367]" />
+            <div className="w-20 h-20 bg-[#00C187]/10 rounded-full flex items-center justify-center mx-auto mb-6 border-2 border-[#00C187]/20">
+              <Calendar size={32} className="text-[#00C187]" />
             </div>
             
-            <h2 className="text-3xl font-black uppercase tracking-tighter mb-2 text-[#BFF367]">Match Not Started Yet</h2>
+            <h2 className="text-3xl font-black uppercase tracking-tighter mb-2 text-[#00C187]">Match Not Started Yet</h2>
             <p className="text-sm text-gray-400 font-bold tracking-widest uppercase mb-4">
               {liveScore.matchName || 'Official Match'}
             </p>
 
             {formattedDateTime && (
-              <div className="flex items-center justify-center gap-2 text-xs font-bold text-[#BFF367] bg-[#BFF367]/10 px-4 py-2 rounded-[6px] border border-[#BFF367]/20 w-fit mx-auto mb-8 shadow-[0_0_15px_rgba(0,193,135,0.1)]">
+              <div className="flex items-center justify-center gap-2 text-xs font-bold text-[#00C187] bg-[#00C187]/10 px-4 py-2 rounded-[6px] border border-[#00C187]/20 w-fit mx-auto mb-8 shadow-[0_0_15px_rgba(0,193,135,0.1)]">
                 <Clock size={14} />
                 <span>STARTS: {formattedDateTime.toUpperCase()}</span>
               </div>
@@ -490,8 +490,8 @@ const MatchAnalytics = () => {
                 <span className="mt-3 font-black text-sm">{teamA}</span>
                 {teamAObj?.captain && (
                   <button onClick={() => navigate(`/profile/${teamAObj.captain.id}`)} className="mt-2 flex items-center gap-1.5 px-3 py-1.5 bg-white/5 hover:bg-white/10 transition-colors rounded-[6px] text-xs font-bold text-gray-400 border border-white/10">
-                    {teamAObj.captain.profilePicture ? <img src={teamAObj.captain.profilePicture} alt="(C)" className="w-4 h-4 rounded-full object-cover" /> : <div className="w-4 h-4 bg-white/10 rounded-full flex items-center justify-center text-[8px] text-[#BFF367]">C</div>}
-                    <span className="text-white/80">{teamAObj.captain.name} <span className="text-[#BFF367]">(C)</span></span>
+                    {teamAObj.captain.profilePicture ? <img src={teamAObj.captain.profilePicture} alt="(C)" className="w-4 h-4 rounded-full object-cover" /> : <div className="w-4 h-4 bg-white/10 rounded-full flex items-center justify-center text-[8px] text-[#00C187]">C</div>}
+                    <span className="text-white/80">{teamAObj.captain.name} <span className="text-[#00C187]">(C)</span></span>
                   </button>
                 )}
               </div>
@@ -503,8 +503,8 @@ const MatchAnalytics = () => {
                 <span className="mt-3 font-black text-sm">{teamB}</span>
                 {teamBObj?.captain && (
                   <button onClick={() => navigate(`/profile/${teamBObj.captain.id}`)} className="mt-2 flex items-center gap-1.5 px-3 py-1.5 bg-white/5 hover:bg-white/10 transition-colors rounded-[6px] text-xs font-bold text-gray-400 border border-white/10">
-                    {teamBObj.captain.profilePicture ? <img src={teamBObj.captain.profilePicture} alt="(C)" className="w-4 h-4 rounded-full object-cover" /> : <div className="w-4 h-4 bg-white/10 rounded-full flex items-center justify-center text-[8px] text-[#BFF367]">C</div>}
-                    <span className="text-white/80">{teamBObj.captain.name} <span className="text-[#BFF367]">(C)</span></span>
+                    {teamBObj.captain.profilePicture ? <img src={teamBObj.captain.profilePicture} alt="(C)" className="w-4 h-4 rounded-full object-cover" /> : <div className="w-4 h-4 bg-white/10 rounded-full flex items-center justify-center text-[8px] text-[#00C187]">C</div>}
+                    <span className="text-white/80">{teamBObj.captain.name} <span className="text-[#00C187]">(C)</span></span>
                   </button>
                 )}
               </div>
@@ -516,7 +516,7 @@ const MatchAnalytics = () => {
                   <Activity size={16} className="text-orange-500" />
                 </div>
                 <div className="overflow-hidden">
-                  <div className="text-[10px] text-gray-500 font-bold uppercase tracking-wider">Ball Type</div>
+                  <div className="text-[10px] text-gray-500 font-black uppercase tracking-wider">Ball Type</div>
                   <div className="text-sm font-bold text-white/90 truncate">{liveScore.ballType || 'Tennis'}</div>
                 </div>
               </div>
@@ -525,7 +525,7 @@ const MatchAnalytics = () => {
                   <Swords size={16} className="text-purple-500" />
                 </div>
                 <div className="overflow-hidden">
-                  <div className="text-[10px] text-gray-500 font-bold uppercase tracking-wider">Format</div>
+                  <div className="text-[10px] text-gray-500 font-black uppercase tracking-wider">Format</div>
                   <div className="text-sm font-bold text-white/90 truncate">{liveScore.format || 'T20'} {liveScore.oversPerInnings ? `(${liveScore.oversPerInnings} Ov)` : ''}</div>
                 </div>
               </div>
@@ -533,11 +533,11 @@ const MatchAnalytics = () => {
 
             <div className="grid grid-cols-2 gap-4 text-left">
               <div className="bg-white/5 p-4 rounded-[8px] flex items-center gap-3">
-                <div className="w-8 h-8 rounded-full bg-[#BFF367]/10 flex items-center justify-center flex-shrink-0">
-                  <MapPin size={16} className="text-[#BFF367]" />
+                <div className="w-8 h-8 rounded-full bg-[#55DEE8]/10 flex items-center justify-center flex-shrink-0">
+                  <MapPin size={16} className="text-[#55DEE8]" />
                 </div>
                 <div className="overflow-hidden">
-                  <div className="text-[10px] text-gray-500 font-bold uppercase tracking-wider">Location</div>
+                  <div className="text-[10px] text-gray-500 font-black uppercase tracking-wider">Location</div>
                   <div className="text-sm font-bold text-white/90 truncate">{loc}</div>
                 </div>
               </div>
@@ -549,7 +549,7 @@ const MatchAnalytics = () => {
                   <Trophy size={16} className="text-[#BFF367]" />
                 </div>
                 <div className="overflow-hidden">
-                  <div className="text-[10px] text-gray-500 font-bold uppercase tracking-wider">Ground</div>
+                  <div className="text-[10px] text-gray-500 font-black uppercase tracking-wider">Ground</div>
                   <div className="text-sm font-bold text-white/90 truncate">{ground}</div>
                 </div>
               </button>
@@ -557,8 +557,8 @@ const MatchAnalytics = () => {
 
             {professionals.length > 0 && (
               <div className="mt-6 bg-white/5 p-4 rounded-[8px] text-left">
-                <div className="text-[10px] text-gray-500 font-bold uppercase tracking-wider mb-2 flex items-center gap-2">
-                  <User size={14} className="text-[#BFF367]"/> Officials
+                <div className="text-[10px] text-gray-500 font-black uppercase tracking-wider mb-2 flex items-center gap-2">
+                  <User size={14} className="text-[#00C187]"/> Officials
                 </div>
                 <div className="flex flex-wrap gap-2">
                   {professionals.map((p, i) => {
@@ -570,8 +570,8 @@ const MatchAnalytics = () => {
 
                     if (id) {
                       return (
-                        <button key={i} onClick={() => navigate(`/profile/${id}`)} className="flex items-center gap-2 px-3 py-1.5 bg-white/5 hover:bg-white/10 transition-colors rounded-[8px] text-xs font-bold text-white/90 border border-white/5">
-                          {pic ? <img src={pic} alt={name} className="w-5 h-5 rounded-full object-cover" /> : <div className="w-5 h-5 bg-white/10 rounded-full flex items-center justify-center text-[8px] text-[#BFF367]">{name.substring(0, 2).toUpperCase()}</div>}
+                        <button key={i} onClick={() => navigate(`/profile/${id}`)} className="flex items-center gap-2 px-3 py-1.5 bg-white/5 hover:bg-white/10 transition-colors rounded-[8px] text-xs font-bold text-white/90 border border-white/10">
+                          {pic ? <img src={pic} alt={name} className="w-5 h-5 rounded-full object-cover" /> : <div className="w-5 h-5 bg-white/10 rounded-full flex items-center justify-center text-[8px] text-[#00C187]">{name.substring(0, 2).toUpperCase()}</div>}
                           <span className="flex items-center gap-1">
                              {role && <span className="text-white/50">{role}:</span>} {name}
                           </span>
@@ -579,7 +579,7 @@ const MatchAnalytics = () => {
                       );
                     }
                     return (
-                      <span key={i} className="flex items-center gap-2 px-3 py-1.5 bg-white/5 rounded-[8px] text-xs font-bold text-white/90 border border-white/5">
+                      <span key={i} className="flex items-center gap-2 px-3 py-1.5 bg-white/5 rounded-[8px] text-xs font-bold text-white/90 border border-white/10">
                         {role && <span className="text-white/50">{role}:</span>} {name}
                       </span>
                     );
@@ -685,40 +685,41 @@ const MatchAnalytics = () => {
       {/* Overlay removed per user request */}
 
       {/* Header */}
-      <div className="sticky top-0 z-50 bg-black/80 backdrop-blur-xl border-b border-white/5 p-4">
-        <div className="max-w-7xl mx-auto flex items-center gap-4">
+      <div className="sticky top-0 z-50 bg-black/80 backdrop-blur-xl border-b border-white/5 p-3 sm:p-4">
+        <div className="max-w-7xl mx-auto flex items-center gap-2 sm:gap-4">
           <button 
             onClick={() => navigate(-1)}
-            className="p-2 hover:bg-white/5 rounded-full transition-colors text-gray-400 hover:text-white"
+            className="p-2 -ml-2 hover:bg-white/5 rounded-full transition-colors text-gray-400 hover:text-white shrink-0"
           >
             <ArrowLeft size={20} />
           </button>
-          <div className="flex-1 flex items-center gap-3">
-            <div>
-              <h1 className="text-sm font-black uppercase tracking-tighter text-white">Match Performance</h1>
-              <p className="text-[10px] text-gray-500 uppercase tracking-widest font-bold">Post-Match Analytics</p>
+          <div className="flex-1 flex flex-col justify-center min-w-0">
+            <h2 className="text-base sm:text-lg font-black uppercase tracking-tighter text-white truncate">Match Performance</h2>
+            <div className="flex items-center gap-2">
+              <p className="text-[9px] text-gray-500 uppercase tracking-widest font-black truncate">Post-Match Analytics</p>
+              {liveScore?.timerState === 'PAUSED' && (
+                <div className="flex items-center gap-1 px-1.5 py-0.5 bg-red-500/10 text-red-500 border border-red-500/20 rounded-[4px] text-[7px] font-black uppercase tracking-widest animate-pulse shrink-0">
+                  <div className="w-1 h-1 rounded-full bg-red-500" />
+                  BREAK
+                </div>
+              )}
             </div>
-            {liveScore?.timerState === 'PAUSED' && (
-              <div className="flex items-center gap-1.5 px-2.5 py-1 bg-red-500/10 text-red-500 border border-red-500/20 rounded-[6px] text-[9px] font-black uppercase tracking-widest animate-pulse">
-                <div className="w-1.5 h-1.5 rounded-full bg-red-500" />
-                MATCH ON BREAK
-              </div>
-            )}
           </div>
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-2 shrink-0">
             {connected && (
-              <div className="flex items-center gap-1.5 px-3 py-1.5 bg-[#BFF367]/10 text-[#BFF367] border border-[#BFF367]/20 rounded-[6px] text-[9px] font-black uppercase tracking-widest">
+              <div className="flex items-center gap-1 px-2 py-1.5 bg-[#00C187]/10 text-[#00C187] border border-[#00C187]/20 rounded-[6px] text-[8px] font-black uppercase tracking-widest">
                 <Wifi size={10} className="animate-pulse" />
-                Live Sync
+                <span className="hidden sm:inline">Live Sync</span>
+                <span className="sm:hidden">Sync</span>
               </div>
             )}
             <button 
               onClick={handleShare}
               disabled={isCapturing}
-              className="p-3 bg-[#BFF367]/10 text-[#BFF367] border border-[#BFF367]/20 rounded-[8px] hover:bg-[#BFF367] hover:text-black transition-all disabled:opacity-50 flex items-center gap-2"
+              className="p-2 sm:p-3 bg-[#00C187]/10 text-[#00C187] border border-[#00C187]/20 rounded-[8px] hover:bg-[#00C187] hover:text-black transition-all disabled:opacity-50 flex items-center gap-2"
             >
-              <Share2 size={18} />
-              <span className="text-[10px] font-black uppercase tracking-widest hidden md:block">Share Card</span>
+              <Share2 size={16} />
+              <span className="text-[9px] font-black uppercase tracking-widest hidden sm:block">Share Card</span>
             </button>
           </div>
         </div>
@@ -756,7 +757,7 @@ const MatchAnalytics = () => {
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id)}
-                className={`flex items-center gap-2 px-6 py-4 border-b-2 text-xs font-black uppercase tracking-wider transition-all whitespace-nowrap ${ active ? 'border-[#BFF367] text-[#BFF367] bg-white/[0.02]' : 'border-transparent text-gray-500 hover:text-white' }`}
+                className={`flex items-center gap-2 px-6 py-4 border-b-2 text-xs font-black uppercase tracking-wider transition-all whitespace-nowrap ${ active ? 'border-[#00C187] text-[#00C187] bg-white/[0.02]' : 'border-transparent text-gray-500 hover:text-white' }`}
               >
                 <Icon size={14} />
                 {tab.label}
@@ -770,52 +771,53 @@ const MatchAnalytics = () => {
         {/* Branding for Capture */}
         {isCapturing && (
           <div className="text-center py-8 border-b border-white/5 mb-8">
-            <h2 className="text-4xl font-black text-[#BFF367] tracking-tighter uppercase mb-2">Kridaz Performance</h2>
-            <p className="text-[10px] text-gray-500 font-bold uppercase tracking-[0.4em]">Official Match Scorecard</p>
+            <h2 className="text-4xl font-black text-[#00C187] tracking-tighter uppercase mb-2">Kridaz Performance</h2>
+            <p className="text-[10px] text-gray-500 font-black uppercase tracking-[0.4em]">Official Match Scorecard</p>
           </div>
         )}
 
         {/* Dynamic Panels */}
         {activeTab === 'overview' && (
           <div className="space-y-6">
-            {/* MVP Card */}
+            {/* MVP Card - Compact View */}
             {mvp && (
               <motion.div 
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
-                className="relative overflow-hidden bg-gradient-to-br from-[#0A0A0A] to-[#121212] border border-white/5 rounded-[8px] p-8 shadow-2xl"
+                className="relative overflow-hidden bg-black/60 backdrop-blur-xl border border-white/10 rounded-[8px] p-4 sm:p-5 shadow-2xl"
               >
                 {/* Background Radial Glow */}
-                <div className="absolute top-0 right-0 w-64 h-64 bg-[#BFF367]/15 rounded-full blur-3xl -mr-32 -mt-32 pointer-events-none" />
-                <div className="absolute bottom-0 left-0 w-32 h-32 bg-[#BFF367]/5 rounded-full blur-2xl -ml-16 -mb-16 pointer-events-none" />
+                <div className="absolute top-0 right-0 w-32 h-32 bg-[#00C187]/15 rounded-full blur-2xl pointer-events-none -mr-16 -mt-16" />
 
-                <div className="relative z-10 flex flex-col md:flex-row items-center gap-8">
-                  <div className="relative">
-                    <div className="w-32 h-32 rounded-full border-4 border-[#BFF367]/30 overflow-hidden bg-black/20">
-                      <img 
-                        src={mvp.profilePicture || `https://api.dicebear.com/7.x/avataaars/svg?seed=${mvp.name}`} 
-                        alt={mvp.name}
-                        className="w-full h-full object-cover"
-                      />
+                <div className="relative z-10 flex items-center justify-between gap-3">
+                  <div className="flex items-center gap-3 sm:gap-4 min-w-0">
+                    <div className="relative shrink-0">
+                      <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-full border-2 border-[#00C187]/30 overflow-hidden bg-black/20">
+                        <img 
+                          src={mvp.profilePicture || `https://api.dicebear.com/7.x/avataaars/svg?seed=${mvp.name}`} 
+                          alt={mvp.name}
+                          className="w-full h-full object-cover"
+                        />
+                      </div>
+                      <div className="absolute -bottom-1 -right-1 bg-[#00C187] text-black p-1 rounded-full shadow-lg border-2 border-[#121212]">
+                        <Trophy size={10} strokeWidth={3} />
+                      </div>
                     </div>
-                    <div className="absolute -bottom-2 -right-2 bg-[#BFF367] text-black p-2.5 rounded-full shadow-lg">
-                      <Trophy size={16} />
+                    
+                    <div className="flex flex-col text-left min-w-0">
+                      <span className="text-[8px] sm:text-[9px] font-black uppercase tracking-widest text-[#00C187] mb-0.5 truncate">
+                        Player of the Match
+                      </span>
+                      <h2 className="text-base sm:text-lg font-black uppercase tracking-tighter text-white truncate">{mvp.name}</h2>
+                      <p className="text-neutral-500 font-black uppercase tracking-widest text-[8px] truncate">
+                        {mvp.points} Performance Points
+                      </p>
                     </div>
                   </div>
-                  
-                  <div className="flex-1 text-center md:text-left">
-                    <span className="inline-block px-3 py-1 bg-[#BFF367]/10 border border-[#BFF367]/20 rounded-full text-[9px] font-black uppercase tracking-widest text-[#BFF367] mb-3">
-                      Player of the Match
-                    </span>
-                    <h2 className="text-4xl font-black uppercase tracking-tighter mb-1">{mvp.name}</h2>
-                    <p className="text-gray-400 font-bold uppercase tracking-widest text-xs">Dominated the field with {mvp.points} Performance Points</p>
-                  </div>
 
-                  <div className="flex gap-4">
-                    <div className="px-6 py-4 bg-white/[0.02] border border-white/5 rounded-[8px] text-center">
-                      <span className="block text-[9px] font-bold text-gray-500 uppercase tracking-widest mb-1">Points</span>
-                      <span className="text-3xl font-black text-[#BFF367]">{mvp.points}</span>
-                    </div>
+                  <div className="flex flex-col items-center justify-center px-3 py-2 bg-white/[0.02] border border-white/10 rounded-[6px] shrink-0">
+                    <span className="block text-[8px] font-black text-neutral-600 uppercase tracking-widest mb-0.5">PTS</span>
+                    <span className="text-lg sm:text-xl font-black text-[#00C187]">{mvp.points}</span>
                   </div>
                 </div>
               </motion.div>
@@ -823,23 +825,23 @@ const MatchAnalytics = () => {
 
             {/* Quick Stats Grid */}
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-              <div className="bg-[#0A0A0A] border border-white/5 p-6 rounded-[8px] flex flex-col group hover:border-[#BFF367]/30 transition-colors">
-                <span className="text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-1">Total Runs</span>
+              <div className="bg-black/60 backdrop-blur-xl border border-white/10 p-6 rounded-[8px] flex flex-col group hover:border-[#00C187]/30 transition-colors">
+                <span className="text-[10px] font-black text-neutral-600 uppercase tracking-widest mb-1">Total Runs</span>
                 <div className="flex items-baseline gap-2">
                   <span className="text-4xl font-black text-white">{liveScore?.totalRuns ?? scoring?.innings?.[0]?.totalRuns ?? 0}</span>
-                  <span className="text-sm font-bold text-gray-500">/ {liveScore?.totalWickets ?? scoring?.innings?.[0]?.totalWickets ?? 0}</span>
+                  <span className="text-sm font-black text-neutral-600">/ {liveScore?.totalWickets ?? scoring?.innings?.[0]?.totalWickets ?? 0}</span>
                 </div>
               </div>
-              <div className="bg-[#0A0A0A] border border-white/5 p-6 rounded-[8px] flex flex-col group hover:border-[#BFF367]/30 transition-colors">
-                <span className="text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-1">Run Rate</span>
-                <span className="text-4xl font-black text-[#BFF367]">{liveScore?.crr ?? stats?.runRate ?? '0.00'}</span>
+              <div className="bg-black/60 backdrop-blur-xl border border-white/10 p-6 rounded-[8px] flex flex-col group hover:border-[#00C187]/30 transition-colors">
+                <span className="text-[10px] font-black text-neutral-600 uppercase tracking-widest mb-1">Run Rate</span>
+                <span className="text-4xl font-black text-[#55DEE8]">{liveScore?.crr ?? stats?.runRate ?? '0.00'}</span>
               </div>
-              <div className="bg-[#0A0A0A] border border-white/5 p-6 rounded-[8px] flex flex-col group hover:border-[#BFF367]/30 transition-colors">
-                <span className="text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-1">Total Fours</span>
+              <div className="bg-black/60 backdrop-blur-xl border border-white/10 p-6 rounded-[8px] flex flex-col group hover:border-[#00C187]/30 transition-colors">
+                <span className="text-[10px] font-black text-neutral-600 uppercase tracking-widest mb-1">Total Fours</span>
                 <span className="text-4xl font-black text-white">{stats?.totalFours || 0}</span>
               </div>
-              <div className="bg-[#0A0A0A] border border-white/5 p-6 rounded-[8px] flex flex-col group hover:border-[#BFF367]/30 transition-colors">
-                <span className="text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-1">Total Sixes</span>
+              <div className="bg-black/60 backdrop-blur-xl border border-white/10 p-6 rounded-[8px] flex flex-col group hover:border-[#00C187]/30 transition-colors">
+                <span className="text-[10px] font-black text-neutral-600 uppercase tracking-widest mb-1">Total Sixes</span>
                 <span className="text-4xl font-black text-white">{stats?.totalSixes || 0}</span>
               </div>
             </div>
@@ -847,37 +849,37 @@ const MatchAnalytics = () => {
             {/* Match Information Cards */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {/* Match Meta Card */}
-              <div className="bg-[#0A0A0A] border border-white/5 rounded-[8px] p-8">
+              <div className="bg-black/60 backdrop-blur-xl border border-white/10 rounded-[8px] p-8">
                 <h3 className="text-sm font-black uppercase tracking-widest text-gray-400 mb-6 border-b border-white/5 pb-4">Match Details</h3>
                 <div className="grid grid-cols-2 gap-y-6 gap-x-4">
                   <div>
-                    <span className="block text-[9px] font-bold text-gray-500 uppercase tracking-wider mb-1">Venue</span>
+                    <span className="block text-[9px] font-black text-neutral-600 uppercase tracking-wider mb-1">Venue</span>
                     <span className="text-sm font-bold text-white truncate block">{scoring?.game?.customVenue || scoring?.game?.turf?.name || 'Local Ground'}</span>
                   </div>
                   <div>
-                    <span className="block text-[9px] font-bold text-gray-500 uppercase tracking-wider mb-1">Location</span>
+                    <span className="block text-[9px] font-black text-neutral-600 uppercase tracking-wider mb-1">Location</span>
                     <span className="text-sm font-bold text-white block">
                       {scoring?.game?.city || scoring?.game?.state || scoring?.game?.location || 'Location Unspecified'}
                     </span>
                   </div>
                   <div>
-                    <span className="block text-[9px] font-bold text-gray-500 uppercase tracking-wider mb-1">Ball Type</span>
+                    <span className="block text-[9px] font-black text-neutral-600 uppercase tracking-wider mb-1">Ball Type</span>
                     <span className="text-sm font-bold text-white uppercase">{scoring?.game?.ballType || 'Tennis'}</span>
                   </div>
                   <div>
-                    <span className="block text-[9px] font-bold text-gray-500 uppercase tracking-wider mb-1">Format / Overs</span>
+                    <span className="block text-[9px] font-black text-neutral-600 uppercase tracking-wider mb-1">Format / Overs</span>
                     <span className="text-sm font-bold text-white">{scoring?.oversPerInnings || 20} Overs</span>
                   </div>
                 </div>
               </div>
               
               {/* Toss & Play Card */}
-              <div className="bg-[#0A0A0A] border border-white/5 rounded-[8px] p-8">
+              <div className="bg-black/60 backdrop-blur-xl border border-white/10 rounded-[8px] p-8">
                 <h3 className="text-sm font-black uppercase tracking-widest text-gray-400 mb-6 border-b border-white/5 pb-4">Toss & Officials</h3>
                 <div className="grid grid-cols-2 gap-y-6 gap-x-4">
                   <div>
-                    <span className="block text-[9px] font-bold text-gray-500 uppercase tracking-wider mb-1">Toss Winner</span>
-                    <span className="text-sm font-bold text-[#BFF367] uppercase">
+                    <span className="block text-[9px] font-black text-neutral-600 uppercase tracking-wider mb-1">Toss Winner</span>
+                    <span className="text-sm font-bold text-[#00C187] uppercase">
                       {scoring?.game?.tossWinner === scoring?.game?.teamA?.id || scoring?.game?.tossWinner === 'teamA' 
                         ? teamAName 
                         : scoring?.game?.tossWinner === scoring?.game?.teamB?.id || scoring?.game?.tossWinner === 'teamB' 
@@ -886,11 +888,11 @@ const MatchAnalytics = () => {
                     </span>
                   </div>
                   <div>
-                    <span className="block text-[9px] font-bold text-gray-500 uppercase tracking-wider mb-1">Decision</span>
+                    <span className="block text-[9px] font-black text-neutral-600 uppercase tracking-wider mb-1">Decision</span>
                     <span className="text-sm font-bold text-white uppercase">{scoring?.game?.tossDecision ? `${scoring.game.tossDecision} First` : 'N/A'}</span>
                   </div>
                   <div>
-                    <span className="block text-[9px] font-bold text-gray-500 uppercase tracking-wider mb-1">Duration</span>
+                    <span className="block text-[9px] font-black text-neutral-600 uppercase tracking-wider mb-1">Duration</span>
                     <span className="text-sm font-bold text-white block">
                       {scoring?.totalDurationSeconds 
                         ? `${Math.floor(scoring.totalDurationSeconds / 3600)}h ${Math.floor((scoring.totalDurationSeconds % 3600) / 60)}m` 
@@ -898,7 +900,7 @@ const MatchAnalytics = () => {
                     </span>
                   </div>
                   <div>
-                    <span className="block text-[9px] font-bold text-gray-500 uppercase tracking-wider mb-1">Umpire</span>
+                    <span className="block text-[9px] font-black text-neutral-600 uppercase tracking-wider mb-1">Umpire</span>
                     <span className="text-sm font-bold text-white truncate block">
                       {scoring?.matchOfficials?.umpire || scoring?.game?.customUmpire?.name || 'Official Umpire'}
                     </span>
@@ -908,10 +910,10 @@ const MatchAnalytics = () => {
             </div>
 
             {/* Top Performers List */}
-            <div className="bg-[#0A0A0A] border border-white/5 rounded-[8px] p-8">
+            <div className="bg-black/60 backdrop-blur-xl border border-white/10 rounded-[8px] p-8">
               <div className="flex items-center justify-between mb-8">
                 <h3 className="text-xl font-black uppercase tracking-tighter flex items-center gap-2">
-                  <Award className="text-[#BFF367]" />
+                  <Award className="text-[#00C187]" />
                   Impact Leaders
                 </h3>
               </div>
@@ -919,7 +921,7 @@ const MatchAnalytics = () => {
                 {stats?.topPerformers?.map((player, idx) => (
                   <div 
                     key={idx}
-                    className="flex items-center gap-4 p-4 bg-white/[0.01] border border-white/5 rounded-[8px] group hover:bg-white/[0.02] transition-all"
+                    className="flex items-center gap-4 p-4 bg-white/[0.01] border border-white/10 rounded-[8px] group hover:bg-white/[0.02] transition-all"
                   >
                     <div className="text-xl font-black text-white/20 w-8">{idx + 1}</div>
                     <div className="w-12 h-12 rounded-full overflow-hidden border border-white/10 bg-black/40">
@@ -930,18 +932,18 @@ const MatchAnalytics = () => {
                       />
                     </div>
                     <div className="flex-1">
-                      <h4 className="font-bold uppercase text-sm">{player.name}</h4>
+                      <h4 className="font-black uppercase text-sm">{player.name}</h4>
                       <div className="w-full bg-white/5 h-1.5 rounded-full mt-2 overflow-hidden">
                         <motion.div 
                           initial={{ width: 0 }}
                           animate={{ width: mvp?.points > 0 ? `${(player.points / mvp.points) * 100}%` : '0%' }}
-                          className="h-full bg-[#BFF367]"
+                          className="h-full bg-[#00C187]"
                         />
                       </div>
                     </div>
                     <div className="text-right">
-                      <span className="block text-[9px] font-bold text-gray-500 uppercase tracking-widest">Points</span>
-                      <span className="text-lg font-black text-[#BFF367]">{player.points}</span>
+                      <span className="block text-[9px] font-black text-neutral-600 uppercase tracking-widest">Points</span>
+                      <span className="text-lg font-black text-[#00C187]">{player.points}</span>
                     </div>
                   </div>
                 ))}
@@ -960,12 +962,12 @@ const MatchAnalytics = () => {
                   animate={{ opacity: 1, y: 0 }}
                   className="relative overflow-hidden bg-gradient-to-br from-white/[0.04] to-transparent border border-white/[0.08] rounded-[8px] p-8 text-center"
                 >
-                  <div className="absolute top-0 right-0 w-40 h-40 bg-[#BFF367]/5 rounded-full blur-3xl -mr-20 -mt-20 pointer-events-none" />
+                  <div className="absolute top-0 right-0 w-40 h-40 bg-[#00C187]/5 rounded-full blur-3xl -mr-20 -mt-20 pointer-events-none" />
                   <div className="absolute bottom-0 left-0 w-32 h-32 bg-blue-500/5 rounded-full blur-3xl -ml-16 -mb-16 pointer-events-none" />
 
                   {liveScore.result && (
-                    <div className="mb-6 py-2 px-4 bg-[#BFF367]/20 border border-[#BFF367]/30 rounded-[8px]">
-                      <p className="text-[#BFF367] text-[10px] font-black uppercase tracking-[0.3em] mb-1">Final Result</p>
+                    <div className="mb-6 py-2 px-4 bg-[#00C187]/20 border border-[#00C187]/30 rounded-[8px]">
+                      <p className="text-[#00C187] text-[10px] font-black uppercase tracking-[0.3em] mb-1">Final Result</p>
                       <h2 className="text-lg font-black italic uppercase tracking-tighter text-white">
                         {liveScore.result}
                       </h2>
@@ -983,7 +985,7 @@ const MatchAnalytics = () => {
                     <span className="text-7xl font-black tracking-tighter italic leading-none">
                       {liveScore.totalRuns}
                     </span>
-                    <span className="text-4xl font-black text-[#BFF367] italic">/</span>
+                    <span className="text-4xl font-black text-[#00C187] italic">/</span>
                     <span className="text-5xl font-black tracking-tighter italic leading-none text-white/90">
                       {liveScore.totalWickets}
                     </span>
@@ -992,7 +994,7 @@ const MatchAnalytics = () => {
                   <div className="flex items-center justify-center gap-3 flex-wrap mt-3 text-[11px] font-bold text-gray-400">
                     <span className="bg-white/[0.04] px-3 py-1 rounded-full">{liveScore.overString} OVERS</span>
                     <span className="w-1 h-1 rounded-full bg-white/15" />
-                    <span className="bg-[#BFF367]/10 text-[#BFF367] px-3 py-1 rounded-[6px] flex items-center gap-1">
+                    <span className="bg-[#00C187]/10 text-[#00C187] px-3 py-1 rounded-[6px] flex items-center gap-1">
                       <TrendingUp size={10} /> CRR {liveScore.crr}
                     </span>
                   </div>
@@ -1000,7 +1002,7 @@ const MatchAnalytics = () => {
                   {liveScore.target && (
                     <div className="mt-5 pt-5 border-t border-white/[0.06] grid grid-cols-3 gap-3">
                       <div>
-                        <p className="text-[9px] font-black text-[#BFF367] uppercase tracking-widest mb-1 flex items-center justify-center gap-1">
+                        <p className="text-[9px] font-black text-[#00C187] uppercase tracking-widest mb-1 flex items-center justify-center gap-1">
                           <Target size={9} /> Target
                         </p>
                         <p className="text-2xl font-black">{liveScore.target}</p>
@@ -1026,7 +1028,7 @@ const MatchAnalytics = () => {
                 <div className="bg-white/[0.03] border border-white/[0.06] rounded-[8px] overflow-hidden">
                   <div className="flex items-center justify-between px-5 pt-4 pb-2 border-b border-white/[0.05]">
                     <h3 className="text-[9px] font-black uppercase tracking-widest text-gray-500">Batting</h3>
-                    <Zap size={12} className="text-[#BFF367]" />
+                    <Zap size={12} className="text-[#00C187]" />
                   </div>
                   <div className="px-5 py-3 space-y-1">
                     <div className="grid grid-cols-[1fr_auto_auto_auto_auto_auto] gap-x-3 text-[8px] font-black text-gray-600 uppercase tracking-widest pb-1">
@@ -1040,23 +1042,23 @@ const MatchAnalytics = () => {
                     {[liveScore.batters?.[0], liveScore.batters?.[1]].filter(Boolean).map((p, i) => (
                       <div
                         key={i}
-                        className={`grid grid-cols-[1fr_auto_auto_auto_auto_auto] gap-x-3 items-center py-2 rounded-[8px] px-1 ${i === 0 ? 'bg-[#BFF367]/5' : ''}`}
+                        className={`grid grid-cols-[1fr_auto_auto_auto_auto_auto] gap-x-3 items-center py-2 rounded-[8px] px-1 ${i === 0 ? 'bg-[#00C187]/5' : ''}`}
                       >
                         <div className="flex items-center gap-2 overflow-hidden">
                           {i === 0 && (
-                            <div className="w-1.5 h-1.5 rounded-full bg-[#BFF367] shrink-0" />
+                            <div className="w-1.5 h-1.5 rounded-full bg-[#00C187] shrink-0" />
                           )}
                           <PlayerAvatar src={p.profilePicture} name={p.name} active={i === 0} />
                           <span className={`text-[11px] font-black uppercase truncate ${i === 0 ? 'text-white' : 'text-gray-500'}`}>
                             {p.name}
                           </span>
-                          {i === 0 && <span className="text-[8px] text-[#BFF367] font-black shrink-0">*</span>}
+                          {i === 0 && <span className="text-[8px] text-[#00C187] font-black shrink-0">*</span>}
                         </div>
                         <span className={`text-right text-sm font-black w-6 ${i === 0 ? 'text-white' : 'text-gray-500'}`}>{p.runs}</span>
                         <span className="text-right text-[10px] font-bold text-gray-600 w-6">{p.balls}</span>
                         <span className="text-right text-[10px] font-bold text-blue-400 w-6">{p.fours ?? 0}</span>
                         <span className="text-right text-[10px] font-bold text-purple-400 w-6">{p.sixes ?? 0}</span>
-                        <span className={`text-right text-[10px] font-black w-10 ${i === 0 ? 'text-[#BFF367]' : 'text-gray-600'}`}>
+                        <span className={`text-right text-[10px] font-black w-10 ${i === 0 ? 'text-[#00C187]' : 'text-gray-600'}`}>
                           {p.strikeRate ?? (p.balls > 0 ? ((p.runs / p.balls) * 100).toFixed(0) : '0.0')}
                         </span>
                       </div>
@@ -1089,7 +1091,7 @@ const MatchAnalytics = () => {
                         <span className="text-right text-[10px] font-bold text-gray-600 w-6">{liveScore.bowler.maidens ?? 0}</span>
                         <span className="text-right text-[10px] font-bold text-white w-6">{liveScore.bowler.runs}</span>
                         <span className="text-right text-sm font-black text-red-400 w-6">{liveScore.bowler.wickets}</span>
-                        <span className="text-right text-[10px] font-black text-[#BFF367] w-10">{liveScore.bowler.economy}</span>
+                        <span className="text-right text-[10px] font-black text-[#00C187] w-10">{liveScore.bowler.economy}</span>
                       </div>
                     </div>
                   </div>
@@ -1118,7 +1120,7 @@ const MatchAnalytics = () => {
                 )}
               </>
             ) : (
-              <div className="bg-[#0A0A0A] border border-white/5 rounded-[8px] p-8 text-center">
+              <div className="bg-black/60 backdrop-blur-xl border border-white/10 rounded-[8px] p-8 text-center">
                 <p className="text-gray-500 uppercase tracking-widest text-xs font-bold mb-2">Live Scoreboard Offline</p>
                 <p className="text-sm text-gray-400">The match has not started or is currently offline.</p>
               </div>
@@ -1129,14 +1131,14 @@ const MatchAnalytics = () => {
         {activeTab === 'scorecard' && (
           <div className="space-y-8">
             {/* Batting Scorecard */}
-            <div className="bg-[#0A0A0A] border border-white/5 rounded-[8px] overflow-hidden">
+            <div className="bg-black/60 backdrop-blur-xl border border-white/10 rounded-[8px] overflow-hidden">
               <div className="p-8 border-b border-white/5 flex items-center justify-between">
                 <h3 className="text-lg font-black uppercase tracking-tighter">Batting Scorecard</h3>
               </div>
               <div className="overflow-x-auto">
                 <table className="w-full text-left">
                   <thead>
-                    <tr className="border-b border-white/5 text-[9px] font-bold text-gray-500 uppercase tracking-widest">
+                    <tr className="border-b border-white/5 text-[9px] font-black text-neutral-600 uppercase tracking-widest">
                       <th className="px-8 py-4">Batter</th>
                       <th className="px-4 py-4">Status</th>
                       <th className="px-4 py-4 text-right">R</th>
@@ -1152,12 +1154,12 @@ const MatchAnalytics = () => {
                       return (
                         <tr key={i} className="group hover:bg-white/[0.01] transition-colors">
                           <td className="px-8 py-4 font-bold text-sm uppercase text-white">{s.user?.name}</td>
-                          <td className="px-4 py-4 text-[10px] text-gray-500 font-bold uppercase">{s.outStatus || 'Not Out'}</td>
-                          <td className="px-4 py-4 text-right font-black text-[#BFF367]">{s.battingRuns || 0}</td>
+                          <td className="px-4 py-4 text-[10px] text-gray-500 font-black uppercase">{s.outStatus || 'Not Out'}</td>
+                          <td className="px-4 py-4 text-right font-black text-[#00C187]">{s.battingRuns || 0}</td>
                           <td className="px-4 py-4 text-right text-gray-400 text-sm">{s.battingBalls || 0}</td>
                           <td className="px-4 py-4 text-right text-gray-400 text-sm">{s.battingFours || 0}</td>
                           <td className="px-4 py-4 text-right text-gray-400 text-sm">{s.battingSixes || 0}</td>
-                          <td className="px-8 py-4 text-right font-bold text-sm text-[#BFF367]">{sr}</td>
+                          <td className="px-8 py-4 text-right font-bold text-sm text-[#55DEE8]">{sr}</td>
                         </tr>
                       );
                     })}
@@ -1174,14 +1176,14 @@ const MatchAnalytics = () => {
             </div>
 
             {/* Bowling Scorecard */}
-            <div className="bg-[#0A0A0A] border border-white/5 rounded-[8px] overflow-hidden">
+            <div className="bg-black/60 backdrop-blur-xl border border-white/10 rounded-[8px] overflow-hidden">
               <div className="p-8 border-b border-white/5 flex items-center justify-between">
                 <h3 className="text-lg font-black uppercase tracking-tighter">Bowling Scorecard</h3>
               </div>
               <div className="overflow-x-auto">
                 <table className="w-full text-left">
                   <thead>
-                    <tr className="border-b border-white/5 text-[9px] font-bold text-gray-500 uppercase tracking-widest">
+                    <tr className="border-b border-white/5 text-[9px] font-black text-neutral-600 uppercase tracking-widest">
                       <th className="px-8 py-4">Bowler</th>
                       <th className="px-4 py-4 text-right">O</th>
                       <th className="px-4 py-4 text-right">M</th>
@@ -1202,8 +1204,8 @@ const MatchAnalytics = () => {
                           <td className="px-4 py-4 text-right font-bold text-sm text-gray-300">{overs}</td>
                           <td className="px-4 py-4 text-right text-gray-400 text-sm">{s.bowlingMaidens || 0}</td>
                           <td className="px-4 py-4 text-right text-gray-400 text-sm">{s.bowlingRuns || 0}</td>
-                          <td className="px-4 py-4 text-right font-black text-[#BFF367]">{s.bowlingWickets || 0}</td>
-                          <td className="px-4 py-4 text-right text-[#BFF367] font-bold text-sm">{econ}</td>
+                          <td className="px-4 py-4 text-right font-black text-[#00C187]">{s.bowlingWickets || 0}</td>
+                          <td className="px-4 py-4 text-right text-[#55DEE8] font-bold text-sm">{econ}</td>
                           <td className="px-4 py-4 text-right text-gray-400 text-sm">{s.bowlingWides || 0}</td>
                           <td className="px-8 py-4 text-right text-gray-400 text-sm">{s.bowlingNoBalls || 0}</td>
                         </tr>
@@ -1226,20 +1228,20 @@ const MatchAnalytics = () => {
         {activeTab === 'wagon-wheel' && (
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
             {/* Filters panel */}
-            <div className="lg:col-span-1 space-y-6 bg-[#0A0A0A] border border-white/5 rounded-[8px] p-8 flex flex-col justify-between">
+            <div className="lg:col-span-1 space-y-6 bg-black/60 backdrop-blur-xl border border-white/10 rounded-[8px] p-8 flex flex-col justify-between">
               <div>
                 <h3 className="text-lg font-black uppercase tracking-tighter mb-4 flex items-center gap-2">
-                  <Target className="text-[#BFF367]" />
+                  <Target className="text-[#00C187]" />
                   Wagon Wheel Filters
                 </h3>
                 
                 <div className="space-y-4">
                   <div className="space-y-2">
-                    <label className="block text-[9px] font-bold text-gray-500 uppercase tracking-widest">Select Batsman</label>
+                    <label className="block text-[9px] font-black text-neutral-600 uppercase tracking-widest">Select Batsman</label>
                     <select
                       value={selectedBatsman}
                       onChange={(e) => setSelectedBatsman(e.target.value)}
-                      className="w-full bg-[#121212] border border-white/10 rounded-[8px] px-4 py-3 text-sm text-white focus:outline-none focus:border-[#BFF367] uppercase font-bold"
+                      className="w-full bg-[#121212] border border-white/10 rounded-[8px] px-4 py-3 text-sm text-white focus:outline-none focus:border-[#00C187] uppercase font-bold"
                     >
                       <option value="all">All Batsmen</option>
                       {batsmenInTimeline.map(b => (
@@ -1249,7 +1251,7 @@ const MatchAnalytics = () => {
                   </div>
 
                   <div className="space-y-2">
-                    <label className="block text-[9px] font-bold text-gray-500 uppercase tracking-widest">Display Filter</label>
+                    <label className="block text-[9px] font-black text-neutral-600 uppercase tracking-widest">Display Filter</label>
                     <div className="flex flex-col gap-2">
                       {[
                         { id: 'all', label: 'All Shots' },
@@ -1259,7 +1261,7 @@ const MatchAnalytics = () => {
                         <button
                           key={filter.id}
                           onClick={() => setRunFilter(filter.id)}
-                          className={`w-full text-left px-4 py-3 rounded-[8px] text-xs font-black uppercase tracking-widest transition-all ${ runFilter === filter.id ? 'bg-[#BFF367] text-black' : 'bg-[#121212] border border-white/5 text-gray-400 hover:text-white' }`}
+                          className={`w-full text-left px-4 py-3 rounded-[8px] text-xs font-black uppercase tracking-widest transition-all ${ runFilter === filter.id ? 'bg-[#00C187] text-black' : 'bg-[#121212] border border-white/10 text-gray-400 hover:text-white' }`}
                         >
                           {filter.label}
                         </button>
@@ -1271,11 +1273,11 @@ const MatchAnalytics = () => {
 
               <div className="border-t border-white/5 pt-6 mt-6 space-y-3">
                 <div className="flex items-center gap-3 text-xs">
-                  <span className="w-3.5 h-3.5 bg-[#BFF367] rounded-full inline-block" />
+                  <span className="w-3.5 h-3.5 bg-[#00C187] rounded-full inline-block" />
                   <span className="text-gray-400 uppercase tracking-wider font-bold text-[10px]">Sixes (6 Runs)</span>
                 </div>
                 <div className="flex items-center gap-3 text-xs">
-                  <span className="w-3.5 h-3.5 bg-[#BFF367] rounded-full inline-block" />
+                  <span className="w-3.5 h-3.5 bg-[#55DEE8] rounded-full inline-block" />
                   <span className="text-gray-400 uppercase tracking-wider font-bold text-[10px]">Fours (4 Runs)</span>
                 </div>
                 <div className="flex items-center gap-3 text-xs">
@@ -1290,19 +1292,19 @@ const MatchAnalytics = () => {
             </div>
 
             {/* Wagon Wheel Graphic */}
-            <div className="lg:col-span-2 bg-[#0A0A0A] border border-white/5 rounded-[8px] p-8 flex flex-col items-center justify-center relative min-h-[440px]">
+            <div className="lg:col-span-2 bg-black/60 backdrop-blur-xl border border-white/10 rounded-[8px] p-8 flex flex-col items-center justify-center relative min-h-[440px]">
               {/* Telemetry Tooltip */}
               {hoveredShot && (
                 <div className="absolute top-4 left-4 bg-black/95 border border-white/10 p-4 rounded-[8px] shadow-2xl z-20 max-w-xs animate-fade-in backdrop-blur-xl">
                   <div className="text-[9px] font-black uppercase text-gray-500 tracking-widest mb-1">Shot Telemetry</div>
-                  <div className="text-sm font-black text-[#BFF367]">{hoveredShot.batter?.name}</div>
+                  <div className="text-sm font-black text-[#00C187]">{hoveredShot.batter?.name}</div>
                   <div className="text-xs text-white/90 mt-1">
                     {hoveredShot.isWicket 
                       ? <span className="text-[#EF4444] font-bold">WICKET ({hoveredShot.wicketType})</span>
                       : <span>Scored <strong className="text-white">{hoveredShot.runs}</strong> run(s) off {hoveredShot.bowler?.name}</span>
                     }
                   </div>
-                  <div className="text-[10px] text-gray-400 mt-3 font-bold uppercase tracking-wider bg-white/5 px-2.5 py-1.5 rounded-[8px] inline-block">
+                  <div className="text-[10px] text-gray-400 mt-3 font-black uppercase tracking-wider bg-white/5 px-2.5 py-1.5 rounded-[8px] inline-block">
                     Over {hoveredShot.over}.{hoveredShot.ballInOver} &bull; {hoveredShot.fieldingPosition} {hoveredShot.distance ? `(${hoveredShot.distance})` : ''}
                   </div>
                 </div>
@@ -1310,8 +1312,8 @@ const MatchAnalytics = () => {
 
               <svg viewBox="0 0 300 300" className="w-full max-w-[340px] aspect-square drop-shadow-[0_0_20px_rgba(0,193,135,0.05)]">
                 {/* Outfield Grass */}
-                <circle cx="150" cy="150" r="135" fill="#071912" fillOpacity="0.25" stroke="#BFF367" strokeOpacity="0.3" strokeWidth="2" />
-                <circle cx="150" cy="150" r="133" fill="none" stroke="#BFF367" strokeOpacity="0.1" strokeWidth="1" strokeDasharray="3,3" />
+                <circle cx="150" cy="150" r="135" fill="#071912" fillOpacity="0.25" stroke="#00C187" strokeOpacity="0.3" strokeWidth="2" />
+                <circle cx="150" cy="150" r="133" fill="none" stroke="#00C187" strokeOpacity="0.1" strokeWidth="1" strokeDasharray="3,3" />
                 
                 {/* 30-Yard Circle */}
                 <circle cx="150" cy="150" r="75" fill="none" stroke="#222" strokeWidth="1.5" strokeDasharray="4,4" />
@@ -1336,10 +1338,10 @@ const MatchAnalytics = () => {
                   let strokeDash = undefined;
 
                   if (ball.isSix) {
-                    strokeColor = '#BFF367';
+                    strokeColor = '#00C187';
                     strokeWidth = 3;
                   } else if (ball.isFour) {
-                    strokeColor = '#BFF367';
+                    strokeColor = '#55DEE8';
                     strokeWidth = 2.5;
                   } else if (ball.isWicket) {
                     strokeColor = '#EF4444';
@@ -1381,10 +1383,10 @@ const MatchAnalytics = () => {
         )}
 
         {activeTab === 'worm-chart' && (
-          <div className="bg-[#0A0A0A] border border-white/5 rounded-[8px] p-8 space-y-6">
+          <div className="bg-black/60 backdrop-blur-xl border border-white/10 rounded-[8px] p-8 space-y-6">
             <div className="flex items-center justify-between">
               <h3 className="text-xl font-black uppercase tracking-tighter flex items-center gap-2">
-                <TrendingUp className="text-[#BFF367]" />
+                <TrendingUp className="text-[#00C187]" />
                 Run Progression (Worm Chart)
               </h3>
             </div>
@@ -1420,7 +1422,7 @@ const MatchAnalytics = () => {
                   <Line 
                     type="monotone" 
                     dataKey={teamAName} 
-                    stroke="#BFF367" 
+                    stroke="#00C187" 
                     strokeWidth={3} 
                     dot={{ r: 4, strokeWidth: 1, fill: '#000' }} 
                     activeDot={{ r: 6 }} 
@@ -1429,7 +1431,7 @@ const MatchAnalytics = () => {
                     <Line 
                       type="monotone" 
                       dataKey={teamBName} 
-                      stroke="#BFF367" 
+                      stroke="#55DEE8" 
                       strokeWidth={3} 
                       dot={{ r: 4, strokeWidth: 1, fill: '#000' }} 
                       activeDot={{ r: 6 }} 
@@ -1442,9 +1444,9 @@ const MatchAnalytics = () => {
         )}
 
         {activeTab === 'timeline' && (
-          <div className="bg-[#0A0A0A] border border-white/5 rounded-[8px] p-8">
+          <div className="bg-black/60 backdrop-blur-xl border border-white/10 rounded-[8px] p-8">
             <h3 className="text-xl font-black uppercase tracking-tighter mb-8 flex items-center gap-2">
-              <Activity className="text-[#BFF367]" />
+              <Activity className="text-[#00C187]" />
               Ball-by-Ball Timeline
             </h3>
             <BallByBallHistory matchData={scoring} />

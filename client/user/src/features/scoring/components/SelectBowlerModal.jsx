@@ -36,7 +36,7 @@ const SelectBowlerModal = ({ pool = [], currentBowlerId, onConfirm }) => {
           {/* Header */}
           <div className="px-6 pt-6 pb-4 border-b border-white/10">
             <h2 className="text-xl font-black tracking-tight text-white flex items-center gap-2">
-              <Zap size={20} className="text-[#BFF367]" />
+              <Zap size={20} className="text-[#00C187]" />
               Select Next Bowler
             </h2>
           </div>
@@ -50,13 +50,13 @@ const SelectBowlerModal = ({ pool = [], currentBowlerId, onConfirm }) => {
               <button
                 key={player.userId}
                 onClick={() => onConfirm(player.userId)}
-                className="w-full flex items-center gap-4 px-4 py-3.5 rounded-[8px] border border-white/8 bg-white/4 hover:border-[#BFF367]/50 hover:bg-[#BFF367]/8 transition-all group text-left"
+                className="w-full flex items-center gap-4 px-4 py-3.5 rounded-[8px] border border-white/8 bg-white/4 hover:border-[#00C187]/50 hover:bg-[#00C187]/8 transition-all group text-left"
               >
-                <div className="w-10 h-10 rounded-[8px] bg-neutral-800 flex items-center justify-center text-sm font-black text-[#BFF367] shrink-0">
+                <div className="w-10 h-10 rounded-[8px] bg-neutral-800 flex items-center justify-center text-sm font-black text-[#00C187] shrink-0">
                   {player.name?.charAt(0)?.toUpperCase() || '?'}
                 </div>
                 <span className="flex-1 font-bold text-white text-sm">{player.name || 'Unnamed'}</span>
-                <ChevronRight size={16} className="text-neutral-600 group-hover:text-[#BFF367] transition-colors" />
+                <ChevronRight size={16} className="text-neutral-600 group-hover:text-[#00C187] transition-colors" />
               </button>
             ))}
           </div>

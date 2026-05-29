@@ -17,7 +17,7 @@ const THEMES = [
     name: 'Sports Network',
     description: 'Professional high-density television broadcast design. Bold color block layout optimized for maximum data display.',
     colors: ['#E0C3FC', '#8EC5FC'],
-    previewBg: 'bg-zinc-900 border-l-[6px] border-[#BFF367] shadow-xl',
+    previewBg: 'bg-zinc-900 border-l-[6px] border-[#00C187] shadow-xl',
     tag: 'TV Broadcast',
     glow: 'rgba(0, 193, 135, 0.4)',
     features: ['Television block design', 'High data readability', 'Sponsor integrations']
@@ -71,7 +71,7 @@ const TickerThemeStoreModal = ({ activeTheme = 'neon_classic', matchId, onClose,
         <div className="flex items-center justify-between p-6 md:px-8 border-b border-white/5 bg-white/[0.01]">
           <div className="space-y-1">
             <div className="flex items-center gap-2">
-              <span className="w-2.5 h-2.5 rounded-full bg-[#BFF367] animate-pulse" />
+              <span className="w-2.5 h-2.5 rounded-full bg-[#00C187] animate-pulse" />
               <h2 className="text-lg md:text-xl font-black uppercase text-white tracking-tight">Kridaz Ticker Store</h2>
             </div>
             <p className="text-[10px] md:text-xs text-neutral-500 font-bold uppercase tracking-widest">Select premium live broadcast overlays</p>
@@ -99,7 +99,7 @@ const TickerThemeStoreModal = ({ activeTheme = 'neon_classic', matchId, onClose,
                   onClick={() => setSelectedTheme(theme.id)}
                   onMouseEnter={() => setHoveredTheme(theme.id)}
                   onMouseLeave={() => setHoveredTheme(null)}
-                  className={`group relative flex flex-col justify-between p-6 rounded-[8px] border cursor-pointer transition-all duration-500 overflow-hidden ${ isSelected ? 'border-[#BFF367] bg-white/[0.02] shadow-[0_15px_30px_rgba(0,193,135,0.06)]' : 'border-white/5 bg-white/[0.01] hover:border-white/10 hover:bg-white/[0.02]' }`}
+                  className={`group relative flex flex-col justify-between p-6 rounded-[8px] border cursor-pointer transition-all duration-500 overflow-hidden ${ isSelected ? 'border-[#00C187] bg-white/[0.02] shadow-[0_15px_30px_rgba(0,193,135,0.06)]' : 'border-white/5 bg-white/[0.01] hover:border-white/10 hover:bg-white/[0.02]' }`}
                 >
                   {/* Dynamic Glowing Accent Background on Hover */}
                   <div 
@@ -119,7 +119,7 @@ const TickerThemeStoreModal = ({ activeTheme = 'neon_classic', matchId, onClose,
                       
                       {/* Active Indicator */}
                       {isActive && (
-                        <span className="text-[8px] font-black uppercase tracking-wider text-black bg-[#BFF367] px-2.5 py-1 rounded-full shadow-[0_0_15px_rgba(0,193,135,0.4)] animate-pulse">
+                        <span className="text-[8px] font-black uppercase tracking-wider text-black bg-[#00C187] px-2.5 py-1 rounded-full shadow-[0_0_15px_rgba(0,193,135,0.4)] animate-pulse">
                           Active
                         </span>
                       )}
@@ -144,9 +144,9 @@ const TickerThemeStoreModal = ({ activeTheme = 'neon_classic', matchId, onClose,
                       {theme.id === 'premium_glass' && (
                         <>
                           <div className="flex items-center gap-2">
-                            <span className="text-[10px] font-black text-transparent bg-clip-text bg-gradient-to-r from-[#BFF367] to-[#BFF367] uppercase tracking-tighter">KRI 168/4</span>
+                            <span className="text-[10px] font-black text-amber-400 uppercase tracking-tighter">KRI 168/4</span>
                           </div>
-                          <div className="text-[8px] font-black uppercase text-transparent bg-clip-text bg-gradient-to-r from-[#BFF367]/80 to-[#BFF367]/80 tracking-widest bg-gradient-to-r from-[#BFF367]/5 to-[#BFF367]/5 px-2 py-0.5 rounded border border-[#BFF367]/10">Gold overlay</div>
+                          <div className="text-[8px] font-black uppercase text-amber-500/80 tracking-widest bg-amber-500/5 px-2 py-0.5 rounded border border-amber-500/10">Gold overlay</div>
                         </>
                       )}
 
@@ -160,9 +160,9 @@ const TickerThemeStoreModal = ({ activeTheme = 'neon_classic', matchId, onClose,
                       )}
 
                       {theme.id === 'sports_network' && (
-                        <div className="w-full flex items-center justify-between border-l-[3px] border-[#BFF367] pl-2 font-sans font-bold">
+                        <div className="w-full flex items-center justify-between border-l-[3px] border-[#00C187] pl-2 font-sans font-bold">
                           <span className="text-[10px] uppercase text-white tracking-wide">KRI 168/4</span>
-                          <span className="text-[9px] text-[#BFF367] uppercase tracking-wider">LIVE</span>
+                          <span className="text-[9px] text-[#00C187] uppercase tracking-wider">LIVE</span>
                         </div>
                       )}
 
@@ -182,7 +182,7 @@ const TickerThemeStoreModal = ({ activeTheme = 'neon_classic', matchId, onClose,
                     <ul className="space-y-1.5">
                       {theme.features.map((feat, i) => (
                         <li key={i} className="flex items-center gap-2 text-[10px] font-bold text-neutral-400 uppercase tracking-tight">
-                          <Check size={12} className="text-[#BFF367]" />
+                          <Check size={12} className="text-[#00C187]" />
                           <span>{feat}</span>
                         </li>
                       ))}
@@ -192,10 +192,10 @@ const TickerThemeStoreModal = ({ activeTheme = 'neon_classic', matchId, onClose,
                       <div className="flex -space-x-1">
                         <div className="w-4 h-4 rounded-full bg-cyan-500/80 border border-black" />
                         <div className="w-4 h-4 rounded-full bg-purple-500/80 border border-black" />
-                        <div className="w-4 h-4 rounded-full bg-[#BFF367]/80 border border-black" />
+                        <div className="w-4 h-4 rounded-full bg-[#00C187]/80 border border-black" />
                       </div>
 
-                      <div className={`w-8 h-8 rounded-full flex items-center justify-center border transition-all duration-300 ${ isSelected ? 'bg-[#BFF367]/10 border-[#BFF367] text-[#BFF367]' : 'bg-white/5 border-white/5 text-neutral-600' }`}>
+                      <div className={`w-8 h-8 rounded-full flex items-center justify-center border transition-all duration-300 ${ isSelected ? 'bg-[#00C187]/10 border-[#00C187] text-[#00C187]' : 'bg-white/5 border-white/5 text-neutral-600' }`}>
                         {isSelected ? <Check size={14} className="stroke-[3]" /> : <Circle size={4} className="fill-neutral-600" />}
                       </div>
                     </div>
@@ -209,7 +209,7 @@ const TickerThemeStoreModal = ({ activeTheme = 'neon_classic', matchId, onClose,
         {/* Footer actions */}
         <div className="flex items-center justify-between p-6 md:px-8 border-t border-white/5 bg-white/[0.01]">
           <div className="hidden md:flex items-center gap-3">
-            <Palette size={16} className="text-[#BFF367]" />
+            <Palette size={16} className="text-[#00C187]" />
             <span className="text-[10px] font-black uppercase text-neutral-500 tracking-wider">Select a theme above to instantly re-style all active scoring streams</span>
           </div>
 
@@ -223,7 +223,7 @@ const TickerThemeStoreModal = ({ activeTheme = 'neon_classic', matchId, onClose,
             <button 
               onClick={handleApplyTheme}
               disabled={isApplying}
-              className="flex-1 md:flex-none px-8 py-3.5 rounded-[8px] bg-[#BFF367] hover:bg-[#00e39e] text-black font-black uppercase text-[10px] tracking-widest transition-all shadow-[0_10px_30px_rgba(0,193,135,0.2)] disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+              className="flex-1 md:flex-none px-8 py-3.5 rounded-[8px] bg-[#00C187] hover:bg-[#00e39e] text-black font-black uppercase text-[10px] tracking-widest transition-all shadow-[0_10px_30px_rgba(0,193,135,0.2)] disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
             >
               {isApplying ? (
                 <>

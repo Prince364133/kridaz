@@ -3,7 +3,7 @@ import { Filter, User, Circle, Shield } from 'lucide-react';
 
 const ballColor = (ball) => {
   if (ball.isWicket) return 'bg-red-600 text-white';
-  if (ball.isExtra) return 'bg-gradient-to-r from-[#BFF367] to-[#BFF367] text-black';
+  if (ball.isExtra) return 'bg-yellow-500 text-black';
   if (ball.runs === 6) return 'bg-primary text-black';
   if (ball.runs === 4) return 'bg-green-500 text-black';
   if (ball.runs === 0) return 'bg-white/10 text-gray-400';
