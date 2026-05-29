@@ -112,7 +112,7 @@ const Navbar = () => {
       lg:transform-none lg:h-screen lg:w-64 lg:border-r lg:border-white/10 bg-black/40 lg:bg-[#050505] backdrop-blur-xl lg:backdrop-blur-none
     `}>
       <div className={`flex justify-center transition-all duration-500 lg:h-full`}>
-        <div className={`relative w-full max-w-full h-16 sm:h-20 lg:h-auto border-b border-white/10 lg:border-none flex items-center lg:items-start lg:flex-col justify-between lg:justify-start px-6 sm:px-12 lg:px-6 lg:pt-8 transition-all duration-500`}>
+        <div className={`relative w-full max-w-full h-16 sm:h-20 lg:h-auto border-b border-white/10 lg:border-none flex items-center lg:items-start lg:flex-col justify-between lg:justify-start px-2 sm:px-4 lg:px-6 lg:pt-8 transition-all duration-500`}>
           {/* Logo & Mobile Location Section */}
           <div className="flex flex-col items-start justify-center lg:mb-8">
             <Link to="/" className="group flex items-center justify-center">
