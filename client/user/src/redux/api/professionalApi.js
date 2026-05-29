@@ -46,6 +46,10 @@ export const professionalApi = baseApi.injectEndpoints({
       query: () => "/api/professional/user-on-demand-bookings",
       providesTags: ["Booking"],
     }),
+    getDashboardStats: builder.query({
+      query: () => "/api/professional/dashboard-stats",
+      providesTags: ["Booking", "User"],
+    }),
   }),
 });
 
@@ -57,4 +61,6 @@ export const {
   useVerifyOTPMutation,
   useGetMyOnDemandBookingsQuery,
   useGetUserOnDemandBookingsQuery,
+  useGetDashboardStatsQuery,
 } = professionalApi;
+

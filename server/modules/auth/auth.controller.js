@@ -1411,6 +1411,7 @@ export const getMe = async (req, res) => {
           businessType: user.ownerProfile.businessType,
           ownerRole: user.role,
           ownerVerified: user.ownerProfile.isVerified,
+          isOnline: user.ownerProfile.isOnline,
         }
       : {};
 

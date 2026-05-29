@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from "react";
-import { useNavigate, Link } from "react-router-dom";
+import { useNavigate, Link, useLocation } from "react-router-dom";
 import { 
   Menu, 
   Bell, 
@@ -17,13 +17,17 @@ import {
   AlertTriangle,
   History,
   ShieldAlert,
-  ExternalLink
+  ExternalLink,
+  ArrowLeft,
+  HelpCircle,
+  Zap
 } from "lucide-react";
 import { useDispatch, useSelector } from "react-redux";
-import { logout } from "@redux/slices/authSlice.js";
+import { logout, updateUser } from "@redux/slices/authSlice.js";
 import axiosInstance from "@hooks/useAxiosInstance";
 import ManualBookingModal from "@features/venue-owner/ManualBookingModal";
 import useNotifications from "@hooks/shared/useNotifications";
+import { useGetDashboardStatsQuery, useToggleOnlineMutation } from "@redux/api/professionalApi";
 import { formatDistanceToNow } from 'date-fns';
 import toast from "react-hot-toast";
 import { getDynamicProfileRoute } from "@utils/routeUtils";
@@ -41,11 +45,17 @@ const AuthenticatedNavbar = ({ toggleSidebar }) => {
   const [isManualBookingOpen, setIsManualBookingOpen] = useState(false);
   const notificationRef = useRef(null);
   const profileRef = useRef(null);
+  const location = useLocation();
+  const isProfessionalDashboard = location.pathname.startsWith('/professional');
   
   const user = useSelector((state) => state?.auth?.user);
   const role = useSelector((state) => state?.auth?.role);
   const isScorer = role?.toLowerCase().includes("scorer");
   const themeColor = isScorer ? "#BFF367" : "#BFF367";
+
+  const { data: statsData } = useGetDashboardStatsQuery(undefined, { skip: !isProfessionalDashboard });
+  const [toggleOnline, { isLoading: isToggling }] = useToggleOnlineMutation();
+  const isOnline = user?.isOnline || false;
 
   const { notifications, loading, unreadCount, markRead, markAllRead, clearAll } = useNotifications();
 
@@ -101,12 +111,35 @@ const AuthenticatedNavbar = ({ toggleSidebar }) => {
     }
   };
 
+  const handleToggleOnline = async () => {
+    const newStatus = !isOnline;
+    // Optimistic update — flip UI instantly before API responds
+    dispatch(updateUser({ isOnline: newStatus }));
+    try {
+      await toggleOnline({ isOnline: newStatus }).unwrap();
+      toast.success(newStatus ? "You are now online and visible to users" : "You are now offline");
+    } catch (error) {
+      // Rollback on failure
+      dispatch(updateUser({ isOnline: !newStatus }));
+      toast.error(error?.data?.message || "Failed to update online status");
+    }
+  };
+
   const getTimeGreeting = () => {
     const hour = new Date().getHours();
     if (hour < 12) return "Good Morning";
     if (hour < 17) return "Good Afternoon";
     return "Good Evening";
   };
+
+  const trustScore = statsData?.stats?.trustScore || 100;
+  const trustMax = 100;
+  const trustPercent = Math.min(100, Math.max(0, (trustScore / trustMax) * 100));
+  const trustLevel = trustScore >= 90 ? "Elite" : trustScore >= 70 ? "Pro" : trustScore >= 50 ? "Rising" : "Rookie";
+  // SVG ring math (radius=18, circumference=~113)
+  const ringRadius = 18;
+  const ringCircumference = 2 * Math.PI * ringRadius;
+  const ringOffset = ringCircumference * (1 - trustPercent / 100);
 
   const getNotificationIcon = (type) => {
     switch (type) {
@@ -134,19 +167,20 @@ const AuthenticatedNavbar = ({ toggleSidebar }) => {
 
         
         <div className="flex items-center gap-4 lg:min-w-[200px]">
-          <button className="p-2 text-white hover:opacity-80 transition-opacity lg:hidden" style={{ color: themeColor }} onClick={toggleSidebar}>
-            <Menu size={24} />
-          </button>
+          {!isProfessionalDashboard ? (
+            <button className="p-2 text-white hover:opacity-80 transition-opacity lg:hidden" style={{ color: themeColor }} onClick={toggleSidebar}>
+              <Menu size={24} />
+            </button>
+          ) : (
+            <Link to="/" className="p-2 text-white hover:opacity-80 transition-opacity" style={{ color: themeColor }}>
+              <ArrowLeft size={24} />
+            </Link>
+          )}
           <Link to="/" className="flex items-center gap-4 group">
             <div className="w-20 h-10 sm:w-32 sm:h-12 bg-transparent flex items-center justify-center overflow-hidden">
                <img src="/logo.png" alt="Kridaz Logo" className="w-full h-full object-contain" />
             </div>
           </Link>
-        </div>
-
-
-        
-        <div className="hidden xl:flex flex-1 items-center justify-center gap-6 max-w-4xl px-8">
         </div>
 
 
@@ -250,8 +284,18 @@ const AuthenticatedNavbar = ({ toggleSidebar }) => {
 
           <div className="h-8 w-[1px] bg-white/5 mx-1 hidden sm:block" />
 
+          {isProfessionalDashboard && (
+            <div className="relative">
+              <Link 
+                to={`/professional/${role}/support`}
+                className="flex items-center justify-center p-2.5 bg-[#0d0d0d] border border-white/5 hover:border-[#BFF367]/30 rounded-[8px] hover:bg-[#BFF367]/10 hover:text-[#BFF367] text-[#999999] transition-all duration-300"
+                title="Support"
+              >
+                <HelpCircle size={20} strokeWidth={2.5} />
+              </Link>
+            </div>
+          )}
 
-          
           <div className="relative">
             <button 
               onClick={handleLogout}
@@ -263,6 +307,97 @@ const AuthenticatedNavbar = ({ toggleSidebar }) => {
           </div>
         </div>
       </nav>
+
+      {/* Professional Sub-Bar — visible on ALL screen sizes */}
+      {isProfessionalDashboard && user && (
+        <div className="bg-[#0A0A0A] border-b border-[#1a1a1a] px-3 sm:px-6 py-2.5">
+          <div className="flex items-center justify-between gap-3">
+            {/* Left: Avatar + Greeting */}
+            <div className="flex items-center gap-2.5 sm:gap-3 min-w-0">
+              {/* Avatar with online indicator ring and dropdown */}
+              <div className="relative shrink-0" ref={profileRef}>
+                <button
+                  onClick={() => setShowProfileMenu(prev => !prev)}
+                  className="relative block focus:outline-none transition-transform active:scale-95"
+                >
+                  <img 
+                    src={user.profilePicture || user.profileImage || `https://ui-avatars.com/api/?name=${encodeURIComponent(user.name || 'U')}&background=111111&color=BFF367&bold=true&size=80`} 
+                    alt={user.name} 
+                    className="w-9 h-9 sm:w-10 sm:h-10 rounded-full object-cover ring-2 ring-offset-1 ring-offset-[#0A0A0A]" 
+                    style={{ ringColor: isOnline ? '#BFF367' : '#555' }}
+                  />
+                  <span className={`absolute bottom-0 right-0 w-2.5 h-2.5 rounded-full border-2 border-[#0A0A0A] ${isOnline ? 'bg-[#BFF367]' : 'bg-gray-500'}`} />
+                </button>
+
+                {/* Dropdown containing Logout button */}
+                {showProfileMenu && (
+                  <div className="absolute left-0 mt-2 w-48 bg-[#141414] border border-[#2D2D2D] rounded-xl shadow-2xl overflow-hidden z-50 animate-in fade-in slide-in-from-top-2 duration-200">
+                    <div className="p-3 border-b border-[#2D2D2D] bg-[#0d0d0d]">
+                      <p className="text-[10px] font-bold text-gray-500 uppercase tracking-wider">Signed in as</p>
+                      <p className="text-xs font-bold text-white truncate mt-0.5">{user.name}</p>
+                    </div>
+                    <button
+                      onClick={handleLogout}
+                      className="w-full flex items-center gap-2.5 px-4 py-3 text-left text-xs font-semibold text-red-500 hover:bg-red-500/10 transition-colors duration-200"
+                    >
+                      <LogOut size={14} strokeWidth={2.5} />
+                      <span>Log Out</span>
+                    </button>
+                  </div>
+                )}
+              </div>
+              {/* Greeting */}
+              <div className="flex flex-col min-w-0">
+                <span className="text-[9px] sm:text-[10px] font-semibold text-gray-500 uppercase tracking-wider truncate">{getTimeGreeting()}</span>
+                <span className="text-xs sm:text-sm font-bold text-white truncate">{user.name}</span>
+              </div>
+            </div>
+
+            {/* Center: Trust Score Ring (industry-standard circular progress) */}
+            <div className="flex items-center gap-2 sm:gap-3">
+              <div className="relative flex items-center justify-center" style={{ width: 44, height: 44 }}>
+                {/* SVG Ring */}
+                <svg width="44" height="44" viewBox="0 0 44 44" className="-rotate-90">
+                  {/* Background track */}
+                  <circle cx="22" cy="22" r={ringRadius} fill="transparent" stroke="#1a1a1a" strokeWidth="3" />
+                  {/* Progress arc */}
+                  <circle 
+                    cx="22" cy="22" r={ringRadius} fill="transparent" 
+                    stroke="#BFF367" strokeWidth="3" strokeLinecap="round"
+                    strokeDasharray={ringCircumference} 
+                    strokeDashoffset={ringOffset}
+                    style={{ transition: 'stroke-dashoffset 0.8s ease', filter: 'drop-shadow(0 0 4px rgba(191,243,103,0.4))' }}
+                  />
+                </svg>
+                {/* Center score */}
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <span className="text-[11px] font-black text-[#BFF367] leading-none">{trustScore}</span>
+                </div>
+              </div>
+              {/* Label */}
+              <div className="flex flex-col">
+                <span className="text-[8px] sm:text-[9px] font-bold text-gray-500 uppercase tracking-widest">Trust</span>
+                <span className="text-[10px] sm:text-xs font-black text-[#BFF367] uppercase">{trustScore} XP</span>
+              </div>
+            </div>
+
+            {/* Right: Online Toggle (OverviewTab style) */}
+            <div className="flex items-center gap-2 bg-[#222222] px-3 py-2 sm:px-4 sm:py-2.5 rounded-xl border border-[#2D2D2D]">
+              <span className={`text-[10px] sm:text-xs font-semibold tracking-wide ${isOnline ? 'text-[#BFF367]' : 'text-gray-400'}`}>
+                <span className="sm:hidden">{isOnline ? 'ONLINE' : 'OFFLINE'}</span>
+                <span className="hidden sm:inline">{isOnline ? 'ONLINE & AVAILABLE' : 'OFFLINE / BUSY'}</span>
+              </span>
+              <button 
+                onClick={handleToggleOnline} 
+                disabled={isToggling}
+                className={`w-11 h-6 sm:w-12 sm:h-7 rounded-full p-1 transition-all duration-300 ${isOnline ? 'bg-[#BFF367]' : 'bg-gray-600'}`}
+              >
+                <div className={`h-4 w-4 sm:h-5 sm:w-5 rounded-full bg-black shadow-md transform transition-all duration-300 ${isOnline ? 'translate-x-5 sm:translate-x-5' : 'translate-x-0'}`} />
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

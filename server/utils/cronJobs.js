@@ -315,7 +315,7 @@ export const autoExpireMatchOffers = async () => {
           if (nextIndex < queuePositions.length) {
             const nextCandidateId = queuePositions[nextIndex];
             
-            await prisma.$transaction(async (tx) => {
+            const offer = await prisma.$transaction(async (tx) => {
               await tx.professionalMatchRequest.update({
                 where: { id: matchReq.id },
                 data: { 
@@ -324,7 +324,7 @@ export const autoExpireMatchOffers = async () => {
                 }
               });
 
-              await tx.professionalMatchOffer.create({
+              return tx.professionalMatchOffer.create({
                 data: {
                   requestId: matchReq.id,
                   professionalId: nextCandidateId,
@@ -339,6 +339,7 @@ export const autoExpireMatchOffers = async () => {
               const io = getIO();
               if (io) {
                 io.to(nextProf.userId).emit("professional:match_offer", {
+                  offerId: offer.id,
                   requestId: matchReq.id,
                   groundName: matchReq.groundId ? "Selected Venue" : "Custom Location",
                   budget: `${matchReq.minBudget} - ${matchReq.maxBudget}`,

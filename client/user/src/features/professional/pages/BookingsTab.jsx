@@ -16,6 +16,7 @@ const BookingsTab = ({ role }) => {
   const [activeSubTab, setActiveSubTab] = useState("active");
 
   const bookings = bookingsData?.bookings || [];
+  const nonAcceptedBookings = bookingsData?.nonAcceptedBookings || [];
 
   const activeBookings = bookings.filter(
     (b) => b.status === "ASSIGNED" || b.status === "IN_PROGRESS"
@@ -37,12 +38,20 @@ const BookingsTab = ({ role }) => {
         return "bg-red-500/10 text-red-400 border border-red-500/20";
       case "NO_SHOW":
         return "bg-yellow-500/10 text-yellow-400 border border-yellow-500/20";
+      case "REJECTED":
+      case "EXPIRED":
+      case "SKIPPED":
+        return "bg-red-500/10 text-red-400 border border-red-500/20";
       default:
         return "bg-gray-500/10 text-gray-400 border border-gray-500/20";
     }
   };
 
-  const currentList = activeSubTab === "active" ? activeBookings : completedBookings;
+  const currentList = activeSubTab === "active" 
+    ? activeBookings 
+    : activeSubTab === "history" 
+      ? completedBookings 
+      : nonAcceptedBookings;
 
   return (
     <div className="space-y-6 text-white font-inter">
@@ -60,6 +69,12 @@ const BookingsTab = ({ role }) => {
             className={`pb-3 text-sm font-semibold border-b-2 transition-colors relative ${activeSubTab === "history" ? "text-[#BFF367] border-[#BFF367]" : "text-[#878C9F] border-transparent hover:text-white"}`}
           >
             Booking History ({completedBookings.length})
+          </button>
+          <button
+            onClick={() => setActiveSubTab("nonAccepted")}
+            className={`pb-3 text-sm font-semibold border-b-2 transition-colors relative ${activeSubTab === "nonAccepted" ? "text-[#BFF367] border-[#BFF367]" : "text-[#878C9F] border-transparent hover:text-white"}`}
+          >
+            Non Accepted ({nonAcceptedBookings.length})
           </button>
         </div>
 
@@ -83,7 +98,9 @@ const BookingsTab = ({ role }) => {
             <p className="text-sm text-[#878C9F] mt-1">
               {activeSubTab === "active" 
                 ? "You do not have any active or in-progress match assignments right now." 
-                : "No completed or historical matching records found on this account."}
+                : activeSubTab === "history"
+                  ? "No completed or historical matching records found on this account."
+                  : "No rejected, expired, or skipped matching requests found."}
             </p>
           </div>
         </div>

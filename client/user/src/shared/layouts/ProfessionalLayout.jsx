@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { Outlet, Navigate, useLocation } from "react-router-dom";
 import ProfessionalSidebar from "@components/layout/ProfessionalSidebar";
 import { AuthenticatedNavbar } from "@components/layout";
-import MobileBottomNav from "@user/components/layout/MobileBottomNav";
+import ProfessionalBottomNav from "@components/layout/ProfessionalBottomNav";
 
 const ProfessionalLayout = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -15,7 +15,7 @@ const ProfessionalLayout = () => {
     <div className="flex flex-col min-h-screen bg-black">
       <AuthenticatedNavbar toggleSidebar={toggleSidebar} />
 
-      <div className="flex flex-1 pt-16 lg:pt-20">
+      <div className="flex flex-1 pt-28 lg:pt-32">
         <div 
           onMouseEnter={() => window.innerWidth >= 1024 && setIsHovered(true)} 
           onMouseLeave={() => window.innerWidth >= 1024 && setIsHovered(false)}
@@ -36,7 +36,7 @@ const ProfessionalLayout = () => {
           </div>
         </main>
       </div>
-      <MobileBottomNav />
+      <ProfessionalBottomNav />
     </div>
   );
 };

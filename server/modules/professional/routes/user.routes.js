@@ -23,7 +23,8 @@ import {
   rejectMatchOffer,
   verifyOTPCheckIn,
   getMyOnDemandBookings,
-  getUserOnDemandBookings
+  getUserOnDemandBookings,
+  getDashboardStats
 } from "../professional.controller.js";
 import protect, { optionalAuth } from "../../../middleware/jwt/auth.middleware.js";
 
@@ -292,5 +293,6 @@ router.post("/offers/:offerId/reject", protect, rejectMatchOffer);
 router.post("/bookings/:bookingId/verify-otp", protect, verifyOTPCheckIn);
 router.get("/on-demand-bookings", protect, getMyOnDemandBookings);
 router.get("/user-on-demand-bookings", protect, getUserOnDemandBookings);
+router.get("/dashboard-stats", protect, getDashboardStats);
 
 export default router;

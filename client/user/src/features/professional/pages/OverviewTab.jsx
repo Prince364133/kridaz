@@ -77,18 +77,18 @@ import {
   useGetMyOnDemandBookingsQuery, 
   useVerifyOTPMutation,
   useAcceptOfferMutation,
-  useRejectOfferMutation
+  useRejectOfferMutation,
+  useGetDashboardStatsQuery
 } from "../../../redux/api/professionalApi";
-import { useSelector } from "react-redux";
-import { useSocket } from "@context/SocketContext"; // wait, socket is browser-side, we must import socket.io-client or use a shared hook. Let's check how the codebase connects to sockets.
-
-// Let's create a custom websocket listener or use standard window socket if available.
-// Let's design it dynamically to support real-time WebSocket matching.
+import { useSelector, useDispatch } from "react-redux";
+import { updateUser } from "@redux/slices/authSlice.js";
+import { useSocket } from "@context/SocketContext";
 
 const OverviewTab = ({ role, profile }) => {
   const user = useSelector((state) => state.auth?.user);
+  const dispatch = useDispatch();
   const { socket } = useSocket();
-  const [isOnline, setIsOnline] = useState(profile?.isOnline || false);
+  const isOnline = user?.isOnline || false;
   const [otp, setOtp] = useState("");
   const [errorMsg, setErrorMsg] = useState("");
   const [successMsg, setSuccessMsg] = useState("");
@@ -114,42 +114,41 @@ const OverviewTab = ({ role, profile }) => {
   const [offerCountdown, setOfferCountdown] = useState(30);
 
   const { data: bookingsData, refetch: refetchBookings } = useGetMyOnDemandBookingsQuery();
+  const { data: statsData, refetch: refetchStats } = useGetDashboardStatsQuery();
   const [toggleOnlineApi, { isLoading: isToggling }] = useToggleOnlineMutation();
   const [verifyOtpApi, { isLoading: isVerifying }] = useVerifyOTPMutation();
   const [acceptOfferApi] = useAcceptOfferMutation();
   const [rejectOfferApi] = useRejectOfferMutation();
 
-  // Load profile online state
-  useEffect(() => {
-    if (profile) {
-      setIsOnline(profile.isOnline);
-    }
-  }, [profile]);
-
   // Handle Online Toggle
   const handleToggleOnline = async () => {
-    try {
-      const nextState = !isOnline;
-      // Get current geolocation if available
-      if (nextState && navigator.geolocation) {
-        navigator.geolocation.getCurrentPosition(
-          async (position) => {
-            const { latitude, longitude } = position.coords;
-            await toggleOnlineApi({ isOnline: nextState, latitude, longitude }).unwrap();
-            setIsOnline(nextState);
-          },
-          async () => {
-            // Fallback if location access is denied
-            await toggleOnlineApi({ isOnline: nextState }).unwrap();
-            setIsOnline(nextState);
-          }
-        );
-      } else {
-        await toggleOnlineApi({ isOnline: nextState }).unwrap();
-        setIsOnline(nextState);
+    const nextState = !isOnline;
+    // Optimistic update — flip UI instantly before API responds
+    dispatch(updateUser({ isOnline: nextState }));
+
+    const performToggle = async (coords = {}) => {
+      try {
+        await toggleOnlineApi({ isOnline: nextState, ...coords }).unwrap();
+        refetchStats();
+      } catch (err) {
+        console.error("Failed to toggle online status", err);
+        // Rollback on failure
+        dispatch(updateUser({ isOnline: !nextState }));
       }
-    } catch (err) {
-      console.error("Failed to toggle online status", err);
+    };
+
+    if (nextState && navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          const { latitude, longitude } = position.coords;
+          performToggle({ latitude, longitude });
+        },
+        () => {
+          performToggle();
+        }
+      );
+    } else {
+      performToggle();
     }
   };
 
@@ -166,6 +165,7 @@ const OverviewTab = ({ role, profile }) => {
       setSuccessMsg("Check-in successful! Payout escrow released.");
       setOtp("");
       refetchBookings();
+      refetchStats();
     } catch (err) {
       setErrorMsg(err.data?.message || "OTP verification failed. Please try again.");
     }
@@ -215,6 +215,7 @@ const OverviewTab = ({ role, profile }) => {
       await acceptOfferApi(offerId).unwrap();
       setActiveOffer(null);
       refetchBookings();
+      refetchStats();
     } catch (err) {
       alert("Failed to accept offer. It may have expired or been taken by another professional.");
       setActiveOffer(null);
@@ -225,45 +226,75 @@ const OverviewTab = ({ role, profile }) => {
     try {
       await rejectOfferApi(offerId).unwrap();
       setActiveOffer(null);
+      refetchStats();
     } catch (err) {
       setActiveOffer(null);
     }
   };
 
+  const getFilteredBookings = (timeline, dates) => {
+    const completed = bookingsData?.bookings?.filter((b) => b.status === "COMPLETED") || [];
+    const now = new Date();
+    
+    if (timeline === "Today") {
+      const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+      return completed.filter(b => new Date(b.createdAt) >= todayStart);
+    }
+    if (timeline === "This Week") {
+      const oneWeekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+      return completed.filter(b => new Date(b.createdAt) >= oneWeekAgo);
+    }
+    if (timeline === "This Month") {
+      const oneMonthAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+      return completed.filter(b => new Date(b.createdAt) >= oneMonthAgo);
+    }
+    if (timeline === "Custom Time" && dates[0] && dates[1]) {
+      const start = new Date(dates[0]);
+      const end = new Date(dates[1]);
+      end.setHours(23, 59, 59, 999);
+      return completed.filter(b => {
+        const d = new Date(b.createdAt);
+        return d >= start && d <= end;
+      });
+    }
+    return completed;
+  };
+
   const getBookingsValue = () => {
-    if (bookingsTimeline === "All Time") return pastBookingsCount;
-    if (bookingsTimeline === "Today") return "2";
-    if (bookingsTimeline === "This Week") return "14";
-    if (bookingsTimeline === "This Month") return "56";
-    if (bookingsTimeline === "Custom Time") return "28";
-    return pastBookingsCount;
+    return getFilteredBookings(bookingsTimeline, customDates.bookings).length;
   };
 
   const getEarningsValue = () => {
-    if (earningsTimeline === "All Time") return totalEarnings;
-    if (earningsTimeline === "Today") return "400";
-    if (earningsTimeline === "This Week") return "3,200";
-    if (earningsTimeline === "This Month") return "12,400";
-    if (earningsTimeline === "Custom Time") return "6,400";
-    return totalEarnings;
+    const filtered = getFilteredBookings(earningsTimeline, customDates.earnings);
+    return filtered.reduce((sum, b) => sum + parseFloat(b.hourlyRate || 0), 0);
   };
 
   const getAvgTimeValue = () => {
-    if (timeTimeline === "All Time") return "4h 45m";
-    if (timeTimeline === "Today") return "4h 00m";
-    if (timeTimeline === "This Week") return "4h 30m";
-    if (timeTimeline === "This Month") return "5h 15m";
-    if (timeTimeline === "Custom Time") return "4h 10m";
-    return "4h 45m";
+    const filtered = getFilteredBookings(timeTimeline, customDates.time);
+    if (filtered.length === 0) return "0h 0m";
+    
+    let totalMinutes = 0;
+    filtered.forEach(b => {
+      if (b.matchStartTime && b.matchEndTime) {
+        const [sh, sm] = b.matchStartTime.split(":").map(Number);
+        const [eh, em] = b.matchEndTime.split(":").map(Number);
+        let start = sh * 60 + sm;
+        let end = eh * 60 + em;
+        if (end < start) end += 24 * 60;
+        totalMinutes += (end - start);
+      } else {
+        totalMinutes += 120; // default 2 hours
+      }
+    });
+    
+    const avgMinutes = Math.round(totalMinutes / filtered.length);
+    const hrs = Math.floor(avgMinutes / 60);
+    const mins = avgMinutes % 60;
+    return `${hrs}h ${mins}m`;
   };
 
   const getRatingValue = () => {
-    if (ratingTimeline === "All Time") return profile?.rating || "5.0";
-    if (ratingTimeline === "Today") return "5.0";
-    if (ratingTimeline === "This Week") return "4.8";
-    if (ratingTimeline === "This Month") return "4.9";
-    if (ratingTimeline === "Custom Time") return "4.7";
-    return profile?.rating || "5.0";
+    return Number(statsData?.stats?.rating || profile?.rating || 5.0).toFixed(1);
   };
 
   const offerDuration = 30;
@@ -275,62 +306,6 @@ const OverviewTab = ({ role, profile }) => {
 
   return (
     <div className="space-y-6 text-white font-inter">
-      {/* Online State Toggle (Top Right) */}
-      <div className="flex justify-end">
-        <div className="flex items-center gap-2 sm:gap-4">
-          <div className="group relative flex min-w-0 md:hidden">
-            <button
-              type="button"
-              aria-label="Kridaz points regulations"
-              className="relative flex h-[58px] w-[170px] max-w-[45vw] items-center justify-between overflow-hidden rounded-xl border border-[#BFF367]/70 bg-[#061413]/95 px-3 text-left shadow-[0_0_24px_rgba(85,222,232,0.16)] outline-none transition-all focus:border-[#BFF367] focus:ring-2 focus:ring-[#BFF367]/30"
-            >
-              <span className="absolute inset-y-0 right-0 w-16 bg-[#BFF367]/10 blur-2xl" />
-              <span className="relative min-w-0">
-                <span className="block text-[9px] font-medium uppercase leading-none tracking-[0.18em] text-white/75">Trust Score</span>
-                <span className="mt-1 block text-xl font-black leading-none text-[#BFF367]">104 XP</span>
-                <span className="mt-1 block truncate text-[10px] font-bold uppercase leading-none tracking-[0.12em] text-white/75">
-                  Level: <span className="text-[#BFF367]">Elite</span>
-                </span>
-              </span>
-              <span className="relative ml-2 flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-[#BFF367]/60 bg-[#BFF367]/10 text-[7px] font-black uppercase tracking-wide text-[#BFF367] shadow-[0_0_14px_rgba(85,222,232,0.25)]">
-                Elite
-              </span>
-            </button>
-            <div className="pointer-events-none absolute left-0 top-[68px] z-30 w-[min(82vw,290px)] translate-y-2 rounded-xl border border-[#2D2D2D] bg-[#141414] p-4 opacity-0 shadow-2xl shadow-black/40 transition-all duration-200 group-hover:pointer-events-auto group-hover:translate-y-0 group-hover:opacity-100 group-focus-within:pointer-events-auto group-focus-within:translate-y-0 group-focus-within:opacity-100">
-              <h3 className="mb-3 text-xs font-bold uppercase tracking-wider text-white">Kridaz Points</h3>
-              <div className="space-y-3">
-                <div className="flex items-start gap-3">
-                  <div className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-[#BFF367]/10 text-[10px] font-bold text-[#BFF367]">1</div>
-                  <p className="text-xs text-gray-300">No points will be reduced if rejected.</p>
-                </div>
-                <div className="flex items-start gap-3">
-                  <div className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-[#BFF367]/10 text-[10px] font-bold text-[#BFF367]">2</div>
-                  <p className="text-xs text-gray-300">There will be an increase in point for every successful booking.</p>
-                </div>
-                <div className="flex items-start gap-3">
-                  <div className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-[#BFF367]/10 text-[10px] font-bold text-[#BFF367]">3</div>
-                  <p className="text-xs text-gray-300">There will be a 0.5 point reduction for skipping.</p>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div className="flex items-center gap-2 bg-[#222222] px-3 py-2 sm:gap-4 sm:px-5 sm:py-3 rounded-xl border border-[#2D2D2D]">
-            <span className={`text-[11px] sm:text-sm font-semibold tracking-wide ${isOnline ? "text-[#BFF367]" : "text-gray-400"}`}>
-              <span className="sm:hidden">{isOnline ? "ONLINE" : "OFFLINE"}</span>
-              <span className="hidden sm:inline">{isOnline ? "ONLINE & AVAILABLE" : "OFFLINE / BUSY"}</span>
-            </span>
-            <button 
-              onClick={handleToggleOnline} 
-              disabled={isToggling}
-              className={`w-12 h-7 sm:w-14 sm:h-8 rounded-full p-1 transition-all duration-300 ${isOnline ? "bg-[#BFF367]" : "bg-gray-600"}`}
-            >
-              <div className={`h-5 w-5 sm:w-6 sm:h-6 rounded-full bg-black shadow-md transform transition-all duration-300 ${isOnline ? "translate-x-5 sm:translate-x-6" : "translate-x-0"}`} />
-            </button>
-          </div>
-        </div>
-      </div>
-
       {/* Analytics Dashboard Grid */}
       <div className="grid grid-cols-2 lg:grid-cols-5 gap-4">
         {/* Bookings */}
@@ -510,12 +485,12 @@ const OverviewTab = ({ role, profile }) => {
           <div className="mt-2 flex items-center gap-4">
             <div>
               <p className="text-[10px] text-gray-500 uppercase font-bold mb-0.5">Accepted</p>
-              <h3 className="text-2xl font-bold text-green-400">{pastBookingsCount}</h3>
+              <h3 className="text-2xl font-bold text-green-400">{statsData?.stats?.acceptedRequests ?? pastBookingsCount}</h3>
             </div>
             <div className="w-px h-8 bg-[#2D2D2D]"></div>
             <div>
               <p className="text-[10px] text-gray-500 uppercase font-bold mb-0.5">Rejected</p>
-              <h3 className="text-2xl font-bold text-red-400">0</h3>
+              <h3 className="text-2xl font-bold text-red-400">{statsData?.stats?.rejectedRequests ?? 0}</h3>
             </div>
           </div>
           <div className="mt-3 flex items-center border-t border-[#2D2D2D] pt-3">
@@ -613,41 +588,48 @@ const OverviewTab = ({ role, profile }) => {
 
               <div className="space-y-3">
                 <h4 className="text-xs font-bold uppercase tracking-wider text-[#BFF367]">Skipped Requests</h4>
-                <div className="grid grid-cols-1 xl:grid-cols-2 gap-3">
-                  {skippedRequests.map((request, index) => (
-                    <div
-                      key={request.title}
-                      className="rounded-xl border border-[#BFF367]/40 bg-black/20 p-4 transition-all hover:border-[#BFF367]/60 hover:bg-[#BFF367]/[0.03]"
-                    >
-                      <div className="space-y-2">
-                        <h5 className="text-sm font-bold text-white">
-                          {index + 1}. {request.title}
-                        </h5>
-                        <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs font-medium text-[#B8BCC8]">
-                          <span className="inline-flex items-center gap-1.5">
-                            <Clock size={13} className="text-[#878C9F]" />
-                            {request.dateTime}
-                          </span>
-                          <span className="text-[#2D2D2D]">|</span>
-                          <span className="font-bold text-white">{request.pay}</span>
+                {(!statsData?.stats?.skippedRequests || statsData.stats.skippedRequests.length === 0) ? (
+                  <p className="text-xs text-[#878C9F]">No skipped booking requests.</p>
+                ) : (
+                  <div className="grid grid-cols-1 xl:grid-cols-2 gap-3">
+                    {statsData.stats.skippedRequests.map((request, index) => (
+                      <div
+                        key={request.id || index}
+                        className="rounded-xl border border-[#BFF367]/40 bg-black/20 p-4 transition-all hover:border-[#BFF367]/60 hover:bg-[#BFF367]/[0.03]"
+                      >
+                        <div className="space-y-2">
+                          <h5 className="text-sm font-bold text-white">
+                            {index + 1}. {request.title}
+                          </h5>
+                          <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs font-medium text-[#B8BCC8]">
+                            <span className="inline-flex items-center gap-1.5">
+                              <Clock size={13} className="text-[#878C9F]" />
+                              {request.dateTime}
+                            </span>
+                            <span className="text-[#2D2D2D]">|</span>
+                            <span className="font-bold text-white">{request.pay}</span>
+                          </div>
                         </div>
-                      </div>
 
-                      <div className="mt-4 flex items-end justify-between gap-3">
-                        <div>
-                          <p className="text-[11px] text-[#878C9F]">Status</p>
-                          <p className="text-xs font-black uppercase tracking-wider text-yellow-400">Skipped</p>
-                        </div>
-                        <div className="text-right">
-                          <p className="mb-1 text-[11px] text-[#878C9F]">Action</p>
-                          <button className="rounded-full bg-[#BFF367] px-4 py-2 text-[11px] font-black uppercase tracking-wide text-black shadow-[0_0_14px_rgba(191,243,103,0.28)] transition-all hover:bg-[#CCFF00]">
-                            Re-Accept
-                          </button>
+                        <div className="mt-4 flex items-end justify-between gap-3">
+                          <div>
+                            <p className="text-[11px] text-[#878C9F]">Status</p>
+                            <p className="text-xs font-black uppercase tracking-wider text-yellow-400">Skipped</p>
+                          </div>
+                          <div className="text-right">
+                            <p className="mb-1 text-[11px] text-[#878C9F]">Action</p>
+                            <button 
+                              disabled
+                              className="rounded-full bg-gray-700 px-4 py-2 text-[11px] font-black uppercase tracking-wide text-gray-400 cursor-not-allowed"
+                            >
+                              Skipped
+                            </button>
+                          </div>
                         </div>
                       </div>
-                    </div>
-                  ))}
-                </div>
+                    ))}
+                  </div>
+                )}
               </div>
             </div>
           ) : (
@@ -698,7 +680,7 @@ const OverviewTab = ({ role, profile }) => {
             )}
             <div className="h-[250px] w-full relative z-10">
               <ResponsiveContainer width="100%" height="100%">
-                <AreaChart data={graphData[graphTimeline] || graphData["This Week"]} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+                <AreaChart data={statsData?.stats?.graphData?.[graphTimeline] || graphData[graphTimeline] || []} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
                   <defs>
                     <linearGradient id="colorIncome" x1="0" y1="0" x2="0" y2="1">
                       <stop offset="5%" stopColor="#BFF367" stopOpacity={0.3}/>
@@ -734,10 +716,10 @@ const OverviewTab = ({ role, profile }) => {
             {/* Circular Progress */}
             <div className="w-32 h-32 rounded-full border-4 border-[#2A2D35] flex items-center justify-center relative mb-8">
               <svg className="absolute inset-0 w-full h-full transform -rotate-90" viewBox="0 0 100 100">
-                <circle cx="50" cy="50" r="46" fill="transparent" stroke="#BFF367" strokeWidth="8" strokeDasharray="289" strokeDashoffset="0" className="drop-shadow-[0_0_8px_rgba(191,243,103,0.5)]" />
+                <circle cx="50" cy="50" r="46" fill="transparent" stroke="#BFF367" strokeWidth="8" strokeDasharray="289" strokeDashoffset={289 * (1 - Math.min(100, Math.max(0, statsData?.stats?.trustScore || 100)) / 100)} className="drop-shadow-[0_0_8px_rgba(191,243,103,0.5)]" />
               </svg>
               <div className="text-center z-10 flex items-center justify-center h-full">
-                <span className="text-4xl font-bold text-[#BFF367]">100</span>
+                <span className="text-4xl font-bold text-[#BFF367]">{statsData?.stats?.trustScore || 100}</span>
               </div>
             </div>
 
@@ -837,14 +819,14 @@ const OverviewTab = ({ role, profile }) => {
 
                   <div className="flex flex-wrap gap-3 pt-1">
                     <button 
-                      onClick={() => activeOffer && handleAcceptOffer(activeOffer.requestId)}
+                      onClick={() => activeOffer && handleAcceptOffer(activeOffer.offerId)}
                       className="inline-flex items-center gap-2 rounded-xl bg-[#BFF367] px-5 py-3 text-sm font-black uppercase tracking-wide text-black shadow-[0_0_18px_rgba(191,243,103,0.55)] transition-all hover:bg-[#CCFF00]"
                     >
                       <CheckCircle size={17} fill="currentColor" />
                       Accept Booking
                     </button>
                     <button 
-                      onClick={() => activeOffer && handleRejectOffer(activeOffer.requestId)}
+                      onClick={() => activeOffer && handleRejectOffer(activeOffer.offerId)}
                       className="inline-flex items-center gap-2 rounded-xl border border-red-400/60 bg-red-500/10 px-5 py-3 text-sm font-black uppercase tracking-wide text-red-300 shadow-[0_0_18px_rgba(248,113,113,0.2)] transition-all hover:bg-red-500/20"
                     >
                       <X size={17} />

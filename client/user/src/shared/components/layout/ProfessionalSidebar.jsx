@@ -43,7 +43,6 @@ const ProfessionalSidebar = ({ isOpen, toggleSidebar, isMinimized, className }) 
     { to: `/professional/${role}/bookings`, label: "Bookings", icon: Activity },
     { to: `/professional/${role}/payouts`, label: "Payouts & Earnings", icon: IndianRupee },
     { to: `/professional/${role}/reviews`, label: "Reviews & Feedback", icon: Star },
-    { to: `/professional/${role}/support`, label: "Support & Dispute", icon: HelpCircle },
   ];
 
   const bottomNavItems = [];

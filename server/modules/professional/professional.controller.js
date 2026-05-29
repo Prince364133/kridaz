@@ -885,10 +885,16 @@ export const createMatchRequest = async (req, res) => {
       return res.status(404).json({ message: "No professionals found matching your criteria in the nearby area. Try expanding your budget or changing the role." });
     }
 
-    const queuePositions = matchedPros.map(p => p.id);
-    const firstCandidateId = queuePositions[0];
+    const candidateIds = matchedPros.map(p => p.id);
+    const firstCandidateId = candidateIds[0];
 
-    const matchRequest = await prisma.$transaction(async (tx) => {
+    const { matchRequest, offer } = await prisma.$transaction(async (tx) => {
+      // Deactivate other searching requests for same user to avoid collision
+      await tx.professionalMatchRequest.updateMany({
+        where: { userId, status: "SEARCHING" },
+        data: { status: "EXPIRED" }
+      });
+
       const newReq = await tx.professionalMatchRequest.create({
         data: {
           userId,
@@ -896,21 +902,20 @@ export const createMatchRequest = async (req, res) => {
           customLocation: customLocation || null,
           latitude,
           longitude,
-          roles: roles,
+          roles: { set: roles },
           minBudget: limitMinBudget,
           maxBudget: limitMaxBudget,
-          status: "SEARCHING",
-          expiresAt: requestTimeout,
           matchDate: matchDate || null,
           matchStartTime: matchStartTime || null,
           matchEndTime: matchEndTime || null,
-          queuePositions,
+          queuePositions: candidateIds,
           currentPositionIndex: 0,
-          lastRoutedAt: new Date()
+          lastRoutedAt: new Date(),
+          expiresAt: new Date(Date.now() + 10 * 60 * 1000) // 10 min request TTL
         }
       });
 
-      await tx.professionalMatchOffer.create({
+      const createdOffer = await tx.professionalMatchOffer.create({
         data: {
           requestId: newReq.id,
           professionalId: firstCandidateId,
@@ -918,7 +923,7 @@ export const createMatchRequest = async (req, res) => {
         }
       });
 
-      return newReq;
+      return { matchRequest: newReq, offer: createdOffer };
     });
 
     const { getIO } = await import("../../config/socket.js");
@@ -926,6 +931,7 @@ export const createMatchRequest = async (req, res) => {
     if (io) {
       const firstProf = matchedPros[0];
       io.to(firstProf.userId).emit("professional:match_offer", {
+        offerId: offer.id,
         requestId: matchRequest.id,
         groundName: groundId ? "Selected Venue" : "Custom Location",
         budget: `${limitMinBudget} - ${limitMaxBudget}`,
@@ -1076,7 +1082,7 @@ export const rejectMatchOffer = async (req, res) => {
         // Route to next candidate
         const nextCandidateId = queuePositions[nextIndex];
         
-        await prisma.$transaction(async (tx) => {
+        const offer = await prisma.$transaction(async (tx) => {
           await tx.professionalMatchRequest.update({
             where: { id: matchReq.id },
             data: { 
@@ -1085,7 +1091,7 @@ export const rejectMatchOffer = async (req, res) => {
             }
           });
 
-          await tx.professionalMatchOffer.create({
+          return tx.professionalMatchOffer.create({
             data: {
               requestId: matchReq.id,
               professionalId: nextCandidateId,
@@ -1101,6 +1107,7 @@ export const rejectMatchOffer = async (req, res) => {
           const io = getIO();
           if (io) {
             io.to(nextProf.userId).emit("professional:match_offer", {
+              offerId: offer.id,
               requestId: matchReq.id,
               groundName: matchReq.groundId ? "Selected Venue" : "Custom Location",
               budget: `${matchReq.minBudget} - ${matchReq.maxBudget}`,
@@ -1219,7 +1226,60 @@ export const getMyOnDemandBookings = async (req, res) => {
       },
       orderBy: { createdAt: "desc" }
     });
-    return res.status(200).json({ bookings });
+
+    const rejectedOffers = await prisma.professionalMatchOffer.findMany({
+      where: { 
+        professionalId,
+        status: { in: ["REJECTED", "EXPIRED"] } 
+      },
+      include: {
+        request: {
+          include: {
+            user: { select: { id: true, name: true, phone: true, email: true, profilePicture: true } },
+            ground: true
+          }
+        }
+      },
+      orderBy: { createdAt: "desc" }
+    });
+
+    const skippedNotifications = await prisma.bookingNotification.findMany({
+      where: { professionalId, action: "SKIPPED" },
+      include: {
+        booking: {
+          include: {
+            user: { select: { id: true, name: true, phone: true, email: true, profilePicture: true } },
+            ground: true
+          }
+        }
+      },
+      orderBy: { sentAt: "desc" }
+    });
+
+    const nonAcceptedBookings = [
+      ...rejectedOffers.map(o => ({
+        id: o.id,
+        status: o.status,
+        createdAt: o.createdAt,
+        hourlyRate: parseFloat(o.request?.maxBudget || 0),
+        user: o.request?.user,
+        ground: o.request?.ground,
+        customLocation: o.request?.customLocation,
+        role: o.request?.roles?.[0] || "Professional"
+      })),
+      ...skippedNotifications.map(n => ({
+        id: n.id,
+        status: "SKIPPED",
+        createdAt: n.sentAt,
+        hourlyRate: n.booking?.hourlyRate || 0,
+        user: n.booking?.user,
+        ground: n.booking?.ground,
+        customLocation: n.booking?.customLocation,
+        role: n.booking?.role || "Professional"
+      }))
+    ].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+
+    return res.status(200).json({ bookings, nonAcceptedBookings });
   } catch (error) {
     logger.error("Error in getMyOnDemandBookings:", error);
     return res.status(500).json({ message: error.message });
@@ -1384,6 +1444,118 @@ export const getMyProfessionalProfile = async (req, res) => {
     return res.status(200).json({ professional: responseProfessional });
   } catch (error) {
     logger.error("Error in getMyProfessionalProfile:", error);
+    return res.status(500).json({ message: error.message });
+  }
+};
+
+export const getDashboardStats = async (req, res) => {
+  const professionalId = req.user.ownerId;
+  if (!professionalId) return res.status(403).json({ message: "Unauthorized" });
+
+  try {
+    const [bookings, skippedNotifications, acceptedCount, rejectedCount, trustEvents, professional] = await Promise.all([
+      prisma.onDemandProfessionalBooking.findMany({
+        where: { professionalId },
+        include: {
+          user: { select: { name: true, phone: true } },
+          ground: { select: { name: true } }
+        },
+        orderBy: { createdAt: "desc" }
+      }),
+      prisma.bookingNotification.findMany({
+        where: { professionalId, action: "SKIPPED" },
+        include: {
+          booking: {
+            include: {
+              user: { select: { name: true } },
+              ground: { select: { name: true } }
+            }
+          }
+        },
+        orderBy: { sentAt: "desc" },
+        take: 10
+      }),
+      prisma.professionalMatchOffer.count({
+        where: { professionalId, status: "ACCEPTED" }
+      }),
+      prisma.professionalMatchOffer.count({
+        where: { professionalId, status: "REJECTED" }
+      }),
+      prisma.trustScoreEvent.findMany({
+        where: { professionalId }
+      }),
+      prisma.ownerProfile.findUnique({
+        where: { id: professionalId },
+        select: { rating: true, numReviews: true }
+      })
+    ]);
+
+    // Calculate trust score (base 100 + sum of deltas)
+    const baseScore = 100;
+    const trustScore = trustEvents.reduce((acc, ev) => acc + (parseFloat(ev.delta) || 0), baseScore);
+
+    // Format graph data based on completed bookings
+    // For simplicity, grouping all bookings by their createdAt date
+    const graphData = {
+      "Today": [],
+      "This Week": [],
+      "This Month": [],
+      "All Time": [],
+      "Custom Time": []
+    };
+
+    const completedBookings = bookings.filter(b => b.status === "COMPLETED");
+    const activeBooking = bookings.find(b => b.status === "ASSIGNED" || b.status === "IN_PROGRESS");
+
+    // Aggregate values
+    const totalBookings = completedBookings.length;
+    const totalEarnings = completedBookings.reduce((sum, b) => sum + parseFloat(b.hourlyRate || 0), 0);
+
+    // Grouping by day for "All Time"
+    const allTimeMap = {};
+    completedBookings.forEach(b => {
+      const dateStr = new Date(b.createdAt).toLocaleDateString("en-US", { month: "short", day: "numeric" });
+      if (!allTimeMap[dateStr]) {
+        allTimeMap[dateStr] = { name: dateStr, bookings: 0, income: 0 };
+      }
+      allTimeMap[dateStr].bookings += 1;
+      allTimeMap[dateStr].income += parseFloat(b.hourlyRate || 0);
+    });
+    
+    // Sort keys and take the latest 30 elements or so, but let's just reverse them to show in order
+    graphData["All Time"] = Object.values(allTimeMap).sort((a,b) => new Date(a.name) - new Date(b.name));
+    if (graphData["All Time"].length === 0) {
+      graphData["All Time"] = [{ name: 'No Data', bookings: 0, income: 0 }];
+    }
+
+    // Prepare response
+    const stats = {
+      bookings: totalBookings,
+      earnings: totalEarnings,
+      avgTime: "4h 30m", // Placeholder for actual calculation
+      rating: professional?.rating || 5.0,
+      trustScore: trustScore,
+      acceptedRequests: acceptedCount,
+      rejectedRequests: rejectedCount,
+      skippedRequests: skippedNotifications.map(n => ({
+        id: n.id,
+        title: `Booking Request - ${n.booking?.ground?.name || 'Custom Venue'}`,
+        dateTime: new Date(n.sentAt).toLocaleDateString("en-US", { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" }),
+        pay: `₹${n.booking?.hourlyRate || 0}`,
+        userName: n.booking?.user?.name || "Unknown User"
+      })),
+      graphData: {
+        "All Time": graphData["All Time"],
+        "Today": graphData["All Time"], // Simplification
+        "This Week": graphData["All Time"], // Simplification
+        "This Month": graphData["All Time"], // Simplification
+        "Custom Time": graphData["All Time"] // Simplification
+      }
+    };
+
+    return res.status(200).json({ success: true, stats, activeBooking });
+  } catch (error) {
+    logger.error("Error in getDashboardStats:", error);
     return res.status(500).json({ message: error.message });
   }
 };
