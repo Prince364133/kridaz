@@ -24,6 +24,7 @@ export default function ProfessionalDetails() {
   // Supporting data for locations
   const [grounds, setGrounds] = useState([]);
   const [activeMedia, setActiveMedia] = useState(null); // Lightbox state
+  const [activeCertificate, setActiveCertificate] = useState(null); // Certificate popup state
 
   useEffect(() => {
     fetchProDetails();
@@ -366,7 +367,7 @@ export default function ProfessionalDetails() {
                   (pro.matchesCovered || pro.matchFormats?.length > 0)) && (
                   <div className="bg-[#0a0a0c] rounded-xl border border-white/5 p-8 space-y-6 shadow-xl">
                     <h3 style={SECTION_HEADING_STYLE} className="font-heading text-xs font-black uppercase tracking-widest text-[#BFF367] flex items-center gap-2 border-b border-white/5 pb-3">
-                      <Layers size={14} className="text-white" /> Operational Specifications
+                      <Layers size={14} className="text-white" /> Operational Specifications & Services
                     </h3>
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -580,33 +581,45 @@ export default function ProfessionalDetails() {
                     <Shield size={14} className="text-white" /> Verified Certifications Stack
                   </h3>
                   
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                     {pro.certifications?.length > 0 ? pro.certifications.map((cert, i) => (
-                      <div key={i} className="flex gap-4 p-4 rounded-lg bg-black/40 border border-white/5 hover:border-white/10 transition-all group relative">
-                        <div className="w-16 h-16 rounded overflow-hidden bg-neutral-900 border border-white/5 shrink-0 relative flex items-center justify-center">
+                      <div key={i} className="rounded-xl bg-black/40 border border-white/5 hover:border-white/10 transition-all group overflow-hidden cursor-pointer" onClick={() => setActiveCertificate(cert)}>
+                        {/* Certificate Image */}
+                        <div className="aspect-[16/9] relative overflow-hidden bg-neutral-900 border-b border-white/5 flex items-center justify-center">
                           {cert.image ? (
                             <>
-                              <img src={cert.image} className="w-full h-full object-cover" />
-                              <button 
-                                onClick={() => setActiveMedia({ title: cert.title, url: cert.image })}
-                                className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center text-white"
-                              >
-                                <Eye size={16} />
-                              </button>
+                              <img src={cert.image} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" alt={cert.title} />
+                              <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end justify-center pb-3">
+                                <span className="text-[8px] font-black text-[#BFF367] uppercase tracking-[0.25em] flex items-center gap-1.5">
+                                  <Eye size={12} /> View Certificate
+                                </span>
+                              </div>
                             </>
                           ) : (
-                            <Shield className="text-neutral-800" size={24} />
+                            <div className="w-full h-full flex flex-col items-center justify-center gap-2">
+                              <Shield className="text-neutral-700" size={32} />
+                              <span className="text-[7px] font-black text-neutral-700 uppercase tracking-[0.3em]">No Image</span>
+                            </div>
                           )}
                         </div>
-                        <div className="space-y-1">
-                          <h4 className="text-xs font-bold text-white uppercase tracking-wider">{cert.title}</h4>
-                          <p className="text-[10px] text-white/50 leading-relaxed font-sans line-clamp-3">{cert.description}</p>
+                        {/* Certificate Info */}
+                        <div className="p-4 space-y-2">
+                          <h4 className="text-[11px] font-black text-white uppercase tracking-tight line-clamp-1">{cert.title}</h4>
+                          <p className="text-[10px] text-white/50 leading-relaxed font-sans line-clamp-2">{cert.description}</p>
+                          {cert.description && cert.description.length > 80 && (
+                            <button
+                              onClick={(e) => { e.stopPropagation(); setActiveCertificate(cert); }}
+                              className="text-[9px] font-black uppercase tracking-widest text-[#55DEE8] hover:text-[#BFF367] transition-colors pt-0.5"
+                            >
+                              Read More →
+                            </button>
+                          )}
                         </div>
                       </div>
                     )) : (
-                      <div className="col-span-full py-10 bg-black/20 rounded-lg border border-dashed border-white/5 flex flex-col items-center justify-center space-y-2">
-                        <Shield size={24} className="text-neutral-800" />
-                        <p className="text-xs text-white/40 italic font-sans">No verified certifications loaded yet.</p>
+                      <div className="col-span-full py-14 bg-black/20 rounded-lg border border-dashed border-white/5 flex flex-col items-center justify-center space-y-3">
+                        <Shield size={28} className="text-neutral-800" />
+                        <p className="text-[9px] font-black text-neutral-600 uppercase tracking-widest">No verified certifications loaded yet</p>
                       </div>
                     )}
                   </div>
@@ -794,10 +807,7 @@ export default function ProfessionalDetails() {
                     <span className="text-white/40">Professional Role:</span>
                     <span className="text-white font-bold capitalize">{pro.user?.role}</span>
                   </div>
-                  <div className="flex justify-between">
-                    <span className="text-white/40">Service Radius:</span>
-                    <span className="text-white font-bold">15 km</span>
-                  </div>
+
                 </div>
 
                 <button 
@@ -928,6 +938,53 @@ export default function ProfessionalDetails() {
             )}
           </div>
           <p className="text-white text-sm font-bold uppercase tracking-widest mt-4 text-center max-w-xl">{activeMedia.title}</p>
+        </div>
+      )}
+
+      {/* Certificate Detail Popup Modal */}
+      {activeCertificate && (
+        <div className="fixed inset-0 bg-black/90 z-[999] flex items-center justify-center p-4 md:p-8 animate-in fade-in duration-300" onClick={() => setActiveCertificate(null)}>
+          <button 
+            onClick={() => setActiveCertificate(null)}
+            className="absolute top-4 right-4 md:top-8 md:right-8 w-10 h-10 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center transition-colors outline-none z-10"
+          >
+            <X size={20} />
+          </button>
+          
+          <div className="bg-[#0a0a0c] border border-white/10 rounded-2xl max-w-2xl w-full max-h-[85vh] overflow-y-auto shadow-2xl" onClick={(e) => e.stopPropagation()}>
+            {/* Certificate Image */}
+            {activeCertificate.image && (
+              <div className="w-full aspect-[16/10] bg-neutral-900 overflow-hidden rounded-t-2xl border-b border-white/5">
+                <img src={activeCertificate.image} alt={activeCertificate.title} className="w-full h-full object-contain" />
+              </div>
+            )}
+            
+            {/* Certificate Details */}
+            <div className="p-6 md:p-8 space-y-4">
+              <div className="flex items-start gap-3">
+                <div className="w-10 h-10 rounded-lg bg-[#BFF367]/10 border border-[#BFF367]/20 flex items-center justify-center shrink-0 mt-0.5">
+                  <ShieldCheck size={18} className="text-[#BFF367]" />
+                </div>
+                <div className="space-y-1">
+                  <h3 className="text-sm font-black text-white uppercase tracking-tight">{activeCertificate.title}</h3>
+                  <span className="text-[8px] font-black text-[#55DEE8] uppercase tracking-widest">Verified Certification</span>
+                </div>
+              </div>
+              
+              <div className="border-t border-white/5 pt-4">
+                <p className="text-[11px] text-white/70 leading-relaxed font-sans whitespace-pre-wrap">{activeCertificate.description}</p>
+              </div>
+              
+              <div className="flex justify-end pt-2">
+                <button
+                  onClick={() => setActiveCertificate(null)}
+                  className="px-5 py-2 text-[8px] font-black uppercase tracking-widest rounded-lg bg-white/5 border border-white/10 text-white hover:bg-white/10 transition-all"
+                >
+                  Close
+                </button>
+              </div>
+            </div>
+          </div>
         </div>
       )}
 
