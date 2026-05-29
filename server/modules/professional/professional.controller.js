@@ -1220,9 +1220,26 @@ export const getMyOnDemandBookings = async (req, res) => {
       where: { professionalId },
       include: {
         user: {
-          select: { id: true, name: true, phone: true, email: true, profilePicture: true }
+          select: { id: true, name: true, profilePicture: true }
         },
         ground: true
+      },
+      orderBy: { createdAt: "desc" }
+    });
+
+    // Pending offers (not yet accepted/rejected — still awaiting response)
+    const pendingOffers = await prisma.professionalMatchOffer.findMany({
+      where: { 
+        professionalId,
+        status: "PENDING"
+      },
+      include: {
+        request: {
+          include: {
+            user: { select: { id: true, name: true, profilePicture: true } },
+            ground: true
+          }
+        }
       },
       orderBy: { createdAt: "desc" }
     });
@@ -1235,7 +1252,7 @@ export const getMyOnDemandBookings = async (req, res) => {
       include: {
         request: {
           include: {
-            user: { select: { id: true, name: true, phone: true, email: true, profilePicture: true } },
+            user: { select: { id: true, name: true, profilePicture: true } },
             ground: true
           }
         }
@@ -1248,7 +1265,7 @@ export const getMyOnDemandBookings = async (req, res) => {
       include: {
         booking: {
           include: {
-            user: { select: { id: true, name: true, phone: true, email: true, profilePicture: true } },
+            user: { select: { id: true, name: true, profilePicture: true } },
             ground: true
           }
         }
@@ -1256,10 +1273,25 @@ export const getMyOnDemandBookings = async (req, res) => {
       orderBy: { sentAt: "desc" }
     });
 
+    // Pending offers shown in Active tab with PENDING status
+    const pendingBookings = pendingOffers.map(o => ({
+      id: o.id,
+      status: "PENDING",
+      createdAt: o.createdAt,
+      hourlyRate: parseFloat(o.request?.maxBudget || 0),
+      matchDate: o.request?.matchDate || null,
+      matchStartTime: o.request?.matchStartTime || null,
+      matchEndTime: o.request?.matchEndTime || null,
+      user: o.request?.user,
+      ground: o.request?.ground,
+      customLocation: o.request?.customLocation,
+      role: o.request?.roles?.[0] || "Professional"
+    }));
+
     const nonAcceptedBookings = [
       ...rejectedOffers.map(o => ({
         id: o.id,
-        status: o.status,
+        status: "NOT_ACCEPTED",
         createdAt: o.createdAt,
         hourlyRate: parseFloat(o.request?.maxBudget || 0),
         user: o.request?.user,
@@ -1269,7 +1301,7 @@ export const getMyOnDemandBookings = async (req, res) => {
       })),
       ...skippedNotifications.map(n => ({
         id: n.id,
-        status: "SKIPPED",
+        status: "NOT_ACCEPTED",
         createdAt: n.sentAt,
         hourlyRate: n.booking?.hourlyRate || 0,
         user: n.booking?.user,
@@ -1279,7 +1311,7 @@ export const getMyOnDemandBookings = async (req, res) => {
       }))
     ].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
 
-    return res.status(200).json({ bookings, nonAcceptedBookings });
+    return res.status(200).json({ bookings, pendingBookings, nonAcceptedBookings });
   } catch (error) {
     logger.error("Error in getMyOnDemandBookings:", error);
     return res.status(500).json({ message: error.message });

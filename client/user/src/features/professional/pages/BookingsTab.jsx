@@ -5,8 +5,6 @@ import {
   User, 
   Trophy, 
   Clock, 
-  CheckCircle, 
-  ArrowRight,
   Info
 } from "lucide-react";
 import { useGetMyOnDemandBookingsQuery } from "../../../redux/api/professionalApi";
@@ -16,11 +14,16 @@ const BookingsTab = ({ role }) => {
   const [activeSubTab, setActiveSubTab] = useState("active");
 
   const bookings = bookingsData?.bookings || [];
+  const pendingBookings = bookingsData?.pendingBookings || [];
   const nonAcceptedBookings = bookingsData?.nonAcceptedBookings || [];
 
-  const activeBookings = bookings.filter(
-    (b) => b.status === "ASSIGNED" || b.status === "IN_PROGRESS"
-  );
+  // Active tab: confirmed active bookings + pending offers
+  const activeBookings = [
+    ...bookings.filter(
+      (b) => b.status === "ASSIGNED" || b.status === "IN_PROGRESS"
+    ),
+    ...pendingBookings
+  ];
   
   const completedBookings = bookings.filter(
     (b) => b.status === "COMPLETED" || b.status === "CANCELLED" || b.status === "NO_SHOW"
@@ -29,21 +32,34 @@ const BookingsTab = ({ role }) => {
   const getStatusStyle = (status) => {
     switch (status) {
       case "ASSIGNED":
-        return "bg-[#BFF367]/10 text-[#BFF367] border border-[#BFF367]/20";
+        return "bg-amber-500/10 text-amber-400 border border-amber-500/20 shadow-[0_0_12px_rgba(245,158,11,0.05)]";
       case "IN_PROGRESS":
-        return "bg-green-500/10 text-green-400 border border-green-500/20";
+        return "bg-[#BFF367]/10 text-[#BFF367] border border-[#BFF367]/20 shadow-[0_0_12px_rgba(191,243,103,0.05)]";
       case "COMPLETED":
-        return "bg-green-500/20 text-green-300 border border-green-500/30";
+        return "bg-green-500/10 text-green-400 border border-green-500/20";
       case "CANCELLED":
         return "bg-red-500/10 text-red-400 border border-red-500/20";
       case "NO_SHOW":
-        return "bg-yellow-500/10 text-yellow-400 border border-yellow-500/20";
-      case "REJECTED":
-      case "EXPIRED":
-      case "SKIPPED":
+        return "bg-rose-500/10 text-rose-400 border border-rose-500/20";
+      case "PENDING":
+        return "bg-yellow-500/10 text-yellow-400 border border-yellow-500/20 shadow-[0_0_12px_rgba(234,179,8,0.05)]";
+      case "NOT_ACCEPTED":
         return "bg-red-500/10 text-red-400 border border-red-500/20";
       default:
         return "bg-gray-500/10 text-gray-400 border border-gray-500/20";
+    }
+  };
+
+  const getStatusLabel = (status) => {
+    switch (status) {
+      case "PENDING": return "Pending";
+      case "ASSIGNED": return "Assigned";
+      case "IN_PROGRESS": return "In Progress";
+      case "COMPLETED": return "Completed";
+      case "CANCELLED": return "Cancelled";
+      case "NO_SHOW": return "No Show";
+      case "NOT_ACCEPTED": return "Not Accepted";
+      default: return status;
     }
   };
 
@@ -53,51 +69,61 @@ const BookingsTab = ({ role }) => {
       ? completedBookings 
       : nonAcceptedBookings;
 
+  const formatDate = (dateStr) => {
+    if (!dateStr) return "N/A";
+    try {
+      const d = new Date(dateStr);
+      if (isNaN(d.getTime())) return dateStr;
+      return d.toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" });
+    } catch {
+      return dateStr;
+    }
+  };
+
   return (
     <div className="space-y-6 text-white font-inter">
       {/* Tab Selectors */}
-      <div className="flex justify-between items-center border-b border-[#2D2D2D] pb-1">
-        <div className="flex gap-4">
+      <div className="border-b border-[#1A1A1A] pb-1">
+        <div className="grid grid-cols-3 w-full text-center">
           <button
             onClick={() => setActiveSubTab("active")}
-            className={`pb-3 text-sm font-semibold border-b-2 transition-colors relative ${activeSubTab === "active" ? "text-[#BFF367] border-[#BFF367]" : "text-[#878C9F] border-transparent hover:text-white"}`}
+            className={`pb-3 text-[10px] sm:text-xs font-bold uppercase tracking-wider border-b-2 transition-all ${activeSubTab === "active" ? "text-[#BFF367] border-[#BFF367]" : "text-gray-500 border-transparent hover:text-white"}`}
           >
-            Active Assignments ({activeBookings.length})
+            <span className="block sm:hidden">Active ({activeBookings.length})</span>
+            <span className="hidden sm:block">Active Assignments ({activeBookings.length})</span>
           </button>
           <button
             onClick={() => setActiveSubTab("history")}
-            className={`pb-3 text-sm font-semibold border-b-2 transition-colors relative ${activeSubTab === "history" ? "text-[#BFF367] border-[#BFF367]" : "text-[#878C9F] border-transparent hover:text-white"}`}
+            className={`pb-3 text-[10px] sm:text-xs font-bold uppercase tracking-wider border-b-2 transition-all ${activeSubTab === "history" ? "text-[#BFF367] border-[#BFF367]" : "text-gray-500 border-transparent hover:text-white"}`}
           >
-            Booking History ({completedBookings.length})
+            <span className="block sm:hidden">History ({completedBookings.length})</span>
+            <span className="hidden sm:block">Booking History ({completedBookings.length})</span>
           </button>
           <button
             onClick={() => setActiveSubTab("nonAccepted")}
-            className={`pb-3 text-sm font-semibold border-b-2 transition-colors relative ${activeSubTab === "nonAccepted" ? "text-[#BFF367] border-[#BFF367]" : "text-[#878C9F] border-transparent hover:text-white"}`}
+            className={`pb-3 text-[10px] sm:text-xs font-bold uppercase tracking-wider border-b-2 transition-all ${activeSubTab === "nonAccepted" ? "text-[#BFF367] border-[#BFF367]" : "text-gray-500 border-transparent hover:text-white"}`}
           >
-            Non Accepted ({nonAcceptedBookings.length})
+            <span className="block sm:hidden">Not Accepted ({nonAcceptedBookings.length})</span>
+            <span className="hidden sm:block">Not Accepted ({nonAcceptedBookings.length})</span>
           </button>
         </div>
-
-        <button 
-          onClick={refetch}
-          className="text-xs text-[#878C9F] hover:text-[#BFF367] transition-colors"
-        >
-          Refresh List
-        </button>
       </div>
 
       {isLoading ? (
-        <div className="py-12 text-center text-[#878C9F]">Loading assignments...</div>
+        <div className="py-20 text-center flex flex-col items-center justify-center gap-3">
+          <div className="w-8 h-8 rounded-full border-2 border-t-transparent border-[#BFF367] animate-spin" />
+          <p className="text-xs font-bold uppercase tracking-widest text-gray-500">Syncing assignments...</p>
+        </div>
       ) : currentList.length === 0 ? (
-        <div className="p-12 text-center bg-[#141414] border border-[#2D2D2D] rounded-2xl space-y-4">
-          <div className="mx-auto w-10 h-10 bg-white/5 rounded-full flex items-center justify-center text-gray-500">
-            <Info size={20} />
+        <div className="p-16 text-center bg-[#0D0D0D] border border-[#1A1A1A] rounded-2xl space-y-4">
+          <div className="mx-auto w-12 h-12 bg-white/5 rounded-full flex items-center justify-center text-gray-600">
+            <Info size={24} />
           </div>
-          <div>
-            <h4 className="font-bold">No bookings found</h4>
-            <p className="text-sm text-[#878C9F] mt-1">
+          <div className="space-y-1">
+            <h4 className="font-bold text-sm sm:text-base text-white">No Bookings Found</h4>
+            <p className="text-xs text-gray-500 max-w-sm mx-auto leading-relaxed">
               {activeSubTab === "active" 
-                ? "You do not have any active or in-progress match assignments right now." 
+                ? "You do not have any active or pending match assignments right now." 
                 : activeSubTab === "history"
                   ? "No completed or historical matching records found on this account."
                   : "No rejected, expired, or skipped matching requests found."}
@@ -105,57 +131,112 @@ const BookingsTab = ({ role }) => {
           </div>
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
           {currentList.map((booking) => (
             <div 
               key={booking.id} 
-              className="p-5 rounded-2xl bg-[#141414] border border-[#2D2D2D] hover:border-[#BFF367]/30 transition-all duration-300 space-y-4"
+              className={`p-5 rounded-2xl bg-[#0D0D0D] border transition-all duration-300 flex flex-col justify-between gap-5 relative overflow-hidden ${
+                booking.status === "PENDING" 
+                  ? "border-yellow-500/20 hover:border-yellow-500/40" 
+                  : "border-[#1A1A1A] hover:border-[#BFF367]/30"
+              }`}
             >
-              <div className="flex justify-between items-start">
-                <div className="space-y-1">
-                  <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider ${getStatusStyle(booking.status)}`}>
-                    {booking.status}
+              {/* Background gradient card glow */}
+              <div className={`absolute top-0 right-0 w-24 h-24 blur-3xl pointer-events-none rounded-full ${
+                booking.status === "PENDING" ? "bg-yellow-500/5" : "bg-[#BFF367]/5"
+              }`} />
+
+              {/* Pending indicator pulse */}
+              {booking.status === "PENDING" && (
+                <div className="absolute top-3 right-3 flex items-center gap-1.5">
+                  <span className="flex h-2 w-2 relative">
+                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-yellow-400 opacity-75" />
+                    <span className="relative inline-flex rounded-full h-2 w-2 bg-yellow-400" />
                   </span>
-                  <div className="text-xs text-[#878C9F] flex items-center gap-1.5 mt-2">
-                    <Calendar size={12} />
-                    <span>{new Date(booking.createdAt).toLocaleDateString("en-IN", { dateStyle: "medium" })}</span>
+                  <span className="text-[8px] font-black text-yellow-400 uppercase tracking-widest">Awaiting Response</span>
+                </div>
+              )}
+
+              <div className="space-y-4">
+                {/* Header: Status & Price */}
+                <div className="flex justify-between items-start gap-2">
+                  <div className="flex flex-wrap gap-2 items-center">
+                    <span className={`text-[9px] font-black px-2.5 py-1 rounded-full uppercase tracking-wider ${getStatusStyle(booking.status)}`}>
+                      {getStatusLabel(booking.status)}
+                    </span>
+                    {booking.role && (
+                      <span className="inline-flex items-center gap-1 text-[9px] font-black px-2.5 py-1 rounded-full uppercase tracking-wider bg-white/5 text-gray-300 border border-white/5">
+                        <Trophy size={10} />
+                        {booking.role}
+                      </span>
+                    )}
+                  </div>
+                  <div className="text-right">
+                    <span className="block text-[8px] font-black text-gray-500 uppercase tracking-widest leading-none">Hourly rate</span>
+                    <span className="text-[#BFF367] font-black text-base sm:text-lg block mt-1">₹{booking.hourlyRate}</span>
                   </div>
                 </div>
-                <h4 className="text-[#BFF367] font-bold text-lg">₹{booking.hourlyRate}</h4>
+
+                {/* Match timing block */}
+                <div className="p-3 bg-[#121212] border border-[#1A1A1A] rounded-xl grid grid-cols-2 gap-3">
+                  <div className="space-y-1">
+                    <span className="text-[8px] font-bold text-gray-500 uppercase tracking-widest flex items-center gap-1">
+                      <Calendar size={10} /> Match Date
+                    </span>
+                    <span className="text-xs font-bold text-white block">
+                      {booking.matchDate || formatDate(booking.createdAt)}
+                    </span>
+                  </div>
+                  <div className="space-y-1">
+                    <span className="text-[8px] font-bold text-gray-500 uppercase tracking-widest flex items-center gap-1">
+                      <Clock size={10} /> Shift Timings
+                    </span>
+                    <span className="text-xs font-bold text-white block">
+                      {booking.matchStartTime && booking.matchEndTime 
+                        ? `${booking.matchStartTime} - ${booking.matchEndTime}`
+                        : "Flexible Shift"}
+                    </span>
+                  </div>
+                </div>
+
+                {/* Venue / Location Details */}
+                <div className="flex gap-3">
+                  <div className="w-8 h-8 rounded-lg bg-[#BFF367]/5 border border-[#BFF367]/10 flex items-center justify-center shrink-0">
+                    <MapPin size={16} className="text-[#BFF367]" />
+                  </div>
+                  <div className="min-w-0">
+                    <span className="text-[8px] font-bold text-gray-500 uppercase tracking-widest block leading-none mb-1.5">Venue Location</span>
+                    <h5 className="text-xs font-bold text-white truncate">
+                      {booking.ground?.name || "Custom Ground / Court"}
+                    </h5>
+                    <p className="text-[11px] text-gray-400 mt-1 leading-relaxed line-clamp-2">
+                      {booking.ground?.location || booking.customLocation?.address || "Location Address not available"}
+                    </p>
+                  </div>
+                </div>
               </div>
 
-              {/* Location details */}
-              <div className="flex gap-2">
-                <MapPin size={16} className="text-[#BFF367] flex-shrink-0 mt-0.5" />
-                <div>
-                  <h5 className="text-sm font-semibold text-white">
-                    {booking.ground?.name || "Custom Venue"}
-                  </h5>
-                  <p className="text-xs text-[#878C9F] mt-0.5 line-clamp-2">
-                    {booking.ground?.location || booking.customLocation?.address || "Custom geocoded location"}
-                  </p>
-                </div>
-              </div>
-
-              {/* Client information */}
-              <div className="p-3 bg-[#1e1e1e] rounded-xl border border-[#2D2D2D] flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <div className="w-8 h-8 rounded-full bg-[#BFF367]/10 text-[#BFF367] flex items-center justify-center font-bold text-xs uppercase">
-                    {booking.user?.name?.charAt(0) || "U"}
-                  </div>
-                  <div>
-                    <h6 className="text-xs font-semibold text-white">{booking.user?.name || "Client"}</h6>
-                    <p className="text-[10px] text-[#878C9F]">Requester</p>
+              {/* Client Details Section — no email/phone */}
+              <div className="p-3 bg-[#121212] border border-[#1A1A1A] rounded-xl flex items-center gap-3">
+                <div className="flex items-center gap-2.5 min-w-0">
+                  {booking.user?.profilePicture ? (
+                    <img 
+                      src={booking.user.profilePicture} 
+                      alt="" 
+                      className="w-9 h-9 rounded-full object-cover border border-[#BFF367]/20 shrink-0" 
+                    />
+                  ) : (
+                    <div className="w-9 h-9 rounded-full bg-[#BFF367]/10 text-[#BFF367] border border-[#BFF367]/20 flex items-center justify-center font-bold text-xs uppercase shrink-0">
+                      {booking.user?.name?.charAt(0) || "U"}
+                    </div>
+                  )}
+                  <div className="min-w-0">
+                    <h6 className="text-xs font-black text-white truncate leading-none">{booking.user?.name || "Client Name"}</h6>
+                    <p className="text-[9px] text-gray-500 font-semibold uppercase tracking-wider mt-1 flex items-center gap-1">
+                      <User size={10} /> Requester
+                    </p>
                   </div>
                 </div>
-                {booking.user?.phone && (
-                  <a 
-                    href={`tel:${booking.user.phone}`} 
-                    className="p-2 bg-black hover:bg-[#222] rounded-lg transition-colors border border-[#2d2d2d]"
-                  >
-                    <User size={14} className="text-[#878C9F] hover:text-[#BFF367]" />
-                  </a>
-                )}
               </div>
             </div>
           ))}

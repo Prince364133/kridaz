@@ -16,6 +16,7 @@ export const approveWithdrawalSchema = z.object({
   }),
   body: z.object({
     transactionId: z.string().min(1, "Transaction ID is required"),
+    screenshot: z.string().optional(),
   }),
 });
 

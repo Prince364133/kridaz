@@ -2,11 +2,16 @@ import { prisma } from "../../config/prisma.js";
 import * as argon2 from "argon2";
 
 export const getBankingDetails = async (req, res) => {
-  const { id: ownerId } = req.owner;
+  const { id: userId, ownerId } = req.owner;
   try {
-    const owner = await prisma.ownerProfile.findUnique({
-      where: { userId: ownerId },
-      select: { bankingDetails: true, walletBalance: true }
+    const owner = await prisma.ownerProfile.findFirst({
+      where: {
+        OR: [
+          { userId: userId },
+          { id: ownerId || "" }
+        ]
+      },
+      select: { bankingDetails: true, walletBalance: true, reservedBalance: true, disputeBalance: true, withdrawnBalance: true }
     });
       
     if (!owner) {
@@ -15,7 +20,10 @@ export const getBankingDetails = async (req, res) => {
     res.status(200).json({ 
       success: true, 
       bankingDetails: owner.bankingDetails || {},
-      walletBalance: owner.walletBalance || 0 
+      walletBalance: owner.walletBalance || 0,
+      reservedBalance: owner.reservedBalance || 0,
+      disputeBalance: owner.disputeBalance || 0,
+      withdrawnBalance: owner.withdrawnBalance || 0
     });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
@@ -23,10 +31,17 @@ export const getBankingDetails = async (req, res) => {
 };
 
 export const updateBankingDetails = async (req, res) => {
-  const { id: ownerId } = req.owner;
+  const { id: userId, ownerId } = req.owner;
   const { accountName, accountNumber, ifscCode, bankName, upiId, payoutMode, cancelledCheckUrl } = req.body;
   try {
-    const owner = await prisma.ownerProfile.findUnique({ where: { userId: ownerId } });
+    const owner = await prisma.ownerProfile.findFirst({
+      where: {
+        OR: [
+          { userId: userId },
+          { id: ownerId || "" }
+        ]
+      }
+    });
     if (!owner) return res.status(404).json({ message: "Owner not found" });
 
     const currentDetails = (owner.bankingDetails || {});
@@ -43,7 +58,7 @@ export const updateBankingDetails = async (req, res) => {
     };
 
     const updatedOwner = await prisma.ownerProfile.update({
-      where: { userId: ownerId },
+      where: { id: owner.id },
       data: { bankingDetails: updatedBankingDetails }
     });
 
@@ -67,29 +82,26 @@ export const getPayoutConfig = async (req, res) => {
 };
 
 export const requestPayout = async (req, res) => {
-  const { id: ownerId } = req.owner;
+  const { id: userId, ownerId } = req.owner;
   const { amount, password } = req.body;
 
   try {
-    const owner = await prisma.ownerProfile.findUnique({ where: { userId: ownerId } });
+    const owner = await prisma.ownerProfile.findFirst({
+      where: {
+        OR: [
+          { userId: userId },
+          { id: ownerId || "" }
+        ]
+      }
+    });
     if (!owner) return res.status(404).json({ message: "Owner not found" });
 
-    // Verify password
-    if (!password) {
-      return res.status(400).json({ success: false, message: "Please enter your password" });
-    }
-
-    if (!owner.password) {
-      return res.status(400).json({ 
-        success: false, 
-        message: "No master password set for this account. If you signed up via Google, please set a password in your profile settings." 
-      });
-    }
-
-    // Verify password using argon2
-    const isMatch = await argon2.verify(owner.password, password);
-    if (!isMatch) {
-      return res.status(401).json({ success: false, message: "Invalid master password" });
+    // Verify password if master password is set and password parameter is provided
+    if (owner.password && password) {
+      const isMatch = await argon2.verify(owner.password, password);
+      if (!isMatch) {
+        return res.status(401).json({ success: false, message: "Invalid master password" });
+      }
     }
 
     // If amount is 0, we just return success for password verification
@@ -128,7 +140,7 @@ export const requestPayout = async (req, res) => {
     await prisma.$transaction(async (tx) => {
       // Re-verify balance within transaction
       const currentOwner = await tx.ownerProfile.findUnique({
-        where: { userId: ownerId },
+        where: { id: owner.id },
         select: { walletBalance: true }
       });
 
@@ -137,13 +149,13 @@ export const requestPayout = async (req, res) => {
       }
 
       await tx.ownerProfile.update({
-        where: { userId: ownerId },
+        where: { id: owner.id },
         data: { walletBalance: { decrement: amount } }
       });
 
       await tx.withdrawalRequest.create({
         data: {
-          ownerId,
+          ownerId: owner.id,
           amount,
           bankDetails: {
             accountName: bankingDetails.accountName,

@@ -20,14 +20,14 @@ const useWithdrawals = () => {
     }
   };
 
-  const handleApprove = async (id, transactionId) => {
+  const handleApprove = async (id, transactionId, screenshot) => {
     if (!transactionId) {
       toast.error("Transaction ID is required for approval");
       return;
     }
     setProcessingId(id);
     try {
-      const response = await axiosInstance.put(`/api/admin/withdrawals/${id}/approve`, { transactionId });
+      const response = await axiosInstance.put(`/api/admin/withdrawals/${id}/approve`, { transactionId, screenshot });
       toast.success(response.data.message);
       fetchWithdrawals(); // Refresh list
     } catch (err) {

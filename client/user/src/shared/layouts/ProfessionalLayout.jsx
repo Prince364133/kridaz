@@ -15,7 +15,7 @@ const ProfessionalLayout = () => {
     <div className="flex flex-col min-h-screen bg-black">
       <AuthenticatedNavbar toggleSidebar={toggleSidebar} />
 
-      <div className="flex flex-1 pt-28 lg:pt-32">
+      <div className="flex flex-1 pt-32 lg:pt-40">
         <div 
           onMouseEnter={() => window.innerWidth >= 1024 && setIsHovered(true)} 
           onMouseLeave={() => window.innerWidth >= 1024 && setIsHovered(false)}

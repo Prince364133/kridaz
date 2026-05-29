@@ -247,7 +247,7 @@ export default function ProfessionalProfile() {
 
   const fetchGrounds = async () => {
     try {
-      const res = await axiosInstance.get("/api/turf/all");
+      const res = await axiosInstance.get("/api/user/turf/all");
       setGrounds(res.data.turfs || res.data || []);
     } catch (err) {
       console.error("Error fetching grounds:", err);

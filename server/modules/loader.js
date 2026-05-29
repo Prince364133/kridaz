@@ -85,16 +85,6 @@ const MODULE_MANIFEST = [
     description: "24-hour ephemeral story content",
   },
   {
-    module: "youtube",
-    mountPath: "/youtube",
-    description: "YouTube OAuth & live broadcast management",
-  },
-  {
-    module: "facebook",
-    mountPath: "/facebook",
-    description: "Facebook OAuth & page-based streaming",
-  },
-  {
     module: "scoring",
     mountPath: "/scoring",
     description: "Cricket match scoring engine & ball-by-ball events",

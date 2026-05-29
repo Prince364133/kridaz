@@ -296,15 +296,17 @@ const AuthenticatedNavbar = ({ toggleSidebar }) => {
             </div>
           )}
 
-          <div className="relative">
-            <button 
-              onClick={handleLogout}
-              className="flex items-center justify-center p-2.5 bg-[#0d0d0d] border border-white/5 hover:border-red-500/30 rounded-[8px] hover:bg-red-500/10 hover:text-red-500 text-[#999999] transition-all duration-300"
-              title="Logout"
-            >
-              <LogOut size={20} strokeWidth={2.5} />
-            </button>
-          </div>
+          {!isProfessionalDashboard && (
+            <div className="relative">
+              <button 
+                onClick={handleLogout}
+                className="flex items-center justify-center p-2.5 bg-[#0d0d0d] border border-white/5 hover:border-red-500/30 rounded-[8px] hover:bg-red-500/10 hover:text-red-500 text-[#999999] transition-all duration-300"
+                title="Logout"
+              >
+                <LogOut size={20} strokeWidth={2.5} />
+              </button>
+            </div>
+          )}
         </div>
       </nav>
 

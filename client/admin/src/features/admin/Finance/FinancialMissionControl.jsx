@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { 
   IndianRupee, 
@@ -16,7 +16,10 @@ import {
   AlertCircle,
   ExternalLink,
   ChevronRight,
-  Activity
+  Activity,
+  Upload,
+  X,
+  Image
 } from "lucide-react";
 import CountUp from "react-countup";
 import useAdminFinance from "@hooks/admin/useAdminFinance";
@@ -45,6 +48,52 @@ const FinancialMissionControl = () => {
   const [activeTab, setActiveTab] = useState("payouts"); // payouts, kyc, settings
   const [searchTerm, setSearchTerm] = useState("");
   const [payoutFilter, setPayoutFilter] = useState("ALL");
+
+  // Settlement modal state
+  const [settleModal, setSettleModal] = useState(null); // holds the request object being settled
+  const [settleTxnId, setSettleTxnId] = useState("");
+  const [settleScreenshot, setSettleScreenshot] = useState(null); // base64 data URL
+  const [settleScreenshotName, setSettleScreenshotName] = useState("");
+  const [isSettling, setIsSettling] = useState(false);
+  const screenshotInputRef = useRef(null);
+
+  // Reject modal state
+  const [rejectModal, setRejectModal] = useState(null);
+  const [rejectReason, setRejectReason] = useState("");
+  const [isRejecting, setIsRejecting] = useState(false);
+
+  const openSettleModal = (req) => {
+    setSettleModal(req);
+    setSettleTxnId("");
+    setSettleScreenshot(null);
+    setSettleScreenshotName("");
+  };
+
+  const handleScreenshotUpload = (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setSettleScreenshotName(file.name);
+    const reader = new FileReader();
+    reader.onloadend = () => setSettleScreenshot(reader.result);
+    reader.readAsDataURL(file);
+  };
+
+  const handleSettleConfirm = async () => {
+    if (!settleTxnId.trim()) return;
+    setIsSettling(true);
+    await handleApprove(settleModal._id || settleModal.id, settleTxnId.trim(), settleScreenshot || null);
+    setIsSettling(false);
+    setSettleModal(null);
+  };
+
+  const handleRejectConfirm = async () => {
+    if (!rejectReason.trim()) return;
+    setIsRejecting(true);
+    await handleReject(rejectModal._id || rejectModal.id, rejectReason.trim());
+    setIsRejecting(false);
+    setRejectModal(null);
+    setRejectReason("");
+  };
 
   const filteredWithdrawals = withdrawalRequests.filter(req => {
     const matchesSearch = 
@@ -273,27 +322,31 @@ const FinancialMissionControl = () => {
                               {req.status === "PENDING" ? (
                                 <div className="flex justify-end gap-2">
                                   <button 
-                                    onClick={() => {
-                                      const tid = prompt("Enter Transfer Transaction ID:");
-                                      if(tid) handleApprove(req._id, tid);
-                                    }}
-                                    className="p-2 bg-[#CCFF00]/10 text-[#CCFF00] hover:bg-[#CCFF00] hover:text-black rounded-[6px] transition-all border border-[#CCFF00]/20"
+                                    onClick={() => openSettleModal(req)}
+                                    className="px-3 py-1.5 bg-[#CCFF00]/10 text-[#CCFF00] hover:bg-[#CCFF00] hover:text-black rounded-[6px] transition-all border border-[#CCFF00]/20 text-[10px] font-black uppercase tracking-widest flex items-center gap-1.5"
                                   >
-                                    <CheckCircle size={16} />
+                                    <CheckCircle size={13} /> Settle
                                   </button>
                                   <button 
-                                    onClick={() => {
-                                      const reason = prompt("Enter Rejection Reason:");
-                                      if(reason) handleReject(req._id, reason);
-                                    }}
-                                    className="p-2 bg-red-500/10 text-red-500 hover:bg-red-500 hover:text-white rounded-[6px] transition-all border border-red-500/20"
+                                    onClick={() => { setRejectModal(req); setRejectReason(""); }}
+                                    className="px-3 py-1.5 bg-red-500/10 text-red-500 hover:bg-red-500 hover:text-white rounded-[6px] transition-all border border-red-500/20 text-[10px] font-black uppercase tracking-widest flex items-center gap-1.5"
                                   >
-                                    <XCircle size={16} />
+                                    <XCircle size={13} /> Reject
                                   </button>
                                 </div>
                               ) : (
-                                <div className="text-[10px] text-[#878C9F] italic font-mono uppercase tracking-tighter">
-                                  {req.status === "COMPLETED" ? `TXN: ${req.transactionId?.slice(-8) || "N/A"}` : req.rejectionReason?.slice(0, 20)}
+                                <div className="space-y-0.5">
+                                  <div className="text-[10px] text-[#878C9F] italic font-mono uppercase tracking-tighter">
+                                    {req.status === "COMPLETED" ? `TXN: ${req.transactionId?.slice(-8) || "N/A"}` : req.rejectionReason?.slice(0, 30)}
+                                  </div>
+                                  {req.status === "COMPLETED" && req.bankDetails?.screenshotUrl && (
+                                    <button
+                                      onClick={() => window.open(req.bankDetails.screenshotUrl, '_blank')}
+                                      className="text-[9px] text-[#CCFF00] font-bold uppercase tracking-wider flex items-center gap-1 hover:underline"
+                                    >
+                                      <Image size={10} /> View Receipt
+                                    </button>
+                                  )}
                                 </div>
                               )}
                             </td>
@@ -496,6 +549,151 @@ const FinancialMissionControl = () => {
           )}
         </div>
       </div>
+
+      {/* ── SETTLE MODAL ── */}
+      {settleModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm" onClick={() => setSettleModal(null)}>
+          <div className="bg-[#0A0A0A] border border-[#2D2D2D] rounded-[12px] w-full max-w-md mx-4 shadow-2xl" onClick={e => e.stopPropagation()}>
+            {/* Header */}
+            <div className="flex items-center justify-between px-6 py-4 border-b border-[#2D2D2D]">
+              <div>
+                <h3 className="text-white font-black text-sm uppercase tracking-wider">Settle Withdrawal</h3>
+                <p className="text-[#878C9F] text-[10px] mt-0.5 font-mono">
+                  {settleModal.owner?.name} · ₹{Number(settleModal.amount).toLocaleString("en-IN")}
+                </p>
+              </div>
+              <button onClick={() => setSettleModal(null)} className="p-1.5 hover:bg-white/5 rounded-md transition-colors">
+                <X size={16} className="text-[#878C9F]" />
+              </button>
+            </div>
+
+            {/* Body */}
+            <div className="px-6 py-5 space-y-4">
+              {/* Transaction ID */}
+              <div>
+                <label className="text-[10px] font-black text-[#878C9F] uppercase tracking-widest block mb-1.5">Transaction ID *</label>
+                <input
+                  type="text"
+                  value={settleTxnId}
+                  onChange={e => setSettleTxnId(e.target.value)}
+                  placeholder="e.g. UTR123456789"
+                  className="w-full bg-black/60 border border-[#2D2D2D] rounded-[6px] px-3 py-2.5 text-white font-mono text-sm focus:outline-none focus:border-[#CCFF00] transition-colors placeholder:text-[#878C9F]/40"
+                />
+              </div>
+
+              {/* Screenshot Upload */}
+              <div>
+                <label className="text-[10px] font-black text-[#878C9F] uppercase tracking-widest block mb-1.5">Payment Screenshot (Optional)</label>
+                <input
+                  ref={screenshotInputRef}
+                  type="file"
+                  accept="image/*"
+                  onChange={handleScreenshotUpload}
+                  className="hidden"
+                />
+                {settleScreenshot ? (
+                  <div className="relative rounded-[6px] overflow-hidden border border-[#2D2D2D]">
+                    <img src={settleScreenshot} alt="Receipt" className="w-full max-h-48 object-contain bg-black" />
+                    <button
+                      onClick={() => { setSettleScreenshot(null); setSettleScreenshotName(""); }}
+                      className="absolute top-2 right-2 p-1 bg-black/80 rounded-md border border-[#2D2D2D] hover:border-red-500 transition-colors"
+                    >
+                      <X size={12} className="text-red-400" />
+                    </button>
+                    <div className="px-3 py-1.5 bg-black/80 text-[9px] text-[#878C9F] font-mono truncate">
+                      {settleScreenshotName}
+                    </div>
+                  </div>
+                ) : (
+                  <button
+                    onClick={() => screenshotInputRef.current?.click()}
+                    className="w-full border-2 border-dashed border-[#2D2D2D] rounded-[6px] py-6 flex flex-col items-center gap-2 hover:border-[#CCFF00]/30 transition-colors group"
+                  >
+                    <Upload size={20} className="text-[#878C9F] group-hover:text-[#CCFF00] transition-colors" />
+                    <span className="text-[10px] text-[#878C9F] group-hover:text-white font-bold uppercase tracking-wider transition-colors">
+                      Upload Receipt
+                    </span>
+                  </button>
+                )}
+              </div>
+            </div>
+
+            {/* Footer */}
+            <div className="px-6 py-4 border-t border-[#2D2D2D] flex gap-3">
+              <button
+                onClick={() => setSettleModal(null)}
+                className="flex-1 py-2.5 bg-white/5 text-[#878C9F] rounded-[6px] text-[10px] font-black uppercase tracking-widest hover:bg-white/10 transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleSettleConfirm}
+                disabled={!settleTxnId.trim() || isSettling}
+                className="flex-1 py-2.5 bg-[#CCFF00] text-black rounded-[6px] text-[10px] font-black uppercase tracking-widest hover:bg-[#b8e600] transition-colors disabled:opacity-30 disabled:cursor-not-allowed flex items-center justify-center gap-1.5"
+              >
+                {isSettling ? (
+                  <div className="w-4 h-4 border-2 border-black/30 border-t-black rounded-full animate-spin" />
+                ) : (
+                  <><CheckCircle size={13} /> Confirm Settlement</>
+                )}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ── REJECT MODAL ── */}
+      {rejectModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm" onClick={() => setRejectModal(null)}>
+          <div className="bg-[#0A0A0A] border border-[#2D2D2D] rounded-[12px] w-full max-w-md mx-4 shadow-2xl" onClick={e => e.stopPropagation()}>
+            {/* Header */}
+            <div className="flex items-center justify-between px-6 py-4 border-b border-[#2D2D2D]">
+              <div>
+                <h3 className="text-red-400 font-black text-sm uppercase tracking-wider">Reject Withdrawal</h3>
+                <p className="text-[#878C9F] text-[10px] mt-0.5 font-mono">
+                  {rejectModal.owner?.name} · ₹{Number(rejectModal.amount).toLocaleString("en-IN")}
+                </p>
+              </div>
+              <button onClick={() => setRejectModal(null)} className="p-1.5 hover:bg-white/5 rounded-md transition-colors">
+                <X size={16} className="text-[#878C9F]" />
+              </button>
+            </div>
+
+            {/* Body */}
+            <div className="px-6 py-5">
+              <label className="text-[10px] font-black text-[#878C9F] uppercase tracking-widest block mb-1.5">Rejection Reason *</label>
+              <textarea
+                value={rejectReason}
+                onChange={e => setRejectReason(e.target.value)}
+                placeholder="Explain why this withdrawal is being rejected…"
+                rows={4}
+                className="w-full bg-black/60 border border-[#2D2D2D] rounded-[6px] px-3 py-2.5 text-white text-sm resize-none focus:outline-none focus:border-red-500 transition-colors placeholder:text-[#878C9F]/40"
+              />
+            </div>
+
+            {/* Footer */}
+            <div className="px-6 py-4 border-t border-[#2D2D2D] flex gap-3">
+              <button
+                onClick={() => setRejectModal(null)}
+                className="flex-1 py-2.5 bg-white/5 text-[#878C9F] rounded-[6px] text-[10px] font-black uppercase tracking-widest hover:bg-white/10 transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleRejectConfirm}
+                disabled={!rejectReason.trim() || isRejecting}
+                className="flex-1 py-2.5 bg-red-500 text-white rounded-[6px] text-[10px] font-black uppercase tracking-widest hover:bg-red-600 transition-colors disabled:opacity-30 disabled:cursor-not-allowed flex items-center justify-center gap-1.5"
+              >
+                {isRejecting ? (
+                  <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                ) : (
+                  <><XCircle size={13} /> Reject Withdrawal</>
+                )}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

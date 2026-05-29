@@ -14,7 +14,9 @@ ownerRouter.use("/reviews", reviewsRouter);
 ownerRouter.use("/wallet", walletRouter);
 ownerRouter.use("/notifications", notificationRouter);
 
-// Mount Owner Operations Domain
+// Mount Owner Operations Domain & override banking mount for direct path
+import bankingRouter from "../../modules/owner/routes/banking.routes.js";
+ownerRouter.use("/banking", bankingRouter);
 ownerRouter.use("/", ownerOperationsRouter);
 
 export default ownerRouter;

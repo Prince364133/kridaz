@@ -271,7 +271,7 @@ export const getAllOwners = async (req, res) => {
     const owners = await prisma.ownerProfile.findMany({
       where: {
         user: {
-          role: { in: ["VENUE_OWNER", "OWNER"] }
+          role: { in: ["VENUE_OWNER", "OWNER", "COACH", "UMPIRE", "STREAMER", "SCORER"] }
         }
       },
       include: {
@@ -778,7 +778,7 @@ export const getAllWithdrawalRequests = async (req, res) => {
 export const approveWithdrawalRequest = async (req, res) => {
   const admin = req.admin.role;
   const { id } = req.params;
-  const { transactionId } = req.body;
+  const { transactionId, screenshot } = req.body;
 
   if (admin?.toUpperCase() !== "ADMIN") {
     return res.status(403).json({ success: false, message: "Unauthorized access denied" });
@@ -807,6 +807,8 @@ export const approveWithdrawalRequest = async (req, res) => {
       return res.status(400).json({ success: false, message: "Insufficient owner wallet balance" });
     }
 
+    const currentBankDetails = request.bankDetails && typeof request.bankDetails === 'object' ? request.bankDetails : {};
+
     await prisma.$transaction([
       prisma.ownerProfile.update({
         where: { id: request.ownerId },
@@ -820,7 +822,11 @@ export const approveWithdrawalRequest = async (req, res) => {
         data: {
           status: "COMPLETED",
           transactionId,
-          processedAt: new Date()
+          processedAt: new Date(),
+          bankDetails: {
+            ...currentBankDetails,
+            screenshotUrl: screenshot || null
+          }
         }
       })
     ]);
