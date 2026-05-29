@@ -145,59 +145,59 @@ const UploadReel = () => {
           <motion.div 
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
-            className="flex-1 p-4 flex justify-center"
+            className="flex-1 p-4 flex flex-col"
           >
-            <div className="w-full max-w-2xl bg-[#0A0A0A]/80 border border-white/5 rounded-[24px] p-4 md:p-6 shadow-xl backdrop-blur-md flex flex-row gap-4 items-start h-fit">
+            <div className="w-full max-w-4xl mx-auto bg-[#0A0A0A]/80 border border-white/5 rounded-[24px] p-4 md:p-6 shadow-xl backdrop-blur-md flex flex-row gap-4 md:gap-8 flex-1">
               
-              {/* Left: Compact Video Thumbnail */}
-              <div className="w-24 md:w-32 shrink-0 flex flex-col gap-3">
-                <div className="relative aspect-[9/16] w-full bg-black rounded-[12px] overflow-hidden shadow-2xl border border-white/10 group">
-                  <video src={preview} className="w-full h-full object-cover" muted autoPlay loop playsInline />
-                  
-                  {/* Remove Button */}
-                  <button 
-                    onClick={clearForm}
-                    className="absolute top-1.5 right-1.5 p-1 bg-black/60 rounded-full text-white/80 hover:text-white hover:bg-red-500/80 transition-all z-10 backdrop-blur-md"
-                    title="Remove video"
-                  >
-                    <X size={14} strokeWidth={2.5} />
-                  </button>
-                </div>
+              {/* Left: Full-Height Video Thumbnail */}
+              <div className="w-[35%] md:w-64 shrink-0 relative rounded-[16px] overflow-hidden shadow-2xl border border-white/10 group">
+                <video src={preview} className="absolute inset-0 w-full h-full object-cover" muted autoPlay loop playsInline />
+                
+                {/* Remove Button */}
+                <button 
+                  onClick={clearForm}
+                  className="absolute top-2 right-2 p-1.5 bg-black/60 rounded-full text-white/80 hover:text-white hover:bg-red-500/80 transition-all z-10 backdrop-blur-md"
+                  title="Remove video"
+                >
+                  <X size={16} strokeWidth={2.5} />
+                </button>
               </div>
 
               {/* Right: Form Details */}
               <div className="flex-1 flex flex-col gap-4">
                 
+                <h2 className="text-lg md:text-xl font-bold text-white hidden md:block">Short Details</h2>
+                
                 {/* Caption */}
-                <div>
+                <div className="flex-1 min-h-[100px]">
                   <textarea 
                     value={caption}
                     onChange={(e) => setCaption(e.target.value)}
                     placeholder="Write a catchy caption..."
-                    className="w-full bg-black/50 border border-white/10 rounded-[12px] p-3 text-white placeholder:text-white/20 focus:outline-none focus:border-[#BFF367] focus:ring-1 focus:ring-[#BFF367] transition-all resize-none h-20 text-sm"
+                    className="w-full h-full bg-black/50 border border-white/10 rounded-[12px] p-4 text-white placeholder:text-white/20 focus:outline-none focus:border-[#BFF367] focus:ring-1 focus:ring-[#BFF367] transition-all resize-none text-sm md:text-base"
                   />
                 </div>
 
                 {/* Hashtags */}
-                <div className="relative">
-                  <Hash size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-[#BFF367]" />
+                <div className="relative shrink-0">
+                  <Hash size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-[#BFF367]" />
                   <input 
                     type="text"
                     value={hashtags}
                     onChange={(e) => setHashtags(e.target.value)}
-                    placeholder="e.g., #sports #kridaz #goals"
-                    className="w-full bg-black/50 border border-white/10 rounded-[12px] py-2.5 pl-9 pr-3 text-white placeholder:text-white/20 focus:outline-none focus:border-[#BFF367] focus:ring-1 focus:ring-[#BFF367] transition-all text-sm"
+                    placeholder="e.g., #sports #kridaz"
+                    className="w-full bg-black/50 border border-white/10 rounded-[12px] py-3 pl-10 pr-4 text-white placeholder:text-white/20 focus:outline-none focus:border-[#BFF367] focus:ring-1 focus:ring-[#BFF367] transition-all text-sm md:text-base"
                   />
                 </div>
                 
                 {/* Privacy and Location Row */}
-                <div className="flex flex-col sm:flex-row gap-3">
-                  <div className="relative shrink-0">
-                    <Globe size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-white/50" />
+                <div className="flex flex-col xl:flex-row gap-3 shrink-0">
+                  <div className="relative shrink-0 xl:w-1/3">
+                    <Globe size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-white/50" />
                     <select 
                       value={privacy}
                       onChange={(e) => setPrivacy(e.target.value)}
-                      className="w-full sm:w-auto appearance-none bg-black/50 border border-white/10 rounded-[12px] py-2.5 pl-9 pr-8 text-white focus:outline-none focus:border-[#BFF367] text-sm cursor-pointer"
+                      className="w-full appearance-none bg-black/50 border border-white/10 rounded-[12px] py-3 pl-10 pr-8 text-white focus:outline-none focus:border-[#BFF367] text-sm md:text-base cursor-pointer"
                     >
                       <option value="Public">Public</option>
                       <option value="Private">Private</option>
@@ -209,17 +209,17 @@ const UploadReel = () => {
                     </div>
                   </div>
 
-                  <div className="flex-1 flex items-center bg-black/50 border border-white/10 rounded-[12px] px-3 py-2.5 min-w-0">
-                    <MapPin size={14} className="text-white/50 shrink-0 mr-2" />
+                  <div className="flex-1 flex items-center bg-black/50 border border-white/10 rounded-[12px] px-4 py-3 min-w-0">
+                    <MapPin size={16} className="text-white/50 shrink-0 mr-3" />
                     {locationName ? (
                       <div className="flex items-center justify-between w-full min-w-0 gap-2">
-                        <span className="text-sm text-white truncate">{locationName}</span>
+                        <span className="text-sm md:text-base text-white truncate">{locationName}</span>
                         <button onClick={() => setLocationName('')} className="shrink-0 text-white/50 hover:text-white">
-                          <X size={14} />
+                          <X size={16} />
                         </button>
                       </div>
                     ) : (
-                      <button onClick={fetchLocation} className="text-sm text-white/50 hover:text-white truncate text-left w-full">
+                      <button onClick={fetchLocation} className="text-sm md:text-base text-white/50 hover:text-white truncate text-left w-full">
                         {isLocating ? 'Locating...' : 'Add Location'}
                       </button>
                     )}
@@ -227,17 +227,17 @@ const UploadReel = () => {
                 </div>
 
                 {/* Actions */}
-                <div className="flex gap-3 mt-2">
+                <div className="flex gap-3 mt-auto pt-2 shrink-0">
                   <button 
                     onClick={clearForm}
-                    className="flex-1 py-3 bg-white/5 hover:bg-white/10 text-white font-bold rounded-[12px] transition-colors text-sm"
+                    className="flex-1 py-3.5 bg-white/5 hover:bg-white/10 text-white font-bold rounded-[12px] transition-colors text-sm md:text-base"
                   >
                     Discard
                   </button>
                   <button 
                     onClick={handleUpload}
                     disabled={!file || isPreparing}
-                    className="flex-[2] py-3 bg-[#BFF367] text-black font-black uppercase tracking-wider rounded-[12px] disabled:opacity-50 disabled:cursor-not-allowed hover:bg-[#a6d855] transition-colors shadow-[0_0_20px_rgba(191,243,103,0.15)] hover:shadow-[0_0_30px_rgba(191,243,103,0.3)] text-sm"
+                    className="flex-[2] py-3.5 bg-[#BFF367] text-black font-black uppercase tracking-wider rounded-[12px] disabled:opacity-50 disabled:cursor-not-allowed hover:bg-[#a6d855] transition-colors shadow-[0_0_20px_rgba(191,243,103,0.15)] hover:shadow-[0_0_30px_rgba(191,243,103,0.3)] text-sm md:text-base"
                   >
                     {isPreparing ? 'Preparing...' : 'Share Short'}
                   </button>
