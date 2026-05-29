@@ -327,7 +327,7 @@ const ReelItem = ({ reel, isVisible }) => {
       </div>
 
       {/* Bottom Info Overlay */}
-      <div className="absolute bottom-0 left-0 right-16 p-4 pt-12 pb-8 bg-gradient-to-t from-black/80 via-black/30 to-transparent z-10 pointer-events-none">
+      <div className="absolute bottom-0 left-0 right-16 p-4 pt-12 pb-8 z-10 pointer-events-none">
         <div className="flex flex-col gap-2 pointer-events-auto">
           {/* Profile Section */}
           <div className="flex items-center gap-3 cursor-pointer group" onClick={navigateToProfile}>
