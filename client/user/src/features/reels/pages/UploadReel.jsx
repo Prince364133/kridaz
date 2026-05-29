@@ -149,18 +149,20 @@ const UploadReel = () => {
           >
             <div className="w-full max-w-4xl mx-auto bg-[#0A0A0A]/80 border border-white/5 rounded-[24px] p-4 md:p-6 shadow-xl backdrop-blur-md flex flex-row gap-4 md:gap-8 flex-1">
               
-              {/* Left: Full-Height Video Thumbnail */}
-              <div className="w-[35%] md:w-64 shrink-0 relative rounded-[16px] overflow-hidden shadow-2xl border border-white/10 group">
-                <video src={preview} className="absolute inset-0 w-full h-full object-cover" muted autoPlay loop playsInline />
-                
-                {/* Remove Button */}
-                <button 
-                  onClick={clearForm}
-                  className="absolute top-2 right-2 p-1.5 bg-black/60 rounded-full text-white/80 hover:text-white hover:bg-red-500/80 transition-all z-10 backdrop-blur-md"
-                  title="Remove video"
-                >
-                  <X size={16} strokeWidth={2.5} />
-                </button>
+              {/* Left: Video Thumbnail (Proportional) */}
+              <div className="w-[45%] md:w-64 shrink-0 flex flex-col justify-center h-full">
+                <div className="relative w-full aspect-[9/16] rounded-[16px] overflow-hidden shadow-2xl border border-white/10 group bg-black">
+                  <video src={preview} className="absolute inset-0 w-full h-full object-cover" muted autoPlay loop playsInline />
+                  
+                  {/* Remove Button */}
+                  <button 
+                    onClick={clearForm}
+                    className="absolute top-2 right-2 p-1.5 bg-black/60 rounded-full text-white/80 hover:text-white hover:bg-red-500/80 transition-all z-10 backdrop-blur-md"
+                    title="Remove video"
+                  >
+                    <X size={16} strokeWidth={2.5} />
+                  </button>
+                </div>
               </div>
 
               {/* Right: Form Details */}
@@ -227,19 +229,19 @@ const UploadReel = () => {
                 </div>
 
                 {/* Actions */}
-                <div className="flex gap-3 mt-auto pt-2 shrink-0">
+                <div className="flex flex-col sm:flex-row gap-3 mt-auto pt-2 shrink-0">
                   <button 
                     onClick={clearForm}
-                    className="flex-1 py-3.5 bg-white/5 hover:bg-white/10 text-white font-bold rounded-[12px] transition-colors text-sm md:text-base"
+                    className="w-full sm:flex-1 py-3.5 bg-white/5 hover:bg-white/10 text-white font-bold rounded-[12px] transition-colors text-sm md:text-base order-2 sm:order-1"
                   >
                     Discard
                   </button>
                   <button 
                     onClick={handleUpload}
                     disabled={!file || isPreparing}
-                    className="flex-[2] py-3.5 bg-[#BFF367] text-black font-black uppercase tracking-wider rounded-[12px] disabled:opacity-50 disabled:cursor-not-allowed hover:bg-[#a6d855] transition-colors shadow-[0_0_20px_rgba(191,243,103,0.15)] hover:shadow-[0_0_30px_rgba(191,243,103,0.3)] text-sm md:text-base"
+                    className="w-full sm:flex-[2] py-3.5 bg-[#BFF367] text-black font-black uppercase tracking-wider rounded-[12px] disabled:opacity-50 disabled:cursor-not-allowed hover:bg-[#a6d855] transition-colors shadow-[0_0_20px_rgba(191,243,103,0.15)] hover:shadow-[0_0_30px_rgba(191,243,103,0.3)] text-sm md:text-base order-1 sm:order-2"
                   >
-                    {isPreparing ? 'Preparing...' : 'Share Short'}
+                    {isPreparing ? 'Preparing...' : 'Share'}
                   </button>
                 </div>
               </div>
