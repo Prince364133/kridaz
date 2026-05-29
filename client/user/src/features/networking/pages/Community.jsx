@@ -885,7 +885,7 @@ const Community = ({ children, onSearchActive }) => {
   };
 
   return (
-    <div className={`min-h-screen bg-[#050505] text-white pt-4 pb-12 ${activeFilter === 'Reels' ? 'px-0 md:px-6' : 'px-4 md:px-6'} font-sans relative`}>
+    <div className={`min-h-screen bg-[#050505] text-white pt-4 pb-12 ${activeFilter === 'Reels' ? 'px-0 md:px-4' : 'px-2 md:px-4'} font-sans relative`}>
 
 
 
