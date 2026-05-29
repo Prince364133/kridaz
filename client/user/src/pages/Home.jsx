@@ -662,7 +662,7 @@ export default function Home() {
  <div className="w-full">
  <button 
  onClick={(e) => handleFollowToggle(e, p)}
- className={`w-full py-1.5 rounded-[6px] font-black text-[9px] uppercase tracking-wider transition-all duration-300 ${isFollowing ? 'bg-white/5 border border-white/10 text-white/30 hover:bg-white/10' : 'bg-[#222] border border-white/5 text-white hover:bg-white hover:text-black shadow-lg'}`}
+ className={`w-full py-1.5 rounded-[6px] font-black text-[9px] uppercase tracking-wider transition-all duration-300 ${isFollowing ? 'bg-white/5 border border-white/10 text-white/30 hover:bg-white/10' : 'bg-white text-black hover:bg-white/90 shadow-lg'}`}
  >
  {isFollowing ? 'Following' : 'Follow +'}
  </button>
