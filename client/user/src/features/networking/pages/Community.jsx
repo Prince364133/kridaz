@@ -972,8 +972,7 @@ const Community = ({ children, onSearchActive }) => {
       <div className="max-w-[1500px] mx-auto w-full">
         <div className="grid grid-cols-1 gap-6">
 
-
-
+          {!debouncedSearchQuery.trim() && children}
 
           {/* ================= FEED (centered, full-width on desktop) ================= */}
           <div className={`max-w-3xl mx-auto w-full transition-all duration-300 ${activeFilter === 'Reels' ? 'h-[calc(100vh-100px)] sticky top-[80px] max-w-none' : 'space-y-2'}`}>
@@ -1044,8 +1043,6 @@ const Community = ({ children, onSearchActive }) => {
                     </div>
                   </div>
                 )}
-
-                {!debouncedSearchQuery.trim() && children}
 
                 {/* Filters Row */}
                 {!debouncedSearchQuery.trim() && (
