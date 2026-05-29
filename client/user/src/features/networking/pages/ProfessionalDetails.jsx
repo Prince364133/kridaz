@@ -280,7 +280,7 @@ export default function ProfessionalDetails() {
                     className={`w-full py-2 text-[10px] md:text-xs font-black uppercase tracking-widest rounded-lg transition-all flex items-center justify-center gap-2 ${
                       isFollowing 
                         ? "bg-neutral-800 text-white border border-white/10 hover:bg-neutral-700" 
-                        : "bg-[#BFF367] text-black hover:bg-[#a1e649] shadow-[0_0_15px_rgba(191,243,103,0.2)]"
+                        : "bg-white text-black hover:bg-neutral-200 shadow-[0_0_15px_rgba(255,255,255,0.15)]"
                     }`}
                   >
                     <UserPlus size={14} strokeWidth={2.5} /> {isFollowing ? "Following" : "Follow"}

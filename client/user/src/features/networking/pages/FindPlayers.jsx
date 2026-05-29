@@ -150,8 +150,7 @@ const PlayerCard = ({ player, followingIds, handleFollowToggle, handleAvatarClic
         ) : (
           <button
             onClick={() => handleFollowToggle(playerId)}
-            className="px-4 py-1.5 rounded-xl text-[9px] font-black uppercase tracking-widest text-black active:scale-95 transition-all whitespace-nowrap shadow-[0_4px_14px_rgba(191,243,103,0.25)]"
-            style={{ background: GRAD }}
+            className="px-4 py-1.5 rounded-xl text-[9px] font-black uppercase tracking-widest text-black bg-white active:scale-95 transition-all whitespace-nowrap shadow-[0_4px_14px_rgba(255,255,255,0.15)]"
           >
             Follow
           </button>
