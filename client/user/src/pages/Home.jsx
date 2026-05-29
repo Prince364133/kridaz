@@ -701,7 +701,6 @@ export default function Home() {
 
  {/* Reels Section (Horizontal Mock Data) */}
  <div className="mb-8">
- <h3 className="text-lg md:text-xl font-bold text-white/80 mb-4 tracking-wide">REELS</h3>
  <div className="flex gap-4 overflow-x-auto pb-4 scrollbar-hide snap-x">
  {reelsFeed.length === 0 ? (
    <div className="w-full py-12 flex items-center justify-center border border-white/5 bg-white/5 rounded-[12px]">
@@ -709,7 +708,7 @@ export default function Home() {
    </div>
  ) : (
    reelsFeed.map((reel, idx) => (
-     <div key={`reel-${idx}`} className="w-[140px] md:w-[160px] aspect-[9/16] shrink-0 bg-[#0A0A0A] border rounded-[12px] overflow-hidden snap-start group transition-all relative cursor-pointer" style={{ borderColor: BDR }} onClick={(e) => { e.preventDefault(); navigate(`/?tab=shots&id=${reel.id || reel._id || ''}`); }}>
+     <div key={`reel-${idx}`} className="w-[180px] md:w-[210px] aspect-[9/16] shrink-0 bg-[#0A0A0A] border rounded-[12px] overflow-hidden snap-start group transition-all relative cursor-pointer" style={{ borderColor: BDR }} onClick={(e) => { e.preventDefault(); navigate(`/?tab=shots&id=${reel.id || reel._id || ''}`); }}>
        <img
          src={reel.thumbnailUrl || reel.image || reel.mediaUrl || ''}
          alt="Reel thumbnail"
