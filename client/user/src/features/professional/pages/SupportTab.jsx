@@ -8,7 +8,7 @@ import {
   Clock,
   ArrowRight
 } from "lucide-react";
-import axios from "axios";
+import axiosInstance from "../../../infrastructure/axios";
 
 const SupportTab = ({ role }) => {
   const [tickets, setTickets] = useState([]);
@@ -27,10 +27,7 @@ const SupportTab = ({ role }) => {
   const fetchTickets = async () => {
     setIsLoading(true);
     try {
-      const token = localStorage.getItem("token") || "";
-      const res = await axios.get("/api/owner/support/tickets", {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+      const res = await axiosInstance.get("/api/owner/support/tickets");
       if (res.data && res.data.tickets) {
         setTickets(res.data.tickets);
       }
@@ -52,14 +49,11 @@ const SupportTab = ({ role }) => {
     setIsSubmitting(true);
     setFeedback("");
     try {
-      const token = localStorage.getItem("token") || "";
-      const res = await axios.post("/api/owner/support/create", {
+      const res = await axiosInstance.post("/api/owner/support/create", {
         subject,
         category,
         priority,
         description
-      }, {
-        headers: { Authorization: `Bearer ${token}` }
       });
 
       if (res.data) {
