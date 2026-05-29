@@ -513,8 +513,14 @@ const JoinGames = () => {
    <div className="flex gap-1.5 items-center shrink-0">
    {/* Game Tag */}
    <span className="px-1.5 py-0.5 md:px-2 md:py-1 rounded-[4px] bg-[#BFF367]/10 text-[#BFF367] text-[7.5px] md:text-[9px] font-black uppercase tracking-widest border border-[#BFF367]/20">
-   {game.gameType || 'MATCH'}
+   {game.gameType === 'SCORING_MATCH' ? 'CRICKET' : (game.gameType || 'MATCH')}
    </span>
+   {/* Match Type Tag (if SCORING_MATCH) */}
+   {game.gameType === 'SCORING_MATCH' && (
+     <span className="px-1.5 py-0.5 md:px-2 md:py-1 rounded-[4px] bg-white/5 text-white text-[7.5px] md:text-[9px] font-black uppercase tracking-widest border border-white/10">
+       SCORING MATCH
+     </span>
+   )}
    {/* Coins Tag */}
    <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 md:px-2 md:py-1 rounded-[4px] bg-white/5 text-white text-[7.5px] md:text-[9px] font-black uppercase tracking-widest border border-white/10">
    <Coins className="w-2 h-2 md:w-2.5 md:h-2.5 text-[#BFF367]" />
@@ -573,9 +579,9 @@ const JoinGames = () => {
   >
   <div className="sticky top-0 z-20 bg-[#060608]/90 backdrop-blur-xl border-b border-white/[0.06] px-8 py-5 flex items-center justify-between">
   <div className="flex items-center gap-3 flex-wrap">
-  <div className="px-4 py-1.5 bg-gradient-to-r from-[#BFF367] to-[#BFF367] text-black text-[10px] font-black uppercase tracking-wider rounded-full font-open-sans">
-  {selectedGame.gameType} Elite
-  </div>
+   <div className="px-4 py-1.5 bg-gradient-to-r from-[#BFF367] to-[#BFF367] text-black text-[10px] font-black uppercase tracking-wider rounded-full font-open-sans">
+   {selectedGame.gameType === 'SCORING_MATCH' ? 'CRICKET' : selectedGame.gameType} Elite
+   </div>
   {selectedGame.shortId && (
   <button
   onClick={() => { navigator.clipboard?.writeText(selectedGame.shortId); toast.success('Game ID copied!'); }}
