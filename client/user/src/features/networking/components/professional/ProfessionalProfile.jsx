@@ -909,19 +909,7 @@ export default function ProfessionalProfile() {
                         </div>
                       </div>
 
-                      {/* Online/Offline Status Switch */}
-                      <div className="flex flex-col items-end">
-                        <span className="text-[8px] font-bold text-neutral-500 uppercase tracking-widest mb-1.5">Availability Status</span>
-                        <button
-                          onClick={() => setFormData({ ...formData, isOnline: !formData.isOnline })}
-                          className="flex items-center gap-2 px-3 py-2 bg-black border border-white/5 rounded-lg select-none transition-all active:scale-95 cursor-pointer"
-                        >
-                          <span className={`w-2 h-2 rounded-full ${formData.isOnline ? 'bg-green-500 animate-pulse' : 'bg-red-500'}`} />
-                          <span className="text-[9px] font-black uppercase tracking-widest text-white">
-                            {formData.isOnline ? 'Active Online' : 'Active Offline'}
-                          </span>
-                        </button>
-                      </div>
+
                     </div>
 
                     {/* Editable Full Name */}
