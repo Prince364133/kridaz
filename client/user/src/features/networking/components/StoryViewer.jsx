@@ -2,11 +2,16 @@ import React, { useState, useEffect } from 'react';
 import { X, Trash2, Eye, Calendar, User as UserIcon } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
-const StoryViewer = ({ storyGroup, onClose, onDelete, currentUser, isAdmin, initialIndex = 0 }) => {
+const StoryViewer = ({ storyGroup, onClose, onDelete, currentUser, isAdmin, initialIndex = 0, onNextUser, onPrevUser }) => {
  const [currentStoryIndex, setCurrentStoryIndex] = useState(initialIndex);
  const [showViewers, setShowViewers] = useState(false);
  const [touchStart, setTouchStart] = useState(null);
  const [touchEnd, setTouchEnd] = useState(null);
+
+ // Reset index when storyGroup changes
+ useEffect(() => {
+   setCurrentStoryIndex(initialIndex);
+ }, [storyGroup, initialIndex]);
 
  useEffect(() => {
  if (!storyGroup || showViewers) return;
@@ -15,12 +20,13 @@ const StoryViewer = ({ storyGroup, onClose, onDelete, currentUser, isAdmin, init
  if (currentStoryIndex < storyGroup.stories.length - 1) {
  setCurrentStoryIndex(currentStoryIndex + 1);
  } else {
- onClose();
+ if (onNextUser) onNextUser();
+ else onClose();
  }
  }, 5000);
 
  return () => clearTimeout(timer);
- }, [currentStoryIndex, storyGroup, onClose, showViewers]);
+ }, [currentStoryIndex, storyGroup, onClose, onNextUser, showViewers]);
 
  if (!storyGroup) return null;
 
@@ -55,10 +61,15 @@ const StoryViewer = ({ storyGroup, onClose, onDelete, currentUser, isAdmin, init
  if (currentStoryIndex < storyGroup.stories.length - 1) {
  setCurrentStoryIndex(currentStoryIndex + 1);
  } else {
- onClose();
+ if (onNextUser) onNextUser();
+ else onClose();
  }
  } else if (isRightSwipe) {
- setCurrentStoryIndex(Math.max(0, currentStoryIndex - 1));
+ if (currentStoryIndex > 0) {
+ setCurrentStoryIndex(currentStoryIndex - 1);
+ } else {
+ if (onPrevUser) onPrevUser();
+ }
  }
  }
  };
@@ -119,7 +130,11 @@ const StoryViewer = ({ storyGroup, onClose, onDelete, currentUser, isAdmin, init
  className="w-1/3 h-full cursor-pointer pointer-events-auto" 
  onClick={(e) => {
  e.stopPropagation();
- setCurrentStoryIndex(Math.max(0, currentStoryIndex - 1));
+ if (currentStoryIndex > 0) {
+ setCurrentStoryIndex(currentStoryIndex - 1);
+ } else {
+ if (onPrevUser) onPrevUser();
+ }
  }}
  />
  <div className="w-1/3 h-full" />
@@ -130,7 +145,8 @@ const StoryViewer = ({ storyGroup, onClose, onDelete, currentUser, isAdmin, init
  if (currentStoryIndex < storyGroup.stories.length - 1) {
  setCurrentStoryIndex(currentStoryIndex + 1);
  } else {
- onClose();
+ if (onNextUser) onNextUser();
+ else onClose();
  }
  }}
  />

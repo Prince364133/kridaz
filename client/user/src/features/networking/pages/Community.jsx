@@ -2095,6 +2095,22 @@ const Community = ({ children, onSearchActive }) => {
           onDelete={handleDeleteStory}
           currentUser={user}
           isAdmin={isAdmin}
+          onNextUser={() => {
+            const displayStories = myStoryGroup ? [myStoryGroup, ...otherStories] : otherStories;
+            const currentIndex = displayStories.findIndex(g => g._id === selectedStoryGroup._id);
+            if (currentIndex !== -1 && currentIndex < displayStories.length - 1) {
+               setSelectedStoryGroup(displayStories[currentIndex + 1]);
+            } else {
+               setSelectedStoryGroup(null);
+            }
+          }}
+          onPrevUser={() => {
+            const displayStories = myStoryGroup ? [myStoryGroup, ...otherStories] : otherStories;
+            const currentIndex = displayStories.findIndex(g => g._id === selectedStoryGroup._id);
+            if (currentIndex > 0) {
+               setSelectedStoryGroup(displayStories[currentIndex - 1]);
+            }
+          }}
         />
       )}
     </div>
