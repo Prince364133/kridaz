@@ -269,7 +269,7 @@ const JoinGames = () => {
  };
 
  return (
- <div className="min-h-screen bg-[#000000] text-white p-6 lg:p-10 pb-24 relative overflow-hidden font-inter">
+ <div className="min-h-screen bg-[#000000] text-white px-1 md:px-3 pt-4 pb-24 relative overflow-hidden font-inter">
   {/* Dynamic Background Glow */}
   <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-[#BFF367]/5 blur-[150px] pointer-events-none" />
   <div className="absolute bottom-0 left-0 w-[500px] h-[500px] bg-[#BFF367]/5 blur-[150px] pointer-events-none" />
