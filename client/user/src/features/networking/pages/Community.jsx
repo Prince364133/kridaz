@@ -72,6 +72,8 @@ const Community = ({ children, onSearchActive }) => {
     location ? { lat: location.lat, lng: location.lng } : undefined
   );
   const stories = storiesData?.stories || [];
+  const myStoryGroup = stories.find(group => group.user?._id === user?._id || group.user?.id === user?._id || group.user?._id === user?.id);
+  const otherStories = stories.filter(group => group.user?._id !== user?._id && group.user?.id !== user?._id && group.user?._id !== user?.id);
   const { data: statsData } = useGetCommunityStatsQuery();
 
   const [createPost] = useCreatePostMutation();
@@ -989,24 +991,67 @@ const Community = ({ children, onSearchActive }) => {
                   <div className="py-2 px-1">
                     <div className="flex gap-4 overflow-x-auto no-scrollbar scroll-smooth items-center pb-2">
 
-                      {/* Add Story */}
-                      <div
-                        onClick={() => gateInteraction(() => setShowStoryModal(true))}
-                        className="flex flex-col items-center gap-2.5 shrink-0 cursor-pointer group"
-                      >
-                        <div className="w-[68px] h-[68px] rounded-full border border-dashed border-white/30 flex items-center justify-center group-hover:border-[#BFF367]/50 transition-all relative p-0.5">
-                          <div className="w-full h-full rounded-full bg-[#111] flex items-center justify-center overflow-hidden border border-white/10">
-                            <img src={user?.profilePicture || "/default-avatar.png"} className="w-full h-full object-cover opacity-60" />
+                      {/* Add/View Your Story */}
+                      <div className="flex flex-col items-center gap-2.5 shrink-0 group relative">
+                        <div 
+                          className={`w-[68px] h-[68px] rounded-full relative transition-transform ${myStoryGroup ? 'p-[2px] bg-gradient-to-r from-[#BFF367] to-[#BFF367]' : 'border border-dashed border-white/30 group-hover:border-[#BFF367]/50 p-0.5'}`}
+                        >
+                          <div 
+                            onClick={() => {
+                              if (myStoryGroup) {
+                                setSelectedStoryGroup(myStoryGroup);
+                                setCurrentStoryIndex(0);
+                              } else {
+                                gateInteraction(() => setShowStoryModal(true));
+                              }
+                            }}
+                            className={`w-full h-full rounded-full flex items-center justify-center overflow-hidden bg-[#111] cursor-pointer ${myStoryGroup ? 'border-2 border-[#0A0A0A]' : 'border border-white/10'}`}
+                          >
+                            {myStoryGroup && myStoryGroup.stories[0].mediaUrl ? (
+                               <img 
+                                 src={myStoryGroup.stories[0].thumbnailUrl || myStoryGroup.stories[0].mediaUrl} 
+                                 className={`w-full h-full object-cover ${(myStoryGroup.stories.some(s => s.status === 'pending' || s.status === 'processing')) ? 'blur-sm opacity-50' : ''}`} 
+                                 alt="Your story"
+                               />
+                            ) : myStoryGroup && myStoryGroup.stories[0].content ? (
+                               <div className="w-full h-full flex items-center justify-center text-[7px] p-2 text-center text-[#BFF367] font-bold bg-[#111]">
+                                 {myStoryGroup.stories[0].content?.slice(0, 15)}
+                               </div>
+                            ) : (
+                               <img 
+                                 src={user?.profilePicture || user?.profileImage || "/default-avatar.png"} 
+                                 className="w-full h-full object-cover opacity-60" 
+                                 alt="Profile"
+                               />
+                            )}
                           </div>
-                          <div className="absolute bottom-0 right-0 w-[22px] h-[22px] bg-gradient-to-r from-[#BFF367] to-[#BFF367] rounded-full flex items-center justify-center border-2 border-[#0A0A0A]">
+                          <div 
+                            onClick={(e) => {
+                               e.stopPropagation();
+                               gateInteraction(() => setShowStoryModal(true));
+                            }}
+                            className="absolute bottom-0 right-0 w-[22px] h-[22px] bg-gradient-to-r from-[#BFF367] to-[#BFF367] rounded-full flex items-center justify-center border-2 border-[#0A0A0A] cursor-pointer hover:scale-110 transition-transform z-10"
+                          >
                             <Plus size={12} strokeWidth={4} className="text-black" />
                           </div>
                         </div>
-                        <span className="text-[10px] font-bold text-white/60 group-hover:text-white transition-colors">Your story</span>
+                        <span 
+                          onClick={() => {
+                            if (myStoryGroup) {
+                              setSelectedStoryGroup(myStoryGroup);
+                              setCurrentStoryIndex(0);
+                            } else {
+                              gateInteraction(() => setShowStoryModal(true));
+                            }
+                          }}
+                          className="text-[10px] font-bold text-white/60 group-hover:text-white transition-colors cursor-pointer"
+                        >
+                          Your story
+                        </span>
                       </div>
 
-                      {/* Render Stories */}
-                      {stories.map((group, idx) => (
+                      {/* Render Other Stories */}
+                      {otherStories.map((group, idx) => (
                         <div
                           key={group._id}
                           onClick={() => { setSelectedStoryGroup(group); setCurrentStoryIndex(0); }}
