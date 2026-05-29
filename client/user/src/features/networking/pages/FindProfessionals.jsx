@@ -340,10 +340,10 @@ export default function FindProfessionals() {
   };
 
   return (
-    <div className="min-h-screen bg-black text-white pb-20 px-6 md:px-10 font-sans">
+    <div className="min-h-screen bg-black text-white pb-20 px-1 md:px-3 font-sans">
 
       {/* Header Section */}
-      <div className="max-w-7xl mx-auto pt-6 pb-6 text-center relative px-4">
+      <div className="max-w-7xl mx-auto pt-6 pb-6 text-center relative px-2">
         <h1 className="font-['Open_Sans'] font-extrabold text-5xl lg:text-[64px] uppercase tracking-tighter text-transparent bg-clip-text bg-gradient-to-r from-[#BFF367] to-[#BFF367] mb-2 leading-[1]">
           FIND PROFESSIONALS
         </h1>
@@ -354,7 +354,7 @@ export default function FindProfessionals() {
 
       {/* Search & Filters */}
       {/* Search & Filters */}
-      <div className="max-w-7xl mx-auto px-4 mb-8">
+      <div className="max-w-7xl mx-auto px-2 mb-8">
         <div className="max-w-5xl mx-auto">
           {/* Search Input */}
           <div 
