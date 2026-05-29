@@ -20,6 +20,7 @@ import VisualWagonWheelModal from '../components/VisualWagonWheelModal';
 import PenaltyModal from '../components/PenaltyModal';
 import EndMatchModal from '../components/EndMatchModal';
 import MatchReportModal from '../components/MatchReportModal';
+import MatchExitModal from '../components/MatchExitModal';
 import cricketLoadingGif from '../../../assets/cricket-loading.gif';
 
 const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:6001';
@@ -194,6 +195,7 @@ const ScoringApp = () => {
   const [showPenaltyModal, setShowPenaltyModal] = useState(false);
   const [showCustomRunsModal, setShowCustomRunsModal] = useState(false);
   const [showMatchReport, setShowMatchReport] = useState(false);
+  const [showExitModal, setShowExitModal] = useState(false);
   const [wagonWheelData, setWagonWheelData] = useState(null);
   const [showMatchActions, setShowMatchActions] = useState(false);
 
@@ -756,7 +758,7 @@ const ScoringApp = () => {
                  
                  <div className="flex gap-3 w-full mt-auto pb-4 pt-4">
                     <button
-                      onClick={() => window.history.back()}
+                      onClick={() => setShowExitModal(true)}
                       className="flex-1 h-14 bg-[#1e1e1e] border border-white/5 rounded-[8px] flex items-center justify-center gap-2 text-white text-[13px] font-black uppercase tracking-[0.1em] hover:bg-white/10 transition-all shadow-xl"
                     >
                       <ChevronLeft size={16} /> BACK
@@ -792,7 +794,7 @@ const ScoringApp = () => {
           }}
         >
           <div className="absolute top-4 left-4 z-50">
-            <button onClick={() => window.history.back()} className="p-2 transition-all opacity-80 hover:opacity-100">
+            <button onClick={() => setShowExitModal(true)} className="p-2 transition-all opacity-80 hover:opacity-100">
               <img src="/back-icon.png" alt="Back" className="w-8 h-8 object-contain" />
             </button>
           </div>
@@ -940,11 +942,11 @@ const ScoringApp = () => {
 
       {/* Settings Modal */}
       {showSettings && (
-        <div className="fixed inset-0 z-[100] bg-black/95 backdrop-blur-3xl p-6 flex items-center justify-center animate-in fade-in duration-500">
-          <div className="w-full max-w-sm max-h-[90vh] overflow-y-auto bg-[#000] border border-white/10 rounded-[8px] p-10 space-y-10 shadow-2xl relative">
+        <div className="fixed inset-0 z-[100] bg-black/95 backdrop-blur-3xl flex justify-center animate-in fade-in duration-500">
+          <div className="w-full h-[100dvh] max-w-[450px] overflow-y-auto bg-[#000] px-4 py-8 space-y-10 shadow-2xl relative pb-24">
             <div className="absolute top-0 right-0 w-32 h-32 bg-[#00C187]/5 blur-3xl pointer-events-none" />
             <div className="flex justify-between items-center">
-              <h3 className="text-2xl font-black uppercase tracking-tighter text-white">Interface Config</h3>
+              <h3 className="text-[28px] font-semibold font-inter text-white tracking-tight">Interface Config</h3>
               <button onClick={() => setShowSettings(false)} className="p-3 bg-white/5 rounded-[8px] border border-white/5 hover:text-white transition-all">
                 <X size={20} className="text-neutral-500" />
               </button>
@@ -952,22 +954,22 @@ const ScoringApp = () => {
 
             <div className="space-y-6">
               {matchData?.hostedGameId && !liveEnabled && (
-                <div className="py-12 text-center bg-white/[0.02] rounded-[8px] border border-dashed border-white/10">
+                <div className="py-12 text-center">
                   <div className="w-8 h-8 border-2 border-[#00C187] border-t-transparent rounded-full animate-spin mx-auto mb-4" />
                   <p className="text-[10px] font-black text-neutral-500 uppercase tracking-[0.2em]">Establishing Sync...</p>
                 </div>
               )}
 
               {matchData?.hostedGameId && liveEnabled && (
-                <div className="p-6 bg-white/[0.02] rounded-[8px] border border-white/5 space-y-6 animate-in slide-in-from-top duration-500">
-                  <p className="text-[10px] font-black text-neutral-500 uppercase tracking-[0.2em] text-center">Broadcast Credentials</p>
+                <div className="space-y-6 animate-in slide-in-from-top duration-500">
+                  <p className="text-[8px] font-black text-neutral-600 uppercase tracking-widest">Broadcast Credentials</p>
                   <div className="space-y-3">
                     <input
                       type="text"
                       placeholder="YouTube ID..."
                       defaultValue={matchData?.hostedGameId?.youtubeVideoId}
                       id="ytVideoId"
-                      className="w-full bg-black/50 border border-white/5 rounded-[8px] px-6 py-4 text-xs focus:border-[#00C187] outline-none text-white font-bold"
+                      className="w-full bg-[#222] border border-white/10 rounded-[8px] px-6 py-[14.5px] text-[10px] focus:border-[#00C187] outline-none text-white font-bold"
                     />
                     <button
                       onClick={async () => {
@@ -999,7 +1001,7 @@ const ScoringApp = () => {
                           toast.error('Network failure');
                         }
                       }}
-                      className="w-full py-3 bg-[#00C187]/10 border border-[#00C187]/20 text-[#00C187] text-[10px] font-black uppercase tracking-widest rounded-[8px] hover:bg-[#00C187] hover:text-black transition-all"
+                      className="w-full py-[14.5px] bg-[#222] border border-white/10 text-[#00C187] text-[10px] font-black uppercase tracking-widest rounded-[8px] hover:bg-[#00C187] hover:text-black transition-all"
                     >
                       Authorize Stream
                     </button>
@@ -1010,13 +1012,13 @@ const ScoringApp = () => {
                       <div className="space-y-1.5">
                         <p className="text-[8px] font-black text-neutral-600 uppercase tracking-widest">OBS Overlay (Copy this)</p>
                         <div className="flex gap-2">
-                          <input readOnly value={liveUrls.obsOverlay} className="flex-1 bg-black/40 border border-white/5 rounded-[8px] px-4 py-2.5 text-[9px] text-neutral-400 font-bold truncate outline-none" />
-                          <button onClick={() => { navigator.clipboard.writeText(liveUrls.obsOverlay); toast.success('Copied!'); }} className="px-4 py-2 bg-[#00C187]/10 text-[#00C187] text-[8px] font-black uppercase rounded-[8px] border border-[#00C187]/20 hover:bg-[#00C187] hover:text-black transition-all">Copy</button>
+                          <input readOnly value={liveUrls.obsOverlay} className="flex-1 bg-[#222] border border-white/10 rounded-[8px] px-4 py-[14.5px] text-[10px] text-neutral-400 font-bold truncate outline-none" />
+                          <button onClick={() => { navigator.clipboard.writeText(liveUrls.obsOverlay); toast.success('Copied!'); }} className="px-4 py-[14.5px] bg-[#222] text-[#00C187] text-[10px] font-black uppercase rounded-[8px] border border-white/10 hover:bg-[#00C187] hover:text-black transition-all">Copy</button>
                         </div>
                         <button
                           type="button"
                           onClick={() => setShowThemeStore(true)}
-                          className="w-full mt-2 py-2.5 bg-[#00C187]/10 text-[#00C187] text-[9px] font-black uppercase tracking-widest rounded-[8px] border border-[#00C187]/20 hover:bg-[#00C187] hover:text-black hover:shadow-[0_0_15px_rgba(0,193,135,0.15)] transition-all flex items-center justify-center gap-2"
+                          className="w-full mt-2 py-[14.5px] bg-[#222] text-[#00C187] text-[10px] font-black uppercase tracking-widest rounded-[8px] border border-white/10 hover:bg-[#00C187] hover:text-black hover:shadow-[0_0_15px_rgba(0,193,135,0.15)] transition-all flex items-center justify-center gap-2"
                         >
                           <Sparkles size={12} />
                           Change Ticker Theme
@@ -1025,15 +1027,15 @@ const ScoringApp = () => {
                       <div className="space-y-1.5">
                         <p className="text-[8px] font-black text-neutral-600 uppercase tracking-widest">Public Match Analytics</p>
                         <div className="flex gap-2">
-                          <input readOnly value={liveUrls.publicScoreboard} className="flex-1 bg-black/40 border border-white/5 rounded-[8px] px-4 py-2.5 text-[9px] text-neutral-400 font-bold truncate outline-none" />
-                          <button onClick={() => { navigator.clipboard.writeText(liveUrls.publicScoreboard); toast.success('Copied!'); }} className="px-4 py-2 bg-[#00C187]/10 text-[#00C187] text-[8px] font-black uppercase rounded-[8px] border border-[#00C187]/20 hover:bg-[#00C187] hover:text-black transition-all">Copy</button>
+                          <input readOnly value={liveUrls.publicScoreboard} className="flex-1 bg-[#222] border border-white/10 rounded-[8px] px-4 py-[14.5px] text-[10px] text-neutral-400 font-bold truncate outline-none" />
+                          <button onClick={() => { navigator.clipboard.writeText(liveUrls.publicScoreboard); toast.success('Copied!'); }} className="px-4 py-[14.5px] bg-[#222] text-[#00C187] text-[10px] font-black uppercase rounded-[8px] border border-white/10 hover:bg-[#00C187] hover:text-black transition-all">Copy</button>
                         </div>
                         <div className="flex gap-2 w-full mt-2">
                           <a
                             href={`/live-overlay/${matchId}/preview?theme=${matchData?.hostedGameId?.tickerTheme || 'neon_classic'}`}
                             target="_blank"
                             rel="noreferrer"
-                            className="w-full bg-[#00C187]/20 text-[#00C187] border border-[#00C187]/50 rounded-[8px] px-4 py-2 text-xs font-bold text-center hover:bg-[#00C187]/30 transition-colors"
+                            className="w-full py-[14.5px] bg-[#222] text-[#00C187] border border-white/10 rounded-[8px] px-4 text-[10px] font-black uppercase tracking-widest text-center hover:bg-[#00C187]/30 transition-colors"
                           >
                             Preview Theme
                           </a>
@@ -1044,7 +1046,7 @@ const ScoringApp = () => {
                 </div>
               )}
 
-              <div className="p-6 bg-white/[0.02] rounded-[8px] border border-white/5 space-y-6">
+              <div className="space-y-6">
                 <div className="space-y-4">
                   <p className="text-[8px] font-black text-neutral-600 uppercase tracking-widest">Match State</p>
                   <div className="grid grid-cols-3 gap-2">
@@ -1054,7 +1056,7 @@ const ScoringApp = () => {
                         if (res.success) toast.success('Match Resumed!');
                         else toast.error('Failed to update status');
                       }}
-                      className={`py-2 rounded-[8px] text-[9px] font-black uppercase transition-all ${matchData?.status === 'LIVE' ? 'bg-[#00C187]/20 text-[#00C187] border border-[#00C187]/30' : 'bg-white/5 text-neutral-400 hover:bg-white/10'}`}
+                      className={`py-[14.5px] rounded-[8px] text-[10px] font-black uppercase transition-all ${matchData?.status === 'LIVE' ? 'bg-[#222] text-[#00C187] border border-white/10' : 'bg-white/5 text-neutral-400 hover:bg-white/10'}`}
                     >
                       Live
                     </button>
@@ -1064,7 +1066,7 @@ const ScoringApp = () => {
                         if (res.success) toast.success('Match Paused: Rain Delay');
                         else toast.error('Failed to update status');
                       }}
-                      className={`py-2 rounded-[8px] text-[9px] font-black uppercase transition-all ${matchData?.status === 'RAIN_DELAY' ? 'bg-blue-500/20 text-blue-400 border border-blue-500/30' : 'bg-white/5 text-neutral-400 hover:bg-white/10'}`}
+                      className={`py-[14.5px] rounded-[8px] text-[10px] font-black uppercase transition-all ${matchData?.status === 'RAIN_DELAY' ? 'bg-blue-500/20 text-blue-400 border border-blue-500/30' : 'bg-white/5 text-neutral-400 hover:bg-white/10'}`}
                     >
                       Rain Delay
                     </button>
@@ -1074,7 +1076,7 @@ const ScoringApp = () => {
                         if (res.success) toast.success('Match Paused: Bad Light');
                         else toast.error('Failed to update status');
                       }}
-                      className={`py-2 rounded-[8px] text-[9px] font-black uppercase transition-all ${matchData?.status === 'BAD_LIGHT' ? 'bg-orange-500/20 text-orange-400 border border-orange-500/30' : 'bg-white/5 text-neutral-400 hover:bg-white/10'}`}
+                      className={`py-[14.5px] rounded-[8px] text-[10px] font-black uppercase transition-all ${matchData?.status === 'BAD_LIGHT' ? 'bg-orange-500/20 text-orange-400 border border-orange-500/30' : 'bg-white/5 text-neutral-400 hover:bg-white/10'}`}
                     >
                       Bad Light
                     </button>
@@ -1084,7 +1086,7 @@ const ScoringApp = () => {
                 <div className="space-y-4 pt-4 border-t border-white/5">
                   <p className="text-[8px] font-black text-neutral-600 uppercase tracking-widest flex items-center justify-between">
                     <span>AI Commentator (OpenAI TTS)</span>
-                    <span className={`px-2 py-0.5 rounded text-[8px] ${isAiCommentaryEnabled ? 'bg-[#00C187]/20 text-[#00C187]' : 'bg-white/5 text-neutral-500'}`}>
+                    <span className={`px-2 py-0.5 rounded text-[8px] ${isAiCommentaryEnabled ? 'bg-[#222] text-[#00C187]' : 'bg-white/5 text-neutral-500'}`}>
                       {isAiCommentaryEnabled ? 'ACTIVE' : 'OFF'}
                     </span>
                   </p>
@@ -1092,7 +1094,7 @@ const ScoringApp = () => {
                   <div className="flex gap-2">
                     <button
                       onClick={() => setIsAiCommentaryEnabled(!isAiCommentaryEnabled)}
-                      className={`flex-1 py-2.5 rounded-[8px] text-[9px] font-black uppercase tracking-widest transition-all ${isAiCommentaryEnabled ? 'bg-[#00C187] text-black shadow-[0_0_15px_rgba(0,193,135,0.3)]' : 'bg-white/5 border border-white/10 text-white'}`}
+                      className={`flex-1 py-[14.5px] rounded-[8px] text-[10px] font-black uppercase tracking-widest transition-all ${isAiCommentaryEnabled ? 'bg-[#222] text-[#00C187] border border-white/10 shadow-[0_0_15px_rgba(0,193,135,0.15)]' : 'bg-white/5 border border-white/10 text-white'}`}
                     >
                       {isAiCommentaryEnabled ? 'Disable' : 'Enable Commentary'}
                     </button>
@@ -1104,7 +1106,7 @@ const ScoringApp = () => {
                         <select
                           value={commentaryLanguage}
                           onChange={(e) => setCommentaryLanguage(e.target.value)}
-                          className="flex-1 bg-black/40 border border-white/5 rounded-[8px] px-4 py-2.5 text-[10px] text-white font-bold outline-none focus:border-[#00C187]"
+                          className="flex-1 bg-[#222] border border-white/10 rounded-[8px] px-4 py-[14.5px] text-[10px] text-white font-bold outline-none focus:border-[#00C187]"
                         >
                           <option value="en">English (Default)</option>
                           <option value="hi">Hindi</option>
@@ -1119,7 +1121,7 @@ const ScoringApp = () => {
                         <select
                           value={commentaryVoice}
                           onChange={(e) => setCommentaryVoice(e.target.value)}
-                          className="flex-1 bg-black/40 border border-white/5 rounded-[8px] px-4 py-2.5 text-[10px] text-white font-bold outline-none focus:border-[#00C187]"
+                          className="flex-1 bg-[#222] border border-white/10 rounded-[8px] px-4 py-[14.5px] text-[10px] text-white font-bold outline-none focus:border-[#00C187]"
                         >
                           <option value="alloy">Alloy (Neutral)</option>
                           <option value="echo">Echo (Male, Warm)</option>
@@ -1133,7 +1135,7 @@ const ScoringApp = () => {
                         <select
                           value={commentaryStyle}
                           onChange={(e) => setCommentaryStyle(e.target.value)}
-                          className="w-full bg-black/40 border border-white/5 rounded-[8px] px-4 py-2.5 text-[10px] text-white font-bold outline-none focus:border-[#00C187]"
+                          className="w-full bg-[#222] border border-white/10 rounded-[8px] px-4 py-[14.5px] text-[10px] text-white font-bold outline-none focus:border-[#00C187]"
                         >
                           <option value="professional">Professional Broadcast</option>
                           <option value="natural">Natural Human (Casual)</option>
@@ -1161,7 +1163,7 @@ const ScoringApp = () => {
                             toast.error('Network error saving settings');
                           }
                         }}
-                        className="w-full py-2 bg-[#00C187]/10 text-[#00C187] text-[9px] font-black uppercase tracking-widest rounded-[8px] border border-[#00C187]/20 hover:bg-[#00C187] hover:text-black transition-all"
+                        className="w-full py-[14.5px] bg-[#222] text-[#00C187] text-[10px] font-black uppercase tracking-widest rounded-[8px] border border-white/10 hover:bg-[#00C187] hover:text-black transition-all"
                       >
                         Save Commentary Profile
                       </button>
@@ -1177,7 +1179,7 @@ const ScoringApp = () => {
                       id="revisedTarget"
                       placeholder="Revised Target"
                       defaultValue={matchData?.revisedTarget || ''}
-                      className="flex-1 bg-black/40 border border-white/5 rounded-[8px] px-4 py-2.5 text-[10px] text-white font-bold outline-none focus:border-[#00C187]"
+                      className="flex-1 bg-[#222] border border-white/10 rounded-[8px] px-4 py-[14.5px] text-[10px] text-white font-bold outline-none focus:border-[#00C187]"
                     />
                     <input
                       type="number"
@@ -1185,7 +1187,7 @@ const ScoringApp = () => {
                       id="revisedOvers"
                       placeholder="Revised Overs"
                       defaultValue={matchData?.revisedOvers || ''}
-                      className="flex-1 bg-black/40 border border-white/5 rounded-[8px] px-4 py-2.5 text-[10px] text-white font-bold outline-none focus:border-[#00C187]"
+                      className="flex-1 bg-[#222] border border-white/10 rounded-[8px] px-4 py-[14.5px] text-[10px] text-white font-bold outline-none focus:border-[#00C187]"
                     />
                   </div>
                   <button
@@ -1197,7 +1199,7 @@ const ScoringApp = () => {
                       if (res.success) toast.success('Target Revised!');
                       else toast.error('Failed to revise target');
                     }}
-                    className="w-full py-2.5 bg-purple-500/10 text-purple-400 text-[9px] font-black uppercase tracking-widest rounded-[8px] border border-purple-500/20 hover:bg-purple-500 hover:text-white transition-all"
+                    className="w-full py-[14.5px] bg-purple-500/10 text-purple-400 text-[10px] font-black uppercase tracking-widest rounded-[8px] border border-purple-500/20 hover:bg-purple-500 hover:text-white transition-all"
                   >
                     Apply DLS Revision
                   </button>
@@ -1211,23 +1213,23 @@ const ScoringApp = () => {
                       id="umpire1"
                       placeholder="Umpire 1"
                       defaultValue={matchData?.matchOfficials?.umpire1 || ''}
-                      className="flex-1 bg-black/40 border border-white/5 rounded-[8px] px-4 py-2.5 text-[10px] text-white font-bold outline-none focus:border-[#00C187]"
+                      className="flex-1 bg-[#222] border border-white/10 rounded-[8px] px-4 py-[14.5px] text-[10px] text-white font-bold outline-none focus:border-[#00C187]"
                     />
                     <input
                       type="text"
                       id="umpire2"
                       placeholder="Umpire 2"
                       defaultValue={matchData?.matchOfficials?.umpire2 || ''}
-                      className="flex-1 bg-black/40 border border-white/5 rounded-[8px] px-4 py-2.5 text-[10px] text-white font-bold outline-none focus:border-[#00C187]"
+                      className="flex-1 bg-[#222] border border-white/10 rounded-[8px] px-4 py-[14.5px] text-[10px] text-white font-bold outline-none focus:border-[#00C187]"
                     />
                   </div>
-                  <div className="flex gap-2">
+                  <div className="grid grid-cols-2 gap-2">
                     <input
                       type="text"
                       id="matchReferee"
                       placeholder="Match Referee"
                       defaultValue={matchData?.matchOfficials?.matchReferee || ''}
-                      className="flex-1 bg-black/40 border border-white/5 rounded-[8px] px-4 py-2.5 text-[10px] text-white font-bold outline-none focus:border-[#00C187]"
+                      className="w-full bg-[#222] border border-white/10 rounded-[8px] px-4 py-[14.5px] text-[10px] text-white font-bold outline-none focus:border-[#00C187]"
                     />
                     <button
                       onClick={async () => {
@@ -1238,7 +1240,7 @@ const ScoringApp = () => {
                         if (res.success) toast.success('Officials Updated!');
                         else toast.error('Failed to update officials');
                       }}
-                      className="px-6 py-2.5 bg-blue-500/10 text-blue-400 text-[9px] font-black uppercase tracking-widest rounded-[8px] border border-blue-500/20 hover:bg-blue-500 hover:text-white transition-all"
+                      className="w-full py-[14.5px] bg-blue-500/10 text-blue-400 text-[10px] font-black uppercase tracking-widest rounded-[8px] border border-blue-500/20 hover:bg-blue-500 hover:text-white transition-all"
                     >
                       Save
                     </button>
@@ -1248,13 +1250,13 @@ const ScoringApp = () => {
                 <div className="space-y-4 pt-4 border-t border-white/5">
                   <p className="text-[8px] font-black text-neutral-600 uppercase tracking-widest">Match Rules (Phase 5)</p>
 
-                  <div className="flex gap-2">
+                  <div className="grid grid-cols-2 gap-2">
                     <input
                       type="number"
                       id="powerplayOvers"
                       placeholder="Powerplay Overs"
                       defaultValue={matchData?.powerplayOvers || 0}
-                      className="flex-1 bg-black/40 border border-white/5 rounded-[8px] px-4 py-2.5 text-[10px] text-white font-bold outline-none focus:border-[#00C187]"
+                      className="w-full bg-[#222] border border-white/10 rounded-[8px] px-4 py-[14.5px] text-[10px] text-white font-bold outline-none focus:border-[#00C187]"
                     />
                     <button
                       onClick={async () => {
@@ -1264,7 +1266,7 @@ const ScoringApp = () => {
                         if (res.success) toast.success('Powerplay Overs Updated!');
                         else toast.error('Failed to update powerplay');
                       }}
-                      className="px-6 py-2.5 bg-[#00C187]/10 text-[#00C187] text-[9px] font-black uppercase tracking-widest rounded-[8px] border border-[#00C187]/20 hover:bg-[#00C187] hover:text-black transition-all"
+                      className="w-full py-[14.5px] bg-[#222] text-[#00C187] text-[10px] font-black uppercase tracking-widest rounded-[8px] border border-white/10 hover:bg-[#00C187] hover:text-black transition-all"
                     >
                       Set Powerplay
                     </button>
@@ -1278,7 +1280,7 @@ const ScoringApp = () => {
                         if (res.success) toast.success(isSuccess ? 'Review Retained' : 'Review Lost');
                         else toast.error('Failed to use review');
                       }}
-                      className="w-full py-2.5 bg-yellow-500/10 text-yellow-400 text-[9px] font-black uppercase tracking-widest rounded-[8px] border border-yellow-500/20 hover:bg-yellow-500 hover:text-white transition-all"
+                      className="w-full py-[14.5px] bg-yellow-500/10 text-yellow-400 text-[10px] font-black uppercase tracking-widest rounded-[8px] border border-yellow-500/20 hover:bg-yellow-500 hover:text-white transition-all"
                     >
                       Use Batting Review ({matchData?.reviews?.batting ?? 2})
                     </button>
@@ -1290,7 +1292,7 @@ const ScoringApp = () => {
                         if (res.success) toast.success(isSuccess ? 'Review Retained' : 'Review Lost');
                         else toast.error('Failed to use review');
                       }}
-                      className="w-full py-2.5 bg-yellow-500/10 text-yellow-400 text-[9px] font-black uppercase tracking-widest rounded-[8px] border border-yellow-500/20 hover:bg-yellow-500 hover:text-white transition-all"
+                      className="w-full py-[14.5px] bg-yellow-500/10 text-yellow-400 text-[10px] font-black uppercase tracking-widest rounded-[8px] border border-yellow-500/20 hover:bg-yellow-500 hover:text-white transition-all"
                     >
                       Use Fielding Review ({matchData?.reviews?.fielding ?? 2})
                     </button>
@@ -1298,13 +1300,13 @@ const ScoringApp = () => {
                 </div>
                 <div className="space-y-4 pt-4 border-t border-white/5">
                   <p className="text-[8px] font-black text-neutral-600 uppercase tracking-widest">Match Analysis</p>
-                  <div className="grid grid-cols-2 gap-3">
+                  <div className="grid grid-cols-2 gap-2">
                     <button
                       onClick={() => {
                         setShowSettings(false);
                         setShowMatchReport(true);
                       }}
-                      className="w-full py-3 bg-[#00C187]/10 text-[#00C187] text-[9px] font-black uppercase tracking-widest rounded-[8px] border border-[#00C187]/20 hover:bg-[#00C187] hover:text-black hover:shadow-[0_0_15px_rgba(0,193,135,0.15)] transition-all flex items-center justify-center gap-2"
+                      className="w-full py-[14.5px] bg-[#222] text-[#00C187] text-[10px] font-black uppercase tracking-widest rounded-[8px] border border-white/10 hover:bg-[#00C187] hover:text-black hover:shadow-[0_0_15px_rgba(0,193,135,0.15)] transition-all flex items-center justify-center gap-2"
                     >
                       <FileText size={14} />
                       Match Report
@@ -1314,7 +1316,7 @@ const ScoringApp = () => {
                       onClick={() => {
                         window.open(`/analytics/${matchData?.hostedGameId?.shortId || matchId}`, '_blank');
                       }}
-                      className="w-full py-3 bg-[#55DEE8]/10 text-[#55DEE8] text-[9px] font-black uppercase tracking-widest rounded-[8px] border border-[#55DEE8]/20 hover:bg-[#55DEE8] hover:text-black hover:shadow-[0_0_15px_rgba(85,222,232,0.15)] transition-all flex items-center justify-center gap-2"
+                      className="w-full py-[14.5px] bg-[#55DEE8]/10 text-[#55DEE8] text-[10px] font-black uppercase tracking-widest rounded-[8px] border border-[#55DEE8]/20 hover:bg-[#55DEE8] hover:text-black hover:shadow-[0_0_15px_rgba(85,222,232,0.15)] transition-all flex items-center justify-center gap-2"
                     >
                       <TrendingUp size={14} />
                       Live Analytics
@@ -1402,6 +1404,17 @@ const ScoringApp = () => {
             if (res.success) toast.success(`Added ${runs} penalty runs`);
             else toast.error(res.message || 'Failed to add penalty');
             setShowPenaltyModal(false);
+          }}
+        />
+      )}
+
+      {showExitModal && (
+        <MatchExitModal
+          isOpen={showExitModal}
+          onClose={() => setShowExitModal(false)}
+          onConfirm={(data) => {
+            setShowExitModal(false);
+            window.history.back();
           }}
         />
       )}
