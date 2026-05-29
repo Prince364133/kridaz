@@ -4,11 +4,14 @@ import ReelPlayer from './ReelPlayer';
 import { ThumbsUp, MessageCircle, Share2, Bookmark, MoreVertical, Music } from 'lucide-react';
 import { useInteractWithReelMutation, useDeleteReelMutation, useAddReelCommentMutation, useReportReelMutation, useGetReelCommentsQuery } from '@redux/api/reelsApi';
 import { motion, AnimatePresence } from 'framer-motion';
-import { useSelector } from 'react-redux';
+import { useSelector, useDispatch } from 'react-redux';
 import toast from 'react-hot-toast';
+import { followUser } from '@redux/slices/authSlice';
+import axiosInstance from '@hooks/useAxiosInstance';
 
 const ReelItem = ({ reel, isVisible }) => {
   const navigate = useNavigate();
+  const dispatch = useDispatch();
   const { user } = useSelector((state) => state.auth);
   const [interact] = useInteractWithReelMutation();
   const [deleteReel] = useDeleteReelMutation();
@@ -340,19 +343,27 @@ const ReelItem = ({ reel, isVisible }) => {
                 />
               </div>
               {/* Follow Plus Button */}
-              {!isCreator && (
+              {!isCreator && !user?.following?.includes(reel.creatorId?.id || reel.creatorId?._id) && (
                 <button 
                   className="absolute -bottom-1 -right-1 w-5 h-5 bg-[#BFF367] text-black rounded-full flex items-center justify-center border border-white shadow-md active:scale-90 transition-transform"
-                  onClick={(e) => {
+                  onClick={async (e) => {
                     e.stopPropagation();
+                    const targetId = reel.creatorId?.id || reel.creatorId?._id;
+                    if (!targetId) return;
+                    dispatch(followUser(targetId));
                     toast.success('Followed ' + (reel.creatorId?.username || reel.creatorId?.name || 'user'));
+                    try {
+                      await axiosInstance.post(`/api/user/players/${targetId}/follow`);
+                    } catch (err) {
+                      toast.error('Failed to follow user');
+                    }
                   }}
                 >
                   <span className="text-sm font-bold leading-none" style={{ marginTop: '-2px' }}>+</span>
                 </button>
               )}
             </div>
-            <h3 className="text-white font-bold text-[16px] drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)] tracking-tight group-hover:underline">
+            <h3 className="text-white font-sans font-bold text-[16px] drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)] tracking-tight group-hover:underline">
               @{reel.creatorId?.username || reel.creatorId?.name || 'kridaz_user'}
             </h3>
           </div>
