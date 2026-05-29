@@ -248,7 +248,7 @@ const UploadReel = () => {
               <button 
                 onClick={handleUpload}
                 disabled={!file || isPreparing}
-                className="w-full py-3.5 bg-white text-black font-semibold rounded-full disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-200 transition-colors text-[15px]"
+                className="w-full py-3.5 bg-[#BFF367] text-black font-semibold rounded-full disabled:opacity-50 disabled:cursor-not-allowed hover:bg-[#a6d855] transition-colors text-[15px]"
               >
                 {isPreparing ? 'Preparing...' : 'Upload Short'}
               </button>
