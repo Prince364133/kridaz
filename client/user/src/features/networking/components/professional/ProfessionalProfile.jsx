@@ -1231,6 +1231,21 @@ export default function ProfessionalProfile() {
                       )}
                     </div>
 
+                    {/* Service Pricing */}
+                    <div>
+                      <label className="text-[9px] font-bold text-neutral-500 uppercase tracking-wider block mb-1">Service Pricing (₹ / Hour)</label>
+                      <div className="relative flex items-center">
+                        <span className="absolute left-3 text-xs font-bold text-neutral-500">₹</span>
+                        <input 
+                          type="number"
+                          placeholder="e.g. 500"
+                          className="w-full bg-[#1A1A1A] border border-white/5 rounded-lg pl-8 pr-3 py-2.5 text-xs text-white outline-none focus:border-white/10 transition-colors font-bold font-mono"
+                          value={formData.hourlyPrice}
+                          onChange={(e) => setFormData({...formData, hourlyPrice: parseFloat(e.target.value) || 0})}
+                        />
+                      </div>
+                    </div>
+
                     {/* Availability Timings (kept) */}
                     <div>
                       <label className="text-[9px] font-bold text-neutral-500 uppercase tracking-wider block mb-1">Availability Timings</label>
