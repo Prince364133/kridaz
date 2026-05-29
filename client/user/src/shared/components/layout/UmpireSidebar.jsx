@@ -1,4 +1,4 @@
-﻿import React from "react";
+import React from "react";
 import { Link, useLocation } from "react-router-dom";
 import { 
   X, 
@@ -19,6 +19,7 @@ import {
 import { useDispatch, useSelector } from "react-redux";
 import { logout } from "@redux/slices/authSlice.js";
 import { useNavigate } from "react-router-dom";
+import { getDynamicProfileRoute } from "@utils/routeUtils";
 import axiosInstance from "@hooks/useAxiosInstance";
 import useUmpireDashboard from "@hooks/owner/useUmpireDashboard";
 import { toast } from "react-hot-toast";
@@ -27,7 +28,7 @@ const UmpireSidebar = ({ isOpen, toggleSidebar, isMinimized, className }) => {
   const location = useLocation();
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const { role } = useSelector((state) => state.auth);
+  const { role, user } = useSelector((state) => state.auth);
   const { dashboardData, loading: dashLoading } = useUmpireDashboard();
   const isLimitedUmpire = role?.toLowerCase() === "limited_umpire";
   const upgradeRequested = dashboardData?.upgradeRequested || false;
@@ -60,7 +61,7 @@ const UmpireSidebar = ({ isOpen, toggleSidebar, isMinimized, className }) => {
     { to: "/umpire/bookings", label: "Bookings", icon: Activity },
     { to: "/umpire/revenue", label: "Earnings", icon: IndianRupee },
     { to: "/umpire/banking", label: "Payout & Banking", icon: Landmark },
-    { to: "/umpire/profile", label: "Profile", icon: User },
+    { to: getDynamicProfileRoute(user, role), label: "Profile", icon: User },
     { to: "/umpire/support", label: "Docs & Support", icon: HelpCircle },
   ].filter(item => {
     if (isLimitedUmpire) {

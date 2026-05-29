@@ -18,14 +18,18 @@ import {
   Play,
   Star
 } from "lucide-react";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { logout } from "@redux/slices/authSlice.js";
+import { getDynamicProfileRoute } from "@utils/routeUtils";
 import { useNavigate } from "react-router-dom";
 
 const ProfessionalSidebar = ({ isOpen, toggleSidebar, isMinimized, className }) => {
   const location = useLocation();
   const dispatch = useDispatch();
   const navigate = useNavigate();
+  const authState = useSelector((state) => state.auth);
+  const user = authState?.user;
+  const userRole = authState?.role;
   const { role } = useParams(); // e.g. coach, umpire, streamer, commentator
 
   const handleLogout = () => {
@@ -35,7 +39,7 @@ const ProfessionalSidebar = ({ isOpen, toggleSidebar, isMinimized, className }) 
 
   const mainNavItems = [
     { to: `/professional/${role}`, label: "Overview", icon: LayoutDashboard },
-    { to: `/professional/${role}/profile`, label: "Profile", icon: User },
+    { to: `/professional/${role}/profile`, label: "Edit Profile", icon: User },
     { to: `/professional/${role}/bookings`, label: "Bookings", icon: Activity },
     { to: `/professional/${role}/payouts`, label: "Payouts & Earnings", icon: IndianRupee },
     { to: `/professional/${role}/reviews`, label: "Reviews & Feedback", icon: Star },

@@ -20,6 +20,7 @@ import {
 import { useDispatch, useSelector } from "react-redux";
 import { logout } from "@redux/slices/authSlice.js";
 import { useNavigate } from "react-router-dom";
+import { getDynamicProfileRoute } from "@utils/routeUtils";
 import axiosInstance from "@hooks/useAxiosInstance";
 import useStreamerDashboard from "@hooks/owner/useStreamerDashboard";
 import { toast } from "react-hot-toast";
@@ -28,7 +29,7 @@ const StreamerSidebar = ({ isOpen, toggleSidebar, isMinimized, className }) => {
   const location = useLocation();
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const { role } = useSelector((state) => state.auth);
+  const { role, user } = useSelector((state) => state.auth);
   const { dashboardData, loading: dashLoading } = useStreamerDashboard();
   const isLimitedStreamer = role?.toLowerCase() === "limited_streamer";
   const [requestLoading, setRequestLoading] = React.useState(false);
@@ -60,7 +61,7 @@ const StreamerSidebar = ({ isOpen, toggleSidebar, isMinimized, className }) => {
     { to: "/streamer/bookings", label: "Bookings", icon: Activity },
     { to: "/streamer/revenue", label: "Earnings", icon: IndianRupee },
     { to: "/streamer/banking", label: "Payout & Banking", icon: Landmark },
-    { to: "/streamer/profile", label: "Profile", icon: User },
+    { to: getDynamicProfileRoute(user, role), label: "Profile", icon: User },
     { to: "/streamer/support", label: "Docs & Support", icon: HelpCircle },
   ].filter(item => {
     if (isLimitedStreamer) {

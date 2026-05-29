@@ -26,6 +26,7 @@ import ManualBookingModal from "@features/venue-owner/ManualBookingModal";
 import useNotifications from "@hooks/shared/useNotifications";
 import { formatDistanceToNow } from 'date-fns';
 import toast from "react-hot-toast";
+import { getDynamicProfileRoute } from "@utils/routeUtils";
 
 /**
  * AuthenticatedNavbar Rs � Role-aware top navigation.
@@ -59,7 +60,7 @@ const AuthenticatedNavbar = ({ toggleSidebar }) => {
   };
 
   const handleProfileClick = () => {
-    navigate(`${getBasePath()}/profile`);
+    navigate(getDynamicProfileRoute(user, role));
   };
 
   useEffect(() => {

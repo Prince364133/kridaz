@@ -2,10 +2,11 @@ import { Link, useLocation } from "react-router-dom";
 import { Home, Search, Users, UserSearch, Trophy } from "lucide-react";
 import { useSelector } from "react-redux";
 import { useScrollDirection } from "@hooks/useScrollDirection.js";
+import { getDynamicProfileRoute } from "@utils/routeUtils";
 
 const MobileBottomNav = () => {
   const location = useLocation();
-  const { isLoggedIn, role } = useSelector((state) => state.auth);
+  const { isLoggedIn, role, user } = useSelector((state) => state.auth);
   const { scrollDirection, scrolled } = useScrollDirection();
 
   const getDashboardPath = () => {
@@ -14,7 +15,7 @@ const MobileBottomNav = () => {
     if (["venu_owners", "owner", "venue_owner", "verified_venue_owner"].some(r => roleStr.includes(r))) return "/venue-owner";
     if (roleStr.includes("coach")) return "/professional/coach";
     if (roleStr.includes("umpire")) return "/umpire";
-    return "/profile";
+    return getDynamicProfileRoute(user, role);
   };
 
 

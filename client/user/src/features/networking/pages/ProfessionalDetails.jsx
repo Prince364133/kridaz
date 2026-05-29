@@ -1,10 +1,11 @@
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
+import { useSelector } from "react-redux";
 import axiosInstance from "@hooks/useAxiosInstance";
 import { 
-  MapPin, Star, Shield, Award, ChevronLeft, Loader2, User, Camera,
+  MapPin, Star, Shield, Award, ChevronLeft, Loader2, User, Camera, Pencil,
   Building, Globe, Clock, CheckCircle2, Layout, BookOpen, Play, X, Eye,
-  Trophy, Tv, Layers, ShieldCheck, MessageSquare
+  Trophy, Tv, Layers, ShieldCheck, MessageSquare, Users, UserPlus, Heart, MessageCircle, Share2
 } from "lucide-react";
 import toast from "react-hot-toast";
 
@@ -14,6 +15,7 @@ const SECTION_HEADING_STYLE = { fontFamily: "\"Open Sans\", sans-serif" };
 export default function ProfessionalDetails() {
   const { id } = useParams();
   const navigate = useNavigate();
+  const { user: currentUser, role } = useSelector((/** @type {any} */ state) => state.auth);
   const [pro, setPro] = useState(null);
   const [reviews, setReviews] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -44,6 +46,13 @@ export default function ProfessionalDetails() {
         experience: "8+ Years",
         bookingCount: 345,
         user: { role: "coach", profilePicture: "https://images.unsplash.com/photo-1522529599102-193c0d76b5b6?q=80&w=2070&auto=format&fit=crop" },
+        username: "abhiram_coach",
+        followersCount: 1542,
+        followingCount: 345,
+        posts: [
+          { id: 1, content: "Great training session today! Footwork is improving across the board.", likes: 45, comments: 12, date: "2 hrs ago", image: "https://images.unsplash.com/photo-1518605368461-1ee12523dc10?q=80&w=1000&auto=format&fit=crop" },
+          { id: 2, content: "Always remember: Form before speed. Don't rush your shots.", likes: 120, comments: 34, date: "1 day ago" }
+        ],
         specialization: "Advanced Batting Techniques & Biomechanics",
         bio: "Former state-level player turned professional coach. Specializing in correcting batting techniques and mental conditioning for high-pressure matches. Certified by NCA.",
         instagram: "https://instagram.com",
@@ -196,6 +205,16 @@ export default function ProfessionalDetails() {
                 <div className="absolute bottom-1 right-2 w-7 h-7 bg-[#0a0a0c] rounded-full p-1.5 border border-black/50">
                   <div className="w-full h-full bg-[#22c55e] rounded-full shadow-[0_0_8px_rgba(34,197,94,0.6)]"></div>
                 </div>
+                {/* Edit button — only on own profile */}
+                {currentUser?.ownerProfile?.id === id && (
+                  <button
+                    onClick={() => navigate(`/professional/${role?.toLowerCase()}/profile`)}
+                    className="absolute top-0 right-0 w-8 h-8 bg-[#BFF367] rounded-full flex items-center justify-center text-black shadow-lg border-2 border-[#0a0a0c] hover:scale-110 transition-transform cursor-pointer"
+                    title="Edit Profile"
+                  >
+                    <Pencil size={14} strokeWidth={2.5} />
+                  </button>
+                )}
               </div>
 
               {/* Profile Info */}
@@ -207,20 +226,21 @@ export default function ProfessionalDetails() {
                       <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" /></svg>
                     </div>
                   </div>
-                  <p className="text-white/60 text-xs md:text-sm font-sans font-medium">
-                    Professional {pro.user?.role?.charAt(0).toUpperCase() + pro.user?.role?.slice(1)} • Elite Professional
-                  </p>
-                </div>
-
-                <div className="flex flex-wrap items-center gap-3 mb-5">
-                  <span className="flex items-center gap-1.5 px-3 py-1 rounded-full border border-[#BFF367]/30 bg-black/50 text-[#BFF367] text-[9px] font-black tracking-widest uppercase backdrop-blur-md">
-                    <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 14a1 1 0 011-1h16a1 1 0 011 1v2a1 1 0 01-1 1H4a1 1 0 01-1-1v-2z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 13V5a2 2 0 012-2h4a2 2 0 012 2v8" /></svg>
-                    PRO {pro.user?.role}
-                  </span>
-                  <span className="flex items-center gap-1.5 px-3 py-1 rounded-full border border-orange-500/40 bg-black/50 text-orange-400 text-[9px] font-black tracking-widest uppercase backdrop-blur-md">
-                    <svg className="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
-                    ELITE PROFESSIONAL
-                  </span>
+                  <div className="flex items-center gap-3 mb-3">
+                    <p className="text-[#BFF367] text-xs md:text-sm font-sans font-bold">
+                      @{pro.username || pro.name?.toLowerCase().replace(/\s+/g, '')}
+                    </p>
+                    <span className="flex items-center gap-1.5 px-2 py-0.5 rounded-full border border-[#BFF367]/30 bg-black/50 text-[#BFF367] text-[9px] font-black tracking-widest uppercase backdrop-blur-md">
+                      <svg className="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 14a1 1 0 011-1h16a1 1 0 011 1v2a1 1 0 01-1 1H4a1 1 0 01-1-1v-2z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 13V5a2 2 0 012-2h4a2 2 0 012 2v8" /></svg>
+                      {pro.user?.role}
+                    </span>
+                  </div>
+                  
+                  {/* Followers and Following */}
+                  <div className="flex flex-wrap items-center gap-5 text-xs text-white/90 font-sans font-bold mb-5">
+                    <span className="flex items-center gap-1.5 cursor-pointer hover:text-[#BFF367] transition-colors"><Users size={14} className="text-[#55DEE8]" /> {pro.followersCount?.toLocaleString() || 0} Followers</span>
+                    <span className="flex items-center gap-1.5 cursor-pointer hover:text-[#BFF367] transition-colors"><UserPlus size={14} className="text-[#55DEE8]" /> {pro.followingCount?.toLocaleString() || 0} Following</span>
+                  </div>
                 </div>
 
                 <div className="flex flex-wrap items-center gap-5 text-xs text-white/80 font-sans font-medium">
@@ -275,9 +295,10 @@ export default function ProfessionalDetails() {
             <div className="flex bg-[#0a0a0c] p-1 rounded-xl border border-white/5 shadow-xl">
               {[
                 { id: "overview", label: "Overview", icon: BookOpen },
+                { id: "posts", label: "Posts", icon: MessageSquare },
                 { id: "exhibition", label: "Showcase Gallery", icon: Layout },
-                { id: "credentials", label: "Credentials & Milestones", icon: ShieldCheck },
-                { id: "reviews", label: "Customer Reviews", icon: Star }
+                { id: "credentials", label: "Credentials", icon: ShieldCheck },
+                { id: "reviews", label: "Reviews", icon: Star }
               ].map(tab => {
                 const Icon = tab.icon;
                 const isSelected = activeTab === tab.id;
@@ -678,6 +699,59 @@ export default function ProfessionalDetails() {
                             <p className="text-xs text-white/60 leading-relaxed font-sans pt-1">
                               {review.comment || "Loved the experience!"}
                             </p>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+
+            {/* POSTS TAB */}
+            {activeTab === "posts" && (
+              <div className="space-y-6 animate-in fade-in duration-300">
+                <div className="bg-[#0a0a0c] rounded-xl border border-white/5 p-8 shadow-xl min-h-[400px]">
+                  <h3 style={SECTION_HEADING_STYLE} className="font-heading text-xs font-black uppercase tracking-widest text-[#BFF367] mb-6 flex items-center gap-2 border-b border-white/5 pb-3">
+                    <MessageSquare size={14} className="text-white" /> Recent Posts & Updates
+                  </h3>
+
+                  {!pro.posts || pro.posts.length === 0 ? (
+                    <div className="py-20 flex flex-col items-center justify-center space-y-3 text-neutral-650">
+                      <MessageSquare size={36} />
+                      <span className="text-[8px] font-black uppercase tracking-[0.4em]">No posts published yet</span>
+                    </div>
+                  ) : (
+                    <div className="space-y-6 font-sans">
+                      {pro.posts.map((post) => (
+                        <div key={post.id} className="p-5 bg-white/[0.02] border border-white/5 rounded-xl space-y-4">
+                          <div className="flex items-center gap-3">
+                            <div className="w-10 h-10 rounded-full bg-neutral-900 overflow-hidden border border-[#BFF367]/30">
+                              <img src={pro.profilePicture} className="w-full h-full object-cover" />
+                            </div>
+                            <div>
+                              <span className="text-xs text-white font-bold capitalize block">{pro.name}</span>
+                              <span className="text-[10px] text-white/50">{post.date}</span>
+                            </div>
+                          </div>
+                          <p className="text-sm text-white/80 leading-relaxed font-sans whitespace-pre-wrap">
+                            {post.content}
+                          </p>
+                          {post.image && (
+                            <div className="rounded-lg overflow-hidden border border-white/10 mt-2 max-h-64 flex justify-center bg-black/50">
+                              <img src={post.image} className="w-full h-full object-cover opacity-90" />
+                            </div>
+                          )}
+                          <div className="flex items-center gap-6 pt-3 border-t border-white/5 text-xs text-white/50">
+                            <button className="flex items-center gap-1.5 hover:text-[#BFF367] transition-colors">
+                              <Heart size={14} /> {post.likes} Likes
+                            </button>
+                            <button className="flex items-center gap-1.5 hover:text-[#55DEE8] transition-colors">
+                              <MessageCircle size={14} /> {post.comments} Comments
+                            </button>
+                            <button className="flex items-center gap-1.5 hover:text-white transition-colors ml-auto">
+                              <Share2 size={14} /> Share
+                            </button>
                           </div>
                         </div>
                       ))}

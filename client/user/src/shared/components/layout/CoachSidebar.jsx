@@ -18,14 +18,16 @@ import {
   IndianRupee,
   Landmark
 } from "lucide-react";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { logout } from "@redux/slices/authSlice.js";
+import { getDynamicProfileRoute } from "@utils/routeUtils";
 import { useNavigate } from "react-router-dom";
 
 const CoachSidebar = ({ isOpen, toggleSidebar, isMinimized, className }) => {
   const location = useLocation();
   const dispatch = useDispatch();
   const navigate = useNavigate();
+  const { user, role } = useSelector((state) => state.auth);
 
   const handleLogout = () => {
     dispatch(logout());
@@ -40,7 +42,7 @@ const CoachSidebar = ({ isOpen, toggleSidebar, isMinimized, className }) => {
     { to: "/professional/coach/bookings", label: "Bookings", icon: Activity },
     { to: "/professional/coach/revenue", label: "Earnings", icon: IndianRupee },
     { to: "/professional/coach/banking", label: "Payout & Banking", icon: Landmark },
-    { to: "/professional/coach/profile", label: "Profile", icon: User },
+    { to: "/professional/coach/profile", label: "Edit Profile", icon: User },
     { to: "/professional/coach/masterclass", label: "Masterclass", icon: Video },
     { to: "/professional/coach/support", label: "Docs & Support", icon: HelpCircle },
   ];

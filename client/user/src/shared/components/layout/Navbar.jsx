@@ -1,4 +1,5 @@
 import { Link, useLocation, useNavigate } from "react-router-dom";
+import { getDynamicProfileRoute } from "@utils/routeUtils";
 import { useSelector, useDispatch } from "react-redux";
 import { User, Users, Menu, X, LogOut, Activity, ShieldCheck, Zap, ArrowRight, Clock, Trophy, Target, MessageCircle, MapPin, ChevronRight, Bell, UserSearch, Search, Plus, Bookmark } from "lucide-react";
 import { useState, useEffect, useCallback } from "react";
@@ -308,7 +309,7 @@ const Navbar = () => {
                       <div className="p-4 space-y-2">
                         {/* User info / Profile Link */}
                         <Link
-                          to="/profile"
+                          to={getDynamicProfileRoute(user, role)}
                           onClick={() => setIsSidebarOpen(false)}
                           className="flex items-center gap-4 p-3 rounded-[8px] bg-white/5 hover:bg-white/10 text-white transition-all mb-4"
                         >

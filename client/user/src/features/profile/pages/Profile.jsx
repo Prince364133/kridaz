@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Link, useParams, useSearchParams, useNavigate } from "react-router-dom";
+import { Link, useParams, useSearchParams, useNavigate, useLocation } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
 import {
   User, MapPin, Clock, IndianRupee, Calendar, Zap, Activity,
@@ -18,6 +18,7 @@ import useLoginOnDemand from "@hooks/useLoginOnDemand";
 import { StoryViewer } from "@features/networking";
 import EditProfileModal from "@components/modals/EditProfileModal";
 import { useSocket } from "@context/SocketContext";
+import { isProfessionalRole, getDynamicProfileRoute } from "@utils/routeUtils";
 
 const PRI = "#BFF367"; // New primary lime accent matching the gradient vibrant stop
 const SEC = "#55DEE8"; // Secondary cyan accent matching the gradient cool stop
@@ -394,6 +395,7 @@ export default function Profile() {
   const { user: currentUser, followingIds } = useSelector((/** @type {any} */ state) => state.auth);
   const { gateInteraction } = useLoginOnDemand();
   const navigate = useNavigate();
+  const location = useLocation();
   const [searchParams, setSearchParams] = useSearchParams();
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [selectedMatch, setSelectedMatch] = useState(null);
@@ -409,6 +411,16 @@ export default function Profile() {
   const { isUserOnline, getLastSeen } = useSocket();
   const isOwnProfile = !userId || (currentUser && (userId === currentUser.id || userId === currentUser._id));
   const targetUserId = isOwnProfile ? (currentUser?.id || currentUser?._id) : userId;
+
+  useEffect(() => {
+    // Redirect professionals away from their own generic profile to their showcase
+    if (isOwnProfile && currentUser && isProfessionalRole(currentUser?.role) && currentUser?.ownerProfile?.id) {
+      const targetRoute = getDynamicProfileRoute(currentUser, currentUser.role);
+      if (location.pathname === "/profile" || location.pathname === "/profile/") {
+        navigate(targetRoute, { replace: true });
+      }
+    }
+  }, [isOwnProfile, currentUser, navigate]);
 
   const [profileUser, setProfileUser] = useState(isOwnProfile ? currentUser : null);
   const [loadingProfile, setLoadingProfile] = useState(!isOwnProfile);

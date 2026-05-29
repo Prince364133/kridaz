@@ -17,13 +17,14 @@ import {
 import { useDispatch, useSelector } from "react-redux";
 import { logout } from "@redux/slices/authSlice.js";
 import { useNavigate } from "react-router-dom";
+import { getDynamicProfileRoute } from "@utils/routeUtils";
 import useScorerDashboard from "@hooks/owner/useScorerDashboard";
 
 const ScorerSidebar = ({ isOpen, toggleSidebar, isMinimized, className }) => {
   const location = useLocation();
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const { role } = useSelector((state) => state.auth);
+  const { role, user } = useSelector((state) => state.auth);
   const { dashboardData, loading: dashLoading } = useScorerDashboard();
   const isLimitedScorer = role?.toLowerCase() === "limited_scorer";
 
@@ -40,7 +41,7 @@ const ScorerSidebar = ({ isOpen, toggleSidebar, isMinimized, className }) => {
     { to: "/scorer/bookings", label: "Bookings", icon: Activity },
     { to: "/scorer/revenue", label: "Earnings", icon: IndianRupee },
     { to: "/scorer/banking", label: "Payout & Banking", icon: Landmark },
-    { to: "/scorer/profile", label: "Profile", icon: User },
+    { to: getDynamicProfileRoute(user, role), label: "Profile", icon: User },
     { to: "/scorer/support", label: "Docs & Support", icon: HelpCircle },
   ].filter(item => {
     if (isLimitedScorer) {
