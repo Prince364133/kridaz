@@ -15,6 +15,8 @@ const UploadReel = () => {
   const [hashtags, setHashtags] = useState('');
   const [isPreparing, setIsPreparing] = useState(false);
   const [privacy, setPrivacy] = useState('Public');
+  const [locationName, setLocationName] = useState('');
+  const [isLocating, setIsLocating] = useState(false);
 
   const handleFileChange = (e) => {
     const selectedFile = e.target.files[0];
@@ -51,6 +53,35 @@ const UploadReel = () => {
     setPreview(null);
     setCaption('');
     setHashtags('');
+    setLocationName('');
+  };
+
+  const fetchLocation = () => {
+    if (!navigator.geolocation) return;
+    setIsLocating(true);
+    navigator.geolocation.getCurrentPosition(
+      async ({ coords }) => {
+        try {
+          const res = await fetch(
+            `https://nominatim.openstreetmap.org/reverse?lat=${coords.latitude}&lon=${coords.longitude}&format=json`,
+            { headers: { "Accept-Language": "en" } }
+          );
+          const data = await res.json();
+          const city = data.address?.city || data.address?.town || data.address?.village || data.address?.county || "";
+          const state = data.address?.state || "";
+          setLocationName(city && state ? `${city}, ${state}` : city || state || "Unknown");
+        } catch {
+          toast.error("Failed to fetch location");
+        } finally {
+          setIsLocating(false);
+        }
+      },
+      () => {
+        toast.error("Location permission denied");
+        setIsLocating(false);
+      },
+      { timeout: 8000 }
+    );
   };
 
   return (
@@ -114,118 +145,99 @@ const UploadReel = () => {
           <motion.div 
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
-            className="flex-1 p-4 md:p-8"
+            className="flex-1 p-4 flex justify-center"
           >
-            <div className="max-w-5xl mx-auto grid grid-cols-1 md:grid-cols-[300px_1fr] lg:grid-cols-[340px_1fr] gap-6 md:gap-10">
+            <div className="w-full max-w-2xl bg-[#0A0A0A]/80 border border-white/5 rounded-[24px] p-4 md:p-6 shadow-xl backdrop-blur-md flex flex-row gap-4 items-start h-fit">
               
-              {/* Left: Video Preview */}
-              <div className="flex flex-col gap-4">
-                <div className="relative aspect-[9/16] w-full max-w-[280px] md:max-w-none mx-auto bg-black rounded-[20px] overflow-hidden shadow-2xl border border-white/10 group">
-                  <video src={preview} className="w-full h-full object-cover" controls autoPlay loop playsInline />
+              {/* Left: Compact Video Thumbnail */}
+              <div className="w-24 md:w-32 shrink-0 flex flex-col gap-3">
+                <div className="relative aspect-[9/16] w-full bg-black rounded-[12px] overflow-hidden shadow-2xl border border-white/10 group">
+                  <video src={preview} className="w-full h-full object-cover" muted autoPlay loop playsInline />
                   
                   {/* Remove Button */}
                   <button 
                     onClick={clearForm}
-                    className="absolute top-4 right-4 p-2 bg-black/60 rounded-full text-white/80 hover:text-white hover:bg-red-500/80 transition-all z-10 backdrop-blur-md opacity-100 md:opacity-0 md:group-hover:opacity-100"
+                    className="absolute top-1.5 right-1.5 p-1 bg-black/60 rounded-full text-white/80 hover:text-white hover:bg-red-500/80 transition-all z-10 backdrop-blur-md"
                     title="Remove video"
                   >
-                    <X size={18} strokeWidth={2.5} />
+                    <X size={14} strokeWidth={2.5} />
                   </button>
-                  
-                  {/* Overlay decorative gradient */}
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 md:group-hover:opacity-100 transition-opacity pointer-events-none flex items-end p-4">
-                    <div className="flex items-center gap-2">
-                      <Music size={14} className="text-white" />
-                      <span className="text-white text-xs font-semibold">Original Audio</span>
-                    </div>
-                  </div>
                 </div>
               </div>
 
               {/* Right: Form Details */}
-              <div className="flex flex-col gap-6">
-                <div className="bg-[#0A0A0A]/80 border border-white/5 rounded-[24px] p-6 md:p-8 shadow-xl backdrop-blur-md">
-                  <h2 className="text-xl font-bold text-white mb-6">Short Details</h2>
-                  
-                  <div className="space-y-6">
-                    {/* Caption */}
-                    <div>
-                      <label className="text-sm font-bold text-white/70 mb-2 flex items-center gap-2 uppercase tracking-wider">
-                        Caption
-                      </label>
-                      <textarea 
-                        value={caption}
-                        onChange={(e) => setCaption(e.target.value)}
-                        placeholder="Write a catchy caption..."
-                        className="w-full bg-black/50 border border-white/10 rounded-[12px] p-4 text-white placeholder:text-white/20 focus:outline-none focus:border-[#BFF367] focus:ring-1 focus:ring-[#BFF367] transition-all resize-none h-32 text-sm"
-                      />
-                    </div>
+              <div className="flex-1 flex flex-col gap-4">
+                
+                {/* Caption */}
+                <div>
+                  <textarea 
+                    value={caption}
+                    onChange={(e) => setCaption(e.target.value)}
+                    placeholder="Write a catchy caption..."
+                    className="w-full bg-black/50 border border-white/10 rounded-[12px] p-3 text-white placeholder:text-white/20 focus:outline-none focus:border-[#BFF367] focus:ring-1 focus:ring-[#BFF367] transition-all resize-none h-20 text-sm"
+                  />
+                </div>
 
-                    {/* Hashtags */}
-                    <div>
-                      <label className="text-sm font-bold text-white/70 mb-2 flex items-center gap-2 uppercase tracking-wider">
-                        <Hash size={16} className="text-[#BFF367]" />
-                        Hashtags
-                      </label>
-                      <input 
-                        type="text"
-                        value={hashtags}
-                        onChange={(e) => setHashtags(e.target.value)}
-                        placeholder="#sports #kridaz #goals"
-                        className="w-full bg-black/50 border border-white/10 rounded-[12px] p-4 text-white placeholder:text-white/20 focus:outline-none focus:border-[#BFF367] focus:ring-1 focus:ring-[#BFF367] transition-all text-sm"
-                      />
+                {/* Hashtags */}
+                <div className="relative">
+                  <Hash size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-[#BFF367]" />
+                  <input 
+                    type="text"
+                    value={hashtags}
+                    onChange={(e) => setHashtags(e.target.value)}
+                    placeholder="e.g., #sports #kridaz #goals"
+                    className="w-full bg-black/50 border border-white/10 rounded-[12px] py-2.5 pl-9 pr-3 text-white placeholder:text-white/20 focus:outline-none focus:border-[#BFF367] focus:ring-1 focus:ring-[#BFF367] transition-all text-sm"
+                  />
+                </div>
+                
+                {/* Privacy and Location Row */}
+                <div className="flex flex-col sm:flex-row gap-3">
+                  <div className="relative shrink-0">
+                    <Globe size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-white/50" />
+                    <select 
+                      value={privacy}
+                      onChange={(e) => setPrivacy(e.target.value)}
+                      className="w-full sm:w-auto appearance-none bg-black/50 border border-white/10 rounded-[12px] py-2.5 pl-9 pr-8 text-white focus:outline-none focus:border-[#BFF367] text-sm cursor-pointer"
+                    >
+                      <option value="Public">Public</option>
+                      <option value="Private">Private</option>
+                    </select>
+                    <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none">
+                      <svg width="10" height="6" viewBox="0 0 10 6" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M1 1L5 5L9 1" stroke="currentColor" strokeOpacity="0.5" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                      </svg>
                     </div>
-                    
-                    {/* Preferences */}
-                    <div className="grid grid-cols-2 gap-4 pt-2">
-                      <button 
-                        onClick={() => setPrivacy(privacy === 'Public' ? 'Private' : 'Public')}
-                        className="bg-black/50 border border-white/10 rounded-[12px] p-4 flex items-center gap-3 hover:border-white/30 transition-colors text-left"
-                      >
-                        <div className="p-2 bg-white/5 rounded-full shrink-0">
-                          <Globe size={18} className={privacy === 'Public' ? 'text-[#BFF367]' : 'text-white/50'} />
-                        </div>
-                        <div className="flex flex-col min-w-0">
-                          <span className="text-sm font-bold text-white truncate">{privacy}</span>
-                          <span className="text-xs text-white/40 truncate">
-                            {privacy === 'Public' ? 'Anyone can see' : 'Only you'}
-                          </span>
-                        </div>
+                  </div>
+
+                  <div className="flex-1 flex items-center bg-black/50 border border-white/10 rounded-[12px] px-3 py-2.5 min-w-0">
+                    <MapPin size={14} className="text-white/50 shrink-0 mr-2" />
+                    {locationName ? (
+                      <div className="flex items-center justify-between w-full min-w-0 gap-2">
+                        <span className="text-sm text-white truncate">{locationName}</span>
+                        <button onClick={() => setLocationName('')} className="shrink-0 text-white/50 hover:text-white">
+                          <X size={14} />
+                        </button>
+                      </div>
+                    ) : (
+                      <button onClick={fetchLocation} className="text-sm text-white/50 hover:text-white truncate text-left w-full">
+                        {isLocating ? 'Locating...' : 'Add Location'}
                       </button>
-                      
-                      <button className="bg-black/50 border border-white/10 rounded-[12px] p-4 flex items-center gap-3 hover:border-white/30 transition-colors text-left">
-                        <div className="p-2 bg-white/5 rounded-full shrink-0">
-                          <MapPin size={18} className="text-white/50" />
-                        </div>
-                        <div className="flex flex-col min-w-0">
-                          <span className="text-sm font-bold text-white truncate">Location</span>
-                          <span className="text-xs text-white/40 truncate">Add location</span>
-                        </div>
-                      </button>
-                    </div>
+                    )}
                   </div>
                 </div>
 
-                {/* Info Note */}
-                <div className="bg-[#BFF367]/5 border border-[#BFF367]/20 rounded-[16px] p-4 flex gap-4 items-start">
-                  <AlertCircle size={20} className="text-[#BFF367] shrink-0 mt-0.5" />
-                  <p className="text-sm text-[#BFF367]/80 leading-relaxed font-medium">
-                    Your video will be automatically optimized for streaming. High-quality encoding happens in the background.
-                  </p>
-                </div>
-
                 {/* Actions */}
-                <div className="flex gap-4 mt-auto pt-4 md:pt-0">
+                <div className="flex gap-3 mt-2">
                   <button 
                     onClick={clearForm}
-                    className="flex-1 py-4 bg-white/5 hover:bg-white/10 text-white font-bold rounded-[12px] transition-colors"
+                    className="flex-1 py-3 bg-white/5 hover:bg-white/10 text-white font-bold rounded-[12px] transition-colors text-sm"
                   >
                     Discard
                   </button>
                   <button 
                     onClick={handleUpload}
                     disabled={!file || isPreparing}
-                    className="flex-[2] py-4 bg-[#BFF367] text-black font-black uppercase tracking-wider rounded-[12px] disabled:opacity-50 disabled:cursor-not-allowed hover:bg-[#a6d855] transition-colors shadow-[0_0_20px_rgba(191,243,103,0.15)] hover:shadow-[0_0_30px_rgba(191,243,103,0.3)]"
+                    className="flex-[2] py-3 bg-[#BFF367] text-black font-black uppercase tracking-wider rounded-[12px] disabled:opacity-50 disabled:cursor-not-allowed hover:bg-[#a6d855] transition-colors shadow-[0_0_20px_rgba(191,243,103,0.15)] hover:shadow-[0_0_30px_rgba(191,243,103,0.3)] text-sm"
                   >
                     {isPreparing ? 'Preparing...' : 'Share Short'}
                   </button>
