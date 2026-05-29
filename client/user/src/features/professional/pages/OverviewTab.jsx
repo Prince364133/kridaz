@@ -271,10 +271,13 @@ const OverviewTab = ({ role, profile }) => {
 
   const getAvgTimeValue = () => {
     const filtered = getFilteredBookings(timeTimeline, customDates.time);
-    if (filtered.length === 0) return "0h 0m";
+    if (filtered.length === 0) return "0%";
     
     let totalMinutes = 0;
+    const uniqueDays = new Set();
+    
     filtered.forEach(b => {
+      uniqueDays.add(new Date(b.createdAt).toDateString());
       if (b.matchStartTime && b.matchEndTime) {
         const [sh, sm] = b.matchStartTime.split(":").map(Number);
         const [eh, em] = b.matchEndTime.split(":").map(Number);
@@ -287,10 +290,12 @@ const OverviewTab = ({ role, profile }) => {
       }
     });
     
-    const avgMinutes = Math.round(totalMinutes / filtered.length);
-    const hrs = Math.floor(avgMinutes / 60);
-    const mins = avgMinutes % 60;
-    return `${hrs}h ${mins}m`;
+    const daysCount = uniqueDays.size || 1;
+    const avgMinutesPerDay = totalMinutes / daysCount;
+    // Percentage of a 24-hour day (1440 minutes)
+    const percentage = ((avgMinutesPerDay / 1440) * 100).toFixed(1);
+    
+    return `${percentage}%`;
   };
 
   const getRatingValue = () => {
