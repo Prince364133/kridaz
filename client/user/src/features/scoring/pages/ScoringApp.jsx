@@ -701,8 +701,8 @@ const ScoringApp = () => {
                  {/* Matchup Card */}
                  <div className="w-full bg-[#1e1e1e] border border-white/5 rounded-[12px] p-6 flex items-center justify-between shadow-lg mb-4 mt-2">
                     <div className="flex flex-col items-center gap-3 w-[30%]">
-                      <div className="w-14 h-14 rounded-full bg-[#81FBB8] flex items-center justify-center shadow-[0_0_15px_rgba(129,251,184,0.3)] shrink-0">
-                         <Shield size={24} className="text-[#1a1a1a]" fill="currentColor" />
+                      <div className="w-14 h-14 rounded-full bg-[#81FBB8] flex items-center justify-center shadow-[0_0_15px_rgba(129,251,184,0.3)] shrink-0 overflow-hidden">
+                         {tA?.logo ? <img src={tA.logo} alt={tAName} className="w-full h-full object-cover" /> : <Shield size={24} className="text-[#1a1a1a]" fill="currentColor" />}
                       </div>
                       <span className="text-[14px] font-black uppercase tracking-wider text-white truncate w-full text-center" style={{ fontFamily: '"Bebas Neue", Anton, sans-serif' }}>
                          {tAName}
@@ -714,8 +714,8 @@ const ScoringApp = () => {
                     </div>
 
                     <div className="flex flex-col items-center gap-3 w-[30%]">
-                      <div className="w-14 h-14 rounded-full bg-[#2FD1C6] flex items-center justify-center shadow-[0_0_15px_rgba(47,209,198,0.3)] shrink-0">
-                         <Zap size={24} className="text-[#1a1a1a]" fill="currentColor" />
+                      <div className="w-14 h-14 rounded-full bg-[#2FD1C6] flex items-center justify-center shadow-[0_0_15px_rgba(47,209,198,0.3)] shrink-0 overflow-hidden">
+                         {tB?.logo ? <img src={tB.logo} alt={tBName} className="w-full h-full object-cover" /> : <Zap size={24} className="text-[#1a1a1a]" fill="currentColor" />}
                       </div>
                       <span className="text-[14px] font-black uppercase tracking-wider text-white truncate w-full text-center" style={{ fontFamily: '"Bebas Neue", Anton, sans-serif' }}>
                          {tBName}

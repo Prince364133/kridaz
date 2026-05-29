@@ -309,12 +309,20 @@ export const interactWithReel = async (req, res) => {
       return res.status(200).json({ success: true, message: 'Interaction already tracked (Bloom hit)' });
     }
 
-    const interaction = await prisma.reelInteraction.upsert({
-      where: {
-        userId_reelId_type: { userId, reelId, type: normalizedType }
-      },
-      update: { watchTime, completionRate },
-      create: { userId, reelId, type: normalizedType, watchTime, completionRate }
+    // Check if interaction already exists in DB (Bloom miss doesn't mean it's new)
+    const existingInteraction = await prisma.reelInteraction.findUnique({
+      where: { userId_reelId_type: { userId, reelId, type: normalizedType } }
+    });
+
+    if (existingInteraction) {
+      // Re-populate Bloom filter from DB truth and return without incrementing
+      addReelInteractionToBloom(userId, reelId, normalizedType);
+      return res.status(200).json({ success: true, message: 'Already interacted (DB hit)' });
+    }
+
+    // Genuinely new interaction — create it
+    const interaction = await prisma.reelInteraction.create({
+      data: { userId, reelId, type: normalizedType, watchTime, completionRate }
     });
 
     // Update Bloom filter after successful DB operation
