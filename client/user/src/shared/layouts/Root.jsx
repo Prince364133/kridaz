@@ -32,7 +32,7 @@ const Root = () => {
   }, [isAuthenticated, user]);
 
   const searchParams = new URLSearchParams(location.search);
-  const isReelsPage = location.pathname.startsWith('/reels') || location.pathname.startsWith('/shorts');
+  const isReelsPage = location.pathname.startsWith('/reels') || location.pathname.startsWith('/shorts') || searchParams.get('tab') === 'shots';
   const hideNav = isReelsPage || location.pathname.startsWith('/messages');
 
   return (

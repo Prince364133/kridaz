@@ -976,7 +976,7 @@ const Community = ({ children, onSearchActive }) => {
 
 
           {/* ================= FEED (centered, full-width on desktop) ================= */}
-          <div className={`max-w-3xl mx-auto w-full transition-all duration-300 ${activeFilter === 'Reels' ? 'h-[calc(100dvh-100px)] sticky top-[64px] lg:top-[80px] max-w-none' : 'space-y-2'}`}>
+          <div className={`max-w-3xl mx-auto w-full transition-all duration-300 ${activeFilter === 'Reels' ? 'h-[100dvh] sticky top-0 max-w-none' : 'space-y-2'}`}>
 
             {activeFilter !== "Reels" && (
               <div className="space-y-3 mb-2">
@@ -1220,7 +1220,7 @@ const Community = ({ children, onSearchActive }) => {
 
             {/* Main Feed Posts / Reels */}
             {activeFilter === "Reels" ? (
-              <div className="relative flex justify-center h-[calc(100dvh-130px)] bg-black md:bg-black/40 md:rounded-[8px]">
+              <div className="relative flex justify-center h-[100dvh] bg-black md:rounded-[8px]">
                 {/* Back button & header */}
                 <div className="absolute top-3 left-3 right-3 z-30 flex items-center justify-between">
                   <div className="flex items-center gap-3">
