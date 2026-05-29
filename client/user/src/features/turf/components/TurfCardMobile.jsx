@@ -16,7 +16,7 @@ const haversineKm = (lat1, lon1, lat2, lon2) => {
   return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
 };
 
-const TurfCardMobile = ({ turf, distance: distanceProp }) => {
+const TurfCardMobile = ({ turf, distance: distanceProp, compact = false }) => {
   const [isWishlisted, setIsWishlisted] = useState(false);
   const navigate = useNavigate();
 
@@ -70,7 +70,9 @@ const TurfCardMobile = ({ turf, distance: distanceProp }) => {
   return (
     <div
       onClick={() => navigate(to)}
-      className="group relative h-[320px] md:h-[400px] w-full rounded-[12px] overflow-hidden cursor-pointer bg-black transition-all duration-500 hover:-translate-y-1 hover:shadow-2xl"
+      className={`group relative w-full rounded-[12px] overflow-hidden cursor-pointer bg-black transition-all duration-500 hover:-translate-y-1 hover:shadow-2xl ${
+        compact ? "h-[220px] md:h-[260px]" : "h-[320px] md:h-[400px]"
+      }`}
     >
       {/* ── Background Images (Scrollable) ── */}
       <div className="absolute inset-0 flex overflow-x-auto snap-x snap-mandatory no-scrollbar">
@@ -88,10 +90,10 @@ const TurfCardMobile = ({ turf, distance: distanceProp }) => {
 
       {/* ── Top Left Area: Slots and Game Type ── */}
       <div className="absolute top-4 left-4 z-20 flex flex-row gap-2 items-center">
-        <span className="bg-black/60 backdrop-blur-md text-[#55DEE8] border border-white/10 text-[10px] font-black px-2.5 py-1 rounded-full uppercase tracking-widest">
+        <span className={`bg-black/60 backdrop-blur-md text-[#BFF367] border border-[#BFF367]/20 font-black px-2.5 py-1 rounded-full uppercase tracking-widest ${compact ? 'text-[8px]' : 'text-[10px]'}`}>
           {gameTypesDisplay}
         </span>
-        <span className="bg-[#BFF367]/20 backdrop-blur-md text-[#BFF367] border border-[#BFF367]/30 text-[10px] font-bold px-2.5 py-1 rounded-full uppercase">
+        <span className={`bg-[#BFF367] text-black font-black px-2.5 py-1 rounded-full uppercase tracking-widest ${compact ? 'text-[8px]' : 'text-[10px]'}`}>
           {slotsLeft} Slots Left
         </span>
       </div>
@@ -100,26 +102,26 @@ const TurfCardMobile = ({ turf, distance: distanceProp }) => {
       <div className="absolute top-4 right-4 z-20">
         <button 
           onClick={toggleWishlist}
-          className="p-2 rounded-full bg-black/40 backdrop-blur-md border border-white/10 hover:bg-black/60 transition-all duration-300 group/heart"
+          className={`rounded-full bg-black/40 backdrop-blur-md border border-white/10 hover:bg-black/60 transition-all duration-300 group/heart ${compact ? 'p-1.5' : 'p-2'}`}
         >
           <Heart 
-            size={18} 
+            size={compact ? 14 : 18} 
             className={`transition-all duration-300 ${ isWishlisted ? "fill-red-500 text-red-500 scale-110" : "text-white group-hover/heart:scale-110" }`} 
           />
         </button>
       </div>
 
       {/* ── Bottom Content Area ── */}
-      <div className="absolute bottom-0 left-0 right-0 p-5 z-20 flex flex-col gap-1">
+      <div className={`absolute bottom-0 left-0 right-0 z-20 flex flex-col ${compact ? 'p-3 gap-0.5' : 'p-5 gap-1'}`}>
         {/* Venue Name */}
-        <h3 className="text-xl md:text-2xl font-bold text-white tracking-tight leading-tight font-inter line-clamp-1">
+        <h3 className={`font-bold text-white tracking-tight leading-tight font-inter line-clamp-1 ${compact ? 'text-lg md:text-xl' : 'text-xl md:text-2xl'}`}>
           {turf.name}
         </h3>
         
         {/* Location */}
-        <div className="flex items-center gap-1.5 mb-2">
-          <MapPin size={12} className="text-[#55DEE8]" />
-          <p className="text-xs md:text-sm text-white/70 font-medium font-inter">
+        <div className={`flex items-center mb-1 ${compact ? 'gap-1' : 'gap-1.5 mb-2'}`}>
+          <MapPin size={compact ? 10 : 12} className="text-[#BFF367]" />
+          <p className={`text-white/70 font-medium font-inter ${compact ? 'text-[10px] md:text-xs' : 'text-xs md:text-sm'}`}>
             {turf.location || turf.city || 'Hyderabad'}
           </p>
         </div>
@@ -127,24 +129,24 @@ const TurfCardMobile = ({ turf, distance: distanceProp }) => {
         {/* Pricing & Rating Row */}
         <div className="flex items-start justify-between mt-1">
           <div className="flex items-baseline gap-1 mt-1">
-            <span className="text-xl md:text-2xl font-black text-[#55DEE8]">₹{price}</span>
-            <span className="text-xs md:text-sm text-white/70 font-medium">/ hr</span>
+            <span className={`font-black text-[#BFF367] ${compact ? 'text-lg md:text-xl' : 'text-xl md:text-2xl'}`}>₹{price}</span>
+            <span className={`text-white/70 font-medium ${compact ? 'text-[10px] md:text-xs' : 'text-xs md:text-sm'}`}>/ hr</span>
           </div>
 
-          <div className="flex flex-col items-end gap-1">
+          <div className="flex flex-col items-end gap-0.5">
             <div className="flex items-center gap-1.5 text-[#BFF367]">
-              <Star size={16} className="fill-[#BFF367]" />
-              <span className="text-base md:text-lg font-bold font-inter">{rating.toFixed(1)}</span>
+              <Star size={compact ? 14 : 16} className="fill-[#BFF367]" />
+              <span className={`font-bold font-inter ${compact ? 'text-sm md:text-base' : 'text-base md:text-lg'}`}>{rating.toFixed(1)}</span>
             </div>
             {distance ? (
               <div className="flex items-center gap-1 text-white/50">
-                <Navigation size={9} className="text-[#55DEE8]" />
-                <span className="text-[9px] font-bold tracking-widest uppercase">
+                <Navigation size={compact ? 8 : 9} className="text-[#BFF367]" />
+                <span className={`font-bold tracking-widest uppercase ${compact ? 'text-[8px]' : 'text-[9px]'}`}>
                   {distance}
                 </span>
               </div>
             ) : (
-              <span className="text-[9px] font-bold tracking-widest uppercase text-white/20">
+              <span className={`font-bold tracking-widest uppercase text-white/20 ${compact ? 'text-[8px]' : 'text-[9px]'}`}>
                 --
               </span>
             )}

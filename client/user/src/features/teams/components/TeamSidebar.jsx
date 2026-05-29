@@ -60,18 +60,15 @@ const TeamSidebar = ({ onSelectTeam, selectedTeamId, onCreateTeam }) => {
             <h2 className="text-xl font-bold text-white tracking-tight uppercase" style={{ fontFamily: "'Open Sans', sans-serif" }}>
               {activeTab === 'myTeams' ? 'My Teams' : activeTab === 'opponentTeams' ? 'Opponents' : 'My Matches'}
             </h2>
-            <p className="text-xs text-white/40 font-medium tracking-wide mt-0.5" style={{ fontFamily: "'Inter', sans-serif" }}>
-              {activeTab === 'myTeams' ? 'Manage your squads' : activeTab === 'opponentTeams' ? 'Rival discovery' : 'Manage your scoring matches'}
-            </p>
+
           </div>
           <div className="flex items-center gap-2">
             <button 
               onClick={() => setIsStartScoringOpen(true)}
-              className="flex items-center gap-1.5 px-3 h-8 bg-[#BFF367]/10 border border-[#BFF367]/20 text-[#BFF367] rounded-[8px] hover:bg-[#BFF367]/20 hover:scale-105 transition-all duration-300 shrink-0"
+              className="flex items-center justify-center px-4 h-8 bg-gradient-to-r from-[#55DEE8] to-[#BFF367] text-black rounded-[8px] hover:scale-105 shadow-lg shadow-[#55DEE8]/10 hover:shadow-[#BFF367]/15 transition-all duration-300 shrink-0"
               title="Start Scoring"
             >
-              <Trophy size={14} strokeWidth={2.5} />
-              <span className="text-[9px] font-black uppercase tracking-widest hidden sm:inline">Score</span>
+              <span className="text-[9px] font-black uppercase tracking-widest">Start Scoring</span>
             </button>
             <div className="relative">
             <button 

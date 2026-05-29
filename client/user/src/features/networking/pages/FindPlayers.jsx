@@ -365,11 +365,9 @@ const FindPlayers = () => {
   
   const lastEmittedLocation = useRef(null);
   const lastEmitTime = useRef(0);
-  const lastPersistedLocation = useRef(null);
   const watchId = useRef(null);
   const MOVEMENT_THRESHOLD_METERS = 50;
   const HEARTBEAT_INTERVAL_MS = 30000;
-  const PERSIST_THRESHOLD_METERS = 200; // Only persist to DB when moved significantly
 
   const clusterPlayers = (players, zoom, radiusPx) => {
     if (!players.length) return [];
@@ -484,25 +482,6 @@ const FindPlayers = () => {
             socket.emit("location:update", newLocation);
             lastEmittedLocation.current = newLocation;
             lastEmitTime.current = now;
-          }
-        }
-
-        // Persist location to database so other users can find us via nearby query
-        if (currentUser && isLocationSharing) {
-          const shouldPersist = !lastPersistedLocation.current ||
-            haversineMeters(
-              lastPersistedLocation.current.lat,
-              lastPersistedLocation.current.lng,
-              newLat, newLng
-            ) > PERSIST_THRESHOLD_METERS;
-
-          if (shouldPersist) {
-            lastPersistedLocation.current = { lat: newLat, lng: newLng };
-            axiosInstance.post("/api/user/players/location", {
-              lat: newLat,
-              lng: newLng,
-              sharing: true
-            }).catch(err => console.warn("Failed to persist location:", err.message));
           }
         }
       },
@@ -700,21 +679,16 @@ const FindPlayers = () => {
     if (!socket) return;
     
     const handleLocationUpdate = ({ userId, lat, lng }) => {
-      let isNew = false;
       setAllNearbyPlayers(prev => {
         const existing = prev.find(p => (p.id || p._id) === userId);
         if (existing) {
           return prev.map(p => (p.id || p._id) === userId ? { ...p, lat, lng } : p);
         } else {
-          isNew = true;
+          // New user moved into radius, trigger fetch to get their profile data
+          fetchNearbyPlayers();
           return prev;
         }
       });
-      
-      if (isNew) {
-        // New user moved into radius, trigger fetch to get their profile data
-        fetchNearbyPlayers();
-      }
     };
 
     socket.on("nearby:location:update", handleLocationUpdate);
@@ -722,7 +696,7 @@ const FindPlayers = () => {
     return () => {
       socket.off("nearby:location:update", handleLocationUpdate);
     };
-  }, [socket, fetchNearbyPlayers]);
+  }, [socket]);
 
   const fetchTeams = useCallback(async () => {
     try {

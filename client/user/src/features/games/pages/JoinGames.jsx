@@ -278,17 +278,17 @@ const JoinGames = () => {
   {/* Header Section */}
   <div className="relative flex flex-col lg:flex-row lg:items-center justify-between gap-10 border-b border-[#2D2D2D] pb-10 mb-12">
   <div className="relative w-full lg:w-auto">
-  <div className="flex items-center justify-between lg:justify-start gap-4 mb-4 w-full">
-    <h1 className="text-4xl md:text-6xl font-black text-white uppercase tracking-tighter leading-none font-open-sans">
-    Join <span className="bg-gradient-to-r from-[#BFF367] to-[#BFF367] bg-clip-text text-transparent">Games</span>
-    </h1>
+   <div className="flex items-center justify-between lg:justify-start gap-4 mb-4 w-full">
+     <h1 className="text-4xl md:text-6xl font-black text-white uppercase tracking-tighter leading-none font-open-sans">
+     Join <span className="bg-gradient-to-r from-[#BFF367] to-[#BFF367] bg-clip-text text-transparent">Games</span>
+     </h1>
     <button 
     onClick={() => gateInteraction(() => navigate('/host-game'))}
     className="lg:hidden px-4 py-2.5 bg-gradient-to-r from-[#BFF367] to-[#BFF367] text-black font-black text-[10px] uppercase tracking-widest rounded-[8px] flex items-center gap-2 hover:scale-105 transition-all duration-500 shadow-[0_0_20px_rgba(191,243,103,0.25)] hover:shadow-[0_0_30px_rgba(191,243,103,0.35)] whitespace-nowrap"
     >
     <Trophy size={14} /> Host Match
     </button>
-  </div>
+      </div>
   <p className="text-sm md:text-xl text-[#999999] tracking-tight max-w-xl" style={SUBHEADING_STYLE}>
   Competitive Matchmaking • Discover & participate in matches hosted by the elite sports community.
   </p>
@@ -467,34 +467,34 @@ const JoinGames = () => {
    <div className="absolute inset-y-0 right-0 w-[60%] overflow-hidden" style={{ clipPath: 'polygon(35% 0, 100% 0, 100% 100%, 0 100%)' }}>
    <img src={game.teams?.teamB?.image || "https://images.unsplash.com/photo-1575361204480-aadea25e6e68?w=800&q=80"} alt="Team B" className="w-full h-full object-cover object-left scale-110 group-hover:scale-125 transition-transform duration-700" />
    </div>
-   {/* Overlay */}
-   <div className="absolute inset-0 bg-black/40 z-10" />
    </div>
 
    {/* Content over image */}
    <div className="relative z-25 flex flex-col h-full p-4 justify-center bg-transparent">
 
 
-   {/* Center Title */}
-   <div className="flex-grow flex flex-col justify-center items-center text-center bg-transparent mt-8">
-   <h3 className="text-[11px] md:text-[16px] font-black uppercase leading-tight tracking-tight text-white font-open-sans px-2 drop-shadow-[0_2px_8px_rgba(0,0,0,0.9)]">
-   {game.gameMode === 'QUICK' ? (
-   <>Casual <span className="text-[#BFF367]">{game.gameType}</span> Match</>
-   ) : (
-   <span className="flex items-center justify-center flex-wrap gap-x-1.5 md:gap-x-2">
-   <span>{game.teams?.teamA?.name?.length > 11 ? game.teams.teamA.name.substring(0, 11) + '...' : game.teams?.teamA?.name}</span>
-   <span className="text-[9px] md:text-xs italic text-[#BFF367] font-bold">vs</span>
-   <span>{game.teams?.teamB?.name?.length > 11 ? game.teams.teamB.name.substring(0, 11) + '...' : game.teams?.teamB?.name}</span>
-   </span>
-   )}
-   </h3>
-   </div>
+
    </div>
    </div>
 
    {/* ── Bottom Info Panel (Below Image) ── */}
    <div className="flex flex-col gap-2 md:gap-2.5 p-2.5 md:p-3 bg-[#0a0a0c] border-t border-white/5">
    
+   {/* Match Title */}
+   <div className="w-full text-left mb-0.5">
+   <h3 className="text-[11px] md:text-[14px] font-black uppercase leading-tight tracking-tight text-white font-open-sans truncate">
+   {game.gameMode === 'QUICK' ? (
+   <>Casual <span className="text-[#BFF367]">{game.gameType}</span> Match</>
+   ) : (
+   <span className="flex items-center gap-x-1.5 md:gap-x-2">
+   <span className="truncate max-w-[100px] md:max-w-[120px]">{game.teams?.teamA?.name}</span>
+   <span className="text-[9px] md:text-[10px] italic text-[#BFF367] font-bold">vs</span>
+   <span className="truncate max-w-[100px] md:max-w-[120px]">{game.teams?.teamB?.name}</span>
+   </span>
+   )}
+   </h3>
+   </div>
+
    {/* Row 1: Date & Capacity */}
    <div className="flex justify-between items-center w-full">
    <span className="text-[10px] md:text-[12px] font-black text-white shrink-0">
@@ -522,20 +522,7 @@ const JoinGames = () => {
    </span>
    </div>
 
-   {/* CTA Button */}
-   <button 
-   onClick={(e) => {
-   if (game.isLive || game.scoringStatus === 'IN_PROGRESS') {
-   e.stopPropagation();
-   navigate(`/analytics/${game.shortId || game._id}`);
-   } else {
-   setSelectedGame(game);
-   }
-   }}
-   className={`px-3 md:px-4 py-1.5 rounded-[6px] font-black text-[8px] md:text-[10px] uppercase tracking-wider transition-all duration-300 flex items-center justify-center gap-1 backdrop-blur-sm bg-transparent ${ game.isLive || game.scoringStatus === 'IN_PROGRESS' ? 'border border-red-500/30 text-red-400 hover:bg-red-500/10 hover:border-red-500/50 hover:text-white' : 'border border-white/10 text-white hover:bg-[#BFF367]/10 hover:border-[#BFF367]/40 hover:text-[#BFF367]' }`}
-   >
-   {game.isLive || game.scoringStatus === 'IN_PROGRESS' ? 'WATCH' : 'JOIN'} <ChevronRight size={9} strokeWidth={3} />
-   </button>
+
    </div>
    </div>
    </motion.div>

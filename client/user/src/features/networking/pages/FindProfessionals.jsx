@@ -386,22 +386,37 @@ export default function FindProfessionals() {
           {/* Categories Horizontal Scroll */}
           <div className="flex gap-4 overflow-x-auto no-scrollbar mb-12 pb-4">
             {[
-              { name: "ALL SPORTS", emoji: "🏆" },
-              { name: "FOOTBALL", emoji: "⚽" },
-              { name: "CRICKET", emoji: "🏏" },
-              { name: "BADMINTON", emoji: "🏸" },
-              { name: "TENNIS", emoji: "🎾" },
-              { name: "PICKLEBALL", emoji: "🏓" }
+              { name: "FOOTBALL", emoji: "⚽", img: "/Football_transparent.png" },
+              { name: "CRICKET", emoji: "🏏", img: "/Cricket_transparent.png" },
+              { name: "BASKETBALL", emoji: "🏀", img: "/Basketball_transparent.png" },
+              { name: "VOLLEYBALL", emoji: "🏐", img: "/Volleyball_transparent.png" },
+              { name: "BADMINTON", emoji: "🏸", img: "/Badminton_transparent.png" },
+              { name: "TENNIS", emoji: "🎾", img: "/tennis_icon_transparent.png" },
+              { name: "TABLE TENNIS", emoji: "🏓", img: "/Table-tennis_transparent.png" },
+              { name: "PICKLEBALL", emoji: "🥒", img: "/Pickleball_transparent.png" }
             ].map((sport) => (
               <div
                 key={sport.name}
-                onClick={() => setSelectedSport(sport.name)}
-                className={`min-w-[80px] h-[80px] rounded-2xl flex flex-col items-center justify-center p-2 cursor-pointer shadow-md transition-all shrink-0 ${selectedSport === sport.name
-                    ? "bg-[#BFF367] scale-105 ring-2 ring-[#BFF367]/50"
-                    : "bg-white hover:scale-105"
+                onClick={() => setSelectedSport(sport.name === selectedSport ? "ALL SPORTS" : sport.name)}
+                className={`relative min-w-[90px] h-[90px] rounded-2xl flex flex-col items-center justify-center p-1 cursor-pointer transition-all duration-300 shrink-0 ${selectedSport === sport.name
+                    ? "scale-110 opacity-100"
+                    : "hover:scale-110 opacity-70 hover:opacity-100"
                   }`}
               >
-                <span className="text-4xl">{sport.emoji}</span>
+                {sport.img ? (
+                  <img 
+                    src={sport.img} 
+                    alt={sport.name} 
+                    className="w-[70px] h-[70px] object-contain drop-shadow-[0_10px_15px_rgba(0,0,0,0.5)] brightness-125 contrast-110 saturate-110" 
+                  />
+                ) : (
+                  <span className="text-5xl">{sport.emoji}</span>
+                )}
+                
+                {/* Gradient line for selected state */}
+                {selectedSport === sport.name && (
+                  <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 w-12 h-1 bg-gradient-to-r from-[#55DEE8] to-[#BFF367] rounded-full shadow-[0_0_10px_rgba(191,243,103,0.6)]" />
+                )}
               </div>
             ))}
           </div>
@@ -533,16 +548,13 @@ export default function FindProfessionals() {
           />
 
           {/* Modal Content */}
-          <div className="relative w-full max-w-lg max-h-[90vh] overflow-y-auto bg-[#0a0a0c] border border-white/10 rounded-2xl shadow-[0_24px_80px_rgba(85,222,232,0.1)] animate-in fade-in zoom-in-95 duration-300">
+          <div className="relative w-full max-w-lg max-h-[90vh] overflow-y-auto bg-[#0a0a0c] border border-white/10 rounded-2xl shadow-[0_24px_80px_rgba(191,243,103,0.1)] animate-in fade-in zoom-in-95 duration-300">
             {/* Modal Header */}
             <div className="sticky top-0 z-10 bg-[#0a0a0c]/95 backdrop-blur-xl border-b border-white/5 p-5 flex items-center justify-between rounded-t-2xl">
               <div className="flex items-center gap-3">
-                <div className="p-2 bg-[#55DEE8]/10 rounded-lg text-[#55DEE8]">
-                  <Sparkles size={20} />
-                </div>
                 <div>
-                  <h2 className="text-lg font-bold uppercase tracking-tight text-white">Request Live Match</h2>
-                  <p className="text-[10px] text-white/50">On-demand matching for coaches, umpires & scorers.</p>
+                  <h2 className="text-lg font-bold uppercase tracking-tight text-white" style={{ fontFamily: "'Open Sans', sans-serif" }}>Request Live Match</h2>
+                  <p className="text-[10px] text-white/50" style={{ fontFamily: "'Inter 28pt Light', sans-serif" }}>On-demand matching for coaches, umpires & scorers.</p>
                 </div>
               </div>
               <button
@@ -557,11 +569,11 @@ export default function FindProfessionals() {
             {isCreatingRequest ? (
               <div className="p-10 sm:p-16 flex flex-col items-center justify-center space-y-8 animate-in fade-in zoom-in duration-300 min-h-[400px]">
                 <div className="relative flex items-center justify-center w-32 h-32">
-                  <div className="absolute inset-0 border-[3px] border-[#55DEE8] rounded-full animate-ping opacity-75"></div>
+                  <div className="absolute inset-0 border-[3px] border-[#BFF367] rounded-full animate-ping opacity-75"></div>
                   <div className="absolute inset-2 border-[3px] border-[#BFF367] rounded-full animate-ping opacity-60" style={{ animationDelay: '0.2s' }}></div>
                   <div className="absolute inset-4 border-[3px] border-white/20 rounded-full animate-ping opacity-50" style={{ animationDelay: '0.4s' }}></div>
-                  <div className="relative bg-[#0d0d0e] rounded-full p-5 border border-white/10 z-10 shadow-[0_0_40px_rgba(85,222,232,0.4)]">
-                    <Search size={40} className="text-[#55DEE8] animate-pulse" />
+                  <div className="relative bg-[#0d0d0e] rounded-full p-5 border border-white/10 z-10 shadow-[0_0_40px_rgba(191,243,103,0.4)]">
+                    <Search size={40} className="text-[#BFF367] animate-pulse" />
                   </div>
                 </div>
                 <div className="text-center space-y-3">
@@ -575,7 +587,7 @@ export default function FindProfessionals() {
               <div>
                 <label className="text-[10px] font-black uppercase text-white/50 tracking-wider block mb-2">Roles</label>
                 <div className="flex flex-wrap gap-2">
-                  {["COACH", "UMPIRE", "SCORER", "STREAMER"].map((roleVal) => {
+                  {["COACH", "UMPIRE", "SCORER", "STREAMER", "CHEERLEADER"].map((roleVal) => {
                     const isSelected = selectedRoles.includes(roleVal);
                     return (
                       <button
@@ -583,7 +595,7 @@ export default function FindProfessionals() {
                         type="button"
                         onClick={() => handleToggleRole(roleVal)}
                         className={`px-3.5 py-1.5 rounded-full text-[10px] font-bold uppercase tracking-wider transition-all flex items-center gap-1.5 ${isSelected
-                            ? "bg-[#55DEE8]/15 border border-[#55DEE8] text-[#55DEE8]"
+                            ? "bg-[#BFF367]/15 border border-[#BFF367] text-[#BFF367]"
                             : "bg-white/5 border border-white/10 text-white/50 hover:border-white/25 hover:text-white/70"
                           }`}
                       >
@@ -610,11 +622,11 @@ export default function FindProfessionals() {
                         setShowLocationSearchModal(true);
                       }
                     }}
-                    className="w-full bg-black border border-white/10 rounded-lg p-3 pr-24 text-xs font-bold text-white focus:border-[#55DEE8] outline-none appearance-none"
+                    className="w-full bg-black border border-white/10 rounded-lg p-3 pr-24 text-xs font-bold text-white focus:border-[#BFF367] outline-none appearance-none"
                   >
                     <option value="">-- Choose Venue/Ground --</option>
                     {grounds.map((g) => (
-                      <option key={g.id || g._id} value={g.id || g._id}>
+                      <option key={g._id} value={g._id}>
                         {g.name} - {g.city}, {g.state}
                       </option>
                     ))}
@@ -631,7 +643,7 @@ export default function FindProfessionals() {
                           e.stopPropagation();
                           setShowLocationSearchModal(true);
                         }}
-                        className="text-[9px] font-bold text-[#55DEE8] hover:text-white px-3 py-1.5 rounded bg-[#55DEE8]/10 hover:bg-[#55DEE8]/20 transition-colors pointer-events-auto mr-3"
+                        className="text-[9px] font-bold text-[#BFF367] hover:text-white px-3 py-1.5 rounded bg-[#BFF367]/10 hover:bg-[#BFF367]/20 transition-colors pointer-events-auto mr-3"
                       >
                         CHANGE
                       </button>
@@ -646,7 +658,7 @@ export default function FindProfessionals() {
                         onClick={() => setShowLocationSearchModal(true)}
                         className="w-full py-3 bg-white/5 hover:bg-white/10 border border-white/10 rounded-lg text-xs font-bold text-white transition-colors flex items-center justify-center gap-2"
                       >
-                        <MapPin size={14} className="text-[#55DEE8]" />
+                        <MapPin size={14} className="text-[#BFF367]" />
                         Open Location Search
                       </button>
                     </div>
@@ -659,10 +671,10 @@ export default function FindProfessionals() {
                 <label className="text-[10px] font-black uppercase text-white/50 tracking-wider block mb-2">Match Schedule</label>
                 <div className="flex items-center bg-[#111] border border-white/10 rounded-lg divide-x divide-white/10 overflow-hidden">
                   <div className="flex-[1.2] p-2.5 relative group hover:bg-white/5 transition-colors">
-                    <span className="text-[8px] text-[#55DEE8] font-bold uppercase mb-1 flex items-center gap-1">
+                    <span className="text-[8px] text-[#BFF367] font-bold uppercase mb-1 flex items-center gap-1">
                       <Calendar size={10} /> Date
                     </span>
-                    <div className="text-[11px] sm:text-xs font-bold text-white group-hover:text-[#55DEE8] transition-colors truncate">
+                    <div className="text-[11px] sm:text-xs font-bold text-white group-hover:text-[#BFF367] transition-colors truncate">
                       {formatDisplayDate(matchDate)}
                     </div>
                     <input
@@ -739,7 +751,7 @@ export default function FindProfessionals() {
               <button
                 type="submit"
                 disabled={isCreatingRequest}
-                className="w-full py-4 rounded-lg bg-gradient-to-r from-[#55DEE8] to-[#BFF367] text-black font-black text-xs uppercase tracking-widest hover:opacity-90 active:scale-[0.98] transition-all flex items-center justify-center gap-2 shadow-[0_4px_20px_rgba(85,222,232,0.2)] hover:shadow-[0_4px_25px_rgba(85,222,232,0.4)]"
+                className="w-full py-4 rounded-lg bg-gradient-to-r from-[#BFF367] to-[#BFF367] text-black font-black text-xs uppercase tracking-widest hover:opacity-90 active:scale-[0.98] transition-all flex items-center justify-center gap-2 shadow-[0_4px_20px_rgba(191,243,103,0.2)] hover:shadow-[0_4px_25px_rgba(191,243,103,0.4)]"
               >
                 {isCreatingRequest ? (
                   <>
@@ -754,7 +766,7 @@ export default function FindProfessionals() {
               {/* Info Footer */}
               <p className="text-[9px] text-white/30 text-center leading-relaxed">
                 Your max budget will be reserved from your wallet as escrow. After a match is confirmed, check your{" "}
-                <Link to="/booking-history?subTab=professionals" className="text-[#55DEE8] underline hover:text-[#55DEE8]/80">
+                <Link to="/booking-history?subTab=professionals" className="text-[#BFF367] underline hover:text-[#BFF367]/80">
                   Booking History
                 </Link>{" "}
                 for OTP verification and status updates.
@@ -773,7 +785,7 @@ export default function FindProfessionals() {
             {/* Header */}
             <div className="p-4 border-b border-white/5 flex items-center justify-between bg-black">
               <div className="flex items-center gap-2">
-                <MapPin size={16} className="text-[#55DEE8]" />
+                <MapPin size={16} className="text-[#BFF367]" />
                 <h3 className="text-sm font-bold text-white uppercase tracking-wider">Search Location</h3>
               </div>
               <button
@@ -793,7 +805,7 @@ export default function FindProfessionals() {
                     onClick={() => {
                       handleDetectLocation();
                     }}
-                    className="px-3 py-1.5 bg-[#55DEE8]/10 hover:bg-[#55DEE8]/20 text-[10px] font-bold text-[#55DEE8] border border-[#55DEE8]/20 rounded flex items-center gap-1.5 transition-all"
+                    className="px-3 py-1.5 bg-[#BFF367]/10 hover:bg-[#BFF367]/20 text-[10px] font-bold text-[#BFF367] border border-[#BFF367]/20 rounded flex items-center gap-1.5 transition-all"
                   >
                     <Navigation size={12} />
                     Detect My GPS Location

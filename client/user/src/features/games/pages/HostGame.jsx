@@ -5,6 +5,7 @@ import { useSelector } from 'react-redux';
 import axiosInstance from '@hooks/useAxiosInstance';
 import { toast } from 'react-hot-toast';
 import SlotPickerPopup from '@components/SlotPickerPopup';
+import MaterialDateTimePicker from '../../../shared/components/MaterialDateTimePicker';
 import { 
   Trophy, Calendar, Clock, MapPin, 
   Users, UserCheck, ChevronRight, Search,
@@ -222,10 +223,19 @@ const HostGame = () => {
   });
 
   // Clock picker state
-  const [showClock, setShowClock] = useState(false);
+  const [showDateTimePicker, setShowDateTimePicker] = useState(false);
+  const [showClock, setShowClock] = useState(false); // Legacy, can be removed later
   const [clockHour, setClockHour] = useState(9);
   const [clockMinute, setClockMinute] = useState(0);
   const [clockAmPm, setClockAmPm] = useState('AM');
+
+  const displayFullDateTime = () => {
+    if (gameData.date && gameData.time) {
+      const d = new Date(`${gameData.date}T${gameData.time}`);
+      return d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }) + `, ${gameData.time} local time`;
+    }
+    return "Select Date & Time";
+  };
 
   // Team Fill state
   const [showTeamFillModal, setShowTeamFillModal] = useState(false);
@@ -751,91 +761,30 @@ const HostGame = () => {
                   <div className="w-[3px] h-[18px] bg-gradient-to-b from-cyan-400 to-lime-400 rounded-full" />
                   <label className="text-xs font-bold text-white uppercase tracking-widest block">Date & Time</label>
                 </div>
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="relative group">
-                    <Calendar className="absolute left-4 top-1/2 -translate-y-1/2 text-cyan-400 group-focus-within:text-lime-400 transition-colors pointer-events-none" size={18} />
-                    <input 
-                      type="date"
-                      value={gameData.date}
-                      onChange={(e) => setGameData({ ...gameData, date: e.target.value })}
-                      onClick={(e) => e.target.showPicker && e.target.showPicker()}
-                      onFocus={(e) => e.target.showPicker && e.target.showPicker()}
-                      className="w-full bg-[#000] border border-neutral-800/80 rounded-[8px] py-4 pl-12 pr-4 text-sm focus:border-cyan-400/80 focus:ring-1 focus:ring-cyan-400/30 outline-none transition-all font-bold text-white placeholder-neutral-500 cursor-pointer"
-                    />
-                  </div>
+                <div className="relative">
+                  <button
+                    type="button"
+                    onClick={() => setShowDateTimePicker(true)}
+                    className="w-full flex items-center justify-between bg-[#000] border border-neutral-800/80 hover:border-cyan-400/60 rounded-[8px] py-4 px-4 text-sm font-bold transition-all text-white"
+                  >
+                    <div className="flex items-center gap-3">
+                      <Calendar size={18} className="text-cyan-400" />
+                      <span className={(gameData.date && gameData.time) ? 'text-white' : 'text-neutral-500'}>
+                        {displayFullDateTime()}
+                      </span>
+                    </div>
+                    <ChevronDown size={16} className="text-neutral-500" />
+                  </button>
 
-                  {/* Clock Picker */}
-                  <div className="relative">
-                    <button
-                      type="button"
-                      onClick={() => setShowClock(v => !v)}
-                      className="w-full flex items-center justify-between bg-[#000] border border-neutral-800/80 hover:border-cyan-400/60 rounded-[8px] py-4 px-4 text-sm font-bold transition-all text-white"
-                    >
-                      <div className="flex items-center gap-3">
-                        <Clock size={18} className="text-cyan-400" />
-                        <span className={gameData.time ? 'text-white' : 'text-neutral-500'}>
-                          {gameData.time
-                            ? displayTime(clockHour, clockMinute, clockAmPm)
-                            : 'Select Time'}
-                        </span>
-                      </div>
-                      <ChevronDown size={16} className="text-neutral-500" />
-                    </button>
-
-                    {/* Clock Dropdown */}
-                    {showClock && (
-                      <div className="absolute top-full left-0 mt-2 z-50 bg-[#000] border border-neutral-800/90 rounded-[8px] p-5 shadow-2xl shadow-black/85 w-64">
-                        <p className="text-[9px] font-black text-neutral-400 uppercase tracking-widest mb-4 text-center">Pick Time</p>
-
-                        <div className="flex items-center justify-center gap-2">
-                          {/* Hour */}
-                          <div className="flex flex-col items-center gap-1">
-                            <button onClick={() => setClockHour(h => h === 12 ? 1 : h + 1)} className="p-1 text-neutral-500 hover:text-cyan-400 transition-colors"><ChevronUp size={16} /></button>
-                            <div className="w-14 h-12 bg-[#000] border border-neutral-800 rounded-[8px] flex items-center justify-center text-xl font-black text-white">
-                              {String(clockHour).padStart(2, '0')}
-                            </div>
-                            <button onClick={() => setClockHour(h => h === 1 ? 12 : h - 1)} className="p-1 text-neutral-500 hover:text-cyan-400 transition-colors"><ChevronDown size={16} /></button>
-                            <span className="text-[8px] text-neutral-600 font-black uppercase tracking-widest">HR</span>
-                          </div>
-
-                          <span className="text-2xl font-black text-cyan-400 mb-4">:</span>
-
-                          {/* Minute */}
-                          <div className="flex flex-col items-center gap-1">
-                            <button onClick={() => setClockMinute(m => m === 55 ? 0 : m + 5)} className="p-1 text-neutral-500 hover:text-cyan-400 transition-colors"><ChevronUp size={16} /></button>
-                            <div className="w-14 h-12 bg-[#000] border border-neutral-800 rounded-[8px] flex items-center justify-center text-xl font-black text-white">
-                              {String(clockMinute).padStart(2, '0')}
-                            </div>
-                            <button onClick={() => setClockMinute(m => m === 0 ? 55 : m - 5)} className="p-1 text-neutral-500 hover:text-cyan-400 transition-colors"><ChevronDown size={16} /></button>
-                            <span className="text-[8px] text-neutral-600 font-black uppercase tracking-widest">MIN</span>
-                          </div>
-
-                          {/* AM/PM */}
-                          <div className="flex flex-col gap-1 ml-1">
-                            {['AM', 'PM'].map(period => (
-                              <button
-                                key={period}
-                                onClick={() => setClockAmPm(period)}
-                                className={`w-12 py-2 rounded-[8px] text-xs font-black uppercase tracking-widest transition-all ${ clockAmPm === period ? 'bg-gradient-to-r from-cyan-400 to-lime-400 text-black shadow-[0_0_12px_rgba(6,182,212,0.4)]' : 'bg-[#000] text-neutral-500 hover:bg-neutral-800 border border-neutral-800/80' }`}
-                              >
-                                {period}
-                              </button>
-                            ))}
-                          </div>
-                        </div>
-
-                        <button
-                          onClick={() => {
-                            setGameData({ ...gameData, time: formatTime(clockHour, clockMinute, clockAmPm) });
-                            setShowClock(false);
-                          }}
-                          className="w-full mt-4 py-3 bg-gradient-to-r from-cyan-400 to-lime-400 text-black font-black rounded-[8px] text-xs uppercase tracking-widest hover:opacity-90 transition-all shadow-[0_4px_15px_rgba(6,182,212,0.15)]"
-                        >
-                          Set Time
-                        </button>
-                      </div>
-                    )}
-                  </div>
+                  <MaterialDateTimePicker 
+                    isOpen={showDateTimePicker}
+                    onClose={() => setShowDateTimePicker(false)}
+                    initialDate={gameData.date || null}
+                    initialTime={gameData.time || null}
+                    onSelect={(date, time) => {
+                      setGameData({ ...gameData, date, time });
+                    }}
+                  />
                 </div>
               </section>
 

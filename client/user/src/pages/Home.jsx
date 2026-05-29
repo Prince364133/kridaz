@@ -445,8 +445,7 @@ export default function Home() {
         <img 
           src="/3d_scoreboard_v2.png" 
           alt="Scorer Icon" 
-          className="absolute -right-2 -top-[14px] w-[94px] h-[94px] object-contain pointer-events-none transform group-hover:scale-105 group-hover:-translate-y-0.5 transition-all duration-300 z-10"
-          style={{ mixBlendMode: "screen" }}
+          className="absolute -right-3 -top-[20px] w-[105px] h-[105px] object-contain pointer-events-none transform group-hover:scale-105 group-hover:-translate-y-0.5 transition-all duration-300 z-10"
         />
       </Link>
 
@@ -487,7 +486,6 @@ export default function Home() {
           src="/3d_professional_v2.png" 
           alt="Pros Icon" 
           className="absolute -right-2 -top-[16px] w-[94px] h-[94px] object-contain pointer-events-none transform group-hover:scale-105 group-hover:-translate-y-0.5 transition-all duration-300 z-10"
-          style={{ mixBlendMode: "screen" }}
         />
       </Link>
         </div>
@@ -497,7 +495,10 @@ export default function Home() {
  <div className="relative flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6 border-b border-white/5 pb-4">
  <div className="relative">
  <h2 className="text-3xl md:text-5xl lg:text-6xl font-black text-white uppercase tracking-tighter leading-none" style={{ fontFamily: "'Open Sans', sans-serif" }}>
- {userLocation?.city ? `Venues In ${userLocation.city}` : userLocation?.state ? `Venues In ${userLocation.state}` : 'Venues Near You'}
+  VENUES {userLocation?.city || userLocation?.state ? 'IN ' : 'NEAR '}
+  <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#55DEE8] to-[#BFF367]">
+    {userLocation?.city || userLocation?.state || 'YOU'}
+  </span>
  </h2>
  <p className="text-xs md:text-sm font-bold text-white/40 uppercase tracking-[0.15em] mt-4" style={{ fontFamily: "'Inter 28pt Light', sans-serif" }}>
  Premium Venue Discovery • Elite Sports Infrastructure
@@ -613,6 +614,9 @@ export default function Home() {
  {/* Profile Image */}
  <div className="relative bg-[#121212] rounded-[8px] p-2.5 h-full">
  <Link to={`/profile/${p.id || p._id}`} className="relative aspect-[1/1.1] rounded-[8px] overflow-hidden block mb-4">
+ <div className="absolute top-2 right-2 z-20 px-1.5 py-0.5 bg-gradient-to-r from-[#55DEE8] to-[#BFF367] rounded border border-black/20 text-[8px] font-black text-black uppercase tracking-widest shadow-[0_4px_10px_rgba(0,0,0,0.5)]">
+ {p.preferredSport || "ATHLETE"}
+ </div>
  <div className="w-full h-full bg-[#1A1A1A] flex items-center justify-center">
  {(p.profilePicture || p.profileImage) ? (
  <img 
@@ -629,7 +633,7 @@ export default function Home() {
  className="relative z-10 flex items-center justify-center w-full h-full bg-gradient-to-br from-[#1a1a1a] to-[#0a0a0a]"
  style={{ display: (p.profilePicture || p.profileImage) ? 'none' : 'flex' }}
  >
- <span className="text-[#55DEE8] font-black text-5xl tracking-tighter opacity-20 group-hover:opacity-40 transition-opacity duration-500">
+ <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#55DEE8] to-[#BFF367] font-black text-5xl tracking-tighter opacity-40 group-hover:opacity-80 transition-opacity duration-500">
  {initials}
  </span>
  </div>
@@ -649,19 +653,16 @@ export default function Home() {
  </div>
  </div>
  
- <p className="text-white/30 text-[10px] font-medium leading-tight mb-4 line-clamp-2 flex items-center gap-1.5">
- <MapPin size={10} className="text-[#55DEE8]" /> {p.distance ? `${(p.distance/1000).toFixed(1)} km Away` : formatLoc(p.city)}
+ <p className="text-[#BFF367] text-[10px] font-medium leading-tight mb-4 flex items-center gap-1.5 w-full">
+ <MapPin size={10} className="text-white shrink-0" /> 
+ <span className="truncate">{p.distance ? `${(p.distance/1000).toFixed(1)} km Away` : formatLoc(p.city)}</span>
  </p>
 
  {/* Bottom Bar */}
- <div className="flex items-center justify-between">
- <div className="px-2 py-1 bg-white/5 border border-white/10 rounded-lg text-[8px] font-black text-white/50 uppercase tracking-widest truncate max-w-[80px]">
- {p.preferredSport || "ATHLETE"}
- </div>
-
+ <div className="w-full">
  <button 
  onClick={(e) => handleFollowToggle(e, p)}
- className={`px-2 py-1 rounded-[6px] font-black text-[8px] uppercase tracking-wider transition-all duration-300 ${isFollowing ? 'bg-white/5 border border-white/10 text-white/30 hover:bg-white/10' : 'bg-[#222] border border-white/5 text-white hover:bg-white hover:text-black shadow-lg'}`}
+ className={`w-full py-1.5 rounded-[6px] font-black text-[9px] uppercase tracking-wider transition-all duration-300 ${isFollowing ? 'bg-white/5 border border-white/10 text-white/30 hover:bg-white/10' : 'bg-[#222] border border-white/5 text-white hover:bg-white hover:text-black shadow-lg'}`}
  >
  {isFollowing ? 'Following' : 'Follow +'}
  </button>
