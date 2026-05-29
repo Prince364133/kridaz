@@ -102,6 +102,7 @@ export default function ProfessionalProfile() {
   const [showEngagementDropdown, setShowEngagementDropdown] = useState(false);
   const [showProficiencyDropdown, setShowProficiencyDropdown] = useState(false);
   const [showPreferredDropdown, setShowPreferredDropdown] = useState(false);
+  const [preferredMode, setPreferredMode] = useState("list"); // 'list' or 'search'
   const preferredDropdownRef = useRef(null);
 
   // Location search state
@@ -317,6 +318,38 @@ export default function ProfessionalProfile() {
     setCustomSearchQuery("");
     setCustomSearchResults([]);
     toast.success(`Linked ${cityName}, ${stateName}`);
+  };
+
+  const detectGPSLocation = () => {
+    if (!navigator.geolocation) {
+      toast.error("Geolocation is not supported by your browser");
+      return;
+    }
+    toast.loading("Detecting location...", { id: "gps" });
+    navigator.geolocation.getCurrentPosition(
+      async (position) => {
+        try {
+          const { latitude, longitude } = position.coords;
+          const res = await fetch(
+            `https://nominatim.openstreetmap.org/reverse?lat=${latitude}&lon=${longitude}&format=json&addressdetails=1`
+          );
+          const data = await res.json();
+          if (data && data.address) {
+            addSearchedCustomLocation(data);
+            toast.success("Location detected & linked!", { id: "gps" });
+          } else {
+            toast.error("Could not resolve location address.", { id: "gps" });
+          }
+        } catch (err) {
+          console.error("GPS resolution error:", err);
+          toast.error("Failed to resolve GPS coordinates.", { id: "gps" });
+        }
+      },
+      (error) => {
+        console.error("GPS error:", error);
+        toast.error("Permission denied or GPS error.", { id: "gps" });
+      }
+    );
   };
 
   const selectLocation = (result) => {
@@ -1015,101 +1048,140 @@ export default function ProfessionalProfile() {
                       </div>
 
                       {showPreferredDropdown && (
-                        <div className="absolute top-full left-0 right-0 mt-1 bg-[#1A1A1A] border border-white/10 rounded-lg shadow-2xl p-4 z-50 custom-scrollbar max-h-96 overflow-y-auto space-y-4">
-                          {/* Section 1: Add Custom Location */}
-                          <div className="space-y-3 pb-3 border-b border-white/5">
-                            <p className="text-[10px] font-black uppercase tracking-widest text-[#55DEE8] flex items-center gap-1.5 leading-none">
-                              <Globe size={12} /> Add Custom Service Area (City/State)
-                            </p>
-                            
-                            <div className="relative" onClick={(e) => e.stopPropagation()}>
-                              <div className="relative flex items-center">
+                        <div className="absolute top-full left-0 right-0 mt-1 bg-[#1A1A1A] border border-white/10 rounded-lg shadow-2xl p-4 z-50 custom-scrollbar max-h-96 overflow-y-auto">
+                          {preferredMode === "list" ? (
+                            <div className="space-y-3">
+                              <p className="text-[10px] font-black uppercase tracking-widest text-[#878C9F] flex items-center gap-1.5 leading-none">
+                                <Building size={12} style={{ color: themeColor }} /> Choose Venue/Ground
+                              </p>
+
+                              {/* Mini search inside dropdown for venues */}
+                              <div className="relative flex items-center mb-2" onClick={(e) => e.stopPropagation()}>
                                 <Search size={12} className="absolute left-2.5 text-neutral-500" />
                                 <input 
                                   type="text"
-                                  placeholder="Search city, town, or region to add..."
-                                  className="w-full bg-[#222] border border-[#333] rounded-lg pl-8 pr-8 py-2 text-xs text-white outline-none focus:border-white/10"
-                                  value={customSearchQuery}
+                                  placeholder="Filter venues/grounds..."
+                                  className="w-full bg-[#222] border border-[#333] rounded-lg pl-8 pr-3 py-1.5 text-xs text-white outline-none focus:border-white/10 font-medium"
+                                  value={groundSearch}
                                   onChange={(e) => {
-                                    setCustomSearchQuery(e.target.value);
-                                    handleCustomLocationSearch(e.target.value);
+                                    e.stopPropagation();
+                                    setGroundSearch(e.target.value);
                                   }}
                                 />
-                                {customSearching && <Loader2 size={12} className="absolute right-2.5 text-neutral-500 animate-spin" />}
                               </div>
 
-                              {/* Search Results for Custom Location */}
-                              {customSearchResults.length > 0 && (
-                                <div className="absolute top-full left-0 right-0 mt-1 bg-[#1A1A1A] border border-white/10 rounded-lg shadow-2xl max-h-48 overflow-y-auto z-[60] custom-scrollbar">
-                                  {customSearchResults.map((result, idx) => (
-                                    <button
-                                      key={idx}
-                                      onClick={() => addSearchedCustomLocation(result)}
-                                      className="w-full text-left px-3 py-2 hover:bg-white/5 transition-colors border-b border-white/5 last:border-0 flex items-start gap-2"
-                                    >
-                                      <MapPin size={10} className="text-neutral-500 mt-0.5 shrink-0" />
-                                      <span className="text-[10px] text-white/80 font-medium leading-snug">{result.display_name}</span>
-                                    </button>
-                                  ))}
-                                </div>
-                              )}
-                            </div>
-                          </div>
-
-                          {/* Section 2: Platform Venues / Grounds */}
-                          <div className="space-y-3">
-                            <p className="text-[10px] font-black uppercase tracking-widest text-[#55DEE8] flex items-center gap-1.5 leading-none">
-                              <Building size={12} /> Select Registered Platform Venues
-                            </p>
-
-                            {/* Mini search inside dropdown for venues */}
-                            <div className="relative flex items-center mb-2" onClick={(e) => e.stopPropagation()}>
-                              <Search size={12} className="absolute left-2.5 text-neutral-500" />
-                              <input 
-                                type="text"
-                                placeholder="Filter venues/grounds..."
-                                className="w-full bg-[#222] border border-[#333] rounded-lg pl-8 pr-3 py-1.5 text-xs text-white outline-none focus:border-white/10"
-                                value={groundSearch}
-                                onChange={(e) => {
-                                  e.stopPropagation();
-                                  setGroundSearch(e.target.value);
-                                }}
-                              />
-                            </div>
-
-                            <div className="space-y-1 max-h-40 overflow-y-auto custom-scrollbar">
-                              {filteredGrounds.map(ground => {
-                                const isSelected = formData.preferredLocations?.grounds?.includes(ground.id);
-                                return (
-                                  <button 
-                                    key={ground.id}
-                                    onClick={(e) => {
-                                      e.stopPropagation();
-                                      toggleGroundSelection(ground.id);
-                                    }}
-                                    className={`w-full flex justify-between items-center px-3 py-2 text-left text-xs rounded hover:bg-white/[0.04] transition-colors ${isSelected ? 'bg-white/[0.02]' : ''}`}
-                                  >
-                                    <div>
-                                      <p className="font-bold text-white uppercase tracking-wide">{ground.name}</p>
-                                      <p className="text-[9px] text-neutral-500 uppercase tracking-widest">{ground.city}, {ground.state}</p>
-                                    </div>
-                                    <span 
-                                      className="text-[8px] font-black px-2 py-0.5 rounded uppercase tracking-widest"
-                                      style={{ 
-                                        color: isSelected ? '#EF4444' : themeColor, 
-                                        backgroundColor: isSelected ? 'rgba(239, 68, 68, 0.1)' : `${themeColor}1a` 
+                              <div className="space-y-1 max-h-56 overflow-y-auto custom-scrollbar">
+                                {filteredGrounds.map(ground => {
+                                  const isSelected = formData.preferredLocations?.grounds?.includes(ground.id);
+                                  return (
+                                    <button 
+                                      key={ground.id}
+                                      onClick={(e) => {
+                                        e.stopPropagation();
+                                        toggleGroundSelection(ground.id);
                                       }}
+                                      className={`w-full flex justify-between items-center px-3 py-2.5 text-left text-xs rounded hover:bg-white/[0.04] transition-colors ${isSelected ? 'bg-white/[0.02]' : ''}`}
                                     >
-                                      {isSelected ? 'Remove' : 'Select'}
-                                    </span>
-                                  </button>
-                                );
-                              })}
-                              {filteredGrounds.length === 0 && (
-                                <p className="text-[9px] font-medium text-neutral-600 italic">No matching platform venues found.</p>
-                              )}
+                                      <div>
+                                        <p className="font-bold text-white uppercase tracking-wide">{ground.name}</p>
+                                        <p className="text-[9px] text-neutral-500 uppercase tracking-widest mt-0.5">{ground.city}, {ground.state}</p>
+                                      </div>
+                                      <input 
+                                        type="checkbox"
+                                        checked={isSelected}
+                                        readOnly
+                                        className="peer appearance-none w-3.5 h-3.5 border border-white/20 rounded checked:bg-[#55DEE8] checked:border-[#55DEE8]"
+                                        style={{ 
+                                          backgroundColor: isSelected ? themeColor : 'transparent',
+                                          borderColor: isSelected ? themeColor : 'rgba(255,255,255,0.2)'
+                                        }}
+                                      />
+                                    </button>
+                                  );
+                                })}
+                                {filteredGrounds.length === 0 && (
+                                  <p className="text-[9px] font-medium text-neutral-600 italic px-3 py-1">No matching venues found.</p>
+                                )}
+                              </div>
+
+                              {/* Special Search by Location Option */}
+                              <button 
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  setPreferredMode("search");
+                                }}
+                                className="w-full text-left px-3 py-3 text-[11px] font-black uppercase tracking-wider flex items-center gap-2 border-t border-white/5 mt-2 transition-colors hover:bg-white/[0.02]"
+                                style={{ color: themeColor }}
+                              >
+                                <MapPin size={14} className="shrink-0" style={{ color: themeColor }} />
+                                Search by Location
+                              </button>
                             </div>
-                          </div>
+                          ) : (
+                            // Search Location mode
+                            <div className="space-y-4">
+                              <div className="flex items-center justify-between border-b border-white/5 pb-2">
+                                <h4 className="text-[10px] font-black uppercase tracking-widest text-[#55DEE8] flex items-center gap-1.5 leading-none">
+                                  <MapPin size={12} /> Search Location
+                                </h4>
+                                <button 
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    setPreferredMode("list");
+                                    setCustomSearchQuery("");
+                                    setCustomSearchResults([]);
+                                  }}
+                                  className="text-neutral-500 hover:text-white transition-colors"
+                                >
+                                  <X size={14} />
+                                </button>
+                              </div>
+
+                              <button 
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  detectGPSLocation();
+                                }}
+                                className="w-full py-2 bg-white/[0.02] border border-white/5 hover:border-white/10 rounded-lg text-[9px] font-black uppercase tracking-[0.2em] flex items-center justify-center gap-2 text-[#55DEE8] transition-all"
+                                style={{ color: themeColor, borderColor: `${themeColor}22` }}
+                              >
+                                <MapPin size={12} /> Detect My GPS Location
+                              </button>
+
+                              <div className="relative" onClick={(e) => e.stopPropagation()}>
+                                <div className="relative flex items-center">
+                                  <Search size={12} className="absolute left-2.5 text-neutral-500" />
+                                  <input 
+                                    type="text"
+                                    placeholder="Search for a place, city, or area..."
+                                    className="w-full bg-[#222] border border-[#333] rounded-lg pl-8 pr-8 py-2 text-xs text-white outline-none focus:border-white/10 font-medium"
+                                    value={customSearchQuery}
+                                    onChange={(e) => {
+                                      setCustomSearchQuery(e.target.value);
+                                      handleCustomLocationSearch(e.target.value);
+                                    }}
+                                  />
+                                  {customSearching && <Loader2 size={12} className="absolute right-2.5 text-neutral-500 animate-spin" />}
+                                </div>
+
+                                {/* Search Results for Custom Location */}
+                                {customSearchResults.length > 0 && (
+                                  <div className="absolute top-full left-0 right-0 mt-1 bg-[#1A1A1A] border border-white/10 rounded-lg shadow-2xl max-h-48 overflow-y-auto z-[60] custom-scrollbar">
+                                    {customSearchResults.map((result, idx) => (
+                                      <button
+                                        key={idx}
+                                        onClick={() => addSearchedCustomLocation(result)}
+                                        className="w-full text-left px-3 py-2 hover:bg-white/5 transition-colors border-b border-white/5 last:border-0 flex items-start gap-2"
+                                      >
+                                        <MapPin size={10} className="text-neutral-500 mt-0.5 shrink-0" />
+                                        <span className="text-[10px] text-white/80 font-medium leading-snug">{result.display_name}</span>
+                                      </button>
+                                    ))}
+                                  </div>
+                                )}
+                              </div>
+                            </div>
+                          )}
                         </div>
                       )}
                     </div>
