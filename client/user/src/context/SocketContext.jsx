@@ -40,7 +40,8 @@ export const SocketProvider = ({ children }) => {
 
       newSocket.on('connect', () => {
         console.log('Connected to socket server');
-        newSocket.emit('setup', user);
+        // Only send necessary fields to avoid HTTP 413 Payload Too Large errors
+        newSocket.emit('setup', { id: user.id });
       });
 
       newSocket.on('connected', () => {

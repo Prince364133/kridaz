@@ -81,6 +81,13 @@ const worker = new Worker(
           break;
         }
 
+        case "PRO_OFFER_EXPIRY": {
+          const { bookingId, notificationId } = data;
+          const { DispatchService } = await import("../services/dispatch.service.js");
+          await DispatchService.handleOfferExpiry(bookingId, notificationId);
+          break;
+        }
+
         default:
           logger.warn(`[Notification Worker] Unknown job type: ${name}`);
       }

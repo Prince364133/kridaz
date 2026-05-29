@@ -614,7 +614,7 @@ export default function FindProfessionals() {
                   >
                     <option value="">-- Choose Venue/Ground --</option>
                     {grounds.map((g) => (
-                      <option key={g._id} value={g._id}>
+                      <option key={g.id || g._id} value={g.id || g._id}>
                         {g.name} - {g.city}, {g.state}
                       </option>
                     ))}

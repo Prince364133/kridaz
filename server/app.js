@@ -17,10 +17,12 @@ dotenv.config();
 const app = express();
 
 app.use(express.json({
+  limit: "50mb",
   verify: (req, res, buf) => {
     req.rawBody = buf;
   }
 }));
+app.use(express.urlencoded({ limit: "50mb", extended: true }));
 app.use(cookieParser());
 
 // Serve static files from the public directory

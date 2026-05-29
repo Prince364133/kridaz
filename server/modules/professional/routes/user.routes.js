@@ -25,7 +25,7 @@ import {
   getMyOnDemandBookings,
   getUserOnDemandBookings
 } from "../professional.controller.js";
-import protect from "../../../middleware/jwt/auth.middleware.js";
+import protect, { optionalAuth } from "../../../middleware/jwt/auth.middleware.js";
 
 const router = express.Router();
 
@@ -88,7 +88,7 @@ router.get("/filters", getProfessionalFilters);
  *       200:
  *         description: Professional details
  */
-router.get("/details/:id", getProfessionalById);
+router.get("/details/:id", optionalAuth, getProfessionalById);
 
 /**
  * @swagger

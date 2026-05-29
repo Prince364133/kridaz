@@ -28,6 +28,7 @@ import { createDomainRouter } from "../modules/loader.js";
 import userRouter from "./user/user.routes.js";
 import ownerRouter from "./owner/owner.routes.js";
 import adminRouter from "./admin/admin.routes.js";
+import professionalRouter from "../modules/professional/professional.routes.js";
 
 // ── Utility Routes ────────────────────────────────────────────────────────────
 // Public or cross-actor utilities. Not large enough for their own module.
@@ -44,6 +45,9 @@ import locationRouter from "../modules/turf/routes/public.routes.js";
 import settingsPublicRouter from "../modules/settings/routes/public.routes.js";
 
 const rootRouter = Router();
+
+// ── Tier 1: Actor Hubs (Specific overrides first) ─────────────────────────────
+rootRouter.use("/professional", professionalRouter);
 
 // ── Tier 2: Domain Modules (auto-discovered) ──────────────────────────────────
 // Scans modules/loader.js MODULE_MANIFEST and mounts each domain router.

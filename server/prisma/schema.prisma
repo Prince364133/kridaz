@@ -80,6 +80,8 @@ model User {
   stories                 Story[]
   supportTickets          SupportTicket[]
   systemSettings          SystemSetting[]
+  resolvedDisputes        Dispute[]             @relation("DisputeAdmin")
+  platformConfigs         PlatformConfig[]
   ownedTeams              Team[]                @relation("TeamOwner")
   teamMemberships         TeamMember[]
   oauth                   UserOAuth?
@@ -225,6 +227,10 @@ model OwnerProfile {
   bankingDetails      Json?
   verificationDocs    Json?
   notificationPrefs   Json?
+  governmentId        String?                    @unique
+  maxTravelRadius     Int                        @default(50)
+  avgDailyActivePct   Float                      @default(0.0)
+  acceptanceRate30d   Float                      @default(100.0)
   createdAt           DateTime                   @default(now())
   updatedAt           DateTime                   @updatedAt
   createdChats        Chat[]                     @relation("ChatCreatorOwner")
@@ -243,6 +249,10 @@ model OwnerProfile {
   withdrawalRequests  WithdrawalRequest[]
   customers           ProfessionalCustomer[]
   tasks               ProfessionalTask[]
+  lockedBookings      OnDemandProfessionalBooking[] @relation("LockedBookings")
+  bookingNotifications BookingNotification[]
+  trustScoreEvents     TrustScoreEvent[]
+  umpireSessions       UmpireSession[]
 }
 
 model WithdrawalRequest {
@@ -413,9 +423,13 @@ model Review {
   replyDate      DateTime?
   createdAt      DateTime      @default(now())
   updatedAt      DateTime      @updatedAt
+  bookingId      String?
   professional   OwnerProfile? @relation("ProfessionalReview", fields: [professionalId], references: [id])
   turf           Turf?         @relation(fields: [turfId], references: [id])
   user           User          @relation(fields: [userId], references: [id])
+  onDemandBooking OnDemandProfessionalBooking? @relation(fields: [bookingId], references: [id])
+
+  @@unique([userId, bookingId])
 }
 
 model HostedGame {
@@ -1139,11 +1153,17 @@ model Dispute {
   status         String         @default("PENDING")
   resolution     Json?
   bookingDetails Json?
+  outcome        String?
+  resolvedAt     DateTime?
+  adminId        String?
+  onDemandBookingId String?
   createdAt      DateTime       @default(now())
   updatedAt      DateTime       @updatedAt
   booking        Booking        @relation(fields: [bookingId], references: [id])
   owner          OwnerProfile?  @relation(fields: [ownerId], references: [id])
   raisedBy       User           @relation("DisputeRaiser", fields: [raisedById], references: [id])
+  onDemandBooking OnDemandProfessionalBooking? @relation(fields: [onDemandBookingId], references: [id])
+  admin          User?          @relation("DisputeAdmin", fields: [adminId], references: [id])
   replies        DisputeReply[]
 
   @@index([status, createdAt])
@@ -1249,9 +1269,43 @@ model OnDemandProfessionalBooking {
   verifiedAt     DateTime?
   createdAt      DateTime              @default(now())
   updatedAt      DateTime              @updatedAt
+  blockedAmount  Decimal               @default(0) @db.Decimal(12, 2)
+  commissionAmount Decimal?            @db.Decimal(12, 2)
+  payoutAmount   Decimal?              @db.Decimal(12, 2)
+  cycleNumber    Int                   @default(1)
+  lockedForProId String?
+  otpCode        String?
+  otpAttempts    Int                   @default(0)
+  otpEnteredAt   DateTime?
+  disputeRaisedAt DateTime?
+  fundsReleasedAt DateTime?
+
   user           User                  @relation(fields: [userId], references: [id])
   professional   OwnerProfile          @relation(fields: [professionalId], references: [id])
   ground         Turf?                 @relation(fields: [groundId], references: [id])
+  lockedForPro   OwnerProfile?         @relation("LockedBookings", fields: [lockedForProId], references: [id])
+  notifications  BookingNotification[]
+  trustScoreEvents TrustScoreEvent[]
+  reviews        Review[]
+  disputes       Dispute[]
+}
+
+enum OnDemandBookingStatus {
+  PENDING
+  NOTIFYING
+  CONFIRMED
+  ASSIGNED
+  IN_PROGRESS
+  PENDING_COMPLETION
+  COMPLETED
+  DISPUTED
+  REFUNDED
+  CANCELLED_BY_USER
+  CANCELLED_BY_PRO
+  NO_SHOW_PENDING
+  NO_SHOW
+  CANCELLED
+  FAILED
 }
 
 enum MatchRequestStatus {
@@ -1269,13 +1323,7 @@ enum OfferStatus {
   EXPIRED
 }
 
-enum OnDemandBookingStatus {
-  ASSIGNED
-  IN_PROGRESS
-  COMPLETED
-  CANCELLED
-  NO_SHOW
-}
+
 
 model ProfessionalBooking {
   id              String       @id @default(uuid())
@@ -1453,6 +1501,60 @@ model PostReport {
 
   @@index([postId])
   @@index([userId])
+}
+
+model BookingNotification {
+  id             String                      @id @default(uuid())
+  bookingId      String
+  professionalId String
+  sentAt         DateTime                    @default(now())
+  expiresAt      DateTime
+  action         String?                     // Enum: ACCEPTED, REJECTED, SKIPPED, EXPIRED
+  actedAt        DateTime?
+  
+  booking        OnDemandProfessionalBooking @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+  professional   OwnerProfile                @relation(fields: [professionalId], references: [id])
+  
+  @@index([bookingId, professionalId])
+  @@index([expiresAt, action])
+}
+
+model TrustScoreEvent {
+  id             String                      @id @default(uuid())
+  professionalId String
+  bookingId      String?
+  eventType      String                      // e.g. ONBOARDING, ACCEPTED, REVIEW, SKIPPED, CANCEL_OVER_72, CANCEL_UNDER_72, NO_SHOW, DECAY
+  delta          Float
+  reason         String?
+  createdAt      DateTime                    @default(now())
+  
+  professional   OwnerProfile                @relation(fields: [professionalId], references: [id])
+  booking        OnDemandProfessionalBooking? @relation(fields: [bookingId], references: [id])
+  
+  @@index([professionalId])
+}
+
+model UmpireSession {
+  id                   String       @id @default(uuid())
+  professionalId       String
+  sessionStart         DateTime     @default(now())
+  sessionEnd           DateTime?
+  consecutiveSkipCount Int          @default(0)
+  
+  professional         OwnerProfile @relation(fields: [professionalId], references: [id])
+  
+  @@index([professionalId, sessionEnd])
+}
+
+model PlatformConfig {
+  id          String   @id @default(uuid())
+  key         String   @unique
+  value       String
+  description String?
+  updatedAt   DateTime @updatedAt
+  updatedBy   String?
+  
+  user        User?    @relation(fields: [updatedBy], references: [id])
 }
 
 

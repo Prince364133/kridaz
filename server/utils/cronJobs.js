@@ -119,7 +119,37 @@ export const initCronJobs = () => {
     await autoSettleMatchmaking();
   });
 
-  logger.info("[CRON] All cron jobs initialized (token cleanup, story expiry, media cleanup, match auto-end, game auto-settle, matchmaking sweeps).");
+  // ── Every 15 Minutes: Transition in-progress on-demand bookings to pending completion ──
+  nodeCron.schedule("*/15 * * * *", async () => {
+    await autoTransitionOnDemandBookings();
+  });
+
+  // ── Every 15 Minutes: Auto-release payouts to professionals after lock hours (12h) ──
+  nodeCron.schedule("*/15 * * * *", async () => {
+    await autoReleaseOnDemandPayouts();
+  });
+
+  // ── Every 30 Minutes: Detect professional no-show ──
+  nodeCron.schedule("*/30 * * * *", async () => {
+    await runNoShowDetector();
+  });
+
+  // ── Every Hour: Auto-resolve pending disputes older than 48h ──
+  nodeCron.schedule("0 * * * *", async () => {
+    await runDisputeAutoRelease();
+  });
+
+  // ── Every Monday at 2:00 AM IST: Trust score inactivity decay ──
+  nodeCron.schedule("0 2 * * 1", async () => {
+    await runInactivityDecay();
+  });
+
+  // ── Every 10 Minutes: Clean up expired skipped card lists ──
+  nodeCron.schedule("*/10 * * * *", async () => {
+    await cleanUpSkippedCards();
+  });
+
+  logger.info("[CRON] All cron jobs initialized (token cleanup, story expiry, media cleanup, match auto-end, game auto-settle, matchmaking sweeps, on-demand matching sweeps).");
 };
 
 /**
@@ -370,5 +400,276 @@ export const autoSettleMatchmaking = async () => {
     logger.info(`[CRON] Auto-settle matchmaking sweep (placeholder).`);
   } catch (error) {
     logger.error("[CRON] Error auto-settling matchmaking:", error);
+  }
+};
+
+/**
+ * Transitions IN_PROGRESS on-demand bookings to PENDING_COMPLETION once match time is over
+ */
+export const autoTransitionOnDemandBookings = async () => {
+  logger.info("[CRON] Checking for IN_PROGRESS bookings to transition to PENDING_COMPLETION...");
+  try {
+    const now = new Date();
+    const bookings = await prisma.onDemandProfessionalBooking.findMany({
+      where: {
+        status: "IN_PROGRESS",
+        matchEndParsed: { lt: now }
+      }
+    });
+
+    for (const booking of bookings) {
+      await prisma.onDemandProfessionalBooking.update({
+        where: { id: booking.id },
+        data: { status: "PENDING_COMPLETION" }
+      });
+      logger.info(`[CRON] Transitioned booking ${booking.id} to PENDING_COMPLETION.`);
+    }
+  } catch (error) {
+    logger.error("[CRON] Error transitioning bookings to PENDING_COMPLETION:", error);
+  }
+};
+
+/**
+ * Auto-releases payouts to professionals after lock hours (12h)
+ */
+export const autoReleaseOnDemandPayouts = async () => {
+  logger.info("[CRON] Checking for completed bookings to auto-release payouts...");
+  try {
+    const config = await prisma.platformConfig.findUnique({
+      where: { key: "PAYOUT_LOCK_HOURS" }
+    });
+    const lockHours = config ? parseFloat(config.value) : 12;
+    const cutoff = new Date(Date.now() - lockHours * 60 * 60 * 1000);
+
+    const bookings = await prisma.onDemandProfessionalBooking.findMany({
+      where: {
+        status: "PENDING_COMPLETION",
+        matchEndParsed: { lt: cutoff }
+      }
+    });
+
+    const { WalletBlockingService } = await import("../services/walletBlocking.service.js");
+
+    for (const booking of bookings) {
+      logger.info(`[CRON] Auto-releasing funds to professional for booking ${booking.id}...`);
+      try {
+        await WalletBlockingService.releaseFundsToProfessional(booking.id);
+      } catch (err) {
+        logger.error(`[CRON] Failed to release funds for booking ${booking.id}:`, err);
+      }
+    }
+  } catch (error) {
+    logger.error("[CRON] Error during auto-release payouts:", error);
+  }
+};
+
+/**
+ * Detects professional no-shows and flags them to user and admin
+ */
+export const runNoShowDetector = async () => {
+  logger.info("[CRON] Running no-show detector...");
+  try {
+    const now = new Date();
+    const config = await prisma.platformConfig.findUnique({
+      where: { key: "NO_SHOW_LOCK_HOURS" }
+    });
+    const noShowHours = config ? parseFloat(config.value) : 12;
+
+    const bookings = await prisma.onDemandProfessionalBooking.findMany({
+      where: {
+        status: "CONFIRMED",
+        matchEndParsed: { lt: now }
+      },
+      include: {
+        professional: {
+          include: { user: true }
+        }
+      }
+    });
+
+    const { createNotification } = await import("./notificationHelper.js");
+
+    for (const booking of bookings) {
+      await prisma.onDemandProfessionalBooking.update({
+        where: { id: booking.id },
+        data: { status: "NO_SHOW_PENDING" }
+      });
+      logger.info(`[CRON] Set booking ${booking.id} to NO_SHOW_PENDING.`);
+
+      // Notify user
+      await createNotification({
+        recipientId: booking.userId,
+        recipientModel: "User",
+        title: "Professional No-Show",
+        message: `Your professional did not check in. Please raise a dispute within ${noShowHours} hours if they did not show up.`,
+        type: "SYSTEM_ALERT",
+        metadata: { bookingId: booking.id }
+      }).catch(err => logger.error("[CRON] Failed to create no-show notification:", err));
+
+      const { getIO } = await import("../config/socket.js");
+      const io = getIO();
+      if (io) {
+        io.to(booking.userId).emit("professional:no_show_alert", {
+          bookingId: booking.id,
+          message: `The professional did not check in for your booking. You have ${noShowHours} hours to raise a dispute for a full refund.`,
+        });
+      }
+
+      // Deduct -5.0 trust points for NO_SHOW
+      const { TrustScoreLedgerService } = await import("../services/trustScore.service.js");
+      await TrustScoreLedgerService.recordEvent(
+        booking.professionalId,
+        "NO_SHOW",
+        -5.0,
+        booking.id,
+        "Professional failed to show up / check-in for the scheduled match"
+      ).catch(err => logger.error("[CRON] Failed to record no-show trust event:", err));
+    }
+  } catch (error) {
+    logger.error("[CRON] Error during no-show detection:", error);
+  }
+};
+
+/**
+ * Auto-resolves pending disputes after 48 hours in favor of the professional
+ */
+export const runDisputeAutoRelease = async () => {
+  logger.info("[CRON] Running dispute auto-release checks...");
+  try {
+    const config = await prisma.platformConfig.findUnique({
+      where: { key: "DISPUTE_AUTO_RELEASE_HOURS" }
+    });
+    const hoursLimit = config ? parseFloat(config.value) : 48;
+    const cutoff = new Date(Date.now() - hoursLimit * 60 * 60 * 1000);
+
+    const pendingDisputes = await prisma.dispute.findMany({
+      where: {
+        status: "PENDING",
+        createdAt: { lt: cutoff },
+        onDemandBookingId: { not: null }
+      }
+    });
+
+    const { WalletBlockingService } = await import("../services/walletBlocking.service.js");
+
+    for (const dispute of pendingDisputes) {
+      logger.info(`[CRON] Auto-resolving dispute ${dispute.id} in favor of professional...`);
+      try {
+        await prisma.$transaction(async (tx) => {
+          await tx.dispute.update({
+            where: { id: dispute.id },
+            data: {
+              status: "RESOLVED",
+              outcome: "RELEASE_TO_UMPIRE",
+              resolvedAt: new Date()
+            }
+          });
+
+          await WalletBlockingService.releaseFundsToProfessional(dispute.onDemandBookingId, tx);
+        });
+        logger.info(`[CRON] Auto-resolved dispute ${dispute.id} successfully.`);
+      } catch (err) {
+        logger.error(`[CRON] Failed to resolve dispute ${dispute.id}:`, err);
+      }
+    }
+  } catch (error) {
+    logger.error("[CRON] Error running dispute auto-release:", error);
+  }
+};
+
+/**
+ * Trust score weekly decay for inactive professionals
+ */
+export const runInactivityDecay = async () => {
+  logger.info("[CRON] Checking for trust score inactivity decay...");
+  try {
+    const decayConfig = await prisma.platformConfig.findUnique({
+      where: { key: "DECAY_INACTIVE_DAYS" }
+    });
+    const decayDays = decayConfig ? parseInt(decayConfig.value) : 7;
+    const cutoff = new Date(Date.now() - decayDays * 24 * 60 * 60 * 1000);
+
+    const startOfWeek = new Date();
+    startOfWeek.setHours(0, 0, 0, 0);
+    const day = startOfWeek.getDay();
+    const diff = startOfWeek.getDate() - day + (day === 0 ? -6 : 1);
+    startOfWeek.setDate(diff);
+
+    const pros = await prisma.ownerProfile.findMany({
+      include: { user: true }
+    });
+
+    const { TrustScoreLedgerService } = await import("../services/trustScore.service.js");
+
+    for (const pro of pros) {
+      const existingDecay = await prisma.trustScoreEvent.findFirst({
+        where: {
+          professionalId: pro.id,
+          eventType: "INACTIVITY_DECAY",
+          createdAt: { gte: startOfWeek }
+        }
+      });
+
+      if (existingDecay) {
+        continue;
+      }
+
+      const recentBooking = await prisma.onDemandProfessionalBooking.findFirst({
+        where: {
+          professionalId: pro.id,
+          createdAt: { gte: cutoff }
+        }
+      });
+
+      if (!recentBooking) {
+        const currentScore = await TrustScoreLedgerService.getTrustScore(pro.id);
+        if (currentScore > 0) {
+          const decayValue = currentScore * 0.001;
+          await TrustScoreLedgerService.recordEvent(
+            pro.id,
+            "INACTIVITY_DECAY",
+            -decayValue,
+            null,
+            "Decay due to no activity in the last 7 days"
+          );
+          logger.info(`[CRON] Applied inactivity decay of -${decayValue.toFixed(4)} points to pro ${pro.id}`);
+        }
+      }
+    }
+  } catch (error) {
+    logger.error("[CRON] Error during inactivity decay job:", error);
+  }
+};
+
+/**
+ * Clean up active skipped card references in Redis after requests expire or settle
+ */
+export const cleanUpSkippedCards = async () => {
+  logger.info("[CRON] Running skipped card cleanup...");
+  try {
+    const inactiveRequests = await prisma.professionalMatchRequest.findMany({
+      where: {
+        status: { in: ["MATCHED", "EXHAUSTED", "CANCELLED", "EXPIRED"] },
+      },
+      select: { id: true, queuePositions: true }
+    });
+
+    const { default: DispatchService } = await import("../services/dispatch.service.js");
+
+    for (const req of inactiveRequests) {
+      if (req.queuePositions && Array.isArray(req.queuePositions)) {
+        const booking = await prisma.onDemandProfessionalBooking.findUnique({
+          where: { requestId: req.id },
+          select: { id: true }
+        });
+        if (booking) {
+          for (const proId of req.queuePositions) {
+            await DispatchService.removeSkippedCard(proId, booking.id).catch(() => {});
+          }
+        }
+      }
+    }
+  } catch (error) {
+    logger.error("[CRON] Error during skipped card cleanup:", error);
   }
 };

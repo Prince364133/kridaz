@@ -114,3 +114,51 @@ export const updatePayoutSettings = async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 };
+
+export const getPlatformConfigs = async (req, res) => {
+  try {
+    const configs = await prisma.platformConfig.findMany();
+    const configMap = {};
+    configs.forEach(cfg => {
+      configMap[cfg.key] = cfg.value;
+    });
+    res.status(200).json({ success: true, configs, configMap });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+export const updatePlatformConfigs = async (req, res) => {
+  try {
+    const updates = req.body.configs || req.body;
+    if (!updates || typeof updates !== 'object') {
+      return res.status(400).json({ message: "Invalid payload. Expected key-value configuration pairs." });
+    }
+
+    const updatedConfigs = [];
+    for (const [key, value] of Object.entries(updates)) {
+      if (typeof value !== 'string' && typeof value !== 'number') continue;
+      
+      const config = await prisma.platformConfig.upsert({
+        where: { key },
+        update: {
+          value: String(value),
+          updatedBy: req.user?.id
+        },
+        create: {
+          key,
+          value: String(value),
+          updatedBy: req.user?.id,
+          description: `Admin updated config: ${key}`
+        }
+      });
+      updatedConfigs.push(config);
+    }
+
+    await logAdminAction(req, "UPDATE_PLATFORM_CONFIGS", "SYSTEM_SETTINGS", null, updates);
+
+    res.status(200).json({ success: true, configs: updatedConfigs });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};

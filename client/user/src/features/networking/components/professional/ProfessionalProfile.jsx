@@ -28,7 +28,7 @@ const ALL_LANGUAGES = [
 
 const containsPhonePattern = (value) => {
   if (typeof value === "string") {
-    if (value.startsWith("data:") || value.length > 500) return false;
+    if (value.startsWith("data:") || value.startsWith("http://") || value.startsWith("https://") || value.length > 500) return false;
     return /\d{5,}/.test(value);
   }
   if (Array.isArray(value)) {
@@ -36,7 +36,7 @@ const containsPhonePattern = (value) => {
   }
   if (value && typeof value === "object") {
     return Object.entries(value).some(([key, val]) => {
-      if (key === "profilePicture" || key === "bannerUrl" || key === "phone") return false;
+      if (["profilePicture", "bannerUrl", "phone", "image", "mediaUrl", "proofImage", "logo"].includes(key)) return false;
       return containsPhonePattern(val);
     });
   }
@@ -187,7 +187,16 @@ export default function ProfessionalProfile() {
         state: prof.user?.state || prof.state || "",
         specialization: prof.specialization || prof.businessDetails?.specialization || "",
         experience: prof.experience || prof.businessDetails?.experience || "",
-        certifications: prof.certifications || [],
+        certifications: (prof.certifications || []).map(cert => {
+          if (typeof cert === "string") {
+            try {
+              return JSON.parse(cert);
+            } catch {
+              return { title: cert, description: "", image: null };
+            }
+          }
+          return cert;
+        }),
         gender: prof.gender || "",
         dob: prof.dob ? new Date(prof.dob).toISOString().split('T')[0] : "",
         address: prof.businessDetails?.address || "",
@@ -1198,7 +1207,7 @@ export default function ProfessionalProfile() {
                           </div>
                         )}
                       </div>
-                    </div>    <div className="space-y-1.5 md:col-span-2">
+                    </div>    <div className="space-y-1.5">
                       <label className="text-[9px] font-bold text-neutral-500 uppercase tracking-wider ml-0.5">Tenure & Core Experience</label>
                       <input
                         type="text"
@@ -1207,6 +1216,35 @@ export default function ProfessionalProfile() {
                         value={formData.experience}
                         onChange={(e) => setFormData({ ...formData, experience: e.target.value })}
                       />
+                    </div>
+
+                    {/* Per Hour Rate */}
+                    <div className="space-y-1.5">
+                      <label className="text-[9px] font-bold text-neutral-500 uppercase tracking-wider ml-0.5">Per Hour Rate (₹)</label>
+                      <div className="relative">
+                        <DollarSign size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-neutral-500" />
+                        <input
+                          type="number"
+                          min={300}
+                          max={10000}
+                          step={50}
+                          placeholder="e.g. 800"
+                          className="w-full bg-[#1A1A1A] border border-white/5 rounded-[8px] p-3 pl-9 text-xs text-white focus:border-white/10 outline-none font-bold transition-all [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                          value={formData.hourlyPrice || ""}
+                          onChange={(e) => {
+                            const val = Number(e.target.value);
+                            if (e.target.value === "" || (val >= 0 && val <= 10000)) {
+                              setFormData({ ...formData, hourlyPrice: e.target.value === "" ? "" : val });
+                            }
+                          }}
+                          onBlur={(e) => {
+                            const val = Number(e.target.value);
+                            if (val && val < 300) setFormData({ ...formData, hourlyPrice: 300 });
+                            if (val > 10000) setFormData({ ...formData, hourlyPrice: 10000 });
+                          }}
+                        />
+                      </div>
+                      <p className="text-[8px] text-neutral-600 ml-0.5 tracking-wide">Min ₹300 — Max ₹10,000</p>
                     </div>
 
                     {/* Matches & Tournaments Covered */}
@@ -2080,47 +2118,32 @@ export default function ProfessionalProfile() {
                           value={newPortfolioItem.mediaUrl && (newPortfolioItem.mediaUrl.includes('youtube.com') || newPortfolioItem.mediaUrl.includes('youtu.be')) ? newPortfolioItem.mediaUrl : ''}
                           onChange={(e) => setNewPortfolioItem({ ...newPortfolioItem, mediaUrl: e.target.value })}
                         />
-                        <div className="flex items-center justify-center gap-2 py-1">
-                          <div className="h-[1px] bg-white/5 flex-1" />
-                          <span className="text-[8px] font-bold text-neutral-600 uppercase tracking-widest">OR</span>
-                          <div className="h-[1px] bg-white/5 flex-1" />
-                        </div>
                       </div>
                     )}
 
-                    <div className="space-y-1.5">
-                      <label className="text-[8px] font-black text-neutral-600 uppercase tracking-widest ml-0.5">
-                        {newPortfolioItem.mediaType === 'image' ? 'Upload Asset' : 'Upload Local Video file'}
-                      </label>
-                      <div className="relative group/upload">
-                        <input
-                          type="file"
-                          accept={newPortfolioItem.mediaType === 'image' ? "image/*" : "video/*"}
-                          onChange={handlePortfolioMediaUpload}
-                          className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
-                        />
-                        <div className={`w-full h-36 border border-dashed rounded-[8px] flex flex-col items-center justify-center gap-3 transition-all ${newPortfolioItem.mediaUrl ? "border-white/20 bg-white/5" : "border-white/5 bg-white/[0.02] group-hover/upload:border-white/10"}`}>
-                          {newPortfolioItem.mediaUrl ? (
-                            newPortfolioItem.mediaType === 'image' ? (
+                    {newPortfolioItem.mediaType === 'image' && (
+                      <div className="space-y-1.5">
+                        <label className="text-[8px] font-black text-neutral-600 uppercase tracking-widest ml-0.5">Upload Asset</label>
+                        <div className="relative group/upload">
+                          <input
+                            type="file"
+                            accept="image/*"
+                            onChange={handlePortfolioMediaUpload}
+                            className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
+                          />
+                          <div className={`w-full h-36 border border-dashed rounded-[8px] flex flex-col items-center justify-center gap-3 transition-all ${newPortfolioItem.mediaUrl ? "border-white/20 bg-white/5" : "border-white/5 bg-white/[0.02] group-hover/upload:border-white/10"}`}>
+                            {newPortfolioItem.mediaUrl ? (
                               <img src={newPortfolioItem.mediaUrl} className="w-full h-full object-contain p-2" alt="Preview" />
                             ) : (
-                              <div className="flex flex-col items-center gap-1 px-4 text-center">
-                                <Play size={24} style={{ color: themeColor }} />
-                                <span className="text-[8px] font-black text-white uppercase tracking-widest truncate max-w-full">
-                                  {newPortfolioItem.mediaUrl.includes('youtube.com') || newPortfolioItem.mediaUrl.includes('youtu.be') ? 'YouTube Link Attached' : 'Video File Attached'}
-                                </span>
-                                <span className="text-[7px] text-neutral-500 font-bold uppercase tracking-wider line-clamp-1 max-w-full">{newPortfolioItem.mediaUrl}</span>
-                              </div>
-                            )
-                          ) : (
-                            <>
-                              {newPortfolioItem.mediaType === 'image' ? <ImageIcon size={24} className="text-neutral-900" /> : <Video size={24} className="text-neutral-900" />}
-                              <span className="text-[8px] font-black text-neutral-800 uppercase tracking-widest">Select Visual Asset</span>
-                            </>
-                          )}
+                              <>
+                                <ImageIcon size={24} className="text-neutral-900" />
+                                <span className="text-[8px] font-black text-neutral-800 uppercase tracking-widest">Select Visual Asset</span>
+                              </>
+                            )}
+                          </div>
                         </div>
                       </div>
-                    </div>
+                    )}
 
                     <button
                       onClick={addPortfolioItem}

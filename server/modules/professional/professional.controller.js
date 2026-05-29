@@ -118,11 +118,17 @@ export const getProfessionalById = async (req, res) => {
           select: {
             id: true,
             name: true,
+            username: true,
+            email: true,
             role: true,
             city: true,
             state: true,
             profilePicture: true,
-            sportTypes: true
+            sportTypes: true,
+            phone: true,
+            gender: true,
+            dob: true,
+            lastSeen: true
           }
         },
         reviews: {
@@ -138,6 +144,51 @@ export const getProfessionalById = async (req, res) => {
 
     if (!professional) return res.status(404).json({ message: "Professional not found" });
 
+    // Fetch follower and following counts
+    const followersCount = await prisma.userRelationship.count({
+      where: { targetId: professional.userId, type: "FOLLOW" }
+    });
+
+    const followingCount = await prisma.userRelationship.count({
+      where: { userId: professional.userId, type: "FOLLOW" }
+    });
+
+    // Check if the current logged-in user is following this professional
+    let isFollowing = false;
+    if (req.user && req.user.id) {
+      const relationship = await prisma.userRelationship.findUnique({
+        where: {
+          userId_targetId_type: {
+            userId: req.user.id,
+            targetId: professional.userId,
+            type: "FOLLOW"
+          }
+        }
+      });
+      isFollowing = !!relationship;
+    }
+
+    // Fetch professional's posts
+    const posts = await prisma.post.findMany({
+      where: { authorId: professional.userId, status: "ready" },
+      include: {
+        likes: { select: { id: true } },
+        comments: { select: { id: true } }
+      },
+      orderBy: { createdAt: "desc" },
+      take: 10
+    });
+
+    const formattedPosts = posts.map(p => ({
+      id: p.id,
+      content: p.content || p.title,
+      mediaType: p.mediaType,
+      mediaUrls: p.mediaUrls,
+      likesCount: p.likes.length,
+      commentsCount: p.comments.length,
+      createdAt: p.createdAt
+    }));
+
     // Fetch availability for the specific date
     let availability = null;
     if (date) {
@@ -149,7 +200,11 @@ export const getProfessionalById = async (req, res) => {
     return res.status(200).json({ 
       professional, 
       availability, 
-      reviews: professional.reviews 
+      reviews: professional.reviews,
+      followersCount,
+      followingCount,
+      isFollowing,
+      posts: formattedPosts
     });
   } catch (error) {
     logger.error("Error in getProfessionalById:", error);
@@ -469,17 +524,17 @@ export const updateProfessionalProfile = async (req, res) => {
   try {
     let updatedProfessional = null;
 
+    // 1. Get OwnerProfile outside of transaction to avoid holding locks
+    const owner = await prisma.ownerProfile.findUnique({
+      where: { id: professionalId },
+      select: { userId: true, businessDetails: true }
+    });
+
+    if (!owner) {
+      return res.status(404).json({ message: "Owner profile not found" });
+    }
+
     await prisma.$transaction(async (tx) => {
-      // 1. Get OwnerProfile to find the associated User ID
-      const owner = await tx.ownerProfile.findUnique({
-        where: { id: professionalId },
-        select: { userId: true, businessDetails: true }
-      });
-
-      if (!owner) {
-        throw new Error("Owner profile not found");
-      }
-
       // 2. Update User details if name, city, state, gameTypes or profilePicture are provided
       const userUpdate = {};
       if (name) userUpdate.name = name;
@@ -537,7 +592,9 @@ export const updateProfessionalProfile = async (req, res) => {
         achievements,
         experience,
         specialization,
-        certifications,
+        certifications: certifications !== undefined ? (
+          Array.isArray(certifications) ? certifications.map(cert => typeof cert === "object" && cert !== null ? JSON.stringify(cert) : String(cert)) : []
+        ) : undefined,
         businessDetails: newBusinessDetails
       };
 
@@ -557,6 +614,8 @@ export const updateProfessionalProfile = async (req, res) => {
           }
         }
       });
+    }, {
+      timeout: 25000 // 25 seconds timeout to prevent dev environment transaction timeout issues
     });
 
     return res.status(200).json({ message: "Profile updated successfully", professional: updatedProfessional });
@@ -785,7 +844,7 @@ export const createMatchRequest = async (req, res) => {
     const candidateProfiles = await prisma.ownerProfile.findMany({
       where: {
         isOnline: true,
-        price: { gte: limitMinBudget, lte: limitMaxBudget },
+        price: { lte: limitMaxBudget },
         user: {
           role: { in: roles }
         }
@@ -811,12 +870,19 @@ export const createMatchRequest = async (req, res) => {
       return { ...prof, distance };
     });
 
-    const matchedPros = candidatesWithDistance
-      .filter(prof => prof.distance <= 15.0)
+    // Architecture spec: 50km initial radius, expand to 100km if < 3 candidates
+    let matchedPros = candidatesWithDistance
+      .filter(prof => prof.distance <= 50.0)
       .sort((a, b) => a.distance - b.distance);
 
+    if (matchedPros.length < 3) {
+      matchedPros = candidatesWithDistance
+        .filter(prof => prof.distance <= 100.0)
+        .sort((a, b) => a.distance - b.distance);
+    }
+
     if (matchedPros.length === 0) {
-      return res.status(404).json({ message: "No professionals found matching your criteria in the nearby area." });
+      return res.status(404).json({ message: "No professionals found matching your criteria in the nearby area. Try expanding your budget or changing the role." });
     }
 
     const queuePositions = matchedPros.map(p => p.id);
@@ -1298,7 +1364,24 @@ export const getMyProfessionalProfile = async (req, res) => {
 
     if (!professional) return res.status(404).json({ message: "Professional profile not found" });
 
-    return res.status(200).json({ professional });
+    // Deserialize certifications if stored as stringified objects
+    const parsedCertifications = (professional.certifications || []).map(cert => {
+      if (typeof cert === "string") {
+        try {
+          return JSON.parse(cert);
+        } catch {
+          return { title: cert, description: "", image: null };
+        }
+      }
+      return cert;
+    });
+
+    const responseProfessional = {
+      ...professional,
+      certifications: parsedCertifications
+    };
+
+    return res.status(200).json({ professional: responseProfessional });
   } catch (error) {
     logger.error("Error in getMyProfessionalProfile:", error);
     return res.status(500).json({ message: error.message });

@@ -19,7 +19,12 @@ export default function ProfessionalDetails() {
   const [pro, setPro] = useState(null);
   const [reviews, setReviews] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState("overview"); // overview, exhibition, credentials, reviews
+  const [activeTab, setActiveTab] = useState("overview"); // overview, exhibition, certificates, reviews
+
+  // Follower states
+  const [isFollowing, setIsFollowing] = useState(false);
+  const [followersCount, setFollowersCount] = useState(0);
+  const [followingCount, setFollowingCount] = useState(0);
   
   // Supporting data for locations
   const [grounds, setGrounds] = useState([]);
@@ -34,72 +39,89 @@ export default function ProfessionalDetails() {
   const fetchProDetails = async () => {
     try {
       setLoading(true);
-      
-      // HARDCODED DATA FOR DESIGNING WITHOUT BACKEND
-      const dummyPro = {
-        name: "Abhiram Sharma",
-        profilePicture: "https://images.unsplash.com/photo-1522529599102-193c0d76b5b6?q=80&w=2070&auto=format&fit=crop",
-        bannerUrl: "https://images.unsplash.com/photo-1540747913346-19e32dc3e97e?q=80&w=2000&auto=format&fit=crop",
-        city: "Mumbai",
-        state: "Maharashtra",
-        rating: 4.8,
-        numReviews: 124,
-        experience: "8+ Years",
-        bookingCount: 345,
-        user: { role: "coach", profilePicture: "https://images.unsplash.com/photo-1522529599102-193c0d76b5b6?q=80&w=2070&auto=format&fit=crop" },
-        username: "abhiram_coach",
-        followersCount: 1542,
-        followingCount: 345,
-        posts: [
-          { id: 1, content: "Great training session today! Footwork is improving across the board.", likes: 45, comments: 12, date: "2 hrs ago", image: "https://images.unsplash.com/photo-1518605368461-1ee12523dc10?q=80&w=1000&auto=format&fit=crop" },
-          { id: 2, content: "Always remember: Form before speed. Don't rush your shots.", likes: 120, comments: 34, date: "1 day ago" }
-        ],
-        specialization: "Advanced Batting Techniques & Biomechanics",
-        bio: "Former state-level player turned professional coach. Specializing in correcting batting techniques and mental conditioning for high-pressure matches. Certified by NCA.",
-        instagram: "https://instagram.com",
-        linkedin: "https://linkedin.com",
-        youtube: "https://youtube.com",
-        gameTypes: ["Cricket", "Football"],
-        availabilityMode: "Both",
-        availabilityTimings: "Mon - Sat: 6 AM to 8 PM",
-        languages: "English, Hindi, Marathi",
-        matchesCovered: "150+",
-        matchFormats: ["T20", "ODI", "Test"],
-        streamQuality: "4K Ultra HD",
-        camerasSupported: "3",
-        streamPlatforms: ["YouTube", "Facebook"],
-        liveCommentarySupported: true,
-        panelDiscussionEnabled: true,
-        liveScoringSupport: true,
-        price: 800,
-        isOnline: true,
-        preferredLocations: {
-          grounds: ["1"],
-          customLocations: [{ state: "Maharashtra", cities: ["Mumbai", "Navi Mumbai", "Thane"] }]
-        },
-        portfolio: [
-          { mediaType: "image", mediaUrl: "https://images.unsplash.com/photo-1518605368461-1ee12523dc10?q=80&w=1000&auto=format&fit=crop", title: "Training Camp 2023", description: "Annual summer coaching camp at MCA ground." },
-          { mediaType: "video", mediaUrl: "https://www.youtube.com/watch?v=dQw4w9WgXcQ", title: "Batting Masterclass", description: "A short guide on perfecting the cover drive." }
-        ],
-        certifications: [
-          { title: "NCA Level 2 Coach", description: "Certified by National Cricket Academy", image: null },
-          { title: "Sports Biomechanics Specialist", description: "Diploma in sports science and biomechanics.", image: null }
-        ],
-        structuredAchievements: [
-          { title: "Best Coach Award 2022", description: "Awarded by Mumbai Cricket Association for outstanding contribution to youth development." },
-          { title: "Mentored U-19 Captain", description: "Personal coach for the current state U-19 team captain." }
-        ]
+      const res = await axiosInstance.get(`/api/professional/details/${id}`);
+      const { professional, reviews, followersCount, followingCount, isFollowing, posts } = res.data;
+
+      // Safely parse JSON properties from DB if they are stored as strings or JSON arrays
+      const parseField = (fieldVal) => {
+        if (!fieldVal) return [];
+        if (typeof fieldVal === "string") {
+          try {
+            return JSON.parse(fieldVal);
+          } catch {
+            return [fieldVal];
+          }
+        }
+        return fieldVal;
       };
 
-      const dummyReviews = [
-        { user: { name: "Rahul Deshmukh", profilePicture: "https://images.unsplash.com/photo-1599566150163-29194dcaad36?q=80&w=100&auto=format&fit=crop" }, rating: 5, comment: "Exceptional coaching! Improved my footwork drastically in just 3 sessions." },
-        { user: { name: "Sneha Patil" }, rating: 4.5, comment: "Very professional and punctual. The video analysis sessions were incredibly helpful." }
-      ];
+      const parsedCertifications = parseField(professional.certifications).map(cert => {
+        if (typeof cert === "string") {
+          try {
+            return JSON.parse(cert);
+          } catch {
+            return { title: cert, description: "", image: null };
+          }
+        }
+        return cert;
+      });
 
-      setPro(dummyPro);
-      setReviews(dummyReviews);
+      const parsedPortfolio = parseField(professional.portfolio).map(item => {
+        if (typeof item === "string") {
+          try {
+            return JSON.parse(item);
+          } catch {
+            return { mediaType: "image", mediaUrl: item, title: "", description: "" };
+          }
+        }
+        return item;
+      });
+
+      const parsedStructuredAchievements = parseField(professional.structuredAchievements).map(ach => {
+        if (typeof ach === "string") {
+          try {
+            return JSON.parse(ach);
+          } catch {
+            return { title: ach, description: "" };
+          }
+        }
+        return ach;
+      });
+
+      // Flatten nested user details to maintain maximum compatibility with JSX
+      const mergedPro = {
+        ...professional,
+        name: professional.user?.name || professional.businessName || "",
+        profilePicture: professional.user?.profilePicture,
+        city: professional.user?.city,
+        state: professional.user?.state,
+        username: professional.user?.username,
+        role: professional.user?.role,
+        sportTypes: professional.user?.sportTypes,
+        gameTypes: professional.user?.sportTypes || [],
+        gender: professional.user?.gender,
+        dob: professional.user?.dob,
+        email: professional.user?.email,
+        phone: professional.user?.phone,
+        lastSeen: professional.user?.lastSeen,
+        // Fields stored inside businessDetails JSON
+        availabilityMode: professional.businessDetails?.availabilityMode || professional.availabilityMode,
+        availabilityTimings: professional.businessDetails?.availabilityTimings || professional.availabilityTimings,
+        preferredLocations: professional.businessDetails?.preferredLocations || { grounds: [], customLocations: [] },
+        certifications: parsedCertifications,
+        portfolio: parsedPortfolio,
+        structuredAchievements: parsedStructuredAchievements,
+        posts: posts || []
+      };
+
+      setPro(mergedPro);
+      setReviews(reviews || []);
+      setFollowersCount(followersCount || 0);
+      setFollowingCount(followingCount || 0);
+      setIsFollowing(isFollowing || false);
     } catch (error) {
-      console.error("Error setting hardcoded details:", error);
+      console.error("Error fetching professional details:", error);
+      toast.error("Failed to load professional profile.");
     } finally {
       setLoading(false);
     }
@@ -107,12 +129,44 @@ export default function ProfessionalDetails() {
 
   const fetchGrounds = async () => {
     try {
-      setGrounds([
-        { id: "1", name: "MCA Stadium", city: "Mumbai" },
-        { id: "2", name: "Oval Maidan", city: "Mumbai" }
-      ]);
+      const res = await axiosInstance.get("/api/user/turf/all");
+      if (res.data && res.data.turfs) {
+        setGrounds(res.data.turfs.map(t => ({
+          id: t.id,
+          name: t.name,
+          city: t.city
+        })));
+      }
     } catch (err) {
-      console.error("Error setting hardcoded grounds:", err);
+      console.error("Error fetching grounds:", err);
+    }
+  };
+
+  const handleFollowToggle = async () => {
+    if (!currentUser) {
+      toast.error("Please login to follow professionals.");
+      return;
+    }
+    if (currentUser.id === pro.userId) {
+      toast.error("You cannot follow yourself.");
+      return;
+    }
+
+    try {
+      if (isFollowing) {
+        await axiosInstance.post(`/api/player/${pro.userId}/unfollow`);
+        setIsFollowing(false);
+        setFollowersCount(prev => Math.max(0, prev - 1));
+        toast.success(`Unfollowed @${pro.username || pro.name}`);
+      } else {
+        await axiosInstance.post(`/api/player/${pro.userId}/follow`);
+        setIsFollowing(true);
+        setFollowersCount(prev => prev + 1);
+        toast.success(`Following @${pro.username || pro.name}`);
+      }
+    } catch (err) {
+      console.error("Error toggling follow:", err);
+      toast.error(err.response?.data?.message || "Failed to update follow status.");
     }
   };
 
@@ -189,31 +243,47 @@ export default function ProfessionalDetails() {
             
             {/* Top Row: Picture + Basic Info */}
             <div className="flex flex-col md:flex-row gap-6 md:gap-8 items-start">
-              {/* Profile Image */}
-              <div className="relative shrink-0">
-                <div className="w-28 h-28 md:w-36 md:h-36 rounded-full overflow-hidden border-[3px] border-[#BFF367] shadow-[0_0_20px_rgba(191,243,103,0.15)]">
-                  <div className="w-full h-full bg-black flex items-center justify-center">
-                    {pro.profilePicture ? (
-                      <img src={pro.profilePicture} alt={pro.name} className="w-full h-full object-cover" />
-                    ) : (
-                      <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#55DEE8] to-[#BFF367] font-black text-4xl tracking-tighter">
-                        {pro.name?.split(" ").map(w => w[0]).join("").toUpperCase().slice(0, 2) || "P"}
-                      </span>
-                    )}
+              {/* Profile Image & Actions */}
+              <div className="flex flex-col items-center gap-3 shrink-0">
+                <div className="relative">
+                  <div className="w-28 h-28 md:w-36 md:h-36 rounded-full overflow-hidden border-[3px] border-[#BFF367] shadow-[0_0_20px_rgba(191,243,103,0.15)]">
+                    <div className="w-full h-full bg-black flex items-center justify-center">
+                      {pro.profilePicture ? (
+                        <img src={pro.profilePicture} alt={pro.name} className="w-full h-full object-cover" />
+                      ) : (
+                        <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#55DEE8] to-[#BFF367] font-black text-4xl tracking-tighter">
+                          {pro.name?.split(" ").map(w => w[0]).join("").toUpperCase().slice(0, 2) || "P"}
+                        </span>
+                      )}
+                    </div>
                   </div>
+                  {/* Green dot status */}
+                  <div className="absolute bottom-1 right-2 w-7 h-7 bg-[#0a0a0c] rounded-full p-1.5 border border-black/50" title={pro.isOnline ? "Online" : "Offline"}>
+                    <div className={`w-full h-full rounded-full ${pro.isOnline ? "bg-[#22c55e] shadow-[0_0_8px_rgba(34,197,94,0.6)]" : "bg-neutral-600 shadow-none"}`}></div>
+                  </div>
+                  {/* Edit button — only on own profile */}
+                  {currentUser?.ownerProfile?.id === id && (
+                    <button
+                      onClick={() => navigate(`/professional/${role?.toLowerCase()}/profile`)}
+                      className="absolute top-0 right-0 w-8 h-8 bg-[#BFF367] rounded-full flex items-center justify-center text-black shadow-lg border-2 border-[#0a0a0c] hover:scale-110 transition-transform cursor-pointer"
+                      title="Edit Profile"
+                    >
+                      <Pencil size={14} strokeWidth={2.5} />
+                    </button>
+                  )}
                 </div>
-                {/* Green dot status */}
-                <div className="absolute bottom-1 right-2 w-7 h-7 bg-[#0a0a0c] rounded-full p-1.5 border border-black/50">
-                  <div className="w-full h-full bg-[#22c55e] rounded-full shadow-[0_0_8px_rgba(34,197,94,0.6)]"></div>
-                </div>
-                {/* Edit button — only on own profile */}
-                {currentUser?.ownerProfile?.id === id && (
-                  <button
-                    onClick={() => navigate(`/professional/${role?.toLowerCase()}/profile`)}
-                    className="absolute top-0 right-0 w-8 h-8 bg-[#BFF367] rounded-full flex items-center justify-center text-black shadow-lg border-2 border-[#0a0a0c] hover:scale-110 transition-transform cursor-pointer"
-                    title="Edit Profile"
+
+                {/* Follow Button */}
+                {currentUser?.id !== pro.userId && (
+                  <button 
+                    onClick={handleFollowToggle}
+                    className={`w-full py-2 text-[10px] md:text-xs font-black uppercase tracking-widest rounded-lg transition-all flex items-center justify-center gap-2 ${
+                      isFollowing 
+                        ? "bg-neutral-800 text-white border border-white/10 hover:bg-neutral-700" 
+                        : "bg-[#BFF367] text-black hover:bg-[#a1e649] shadow-[0_0_15px_rgba(191,243,103,0.2)]"
+                    }`}
                   >
-                    <Pencil size={14} strokeWidth={2.5} />
+                    <UserPlus size={14} strokeWidth={2.5} /> {isFollowing ? "Following" : "Follow"}
                   </button>
                 )}
               </div>
@@ -229,25 +299,25 @@ export default function ProfessionalDetails() {
                   </div>
                   <div className="flex items-center gap-3 mb-3">
                     <p className="text-[#BFF367] text-xs md:text-sm font-sans font-bold">
-                      @{pro.username || pro.name?.toLowerCase().replace(/\s+/g, '')}
+                      @{pro.username || "not_specified"}
                     </p>
                     <span className="flex items-center gap-1.5 px-2 py-0.5 rounded-full border border-[#BFF367]/30 bg-black/50 text-[#BFF367] text-[9px] font-black tracking-widest uppercase backdrop-blur-md">
                       <svg className="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 14a1 1 0 011-1h16a1 1 0 011 1v2a1 1 0 01-1 1H4a1 1 0 01-1-1v-2z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 13V5a2 2 0 012-2h4a2 2 0 012 2v8" /></svg>
-                      {pro.user?.role}
+                      {pro.role}
                     </span>
                   </div>
                   
                   {/* Followers and Following */}
                   <div className="flex flex-wrap items-center gap-5 text-xs text-white/90 font-sans font-bold mb-5">
-                    <span className="flex items-center gap-1.5 cursor-pointer hover:text-[#BFF367] transition-colors"><Users size={14} className="text-[#55DEE8]" /> {pro.followersCount?.toLocaleString() || 0} Followers</span>
-                    <span className="flex items-center gap-1.5 cursor-pointer hover:text-[#BFF367] transition-colors"><UserPlus size={14} className="text-[#55DEE8]" /> {pro.followingCount?.toLocaleString() || 0} Following</span>
+                    <span className="flex items-center gap-1.5 cursor-pointer hover:text-[#BFF367] transition-colors"><Users size={14} className="text-[#55DEE8]" /> {followersCount.toLocaleString()} Followers</span>
+                    <span className="flex items-center gap-1.5 cursor-pointer hover:text-[#BFF367] transition-colors"><UserPlus size={14} className="text-[#55DEE8]" /> {followingCount.toLocaleString()} Following</span>
                   </div>
                 </div>
 
                 <div className="flex flex-wrap items-center gap-5 text-xs text-white/80 font-sans font-medium">
-                  <span className="flex items-center gap-1.5"><MapPin size={14} className="text-white" /> {pro.city || "Unspecified"}, {pro.state || ""}</span>
-                  <span className="flex items-center gap-1.5"><Star size={14} className="fill-white text-white" /> {pro.rating?.toFixed(1) || "5.0"} ({pro.numReviews || 0} reviews)</span>
-                  <span className="flex items-center gap-1.5"><Award size={14} className="text-white" /> {pro.experience || "5+ Years"} Experience</span>
+                  <span className="flex items-center gap-1.5"><MapPin size={14} className="text-white" /> {pro.city || "Not Specified"}{pro.state ? `, ${pro.state}` : ""}</span>
+                  <span className="flex items-center gap-1.5"><Star size={14} className="fill-white text-white" /> {pro.rating > 0 ? pro.rating.toFixed(1) : "Not Specified"} ({pro.numReviews || 0} reviews)</span>
+                  <span className="flex items-center gap-1.5"><Award size={14} className="text-white" /> {pro.experience ? (/^\d+$/.test(pro.experience.trim()) ? `${pro.experience.trim()} Years of Experience` : pro.experience) : "Not Specified"}</span>
                 </div>
               </div>
             </div>
@@ -266,7 +336,7 @@ export default function ProfessionalDetails() {
 
               <div className="flex flex-col xl:flex-row xl:items-center justify-between gap-6 mt-1">
                 <p className="text-white/60 leading-relaxed text-xs font-sans max-w-2xl" style={SUBHEADING_STYLE}>
-                  {pro.bio || "Providing high-quality professional services to elevate your sports experience. Certified and experienced in handling complex match scenarios."}
+                  {pro.bio || "Not Specified"}
                 </p>
 
                 <div className="flex flex-wrap items-center gap-2.5 shrink-0">
@@ -298,7 +368,7 @@ export default function ProfessionalDetails() {
                 { id: "overview", label: "Overview", icon: BookOpen },
                 { id: "posts", label: "Posts", icon: MessageSquare },
                 { id: "exhibition", label: "Showcase Gallery", icon: Layout },
-                { id: "credentials", label: "Credentials", icon: ShieldCheck },
+                { id: "certificates", label: "Certificates", icon: ShieldCheck },
                 { id: "reviews", label: "Reviews", icon: Star }
               ].map(tab => {
                 const Icon = tab.icon;
@@ -330,7 +400,7 @@ export default function ProfessionalDetails() {
                       <div className="flex justify-between">
                         <span className="text-white/40 uppercase text-[9px] tracking-wider font-bold">Engagement Mode</span>
                         <span className="font-bold uppercase text-white" style={{ fontFamily: "'Inter 28pt Light', sans-serif" }}>
-                          {pro.availabilityMode === 'Both' ? 'Hybrid (Online & Physical)' : pro.availabilityMode === 'Offline' ? 'Physical Only' : 'Remote Only'}
+                          {pro.availabilityMode ? (pro.availabilityMode === 'Both' ? 'Hybrid (Online & Physical)' : pro.availabilityMode === 'Offline' ? 'Physical Only' : pro.availabilityMode === 'Online' ? 'Remote Only' : pro.availabilityMode) : 'Not Specified'}
                         </span>
                       </div>
                       {pro.availabilityTimings && (
@@ -360,10 +430,10 @@ export default function ProfessionalDetails() {
                 </div>
 
                 {/* Role-conditioned specific specs */}
-                {((pro.user?.role?.toLowerCase().includes("streamer")) || 
-                  (pro.user?.role?.toLowerCase().includes("commentator")) || 
-                  (pro.user?.role?.toLowerCase().includes("scorer")) || 
-                  (pro.user?.role?.toLowerCase().includes("umpire")) || 
+                {((pro.role?.toLowerCase().includes("streamer")) || 
+                  (pro.role?.toLowerCase().includes("commentator")) || 
+                  (pro.role?.toLowerCase().includes("scorer")) || 
+                  (pro.role?.toLowerCase().includes("umpire")) || 
                   (pro.matchesCovered || pro.matchFormats?.length > 0)) && (
                   <div className="bg-[#0a0a0c] rounded-xl border border-white/5 p-8 space-y-6 shadow-xl">
                     <h3 style={SECTION_HEADING_STYLE} className="font-heading text-xs font-black uppercase tracking-widest text-[#BFF367] flex items-center gap-2 border-b border-white/5 pb-3">
@@ -395,17 +465,17 @@ export default function ProfessionalDetails() {
                       )}
 
                       {/* Streamers Specification details */}
-                      {pro.user?.role?.toLowerCase().includes("streamer") && (
+                      {pro.role?.toLowerCase().includes("streamer") && (
                         <div className="space-y-3 bg-black/40 border border-white/5 rounded-lg p-5">
                           <p className="text-[9px] font-black text-neutral-500 uppercase tracking-widest flex items-center gap-1.5 border-b border-white/5 pb-1.5"><Tv size={12} /> Live Broadcasting specs</p>
                           <div className="space-y-1.5 text-xs">
                             <div className="flex justify-between">
                               <span className="text-white/40">Max Quality:</span>
-                              <span className="font-bold text-white uppercase">{pro.streamQuality || "1080p Full HD"}</span>
+                              <span className="font-bold text-white uppercase">{pro.streamQuality || "Not Specified"}</span>
                             </div>
                             <div className="flex justify-between">
                               <span className="text-white/40">Cameras Supported:</span>
-                              <span className="font-bold text-white">{pro.camerasSupported || "1"} Camera(s)</span>
+                              <span className="font-bold text-white">{pro.camerasSupported != null ? `${pro.camerasSupported} Camera(s)` : "Not Specified"}</span>
                             </div>
                           </div>
                           {pro.streamPlatforms?.length > 0 && (
@@ -422,7 +492,7 @@ export default function ProfessionalDetails() {
                       )}
 
                       {/* Commentator Specification details */}
-                      {pro.user?.role?.toLowerCase().includes("commentator") && (
+                      {pro.role?.toLowerCase().includes("commentator") && (
                         <div className="space-y-3 bg-black/40 border border-white/5 rounded-lg p-5">
                           <p className="text-[9px] font-black text-neutral-500 uppercase tracking-widest flex items-center gap-1.5 border-b border-white/5 pb-1.5">Broadcast Features</p>
                           <div className="space-y-2 text-xs">
@@ -439,7 +509,7 @@ export default function ProfessionalDetails() {
                       )}
 
                       {/* Scorer / Umpire Specification details */}
-                      {(pro.user?.role?.toLowerCase().includes("scorer") || pro.user?.role?.toLowerCase().includes("umpire")) && (
+                      {(pro.role?.toLowerCase().includes("scorer") || pro.role?.toLowerCase().includes("umpire")) && (
                         <div className="space-y-3 bg-black/40 border border-white/5 rounded-lg p-5">
                           <p className="text-[9px] font-black text-neutral-500 uppercase tracking-widest flex items-center gap-1.5 border-b border-white/5 pb-1.5">Digital Scoring</p>
                           <div className="space-y-2 text-xs">
@@ -572,8 +642,8 @@ export default function ProfessionalDetails() {
               </div>
             )}
 
-            {/* CREDENTIALS & ACHIEVEMENTS TAB */}
-            {activeTab === "credentials" && (
+            {/* CERTIFICATES & ACHIEVEMENTS TAB */}
+            {activeTab === "certificates" && (
               <div className="space-y-6 animate-in fade-in duration-300">
                 {/* Verified Certifications Stack */}
                 <div className="bg-[#0a0a0c] rounded-xl border border-white/5 p-8 shadow-xl">
@@ -625,51 +695,7 @@ export default function ProfessionalDetails() {
                   </div>
                 </div>
 
-                {/* Structured Career Achievements & Milestones */}
-                <div className="bg-[#0a0a0c] rounded-xl border border-white/5 p-8 space-y-6 shadow-xl">
-                  <h3 style={SECTION_HEADING_STYLE} className="font-heading text-xs font-black uppercase tracking-widest text-[#BFF367] flex items-center gap-2 border-b border-white/5 pb-3">
-                    <Trophy size={14} className="text-white" /> Career Milestones & Achievements
-                  </h3>
-                  
-                  {/* Rich Structured Achievements */}
-                  {pro.structuredAchievements?.length > 0 && (
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      {pro.structuredAchievements.map((ach, idx) => (
-                        <div key={idx} className="flex gap-4 p-4 rounded-lg bg-black/40 border border-white/5 hover:border-white/10 transition-all group">
-                          <div className="w-10 h-10 rounded bg-[#BFF367]/10 border border-[#BFF367]/20 flex items-center justify-center shrink-0">
-                            <Trophy size={18} className="text-white" />
-                          </div>
-                          <div className="space-y-1">
-                            <h4 className="text-xs font-bold text-white uppercase tracking-wider">{ach.title}</h4>
-                            <p className="text-[10px] text-white/50 leading-relaxed font-sans">{ach.description}</p>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  )}
 
-                  {/* Standard text achievements for backwards-compatibility */}
-                  {achievementsList.length > 0 && (
-                    <div className="space-y-3 pt-3">
-                      <span className="text-[8px] font-black text-neutral-600 uppercase tracking-widest block">Registered Milestones</span>
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                        {achievementsList.map((ach, idx) => (
-                          <div key={idx} className="flex items-start gap-2.5 p-3.5 bg-white/[0.02] border border-white/5 rounded-lg">
-                            <CheckCircle2 size={14} className="text-white mt-0.5 shrink-0" />
-                            <span className="text-[10px] text-white/80 font-black uppercase tracking-tight leading-snug">{ach}</span>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-
-                  {(!pro.structuredAchievements || pro.structuredAchievements.length === 0) && achievementsList.length === 0 && (
-                    <div className="py-10 bg-black/20 rounded-lg border border-dashed border-white/5 flex flex-col items-center justify-center space-y-2">
-                      <Trophy size={24} className="text-neutral-800" />
-                      <p className="text-xs text-white/40 italic font-sans">No achievements registered yet.</p>
-                    </div>
-                  )}
-                </div>
               </div>
             )}
 
@@ -705,12 +731,12 @@ export default function ProfessionalDetails() {
                                 <span className="text-[10px] text-white/70 font-bold capitalize block">{review.user?.name?.toLowerCase()}</span>
                                 <div className="flex items-center text-[#BFF367] text-[8px] font-black mt-0.5">
                                   <Star size={10} className="fill-white mr-1 text-white" />
-                                  {review.rating?.toFixed(1) || "5.0"}
+                                  {review.rating > 0 ? review.rating.toFixed(1) : "Not Specified"}
                                 </div>
                               </div>
                             </div>
                             <p className="text-xs text-white/60 leading-relaxed font-sans pt-1">
-                              {review.comment || "Loved the experience!"}
+                              {review.comment || "No comment provided."}
                             </p>
                           </div>
                         </div>
@@ -744,24 +770,26 @@ export default function ProfessionalDetails() {
                             </div>
                             <div>
                               <span className="text-xs text-white font-bold capitalize block">{pro.name}</span>
-                              <span className="text-[10px] text-white/50">{post.date}</span>
+                              <span className="text-[10px] text-white/50">
+                                {post.createdAt ? new Date(post.createdAt).toLocaleDateString(undefined, { day: 'numeric', month: 'short', year: 'numeric' }) : "Recently"}
+                              </span>
                             </div>
                           </div>
                           <p className="text-sm text-white/80 leading-relaxed font-sans whitespace-pre-wrap">
                             {post.content}
                           </p>
-                          {post.image && (
+                          {post.mediaUrls && post.mediaUrls[0] && (
                             <div className="rounded-lg overflow-hidden border border-white/10 mt-2 max-h-64 flex justify-center bg-black/50">
-                              <img src={post.image} className="w-full h-full object-cover opacity-90" />
+                              <img src={post.mediaUrls[0]} className="w-full h-full object-cover opacity-90" />
                             </div>
                           )}
                           <div className="flex items-center gap-6 pt-3 border-t border-white/5 text-xs text-white/50">
-                            <button className="flex items-center gap-1.5 hover:text-[#BFF367] transition-colors">
-                              <Heart size={14} /> {post.likes} Likes
-                            </button>
-                            <button className="flex items-center gap-1.5 hover:text-[#55DEE8] transition-colors">
-                              <MessageCircle size={14} /> {post.comments} Comments
-                            </button>
+                            <span className="flex items-center gap-1.5 text-neutral-400">
+                              <Heart size={14} /> {post.likesCount || 0} Likes
+                            </span>
+                            <span className="flex items-center gap-1.5 text-neutral-400">
+                              <MessageCircle size={14} /> {post.commentsCount || 0} Comments
+                            </span>
                             <button className="flex items-center gap-1.5 hover:text-white transition-colors ml-auto">
                               <Share2 size={14} /> Share
                             </button>
@@ -801,17 +829,17 @@ export default function ProfessionalDetails() {
                 <div className="bg-black/40 border border-white/5 rounded-lg p-4 font-sans text-xs space-y-3">
                   <div className="flex justify-between">
                     <span className="text-white/40">Hourly/Match Rate:</span>
-                    <span className="text-[#BFF367] font-black">₹{pro.price || "500"}</span>
+                    <span className="text-[#BFF367] font-black">₹{pro.price > 0 ? pro.price : "Not Set"}</span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-white/40">Professional Role:</span>
-                    <span className="text-white font-bold capitalize">{pro.user?.role}</span>
+                    <span className="text-white font-bold capitalize">{pro.role}</span>
                   </div>
 
                 </div>
 
                 <button 
-                  onClick={() => navigate(`/professionals?role=${pro.user?.role}`)}
+                  onClick={() => navigate(`/professionals?role=${pro.role}`)}
                   className="w-full bg-gradient-to-r from-[#55DEE8] to-[#BFF367] text-black py-4 rounded-lg font-black text-xs uppercase tracking-widest hover:opacity-90 active:scale-95 transition-all shadow-lg"
                 >
                   ⚡ Request Matching Now
@@ -871,11 +899,11 @@ export default function ProfessionalDetails() {
                             <span className="text-[10px] text-white/70 font-bold capitalize">{review.user?.name?.toLowerCase()}</span>
                             <div className="flex items-center text-[#BFF367] text-[8px] font-bold">
                               <Star size={8} className="fill-white mr-0.5 text-white" />
-                              {review.rating || "5.0"}
+                              {review.rating > 0 ? review.rating.toFixed(1) : "Not Specified"}
                             </div>
                           </div>
                           <p className="text-xs text-white/50 leading-relaxed line-clamp-3">
-                            {review.comment || "Loved the experience!"}
+                            {review.comment || "No comment provided."}
                           </p>
                         </div>
                       </div>
