@@ -586,7 +586,7 @@ export default function Home() {
  {loading ? (
  <div className="flex gap-3 overflow-x-auto no-scrollbar pb-2">
  {[...Array(10)].map((_, i) => (
- <div key={i} className="shrink-0 w-[160px] md:w-[190px] rounded-[8px] border border-white/5 animate-pulse bg-white/5" style={{ height: 260 }} />
+ <div key={i} className="shrink-0 w-[200px] md:w-[240px] rounded-[8px] border border-white/5 animate-pulse bg-white/5" style={{ height: 300 }} />
  ))}
  </div>
  ) : players.length === 0 ? (
@@ -609,7 +609,7 @@ export default function Home() {
  };
  
  return (
- <div key={p.id || p._id} className="shrink-0 w-[160px] md:w-[190px] group">
+ <div key={p.id || p._id} className="shrink-0 w-[200px] md:w-[240px] group">
  <div className="relative rounded-[8px] p-[1px] bg-white/5 transition-all duration-500 group-hover:bg-gradient-to-r group-hover:from-[#BFF367] group-hover:to-[#BFF367] group-hover:shadow-[0_15px_30px_rgba(0,0,0,0.4)]">
  {/* Profile Image */}
  <div className="relative bg-[#121212] rounded-[8px] p-2.5 h-full">
