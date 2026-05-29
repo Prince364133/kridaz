@@ -219,8 +219,12 @@ export const getStories = async (req, res) => {
     
     if (all !== 'true' && userId) {
       const networkIds = await SocialService.getNetworkIds(userId);
-      userIds = [...new Set([...userIds, ...networkIds])];
-      console.log('Story Feed Query Debug:', { userId, networkIds, userIds });
+      
+      // We must resolve any OwnerProfile IDs in networkIds to User IDs, because Stories are always saved with User.id
+      const resolvedNetworkUserIds = await Promise.all(networkIds.map(id => resolveUserId(id)));
+      
+      userIds = [...new Set([...userIds, ...resolvedNetworkUserIds])];
+      console.log('Story Feed Query Debug:', { userId, networkIds, resolvedNetworkUserIds, userIds });
     } else if (all !== 'true' && !userId && lat && lng) {
       // Nearby Users fallback (if lat/lng is passed for guests)
       const nearbyUsers = await findNearby('User', parseFloat(lat), parseFloat(lng), 1000000, { take: 50 });
