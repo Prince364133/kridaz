@@ -142,7 +142,7 @@ const PlayerCard = ({ player, followingIds, handleFollowToggle, handleAvatarClic
         {isFollowing ? (
           <button
             onClick={() => gateInteraction(() => navigate(`/messages?userId=${playerId}`))}
-            className="flex items-center gap-1.5 px-4 py-1.5 rounded-xl text-[9px] font-black uppercase tracking-widest text-black bg-white hover:bg-white/90 active:scale-95 transition-all whitespace-nowrap shadow-[0_4px_14px_rgba(255,255,255,0.15)]"
+            className="flex items-center gap-1.5 px-4 py-1.5 rounded-xl text-[9px] font-black uppercase tracking-widest text-white bg-white/10 border border-white/20 hover:bg-white/20 active:scale-95 transition-all whitespace-nowrap"
           >
             <MessageCircle size={12} className="shrink-0" />
             Message
@@ -897,10 +897,7 @@ const FindPlayers = () => {
                   className="w-full h-full relative"
                 >
                   <NearbyPlayersMap 
-                    userLocation={userLocation ? {
-                      ...userLocation,
-                      profilePicture: currentUser?.profilePicture || currentUser?.profileImage
-                    } : null}
+                    userLocation={userLocation}
                     nearbyPlayers={displayedPlayers} 
                     radiusKm={selectedRadius}
                     onMapMove={handleMapMove}

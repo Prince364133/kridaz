@@ -1,4 +1,4 @@
-﻿import React, { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import {
   LifeBuoy, MessageSquare, ChevronRight, Clock, AlertCircle, Zap,
   HelpCircle, Landmark, Shield, X, Plus
@@ -381,7 +381,7 @@ const PartnerSupport = () => {
                         <span className="flex items-center gap-1"><MessageSquare size={12} /> {ticket.replies?.length || 0} Replies</span>
                         {ticket.images?.length > 0 && <span className="flex items-center gap-1"><Shield size={12} /> {ticket.images.length} Attachments</span>}
                       </div>
-                      <button className="text-[10px] font-bold font-inter uppercase tracking-widest hover:text-white transition-colors" style={{ color: themeColor }}>Enter Chat -></button>
+                      <button className="text-[10px] font-bold font-inter uppercase tracking-widest hover:text-white transition-colors" style={{ color: themeColor }}>Enter Chat {'->'}</button>
                     </div>
                   </div>
                 ))
