@@ -300,10 +300,8 @@ const FindPlayers = () => {
         await axiosInstance.post(endpoint);
         if (isFollowing) {
           setFollowingIds(prev => prev.filter(id => id !== targetUserId));
-          toast.success("Unfollowed player");
         } else {
           setFollowingIds(prev => [...prev, targetUserId]);
-          toast.success("Following player");
         }
       } catch (error) {
         toast.error("Failed to update follow status");

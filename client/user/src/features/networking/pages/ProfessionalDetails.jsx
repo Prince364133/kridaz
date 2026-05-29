@@ -152,19 +152,23 @@ export default function ProfessionalDetails() {
       return;
     }
 
+    // Optimistic Update
+    const previousState = isFollowing;
+    const previousCount = followersCount;
+
+    setIsFollowing(!previousState);
+    setFollowersCount(prev => previousState ? Math.max(0, prev - 1) : prev + 1);
+
     try {
-      if (isFollowing) {
+      if (previousState) {
         await axiosInstance.post(`/api/player/${pro.userId}/unfollow`);
-        setIsFollowing(false);
-        setFollowersCount(prev => Math.max(0, prev - 1));
-        toast.success(`Unfollowed @${pro.username || pro.name}`);
       } else {
         await axiosInstance.post(`/api/player/${pro.userId}/follow`);
-        setIsFollowing(true);
-        setFollowersCount(prev => prev + 1);
-        toast.success(`Following @${pro.username || pro.name}`);
       }
     } catch (err) {
+      // Revert on error
+      setIsFollowing(previousState);
+      setFollowersCount(previousCount);
       console.error("Error toggling follow:", err);
       toast.error(err.response?.data?.message || "Failed to update follow status.");
     }
@@ -218,10 +222,10 @@ export default function ProfessionalDetails() {
   };
 
   return (
-    <div className="min-h-screen bg-black text-white pt-12 pb-20 px-6 md:px-10 font-sans selection:bg-[#BFF367] selection:text-black">
+    <div className="min-h-screen bg-black text-white pt-2 pb-20 px-0 font-sans selection:bg-[#BFF367] selection:text-black">
       <div className="max-w-7xl mx-auto">
         {/* MERGED BANNER & PROFILE HEADER */}
-        <div className="relative w-full rounded-2xl overflow-hidden mb-8 border border-white/5 bg-[#0a0a0c] shadow-2xl mt-4">
+        <div className="relative w-full rounded-2xl overflow-hidden mb-8 border border-white/5 bg-[#0a0a0c] shadow-2xl">
 
 
           {/* Background Image (Top Half) */}
@@ -272,20 +276,6 @@ export default function ProfessionalDetails() {
                     </button>
                   )}
                 </div>
-
-                {/* Follow Button */}
-                {currentUser?.id !== pro.userId && (
-                  <button 
-                    onClick={handleFollowToggle}
-                    className={`w-full py-2 text-[10px] md:text-xs font-black uppercase tracking-widest rounded-lg transition-all flex items-center justify-center gap-2 ${
-                      isFollowing 
-                        ? "bg-neutral-800 text-white border border-white/10 hover:bg-neutral-700" 
-                        : "bg-white text-black hover:bg-neutral-200 shadow-[0_0_15px_rgba(255,255,255,0.15)]"
-                    }`}
-                  >
-                    <UserPlus size={14} strokeWidth={2.5} /> {isFollowing ? "Following" : "Follow"}
-                  </button>
-                )}
               </div>
 
               {/* Profile Info */}
@@ -308,9 +298,24 @@ export default function ProfessionalDetails() {
                   </div>
                   
                   {/* Followers and Following */}
-                  <div className="flex flex-wrap items-center gap-5 text-xs text-white/90 font-sans font-bold mb-5">
+                  <div className="flex flex-wrap items-center gap-4 text-xs text-white/90 font-sans font-bold mb-5">
                     <span className="flex items-center gap-1.5 cursor-pointer hover:text-[#BFF367] transition-colors"><Users size={14} className="text-[#BFF367]" /> {followersCount.toLocaleString()} Followers</span>
                     <span className="flex items-center gap-1.5 cursor-pointer hover:text-[#BFF367] transition-colors"><UserPlus size={14} className="text-[#BFF367]" /> {followingCount.toLocaleString()} Following</span>
+                    
+                    {/* Follow Button */}
+                    <button 
+                      onClick={handleFollowToggle}
+                      disabled={currentUser?.id === pro.userId}
+                      className={`ml-2 px-6 py-1.5 text-[10px] md:text-xs font-black uppercase tracking-widest rounded-[14px] transition-all flex items-center justify-center gap-2 ${
+                        isFollowing 
+                          ? "bg-neutral-800 text-white border border-white/10 hover:bg-neutral-700" 
+                          : currentUser?.id === pro.userId 
+                            ? "bg-neutral-800 text-white/50 border border-white/10 cursor-not-allowed"
+                            : "bg-white text-black hover:bg-neutral-200 shadow-[0_0_15px_rgba(255,255,255,0.15)]"
+                      }`}
+                    >
+                      <UserPlus size={14} strokeWidth={2.5} /> {isFollowing ? "Following" : "Follow"}
+                    </button>
                   </div>
                 </div>
 
@@ -363,11 +368,11 @@ export default function ProfessionalDetails() {
           <div className={activeTab === "overview" ? "lg:col-span-8 space-y-8" : "lg:col-span-12 space-y-8"}>
 
             {/* HIGH-FIDELITY GLASSMORPHIC TAB MENU */}
-            <div className="flex bg-[#0a0a0c] p-1 rounded-xl border border-white/5 shadow-xl">
+            <div className="flex overflow-x-auto hide-scrollbar bg-[#0a0a0c] p-1 rounded-xl border border-white/5 shadow-xl">
               {[
                 { id: "overview", label: "Overview", icon: BookOpen },
                 { id: "posts", label: "Posts", icon: MessageSquare },
-                { id: "exhibition", label: "Showcase Gallery", icon: Layout },
+                { id: "exhibition", label: "Gallery", icon: Layout },
                 { id: "certificates", label: "Certificates", icon: ShieldCheck },
                 { id: "reviews", label: "Reviews", icon: Star }
               ].map(tab => {
@@ -377,7 +382,7 @@ export default function ProfessionalDetails() {
                   <button
                     key={tab.id}
                     onClick={() => setActiveTab(tab.id)}
-                    className={`flex-1 py-3 text-[9px] font-black uppercase tracking-widest rounded-lg transition-all flex items-center justify-center gap-2 ${
+                    className={`shrink-0 flex-1 py-3 px-4 text-[9px] font-black uppercase tracking-widest rounded-lg transition-all flex items-center justify-center gap-2 whitespace-nowrap ${
                       isSelected ? "bg-gradient-to-r from-[#BFF367] to-[#BFF367] text-black shadow-lg" : "text-neutral-500 hover:text-white"
                     }`}
                   >
@@ -392,33 +397,34 @@ export default function ProfessionalDetails() {
               <div className="space-y-6 animate-in fade-in duration-300">
                 {/* Availability, Timeline & General Info */}
                 <div className="bg-[#0a0a0c] rounded-xl border border-white/5 p-8 grid grid-cols-1 md:grid-cols-2 gap-8 shadow-xl">
-                  <div className="space-y-4">
+                  <div className="space-y-5">
                     <h3 style={SECTION_HEADING_STYLE} className="font-heading text-xs font-black uppercase tracking-widest text-[#BFF367] flex items-center gap-2 border-b border-white/5 pb-3">
                       <Clock size={14} className="text-white" /> Schedule & Timings
                     </h3>
-                    <div className="space-y-2.5 text-xs font-sans">
-                      <div className="flex justify-between">
-                        <span className="text-white/40 uppercase text-[9px] tracking-wider font-bold">Engagement Mode</span>
-                        <span className="font-bold uppercase text-white" style={{ fontFamily: "'Inter 28pt Light', sans-serif" }}>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 font-sans">
+                      <div className="bg-white/[0.02] border border-white/5 rounded-lg p-3.5 transition-all hover:bg-white/[0.04]">
+                        <span className="text-white/40 uppercase text-[9px] tracking-wider font-bold block mb-1.5">Engagement Mode</span>
+                        <span className="font-bold text-sm text-white capitalize block tracking-tight">
                           {pro.availabilityMode ? (pro.availabilityMode === 'Both' ? 'Hybrid (Online & Physical)' : pro.availabilityMode === 'Offline' ? 'Physical Only' : pro.availabilityMode === 'Online' ? 'Remote Only' : pro.availabilityMode) : 'Not Specified'}
                         </span>
                       </div>
                       {pro.availabilityTimings && (
-                        <div className="flex justify-between">
-                          <span className="text-white/40 uppercase text-[9px] tracking-wider font-bold">Operation Timings</span>
-                          <span className="font-bold text-white uppercase" style={{ fontFamily: "'Inter 28pt Light', sans-serif" }}>{pro.availabilityTimings}</span>
+                        <div className="bg-white/[0.02] border border-white/5 rounded-lg p-3.5 transition-all hover:bg-white/[0.04]">
+                          <span className="text-white/40 uppercase text-[9px] tracking-wider font-bold block mb-1.5">Operation Timings</span>
+                          <span className="font-bold text-sm text-white block tracking-tight">{pro.availabilityTimings}</span>
                         </div>
                       )}
                     </div>
                   </div>
 
-                  <div className="space-y-4">
+                  <div className="space-y-5">
                     <h3 style={SECTION_HEADING_STYLE} className="font-heading text-xs font-black uppercase tracking-widest text-[#BFF367] flex items-center gap-2 border-b border-white/5 pb-3">
                       <Globe size={14} className="text-white" /> Languages & Communication
                     </h3>
-                    <div className="flex flex-wrap gap-1.5">
+                    <div className="flex flex-wrap gap-2.5 pt-1">
                       {languagesList.map(lang => (
-                        <span key={lang} className="px-2.5 py-1 rounded bg-white/[0.04] border border-white/5 text-[9px] font-black uppercase tracking-wider">
+                        <span key={lang} className="px-3.5 py-1.5 rounded-full bg-[#BFF367]/10 text-[#BFF367] border border-[#BFF367]/20 text-[10px] font-bold uppercase tracking-wider flex items-center gap-1.5 shadow-sm">
+                          <div className="w-1.5 h-1.5 rounded-full bg-[#BFF367] opacity-80" />
                           {lang}
                         </span>
                       ))}
@@ -580,12 +586,12 @@ export default function ProfessionalDetails() {
                 <div className="bg-[#0a0a0c] rounded-xl border border-white/5 p-8 space-y-6 shadow-xl min-h-[400px]">
                   <div className="border-b border-white/5 pb-4">
                     <h3 style={SECTION_HEADING_STYLE} className="font-heading text-xs font-black uppercase tracking-widest text-[#BFF367] flex items-center gap-2">
-                      <Layout size={14} className="text-white" /> Portfolio Exhibition Gallery
+                      <Layout size={14} className="text-white" /> Gallery
                     </h3>
                   </div>
 
                   {pro.portfolio?.length > 0 ? (
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
                       {pro.portfolio.map((item, idx) => (
                         <div key={idx} className="bg-white/[0.02] border border-white/5 rounded-lg overflow-hidden group hover:border-white/10 transition-all">
                           <div className="aspect-video relative overflow-hidden bg-neutral-900 border-b border-white/5 flex items-center justify-center">
@@ -644,14 +650,14 @@ export default function ProfessionalDetails() {
 
             {/* CERTIFICATES & ACHIEVEMENTS TAB */}
             {activeTab === "certificates" && (
-              <div className="space-y-6 animate-in fade-in duration-300">
+               <div className="space-y-6 animate-in fade-in duration-300">
                 {/* Verified Certifications Stack */}
                 <div className="bg-[#0a0a0c] rounded-xl border border-white/5 p-8 shadow-xl">
                   <h3 style={SECTION_HEADING_STYLE} className="font-heading text-xs font-black uppercase tracking-widest text-[#BFF367] mb-6 flex items-center gap-2">
                     <Shield size={14} className="text-white" /> Verified Certifications Stack
                   </h3>
                   
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                  <div className="grid grid-cols-2 md:grid-cols-2 gap-5">
                     {pro.certifications?.length > 0 ? pro.certifications.map((cert, i) => (
                       <div key={i} className="rounded-xl bg-black/40 border border-white/5 hover:border-white/10 transition-all group overflow-hidden cursor-pointer" onClick={() => setActiveCertificate(cert)}>
                         {/* Certificate Image */}
@@ -867,7 +873,10 @@ export default function ProfessionalDetails() {
                       <svg className="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24"><path d="M19.615 3.184c-3.604-.246-11.631-.245-15.23 0-3.897.266-4.356 2.62-4.385 8.816.029 6.185.484 8.549 4.385 8.816 3.6.245 11.626.246 15.23 0 3.897-.266 4.356-2.62 4.385-8.816-.029-6.185-.484-8.549-4.385-8.816zm-10.615 12.816v-8l8 3.993-8 4.007z"/></svg>
                     </a>
                   )}
-                  <button className="ml-auto px-4 py-1.5 rounded-lg border border-[#BFF367]/40 bg-[#BFF367]/10 text-[#BFF367] text-[10px] font-black uppercase tracking-wider hover:bg-[#BFF367]/20 transition-all flex items-center gap-2">
+                  <button 
+                    onClick={() => navigate(`/messages?userId=${pro.userId}`)}
+                    className="ml-auto px-4 py-1.5 rounded-lg border border-[#BFF367]/40 bg-[#BFF367]/10 text-[#BFF367] text-[10px] font-black uppercase tracking-wider hover:bg-[#BFF367]/20 transition-all flex items-center gap-2"
+                  >
                     <MessageSquare size={14} /> Chat Now
                   </button>
                   {(!pro.linkedin && !pro.instagram && !pro.youtube) && (

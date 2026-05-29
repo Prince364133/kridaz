@@ -53,6 +53,7 @@ const JoinGames = () => {
  const [selectedCity, setSelectedCity] = useState('');
  const [loadingStates, setLoadingStates] = useState(false);
  const [loadingCities, setLoadingCities] = useState(false);
+ const [isFilterOpen, setIsFilterOpen] = useState(false);
 
  const fetchGames = async (city = '', state = '', sport = 'All Sports') => {
  try {
@@ -276,9 +277,9 @@ const JoinGames = () => {
 
   <div className="max-w-7xl mx-auto relative z-10">
   {/* Header Section */}
-  <div className="relative flex flex-col lg:flex-row lg:items-center justify-between gap-10 border-b border-[#2D2D2D] pb-10 mb-12">
+  <div className="relative flex flex-col lg:flex-row lg:items-center justify-between gap-4 border-b border-[#2D2D2D] pb-6 mb-6">
   <div className="relative w-full lg:w-auto">
-   <div className="flex items-center justify-between lg:justify-start gap-4 mb-4 w-full">
+   <div className="flex items-center justify-between lg:justify-start gap-4 w-full">
      <h1 className="text-4xl md:text-6xl font-black text-white uppercase tracking-tighter leading-none font-open-sans">
      Join <span className="bg-gradient-to-r from-[#BFF367] to-[#BFF367] bg-clip-text text-transparent">Games</span>
      </h1>
@@ -289,9 +290,6 @@ const JoinGames = () => {
     <Trophy size={14} /> Host Match
     </button>
       </div>
-  <p className="text-sm md:text-xl text-[#999999] tracking-tight max-w-xl" style={SUBHEADING_STYLE}>
-  Competitive Matchmaking • Discover & participate in matches hosted by the elite sports community.
-  </p>
   </div>
   
   {/* Desktop Host Match Button */}
@@ -306,106 +304,177 @@ const JoinGames = () => {
   </div>
 
 
-  {/* Search & Filters Container */}
-  <div className="w-full mb-12 flex flex-col md:flex-row md:items-center gap-3 md:gap-0 md:bg-[#0a0a0c]/80 md:backdrop-blur-2xl md:border md:border-white/10 md:rounded-[8px] md:p-1.5 md:shadow-2xl transition-all duration-500 hover:border-[#BFF367]/30">
-    
-    {/* Search Input Container */}
-    <div className="w-full md:w-auto md:flex-[2] relative flex items-center min-h-[56px] md:min-h-full bg-[#0a0a0c]/80 md:bg-transparent backdrop-blur-2xl md:backdrop-blur-none border border-white/10 md:border-none md:border-r md:border-white/5 rounded-[8px] md:rounded-[6px] px-4 py-3 md:py-0 shadow-2xl md:shadow-none transition-all hover:border-[#BFF367]/30 md:hover:border-transparent">
-      <Search className="text-gray-500 mr-3" size={16} />
+  {/* Search & Filter Button Container */}
+  <div className="w-full mb-10 flex items-center gap-3">
+    <div className="flex-1 relative flex items-center min-h-[56px] bg-[#0a0a0c]/80 backdrop-blur-2xl border border-white/10 rounded-[8px] px-4 shadow-2xl transition-all focus-within:border-[#BFF367]/50 hover:border-white/20">
+      <Search className="text-gray-500 mr-3 shrink-0" size={16} />
       <input 
-        className="w-full h-full bg-transparent text-white outline-none text-xs font-bold placeholder-gray-500 tracking-wide" 
+        className="w-full h-full bg-transparent text-white outline-none text-xs font-bold placeholder-gray-500 tracking-wide py-4" 
         placeholder="Search by sport, venue..." 
         value={search}
         onChange={handleSearch}
         onKeyDown={(e) => e.key === 'Enter' && fetchGames(selectedCity, selectedState, sportFilter)}
       />
     </div>
-
-    {/* Filters Scrollable Container */}
-    <div className="w-full md:w-auto md:flex-[2.5] flex flex-row items-stretch overflow-x-auto hide-scrollbar bg-[#0a0a0c]/80 md:bg-transparent backdrop-blur-2xl md:backdrop-blur-none border border-white/10 md:border-none rounded-[8px] md:rounded-[8px] min-h-[56px] md:min-h-full shadow-2xl md:shadow-none transition-all hover:border-[#BFF367]/30 md:hover:border-transparent">
-      
-      {/* Sport Filter */}
-      <div className="flex-1 md:w-auto md:flex-[0.6] relative border-r border-white/5 flex items-center group min-h-[56px] md:min-h-full flex-shrink-0 min-w-[80px] md:min-w-[150px]">
-        <div className="absolute left-4 pointer-events-none hidden sm:block">
-          <Trophy size={14} className="text-gray-500 group-focus-within:text-[#BFF367]" />
-        </div>
-        <select 
-          className="w-full h-full bg-transparent appearance-none text-[9px] md:text-[11px] font-bold text-white uppercase tracking-tight pl-3 sm:pl-10 pr-8 md:pr-12 py-4 outline-none cursor-pointer"
-          value={sportFilter}
-          onChange={(e) => {
-            setSportFilter(e.target.value);
-            fetchGames(selectedCity, selectedState, e.target.value);
-          }}
-        >
-          <option className="bg-[#0a0a0a] text-white" value="All Sports">All Sports</option>
-          <option className="bg-[#0a0a0a] text-white" value="Cricket">Cricket</option>
-          <option className="bg-[#0a0a0a] text-white" value="Football">Football</option>
-          <option className="bg-[#0a0a0a] text-white" value="Badminton">Badminton</option>
-          <option className="bg-[#0a0a0a] text-white" value="Basketball">Basketball</option>
-          <option className="bg-[#0a0a0a] text-white" value="Tennis">Tennis</option>
-          <option className="bg-[#0a0a0a] text-white" value="Volleyball">Volleyball</option>
-        </select>
-        <ChevronDown size={12} className="absolute right-2 md:right-4 text-gray-500 pointer-events-none group-focus-within:text-[#BFF367]" />
-      </div>
-
-      {/* State Filter */}
-      <div className="flex-1 md:w-auto md:flex-[0.5] relative border-r border-white/5 flex items-center group min-h-[56px] md:min-h-full flex-shrink-0 min-w-[80px] md:min-w-[140px]">
-        <div className="absolute left-4 pointer-events-none hidden sm:block">
-          <MapPin size={14} className="text-gray-500 group-focus-within:text-[#BFF367]" />
-        </div>
-        <select
-          className="w-full h-full bg-transparent appearance-none text-[9px] md:text-[11px] font-bold text-white uppercase tracking-tight pl-3 sm:pl-10 pr-8 md:pr-12 py-4 outline-none cursor-pointer disabled:text-gray-500 disabled:opacity-100 disabled:cursor-not-allowed"
-          value={selectedState}
-          onChange={(e) => handleStateChange(e.target.value)}
-          disabled={loadingStates}
-        >
-          <option className="bg-[#0a0a0a] text-white" value="">{loadingStates ? 'Loading...' : 'All States'}</option>
-          {states.map(s => (
-            <option className="bg-[#0a0a0a] text-white" key={s} value={s}>{s}</option>
-          ))}
-        </select>
-        <ChevronDown size={12} className="absolute right-2 md:right-4 text-gray-500 pointer-events-none group-focus-within:text-[#BFF367]" />
-      </div>
-
-      {/* City Filter */}
-      <div className="flex-1 md:w-auto md:flex-[0.5] relative border-r border-white/5 flex items-center group min-h-[56px] md:min-h-full flex-shrink-0 min-w-[80px] md:min-w-[140px]">
-        <div className="absolute left-4 pointer-events-none hidden sm:block">
-          <MapPin size={14} className="text-gray-500 group-focus-within:text-[#BFF367]" />
-        </div>
-        <select
-          className="w-full h-full bg-transparent appearance-none text-[9px] md:text-[11px] font-bold text-white uppercase tracking-tight pl-3 sm:pl-10 pr-8 md:pr-12 py-4 outline-none cursor-pointer disabled:text-gray-500 disabled:opacity-100 disabled:cursor-not-allowed"
-          value={selectedCity}
-          onChange={(e) => handleCityChange(e.target.value)}
-          disabled={!selectedState || loadingCities}
-        >
-          <option className="bg-[#0a0a0a] text-white" value="">{loadingCities ? 'Loading...' : 'All Cities'}</option>
-          {cities.map(c => (
-            <option className="bg-[#0a0a0a] text-white" key={c} value={c}>{c}</option>
-          ))}
-        </select>
-        <ChevronDown size={12} className="absolute right-2 md:right-4 text-gray-500 pointer-events-none group-focus-within:text-[#BFF367]" />
-      </div>
-
-      {/* Match Type Filter */}
-      <div className="flex-1 md:w-auto md:flex-[0.5] relative border-white/5 flex items-center group min-h-[56px] md:min-h-full flex-shrink-0 min-w-[80px] md:min-w-[150px]">
-        <div className="absolute left-4 pointer-events-none hidden sm:block">
-          <Zap size={14} className="text-gray-500 group-focus-within:text-[#BFF367]" />
-        </div>
-        <select
-          className="w-full h-full bg-transparent appearance-none text-[9px] md:text-[11px] font-bold text-white uppercase tracking-tight pl-3 sm:pl-10 pr-8 md:pr-12 py-4 outline-none cursor-pointer"
-          value={matchTypeFilter}
-          onChange={(e) => setMatchTypeFilter(e.target.value)}
-        >
-          <option className="bg-[#0a0a0a] text-white" value="All Matches">All Matches</option>
-          <option className="bg-[#0a0a0a] text-white" value="My Hosted Games">My Hosted Games</option>
-          <option className="bg-[#0a0a0a] text-white" value="Live">Live Matches</option>
-          <option className="bg-[#0a0a0a] text-white" value="Quick">Quick Matches</option>
-          <option className="bg-[#0a0a0a] text-white" value="Professional">Professional</option>
-        </select>
-        <ChevronDown size={12} className="absolute right-2 md:right-4 text-gray-500 pointer-events-none group-focus-within:text-[#BFF367]" />
-      </div>
-    </div>
+    <button 
+      onClick={() => setIsFilterOpen(true)}
+      className="min-h-[56px] w-[56px] md:w-auto md:px-5 bg-[#0a0a0c]/80 backdrop-blur-2xl border border-white/10 hover:border-[#BFF367]/40 text-white hover:text-[#BFF367] rounded-[8px] flex items-center justify-center gap-2 transition-all shadow-2xl shrink-0 group relative"
+    >
+      <Filter size={20} className="group-hover:scale-110 transition-transform duration-300" />
+      <span className="hidden md:inline text-[11px] font-black uppercase tracking-widest">Filters</span>
+      {(sportFilter !== 'All Sports' || selectedState || selectedCity || matchTypeFilter !== 'All Matches') && (
+        <span className="absolute top-3 right-3 md:top-3.5 md:right-3 w-2 h-2 bg-[#BFF367] rounded-full shadow-[0_0_10px_#BFF367]"></span>
+      )}
+    </button>
   </div>
+
+  {/* Filter Sidebar Modal */}
+  <AnimatePresence>
+    {isFilterOpen && (
+      <div className="fixed inset-0 z-[999] flex justify-end">
+        <motion.div 
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          onClick={() => setIsFilterOpen(false)}
+          className="absolute inset-0 bg-black/80 backdrop-blur-sm"
+        />
+        <motion.div
+          initial={{ x: '100%' }}
+          animate={{ x: 0 }}
+          exit={{ x: '100%' }}
+          transition={{ type: 'spring', damping: 25, stiffness: 200 }}
+          className="relative w-full max-w-sm h-full bg-[#0a0a0c] border-l border-white/10 flex flex-col shadow-2xl z-10"
+        >
+          {/* Header */}
+          <div className="flex items-center justify-between p-6 border-b border-white/10">
+            <div className="flex items-center gap-2">
+              <Filter className="text-[#BFF367]" size={20} />
+              <h2 className="text-xl font-black text-white uppercase tracking-tighter">Filters</h2>
+            </div>
+            <button onClick={() => setIsFilterOpen(false)} className="text-gray-500 hover:text-white transition-colors p-1.5 bg-white/5 rounded-full hover:bg-white/10">
+              <X size={18} />
+            </button>
+          </div>
+          
+          {/* Filter Body */}
+          <div className="flex-1 overflow-y-auto p-6 space-y-8 custom-scrollbar">
+            
+            {/* Sport Filter */}
+            <div className="space-y-3">
+              <label className="text-[10px] font-black text-white/40 uppercase tracking-widest flex items-center gap-2">
+                <Trophy size={12} /> Sport
+              </label>
+              <div className="relative">
+                <select 
+                  className="w-full bg-[#121212] border border-white/5 text-white text-[12px] font-bold uppercase p-4 rounded-[8px] appearance-none outline-none focus:border-[#BFF367]/50 cursor-pointer"
+                  value={sportFilter}
+                  onChange={(e) => {
+                    setSportFilter(e.target.value);
+                    fetchGames(selectedCity, selectedState, e.target.value);
+                  }}
+                >
+                  <option value="All Sports">All Sports</option>
+                  <option value="Cricket">Cricket</option>
+                  <option value="Football">Football</option>
+                  <option value="Badminton">Badminton</option>
+                  <option value="Basketball">Basketball</option>
+                  <option value="Tennis">Tennis</option>
+                  <option value="Volleyball">Volleyball</option>
+                </select>
+                <ChevronDown size={14} className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 pointer-events-none" />
+              </div>
+            </div>
+
+            {/* State Filter */}
+            <div className="space-y-3">
+              <label className="text-[10px] font-black text-white/40 uppercase tracking-widest flex items-center gap-2">
+                <MapPin size={12} /> State
+              </label>
+              <div className="relative">
+                <select
+                  className="w-full bg-[#121212] border border-white/5 text-white text-[12px] font-bold uppercase p-4 rounded-[8px] appearance-none outline-none focus:border-[#BFF367]/50 disabled:opacity-50 cursor-pointer"
+                  value={selectedState}
+                  onChange={(e) => handleStateChange(e.target.value)}
+                  disabled={loadingStates}
+                >
+                  <option value="">{loadingStates ? 'Loading...' : 'All States'}</option>
+                  {states.map(s => (
+                    <option key={s} value={s}>{s}</option>
+                  ))}
+                </select>
+                <ChevronDown size={14} className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 pointer-events-none" />
+              </div>
+            </div>
+
+            {/* City Filter */}
+            <div className="space-y-3">
+              <label className="text-[10px] font-black text-white/40 uppercase tracking-widest flex items-center gap-2">
+                <MapPin size={12} /> City
+              </label>
+              <div className="relative">
+                <select
+                  className="w-full bg-[#121212] border border-white/5 text-white text-[12px] font-bold uppercase p-4 rounded-[8px] appearance-none outline-none focus:border-[#BFF367]/50 disabled:opacity-50 cursor-pointer"
+                  value={selectedCity}
+                  onChange={(e) => handleCityChange(e.target.value)}
+                  disabled={!selectedState || loadingCities}
+                >
+                  <option value="">{loadingCities ? 'Loading...' : 'All Cities'}</option>
+                  {cities.map(c => (
+                    <option key={c} value={c}>{c}</option>
+                  ))}
+                </select>
+                <ChevronDown size={14} className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 pointer-events-none" />
+              </div>
+            </div>
+
+            {/* Match Type Filter */}
+            <div className="space-y-3">
+              <label className="text-[10px] font-black text-white/40 uppercase tracking-widest flex items-center gap-2">
+                <Zap size={12} /> Match Type
+              </label>
+              <div className="relative">
+                <select
+                  className="w-full bg-[#121212] border border-white/5 text-white text-[12px] font-bold uppercase p-4 rounded-[8px] appearance-none outline-none focus:border-[#BFF367]/50 cursor-pointer"
+                  value={matchTypeFilter}
+                  onChange={(e) => setMatchTypeFilter(e.target.value)}
+                >
+                  <option value="All Matches">All Matches</option>
+                  <option value="My Hosted Games">My Hosted Games</option>
+                  <option value="Live">Live Matches</option>
+                  <option value="Quick">Quick Matches</option>
+                  <option value="Professional">Professional</option>
+                </select>
+                <ChevronDown size={14} className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 pointer-events-none" />
+              </div>
+            </div>
+
+          </div>
+
+          {/* Footer actions */}
+          <div className="p-6 border-t border-white/10 flex gap-3 bg-[#0a0a0c]">
+            <button 
+              onClick={() => {
+                setSportFilter('All Sports');
+                setMatchTypeFilter('All Matches');
+                handleClearLocation();
+              }} 
+              className="flex-1 py-4 border border-white/10 text-white rounded-[8px] text-[11px] font-black uppercase tracking-wider hover:bg-white/5 transition-colors"
+            >
+              Reset All
+            </button>
+            <button 
+              onClick={() => setIsFilterOpen(false)} 
+              className="flex-1 py-4 bg-gradient-to-r from-[#BFF367] to-[#BFF367] text-black rounded-[8px] text-[11px] font-black uppercase tracking-wider hover:scale-105 shadow-[0_0_20px_rgba(191,243,103,0.2)] hover:shadow-[0_0_30px_rgba(191,243,103,0.35)] transition-all"
+            >
+              Show Results
+            </button>
+          </div>
+        </motion.div>
+      </div>
+    )}
+  </AnimatePresence>
+
 
   {/* Game List */}
  <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-8">
@@ -516,7 +585,7 @@ const JoinGames = () => {
    {game.gameType === 'SCORING_MATCH' ? 'CRICKET' : (game.gameType || 'MATCH')}
    </span>
    {/* Match Type Tag (if SCORING_MATCH) */}
-   {game.gameType === 'SCORING_MATCH' && (
+   {game.gameType === 'SCORING_MATCH' && matchTypeFilter === 'Professional' && (
      <span className="px-1.5 py-0.5 md:px-2 md:py-1 rounded-[4px] bg-white/5 text-white text-[7.5px] md:text-[9px] font-black uppercase tracking-widest border border-white/10">
        SCORING MATCH
      </span>

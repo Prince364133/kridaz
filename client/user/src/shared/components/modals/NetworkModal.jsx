@@ -39,21 +39,19 @@ const NetworkModal = ({ isOpen, onClose, userId, type, initialCount }) => {
     gateInteraction(async () => {
       const targetId = targetUser.id || targetUser._id;
       const isFollowing = followingIds.includes(targetId);
+      
+      // Optimistic Update
+      dispatch(isFollowing ? unfollowUser(targetId) : followUser(targetId));
+
       try {
         if (isFollowing) {
-          const response = await axiosInstance.post(`/api/user/players/${targetId}/unfollow`);
-          if (response.data.success) {
-            dispatch(unfollowUser(targetId));
-            toast.success(`Unfollowed ${targetUser.name}`);
-          }
+          await axiosInstance.post(`/api/user/players/${targetId}/unfollow`);
         } else {
-          const response = await axiosInstance.post(`/api/user/players/${targetId}/follow`);
-          if (response.data.success) {
-            dispatch(followUser(targetId));
-            toast.success(`Following ${targetUser.name}`);
-          }
+          await axiosInstance.post(`/api/user/players/${targetId}/follow`);
         }
       } catch (error) {
+        // Revert on error
+        dispatch(isFollowing ? followUser(targetId) : unfollowUser(targetId));
         toast.error("Action failed");
       }
     }, { 

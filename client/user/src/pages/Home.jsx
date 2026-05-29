@@ -368,33 +368,39 @@ export default function Home() {
  setPlayerFilters(filters);
  };
 
- const handleFollowToggle = async (e, p) => {
- e.preventDefault();
- e.stopPropagation();
- 
- gateInteraction(async () => {
- const playerId = p.id || p._id;
- const isFollowing = followingIds.includes(playerId);
- try {
- const endpoint = `/api/user/players/${playerId}/${isFollowing ? 'unfollow' : 'follow'}`;
- await axiosInstance.post(endpoint);
- 
- if (isFollowing) {
- setFollowingIds(prev => prev.filter(id => id !== playerId));
- toast.success(`Unfollowed ${p.name}`);
- } else {
- setFollowingIds(prev => [...prev, playerId]);
- toast.success(`Following ${p.name}`);
- }
- } catch (err) {
- console.error("Follow toggle failed:", err);
- toast.error("Failed to update follow status");
- }
- }, { 
- title: "Join the Network", 
- message: "Connect with players, build your squad, and stay updated on the latest games. Sign in to follow athletes." 
- });
- };
+  const handleFollowToggle = async (e, p) => {
+    e.preventDefault();
+    e.stopPropagation();
+    
+    gateInteraction(async () => {
+      const playerId = p.id || p._id;
+      const isFollowing = followingIds.includes(playerId);
+      
+      // Optimistic update
+      if (isFollowing) {
+        setFollowingIds(prev => prev.filter(id => id !== playerId));
+      } else {
+        setFollowingIds(prev => [...prev, playerId]);
+      }
+
+      try {
+        const endpoint = `/api/user/players/${playerId}/${isFollowing ? 'unfollow' : 'follow'}`;
+        await axiosInstance.post(endpoint);
+      } catch (err) {
+        // Revert on error
+        if (isFollowing) {
+          setFollowingIds(prev => [...prev, playerId]);
+        } else {
+          setFollowingIds(prev => prev.filter(id => id !== playerId));
+        }
+        console.error("Follow toggle failed:", err);
+        toast.error("Failed to update follow status");
+      }
+    }, { 
+      title: "Join the Network", 
+      message: "Connect with players, build your squad, and stay updated on the latest games. Sign in to follow athletes." 
+    });
+  };
 
  return (
  <div className={`min-h-screen text-white ${isReelsView ? 'h-[100dvh] overflow-hidden' : ''}`} style={{ backgroundColor: "#000" }}>
@@ -429,9 +435,10 @@ export default function Home() {
         />
       </Link>
 
-      {/* Scorer */}
+      {/* Scoring */}
       <Link 
-        to="/professionals?role=scorer"
+        to="/my-teams"
+        state={{ openStartScoringModal: true }}
         className="relative rounded-[6px] px-3.5 py-2 overflow-visible force-overflow-visible flex flex-col justify-center h-[72px] cursor-pointer group hover:scale-[1.02] transition-all duration-300 shadow-xl border border-[#EBEBEB]/15"
         style={{ 
           background: "radial-gradient(circle at 80% 50%, rgba(255, 255, 255, 0.3) 0%, rgba(255, 255, 255, 0) 50%), radial-gradient(circle at 80% 50%, #FF9800 0%, #E65100 45%, #3E1700 100%)",
@@ -440,7 +447,7 @@ export default function Home() {
       >
         <div className="absolute inset-0 bg-white/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500 rounded-[6px]" />
         <span className="relative z-20 text-white font-bold text-xs sm:text-sm tracking-tight leading-tight max-w-[55%] font-open-sans">
-          Scorer
+          Scoring
         </span>
         <img 
           src="/3d_scoreboard_v2.png" 

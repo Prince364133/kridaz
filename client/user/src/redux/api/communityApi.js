@@ -10,7 +10,10 @@ export const communityApi = baseApi.injectEndpoints({
       providesTags: ['Community'],
     }),
     getStoriesFeed: builder.query({
-      query: () => '/api/user/stories/feed',
+      query: (params) => ({
+        url: '/api/user/stories/feed',
+        params,
+      }),
       providesTags: ['Stories'],
     }),
     getCommunityStats: builder.query({

@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { Star, Heart, MapPin, Navigation } from "lucide-react";
 import axiosInstance from "@hooks/useAxiosInstance";
 
@@ -19,8 +19,11 @@ const haversineKm = (lat1, lon1, lat2, lon2) => {
 const TurfCardMobile = ({ turf, distance: distanceProp, compact = false }) => {
   const [isWishlisted, setIsWishlisted] = useState(false);
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
 
-  const to = `/venue/${turf.id || turf._id}`;
+  const returnTo = searchParams.get('returnTo');
+  const baseTo = `/venue/${turf.id || turf._id}`;
+  const to = returnTo ? `${baseTo}?returnTo=${encodeURIComponent(returnTo)}` : baseTo;
   const images = turf.images?.length > 0 ? turf.images : [turf.image];
   const rating = turf.averageRating ?? turf.avgRating ?? turf.rating ?? 4.8;
   const price = turf.pricePerHour ?? 800;

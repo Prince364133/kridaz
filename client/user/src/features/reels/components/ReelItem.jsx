@@ -126,7 +126,7 @@ const ReelItem = ({ reel, isVisible }) => {
     const shareData = {
       title: 'Kridaz Shorts',
       text: reel.caption,
-      url: `${window.location.origin}/shorts/${reel.id || reel._id}`
+      url: `${window.location.origin}/?tab=shots&id=${reel.id || reel._id}`
     };
 
     try {
@@ -337,7 +337,7 @@ const ReelItem = ({ reel, isVisible }) => {
             <div className="relative">
               <div className="w-10 h-10 rounded-full border-2 border-white overflow-hidden shadow-lg bg-zinc-800">
                 <img 
-                  src={reel.creatorId?.profilePicture || `https://avatar.vercel.sh/${reel.creatorId?.id || reel.creatorId?._id || 'kridaz'}`} 
+                  src={reel.creatorId?.profilePicture || `https://api.dicebear.com/7.x/avataaars/svg?seed=${reel.creatorId?.name || reel.creatorId?.username || 'user'}`} 
                   alt={reel.creatorId?.username} 
                   className="w-full h-full object-cover"
                 />

@@ -804,7 +804,7 @@ export default function ProfessionalProfile() {
   );
 
   return (
-    <div className="space-y-6 animate-fade-in font-inter pb-20 h-full custom-scrollbar text-white px-4 md:px-8 py-6">
+    <div className="space-y-6 animate-fade-in font-inter pb-20 h-full custom-scrollbar text-white px-0 md:px-4 py-6">
       {/* Header */}
       <header className="flex flex-col xl:flex-row justify-between items-start xl:items-center gap-4 relative z-10 pb-4 border-b border-white/5">
         <div className="flex items-center gap-3">
@@ -973,7 +973,7 @@ export default function ProfessionalProfile() {
                     </div>
 
                     {/* Editable Identity Sub-matrix */}
-                    <div className="grid grid-cols-2 gap-3 pt-2">
+                    <div className="grid grid-cols-2 gap-3 pt-4">
                       <div>
                         <label className="text-[9px] font-bold text-neutral-500 uppercase tracking-wider block mb-1">Gender</label>
                         <select
@@ -1002,7 +1002,7 @@ export default function ProfessionalProfile() {
                     </div>
 
 
-                    <div className="pt-2">
+                    <div className="pt-4">
                       <label className="text-[9px] font-bold text-neutral-500 uppercase tracking-wider block mb-1">Operational Headline</label>
                       <input
                         type="text"
@@ -1013,19 +1013,19 @@ export default function ProfessionalProfile() {
                       />
                     </div>
 
-                    <div className="pt-2">
+                    <div className="pt-4">
                       <label className="text-[9px] font-bold text-neutral-500 uppercase tracking-wider block mb-1">Professional Bio Description</label>
                       <textarea
-                        rows="3"
+                        rows="4"
                         placeholder="Describe your qualifications, history, and achievements..."
-                        className="w-full bg-[#1A1A1A] border border-white/5 rounded-lg px-3 py-2.5 text-xs text-white outline-none focus:border-white/10 transition-colors font-medium resize-none"
+                        className="w-full bg-[#1A1A1A] border border-white/5 rounded-lg px-3 py-2.5 text-xs text-white outline-none focus:border-white/10 transition-colors font-medium resize-y break-words overflow-hidden"
                         value={formData.bio}
                         onChange={(e) => setFormData({ ...formData, bio: e.target.value })}
                       />
                     </div>
 
                     {/* Personal Location (Single Search & Preview) */}
-                    <div className="pt-2">
+                    <div className="pt-4">
                       <label className="text-[9px] font-bold text-neutral-500 uppercase tracking-wider block mb-1">Personal Location</label>
                       <div className="relative flex items-center">
                         <Search size={14} className="absolute left-3 text-neutral-500" />

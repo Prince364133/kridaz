@@ -68,9 +68,10 @@ const Community = ({ children, onSearchActive }) => {
   const { location } = useGuestLocation();
   const [triggerGetFeed] = useLazyGetCommunityFeedQuery();
   const [triggerSearchPlayers] = useLazySearchPlayersQuery();
-  const { data: storiesData } = useGetStoriesFeedQuery(
-    location ? { lat: location.lat, lng: location.lng } : undefined
-  );
+  const { data: storiesData } = useGetStoriesFeedQuery({
+    all: true,
+    ...(location ? { lat: location.lat, lng: location.lng } : {})
+  }, { skip: !isLoggedIn });
   const stories = storiesData?.stories || [];
   const myStoryGroup = stories.find(group => group.user?._id === user?._id || group.user?.id === user?._id || group.user?._id === user?.id);
   const otherStories = stories.filter(group => group.user?._id !== user?._id && group.user?.id !== user?._id && group.user?._id !== user?.id);
@@ -794,22 +795,27 @@ const Community = ({ children, onSearchActive }) => {
   const handleFollowToggle = async (targetUserId) => {
     gateInteraction(async () => {
       const isFollowing = followingIds.includes(targetUserId);
+      
+      // Optimistic update
+      if (isFollowing) {
+        dispatch(unfollowUser(targetUserId));
+      } else {
+        dispatch(followUser(targetUserId));
+      }
+
       try {
         const endpoint = isFollowing
           ? `/api/user/players/${targetUserId}/unfollow`
           : `/api/user/players/${targetUserId}/follow`;
 
-        const response = await axiosInstance.post(endpoint);
-        if (response.data.success) {
-          if (isFollowing) {
-            dispatch(unfollowUser(targetUserId));
-            toast.success("Unfollowed player");
-          } else {
-            dispatch(followUser(targetUserId));
-            toast.success("Following player");
-          }
-        }
+        await axiosInstance.post(endpoint);
       } catch (error) {
+        // Revert on error
+        if (isFollowing) {
+          dispatch(followUser(targetUserId));
+        } else {
+          dispatch(unfollowUser(targetUserId));
+        }
         toast.error("Failed to update follow status");
       }
     });

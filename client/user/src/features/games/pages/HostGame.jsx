@@ -11,7 +11,7 @@ import {
   Users, UserCheck, ChevronRight, Search,
   ArrowLeft, Coins, CheckCircle2, AlertCircle,
   ShieldCheck, Zap, Trash2, Plus, Minus, ImageIcon, ChevronUp, ChevronDown,
-  Gift, Mail, Info, ShieldAlert, Video, Award
+  Gift, Mail, Info, ShieldAlert, Video, Award, Receipt, ArrowRight
 } from 'lucide-react';
 import { useGetMyTeamsQuery } from '@redux/api/teamApi';
 import CoinAnimation from '@components/CoinAnimation';
@@ -239,7 +239,13 @@ const HostGame = () => {
 
   // Team Fill state
   const [showTeamFillModal, setShowTeamFillModal] = useState(false);
+  const [isSportDropdownOpen, setIsSportDropdownOpen] = useState(false);
+  const [isStateDropdownOpen, setIsStateDropdownOpen] = useState(false);
+  const [isCityDropdownOpen, setIsCityDropdownOpen] = useState(false);
+  const [stateSearch, setStateSearch] = useState('');
+  const [citySearch, setCitySearch] = useState('');
   const [fillingTeamKey, setFillingTeamKey] = useState(null); // 'teamA', 'teamB', or 'quick'
+  const [activeTeamTab, setActiveTeamTab] = useState('teamA');
   const { data: teamsData } = useGetMyTeamsQuery();
   const myTeams = teamsData?.teams || [];
 
@@ -290,6 +296,7 @@ const HostGame = () => {
           slots: newSlots,
           name: team.name,
           image: team.logo || gameData[teamKey].image,
+          logo: team.logo || null,
           imageName: team.logo ? 'Team Logo' : null
         } 
       });
@@ -578,7 +585,7 @@ const HostGame = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#000] text-white pt-8 pb-24 px-6">
+    <div className="h-full bg-[#000] text-white pt-8 pb-4 px-6">
       <div className={`max-w-4xl mx-auto transition-all duration-700 ${mounted ? 'translate-y-0 opacity-100' : 'translate-y-10 opacity-0'}`}>
         
         {/* Header */}
@@ -693,9 +700,15 @@ const HostGame = () => {
 
             <div className="flex gap-4">
               <button
+                onClick={() => navigate(-1)}
+                className="flex-1 py-3 sm:py-3.5 bg-neutral-800 text-white font-black rounded-[8px] sm:rounded-[8px] hover:bg-neutral-700 transition-all duration-300 text-sm sm:text-base font-open-sans uppercase tracking-wider"
+              >
+                CANCEL
+              </button>
+              <button
                 onClick={() => setStep(2)}
                 disabled={!gameData.gameMode}
-                className="flex-1 py-3 sm:py-3.5 bg-gradient-to-r from-[#BFF367] to-[#BFF367] text-black font-black rounded-[8px] sm:rounded-[8px] hover:scale-[1.01] active:scale-[0.99] transition-all duration-300 text-sm sm:text-base font-open-sans shadow-[0_10px_25px_rgba(85,222,232,0.25)] uppercase tracking-wider disabled:opacity-40 disabled:pointer-events-none disabled:shadow-none"
+                className="flex-[2] py-3 sm:py-3.5 bg-gradient-to-r from-[#BFF367] to-[#BFF367] text-black font-black rounded-[8px] sm:rounded-[8px] hover:scale-[1.01] active:scale-[0.99] transition-all duration-300 text-sm sm:text-base font-open-sans shadow-[0_10px_25px_rgba(85,222,232,0.25)] uppercase tracking-wider disabled:opacity-40 disabled:pointer-events-none disabled:shadow-none"
               >
                 NEXT: SPORT & TIME
               </button>
@@ -711,16 +724,52 @@ const HostGame = () => {
                 <div className="w-[3px] h-[18px] bg-gradient-to-b from-cyan-400 to-lime-400 rounded-full" />
                 <label className="text-xs font-bold text-white uppercase tracking-widest block">Select Sport</label>
               </div>
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                {Object.keys(SPORT_DEFAULTS).map(sport => (
-                  <div 
-                    key={sport}
-                    className={`rounded-[8px] p-[1.5px] transition-all duration-300 ${ gameData.gameType === sport ? 'bg-gradient-to-b from-cyan-400 to-lime-400 shadow-[0_0_15px_rgba(6,182,212,0.12)] scale-[1.015]' : 'bg-neutral-800/40 hover:bg-neutral-700/40' }`}
+
+              {/* Dropdown Toggle Button */}
+              <button
+                onClick={() => setIsSportDropdownOpen(!isSportDropdownOpen)}
+                className="w-full flex items-center justify-between bg-[#000] border border-neutral-800/80 hover:border-cyan-400/60 rounded-[8px] py-4 px-4 text-sm font-bold transition-all text-white mb-3"
+              >
+                <div className="flex items-center gap-3">
+                  {gameData.gameType ? (
+                    <>
+                      <div className="w-6 h-6 flex items-center justify-center">
+                        {SPORT_ICONS[gameData.gameType]}
+                      </div>
+                      <span>{gameData.gameType}</span>
+                    </>
+                  ) : (
+                    <>
+                      <Trophy size={18} className="text-cyan-400" />
+                      <span className="text-neutral-500">Select a Sport</span>
+                    </>
+                  )}
+                </div>
+                <ChevronDown size={16} className={`text-neutral-500 transition-transform duration-300 ${isSportDropdownOpen ? 'rotate-180' : ''}`} />
+              </button>
+
+              <AnimatePresence>
+                {isSportDropdownOpen && (
+                  <motion.div
+                    initial={{ height: 0, opacity: 0 }}
+                    animate={{ height: 'auto', opacity: 1 }}
+                    exit={{ height: 0, opacity: 0 }}
+                    transition={{ duration: 0.3, ease: "easeInOut" }}
+                    className="overflow-hidden"
                   >
-                    <button
-                      onClick={() => initSlots(sport)}
-                      className={`w-full bg-[#000] rounded-[8px] p-4 flex flex-col items-center justify-center gap-2 relative transition-all duration-300 group overflow-hidden ${ gameData.gameType === sport ? '' : 'hover:bg-neutral-900/60' }`}
-                    >
+                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-2">
+                      {Object.keys(SPORT_DEFAULTS).map(sport => (
+                        <div 
+                          key={sport}
+                          className={`rounded-[8px] p-[1.5px] transition-all duration-300 ${ gameData.gameType === sport ? 'bg-gradient-to-b from-cyan-400 to-lime-400 shadow-[0_0_15px_rgba(6,182,212,0.12)] scale-[1.015]' : 'bg-neutral-800/40 hover:bg-neutral-700/40' }`}
+                        >
+                          <button
+                            onClick={() => {
+                              initSlots(sport);
+                              setIsSportDropdownOpen(false);
+                            }}
+                            className={`w-full bg-[#000] rounded-[8px] p-4 flex flex-col items-center justify-center gap-2 relative transition-all duration-300 group overflow-hidden ${ gameData.gameType === sport ? '' : 'hover:bg-neutral-900/60' }`}
+                          >
                       {/* Diagonal Corner Hover Glow Effects (Only when selected) */}
                       {gameData.gameType === sport && (
                         <>
@@ -753,6 +802,9 @@ const HostGame = () => {
                   </div>
                 ))}
               </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
             </section>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -796,59 +848,142 @@ const HostGame = () => {
                 <div className="grid grid-cols-2 gap-4">
                   {/* State Dropdown */}
                   <div className="relative group">
-                    <MapPin className="absolute left-4 top-1/2 -translate-y-1/2 text-cyan-400 pointer-events-none" size={18} />
-                    <select
-                      value={gameData.state}
-                      onChange={(e) => setGameData({ ...gameData, state: e.target.value, city: '' })}
+                    <MapPin className="absolute left-4 top-[18px] text-cyan-400 pointer-events-none z-10" size={18} />
+                    <button
+                      onClick={() => !loadingStates && setIsStateDropdownOpen(!isStateDropdownOpen)}
                       disabled={loadingStates}
-                      className="w-full bg-[#000] border border-neutral-800/80 rounded-[8px] py-4 pl-12 pr-10 appearance-none text-sm text-white focus:border-cyan-400/80 outline-none transition-all font-bold disabled:opacity-50"
+                      className="w-full bg-[#000] border border-neutral-800/80 hover:border-cyan-400/60 rounded-[8px] py-4 pl-12 pr-10 text-left text-sm text-white outline-none transition-all font-bold disabled:opacity-50 flex items-center justify-between"
                     >
-                      <option value="">{loadingStates ? 'Loading...' : 'Select State'}</option>
-                      {states.map(s => <option key={s} value={s}>{s}</option>)}
-                    </select>
-                    <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 text-neutral-500 pointer-events-none" size={16} />
+                      <span className="truncate">{loadingStates ? 'Loading...' : gameData.state || 'Select State'}</span>
+                      <ChevronDown className={`text-neutral-500 transition-transform duration-300 ${isStateDropdownOpen ? 'rotate-180' : ''}`} size={16} />
+                    </button>
+                    
+                    <AnimatePresence>
+                      {isStateDropdownOpen && (
+                        <motion.div
+                          initial={{ opacity: 0, y: -10 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          exit={{ opacity: 0, y: -10 }}
+                          transition={{ duration: 0.2 }}
+                          className="absolute left-0 right-0 top-full mt-2 bg-[#0c0c0c] border border-neutral-800 rounded-[8px] z-[60] shadow-xl flex flex-col"
+                        >
+                          <div className="p-3 border-b border-neutral-800 sticky top-0 bg-[#0c0c0c] z-10 rounded-t-[8px]">
+                            <div className="relative">
+                              <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-neutral-500" size={14} />
+                              <input
+                                type="text"
+                                placeholder="Search state..."
+                                value={stateSearch}
+                                onChange={(e) => setStateSearch(e.target.value)}
+                                onClick={(e) => e.stopPropagation()}
+                                className="w-full bg-neutral-900 border border-neutral-800 rounded-[6px] py-2 pl-9 pr-3 text-sm text-white focus:border-cyan-400/50 outline-none transition-all"
+                              />
+                            </div>
+                          </div>
+                          <div className="max-h-48 overflow-y-auto custom-scrollbar rounded-b-[8px]">
+                            {states.filter(s => s.toLowerCase().includes(stateSearch.toLowerCase())).map(s => (
+                              <div 
+                                key={s}
+                                onClick={() => {
+                                  setGameData({ ...gameData, state: s, city: '' });
+                                  setIsStateDropdownOpen(false);
+                                  setStateSearch('');
+                                }}
+                                className={`px-4 py-3 text-sm cursor-pointer transition-colors ${gameData.state === s ? 'text-cyan-400 bg-cyan-400/10' : 'text-neutral-300 hover:bg-neutral-800/80 hover:text-white'}`}
+                              >
+                                {s}
+                              </div>
+                            ))}
+                            {states.filter(s => s.toLowerCase().includes(stateSearch.toLowerCase())).length === 0 && (
+                              <div className="px-4 py-4 text-sm text-neutral-500 text-center">No states found</div>
+                            )}
+                          </div>
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
                   </div>
 
                   {/* City Dropdown */}
                   <div className="relative group">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="absolute left-4 top-1/2 -translate-y-1/2 text-cyan-400 w-[18px] h-[18px] pointer-events-none">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="absolute left-4 top-[18px] text-cyan-400 w-[18px] h-[18px] pointer-events-none z-10">
                       <rect x="4" y="2" width="16" height="20" rx="2" ry="2" />
                       <line x1="9" y1="22" x2="9" y2="16" />
                       <line x1="15" y1="22" x2="15" y2="16" />
                       <line x1="9" y1="16" x2="15" y2="16" />
                       <path d="M9 6h.01M15 6h.01M9 10h.01M15 10h.01" />
                     </svg>
-                    <select
-                      value={gameData.city}
-                      onChange={(e) => setGameData({ ...gameData, city: e.target.value })}
+                    <button
+                      onClick={() => !(!gameData.state || loadingCities) && setIsCityDropdownOpen(!isCityDropdownOpen)}
                       disabled={!gameData.state || loadingCities}
-                      className="w-full bg-[#000] border border-neutral-800/80 rounded-[8px] py-4 pl-12 pr-10 appearance-none text-sm text-white focus:border-cyan-400/80 outline-none transition-all font-bold disabled:opacity-50"
+                      className="w-full bg-[#000] border border-neutral-800/80 hover:border-cyan-400/60 rounded-[8px] py-4 pl-12 pr-10 text-left text-sm text-white outline-none transition-all font-bold disabled:opacity-50 flex items-center justify-between"
                     >
-                      <option value="">
-                        {loadingCities ? 'Loading cities...' : !gameData.state ? 'Select state first' : 'Select City'}
-                      </option>
-                      {cities.map(c => <option key={c} value={c}>{c}</option>)}
-                    </select>
-                    <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 text-neutral-500 pointer-events-none" size={16} />
+                      <span className="truncate">{loadingCities ? 'Loading cities...' : !gameData.state ? 'Select state first' : gameData.city || 'Select City'}</span>
+                      <ChevronDown className={`text-neutral-500 transition-transform duration-300 ${isCityDropdownOpen ? 'rotate-180' : ''}`} size={16} />
+                    </button>
+                    
+                    <AnimatePresence>
+                      {isCityDropdownOpen && (
+                        <motion.div
+                          initial={{ opacity: 0, y: -10 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          exit={{ opacity: 0, y: -10 }}
+                          transition={{ duration: 0.2 }}
+                          className="absolute left-0 right-0 top-full mt-2 bg-[#0c0c0c] border border-neutral-800 rounded-[8px] z-[60] shadow-xl flex flex-col"
+                        >
+                          <div className="p-3 border-b border-neutral-800 sticky top-0 bg-[#0c0c0c] z-10 rounded-t-[8px]">
+                            <div className="relative">
+                              <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-neutral-500" size={14} />
+                              <input
+                                type="text"
+                                placeholder="Search city..."
+                                value={citySearch}
+                                onChange={(e) => setCitySearch(e.target.value)}
+                                onClick={(e) => e.stopPropagation()}
+                                className="w-full bg-neutral-900 border border-neutral-800 rounded-[6px] py-2 pl-9 pr-3 text-sm text-white focus:border-cyan-400/50 outline-none transition-all"
+                              />
+                            </div>
+                          </div>
+                          <div className="max-h-48 overflow-y-auto custom-scrollbar rounded-b-[8px]">
+                            {cities.filter(c => c.toLowerCase().includes(citySearch.toLowerCase())).map(c => (
+                              <div 
+                                key={c}
+                                onClick={() => {
+                                  setGameData({ ...gameData, city: c });
+                                  setIsCityDropdownOpen(false);
+                                  setCitySearch('');
+                                }}
+                                className={`px-4 py-3 text-sm cursor-pointer transition-colors ${gameData.city === c ? 'text-cyan-400 bg-cyan-400/10' : 'text-neutral-300 hover:bg-neutral-800/80 hover:text-white'}`}
+                              >
+                                {c}
+                              </div>
+                            ))}
+                            {cities.filter(c => c.toLowerCase().includes(citySearch.toLowerCase())).length === 0 && (
+                              <div className="px-4 py-4 text-sm text-neutral-500 text-center">No cities found</div>
+                            )}
+                          </div>
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
                   </div>
                 </div>
               </section>
             </div>
 
-            <button
-              disabled={!gameData.gameType || !gameData.date || !gameData.time || !gameData.city || !gameData.state}
-              onClick={() => setStep(3)}
-              className="w-full py-4 bg-gradient-to-r from-cyan-400 to-lime-400 text-black font-extrabold rounded-[8px] hover:opacity-95 active:scale-[0.99] transition-all disabled:opacity-50 disabled:pointer-events-none text-sm uppercase tracking-wider shadow-[0_4px_20px_rgba(6,182,212,0.15)] h-14"
-            >
-              CONTINUE TO VENUE SELECTION
-            </button>
-
-            <div className="w-full p-[1.5px] bg-gradient-to-r from-cyan-400 to-lime-400 rounded-[8px] mt-4">
-              <button 
-                onClick={() => setStep(1)} 
-                className="w-full bg-[#000] hover:bg-[#0c1424] text-cyan-400 font-extrabold rounded-[8px] py-3.5 transition-all text-xs uppercase tracking-wider h-13 flex items-center justify-center"
+            <div className="flex gap-4 pt-4">
+              <div className="flex-1 p-[1.5px] bg-gradient-to-r from-cyan-400 to-lime-400 rounded-[8px]">
+                <button 
+                  onClick={() => setStep(1)} 
+                  className="w-full h-full bg-[#000] hover:bg-[#0c1424] text-cyan-400 font-extrabold rounded-[6.5px] py-3.5 transition-all text-sm uppercase tracking-wider flex items-center justify-center"
+                >
+                  BACK
+                </button>
+              </div>
+              <button
+                disabled={!gameData.gameType || !gameData.date || !gameData.time || !gameData.city || !gameData.state}
+                onClick={() => setStep(3)}
+                className="flex-[2] py-4 bg-gradient-to-r from-cyan-400 to-lime-400 text-black font-extrabold rounded-[8px] hover:opacity-95 active:scale-[0.99] transition-all disabled:opacity-50 disabled:pointer-events-none text-sm uppercase tracking-wider shadow-[0_4px_20px_rgba(6,182,212,0.15)]"
               >
-                Back to Mode Selection
+                CONTINUE
               </button>
             </div>
           </motion.div>
@@ -857,7 +992,7 @@ const HostGame = () => {
         {/* Step 3: Grounds & Umpires */}
         {step === 3 && (
           <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} className="space-y-10">
-            <div className="grid grid-cols-2 gap-x-8 gap-y-10">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-10">
               {/* Grounds */}
               <section className="space-y-6">
                 <div className="flex items-center justify-between gap-2">
@@ -905,7 +1040,7 @@ const HostGame = () => {
                   <button 
                     onClick={() => {
                       sessionStorage.setItem('hostGameData', JSON.stringify(gameData));
-                      navigate(`/venues?returnTo=/host-game?step=3&city=${gameData.city}&state=${gameData.state}`);
+                      navigate(`/venues?returnTo=${encodeURIComponent(`/host-game?step=3&city=${gameData.city}&state=${gameData.state}`)}`);
                     }}
                     className="w-full py-6 rounded-[8px] border-2 border-dashed border-neutral-700 hover:border-cyan-400 bg-neutral-900/50 hover:bg-cyan-400/5 flex flex-col items-center justify-center gap-3 transition-all group"
                   >
@@ -917,62 +1052,28 @@ const HostGame = () => {
                 )}
               </section>
 
-              {/* Umpires */}
-              <section className="space-y-6">
-                <div className="flex items-center justify-between">
-                  <label className="text-xs font-black text-neutral-400 uppercase tracking-widest whitespace-nowrap">Hire Umpire / Coach</label>
-                  <span className="text-[10px] text-neutral-500 font-black px-3 py-1 bg-neutral-800 rounded-full uppercase tracking-tighter">Optional</span>
-                </div>
 
-                {selectedUmpire ? (
-                  <div className="p-5 rounded-[8px] border-2 border-yellow-500 bg-yellow-500/10">
-                    <div className="flex items-center gap-5">
-                      <img src={selectedUmpire.profilePicture || "https://ui-avatars.com/api/?name="+selectedUmpire.name} className="w-16 h-16 rounded-full object-cover border-2 border-neutral-800" />
-                      <div className="flex-1">
-                        <h3 className="font-black text-base mb-1 tracking-tight">{selectedUmpire.name}</h3>
-                        <div className="flex flex-wrap gap-2 mt-2">
-                          {gameData.date && (
-                            <span className="px-2 py-1 bg-neutral-800 rounded text-[10px] text-cyan-400 font-bold uppercase">
-                              {new Date(gameData.date).toLocaleDateString()}
-                            </span>
-                          )}
-                          {gameData.time && (
-                            <span className="px-2 py-1 bg-neutral-800 rounded text-[10px] text-lime-400 font-bold uppercase">
-                              {gameData.time}
-                            </span>
-                          )}
-                        </div>
-                        <div className="flex items-center justify-between mt-2">
-                          <span className="text-yellow-500 font-black text-sm">₹{selectedUmpire.price}</span>
-                          <button 
-                            onClick={() => {
-                              setSelectedUmpire(null);
-                              setGameData({ ...gameData, umpireId: null });
-                            }}
-                            className="px-4 py-2 bg-neutral-800 text-white rounded-[6px] text-xs font-black uppercase tracking-widest hover:bg-neutral-700 transition-colors"
-                          >
-                            Remove
-                          </button>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                ) : (
-                  <button 
-                    onClick={() => {
-                      sessionStorage.setItem('hostGameData', JSON.stringify(gameData));
-                      navigate(`/professionals?returnTo=/host-game?step=3&city=${gameData.city}&state=${gameData.state}`);
-                    }}
-                    className="w-full py-6 rounded-[8px] border-2 border-dashed border-neutral-700 hover:border-[#BFF367] bg-neutral-900/50 hover:bg-[#BFF367]/5 flex flex-col items-center justify-center gap-3 transition-all group"
-                  >
-                    <div className="w-12 h-12 rounded-full bg-neutral-800 group-hover:bg-[#BFF367]/20 flex items-center justify-center text-neutral-400 group-hover:text-[#BFF367] transition-colors">
-                      <UserCheck size={24} />
-                    </div>
-                    <span className="font-black text-sm uppercase tracking-widest text-neutral-300 group-hover:text-white">Hire Professional</span>
-                  </button>
-                )}
-              </section>
             </div>
+
+            {/* Pricing Section */}
+            <div className="bg-neutral-900 p-8 rounded-[8px] border-2 border-neutral-800 flex flex-col md:flex-row items-center justify-between gap-6 mb-6">
+              <div className="space-y-1">
+                <span className="text-xs font-black text-neutral-400 uppercase tracking-widest">Entry Charge per Player</span>
+                <p className="text-[11px] text-neutral-500 font-medium italic">Recommended: Total Cost ({totalCost}) / Total Players</p>
+              </div>
+              <div className="flex items-center gap-4 bg-black p-2 rounded-[8px] border border-neutral-800">
+                <div className="w-12 h-12 bg-yellow-500/10 rounded-[8px] flex items-center justify-center">
+                  <Coins className="text-yellow-500" size={24} />
+                </div>
+                <input 
+                  type="number"
+                  value={gameData.perPlayerCharge}
+                  onChange={(e) => setGameData({ ...gameData, perPlayerCharge: parseInt(e.target.value) || 0 })}
+                  className="w-24 bg-transparent border-none text-center font-black text-2xl outline-none focus:ring-0"
+                />
+              </div>
+            </div>
+
              <div className="flex gap-4">
               <button 
                 onClick={() => setStep(2)} 
@@ -984,7 +1085,7 @@ const HostGame = () => {
                 onClick={() => setStep(4)}
                 className="flex-[2] py-3 sm:py-3.5 bg-gradient-to-r from-[#BFF367] to-[#BFF367] text-black font-black rounded-[8px] sm:rounded-[8px] hover:scale-[1.01] active:scale-[0.99] transition-all duration-300 text-sm sm:text-base font-open-sans shadow-[0_10px_25px_rgba(85,222,232,0.25)] uppercase tracking-wider"
               >
-                Continue to Player Setup
+                Continue
               </button>
             </div>
           </motion.div>
@@ -1146,17 +1247,48 @@ const HostGame = () => {
         {/* Step 4: Team Configuration (Professional Only) */}
         {step === 4 && gameData.gameMode === 'PROFESSIONAL' && (
           <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} className="space-y-10">
-            <div className="bg-neutral-900/50 border-2 border-neutral-800 rounded-[8px] p-10">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-16 relative">
-                <div className="absolute left-1/2 top-0 bottom-0 w-px bg-neutral-800 hidden md:block" />
-                
-                {["teamA", "teamB"].map((teamKey) => (
-                  <div key={teamKey} className="space-y-8">
+            {/* Team Selection Tabs */}
+            <div className="flex p-1 bg-neutral-900/50 border border-neutral-800 rounded-[8px] max-w-sm mx-auto mb-6">
+              {['teamA', 'teamB'].map((tab) => (
+                <button
+                  key={tab}
+                  onClick={() => setActiveTeamTab(tab)}
+                  className={`flex-1 py-3 text-[10px] sm:text-xs font-black uppercase tracking-widest rounded-[6px] transition-all relative ${
+                    activeTeamTab === tab ? 'text-black' : 'text-neutral-500 hover:text-white'
+                  }`}
+                >
+                  {activeTeamTab === tab && (
+                    <motion.div
+                      layoutId="activeTeamTabIndicator"
+                      className="absolute inset-0 bg-gradient-to-r from-[#BFF367] to-[#BFF367] rounded-[6px]"
+                      transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
+                    />
+                  )}
+                  <span className="relative z-10">{tab === 'teamA' ? 'Team A' : 'Team B'}</span>
+                </button>
+              ))}
+            </div>
+
+            <div className="bg-neutral-900/50 border border-neutral-800 rounded-[8px] p-4 sm:p-6 overflow-hidden">
+              <AnimatePresence mode="wait">
+                {[activeTeamTab].map((teamKey) => (
+                  <motion.div
+                    key={teamKey}
+                    initial={{ opacity: 0, x: 20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    exit={{ opacity: 0, x: -20 }}
+                    transition={{ duration: 0.2 }}
+                    className="space-y-8"
+                  >
                     {/* Team Header */}
                     <div className="flex items-center justify-between gap-5">
                       <div className="flex items-center gap-5">
-                        <div className={`w-14 h-14 rounded-[8px] flex items-center justify-center font-black text-2xl ${teamKey === 'teamA' ? 'bg-blue-500/10 text-blue-500' : 'bg-red-500/10 text-red-500'}`}>
-                          {teamKey === 'teamA' ? 'A' : 'B'}
+                        <div className={`w-14 h-14 rounded-[8px] flex items-center justify-center font-black text-2xl overflow-hidden ${teamKey === 'teamA' ? 'bg-blue-500/10 text-blue-500' : 'bg-red-500/10 text-red-500'}`}>
+                          {gameData[teamKey].logo ? (
+                            <img src={gameData[teamKey].logo} alt="Team Logo" className="w-full h-full object-cover" />
+                          ) : (
+                            teamKey === 'teamA' ? 'A' : 'B'
+                          )}
                         </div>
                         <div className="flex-1">
                           <label className="text-[10px] font-black text-neutral-500 uppercase tracking-widest block mb-1">Team Name</label>
@@ -1291,29 +1423,11 @@ const HostGame = () => {
                     >
                       <Plus size={16} /> Add More Slots
                     </button>
-                  </div>
+                  </motion.div>
                 ))}
-              </div>
+              </AnimatePresence>
             </div>
 
-            {/* Pricing Section */}
-            <div className="bg-neutral-900 p-8 rounded-[8px] border-2 border-neutral-800 flex flex-col md:flex-row items-center justify-between gap-6">
-              <div className="space-y-1">
-                <span className="text-xs font-black text-neutral-400 uppercase tracking-widest">Entry Charge per Player</span>
-                <p className="text-[11px] text-neutral-500 font-medium italic">Recommended: Total Cost ({totalCost}) / Total Players</p>
-              </div>
-              <div className="flex items-center gap-4 bg-black p-2 rounded-[8px] border border-neutral-800">
-                <div className="w-12 h-12 bg-yellow-500/10 rounded-[8px] flex items-center justify-center">
-                  <Coins className="text-yellow-500" size={24} />
-                </div>
-                <input 
-                  type="number"
-                  value={gameData.perPlayerCharge}
-                  onChange={(e) => setGameData({ ...gameData, perPlayerCharge: parseInt(e.target.value) || 0 })}
-                  className="w-24 bg-transparent border-none text-center font-black text-2xl outline-none focus:ring-0"
-                />
-              </div>
-            </div>
 
             <div className="flex gap-4">
               <button onClick={() => setStep(3)} className="flex-1 py-5 bg-neutral-900 text-neutral-400 font-black rounded-[8px] border-2 border-neutral-800 hover:border-neutral-700 transition-all text-lg uppercase tracking-widest">Back</button>
@@ -1329,159 +1443,170 @@ const HostGame = () => {
 
         {/* Step 5: Preview & Finalize */}
         {step === 5 && (
-          <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="space-y-10">
-            <div className="flex items-center justify-between gap-4">
-              <div className="text-left space-y-2">
-                <span className="bg-gradient-to-r from-[#BFF367] to-[#BFF367] text-black text-[10px] font-black px-3 py-1 rounded-full uppercase tracking-widest font-open-sans inline-block">
-                  {gameData.gameMode === 'QUICK' ? 'Quick Game' : 'Professional Match'}
-                </span>
-                <h2 className="text-4xl font-black tracking-tight font-open-sans uppercase">{gameData.gameType} Battle</h2>
-                <div className="flex flex-wrap items-center gap-2 sm:gap-4 text-[#BFF367] font-black text-xs sm:text-sm uppercase tracking-widest font-inter">
-                  <span className="flex items-center gap-1.5 sm:gap-2 bg-neutral-900/50 px-2.5 py-1.5 rounded-[8px] border border-neutral-800"><Calendar size={14} className="sm:w-4 sm:h-4" /> {gameData.date}</span>
-                  <span className="flex items-center gap-1.5 sm:gap-2 bg-neutral-900/50 px-2.5 py-1.5 rounded-[8px] border border-neutral-800"><Clock size={14} className="sm:w-4 sm:h-4" /> {gameData.time}</span>
-                </div>
-              </div>
-              <div className="bg-neutral-900/50 border border-neutral-800 p-4 sm:p-6 rounded-[8px] sm:rounded-[8px] text-center min-w-[120px] sm:min-w-[180px] shrink-0">
-                <p className="text-[8px] sm:text-[10px] text-neutral-500 uppercase font-black tracking-widest mb-1 font-inter">Total Reservation</p>
-                <p className="text-2xl sm:text-4xl font-black text-[#BFF367] flex items-center justify-center gap-1 sm:gap-2 font-open-sans">
-                  <Coins size={20} className="text-[#BFF367] sm:w-8 sm:h-8" /> {totalCost}
-                </p>
+          <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="space-y-6 max-w-xl mx-auto pb-24">
+            
+            {/* Header Section */}
+            <div className="text-center space-y-3 pb-6 border-b border-neutral-800">
+              <span className="bg-[#BFF367]/10 text-[#BFF367] text-[10px] font-black px-3 py-1 rounded-[4px] uppercase tracking-widest font-inter inline-block border border-[#BFF367]/20">
+                {gameData.gameMode === 'QUICK' ? 'Quick Game' : 'Professional Match'}
+              </span>
+              <h2 className="text-3xl font-black tracking-tight font-open-sans uppercase text-white">{gameData.gameType} Battle</h2>
+              <div className="flex justify-center items-center gap-4 text-neutral-400 font-bold text-xs uppercase tracking-widest font-inter">
+                <span className="flex items-center gap-1.5"><Calendar size={14} className="text-[#BFF367]" /> {gameData.date}</span>
+                <span className="flex items-center gap-1.5"><Clock size={14} className="text-[#BFF367]" /> {gameData.time}</span>
               </div>
             </div>
 
-            <div className="grid grid-cols-2 gap-2 sm:gap-6 mb-10">
-              {/* Venue */}
-              <div className="bg-neutral-900/50 border border-neutral-800 p-2.5 sm:p-6 rounded-[8px] sm:rounded-[8px] flex flex-col items-center text-center gap-2 sm:gap-3">
-                <div className="w-10 h-10 sm:w-16 sm:h-16 bg-neutral-800 rounded-[8px] sm:rounded-[8px] flex items-center justify-center shrink-0">
-                  <MapPin className="text-[#BFF367] w-5 h-5 sm:w-8 sm:h-8" />
-                </div>
-                <div className="min-w-0 w-full">
-                  <p className="text-[7px] sm:text-[10px] text-neutral-500 uppercase font-black tracking-wider sm:tracking-widest mb-0.5 sm:mb-1 font-inter">Venue</p>
-                  <p className="font-black text-[10px] sm:text-lg truncate leading-none font-open-sans">{selectedGround?.name || 'Self-Arranged'}</p>
-                  <p className="hidden sm:block text-xs text-neutral-500 mt-1 font-medium italic font-inter">{selectedGround?.location}</p>
-                </div>
+            {/* Venue Details */}
+            <div className="bg-neutral-900/40 border border-neutral-800 p-4 sm:p-5 rounded-[8px] flex items-center gap-4">
+              <div className="w-12 h-12 sm:w-14 sm:h-14 bg-neutral-800/80 rounded-[6px] flex items-center justify-center shrink-0 border border-neutral-700/50">
+                <MapPin className="text-[#BFF367] w-6 h-6" />
               </div>
-
-              {/* Expert */}
-              <div className="bg-neutral-900/50 border border-neutral-800 p-2.5 sm:p-6 rounded-[8px] sm:rounded-[8px] flex flex-col items-center text-center gap-2 sm:gap-3">
-                <div className="w-10 h-10 sm:w-16 sm:h-16 bg-neutral-800 rounded-[8px] sm:rounded-[8px] flex items-center justify-center shrink-0">
-                  <UserCheck className="text-[#BFF367] w-5 h-5 sm:w-8 sm:h-8" />
-                </div>
-                <div className="min-w-0 w-full">
-                  <p className="text-[7px] sm:text-[10px] text-neutral-500 uppercase font-black tracking-wider sm:tracking-widest mb-0.5 sm:mb-1 font-inter">Expert</p>
-                  <p className="font-black text-[10px] sm:text-lg truncate leading-none font-open-sans">{selectedUmpire?.name || 'No Umpire'}</p>
-                  <p className="text-[9px] sm:text-xs text-neutral-500 mt-0.5 sm:mt-1 font-medium italic font-inter truncate w-full">{selectedUmpire?.role || 'Professional'}</p>
-                </div>
+              <div className="min-w-0 w-full text-left flex-1">
+                <p className="text-[10px] text-neutral-500 uppercase font-black tracking-widest mb-1 font-inter">Selected Venue</p>
+                <p className="font-black text-sm sm:text-base text-white truncate leading-none font-open-sans uppercase">{selectedGround?.name || 'Self-Arranged'}</p>
+                <p className="text-xs text-neutral-500 mt-1.5 font-medium italic font-inter truncate">{selectedGround?.location || 'Location to be decided'}</p>
               </div>
-
             </div>
 
+            {/* Match Setup Details */}
             {gameData.gameMode === 'QUICK' ? (
-              <div className="p-8 bg-neutral-900/50 border border-neutral-800 rounded-[8px] text-center space-y-4">
-                <div className="flex items-center justify-center -space-x-4">
-                  {Array.from({ length: Math.min(gameData.quickPlayerCount, 8) }).map((_, i) => (
-                    <div key={i} className="w-14 h-14 rounded-full border-4 border-neutral-900 bg-neutral-800 flex items-center justify-center text-[#BFF367]">
-                      <Users size={20} />
+              <div className="p-5 bg-neutral-900/40 border border-neutral-800 rounded-[8px] flex items-center justify-between">
+                <div className="text-left">
+                  <p className="text-[10px] text-neutral-500 uppercase font-black tracking-widest mb-1 font-inter">Player Slots</p>
+                  <p className="font-black text-sm sm:text-base text-white uppercase font-open-sans">Single Pool Match</p>
+                </div>
+                <div className="flex items-center -space-x-2">
+                  {Array.from({ length: Math.min(gameData.quickPlayerCount, 5) }).map((_, i) => (
+                    <div key={i} className="w-8 h-8 rounded-full border-2 border-neutral-900 bg-neutral-800 flex items-center justify-center text-[#BFF367]">
+                      <Users size={14} />
                     </div>
                   ))}
-                  {gameData.quickPlayerCount > 8 && (
-                    <div className="w-14 h-14 rounded-full border-4 border-neutral-900 bg-neutral-700 flex items-center justify-center text-[10px] font-black font-inter">
-                      +{gameData.quickPlayerCount - 8}
+                  {gameData.quickPlayerCount > 5 && (
+                    <div className="w-8 h-8 rounded-full border-2 border-neutral-900 bg-[#BFF367] text-black flex items-center justify-center text-[10px] font-black font-inter">
+                      +{gameData.quickPlayerCount - 5}
                     </div>
                   )}
                 </div>
-                <p className="text-sm font-black uppercase tracking-[0.2em] text-neutral-400 font-inter">
-                  Single Pool: <span className="text-[#BFF367]">{gameData.quickPlayerCount} Player Slots</span>
-                </p>
               </div>
             ) : (
-              <div className="flex items-center justify-between p-6 bg-neutral-900/50 border border-neutral-800 rounded-[8px]">
-                <div className="flex -space-x-3">
-                  {gameData.teamA.slots.slice(0, 5).map((_, i) => (
-                    <div key={i} className="w-12 h-12 rounded-[8px] border-4 border-neutral-900 bg-blue-500/20 text-blue-500 flex items-center justify-center text-xs font-black font-open-sans">
-                      A
-                    </div>
-                  ))}
-                  {gameData.teamA.slots.length > 5 && <div className="w-12 h-12 rounded-[8px] border-4 border-neutral-900 bg-neutral-800 flex items-center justify-center text-[10px] font-black font-open-sans">+{gameData.teamA.slots.length - 5}</div>}
+              <div className="flex items-center justify-center p-6 bg-neutral-900/40 border border-neutral-800 rounded-[8px] gap-8">
+                <div className="flex flex-col items-center gap-2">
+                  <div className="w-16 h-16 rounded-[8px] bg-neutral-800 overflow-hidden border border-neutral-700/50 shadow-lg">
+                     <img src={gameData.teamA.image || 'https://api.dicebear.com/7.x/initials/svg?seed=A'} alt="Team A" className="w-full h-full object-cover" />
+                  </div>
+                  <span className="text-xs font-black text-white uppercase tracking-wider font-open-sans text-center truncate w-[80px]">{gameData.teamA.name || 'Team A'}</span>
                 </div>
-                <div className="px-6 py-2 bg-neutral-800 rounded-[8px] border border-neutral-700 text-[10px] font-black text-neutral-400 uppercase tracking-[0.3em] italic font-inter">VS</div>
-                <div className="flex -space-x-3">
-                  {gameData.teamB.slots.slice(0, 5).map((_, i) => (
-                    <div key={i} className="w-12 h-12 rounded-[8px] border-4 border-neutral-900 bg-red-500/20 text-red-500 flex items-center justify-center text-xs font-black font-open-sans">
-                      B
-                    </div>
-                  ))}
-                  {gameData.teamB.slots.length > 5 && <div className="w-12 h-12 rounded-[8px] border-4 border-neutral-900 bg-neutral-800 flex items-center justify-center text-[10px] font-black font-open-sans">+{gameData.teamB.slots.length - 5}</div>}
+                
+                <div className="px-4 py-2 bg-neutral-900/80 rounded-[4px] border border-neutral-800 text-xs font-black text-neutral-500 uppercase tracking-widest italic font-inter">VS</div>
+                
+                <div className="flex flex-col items-center gap-2">
+                  <div className="w-16 h-16 rounded-[8px] bg-neutral-800 overflow-hidden border border-neutral-700/50 shadow-lg">
+                     <img src={gameData.teamB.image || 'https://api.dicebear.com/7.x/initials/svg?seed=B'} alt="Team B" className="w-full h-full object-cover" />
+                  </div>
+                  <span className="text-xs font-black text-white uppercase tracking-wider font-open-sans text-center truncate w-[80px]">{gameData.teamB.name || 'Team B'}</span>
                 </div>
               </div>
             )}
 
+            {/* Entry Fee */}
+            {gameData.perPlayerCharge > 0 && (
+               <div className="bg-neutral-900/40 border border-neutral-800 p-4 sm:p-5 rounded-[8px] flex items-center justify-between">
+                 <div className="text-left">
+                   <p className="text-[10px] text-neutral-500 uppercase font-black tracking-widest mb-1 font-inter">Entry Charge</p>
+                   <p className="font-black text-sm text-white uppercase font-open-sans">Per Player</p>
+                 </div>
+                 <div className="flex items-center gap-2">
+                    <Coins size={16} className="text-yellow-500" />
+                    <span className="font-black text-lg text-yellow-500 font-open-sans">₹{gameData.perPlayerCharge}</span>
+                 </div>
+               </div>
+            )}
+
             {/* Billing Summary & Coupon */}
-            <div className="bg-neutral-900/50 border border-neutral-800 p-6 rounded-[8px] space-y-4">
-              <h3 className="text-sm font-black uppercase tracking-widest text-neutral-400">Billing Summary</h3>
+            <div className="bg-neutral-900/80 border border-neutral-800 rounded-[8px] overflow-hidden">
+              <div className="p-5 border-b border-neutral-800/50 flex items-center gap-3 bg-neutral-800/20">
+                 <Receipt className="text-[#BFF367] w-5 h-5" />
+                 <h3 className="text-sm font-black uppercase tracking-widest text-white font-open-sans">Checkout Summary</h3>
+              </div>
               
-              <div className="space-y-2 text-sm font-medium text-neutral-300 font-inter">
-                <div className="flex justify-between">
-                  <span>Subtotal</span>
-                  <span>{subTotal} coins</span>
-                </div>
-                {discountAmount > 0 && (
-                  <div className="flex justify-between text-[#BFF367]">
-                    <span>Discount</span>
-                    <span>-{discountAmount} coins</span>
+              <div className="p-5 space-y-4">
+                <div className="space-y-3 text-sm font-medium text-neutral-400 font-inter">
+                  <div className="flex justify-between items-center">
+                    <span>Venue Cost</span>
+                    <span className="text-white font-bold">{subTotal} coins</span>
                   </div>
-                )}
-                <div className="flex justify-between">
-                  <span>Platform Fee (1.5%)</span>
-                  <span>{platformFee.toFixed(2)} coins</span>
+                  {discountAmount > 0 && (
+                    <div className="flex justify-between items-center text-[#BFF367]">
+                      <span>Discount Applied</span>
+                      <span className="font-bold">-{discountAmount} coins</span>
+                    </div>
+                  )}
+                  <div className="flex justify-between items-center">
+                    <span>Platform Fee (1.5%)</span>
+                    <span className="text-white font-bold">{platformFee.toFixed(2)} coins</span>
+                  </div>
                 </div>
-                <div className="w-full h-[1px] bg-neutral-800 my-2" />
-                <div className="flex justify-between text-lg font-black text-white font-open-sans">
-                  <span>Total Cost</span>
-                  <span className="text-[#BFF367]">{totalCost.toFixed(2)} coins</span>
+
+                {/* Coupon Input */}
+                <div className="pt-4 border-t border-neutral-800/50">
+                  <div className="flex gap-2">
+                    <input
+                      type="text"
+                      placeholder="Enter Coupon Code"
+                      value={couponCode}
+                      onChange={(e) => setCouponCode(e.target.value.toUpperCase())}
+                      disabled={!!couponData}
+                      className="flex-1 bg-black border border-neutral-800 rounded-[6px] px-4 py-3 text-sm text-white font-bold outline-none focus:border-[#BFF367] uppercase tracking-wider disabled:opacity-50 transition-colors"
+                    />
+                    {!couponData ? (
+                      <button
+                        onClick={handleValidateCoupon}
+                        disabled={applyingCoupon || !couponCode}
+                        className="px-6 py-3 bg-neutral-800 text-white font-black rounded-[6px] text-xs uppercase tracking-widest hover:bg-neutral-700 disabled:opacity-50 transition-all font-inter"
+                      >
+                        {applyingCoupon ? '...' : 'Apply'}
+                      </button>
+                    ) : (
+                      <button
+                        onClick={() => { setCouponData(null); setCouponCode(''); setCouponError(''); }}
+                        className="px-6 py-3 bg-red-500/10 text-red-500 border border-red-500/20 font-black rounded-[6px] text-xs uppercase tracking-widest hover:bg-red-500/20 transition-all font-inter"
+                      >
+                        Remove
+                      </button>
+                    )}
+                  </div>
+                  {couponError && <p className="text-red-500 text-[10px] uppercase font-black tracking-widest mt-2">{couponError}</p>}
+                  {couponData && <p className="text-[#BFF367] text-[10px] uppercase font-black tracking-widest mt-2">Coupon applied successfully!</p>}
                 </div>
               </div>
 
-              {/* Coupon Input */}
-              <div className="mt-4 pt-4 border-t border-neutral-800">
-                <div className="flex gap-2">
-                  <input
-                    type="text"
-                    placeholder="Enter Coupon Code"
-                    value={couponCode}
-                    onChange={(e) => setCouponCode(e.target.value.toUpperCase())}
-                    disabled={!!couponData}
-                    className="flex-1 bg-black border border-neutral-800 rounded-[8px] px-4 py-3 text-sm text-white font-bold outline-none focus:border-[#BFF367] uppercase tracking-wider disabled:opacity-50"
-                  />
-                  {!couponData ? (
-                    <button
-                      onClick={handleValidateCoupon}
-                      disabled={applyingCoupon || !couponCode}
-                      className="px-6 py-3 bg-neutral-800 text-white font-black rounded-[8px] text-xs uppercase tracking-widest hover:bg-neutral-700 disabled:opacity-50 transition-all"
-                    >
-                      {applyingCoupon ? '...' : 'Apply'}
-                    </button>
-                  ) : (
-                    <button
-                      onClick={() => { setCouponData(null); setCouponCode(''); setCouponError(''); }}
-                      className="px-6 py-3 bg-red-500/20 text-red-500 font-black rounded-[8px] text-xs uppercase tracking-widest hover:bg-red-500/30 transition-all"
-                    >
-                      Remove
-                    </button>
-                  )}
-                </div>
-                {couponError && <p className="text-red-500 text-[10px] uppercase font-black tracking-widest mt-2">{couponError}</p>}
-                {couponData && <p className="text-[#BFF367] text-[10px] uppercase font-black tracking-widest mt-2">Coupon applied successfully!</p>}
+              {/* Total Box */}
+              <div className="bg-[#BFF367] p-5 flex justify-between items-center">
+                 <div>
+                   <p className="text-[10px] text-black/70 font-black uppercase tracking-widest font-inter mb-0.5">Total Amount</p>
+                   <p className="text-xs text-black/70 font-bold font-inter italic">To be reserved from wallet</p>
+                 </div>
+                 <div className="flex items-center gap-2 text-black">
+                   <Coins size={24} className="text-black" />
+                   <span className="font-black text-3xl font-open-sans tracking-tight">{totalCost.toFixed(2)}</span>
+                 </div>
               </div>
             </div>
 
-            <div className="flex gap-4">
-              <button onClick={() => setStep(gameData.gameMode === 'QUICK' ? 4.5 : 4)} className="flex-1 py-5 bg-neutral-900 text-neutral-400 font-black rounded-[8px] border-2 border-neutral-800 hover:border-neutral-700 transition-all text-lg uppercase tracking-widest font-open-sans">Back</button>
+            {/* Action Buttons */}
+            <div className="flex gap-4 pt-2">
+              <button 
+                onClick={() => setStep(gameData.gameMode === 'QUICK' ? 4.5 : 4)} 
+                className="flex-[0.8] py-4 bg-neutral-900 text-neutral-400 font-black rounded-[8px] border border-neutral-800 hover:border-neutral-700 hover:text-white transition-all text-sm uppercase tracking-widest font-open-sans"
+              >
+                Back
+              </button>
               <button
                 onClick={() => setShowConfirm(true)}
-                className="flex-[2] py-5 bg-gradient-to-r from-[#BFF367] to-[#BFF367] text-black font-black rounded-[8px] hover:scale-[1.01] active:scale-[0.99] transition-all text-xl shadow-[0_20px_40px_rgba(85,222,232,0.25)] font-open-sans uppercase tracking-wider"
+                className="flex-[2] py-4 bg-gradient-to-r from-[#BFF367] to-[#BFF367] text-black font-black rounded-[8px] hover:scale-[1.01] active:scale-[0.99] transition-all text-base sm:text-lg font-open-sans uppercase tracking-widest shadow-[0_15px_30px_rgba(191,243,103,0.2)] flex justify-center items-center gap-3"
               >
-                CONFIRM GAME
+                CONFIRM <ArrowRight size={20} />
               </button>
             </div>
           </motion.div>

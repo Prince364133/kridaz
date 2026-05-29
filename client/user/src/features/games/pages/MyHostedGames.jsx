@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import axios from 'axios';
+import axiosInstance from '@hooks/useAxiosInstance';
 import { toast } from 'react-hot-toast';
 import { 
   Users, Check, X, Clock, MapPin, Video, MonitorPlay,
@@ -35,7 +35,7 @@ const MyHostedGames = () => {
 
   const fetchMyGames = async () => {
     try {
-      const res = await axios.get(`${import.meta.env.VITE_API_URL}/api/hosted-game/my-hosted`, { withCredentials: true });
+      const res = await axiosInstance.get('/api/hosted-game/my-hosted');
       setMyGames(res.data.games);
     } catch (err) {
       toast.error("Failed to fetch your hosted games");
@@ -50,9 +50,9 @@ const MyHostedGames = () => {
 
   const handleApprove = async (gameId, team, slotIndex) => {
     try {
-      const res = await axios.post(`${import.meta.env.VITE_API_URL}/api/hosted-game/approve`, {
+      const res = await axiosInstance.post('/api/hosted-game/approve', {
         gameId, team, slotIndex
-      }, { withCredentials: true });
+      });
 
       if (res.data.success) {
         toast.success("Player approved!");
@@ -66,9 +66,9 @@ const MyHostedGames = () => {
   const handleReject = async (gameId, team, slotIndex) => {
     if (!window.confirm("Reject this player? Their reserved coins will be released.")) return;
     try {
-      const res = await axios.post(`${import.meta.env.VITE_API_URL}/api/hosted-game/reject`, {
+      const res = await axiosInstance.post('/api/hosted-game/reject', {
         gameId, team, slotIndex
-      }, { withCredentials: true });
+      });
 
       if (res.data.success) {
         toast.success("Player rejected and coins released.");
@@ -82,9 +82,9 @@ const MyHostedGames = () => {
   const handleCancelGame = async (gameId) => {
     if (!window.confirm("Cancel this game? All reserved coins for pending players will be released.")) return;
     try {
-      const res = await axios.post(`${import.meta.env.VITE_API_URL}/api/hosted-game/cancel`, {
+      const res = await axiosInstance.post('/api/hosted-game/cancel', {
         gameId
-      }, { withCredentials: true });
+      });
 
       if (res.data.success) {
         toast.success("Game cancelled successfully.");
@@ -106,9 +106,9 @@ const MyHostedGames = () => {
         scorer: 'handle-scorer-request'
       };
       const endpoint = endpointMap[role];
-      const res = await axios.post(`${import.meta.env.VITE_API_URL}/api/hosted-game/${endpoint}`, {
+      const res = await axiosInstance.post(`/api/hosted-game/${endpoint}`, {
         gameId, action
-      }, { withCredentials: true });
+      });
 
       if (res.data.success) {
         toast.success(`${role.charAt(0).toUpperCase() + role.slice(1)} request ${action.toLowerCase()}d!`);

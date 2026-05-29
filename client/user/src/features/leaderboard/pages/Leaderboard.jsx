@@ -1,4 +1,4 @@
-﻿import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { 
   Trophy, Medal, Star, Target, Activity, Search, 
@@ -15,16 +15,7 @@ const GRAD = "linear-gradient(90deg, #BFF367 0%, #BFF367 100%)";
 const HEADING_STYLE = { fontFamily: "'Open Sans', sans-serif" };
 const SUBHEADING_STYLE = { fontFamily: "'Inter 28pt Light', sans-serif", fontWeight: 300 };
 
-const SidebarIcon = ({ icon: Icon, active, onClick, label }) => (
-  <div 
-    onClick={onClick}
-    className={`p-3 rounded-[8px] transition-all cursor-pointer flex flex-col items-center gap-1 group ${active ? 'shadow-[0_0_15px_rgba(85,222,232,0.1)] border' : 'text-gray-500 hover:text-white hover:bg-white/5 border border-transparent'}`}
-    style={active ? { background: GRAD, borderColor: 'transparent' } : {}}
-  >
-    <Icon size={22} strokeWidth={active ? 2.5 : 2} className={active ? 'text-black' : ''} />
-    <span className={`text-[7px] font-black uppercase tracking-widest ${active ? 'text-black' : 'text-gray-600 group-hover:text-gray-400'}`}>{label}</span>
-  </div>
-);
+
 
 const Leaderboard = () => {
   const navigate = useNavigate();
@@ -34,11 +25,7 @@ const Leaderboard = () => {
   const [loading, setLoading] = useState(true);
 
   const sports = [
-    { name: 'Cricket', icon: Trophy },
-    { name: 'Football', icon: Circle },
-    { name: 'Pickleball', icon: Target },
-    { name: 'Badminton', icon: Zap },
-    { name: 'Tennis', icon: Star }
+    { name: 'Cricket', image: '/Cricket_transparent.png' }
   ];
 
   // Map sport to categories
@@ -81,22 +68,7 @@ const Leaderboard = () => {
   };
 
   return (
-    <div className="h-screen bg-[#050505] text-white font-sans overflow-hidden flex">
-      {/* Sidebar Navigation */}
-      <div className="w-24 border-r border-white/5 flex flex-col items-center py-10 gap-6 z-30 bg-[#050505] shrink-0">
-        
-        {sports.map((sport) => (
-          <SidebarIcon 
-            key={sport.name}
-            icon={sport.icon} 
-            label={sport.name}
-            active={selectedSport === sport.name} 
-            onClick={() => setSelectedSport(sport.name)}
-          />
-        ))}
-
-
-      </div>
+    <div className="h-screen bg-[#050505] text-white font-sans overflow-hidden flex flex-col">
 
       {/* Main Content Area */}
       <div className="flex-1 flex flex-col relative overflow-y-auto">
@@ -111,7 +83,7 @@ const Leaderboard = () => {
         </div>
 
         {/* Content Container */}
-        <div className="relative z-10 px-8 py-10 max-w-[1400px] mx-auto w-full">
+        <div className="relative z-10 px-4 sm:px-8 py-6 sm:py-10 max-w-[1400px] mx-auto w-full">
           
           {/* Header Section */}
           <div className="flex flex-col items-center mb-12">
@@ -124,184 +96,109 @@ const Leaderboard = () => {
           </div>
 
           {/* Category & Filters Row */}
-          <div className="flex flex-col lg:flex-row gap-6 items-center justify-between mb-8">
-            <div className="relative w-full lg:w-[400px]">
-              <select 
-                value={category}
-                onChange={(e) => setCategory(e.target.value)}
-                className="w-full bg-[#0A0A0A] border border-white/5 rounded-[8px] px-6 py-4 text-[11px] font-black uppercase tracking-[0.2em] outline-none focus:border-[#BFF367]/50 transition-all appearance-none cursor-pointer shadow-2xl text-[#BFF367]"
-              >
-                {sportCategories[selectedSport].map((cat) => (
-                  <option key={cat} value={cat}>{cat.replace('_', ' ')} CATEGORY</option>
-                ))}
-              </select>
-              <div className="absolute right-6 top-1/2 -translate-y-1/2 pointer-events-none">
-                <ChevronLeft className="rotate-[-90deg] text-[#BFF367]" size={16} />
-              </div>
+          <div className="flex flex-col w-full mb-8">
+            <div className="flex justify-center gap-3 mb-6">
+              {sportCategories[selectedSport].map((cat) => (
+                <button 
+                  key={cat}
+                  onClick={() => setCategory(cat)}
+                  className={`px-6 py-2 rounded-full text-[13px] font-medium capitalize transition-all ${category === cat ? 'bg-[#BFF367] text-black' : 'bg-[#111] text-gray-400 hover:bg-[#1a1a1a]'}`}
+                >
+                  {cat.replace('_', ' ')}
+                </button>
+              ))}
             </div>
 
-            <div className="flex gap-4 w-full lg:w-auto">
-              <div className="relative flex-1 lg:flex-none">
-                <select className="w-full bg-[#0A0A0A] border border-white/5 rounded-[8px] px-4 py-3 text-[10px] font-black uppercase tracking-widest outline-none focus:border-[#BFF367]/50 transition-all appearance-none cursor-pointer pr-10">
+            <div className="flex items-center justify-end mb-4 px-2">
+              <div className="flex gap-2">
+                <select className="bg-transparent text-gray-500 text-xs outline-none cursor-pointer">
                   <option>All Time</option>
                   <option>Monthly</option>
                   <option>Weekly</option>
                 </select>
-                <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none opacity-40">
-                  <ChevronLeft className="rotate-[-90deg]" size={12} />
-                </div>
-              </div>
-              <div className="relative flex-1 lg:flex-none">
-                <select className="w-full bg-[#0A0A0A] border border-white/5 rounded-[8px] px-4 py-3 text-[10px] font-black uppercase tracking-widest outline-none focus:border-[#BFF367]/50 transition-all appearance-none cursor-pointer pr-10">
+                <select className="bg-transparent text-gray-500 text-xs outline-none cursor-pointer">
                   <option>Worldwide</option>
                   <option>National</option>
                   <option>Regional</option>
                 </select>
-                <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none opacity-40">
-                  <ChevronLeft className="rotate-[-90deg]" size={12} />
-                </div>
               </div>
             </div>
           </div>
 
-          {/* Table & Sidebar Flexbox */}
-          <div className="flex flex-col xl:flex-row gap-8">
+          {/* Table Area Container */}
+          <div className="w-full">
             
-            {/* Table Area */}
-            <div className="flex-1 bg-[#0A0A0A]/80 backdrop-blur-md rounded-[8px] border border-white/5 overflow-hidden shadow-2xl">
-              <div className="grid grid-cols-[80px_2fr_1fr_1fr_1fr_1fr_1fr] p-6 border-b border-white/5 bg-white/[0.02]">
-                <div className="text-[10px] font-black text-gray-500 uppercase tracking-widest">Rank</div>
-                <div className="text-[10px] font-black text-gray-500 uppercase tracking-widest">Player</div>
-                <div className="text-[10px] font-black text-gray-500 uppercase tracking-widest flex items-center gap-2"><Clock size={12} className="text-[#BFF367]" /> Matches</div>
-                <div className="text-[10px] font-black text-gray-500 uppercase tracking-widest flex items-center gap-2"><Target size={12} className="text-[#BFF367]" /> {category}</div>
-                <div className="text-[10px] font-black text-gray-500 uppercase tracking-widest flex items-center gap-2"><Star size={12} className="text-[#BFF367]" /> Highest</div>
-                <div className="text-[10px] font-black text-gray-500 uppercase tracking-widest flex items-center gap-2"><BarChart3 size={12} className="text-[#BFF367]" /> Average</div>
-                <div className="text-[10px] font-black text-gray-500 uppercase tracking-widest flex items-center gap-2"><Activity size={12} className="text-[#BFF367]" /> Strike</div>
-              </div>
-
-              <div className="divide-y divide-white/5 min-h-[500px]">
-                {loading ? (
-                  <div className="flex flex-col items-center justify-center py-40">
-                    <div className="w-10 h-10 border-2 border-t-transparent rounded-full animate-spin mb-4" style={{ borderColor: '#BFF367', borderTopColor: 'transparent', background: 'none' }} />
-                    <p className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-600">Retrieving Arena Data...</p>
-                  </div>
-                ) : players.length > 0 ? (
-                  players.map((player, idx) => (
-                    <motion.div 
-                      key={player._id}
-                      initial={{ opacity: 0, y: 10 }}
-                      whileInView={{ opacity: 1, y: 0 }}
-                      transition={{ delay: idx * 0.05 }}
-                      onClick={() => navigate(`/profile/${player._id}`)}
-                      className="grid grid-cols-[80px_2fr_1fr_1fr_1fr_1fr_1fr] p-5 items-center hover:bg-[#BFF367]/5 transition-all group cursor-pointer border-l-2 border-transparent hover:border-[#BFF367]"
-                    >
-                      <div className="flex items-center">{getRankIcon(idx + 1)}</div>
-                      <div className="flex items-center gap-4">
-                        <div className="w-12 h-12 rounded-full overflow-hidden border-2 border-white/10 group-hover:border-[#BFF367]/50 transition-all">
-                          <img src={player.profilePicture || `https://api.dicebear.com/7.x/avataaars/svg?seed=${player.name}`} alt="" className="w-full h-full object-cover" />
+            {/* List Area */}
+            <div className="flex flex-col gap-3">
+              {loading ? (
+                <div className="flex flex-col items-center justify-center py-40">
+                  <div className="w-10 h-10 border-2 border-t-transparent rounded-full animate-spin mb-4" style={{ borderColor: '#BFF367', borderTopColor: 'transparent', background: 'none' }} />
+                  <p className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-600">Retrieving Arena Data...</p>
+                </div>
+              ) : players.length > 0 ? (
+                players.map((player, idx) => (
+                  <motion.div 
+                    key={player._id}
+                    initial={{ opacity: 0, y: 10 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    transition={{ delay: idx * 0.05 }}
+                    onClick={() => navigate(`/profile/${player._id}`)}
+                    className="flex items-center bg-white/[0.03] border border-white/5 rounded-[12px] p-4 hover:bg-white/[0.05] transition-all cursor-pointer shadow-lg relative"
+                  >
+                    <div className="flex items-center gap-4 flex-1">
+                      <div className="relative w-14 h-14 rounded-full flex-shrink-0">
+                        <img src={player.profilePicture || `https://api.dicebear.com/7.x/avataaars/svg?seed=${player.name}`} alt="" className="w-full h-full object-cover rounded-full border border-white/10" />
+                        {player.isPro && (
+                          <span className="absolute -top-1 -right-2 bg-[#BFF367] text-black text-[9px] font-bold px-1.5 py-0.5 rounded-full">PRO</span>
+                        )}
+                      </div>
+                      <div className="flex flex-col justify-center">
+                        <div className="flex items-center gap-1.5">
+                          <h3 className="text-white text-[15px] font-medium leading-tight truncate max-w-[120px]">{player.name}</h3>
+                          <span className="text-gray-500 text-[11px] italic truncate max-w-[130px] inline-block" title={player.city || ''}>
+                            ({player.city ? `India, ${player.city.split(',')[0].trim()}` : 'India'})
+                          </span>
                         </div>
-                        <div>
-                          <p className="text-sm font-black uppercase tracking-tight group-hover:text-[#BFF367] transition-colors">{player.name}</p>
-                          <p className="text-[9px] font-bold text-gray-500 uppercase tracking-widest flex items-center gap-1">
-                            <MapPin size={10} className="text-[#BFF367]/50" /> {player.city || 'Global Elite'}
-                          </p>
+                        <div className="text-gray-400 text-[12px] mt-1 flex flex-wrap items-center gap-x-1.5">
+                          {category === 'batting' ? (
+                            <>
+                              <span>Inn: {player.cricketStats?.matchesPlayed || 0}</span> <span className="text-white/20">|</span> 
+                              <span className="font-bold text-white">Runs: {player.cricketStats?.totalRuns || 0}</span> <span className="text-white/20">|</span> 
+                              <span>Avg: {player.cricketStats?.average || '0.00'}</span> <span className="text-white/20">|</span> 
+                              <span>SR: {player.cricketStats?.strikeRate || '0.00'}</span>
+                            </>
+                          ) : category === 'bowling' ? (
+                            <>
+                              <span>Inn: {player.cricketStats?.matchesPlayed || 0}</span> <span className="text-white/20">|</span> 
+                              <span className="font-bold text-white">W: {player.cricketStats?.totalWickets || 0}</span> <span className="text-white/20">|</span> 
+                              <span>Eco: {player.cricketStats?.economy || '0.00'}</span> <span className="text-white/20">|</span> 
+                              <span>SR: {player.cricketStats?.strikeRate || '0.00'}</span>
+                            </>
+                          ) : (
+                            <>
+                              <span>Mat: {player.cricketStats?.matchesPlayed || 0}</span> <span className="text-white/20">|</span> 
+                              <span className="font-bold text-white">Dismissals: {player.cricketStats?.dismissals || 0}</span> <span className="text-white/20">|</span> 
+                              <span>Catches: {player.cricketStats?.catches || 0}</span> <span className="text-white/20">|</span> 
+                              <span>St.: {player.cricketStats?.stumpings || 0}</span>
+                            </>
+                          )}
                         </div>
-                      </div>
-                      <div className="text-xs font-black text-gray-300 font-mono tracking-tighter ml-3">{player.cricketStats?.matchesPlayed || 0}</div>
-                      <div className="text-sm font-black text-white font-mono tracking-tighter ml-3">
-                        {category === 'batting' ? player.cricketStats?.totalRuns || 0 : 
-                         category === 'bowling' ? player.cricketStats?.totalWickets || 0 : 0}
-                      </div>
-                      <div className="text-xs font-black text-gray-300 font-mono tracking-tighter ml-3">
-                        {category === 'batting' ? player.cricketStats?.highestScore || 0 : player.cricketStats?.bestBowling || '0/0'}
-                      </div>
-                      <div className="text-xs font-black text-gray-300 font-mono tracking-tighter ml-3">{player.cricketStats?.average || '0.0'}</div>
-                      <div className="text-xs font-black text-gray-300 font-mono tracking-tighter ml-3">{player.cricketStats?.strikeRate || '0.0'}</div>
-                    </motion.div>
-                  ))
-                ) : (
-                  <div className="flex flex-col items-center justify-center py-40">
-                    <LayoutGrid size={48} className="text-white/5 mb-4" />
-                    <p className="text-gray-600 font-black uppercase text-xs tracking-widest">No rankings available yet</p>
-                  </div>
-                )}
-                
-                {!loading && players.length > 0 && players.length < 8 && Array(8 - players.length).fill(0).map((_, i) => (
-                  <div key={`filler-${i}`} className="grid grid-cols-[80px_2fr_1fr_1fr_1fr_1fr_1fr] p-5 items-center opacity-10 grayscale">
-                    <div className="ml-3 font-bold text-xs">{players.length + i + 1}</div>
-                    <div className="flex items-center gap-4">
-                      <div className="w-12 h-12 rounded-full bg-white/5"></div>
-                      <div className="space-y-1">
-                        <div className="w-24 h-2 bg-white/10 rounded"></div>
-                        <div className="w-16 h-1 bg-white/5 rounded"></div>
                       </div>
                     </div>
-                    <div className="text-gray-600 font-black">---</div>
-                    <div className="text-gray-600 font-black">---</div>
-                    <div className="text-gray-600 font-black">---</div>
-                    <div className="text-gray-600 font-black">---</div>
-                    <div className="text-gray-600 font-black">---</div>
-                  </div>
-                ))}
-              </div>
-
-              {/* Table Footer */}
-              <div className="p-4 bg-white/[0.01] border-t border-white/5 flex items-center justify-center gap-2">
-                 <Shield size={12} className="text-[#BFF367]" />
-                 <p className="text-[8px] font-black text-gray-600 uppercase tracking-widest">Rankings are updated periodically based on verified {selectedSport} matches.</p>
-                 <Shield size={12} className="text-[#BFF367]" />
-              </div>
+                    <div className="text-[32px] font-light text-white ml-4 w-12 text-right">
+                      {idx + 1}
+                    </div>
+                  </motion.div>
+                ))
+              ) : (
+                <div className="flex flex-col items-center justify-center py-40">
+                  <LayoutGrid size={48} className="text-white/5 mb-4" />
+                  <p className="text-gray-600 font-black uppercase text-xs tracking-widest">No rankings available yet</p>
+                </div>
+              )}
             </div>
 
-            {/* Sidebar Stats Area */}
-            <div className="w-full xl:w-[320px] space-y-6">
-              
-              <div className="bg-[#0A0A0A] rounded-[8px] border border-white/5 p-6 shadow-2xl">
-                <h3 className="text-xs font-black text-[#BFF367] uppercase tracking-[0.2em] mb-8 text-center" style={HEADING_STYLE}>{selectedSport} Overview</h3>
-                
-                <div className="flex flex-col items-center mb-8 relative">
-                  <div className="w-32 h-32 rounded-full border-[8px] border-white/5 border-t-[#BFF367] animate-[spin_10s_linear_infinite] flex items-center justify-center"></div>
-                  <div className="absolute inset-0 flex items-center justify-center">
-                  <div className="w-24 h-24 rounded-full bg-black flex items-center justify-center" style={{ boxShadow: '0 0 20px rgba(85,222,232,0.3)' }}>
-                    <Trophy size={32} style={{ color: '#BFF367' }} />
-                    </div>
-                  </div>
-                </div>
 
-                <div className="space-y-5">
-                  {[
-                    { label: "Total Players", value: "---", icon: Users },
-                    { label: "Total Matches", value: "---", icon: Clock },
-                    { label: "Total Stats", value: "---", icon: Target },
-                    { label: "Season Record", value: "---", icon: Star },
-                    { label: "Average Perf", value: "---", icon: BarChart3 },
-                    { label: "Activity Rate", value: "---", icon: Activity },
-                  ].map((stat, idx) => (
-                    <div key={idx} className="flex items-center justify-between group">
-                      <div className="flex items-center gap-3">
-                        <stat.icon size={16} className="text-[#BFF367]/60 group-hover:text-[#BFF367] transition-colors" />
-                        <span className="text-[10px] font-black text-gray-500 uppercase tracking-widest">{stat.label}</span>
-                      </div>
-                      <span className="text-xs font-black text-white font-mono">---</span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              <div className="bg-gradient-to-br from-[#111] to-[#050505] rounded-[8px] border border-[#BFF367]/20 p-6 shadow-2xl relative overflow-hidden group">
-                <div className="absolute top-[-20px] right-[-20px] w-32 h-32 bg-[#BFF367]/5 rounded-full blur-3xl group-hover:bg-[#BFF367]/10 transition-all"></div>
-                <div className="flex items-start gap-4">
-                  <div className="p-3 rounded-[8px] bg-[#BFF367]/10 text-[#BFF367] shadow-inner shadow-[#BFF367]/20">
-                    <Crown size={24} strokeWidth={2.5} />
-                  </div>
-                  <div>
-                    <h4 className="text-[10px] font-black text-[#BFF367] uppercase tracking-widest mb-1" style={HEADING_STYLE}>Be the next champion</h4>
-                    <p className="text-[9px] text-gray-500 leading-relaxed font-bold uppercase tracking-tight">Play more matches and climb the leaderboard!</p>
-                  </div>
-                </div>
-              </div>
-
-            </div>
 
           </div>
 

@@ -453,14 +453,16 @@ export default function Profile() {
 
   const handlePlayerFollowToggle = async (player) => {
     const isFollowing = followingIds.includes(player.id);
+    
+    // Optimistic Update
+    dispatch(isFollowing ? unfollowUser(player.id) : followUser(player.id));
+
     try {
       const endpoint = isFollowing ? "unfollow" : "follow";
-      const response = await axiosInstance.post(`/api/user/players/${player.id}/${endpoint}`);
-      if (response.data.success) {
-        dispatch(isFollowing ? unfollowUser(player.id) : followUser(player.id));
-        toast.success(`${isFollowing ? 'Unfollowed' : 'Following'} ${player.name}`);
-      }
+      await axiosInstance.post(`/api/user/players/${player.id}/${endpoint}`);
     } catch (error) {
+      // Revert on error
+      dispatch(isFollowing ? followUser(player.id) : unfollowUser(player.id));
       toast.error("Action failed");
     }
   };
@@ -516,23 +518,29 @@ export default function Profile() {
 
   const handleFollowToggle = async () => {
     const isFollowing = followingIds.includes(targetUserId);
+    const currentUserId = currentUser?.id || currentUser?._id;
+
+    // Optimistic Update
+    dispatch(isFollowing ? unfollowUser(targetUserId) : followUser(targetUserId));
+    setProfileUser(prev => ({
+      ...prev,
+      followers: isFollowing 
+        ? prev.followers.filter(id => id !== currentUserId)
+        : [...(prev.followers || []), currentUserId]
+    }));
+
     try {
       const endpoint = isFollowing ? "unfollow" : "follow";
-      const response = await axiosInstance.post(`/api/user/players/${targetUserId}/${endpoint}`);
-      if (response.data.success) {
-        dispatch(isFollowing ? unfollowUser(targetUserId) : followUser(targetUserId));
-        setProfileUser(prev => {
-          const currentUserId = currentUser?.id || currentUser?._id;
-          return {
-            ...prev,
-            followers: isFollowing 
-              ? prev.followers.filter(id => id !== currentUserId)
-              : [...(prev.followers || []), currentUserId]
-          };
-        });
-        toast.success(`${isFollowing ? 'Unfollowed' : 'Following'} ${profileUser.name}`);
-      }
+      await axiosInstance.post(`/api/user/players/${targetUserId}/${endpoint}`);
     } catch (error) {
+      // Revert on error
+      dispatch(isFollowing ? followUser(targetUserId) : unfollowUser(targetUserId));
+      setProfileUser(prev => ({
+        ...prev,
+        followers: isFollowing 
+          ? [...(prev.followers || []), currentUserId]
+          : prev.followers.filter(id => id !== currentUserId)
+      }));
       toast.error("Action failed");
     }
   };

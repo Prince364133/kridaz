@@ -557,40 +557,39 @@ export const getLeaderboard = async (req, res) => {
   try {
     const { category = 'batting', limit = 20 } = req.query;
 
-    const stats = await prisma.userStats.findMany({
-      where: {
-        OR: [
-          { cricket: { path: ['runs'], gte: 1 } },
-          { cricket: { path: ['wickets'], gte: 1 } }
-        ]
-      },
-      orderBy: category === 'bowling' 
-        ? { cricket: { path: ['wickets'], sort: 'desc' } }
-        : { cricket: { path: ['runs'], sort: 'desc' } },
+    const users = await prisma.user.findMany({
+      orderBy: [
+        category === 'bowling' 
+          ? { stats: { wickets: 'desc' } }
+          : { stats: { runs: 'desc' } },
+        { createdAt: 'asc' }
+      ],
       take: parseInt(limit),
-      include: {
-        user: {
-          select: {
-            id: true,
-            name: true,
-            username: true,
-            profilePicture: true,
-            city: true,
-            state: true
-          }
-        }
+      select: {
+        id: true,
+        name: true,
+        username: true,
+        profilePicture: true,
+        city: true,
+        state: true,
+        createdAt: true,
+        stats: true
       }
     });
 
-    const rankedPlayers = stats.map((s, index) => ({
-      id: s.userId,
-      name: s.user.name,
-      username: s.user.username,
-      profilePicture: s.user.profilePicture,
-      city: s.user.city,
+    const rankedPlayers = users.map((u, index) => ({
+      id: u.id,
+      name: u.name,
+      username: u.username,
+      profilePicture: u.profilePicture,
+      city: u.city,
       stats: {
-        cricket: s.cricket,
-        badges: s.badges
+        cricket: { 
+          matches: u.stats?.matches || 0, 
+          runs: u.stats?.runs || 0, 
+          wickets: u.stats?.wickets || 0 
+        },
+        badges: [] // badges require a separate include if needed, but keeping it empty for now or we can include it
       },
       rank: index + 1
     }));
