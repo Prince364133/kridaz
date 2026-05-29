@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useSelector } from "react-redux";
 import axiosInstance from "@hooks/useAxiosInstance";
 import { 
@@ -39,6 +39,7 @@ export default function ProfessionalProfile() {
   
   const [formData, setFormData] = useState({
     name: "",
+    username: "",
     email: "",
     phone: "",
     bio: "",
@@ -100,11 +101,32 @@ export default function ProfessionalProfile() {
   const [showLanguagesDropdown, setShowLanguagesDropdown] = useState(false);
   const [showEngagementDropdown, setShowEngagementDropdown] = useState(false);
   const [showProficiencyDropdown, setShowProficiencyDropdown] = useState(false);
+  const [showPreferredDropdown, setShowPreferredDropdown] = useState(false);
+  const preferredDropdownRef = useRef(null);
+
+  // Location search state
+  const [locationSearchQuery, setLocationSearchQuery] = useState("");
+  const [locationResults, setLocationResults] = useState([]);
+  const [showLocationResults, setShowLocationResults] = useState(false);
+  const [locationSearching, setLocationSearching] = useState(false);
+  const [locationSearchTimer, setLocationSearchTimer] = useState(null);
 
   useEffect(() => {
     fetchProfile();
     fetchGrounds();
     fetchStates();
+  }, []);
+
+  useEffect(() => {
+    function handleClickOutside(event) {
+      if (preferredDropdownRef.current && !preferredDropdownRef.current.contains(event.target)) {
+        setShowPreferredDropdown(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
   }, []);
 
   const fetchProfile = async () => {
@@ -117,6 +139,7 @@ export default function ProfessionalProfile() {
       
       setFormData({
         name: prof.user?.name || prof.name || "",
+        username: prof.user?.username || "",
         email: prof.user?.email || "",
         phone: prof.user?.phone || "",
         bio: prof.bio || "",
@@ -196,6 +219,47 @@ export default function ProfessionalProfile() {
     } catch (err) {
       console.error("Error fetching cities:", err);
     }
+  };
+
+  // Nominatim location search with debounce
+  const handleLocationSearch = (query) => {
+    if (locationSearchTimer) clearTimeout(locationSearchTimer);
+    if (!query || query.length < 3) {
+      setLocationResults([]);
+      setShowLocationResults(false);
+      return;
+    }
+    const timer = setTimeout(async () => {
+      try {
+        setLocationSearching(true);
+        const res = await fetch(
+          `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(query)}&format=json&limit=6&countrycodes=in&addressdetails=1`,
+          { headers: { "Accept-Language": "en" } }
+        );
+        const data = await res.json();
+        setLocationResults(data);
+        setShowLocationResults(true);
+      } catch (err) {
+        console.error("Location search error:", err);
+      } finally {
+        setLocationSearching(false);
+      }
+    }, 400);
+    setLocationSearchTimer(timer);
+  };
+
+  const selectLocation = (result) => {
+    const addr = result.address || {};
+    setFormData({
+      ...formData,
+      city: addr.city || addr.town || addr.village || addr.county || "",
+      state: addr.state || "",
+      address: result.display_name || "",
+      pinCode: addr.postcode || ""
+    });
+    setLocationSearchQuery(result.display_name || "");
+    setShowLocationResults(false);
+    setLocationResults([]);
   };
 
   // Toggle selection of platform listed grounds
@@ -653,12 +717,33 @@ export default function ProfessionalProfile() {
                       </div>
                     </div>
 
-                    {/* Prefilled Fields (Read-Only to preserve user creation schema) */}
+                    {/* Editable Full Name */}
                     <div>
-                      <label className="text-[9px] font-bold text-neutral-500 uppercase tracking-wider block mb-1">Full Name (Account Profile)</label>
-                      <div className="flex items-center gap-2 bg-white/[0.02] border border-white/5 rounded-lg px-3 py-2.5 text-xs text-neutral-400 font-medium">
-                        <User size={14} className="text-neutral-600" />
-                        <span>{formData.name || "N/A"}</span>
+                      <label className="text-[9px] font-bold text-neutral-500 uppercase tracking-wider block mb-1">Full Name</label>
+                      <div className="relative flex items-center">
+                        <User size={14} className="absolute left-3 text-neutral-500" />
+                        <input 
+                          type="text"
+                          placeholder="Your full name"
+                          className="w-full bg-[#1A1A1A] border border-white/5 rounded-lg pl-8 pr-3 py-2.5 text-xs text-white outline-none focus:border-white/10 transition-colors font-medium"
+                          value={formData.name}
+                          onChange={(e) => setFormData({...formData, name: e.target.value})}
+                        />
+                      </div>
+                    </div>
+
+                    {/* Editable Username */}
+                    <div>
+                      <label className="text-[9px] font-bold text-neutral-500 uppercase tracking-wider block mb-1">Username</label>
+                      <div className="relative flex items-center">
+                        <span className="absolute left-3 text-neutral-500 text-xs font-bold">@</span>
+                        <input 
+                          type="text"
+                          placeholder="your_username"
+                          className="w-full bg-[#1A1A1A] border border-white/5 rounded-lg pl-8 pr-3 py-2.5 text-xs text-white outline-none focus:border-white/10 transition-colors font-medium"
+                          value={formData.username}
+                          onChange={(e) => setFormData({...formData, username: e.target.value.toLowerCase().replace(/[^a-z0-9_]/g, '')})}
+                        />
                       </div>
                     </div>
 
@@ -724,6 +809,17 @@ export default function ProfessionalProfile() {
                     </div>
 
                     <div className="pt-2">
+                      <label className="text-[9px] font-bold text-neutral-500 uppercase tracking-wider block mb-1">Operational Headline</label>
+                      <input 
+                        type="text" 
+                        placeholder="e.g. Senior Scorer / Certified Coach"
+                        className="w-full bg-[#1A1A1A] border border-white/5 rounded-lg px-3 py-2.5 text-xs text-white outline-none focus:border-white/10 transition-colors font-bold"
+                        value={formData.specialization}
+                        onChange={(e) => setFormData({...formData, specialization: e.target.value})}
+                      />
+                    </div>
+
+                    <div className="pt-2">
                       <label className="text-[9px] font-bold text-neutral-500 uppercase tracking-wider block mb-1">Professional Bio Description</label>
                       <textarea 
                         rows="3"
@@ -774,69 +870,247 @@ export default function ProfessionalProfile() {
                 </div>
 
                 {/* Base Location & Schedule Card */}
-                <div className="bg-[#111111] border border-white/5 rounded-xl p-5 space-y-4">
+                <div className="bg-[#111111] border border-white/5 rounded-xl p-5 space-y-4 relative z-20">
                   <h3 className="text-[10px] font-black uppercase tracking-[0.3em] text-[#878C9F] flex items-center gap-2">
                     <MapPin size={14} style={{ color: themeColor }} /> Base Location & Timings
                   </h3>
                   
                   <div className="space-y-3">
-                    <div className="grid grid-cols-2 gap-3">
-                      <div>
-                        <label className="text-[9px] font-bold text-neutral-500 uppercase tracking-wider block mb-1">Operational State</label>
+                    {/* Location Search */}
+                    <div className="relative">
+                      <label className="text-[9px] font-bold text-neutral-500 uppercase tracking-wider block mb-1">Search Location</label>
+                      <div className="relative flex items-center">
+                        <Search size={14} className="absolute left-3 text-neutral-500" />
                         <input 
                           type="text"
-                          placeholder="e.g. Maharashtra"
-                          className="w-full bg-[#1A1A1A] border border-white/5 rounded-lg px-3 py-2 text-xs text-white outline-none focus:border-white/10 transition-colors font-medium"
-                          value={formData.state}
-                          onChange={(e) => setFormData({...formData, state: e.target.value})}
+                          placeholder="Search city, area, or address..."
+                          className="w-full bg-[#1A1A1A] border border-white/5 rounded-lg pl-8 pr-3 py-2.5 text-xs text-white outline-none focus:border-white/10 transition-colors font-medium"
+                          value={locationSearchQuery}
+                          onChange={(e) => {
+                            setLocationSearchQuery(e.target.value);
+                            handleLocationSearch(e.target.value);
+                          }}
+                          onFocus={() => locationResults.length > 0 && setShowLocationResults(true)}
                         />
+                        {locationSearching && <Loader2 size={14} className="absolute right-3 text-neutral-500 animate-spin" />}
                       </div>
-                      
-                      <div>
-                        <label className="text-[9px] font-bold text-neutral-500 uppercase tracking-wider block mb-1">Operational City</label>
-                        <input 
-                          type="text"
-                          placeholder="e.g. Mumbai"
-                          className="w-full bg-[#1A1A1A] border border-white/5 rounded-lg px-3 py-2 text-xs text-white outline-none focus:border-white/10 transition-colors font-medium"
-                          value={formData.city}
-                          onChange={(e) => setFormData({...formData, city: e.target.value})}
-                        />
-                      </div>
+
+                      {/* Search Results Dropdown */}
+                      {showLocationResults && locationResults.length > 0 && (
+                        <div className="absolute top-full left-0 right-0 mt-1 bg-[#1A1A1A] border border-white/10 rounded-lg shadow-2xl max-h-52 overflow-y-auto z-50 custom-scrollbar">
+                          {locationResults.map((result, idx) => (
+                            <button
+                              key={idx}
+                              onClick={() => selectLocation(result)}
+                              className="w-full text-left px-3 py-2.5 hover:bg-white/5 transition-colors border-b border-white/5 last:border-0 flex items-start gap-2"
+                            >
+                              <MapPin size={12} className="text-neutral-500 mt-0.5 shrink-0" />
+                              <span className="text-[11px] text-white/80 font-medium leading-snug">{result.display_name}</span>
+                            </button>
+                          ))}
+                        </div>
+                      )}
                     </div>
 
+                    {/* Selected Location Preview */}
+                    {(formData.city || formData.state) && (
+                      <div className="flex flex-wrap items-center gap-2 p-3 bg-white/[0.02] border border-white/5 rounded-lg">
+                        <MapPin size={12} style={{ color: themeColor }} />
+                        <span className="text-[11px] text-white font-bold">{[formData.address, formData.city, formData.state, formData.pinCode].filter(Boolean).join(", ")}</span>
+                        <button
+                          onClick={() => {
+                            setFormData({ ...formData, city: "", state: "", address: "", pinCode: "" });
+                            setLocationSearchQuery("");
+                          }}
+                          className="ml-auto text-neutral-500 hover:text-red-400 transition-colors"
+                        >
+                          <X size={14} />
+                        </button>
+                      </div>
+                    )}
+
+                    {/* Preferred Locations (Multiple Selector) */}
+                    <div className="relative" ref={preferredDropdownRef}>
+                      <label className="text-[9px] font-bold text-neutral-500 uppercase tracking-wider block mb-1">Preferred Service Locations (Multiple)</label>
+                      <div 
+                        onClick={() => setShowPreferredDropdown(!showPreferredDropdown)}
+                        className="w-full bg-[#1A1A1A] border border-white/5 rounded-lg pl-3 pr-8 py-2.5 text-xs text-neutral-400 outline-none focus:border-white/10 transition-colors font-medium flex items-center justify-between cursor-pointer"
+                      >
+                        <span className="text-white font-semibold">
+                          {((formData.preferredLocations?.grounds?.length || 0) + 
+                            (formData.preferredLocations?.customLocations?.reduce((acc, curr) => acc + curr.cities.length, 0) || 0)) || 0} Locations Selected
+                        </span>
+                        <ChevronDown size={14} className="text-neutral-500" />
+                      </div>
+
+                      {showPreferredDropdown && (
+                        <div className="absolute top-full left-0 right-0 mt-1 bg-[#1A1A1A] border border-white/10 rounded-lg shadow-2xl p-4 z-50 custom-scrollbar max-h-96 overflow-y-auto space-y-4">
+                          {/* Section 1: Add Custom Location */}
+                          <div className="space-y-3 pb-3 border-b border-white/5">
+                            <p className="text-[10px] font-black uppercase tracking-widest text-[#55DEE8] flex items-center gap-1.5 leading-none">
+                              <Globe size={12} /> Add Custom Service Area (City/State)
+                            </p>
+                            
+                            <div className="grid grid-cols-2 gap-2" onClick={(e) => e.stopPropagation()}>
+                              <div>
+                                <label className="text-[8px] font-black text-neutral-500 uppercase tracking-widest block mb-1">State</label>
+                                <select 
+                                  className="w-full bg-[#222] border border-white/5 rounded-lg px-2 py-1.5 text-xs text-white outline-none"
+                                  value={selectedState}
+                                  onChange={(e) => handleStateChange(e.target.value)}
+                                >
+                                  <option value="">Select State</option>
+                                  {states.map(st => (
+                                    <option key={st} value={st}>{st}</option>
+                                  ))}
+                                </select>
+                              </div>
+
+                              <div>
+                                <label className="text-[8px] font-black text-neutral-500 uppercase tracking-widest block mb-1">City</label>
+                                <select 
+                                  className="w-full bg-[#222] border border-white/5 rounded-lg px-2 py-1.5 text-xs text-white outline-none"
+                                  value={selectedCity}
+                                  onChange={(e) => setSelectedCity(e.target.value)}
+                                  disabled={!selectedState}
+                                >
+                                  <option value="">Select City</option>
+                                  {cities.map(ct => (
+                                    <option key={ct} value={ct}>{ct}</option>
+                                  ))}
+                                </select>
+                              </div>
+                            </div>
+
+                            <button 
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                addCustomLocation();
+                              }}
+                              disabled={!selectedState || !selectedCity}
+                              className="w-full py-2 rounded-lg text-[9px] font-black uppercase tracking-widest flex items-center justify-center gap-1.5 transition-transform active:scale-95"
+                              style={{ 
+                                backgroundColor: selectedState && selectedCity ? themeColor : '#222', 
+                                color: selectedState && selectedCity ? '#000' : '#444' 
+                              }}
+                            >
+                              <Plus size={14} /> Link Custom City
+                            </button>
+                          </div>
+
+                          {/* Section 2: Platform Venues / Grounds */}
+                          <div className="space-y-3">
+                            <p className="text-[10px] font-black uppercase tracking-widest text-[#55DEE8] flex items-center gap-1.5 leading-none">
+                              <Building size={12} /> Select Registered Platform Venues
+                            </p>
+
+                            {/* Mini search inside dropdown for venues */}
+                            <div className="relative flex items-center mb-2" onClick={(e) => e.stopPropagation()}>
+                              <Search size={12} className="absolute left-2.5 text-neutral-500" />
+                              <input 
+                                type="text"
+                                placeholder="Filter venues/grounds..."
+                                className="w-full bg-[#222] border border-[#333] rounded-lg pl-8 pr-3 py-1.5 text-xs text-white outline-none focus:border-white/10"
+                                value={groundSearch}
+                                onChange={(e) => {
+                                  e.stopPropagation();
+                                  setGroundSearch(e.target.value);
+                                }}
+                              />
+                            </div>
+
+                            <div className="space-y-1 max-h-40 overflow-y-auto custom-scrollbar">
+                              {filteredGrounds.map(ground => {
+                                const isSelected = formData.preferredLocations?.grounds?.includes(ground.id);
+                                return (
+                                  <button 
+                                    key={ground.id}
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      toggleGroundSelection(ground.id);
+                                    }}
+                                    className={`w-full flex justify-between items-center px-3 py-2 text-left text-xs rounded hover:bg-white/[0.04] transition-colors ${isSelected ? 'bg-white/[0.02]' : ''}`}
+                                  >
+                                    <div>
+                                      <p className="font-bold text-white uppercase tracking-wide">{ground.name}</p>
+                                      <p className="text-[9px] text-neutral-500 uppercase tracking-widest">{ground.city}, {ground.state}</p>
+                                    </div>
+                                    <span 
+                                      className="text-[8px] font-black px-2 py-0.5 rounded uppercase tracking-widest"
+                                      style={{ 
+                                        color: isSelected ? '#EF4444' : themeColor, 
+                                        backgroundColor: isSelected ? 'rgba(239, 68, 68, 0.1)' : `${themeColor}1a` 
+                                      }}
+                                    >
+                                      {isSelected ? 'Remove' : 'Select'}
+                                    </span>
+                                  </button>
+                                );
+                              })}
+                              {filteredGrounds.length === 0 && (
+                                <p className="text-[9px] font-medium text-neutral-600 italic">No matching platform venues found.</p>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Selected Preferred Locations List Chips */}
+                    <div className="space-y-2 pt-1">
+                      {/* Selected Grounds Chips */}
+                      {formData.preferredLocations?.grounds?.length > 0 && (
+                        <div className="space-y-1">
+                          <span className="text-[8px] font-bold text-neutral-500 uppercase tracking-widest block">Covered Platform Grounds</span>
+                          <div className="flex flex-wrap gap-1">
+                            {formData.preferredLocations.grounds.map(groundId => {
+                              const gObj = grounds.find(g => g.id === groundId);
+                              if (!gObj) return null;
+                              return (
+                                <span key={groundId} className="px-2 py-1 bg-white/[0.03] border border-white/5 rounded text-[8px] font-bold text-white uppercase tracking-wider flex items-center gap-1.5">
+                                  <Building size={10} className="text-neutral-500" />
+                                  <span>{gObj.name}</span>
+                                  <button onClick={() => toggleGroundSelection(groundId)} className="text-neutral-600 hover:text-red-400">
+                                    <X size={10} />
+                                  </button>
+                                </span>
+                              );
+                            })}
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Selected Custom Locations Chips */}
+                      {formData.preferredLocations?.customLocations?.length > 0 && (
+                        <div className="space-y-1">
+                          <span className="text-[8px] font-bold text-neutral-500 uppercase tracking-widest block">Covered Custom Cities</span>
+                          <div className="flex flex-wrap gap-1">
+                            {formData.preferredLocations.customLocations.map((item, idx) => (
+                              item.cities.map(cityName => (
+                                <span key={`${item.state}-${cityName}`} className="px-2 py-1 bg-white/[0.03] border border-white/5 rounded text-[8px] font-bold text-white uppercase tracking-wider flex items-center gap-1.5">
+                                  <Globe size={10} className="text-neutral-500" />
+                                  <span>{cityName}, {item.state}</span>
+                                  <button onClick={() => removeCustomCity(item.state, cityName)} className="text-neutral-600 hover:text-red-400">
+                                    <X size={10} />
+                                  </button>
+                                </span>
+                              ))
+                            ))}
+                          </div>
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Availability Timings (kept) */}
                     <div>
-                      <label className="text-[9px] font-bold text-neutral-500 uppercase tracking-wider block mb-1">Full Service Address</label>
+                      <label className="text-[9px] font-bold text-neutral-500 uppercase tracking-wider block mb-1">Availability Timings</label>
                       <input 
                         type="text"
-                        placeholder="e.g. 123 Arena Road, Sports Hub"
+                        placeholder="e.g. Daily 6 AM - 8 PM"
                         className="w-full bg-[#1A1A1A] border border-white/5 rounded-lg px-3 py-2.5 text-xs text-white outline-none focus:border-white/10 transition-colors font-medium"
-                        value={formData.address}
-                        onChange={(e) => setFormData({...formData, address: e.target.value})}
+                        value={formData.availabilityTimings}
+                        onChange={(e) => setFormData({...formData, availabilityTimings: e.target.value})}
                       />
-                    </div>
-
-                    <div className="grid grid-cols-2 gap-3">
-                      <div>
-                        <label className="text-[9px] font-bold text-neutral-500 uppercase tracking-wider block mb-1">Pin Code</label>
-                        <input 
-                          type="text"
-                          placeholder="e.g. 400001"
-                          className="w-full bg-[#1A1A1A] border border-white/5 rounded-lg px-3 py-2 text-xs text-white outline-none focus:border-white/10 transition-colors font-medium font-mono"
-                          value={formData.pinCode}
-                          onChange={(e) => setFormData({...formData, pinCode: e.target.value})}
-                        />
-                      </div>
-                      
-                      <div>
-                        <label className="text-[9px] font-bold text-neutral-500 uppercase tracking-wider block mb-1">Availability Timings</label>
-                        <input 
-                          type="text"
-                          placeholder="e.g. Daily 6 AM - 8 PM"
-                          className="w-full bg-[#1A1A1A] border border-white/5 rounded-lg px-3 py-2 text-xs text-white outline-none focus:border-white/10 transition-colors font-medium"
-                          value={formData.availabilityTimings}
-                          onChange={(e) => setFormData({...formData, availabilityTimings: e.target.value})}
-                        />
-                      </div>
                     </div>
                   </div>
                 </div>
@@ -951,16 +1225,6 @@ export default function ProfessionalProfile() {
                   </h3>
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div className="space-y-1.5">
-                      <label className="text-[9px] font-bold text-neutral-500 uppercase tracking-wider ml-0.5">Operational Headline</label>
-                      <input 
-                        type="text" 
-                        placeholder="e.g. Senior Scorer / Certified Coach"
-                        className="w-full bg-[#1A1A1A] border border-white/5 rounded-[8px] p-3 text-xs text-white focus:border-white/10 outline-none font-bold transition-all"
-                        value={formData.specialization}
-                        onChange={(e) => setFormData({...formData, specialization: e.target.value})}
-                      />
-                    </div>
                     
                     <div className={`space-y-1.5 relative ${showProficiencyDropdown ? 'z-[110]' : 'z-auto'}`}>
                       <label className="text-[9px] font-bold text-neutral-500 uppercase tracking-wider ml-0.5">Proficiency Level</label>
@@ -1179,172 +1443,7 @@ export default function ProfessionalProfile() {
                     </div>
                   </div>
                 </div>
-
-                {/* PREFERRED SERVICE LOCATIONS CARD (Dynamic Selector) */}
-                <div className="bg-[#111111] border border-white/5 rounded-xl p-5 space-y-4">
-                  <div>
-                    <h3 className="text-[10px] font-black uppercase tracking-[0.3em] text-white flex items-center gap-2">
-                      <MapPin size={14} style={{ color: themeColor }} /> Preferred Service Locations
-                    </h3>
-                    <p className="text-[8px] font-bold text-neutral-500 uppercase tracking-widest mt-1">Specify where you want to offer your services ( grounds or custom city coordinates )</p>
-                  </div>
-
-                  {/* Tabs */}
-                  <div className="flex bg-black p-1 rounded-lg border border-white/5">
-                    <button 
-                      onClick={() => setLocationTab("grounds")}
-                      className={`flex-1 py-2 text-[9px] font-black uppercase tracking-widest rounded-md transition-all flex items-center justify-center gap-2 ${locationTab === 'grounds' ? 'text-black' : 'text-neutral-500 hover:text-white'}`}
-                      style={{ backgroundColor: locationTab === 'grounds' ? themeColor : 'transparent' }}
-                    >
-                      <Building size={12} /> Platform Grounds
-                    </button>
-                    <button 
-                      onClick={() => setLocationTab("custom")}
-                      className={`flex-1 py-2 text-[9px] font-black uppercase tracking-widest rounded-md transition-all flex items-center justify-center gap-2 ${locationTab === 'custom' ? 'text-black' : 'text-neutral-500 hover:text-white'}`}
-                      style={{ backgroundColor: locationTab === 'custom' ? themeColor : 'transparent' }}
-                    >
-                      <Globe size={12} /> Custom Cities
-                    </button>
-                  </div>
-
-                  {/* Platform Grounds Panel */}
-                  {locationTab === "grounds" && (
-                    <div className="space-y-3">
-                      <div className="relative flex items-center">
-                        <Search size={14} className="absolute left-3 text-neutral-500" />
-                        <input 
-                          type="text"
-                          placeholder="Search listed grounds on the platform..."
-                          className="w-full bg-[#1A1A1A] border border-white/5 rounded-lg pl-9 pr-3 py-2 text-xs text-white outline-none focus:border-white/10"
-                          value={groundSearch}
-                          onChange={(e) => setGroundSearch(e.target.value)}
-                        />
-                      </div>
-
-                      {/* Filtered Grounds Options */}
-                      {groundSearch && filteredGrounds.length > 0 && (
-                        <div className="max-h-48 overflow-y-auto border border-white/5 bg-[#181818] rounded-lg p-1.5 custom-scrollbar space-y-1">
-                          {filteredGrounds.map(ground => {
-                            const isSelected = formData.preferredLocations?.grounds?.includes(ground.id);
-                            return (
-                              <button 
-                                key={ground.id}
-                                onClick={() => {
-                                  toggleGroundSelection(ground.id);
-                                  setGroundSearch("");
-                                }}
-                                className="w-full flex justify-between items-center px-3 py-2 text-left text-xs rounded hover:bg-white/[0.04] transition-colors"
-                              >
-                                <div>
-                                  <p className="font-bold text-white uppercase tracking-wide">{ground.name}</p>
-                                  <p className="text-[9px] text-neutral-500 uppercase tracking-widest">{ground.city}, {ground.state}</p>
-                                </div>
-                                <span className={`text-[8px] font-black px-2 py-0.5 rounded uppercase tracking-widest ${isSelected ? 'bg-red-500/10 text-red-400' : 'bg-[#55DEE8]/10 text-[#55DEE8]'}`}>
-                                  {isSelected ? 'Remove' : 'Select'}
-                                </span>
-                              </button>
-                            );
-                          })}
-                        </div>
-                      )}
-
-                      {/* Display Selected Grounds Chips */}
-                      <div className="space-y-1.5">
-                        <label className="text-[8px] font-bold text-neutral-600 uppercase tracking-widest">Active Covered Grounds</label>
-                        <div className="flex flex-wrap gap-1.5">
-                          {formData.preferredLocations?.grounds?.map(groundId => {
-                            const gObj = grounds.find(g => g.id === groundId);
-                            if (!gObj) return null;
-                            return (
-                              <span key={groundId} className="px-3 py-1.5 bg-white/[0.04] border border-white/5 rounded-lg text-[8px] font-black uppercase tracking-wider text-white flex items-center gap-2">
-                                <Building size={10} className="text-neutral-500" />
-                                <span>{gObj.name} ({gObj.city})</span>
-                                <button onClick={() => toggleGroundSelection(groundId)} className="text-neutral-600 hover:text-red-400">
-                                  <X size={10} />
-                                </button>
-                              </span>
-                            );
-                          })}
-                          {(!formData.preferredLocations?.grounds || formData.preferredLocations.grounds.length === 0) && (
-                            <p className="text-[9px] font-medium text-neutral-700 italic">No specific grounds selected. Search above to link grounds.</p>
-                          )}
-                        </div>
-                      </div>
-                    </div>
-                  )}
-
-                  {/* Custom Cities Panel */}
-                  {locationTab === "custom" && (
-                    <div className="space-y-4">
-                      <div className="grid grid-cols-2 gap-3">
-                        <div>
-                          <label className="text-[8px] font-black text-neutral-500 uppercase tracking-widest block mb-1">State</label>
-                          <select 
-                            className="w-full bg-[#1A1A1A] border border-white/5 rounded-lg px-3 py-2 text-xs text-white outline-none"
-                            value={selectedState}
-                            onChange={(e) => handleStateChange(e.target.value)}
-                          >
-                            <option value="">Select State</option>
-                            {states.map(st => (
-                              <option key={st} value={st}>{st}</option>
-                            ))}
-                          </select>
-                        </div>
-
-                        <div>
-                          <label className="text-[8px] font-black text-neutral-500 uppercase tracking-widest block mb-1">City</label>
-                          <select 
-                            className="w-full bg-[#1A1A1A] border border-white/5 rounded-lg px-3 py-2 text-xs text-white outline-none"
-                            value={selectedCity}
-                            onChange={(e) => setSelectedCity(e.target.value)}
-                            disabled={!selectedState}
-                          >
-                            <option value="">Select City</option>
-                            {cities.map(ct => (
-                              <option key={ct} value={ct}>{ct}</option>
-                            ))}
-                          </select>
-                        </div>
-                      </div>
-
-                      <button 
-                        onClick={addCustomLocation}
-                        disabled={!selectedState || !selectedCity}
-                        className="w-full py-2.5 rounded-lg text-[9px] font-black uppercase tracking-widest flex items-center justify-center gap-1.5 transition-transform active:scale-95"
-                        style={{ backgroundColor: selectedState && selectedCity ? themeColor : '#222', color: selectedState && selectedCity ? '#000' : '#444' }}
-                      >
-                        <Plus size={14} /> Link Custom Location
-                      </button>
-
-                      {/* Grouped Selected States & Cities */}
-                      <div className="space-y-3">
-                        <label className="text-[8px] font-bold text-neutral-600 uppercase tracking-widest block border-b border-white/5 pb-1">Covered Custom States & Cities</label>
-                        <div className="space-y-3 max-h-48 overflow-y-auto pr-1 custom-scrollbar">
-                          {formData.preferredLocations?.customLocations?.map((item, idx) => (
-                            <div key={idx} className="bg-white/[0.02] border border-white/5 rounded-lg p-3 space-y-2">
-                              <p className="text-[9px] font-black uppercase tracking-widest text-[#55DEE8] flex items-center gap-1.5 leading-none">
-                                <Map size={10} /> {item.state}
-                              </p>
-                              <div className="flex flex-wrap gap-1.5">
-                                {item.cities.map(cityName => (
-                                  <span key={cityName} className="px-2 py-1 bg-black border border-white/5 rounded text-[8px] font-bold text-white uppercase tracking-wider flex items-center gap-1.5">
-                                    {cityName}
-                                    <button onClick={() => removeCustomCity(item.state, cityName)} className="text-neutral-600 hover:text-red-400">
-                                      <X size={10} />
-                                    </button>
-                                  </span>
-                                ))}
-                              </div>
-                            </div>
-                          ))}
-                          {(!formData.preferredLocations?.customLocations || formData.preferredLocations.customLocations.length === 0) && (
-                            <p className="text-[9px] font-medium text-neutral-700 italic">No custom state-city scopes mapped yet.</p>
-                          )}
-                        </div>
-                      </div>
-                    </div>
-                  )}
-                </div>
+v>
 
               </div>
 
