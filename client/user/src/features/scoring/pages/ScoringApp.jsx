@@ -1,6 +1,7 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { ChevronLeft, Settings, History, Users, Circle, Zap, CheckCircle2, AlertCircle, Filter, Shield, User, PlayCircle, Undo2, Trophy, Play, Sparkles, X, Pause, FileText, TrendingUp } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { ChevronLeft, Settings, History, Users, Circle, Zap, CheckCircle2, AlertCircle, Filter, Shield, User, PlayCircle, Undo2, Trophy, Play, Sparkles, X, Pause, FileText, TrendingUp, MapPin, Timer, Hash, Crosshair } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { useSelector } from 'react-redux';
 import useCricketScoring from '../hooks/useCricketScoring';
@@ -13,25 +14,29 @@ import TossModal from '@features/scoring/components/TossModal';
 import { io } from 'socket.io-client';
 import axiosInstance from '@hooks/useAxiosInstance';
 import ScoringPasswordModal from '../components/ScoringPasswordModal';
+import CustomRunsModal from '../components/CustomRunsModal';
 import TickerThemeStoreModal from '@features/scoring/components/TickerThemeStoreModal';
 import VisualWagonWheelModal from '../components/VisualWagonWheelModal';
 import PenaltyModal from '../components/PenaltyModal';
+import EndMatchModal from '../components/EndMatchModal';
 import MatchReportModal from '../components/MatchReportModal';
+import MatchExitModal from '../components/MatchExitModal';
+import cricketLoadingGif from '../../../assets/cricket-loading.gif';
 
 const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:6001';
 /**
  * ScoringApp — The primary match scoring console.
- * Fully rebranded for the Scorer Portal with Teal Green (#BFF367) and Inter font.
+ * Fully rebranded for the Scorer Portal with Teal Green (#00C187) and Inter font.
  */
 
-const THEME_COLOR = '#BFF367';
+const THEME_COLOR = '#00C187';
 
 /* ─── Helpers ─── */
 const ballColor = (ball) => {
   if (ball.isWicket) return 'bg-red-500/20 text-red-500 border border-red-500/30';
-  if (ball.isExtra) return 'bg-[#BFF367]/20 text-[#BFF367] border border-[#BFF367]/30';
-  if (ball.runs === 6) return 'bg-[#BFF367] text-black shadow-[0_0_15px_rgba(0,193,135,0.4)]';
-  if (ball.runs === 4) return 'bg-[#BFF367]/80 text-black';
+  if (ball.isExtra) return 'bg-[#00C187]/20 text-[#00C187] border border-[#00C187]/30';
+  if (ball.runs === 6) return 'bg-[#00C187] text-black shadow-[0_0_15px_rgba(0,193,135,0.4)]';
+  if (ball.runs === 4) return 'bg-[#00C187]/80 text-black';
   if (ball.runs === 0) return 'bg-white/5 text-neutral-600 border border-white/5';
   return 'bg-white/10 text-white border border-white/10';
 };
@@ -76,7 +81,7 @@ function MembersTab({ matchData }) {
       <div className="flex gap-2 bg-white/5 rounded-[8px] p-1.5 border border-white/5">
         {[['teamA', teamA?.name || 'TBD'], ['teamB', teamB?.name || 'TBD']].map(([key, label]) => (
           <button key={key} onClick={() => setTeamTab(key)}
-            className={`flex-1 py-2.5 rounded-[8px] text-[10px] font-black uppercase tracking-[0.2em] transition-all ${teamTab === key ? 'bg-[#BFF367] text-black shadow-lg' : 'text-neutral-500 hover:text-white'}`}>
+            className={`flex-1 py-2.5 rounded-[8px] text-[10px] font-black uppercase tracking-[0.2em] transition-all ${teamTab === key ? 'bg-[#00C187] text-black shadow-lg' : 'text-neutral-500 hover:text-white'}`}>
             {label}
           </button>
         ))}
@@ -90,7 +95,7 @@ function MembersTab({ matchData }) {
             const bowl = getBowlingStats(uid);
             return (
               <div key={i} className="flex items-center gap-4 p-4 bg-white/[0.02] rounded-[8px] border border-white/5 hover:bg-white/[0.04] transition-all">
-                <div className="w-11 h-11 rounded-[8px] bg-[#BFF367]/10 border border-[#BFF367]/20 flex items-center justify-center shrink-0 overflow-hidden shadow-inner">
+                <div className="w-11 h-11 rounded-[8px] bg-[#00C187]/10 border border-[#00C187]/20 flex items-center justify-center shrink-0 overflow-hidden shadow-inner">
                   {slot.user?.profilePicture
                     ? <img src={slot.user.profilePicture} className="w-full h-full object-cover" alt="" />
                     : <User size={18} style={{ color: THEME_COLOR }} />}
@@ -188,8 +193,11 @@ const ScoringApp = () => {
   const [authAction, setAuthAction] = useState(null);
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [showPenaltyModal, setShowPenaltyModal] = useState(false);
+  const [showCustomRunsModal, setShowCustomRunsModal] = useState(false);
   const [showMatchReport, setShowMatchReport] = useState(false);
+  const [showExitModal, setShowExitModal] = useState(false);
   const [wagonWheelData, setWagonWheelData] = useState(null);
+  const [showMatchActions, setShowMatchActions] = useState(false);
 
   const [isAiCommentaryEnabled, setIsAiCommentaryEnabled] = useState(false);
   const [commentaryVoice, setCommentaryVoice] = useState('alloy');
@@ -302,7 +310,16 @@ const ScoringApp = () => {
   const [showTossModal, setShowTossModal] = useState(false);
   const [showThemeStore, setShowThemeStore] = useState(false);
   const [extraModal, setExtraModal] = useState(null);
+  const [showEndMatchModal, setShowEndMatchModal] = useState(false);
+  const [isWagonWheelEnabled, setIsWagonWheelEnabled] = useState(true);
 
+  const processRuns = (runData) => {
+    if (isWagonWheelEnabled) {
+      setWagonWheelData(runData);
+    } else {
+      handleScore({ ...runData, extraType: 'NONE' });
+    }
+  };
   const score = (() => {
     const innings = matchData?.innings || [];
     const current = innings[matchData?.currentInningsIndex ?? innings.length - 1];
@@ -450,8 +467,8 @@ const ScoringApp = () => {
   if (scoringLock === 'PENDING' && passwordVerified) return (
     <div className="min-h-screen bg-black flex items-center justify-center font-inter">
       <div className="text-center">
-        <div className="w-10 h-10 border-4 border-[#BFF367]/20 border-t-[#BFF367] rounded-full animate-spin mx-auto mb-4" />
-        <h2 className="text-[13px] font-black uppercase tracking-widest text-[#BFF367]">Acquiring Scoring Lock</h2>
+        <div className="w-10 h-10 border-4 border-[#00C187]/20 border-t-[#00C187] rounded-full animate-spin mx-auto mb-4" />
+        <h2 className="text-[13px] font-black uppercase tracking-widest text-[#00C187]">Acquiring Scoring Lock</h2>
       </div>
     </div>
   );
@@ -463,16 +480,16 @@ const ScoringApp = () => {
       <p className="text-[13px] text-neutral-400 font-medium mb-8 max-w-sm">
         Someone else is currently scoring this game. Please wait until they leave to gain access.
       </p>
-      <div className="flex items-center gap-3 bg-[#BFF367]/10 border border-[#BFF367]/20 px-6 py-4 rounded-[8px]">
-        <div className="w-4 h-4 border-2 border-[#BFF367]/30 border-t-[#BFF367] rounded-full animate-spin" />
-        <span className="text-[11px] font-black uppercase tracking-widest text-[#BFF367]">Waiting in queue...</span>
+      <div className="flex items-center gap-3 bg-[#00C187]/10 border border-[#00C187]/20 px-6 py-4 rounded-[8px]">
+        <div className="w-4 h-4 border-2 border-[#00C187]/30 border-t-[#00C187] rounded-full animate-spin" />
+        <span className="text-[11px] font-black uppercase tracking-widest text-[#00C187]">Waiting in queue...</span>
       </div>
     </div>
   );
 
   if (loading) return (
-    <div className="min-h-screen bg-black flex items-center justify-center font-inter">
-      <div className="w-10 h-10 border-4 border-[#BFF367]/20 border-t-[#BFF367] rounded-full animate-spin" />
+    <div className="min-h-[100dvh] bg-black flex flex-col items-center justify-center font-inter">
+      <img src={cricketLoadingGif} alt="Loading match..." className="w-32 h-32 object-contain" />
     </div>
   );
 
@@ -480,7 +497,7 @@ const ScoringApp = () => {
     <div className="min-h-screen bg-black flex flex-col items-center justify-center p-6 text-center font-inter">
       <AlertCircle style={{ color: THEME_COLOR }} className="mb-6" size={56} />
       <h2 className="text-2xl font-black uppercase tracking-tighter mb-3">Sync Interrupted</h2>
-      <button onClick={() => navigate(-1)} className="px-6 py-3 bg-white/5 rounded-[8px] text-[10px] font-black uppercase tracking-widest text-[#BFF367] border border-[#BFF367]/20">Establish New Link</button>
+      <button onClick={() => navigate(-1)} className="px-6 py-3 bg-white/5 rounded-[8px] text-[10px] font-black uppercase tracking-widest text-[#00C187] border border-[#00C187]/20">Establish New Link</button>
     </div>
   );
 
@@ -489,7 +506,7 @@ const ScoringApp = () => {
       case 'members': return <MembersTab matchData={matchData} />;
       case 'history': return <HistoryTab matchData={matchData} />;
       default: return (
-        <div className="space-y-6 font-inter">
+        <div className="font-inter flex-1 flex flex-col mt-0">
           {matchData?.timerState === 'PAUSED' && (
             <div className="p-4 bg-red-500/10 border border-red-500/30 rounded-[8px] flex items-center gap-3.5 shadow-lg animate-pulse">
               <AlertCircle className="text-red-500 shrink-0" size={20} />
@@ -499,29 +516,12 @@ const ScoringApp = () => {
               </div>
             </div>
           )}
-          {needsMatchStart && (
-            <div className="p-8 bg-white/[0.02] border border-white/5 rounded-[8px] space-y-6 text-center relative overflow-hidden shadow-2xl">
-              <div className="absolute top-0 right-0 w-32 h-32 bg-[#BFF367]/5 blur-3xl pointer-events-none" />
-              <div className="w-16 h-16 bg-[#BFF367]/10 border border-[#BFF367]/20 rounded-[8px] flex items-center justify-center mx-auto shadow-lg">
-                <Play size={28} style={{ color: THEME_COLOR }} />
-              </div>
-              <div>
-                <h3 className="text-2xl font-black uppercase tracking-tighter">Match Ready</h3>
-                <p className="text-[11px] text-neutral-500 font-black uppercase tracking-widest mt-2">Initialize scoring</p>
-              </div>
-              <button
-                onClick={() => setShowTossModal(true)}
-                className="w-full py-5 bg-[#BFF367]/10 border border-[#BFF367]/30 rounded-[8px] text-center text-[#BFF367] text-[13px] font-black uppercase tracking-[0.2em] shadow-xl"
-              >
-                ⚡ Start Match
-              </button>
-            </div>
-          )}
+
 
           {needsInningsSetup && !needsMatchStart && !isFirstInningsComplete && (
             <button
               onClick={() => setShowInningsSetup(true)}
-              className="w-full py-5 bg-[#BFF367]/10 border border-[#BFF367]/30 rounded-[8px] text-center text-[#BFF367] text-[11px] font-black uppercase tracking-[0.2em] animate-pulse shadow-xl"
+              className="w-full py-5 bg-[#00C187]/10 border border-[#00C187]/30 rounded-[8px] text-center text-[#00C187] text-[11px] font-black uppercase tracking-[0.2em] animate-pulse shadow-xl"
             >
               ⚡ Setup Next Pair & Bowler
             </button>
@@ -529,8 +529,8 @@ const ScoringApp = () => {
 
           {isFirstInningsComplete && (
             <div className="p-8 bg-white/[0.02] border border-white/5 rounded-[8px] space-y-6 text-center relative overflow-hidden shadow-2xl">
-              <div className="absolute top-0 right-0 w-32 h-32 bg-[#BFF367]/5 blur-3xl pointer-events-none" />
-              <div className="w-16 h-16 bg-[#BFF367]/10 border border-[#BFF367]/20 rounded-[8px] flex items-center justify-center mx-auto shadow-lg">
+              <div className="absolute top-0 right-0 w-32 h-32 bg-[#00C187]/5 blur-3xl pointer-events-none" />
+              <div className="w-16 h-16 bg-[#00C187]/10 border border-[#00C187]/20 rounded-[8px] flex items-center justify-center mx-auto shadow-lg">
                 <Trophy size={28} style={{ color: THEME_COLOR }} />
               </div>
               <div>
@@ -570,291 +570,383 @@ const ScoringApp = () => {
             </div>
           )}
 
-          <div className="grid grid-cols-2 gap-4">
-            <div className="bg-white/[0.02] border border-[#BFF367]/30 rounded-[8px] p-6 space-y-4 shadow-xl">
-              <div className="flex items-center gap-3">
-                <div className="w-9 h-9 rounded-[8px] bg-[#BFF367]/10 border border-[#BFF367]/20 flex items-center justify-center shadow-inner">
-                  <User size={16} style={{ color: THEME_COLOR }} />
-                </div>
-                <div>
-                  <p className="text-[9px] font-black uppercase tracking-[0.2em]" style={{ color: THEME_COLOR }}>Striker ●</p>
-                  <p className="text-[12px] font-black uppercase truncate text-white">{strikerSlot?.name || 'TBD'}</p>
-                </div>
-              </div>
-              <div className="flex justify-between items-end border-t border-white/5 pt-4">
-                <p className="text-4xl font-black text-white">{strikerStats?.runs ?? 0}</p>
-                <p className="text-[10px] text-neutral-500 font-black uppercase tracking-widest pb-1.5">{strikerStats?.balls ?? 0} balls</p>
-              </div>
-            </div>
-            <div className="bg-white/[0.02] border border-white/5 rounded-[8px] p-6 space-y-4 opacity-40 shadow-xl">
-              <div className="flex items-center gap-3">
-                <div className="w-9 h-9 rounded-[8px] bg-white/5 border border-white/10 flex items-center justify-center">
-                  <User size={16} className="text-neutral-500" />
-                </div>
-                <div>
-                  <p className="text-[9px] text-neutral-600 font-black uppercase tracking-[0.2em]">Off Strike</p>
-                  <p className="text-[12px] font-black uppercase truncate text-white">{nonStrikerSlot?.name || 'TBD'}</p>
-                </div>
-              </div>
-              <div className="flex justify-between items-end border-t border-white/5 pt-4">
-                <p className="text-4xl font-black text-white">{nonStrikerStats?.runs ?? 0}</p>
-                <p className="text-[10px] text-neutral-500 font-black uppercase tracking-widest pb-1.5">{nonStrikerStats?.balls ?? 0} balls</p>
-              </div>
-            </div>
-          </div>
 
-          <div className="bg-gradient-to-r from-[#BFF367]/15 to-transparent border border-[#BFF367]/30 rounded-[8px] p-6 flex items-center justify-between shadow-2xl relative overflow-hidden">
-            <div className="absolute top-0 right-0 w-32 h-32 bg-[#BFF367]/5 blur-3xl pointer-events-none" />
-            <div className="flex items-center gap-5 relative z-10">
-              <div className="w-12 h-12 rounded-[8px] bg-[#BFF367]/20 border border-[#BFF367]/30 flex items-center justify-center shadow-lg">
-                <Zap size={22} style={{ color: THEME_COLOR }} />
-              </div>
-              <div>
-                <p className="text-[10px] font-black uppercase tracking-[0.2em]" style={{ color: THEME_COLOR }}>Active Bowler</p>
-                <p className="text-[15px] font-black uppercase text-white mt-0.5">{bowlerSlot?.name || 'Wait for Bowl'}</p>
-              </div>
-            </div>
-            <div className="text-right relative z-10">
-              <p className="text-3xl font-black text-white">{bowlerStats?.wickets ?? 0}<span className="text-[#BFF367] text-xl mx-1">-</span>{bowlerStats?.runs ?? 0}</p>
-              <p className="text-[10px] font-black text-neutral-500 uppercase tracking-widest mt-1.5">{bowlerStats?.overs ?? 0}.{bowlerStats?.balls ?? 0} OVERS</p>
-            </div>
-          </div>
 
-          <div className={`space-y-4 ${matchData?.timerState === 'PAUSED' ? 'opacity-50' : ''}`}>
-            <div className="grid grid-cols-4 gap-3.5">
-              {[0, 1, 2, 3].map(run => (
-                <button key={run}
-                  disabled={isMutating}
+          {!needsMatchStart && !needsInningsSetup && !isFirstInningsComplete && (
+            <div className={`-mx-4 flex-1 flex flex-col ${matchData?.timerState === 'PAUSED' ? 'opacity-50' : ''} mt-0`}>
+            <div className="flex justify-between flex-1 min-h-[171px] gap-0">
+              {/* Col 1 */}
+              <div className="flex flex-col gap-0 w-[25%]">
+                {[0, 3].map(run => (
+                  <button key={run} disabled={isMutating}
+                    onClick={() => {
+                      if (isMutating || !checkTimerActive()) return;
+                      run === 0 ? handleScore({ runs: run, extraType: 'NONE' }) : processRuns({ runs: run, isBoundary: false, isFour: false, isSix: false });
+                    }}
+                    style={{ backdropFilter: 'blur(6px)' }}
+                    className={`flex-1 bg-white/[0.05] border border-white/10 rounded-none flex items-center justify-center text-white hover:bg-white/10 transition-all transform active:scale-95 ${isMutating ? 'opacity-40 cursor-not-allowed' : ''}`}>
+                    <span style={{ fontFamily: '"Anton", sans-serif', fontSize: '32px', letterSpacing: '1.6px' }}>{run}</span>
+                  </button>
+                ))}
+              </div>
+              
+              {/* Col 2 */}
+              <div className="flex flex-col gap-0 w-[25%]">
+                <button disabled={isMutating}
                   onClick={() => {
-                    if (isMutating) return;
-                    if (!checkTimerActive()) return;
-                    if (run === 0) {
-                      handleScore({ runs: run, extraType: 'NONE' });
-                    } else {
-                      setWagonWheelData({ runs: run, isBoundary: false, isFour: false, isSix: false });
-                    }
+                    if (isMutating || !checkTimerActive()) return;
+                    processRuns({ runs: 1, isBoundary: false, isFour: false, isSix: false });
                   }}
-                  className={`h-16 bg-white/[0.03] border border-white/5 rounded-[8px] flex items-center justify-center text-2xl font-black text-white hover:bg-[#BFF367]/10 hover:border-[#BFF367]/40 transition-all transform active:scale-90 shadow-lg ${isMutating ? 'opacity-40 cursor-not-allowed' : ''}`}>
-                  {run}
+                  style={{ backdropFilter: 'blur(6px)' }}
+                  className={`flex-1 bg-white/[0.05] border border-white/10 rounded-none flex items-center justify-center text-white hover:bg-white/10 transition-all transform active:scale-95 ${isMutating ? 'opacity-40 cursor-not-allowed' : ''}`}>
+                  <span style={{ fontFamily: '"Anton", sans-serif', fontSize: '32px', letterSpacing: '1.6px' }}>1</span>
                 </button>
-              ))}
+                <button disabled={isMutating}
+                  onClick={() => {
+                    if (isMutating || !checkTimerActive()) return;
+                    processRuns({ runs: 4, isBoundary: true, isFour: true, isSix: false });
+                  }}
+                  style={{ backdropFilter: 'blur(6px)' }}
+                  className={`flex-1 bg-white/[0.05] border border-white/10 rounded-none flex items-center justify-center text-white hover:bg-white/10 transition-all transform active:scale-95 ${isMutating ? 'opacity-40 cursor-not-allowed' : ''}`}>
+                  <span style={{ fontFamily: '"Anton", sans-serif', fontSize: '32px', letterSpacing: '1.6px' }}>4</span>
+                </button>
+              </div>
+
+              {/* Col 3 */}
+              <div className="flex flex-col gap-0 w-[25%]">
+                <button disabled={isMutating}
+                  onClick={() => {
+                    if (isMutating || !checkTimerActive()) return;
+                    processRuns({ runs: 2, isBoundary: false, isFour: false, isSix: false });
+                  }}
+                  style={{ backdropFilter: 'blur(6px)' }}
+                  className={`flex-1 bg-white/[0.05] border border-white/10 rounded-none flex items-center justify-center text-white hover:bg-white/10 transition-all transform active:scale-95 ${isMutating ? 'opacity-40 cursor-not-allowed' : ''}`}>
+                  <span style={{ fontFamily: '"Anton", sans-serif', fontSize: '32px', letterSpacing: '1.6px' }}>2</span>
+                </button>
+                <button disabled={isMutating}
+                  onClick={() => {
+                    if (isMutating || !checkTimerActive()) return;
+                    processRuns({ runs: 6, isBoundary: true, isFour: false, isSix: true });
+                  }}
+                  style={{ backdropFilter: 'blur(6px)' }}
+                  className={`flex-1 bg-white/[0.05] border border-white/10 rounded-none flex items-center justify-center text-white hover:bg-white/10 transition-all transform active:scale-95 ${isMutating ? 'opacity-40 cursor-not-allowed' : ''}`}>
+                  <span style={{ fontFamily: '"Anton", sans-serif', fontSize: '32px', letterSpacing: '1.6px' }}>6</span>
+                </button>
+              </div>
+
+              {/* Col 4 */}
+              <div className="flex flex-col gap-0 w-[25%]">
+                <button disabled={isMutating}
+                  onClick={async () => {
+                    if (isMutating || !checkTimerActive()) return;
+                    const result = await undoBall();
+                    if (result.success) toast.success('Reverted last ball');
+                    else toast.error(result.error || 'Undo limit reached');
+                  }}
+                  className={`flex-[3] bg-white/[0.05] border border-white/10 rounded-none flex items-center justify-center hover:bg-white/10 transition-all transform active:scale-95 ${isMutating ? 'opacity-40 cursor-not-allowed' : ''}`}>
+                  <span className="text-white font-inter font-semibold uppercase tracking-widest text-[16px]">UNDO</span>
+                </button>
+                <button disabled={isMutating} onClick={() => { if (!isMutating && checkTimerActive()) setShowWicketModal(true); }}
+                  className={`flex-[2] bg-white/[0.05] border border-white/10 rounded-none flex items-center justify-center hover:bg-white/10 transition-all transform active:scale-95 ${isMutating ? 'opacity-40 cursor-not-allowed' : ''}`}>
+                  <span className="text-[#F40000] font-inter font-semibold uppercase tracking-widest text-[18px]">OUT</span>
+                </button>
+                <button disabled={isMutating} onClick={() => { if (!isMutating && checkTimerActive()) setShowCustomRunsModal(true); }}
+                  className={`flex-[2] bg-white/[0.05] border border-white/10 rounded-none flex items-center justify-center hover:bg-white/10 transition-all transform active:scale-95 ${isMutating ? 'opacity-40 cursor-not-allowed' : ''}`}>
+                  <span className="text-white font-inter font-semibold uppercase tracking-wider text-[13px]">CUSTOM</span>
+                </button>
+              </div>
             </div>
-            <div className="grid grid-cols-4 gap-3.5">
-              {[4, 6].map(run => (
-                <button key={run}
-                  disabled={isMutating}
-                  onClick={() => {
-                    if (isMutating) return;
-                    if (!checkTimerActive()) return;
-                    setWagonWheelData({ runs: run, isBoundary: true, isFour: run === 4, isSix: run === 6 });
-                  }}
-                  className={`h-16 rounded-[8px] flex items-center justify-center text-2xl font-black text-black transform active:scale-95 shadow-xl transition-all ${isMutating ? 'opacity-40 cursor-not-allowed' : ''}`}
-                  style={{ backgroundColor: THEME_COLOR, boxShadow: `0 10px 25px ${THEME_COLOR}33` }}>
-                  {run}
-                </button>
-              ))}
+
+            {/* Bottom Row Extras */}
+            <div className="flex h-[46px] gap-0 mt-0">
               <button disabled={isMutating} onClick={() => { if (!isMutating && checkTimerActive()) setExtraModal('WIDE'); }}
-                className={`h-16 bg-white/[0.03] border border-white/5 text-[#BFF367] rounded-[8px] flex items-center justify-center text-[10px] font-black uppercase tracking-widest hover:bg-[#BFF367]/10 transition-all border-[#BFF367]/20 ${isMutating ? 'opacity-40 cursor-not-allowed' : ''}`}>
-                WIDE
+                className={`flex-1 bg-white/[0.05] border border-white/10 rounded-none flex items-center justify-center hover:bg-white/10 transition-all transform active:scale-95 ${isMutating ? 'opacity-40 cursor-not-allowed' : ''}`}>
+                <span className="text-[#00C187] font-inter font-semibold uppercase tracking-widest text-[15px]">WIDE</span>
               </button>
               <button disabled={isMutating} onClick={() => { if (!isMutating && checkTimerActive()) setExtraModal('NO_BALL'); }}
-                className={`h-16 bg-white/[0.03] border border-white/5 text-[#BFF367] rounded-[8px] flex items-center justify-center text-[10px] font-black uppercase tracking-widest hover:bg-[#BFF367]/10 transition-all border-[#BFF367]/20 ${isMutating ? 'opacity-40 cursor-not-allowed' : ''}`}>
-                NB
+                className={`flex-1 bg-white/[0.05] border border-white/10 rounded-none flex items-center justify-center hover:bg-white/10 transition-all transform active:scale-95 ${isMutating ? 'opacity-40 cursor-not-allowed' : ''}`}>
+                <span className="text-[#00C187] font-inter font-semibold uppercase tracking-widest text-[16px]">NB</span>
               </button>
-            </div>
-            <div className="grid grid-cols-3 gap-3.5">
               <button disabled={isMutating} onClick={() => { if (!isMutating && checkTimerActive()) setExtraModal('BYE'); }}
-                className={`h-14 bg-white/[0.03] border border-white/5 text-neutral-400 rounded-[8px] flex items-center justify-center text-[10px] font-black uppercase tracking-widest hover:text-white transition-all ${isMutating ? 'opacity-40 cursor-not-allowed' : ''}`}>
-                BYE
+                className={`flex-1 bg-white/[0.05] border border-white/10 rounded-none flex items-center justify-center hover:bg-white/10 transition-all transform active:scale-95 ${isMutating ? 'opacity-40 cursor-not-allowed' : ''}`}>
+                <span className="text-white font-inter font-semibold uppercase tracking-widest text-[16px]">BYE</span>
               </button>
               <button disabled={isMutating} onClick={() => { if (!isMutating && checkTimerActive()) setExtraModal('LEG_BYE'); }}
-                className={`h-14 bg-white/[0.03] border border-white/5 text-neutral-400 rounded-[8px] flex items-center justify-center text-[10px] font-black uppercase tracking-widest hover:text-white transition-all ${isMutating ? 'opacity-40 cursor-not-allowed' : ''}`}>
-                LEG BYE
-              </button>
-              <button disabled={isMutating} onClick={() => { if (!isMutating && checkTimerActive()) setShowPenaltyModal(true); }}
-                className={`h-14 bg-white/[0.03] border border-white/5 text-red-400 rounded-[8px] flex items-center justify-center text-[10px] font-black uppercase tracking-widest hover:text-red-300 transition-all ${isMutating ? 'opacity-40 cursor-not-allowed' : ''}`}>
-                PENALTY
+                className={`flex-1 bg-white/[0.05] border border-white/10 rounded-none flex items-center justify-center hover:bg-white/10 transition-all transform active:scale-95 ${isMutating ? 'opacity-40 cursor-not-allowed' : ''}`}>
+                <span className="text-white font-inter font-semibold uppercase tracking-wider text-[13px]">LEG BYE</span>
               </button>
             </div>
-            <button disabled={isMutating} onClick={() => { if (!isMutating && checkTimerActive()) setShowWicketModal(true); }}
-              className={`w-full h-20 bg-red-600 text-white rounded-[8px] flex items-center justify-center text-sm font-black uppercase tracking-[0.4em] shadow-[0_15px_40px_rgba(220,38,38,0.3)] hover:bg-red-700 transition-all transform active:scale-95 ${isMutating ? 'opacity-40 cursor-not-allowed' : ''}`}>
-              ⚡ DISMISSAL
-            </button>
           </div>
+          )}
 
-          <div className="space-y-4 pt-4">
-            <div className="flex justify-between items-center px-2">
-              <h3 className="text-[10px] font-black uppercase tracking-[0.3em] text-neutral-600">Timeline Snapshot</h3>
-              <div className="flex gap-1">
-                {[1, 2, 3].map(i => <div key={i} className="w-1 h-1 rounded-full bg-neutral-800" />)}
-              </div>
-            </div>
-            <div className="flex gap-3 overflow-x-auto no-scrollbar py-4 px-2">
-              {matchData?.timeline?.slice(-12).reverse().map((ball, i) => (
-                <div key={i} className={`w-12 h-12 rounded-[8px] flex items-center justify-center text-sm font-black shrink-0 transition-all transform hover:scale-110 ${ballColor(ball)}`}>
-                  {ballLabel(ball)}
-                </div>
-              ))}
-              {(!matchData?.timeline || matchData.timeline.length === 0) && (
-                <div className="py-2 text-[10px] font-black uppercase text-neutral-800 tracking-widest">Waiting for first delivery...</div>
-              )}
-            </div>
-          </div>
         </div>
       );
     }
   };
 
   return (
-    <div className="min-h-screen bg-[#000] text-white selection:bg-[#BFF367] selection:text-black font-inter">
-      {/* Header */}
-      <div className="sticky top-0 z-50 bg-black/80 backdrop-blur-2xl border-b border-white/5 p-5">
-        <div className="max-w-xl mx-auto flex items-center justify-between">
-          <div className="flex items-center gap-4">
-            <button onClick={() => navigate(-1)} className="p-2.5 bg-white/5 rounded-[8px] hover:bg-white/10 transition-all border border-white/5">
-              <ChevronLeft size={20} />
+    <div className="min-h-[100dvh] bg-[#121212] flex justify-center text-white selection:bg-[#00C187] selection:text-black font-inter overflow-hidden">
+      <div className="w-full max-w-[450px] bg-black h-[100dvh] relative flex flex-col shadow-[0_0_50px_rgba(0,0,0,0.5)] border-x border-white/5 overflow-hidden">
+      
+      {needsMatchStart ? (() => {
+            const game = matchData?.hostedGameId || matchData;
+            const tA = game?.teamA || (Array.isArray(game?.teams) ? game?.teams?.find(t => t.teamKey === 'teamA') : game?.teams?.teamA);
+            const tB = game?.teamB || (Array.isArray(game?.teams) ? game?.teams?.find(t => t.teamKey === 'teamB') : game?.teams?.teamB);
+            const tAName = tA?.name || 'TEAM A';
+            const tBName = tB?.name || 'TEAM B';
+            const locationName = game?.location || 'National Arena, Dubai';
+
+            return (
+              <div className="flex-1 flex flex-col p-4 bg-[#121212] relative overflow-y-auto no-scrollbar">
+                 {/* Matchup Card */}
+                 <div className="w-full bg-[#1e1e1e] border border-white/5 rounded-[12px] p-6 flex items-center justify-between shadow-lg mb-4 mt-2">
+                    <div className="flex flex-col items-center gap-3 w-[30%]">
+                      <div className="w-14 h-14 rounded-full bg-[#81FBB8] flex items-center justify-center shadow-[0_0_15px_rgba(129,251,184,0.3)] shrink-0">
+                         <Shield size={24} className="text-[#1a1a1a]" fill="currentColor" />
+                      </div>
+                      <span className="text-[14px] font-black uppercase tracking-wider text-white truncate w-full text-center" style={{ fontFamily: '"Bebas Neue", Anton, sans-serif' }}>
+                         {tAName}
+                      </span>
+                    </div>
+                    
+                    <div className="w-[40%] flex items-center justify-center">
+                       <span className="text-3xl font-black text-white/10 uppercase" style={{ fontFamily: '"Bebas Neue", Anton, sans-serif' }}>VS</span>
+                    </div>
+
+                    <div className="flex flex-col items-center gap-3 w-[30%]">
+                      <div className="w-14 h-14 rounded-full bg-[#2FD1C6] flex items-center justify-center shadow-[0_0_15px_rgba(47,209,198,0.3)] shrink-0">
+                         <Zap size={24} className="text-[#1a1a1a]" fill="currentColor" />
+                      </div>
+                      <span className="text-[14px] font-black uppercase tracking-wider text-white truncate w-full text-center" style={{ fontFamily: '"Bebas Neue", Anton, sans-serif' }}>
+                         {tBName}
+                      </span>
+                    </div>
+                 </div>
+
+                 {/* Format and Overs Grid */}
+                 <div className="grid grid-cols-2 gap-4 mb-4">
+                    <div className="bg-[#1e1e1e] border border-white/5 rounded-[12px] p-5 shadow-lg flex flex-col justify-between items-start h-[100px]">
+                       <Timer size={18} className="text-[#2FD1C6] mb-auto" />
+                       <div>
+                         <p className="text-[9px] font-black uppercase tracking-widest text-neutral-500 mb-1">FORMAT</p>
+                         <p className="text-xl font-black text-white leading-none uppercase" style={{ fontFamily: '"Bebas Neue", Anton, sans-serif' }}>T20 MATCH</p>
+                       </div>
+                    </div>
+                    <div className="bg-[#1e1e1e] border border-white/5 rounded-[12px] p-5 shadow-lg flex flex-col justify-between items-start h-[100px]">
+                       <Hash size={18} className="text-[#2FD1C6] mb-auto" />
+                       <div>
+                         <p className="text-[9px] font-black uppercase tracking-widest text-neutral-500 mb-1">OVERS</p>
+                         <p className="text-xl font-black text-white leading-none uppercase" style={{ fontFamily: '"Bebas Neue", Anton, sans-serif' }}>{game?.overs || 20}.0 OVERS</p>
+                       </div>
+                    </div>
+                 </div>
+
+                 {/* Venue Card */}
+                 <div 
+                   className="w-full h-32 rounded-[12px] overflow-hidden relative shadow-lg mb-8 border border-white/5 bg-[#1e1e1e]"
+                 >
+                   <div className="absolute inset-0 bg-gradient-to-t from-black via-black/80 to-transparent z-10" />
+                   <img src="/score-bg.png" alt="Venue" className="absolute inset-0 w-full h-full object-cover opacity-30 grayscale" />
+                   <div className="absolute bottom-4 left-4 right-4 z-20 flex items-start gap-3">
+                     <MapPin size={20} className="text-[#D4F99A] mt-0.5" />
+                     <div>
+                       <p className="text-[9px] font-black uppercase tracking-widest text-neutral-400 mb-1">VENUE</p>
+                       <p className="text-lg font-black text-white tracking-wide leading-none uppercase truncate" style={{ fontFamily: '"Bebas Neue", Anton, sans-serif' }}>{locationName}</p>
+                     </div>
+                   </div>
+                 </div>
+                 
+                 <div className="flex gap-3 w-full mt-auto pb-4 pt-4">
+                    <button
+                      onClick={() => setShowExitModal(true)}
+                      className="flex-1 h-14 bg-[#1e1e1e] border border-white/5 rounded-[8px] flex items-center justify-center gap-2 text-white text-[13px] font-black uppercase tracking-[0.1em] hover:bg-white/10 transition-all shadow-xl"
+                    >
+                      <ChevronLeft size={16} /> BACK
+                    </button>
+                    <button
+                      onClick={() => setShowTossModal(true)}
+                      className="flex-[1.5] h-14 bg-[#00C187]/10 border border-[#00C187]/30 rounded-[8px] flex items-center justify-center gap-2 text-[#00C187] text-[13px] font-black uppercase tracking-[0.1em] shadow-xl hover:bg-[#00C187]/20 transition-all"
+                    >
+                      START MATCH <Play size={14} />
+                    </button>
+                 </div>
+              </div>
+            );
+      })() : (
+        <>
+      <div className="flex-1 relative overflow-hidden">
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={activeTab}
+            initial={{ y: "20%", opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            exit={{ y: "-10%", opacity: 0 }}
+            transition={{ type: "spring", stiffness: 300, damping: 30 }}
+            className="absolute inset-0 overflow-y-auto p-4 pb-0 flex flex-col no-scrollbar"
+          >
+        {activeTab === 'scoring' && (
+          <>
+        {/* Score Display */}
+        <div 
+          className="relative -mx-4 -mt-4 h-[439px] flex flex-col justify-end pb-8 bg-cover bg-center rounded-none overflow-hidden shadow-2xl" 
+          style={{ 
+            backgroundImage: `linear-gradient(180deg, rgba(18,18,18,0.2) 0%, rgba(18,18,18,1) 100%), url('/score-bg.png')`
+          }}
+        >
+          <div className="absolute top-4 left-4 z-50">
+            <button onClick={() => setShowExitModal(true)} className="p-2 transition-all opacity-80 hover:opacity-100">
+              <img src="/back-icon.png" alt="Back" className="w-8 h-8 object-contain" />
             </button>
-            <div>
-              <h1 className="text-[15px] font-black uppercase tracking-tighter leading-tight text-white">{matchData?.hostedGameId?.name || 'Scorer Terminal'}</h1>
-              <div className="flex items-center gap-2 mt-0.5">
-                <span className="text-[9px] font-black uppercase tracking-[0.2em]" style={{ color: THEME_COLOR }}>Live Node</span>
-                <span className="w-1 h-1 rounded-full bg-neutral-800" />
-                <span className="text-[9px] text-neutral-500 font-black uppercase tracking-widest">#{matchData?.hostedGameId?.shortId}</span>
+          </div>
+          <div className="absolute top-4 right-4 z-50 flex items-center gap-2">
+            <button className="p-2 transition-all opacity-80 hover:opacity-100">
+              <img src="/share-icon.png" alt="Share" className="w-7 h-7 object-contain" />
+            </button>
+            <button onClick={() => setShowSettings(true)} className="p-2 transition-all opacity-80 hover:opacity-100">
+              <img src="/settings-icon.png" alt="Settings" className="w-8 h-8 object-contain" />
+            </button>
+          </div>
+          <div className="px-6 flex justify-between items-end">
+            {/* Score */}
+            <div className="flex items-baseline">
+              <span className="text-[120px] leading-[0.8] text-white" style={{ fontFamily: '"Bebas Neue", Anton, sans-serif' }}>{score.totalRuns}</span>
+              <span className="text-[85px] leading-[0.8] text-neutral-400" style={{ fontFamily: '"Bebas Neue", Anton, sans-serif' }}>/{score.totalWickets}</span>
+            </div>
+            
+            {/* CRR and Overs */}
+            <div className="flex flex-col gap-2 pb-2 text-right">
+              <div className="flex items-end justify-end gap-3">
+                <span className="text-[13px] opacity-70 tracking-wider text-white" style={{ fontFamily: '"Poppins", sans-serif' }}>CRR</span>
+                <span className="text-[21px] leading-none text-white" style={{ fontFamily: '"Bebas Neue", Anton, sans-serif' }}>{score.crr}</span>
+              </div>
+              <div className="flex items-end justify-end gap-3">
+                <span className="text-[13px] opacity-70 tracking-wider text-white" style={{ fontFamily: '"Poppins", sans-serif' }}>OVERS</span>
+                <span className="text-[21px] leading-none text-white" style={{ fontFamily: '"Bebas Neue", Anton, sans-serif' }}>{score.overs}.{score.balls}/{matchData?.overs || 20}</span>
               </div>
             </div>
           </div>
-          <div className="flex items-center gap-3">
-            {matchData?.status !== 'ENDED' && (
-              <div className="flex items-center gap-2 bg-white/5 rounded-[8px] p-1 border border-white/5">
-                <div className="px-3 py-1 font-mono text-[13px] font-black tracking-widest" style={{ color: THEME_COLOR }}>
-                  {formatTimer(localTimerSecs)}
-                </div>
-                <button
-                  onClick={async () => {
-                    const isRunning = matchData?.timerState === 'RUNNING';
-                    const isPaused = matchData?.timerState === 'PAUSED';
-                    const res = await toggleTimer();
-                    if (res.success) {
-                      if (isRunning) {
-                        toast.success('Match Paused');
-                      } else if (isPaused) {
-                        toast.success('Match Resumed');
-                      } else {
-                        toast.success('Match Started');
-                      }
-                    } else {
-                      toast.error(res.message || 'Failed to toggle timer');
-                    }
-                  }}
-                  className="p-1.5 bg-[#BFF367]/20 rounded-[8px] hover:bg-[#BFF367]/40 transition-all text-[#BFF367]"
-                >
-                  {matchData?.timerState === 'RUNNING' ? <Pause size={16} /> : <Play size={16} className="ml-0.5" />}
-                </button>
+
+          <div className="px-6 mt-8 space-y-6">
+            {/* Bowler Row */}
+            <div className="w-full bg-[#4C4C4C]/50 rounded-[8px] p-3.5 flex items-center justify-between backdrop-blur-md">
+              <div>
+                <p className="text-[9px] tracking-[3px] opacity-60 text-white" style={{ fontFamily: '"Poppins", sans-serif' }}>BALLING</p>
+                <p className="text-[13px] font-medium opacity-90 text-white mt-1 uppercase truncate max-w-[150px]" style={{ fontFamily: '"Poppins", sans-serif' }}>{bowlerSlot?.name?.split(' ')[0] || 'NAME'}</p>
               </div>
-            )}
-            <div className={`px-3 py-1.5 rounded-[8px] flex items-center gap-2 border transition-all ${liveEnabled ? 'bg-[#BFF367]/10 border-[#BFF367]/30 shadow-[0_0_15px_rgba(0,193,135,0.1)]' : 'bg-white/5 border-white/5'}`}>
-              <div className={`w-1.5 h-1.5 rounded-full ${liveEnabled ? 'bg-[#BFF367] animate-pulse' : 'bg-neutral-700'}`} />
-              <span className={`text-[9px] font-black uppercase tracking-widest ${liveEnabled ? 'text-[#BFF367]' : 'text-neutral-500'}`}>
-                {liveEnabled ? 'ON AIR' : 'LOCAL'}
-              </span>
+              <div className="flex items-center gap-2 mt-[5px] -ml-[5px] overflow-x-auto no-scrollbar max-w-[220px] sm:max-w-[260px]">
+                {(matchData?.timeline?.filter(b => b.over === score.overs) || []).map((ball, i) => (
+                  <div key={i} className="w-7 h-7 shrink-0 rounded-full bg-[#FFC403] text-black flex items-center justify-center text-[13px]" style={{ fontFamily: '"Bebas Neue", Anton, sans-serif' }}>
+                    {ballLabel(ball)}
+                  </div>
+                ))}
+                {Array.from({ length: Math.max(0, 6 - (matchData?.timeline?.filter(b => b.over === score.overs)?.length || 0)) }).map((_, i) => (
+                  <div key={`empty-${i}`} className="w-7 h-7 shrink-0 rounded-full border border-white/30" />
+                ))}
+              </div>
             </div>
-            <button onClick={() => setShowSettings(true)} className="p-2.5 bg-white/5 rounded-[8px] border border-white/5 hover:border-[#BFF367]/30 transition-all">
-              <Settings size={20} className="text-neutral-500 hover:text-white" />
-            </button>
+
+            {/* Striker / Non Striker */}
+            <div className="flex justify-between w-full px-1">
+              <div>
+                <p className="text-[9px] tracking-[3px] opacity-60 text-white" style={{ fontFamily: '"Poppins", sans-serif' }}>STRIKER</p>
+                <div className="flex items-center gap-3 mt-1.5">
+                  <p className="font-medium text-[14px] text-[#A1FF00] uppercase truncate max-w-[120px]" style={{ fontFamily: '"Poppins", sans-serif' }}>{strikerSlot?.name?.split(' ')[0] || 'Name'}</p>
+                  <p className="text-[11px] tracking-[3px] text-white" style={{ fontFamily: '"Poppins", sans-serif' }}>{strikerStats?.runs ?? 0} - {strikerStats?.balls ?? 0}</p>
+                </div>
+              </div>
+              <div className="text-right">
+                <p className="text-[9px] tracking-[3px] opacity-60 text-white" style={{ fontFamily: '"Poppins", sans-serif' }}>NON STRIKER</p>
+                <div className="flex items-center justify-end gap-3 mt-1.5">
+                   <p className="text-[11px] tracking-[3px] text-white" style={{ fontFamily: '"Poppins", sans-serif' }}>{nonStrikerStats?.runs ?? 0} - {nonStrikerStats?.balls ?? 0}</p>
+                   <p className="font-medium text-[14px] text-white uppercase truncate max-w-[120px]" style={{ fontFamily: '"Poppins", sans-serif' }}>{nonStrikerSlot?.name?.split(' ')[0] || 'Name'}</p>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
+
+        {/* Match Controls Dropdown */}
+        <div className="bg-[#1a1a1a] border-y border-white/5 rounded-none overflow-hidden shadow-xl -mx-4 !mt-0 mb-0 z-10 relative">
+          <button 
+            onClick={() => setShowMatchActions(!showMatchActions)}
+            className="w-full p-3 flex items-center justify-between hover:bg-white/5 transition-all"
+          >
+            <div className="flex items-center gap-2">
+              <Settings size={14} style={{ color: THEME_COLOR }} />
+              <span className="text-[10px] font-black uppercase tracking-[0.2em] text-white/90">MATCH CONTROLS</span>
+            </div>
+            <ChevronLeft size={16} className={`text-white/50 transition-transform duration-300 ${showMatchActions ? '-rotate-90' : 'rotate-180'}`} />
+          </button>
+          
+          <div className={`transition-all duration-300 ease-in-out ${showMatchActions ? 'max-h-40 opacity-100 p-4 pt-2' : 'max-h-0 opacity-0 px-4 pointer-events-none'}`}>
+            <div className="grid grid-cols-4 gap-3">
+              <button
+                onClick={() => setShowInningsSetup(true)}
+                className="h-16 bg-white/5 border border-white/10 rounded-[8px] text-[9px] font-black uppercase tracking-[0.2em] hover:bg-white/10 transition-all flex flex-col items-center justify-center gap-1.5 text-white transform active:scale-95 shadow-xl"
+              >
+                <Users size={16} /> <span className="mt-0.5">Players</span>
+              </button>
+              <button
+                disabled={isMutating}
+                onClick={() => { if (!isMutating && checkTimerActive()) setShowPenaltyModal(true); }}
+                className={`h-16 bg-white/5 border border-white/10 rounded-[8px] text-[9px] font-black uppercase tracking-[0.2em] hover:bg-white/10 transition-all flex flex-col items-center justify-center gap-1.5 text-white transform active:scale-95 shadow-xl ${isMutating ? 'opacity-40 cursor-not-allowed' : ''}`}
+              >
+                <Zap size={16} /> <span className="mt-0.5">Penalty</span>
+              </button>
+              <button
+                onClick={() => setIsWagonWheelEnabled(!isWagonWheelEnabled)}
+                className={`h-16 border rounded-[8px] text-[9px] font-black uppercase tracking-[0.2em] transition-all flex flex-col items-center justify-center gap-1.5 transform active:scale-95 shadow-xl ${isWagonWheelEnabled ? 'bg-[#00C187]/10 border-[#00C187]/30 text-[#00C187]' : 'bg-white/5 border-white/10 text-white/50 hover:bg-white/10 hover:text-white'}`}
+              >
+                <Crosshair size={16} /> <span className="mt-0.5">Wagon</span>
+              </button>
+              <button
+                onClick={() => setShowEndMatchModal(true)}
+                className="h-16 bg-white/[0.03] border border-white/10 rounded-[8px] text-[9px] font-black uppercase tracking-[0.2em] transition-all transform active:scale-95 shadow-xl flex flex-col items-center justify-center gap-1.5"
+                style={{ color: THEME_COLOR, borderColor: `${THEME_COLOR}33` }}
+              >
+                <CheckCircle2 size={16} /> <span className="mt-0.5">End Match</span>
+              </button>
+            </div>
+          </div>
+        </div>
+          </>
+        )}
+
+        {renderContent()}
+          </motion.div>
+        </AnimatePresence>
       </div>
 
-      <div className="max-w-xl mx-auto p-5 pb-32 space-y-8 animate-in fade-in duration-700">
-        {/* Score Display */}
-        <div className="relative overflow-hidden bg-white/[0.02] border border-white/5 rounded-[8px] p-10 text-center space-y-4 shadow-2xl">
-          <div className="absolute top-0 left-0 w-full h-1" style={{ backgroundColor: THEME_COLOR, opacity: 0.1 }} />
-          <p className="text-[11px] font-black text-neutral-500 uppercase tracking-[0.5em]">Score Engine</p>
-          <div className="flex items-center justify-center gap-6">
-            <h2 className="text-7xl font-black tracking-tighter italic text-white flex items-center">
-              {score.totalRuns} <span className="text-3xl not-italic mx-3 font-light opacity-20">/</span> <span style={{ color: THEME_COLOR }}>{score.totalWickets}</span>
-            </h2>
-          </div>
-          <div className="flex items-center justify-center gap-5 text-[11px] font-black uppercase tracking-[0.2em] text-neutral-500 bg-white/5 py-3 px-6 rounded-[6px] w-fit mx-auto border border-white/5">
-            <span className="text-white">{score.overs}.{score.balls} OVERS</span>
-            <span className="w-1.5 h-1.5 rounded-full bg-white/10" />
-            <span style={{ color: THEME_COLOR }}>CRR: {score.crr}</span>
-          </div>
-
-          <div className="absolute bottom-0 right-0 w-48 h-48 bg-[#BFF367]/5 rounded-full blur-[80px] pointer-events-none" />
-          <div className="absolute top-0 left-0 w-48 h-48 bg-blue-500/5 rounded-full blur-[80px] pointer-events-none" />
-        </div>
-
-        {/* Navigation Tabs */}
-        <div className="flex items-center gap-2 bg-white/5 p-1.5 rounded-[8px] border border-white/5 shadow-inner">
+      {/* Navigation Tabs */}
+      <div className="w-full z-[60] mt-auto bg-black shadow-inner backdrop-blur-md">
+        <div className="flex items-center gap-1 bg-[#1C1C1C] p-2 border-t border-white/5">
           {[
-            { id: 'scoring', icon: Zap, label: 'Control' },
-            { id: 'members', icon: Users, label: 'Dossier' },
+            { id: 'scoring', icon: Zap, label: 'Score' },
+            { id: 'members', icon: Users, label: 'Teams' },
             { id: 'history', icon: History, label: 'Ledger' }
           ].map(tab => (
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
-              className={`flex-1 flex items-center justify-center gap-3 py-3.5 rounded-[8px] transition-all border ${activeTab === tab.id ? 'bg-white/10 text-[#BFF367] border-[#BFF367]/20 shadow-lg' : 'text-neutral-500 hover:text-white border-transparent'}`}
+              className={`flex-1 flex items-center justify-center gap-3 py-3.5 rounded-[8px] transition-all border ${activeTab === tab.id ? 'bg-white/10 text-[#00C187] border-[#00C187]/20 shadow-lg' : 'text-neutral-500 hover:text-white border-transparent'}`}
             >
               <tab.icon size={16} />
               <span className="text-[10px] font-black uppercase tracking-widest">{tab.label}</span>
             </button>
           ))}
         </div>
-
-        {renderContent()}
-
-        {/* Action Bar */}
-        <div className="fixed bottom-0 left-0 right-0 p-6 bg-gradient-to-t from-black via-black/95 to-transparent z-[60]">
-          <div className="max-w-xl mx-auto grid grid-cols-3 gap-3">
-            <button
-              onClick={() => setShowInningsSetup(true)}
-              className="h-16 bg-white/5 border border-white/10 rounded-[8px] text-[9px] font-black uppercase tracking-[0.2em] hover:bg-white/10 transition-all flex flex-col items-center justify-center gap-1.5 text-white transform active:scale-95 shadow-xl"
-            >
-              <Users size={16} /> <span className="mt-0.5">Players</span>
-            </button>
-            <button
-              disabled={isMutating}
-              onClick={async () => {
-                if (isMutating) return;
-                if (!checkTimerActive()) return;
-                const result = await undoBall();
-                if (result.success) toast.success('Reverted last ball');
-                else toast.error(result.error || 'Undo limit reached');
-              }}
-              className={`h-16 bg-white/5 border border-white/10 rounded-[8px] text-[9px] font-black uppercase tracking-[0.2em] hover:bg-white/10 transition-all flex flex-col items-center justify-center gap-1.5 text-white transform active:scale-95 shadow-xl ${isMutating ? 'opacity-40 cursor-not-allowed' : ''}`}
-            >
-              <Undo2 size={16} /> <span className="mt-0.5">Undo</span>
-            </button>
-            <button
-              onClick={() => {
-                if (hasPassword) {
-                  setAuthAction('end');
-                  setShowAuthModal(true);
-                } else {
-                  if (window.confirm('Are you sure you want to end this match?')) {
-                    completeMatch();
-                    navigate('/');
-                  }
-                }
-              }}
-              className="h-16 bg-white/[0.03] border border-white/10 rounded-[8px] text-[9px] font-black uppercase tracking-[0.2em] transition-all transform active:scale-95 shadow-xl flex flex-col items-center justify-center gap-1.5"
-              style={{ color: THEME_COLOR, borderColor: `${THEME_COLOR}33` }}
-            >
-              <CheckCircle2 size={16} /> <span className="mt-0.5">End Match</span>
-            </button>
-          </div>
-        </div>
+      </div>
+      </>
+      )}
       </div>
 
       {/* Settings Modal */}
       {showSettings && (
-        <div className="fixed inset-0 z-[100] bg-black/95 backdrop-blur-3xl p-6 flex items-center justify-center animate-in fade-in duration-500">
-          <div className="w-full max-w-sm max-h-[90vh] overflow-y-auto bg-[#000] border border-white/10 rounded-[8px] p-10 space-y-10 shadow-2xl relative">
-            <div className="absolute top-0 right-0 w-32 h-32 bg-[#BFF367]/5 blur-3xl pointer-events-none" />
+        <div className="fixed inset-0 z-[100] bg-black/95 backdrop-blur-3xl flex justify-center animate-in fade-in duration-500">
+          <div className="w-full h-[100dvh] max-w-[450px] overflow-y-auto bg-[#000] px-4 py-8 space-y-10 shadow-2xl relative pb-24">
+            <div className="absolute top-0 right-0 w-32 h-32 bg-[#00C187]/5 blur-3xl pointer-events-none" />
             <div className="flex justify-between items-center">
-              <h3 className="text-2xl font-black uppercase tracking-tighter text-white">Interface Config</h3>
+              <h3 className="text-[28px] font-semibold font-inter text-white tracking-tight">Interface Config</h3>
               <button onClick={() => setShowSettings(false)} className="p-3 bg-white/5 rounded-[8px] border border-white/5 hover:text-white transition-all">
                 <X size={20} className="text-neutral-500" />
               </button>
@@ -862,22 +954,22 @@ const ScoringApp = () => {
 
             <div className="space-y-6">
               {matchData?.hostedGameId && !liveEnabled && (
-                <div className="py-12 text-center bg-white/[0.02] rounded-[8px] border border-dashed border-white/10">
-                  <div className="w-8 h-8 border-2 border-[#BFF367] border-t-transparent rounded-full animate-spin mx-auto mb-4" />
+                <div className="py-12 text-center">
+                  <div className="w-8 h-8 border-2 border-[#00C187] border-t-transparent rounded-full animate-spin mx-auto mb-4" />
                   <p className="text-[10px] font-black text-neutral-500 uppercase tracking-[0.2em]">Establishing Sync...</p>
                 </div>
               )}
 
               {matchData?.hostedGameId && liveEnabled && (
-                <div className="p-6 bg-white/[0.02] rounded-[8px] border border-white/5 space-y-6 animate-in slide-in-from-top duration-500">
-                  <p className="text-[10px] font-black text-neutral-500 uppercase tracking-[0.2em] text-center">Broadcast Credentials</p>
+                <div className="space-y-6 animate-in slide-in-from-top duration-500">
+                  <p className="text-[8px] font-black text-neutral-600 uppercase tracking-widest">Broadcast Credentials</p>
                   <div className="space-y-3">
                     <input
                       type="text"
                       placeholder="YouTube ID..."
                       defaultValue={matchData?.hostedGameId?.youtubeVideoId}
                       id="ytVideoId"
-                      className="w-full bg-black/50 border border-white/5 rounded-[8px] px-6 py-4 text-xs focus:border-[#BFF367] outline-none text-white font-bold"
+                      className="w-full bg-[#222] border border-white/10 rounded-[8px] px-6 py-[14.5px] text-[10px] focus:border-[#00C187] outline-none text-white font-bold"
                     />
                     <button
                       onClick={async () => {
@@ -909,7 +1001,7 @@ const ScoringApp = () => {
                           toast.error('Network failure');
                         }
                       }}
-                      className="w-full py-3 bg-[#BFF367]/10 border border-[#BFF367]/20 text-[#BFF367] text-[10px] font-black uppercase tracking-widest rounded-[8px] hover:bg-[#BFF367] hover:text-black transition-all"
+                      className="w-full py-[14.5px] bg-[#222] border border-white/10 text-[#00C187] text-[10px] font-black uppercase tracking-widest rounded-[8px] hover:bg-[#00C187] hover:text-black transition-all"
                     >
                       Authorize Stream
                     </button>
@@ -920,13 +1012,13 @@ const ScoringApp = () => {
                       <div className="space-y-1.5">
                         <p className="text-[8px] font-black text-neutral-600 uppercase tracking-widest">OBS Overlay (Copy this)</p>
                         <div className="flex gap-2">
-                          <input readOnly value={liveUrls.obsOverlay} className="flex-1 bg-black/40 border border-white/5 rounded-[8px] px-4 py-2.5 text-[9px] text-neutral-400 font-bold truncate outline-none" />
-                          <button onClick={() => { navigator.clipboard.writeText(liveUrls.obsOverlay); toast.success('Copied!'); }} className="px-4 py-2 bg-[#BFF367]/10 text-[#BFF367] text-[8px] font-black uppercase rounded-[8px] border border-[#BFF367]/20 hover:bg-[#BFF367] hover:text-black transition-all">Copy</button>
+                          <input readOnly value={liveUrls.obsOverlay} className="flex-1 bg-[#222] border border-white/10 rounded-[8px] px-4 py-[14.5px] text-[10px] text-neutral-400 font-bold truncate outline-none" />
+                          <button onClick={() => { navigator.clipboard.writeText(liveUrls.obsOverlay); toast.success('Copied!'); }} className="px-4 py-[14.5px] bg-[#222] text-[#00C187] text-[10px] font-black uppercase rounded-[8px] border border-white/10 hover:bg-[#00C187] hover:text-black transition-all">Copy</button>
                         </div>
                         <button
                           type="button"
                           onClick={() => setShowThemeStore(true)}
-                          className="w-full mt-2 py-2.5 bg-[#BFF367]/10 text-[#BFF367] text-[9px] font-black uppercase tracking-widest rounded-[8px] border border-[#BFF367]/20 hover:bg-[#BFF367] hover:text-black hover:shadow-[0_0_15px_rgba(0,193,135,0.15)] transition-all flex items-center justify-center gap-2"
+                          className="w-full mt-2 py-[14.5px] bg-[#222] text-[#00C187] text-[10px] font-black uppercase tracking-widest rounded-[8px] border border-white/10 hover:bg-[#00C187] hover:text-black hover:shadow-[0_0_15px_rgba(0,193,135,0.15)] transition-all flex items-center justify-center gap-2"
                         >
                           <Sparkles size={12} />
                           Change Ticker Theme
@@ -935,15 +1027,15 @@ const ScoringApp = () => {
                       <div className="space-y-1.5">
                         <p className="text-[8px] font-black text-neutral-600 uppercase tracking-widest">Public Match Analytics</p>
                         <div className="flex gap-2">
-                          <input readOnly value={liveUrls.publicScoreboard} className="flex-1 bg-black/40 border border-white/5 rounded-[8px] px-4 py-2.5 text-[9px] text-neutral-400 font-bold truncate outline-none" />
-                          <button onClick={() => { navigator.clipboard.writeText(liveUrls.publicScoreboard); toast.success('Copied!'); }} className="px-4 py-2 bg-[#BFF367]/10 text-[#BFF367] text-[8px] font-black uppercase rounded-[8px] border border-[#BFF367]/20 hover:bg-[#BFF367] hover:text-black transition-all">Copy</button>
+                          <input readOnly value={liveUrls.publicScoreboard} className="flex-1 bg-[#222] border border-white/10 rounded-[8px] px-4 py-[14.5px] text-[10px] text-neutral-400 font-bold truncate outline-none" />
+                          <button onClick={() => { navigator.clipboard.writeText(liveUrls.publicScoreboard); toast.success('Copied!'); }} className="px-4 py-[14.5px] bg-[#222] text-[#00C187] text-[10px] font-black uppercase rounded-[8px] border border-white/10 hover:bg-[#00C187] hover:text-black transition-all">Copy</button>
                         </div>
                         <div className="flex gap-2 w-full mt-2">
                           <a
                             href={`/live-overlay/${matchId}/preview?theme=${matchData?.hostedGameId?.tickerTheme || 'neon_classic'}`}
                             target="_blank"
                             rel="noreferrer"
-                            className="w-full bg-[#BFF367]/20 text-[#BFF367] border border-[#BFF367]/50 rounded-[8px] px-4 py-2 text-xs font-bold text-center hover:bg-[#BFF367]/30 transition-colors"
+                            className="w-full py-[14.5px] bg-[#222] text-[#00C187] border border-white/10 rounded-[8px] px-4 text-[10px] font-black uppercase tracking-widest text-center hover:bg-[#00C187]/30 transition-colors"
                           >
                             Preview Theme
                           </a>
@@ -954,7 +1046,7 @@ const ScoringApp = () => {
                 </div>
               )}
 
-              <div className="p-6 bg-white/[0.02] rounded-[8px] border border-white/5 space-y-6">
+              <div className="space-y-6">
                 <div className="space-y-4">
                   <p className="text-[8px] font-black text-neutral-600 uppercase tracking-widest">Match State</p>
                   <div className="grid grid-cols-3 gap-2">
@@ -964,7 +1056,7 @@ const ScoringApp = () => {
                         if (res.success) toast.success('Match Resumed!');
                         else toast.error('Failed to update status');
                       }}
-                      className={`py-2 rounded-[8px] text-[9px] font-black uppercase transition-all ${matchData?.status === 'LIVE' ? 'bg-[#BFF367]/20 text-[#BFF367] border border-[#BFF367]/30' : 'bg-white/5 text-neutral-400 hover:bg-white/10'}`}
+                      className={`py-[14.5px] rounded-[8px] text-[10px] font-black uppercase transition-all ${matchData?.status === 'LIVE' ? 'bg-[#222] text-[#00C187] border border-white/10' : 'bg-white/5 text-neutral-400 hover:bg-white/10'}`}
                     >
                       Live
                     </button>
@@ -974,7 +1066,7 @@ const ScoringApp = () => {
                         if (res.success) toast.success('Match Paused: Rain Delay');
                         else toast.error('Failed to update status');
                       }}
-                      className={`py-2 rounded-[8px] text-[9px] font-black uppercase transition-all ${matchData?.status === 'RAIN_DELAY' ? 'bg-blue-500/20 text-blue-400 border border-blue-500/30' : 'bg-white/5 text-neutral-400 hover:bg-white/10'}`}
+                      className={`py-[14.5px] rounded-[8px] text-[10px] font-black uppercase transition-all ${matchData?.status === 'RAIN_DELAY' ? 'bg-blue-500/20 text-blue-400 border border-blue-500/30' : 'bg-white/5 text-neutral-400 hover:bg-white/10'}`}
                     >
                       Rain Delay
                     </button>
@@ -984,7 +1076,7 @@ const ScoringApp = () => {
                         if (res.success) toast.success('Match Paused: Bad Light');
                         else toast.error('Failed to update status');
                       }}
-                      className={`py-2 rounded-[8px] text-[9px] font-black uppercase transition-all ${matchData?.status === 'BAD_LIGHT' ? 'bg-orange-500/20 text-orange-400 border border-orange-500/30' : 'bg-white/5 text-neutral-400 hover:bg-white/10'}`}
+                      className={`py-[14.5px] rounded-[8px] text-[10px] font-black uppercase transition-all ${matchData?.status === 'BAD_LIGHT' ? 'bg-orange-500/20 text-orange-400 border border-orange-500/30' : 'bg-white/5 text-neutral-400 hover:bg-white/10'}`}
                     >
                       Bad Light
                     </button>
@@ -994,7 +1086,7 @@ const ScoringApp = () => {
                 <div className="space-y-4 pt-4 border-t border-white/5">
                   <p className="text-[8px] font-black text-neutral-600 uppercase tracking-widest flex items-center justify-between">
                     <span>AI Commentator (OpenAI TTS)</span>
-                    <span className={`px-2 py-0.5 rounded text-[8px] ${isAiCommentaryEnabled ? 'bg-[#BFF367]/20 text-[#BFF367]' : 'bg-white/5 text-neutral-500'}`}>
+                    <span className={`px-2 py-0.5 rounded text-[8px] ${isAiCommentaryEnabled ? 'bg-[#222] text-[#00C187]' : 'bg-white/5 text-neutral-500'}`}>
                       {isAiCommentaryEnabled ? 'ACTIVE' : 'OFF'}
                     </span>
                   </p>
@@ -1002,7 +1094,7 @@ const ScoringApp = () => {
                   <div className="flex gap-2">
                     <button
                       onClick={() => setIsAiCommentaryEnabled(!isAiCommentaryEnabled)}
-                      className={`flex-1 py-2.5 rounded-[8px] text-[9px] font-black uppercase tracking-widest transition-all ${isAiCommentaryEnabled ? 'bg-[#BFF367] text-black shadow-[0_0_15px_rgba(0,193,135,0.3)]' : 'bg-white/5 border border-white/10 text-white'}`}
+                      className={`flex-1 py-[14.5px] rounded-[8px] text-[10px] font-black uppercase tracking-widest transition-all ${isAiCommentaryEnabled ? 'bg-[#222] text-[#00C187] border border-white/10 shadow-[0_0_15px_rgba(0,193,135,0.15)]' : 'bg-white/5 border border-white/10 text-white'}`}
                     >
                       {isAiCommentaryEnabled ? 'Disable' : 'Enable Commentary'}
                     </button>
@@ -1014,7 +1106,7 @@ const ScoringApp = () => {
                         <select
                           value={commentaryLanguage}
                           onChange={(e) => setCommentaryLanguage(e.target.value)}
-                          className="flex-1 bg-black/40 border border-white/5 rounded-[8px] px-4 py-2.5 text-[10px] text-white font-bold outline-none focus:border-[#BFF367]"
+                          className="flex-1 bg-[#222] border border-white/10 rounded-[8px] px-4 py-[14.5px] text-[10px] text-white font-bold outline-none focus:border-[#00C187]"
                         >
                           <option value="en">English (Default)</option>
                           <option value="hi">Hindi</option>
@@ -1029,7 +1121,7 @@ const ScoringApp = () => {
                         <select
                           value={commentaryVoice}
                           onChange={(e) => setCommentaryVoice(e.target.value)}
-                          className="flex-1 bg-black/40 border border-white/5 rounded-[8px] px-4 py-2.5 text-[10px] text-white font-bold outline-none focus:border-[#BFF367]"
+                          className="flex-1 bg-[#222] border border-white/10 rounded-[8px] px-4 py-[14.5px] text-[10px] text-white font-bold outline-none focus:border-[#00C187]"
                         >
                           <option value="alloy">Alloy (Neutral)</option>
                           <option value="echo">Echo (Male, Warm)</option>
@@ -1043,7 +1135,7 @@ const ScoringApp = () => {
                         <select
                           value={commentaryStyle}
                           onChange={(e) => setCommentaryStyle(e.target.value)}
-                          className="w-full bg-black/40 border border-white/5 rounded-[8px] px-4 py-2.5 text-[10px] text-white font-bold outline-none focus:border-[#BFF367]"
+                          className="w-full bg-[#222] border border-white/10 rounded-[8px] px-4 py-[14.5px] text-[10px] text-white font-bold outline-none focus:border-[#00C187]"
                         >
                           <option value="professional">Professional Broadcast</option>
                           <option value="natural">Natural Human (Casual)</option>
@@ -1071,7 +1163,7 @@ const ScoringApp = () => {
                             toast.error('Network error saving settings');
                           }
                         }}
-                        className="w-full py-2 bg-[#BFF367]/10 text-[#BFF367] text-[9px] font-black uppercase tracking-widest rounded-[8px] border border-[#BFF367]/20 hover:bg-[#BFF367] hover:text-black transition-all"
+                        className="w-full py-[14.5px] bg-[#222] text-[#00C187] text-[10px] font-black uppercase tracking-widest rounded-[8px] border border-white/10 hover:bg-[#00C187] hover:text-black transition-all"
                       >
                         Save Commentary Profile
                       </button>
@@ -1087,7 +1179,7 @@ const ScoringApp = () => {
                       id="revisedTarget"
                       placeholder="Revised Target"
                       defaultValue={matchData?.revisedTarget || ''}
-                      className="flex-1 bg-black/40 border border-white/5 rounded-[8px] px-4 py-2.5 text-[10px] text-white font-bold outline-none focus:border-[#BFF367]"
+                      className="flex-1 bg-[#222] border border-white/10 rounded-[8px] px-4 py-[14.5px] text-[10px] text-white font-bold outline-none focus:border-[#00C187]"
                     />
                     <input
                       type="number"
@@ -1095,7 +1187,7 @@ const ScoringApp = () => {
                       id="revisedOvers"
                       placeholder="Revised Overs"
                       defaultValue={matchData?.revisedOvers || ''}
-                      className="flex-1 bg-black/40 border border-white/5 rounded-[8px] px-4 py-2.5 text-[10px] text-white font-bold outline-none focus:border-[#BFF367]"
+                      className="flex-1 bg-[#222] border border-white/10 rounded-[8px] px-4 py-[14.5px] text-[10px] text-white font-bold outline-none focus:border-[#00C187]"
                     />
                   </div>
                   <button
@@ -1107,7 +1199,7 @@ const ScoringApp = () => {
                       if (res.success) toast.success('Target Revised!');
                       else toast.error('Failed to revise target');
                     }}
-                    className="w-full py-2.5 bg-purple-500/10 text-purple-400 text-[9px] font-black uppercase tracking-widest rounded-[8px] border border-purple-500/20 hover:bg-purple-500 hover:text-white transition-all"
+                    className="w-full py-[14.5px] bg-purple-500/10 text-purple-400 text-[10px] font-black uppercase tracking-widest rounded-[8px] border border-purple-500/20 hover:bg-purple-500 hover:text-white transition-all"
                   >
                     Apply DLS Revision
                   </button>
@@ -1121,23 +1213,23 @@ const ScoringApp = () => {
                       id="umpire1"
                       placeholder="Umpire 1"
                       defaultValue={matchData?.matchOfficials?.umpire1 || ''}
-                      className="flex-1 bg-black/40 border border-white/5 rounded-[8px] px-4 py-2.5 text-[10px] text-white font-bold outline-none focus:border-[#BFF367]"
+                      className="flex-1 bg-[#222] border border-white/10 rounded-[8px] px-4 py-[14.5px] text-[10px] text-white font-bold outline-none focus:border-[#00C187]"
                     />
                     <input
                       type="text"
                       id="umpire2"
                       placeholder="Umpire 2"
                       defaultValue={matchData?.matchOfficials?.umpire2 || ''}
-                      className="flex-1 bg-black/40 border border-white/5 rounded-[8px] px-4 py-2.5 text-[10px] text-white font-bold outline-none focus:border-[#BFF367]"
+                      className="flex-1 bg-[#222] border border-white/10 rounded-[8px] px-4 py-[14.5px] text-[10px] text-white font-bold outline-none focus:border-[#00C187]"
                     />
                   </div>
-                  <div className="flex gap-2">
+                  <div className="grid grid-cols-2 gap-2">
                     <input
                       type="text"
                       id="matchReferee"
                       placeholder="Match Referee"
                       defaultValue={matchData?.matchOfficials?.matchReferee || ''}
-                      className="flex-1 bg-black/40 border border-white/5 rounded-[8px] px-4 py-2.5 text-[10px] text-white font-bold outline-none focus:border-[#BFF367]"
+                      className="w-full bg-[#222] border border-white/10 rounded-[8px] px-4 py-[14.5px] text-[10px] text-white font-bold outline-none focus:border-[#00C187]"
                     />
                     <button
                       onClick={async () => {
@@ -1148,7 +1240,7 @@ const ScoringApp = () => {
                         if (res.success) toast.success('Officials Updated!');
                         else toast.error('Failed to update officials');
                       }}
-                      className="px-6 py-2.5 bg-blue-500/10 text-blue-400 text-[9px] font-black uppercase tracking-widest rounded-[8px] border border-blue-500/20 hover:bg-blue-500 hover:text-white transition-all"
+                      className="w-full py-[14.5px] bg-blue-500/10 text-blue-400 text-[10px] font-black uppercase tracking-widest rounded-[8px] border border-blue-500/20 hover:bg-blue-500 hover:text-white transition-all"
                     >
                       Save
                     </button>
@@ -1158,13 +1250,13 @@ const ScoringApp = () => {
                 <div className="space-y-4 pt-4 border-t border-white/5">
                   <p className="text-[8px] font-black text-neutral-600 uppercase tracking-widest">Match Rules (Phase 5)</p>
 
-                  <div className="flex gap-2">
+                  <div className="grid grid-cols-2 gap-2">
                     <input
                       type="number"
                       id="powerplayOvers"
                       placeholder="Powerplay Overs"
                       defaultValue={matchData?.powerplayOvers || 0}
-                      className="flex-1 bg-black/40 border border-white/5 rounded-[8px] px-4 py-2.5 text-[10px] text-white font-bold outline-none focus:border-[#BFF367]"
+                      className="w-full bg-[#222] border border-white/10 rounded-[8px] px-4 py-[14.5px] text-[10px] text-white font-bold outline-none focus:border-[#00C187]"
                     />
                     <button
                       onClick={async () => {
@@ -1174,7 +1266,7 @@ const ScoringApp = () => {
                         if (res.success) toast.success('Powerplay Overs Updated!');
                         else toast.error('Failed to update powerplay');
                       }}
-                      className="px-6 py-2.5 bg-[#BFF367]/10 text-[#BFF367] text-[9px] font-black uppercase tracking-widest rounded-[8px] border border-[#BFF367]/20 hover:bg-[#BFF367] hover:text-black transition-all"
+                      className="w-full py-[14.5px] bg-[#222] text-[#00C187] text-[10px] font-black uppercase tracking-widest rounded-[8px] border border-white/10 hover:bg-[#00C187] hover:text-black transition-all"
                     >
                       Set Powerplay
                     </button>
@@ -1188,7 +1280,7 @@ const ScoringApp = () => {
                         if (res.success) toast.success(isSuccess ? 'Review Retained' : 'Review Lost');
                         else toast.error('Failed to use review');
                       }}
-                      className="w-full py-2.5 bg-yellow-500/10 text-yellow-400 text-[9px] font-black uppercase tracking-widest rounded-[8px] border border-yellow-500/20 hover:bg-yellow-500 hover:text-white transition-all"
+                      className="w-full py-[14.5px] bg-yellow-500/10 text-yellow-400 text-[10px] font-black uppercase tracking-widest rounded-[8px] border border-yellow-500/20 hover:bg-yellow-500 hover:text-white transition-all"
                     >
                       Use Batting Review ({matchData?.reviews?.batting ?? 2})
                     </button>
@@ -1200,7 +1292,7 @@ const ScoringApp = () => {
                         if (res.success) toast.success(isSuccess ? 'Review Retained' : 'Review Lost');
                         else toast.error('Failed to use review');
                       }}
-                      className="w-full py-2.5 bg-yellow-500/10 text-yellow-400 text-[9px] font-black uppercase tracking-widest rounded-[8px] border border-yellow-500/20 hover:bg-yellow-500 hover:text-white transition-all"
+                      className="w-full py-[14.5px] bg-yellow-500/10 text-yellow-400 text-[10px] font-black uppercase tracking-widest rounded-[8px] border border-yellow-500/20 hover:bg-yellow-500 hover:text-white transition-all"
                     >
                       Use Fielding Review ({matchData?.reviews?.fielding ?? 2})
                     </button>
@@ -1208,13 +1300,13 @@ const ScoringApp = () => {
                 </div>
                 <div className="space-y-4 pt-4 border-t border-white/5">
                   <p className="text-[8px] font-black text-neutral-600 uppercase tracking-widest">Match Analysis</p>
-                  <div className="grid grid-cols-2 gap-3">
+                  <div className="grid grid-cols-2 gap-2">
                     <button
                       onClick={() => {
                         setShowSettings(false);
                         setShowMatchReport(true);
                       }}
-                      className="w-full py-3 bg-[#BFF367]/10 text-[#BFF367] text-[9px] font-black uppercase tracking-widest rounded-[8px] border border-[#BFF367]/20 hover:bg-[#BFF367] hover:text-black hover:shadow-[0_0_15px_rgba(0,193,135,0.15)] transition-all flex items-center justify-center gap-2"
+                      className="w-full py-[14.5px] bg-[#222] text-[#00C187] text-[10px] font-black uppercase tracking-widest rounded-[8px] border border-white/10 hover:bg-[#00C187] hover:text-black hover:shadow-[0_0_15px_rgba(0,193,135,0.15)] transition-all flex items-center justify-center gap-2"
                     >
                       <FileText size={14} />
                       Match Report
@@ -1224,7 +1316,7 @@ const ScoringApp = () => {
                       onClick={() => {
                         window.open(`/analytics/${matchData?.hostedGameId?.shortId || matchId}`, '_blank');
                       }}
-                      className="w-full py-3 bg-[#BFF367]/10 text-[#BFF367] text-[9px] font-black uppercase tracking-widest rounded-[8px] border border-[#BFF367]/20 hover:bg-[#BFF367] hover:text-black hover:shadow-[0_0_15px_rgba(85,222,232,0.15)] transition-all flex items-center justify-center gap-2"
+                      className="w-full py-[14.5px] bg-[#55DEE8]/10 text-[#55DEE8] text-[10px] font-black uppercase tracking-widest rounded-[8px] border border-[#55DEE8]/20 hover:bg-[#55DEE8] hover:text-black hover:shadow-[0_0_15px_rgba(85,222,232,0.15)] transition-all flex items-center justify-center gap-2"
                     >
                       <TrendingUp size={14} />
                       Live Analytics
@@ -1316,6 +1408,17 @@ const ScoringApp = () => {
         />
       )}
 
+      {showExitModal && (
+        <MatchExitModal
+          isOpen={showExitModal}
+          onClose={() => setShowExitModal(false)}
+          onConfirm={(data) => {
+            setShowExitModal(false);
+            window.history.back();
+          }}
+        />
+      )}
+
       {/* Innings Complete Modal */}
       {showInningsCompleteModal && (
         <div className="fixed inset-0 z-[60] flex items-center justify-center p-4">
@@ -1346,7 +1449,7 @@ const ScoringApp = () => {
                   toast.error("Failed to advance innings: " + res.message);
                 }
               }}
-              className="w-full py-4 bg-gradient-to-r from-[#BFF367] to-[#BFF367] text-black font-black text-sm uppercase tracking-wider rounded-[8px] hover:opacity-90 transition-opacity"
+              className="w-full py-4 bg-gradient-to-r from-[#55DEE8] to-[#BFF367] text-black font-black text-sm uppercase tracking-wider rounded-[8px] hover:opacity-90 transition-opacity"
             >
               Start Next Innings
             </button>
@@ -1575,6 +1678,37 @@ const ScoringApp = () => {
         />
       )}
 
+      {showCustomRunsModal && (
+        <CustomRunsModal
+          onClose={() => setShowCustomRunsModal(false)}
+          onConfirm={(runs) => {
+            setShowCustomRunsModal(false);
+            processRuns({ 
+              runs: Number(runs), 
+              isBoundary: Number(runs) >= 4, 
+              isFour: Number(runs) === 4, 
+              isSix: Number(runs) === 6 
+            });
+          }}
+        />
+      )}
+
+
+      {showEndMatchModal && (
+        <EndMatchModal
+          matchId={matchId}
+          hasPassword={hasPassword}
+          onConfirm={async (token) => {
+            if (token) {
+              localStorage.setItem(`scorer_token_${matchId}`, token);
+            }
+            await completeMatch();
+            setShowEndMatchModal(false);
+            navigate('/');
+          }}
+          onClose={() => setShowEndMatchModal(false)}
+        />
+      )}
 
     </div>
   );
