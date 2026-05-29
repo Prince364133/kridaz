@@ -139,7 +139,7 @@ const ReelPlayer = ({ reelId, hlsUrl, isVisible, poster }) => {
       <video
         ref={videoRef}
         poster={poster}
-        className="w-full h-full object-contain"
+        className="w-full h-full object-cover"
         loop
         muted={isMuted}
         playsInline
