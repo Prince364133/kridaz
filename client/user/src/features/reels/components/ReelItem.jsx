@@ -357,7 +357,7 @@ const ReelItem = ({ reel, isVisible }) => {
             </h3>
           </div>
 
-          <p className="text-white text-[14px] leading-snug drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)] pr-2 mt-1">
+          <p className="text-white text-[14px] leading-snug drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)] pr-2 mt-1 line-clamp-2 overflow-hidden break-words">
             {reel.caption}
             {reel.hashtags?.map(tag => (
               <span key={tag} className="font-bold ml-1 text-white">#{tag}</span>

@@ -1231,10 +1231,6 @@ const Community = ({ children, onSearchActive }) => {
                       <ArrowLeft size={14} strokeWidth={2.5} />
                       <span>Community</span>
                     </button>
-                    <div className="flex items-center gap-1.5 bg-black/60 backdrop-blur-md border border-[#BFF367]/20 text-[#BFF367] px-3 py-2 rounded-[8px] text-xs font-black uppercase tracking-widest">
-                      <PlaySquare size={13} />
-                      <span>Shots</span>
-                    </div>
                   </div>
                   <button
                     onClick={() => gateInteraction(() => navigate('/reels/upload'))}
