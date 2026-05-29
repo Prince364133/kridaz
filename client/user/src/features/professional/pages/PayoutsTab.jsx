@@ -2,15 +2,11 @@ import React, { useState, useEffect } from "react";
 import { 
   IndianRupee, 
   Landmark, 
-  CreditCard, 
   ArrowUpRight, 
   CheckCircle, 
   AlertCircle,
-  HelpCircle,
   Edit2,
-  Calendar,
   X,
-  FileText,
   Clock,
   TrendingUp,
   AlertTriangle,
@@ -20,16 +16,13 @@ import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import axios from "axios";
 import { 
-  AreaChart, 
-  Area, 
   BarChart,
   Bar,
   XAxis, 
   YAxis, 
   CartesianGrid, 
   Tooltip, 
-  ResponsiveContainer, 
-  Legend 
+  ResponsiveContainer 
 } from "recharts";
 
 const PayoutsTab = ({ role }) => {
@@ -102,16 +95,20 @@ const PayoutsTab = ({ role }) => {
     fetchBankingDetails();
   }, []);
 
-  // Generate comparison graph data
+  // Generate chart data from live balances
   useEffect(() => {
-    // Generate mock graph comparing current selection/month with previous
+    if (!banking) return;
+    const usable = parseFloat(banking.walletBalance || 0);
+    const reserved = parseFloat(banking.reservedBalance || 0);
+    const dispute = parseFloat(banking.disputeBalance || 0);
+    const withdrawn = parseFloat(banking.withdrawnBalance || 0);
     setChartData([
-      { name: "Week 1", "Previous Month": 4200, "This Month": 5100 },
-      { name: "Week 2", "Previous Month": 3800, "This Month": 6200 },
-      { name: "Week 3", "Previous Month": 5500, "This Month": 4800 },
-      { name: "Week 4", "Previous Month": 6100, "This Month": 7300 },
+      { name: "Usable", "Current Balance": usable, "Withdrawn": 0 },
+      { name: "Reserved", "Current Balance": reserved, "Withdrawn": 0 },
+      { name: "Dispute", "Current Balance": dispute, "Withdrawn": 0 },
+      { name: "Withdrawn", "Current Balance": 0, "Withdrawn": withdrawn },
     ]);
-  }, [earningsFilter, customStartDate, customEndDate]);
+  }, [banking]);
 
   // Save Banking Configuration
   const handleSaveBanking = async (e) => {
@@ -530,32 +527,32 @@ const PayoutsTab = ({ role }) => {
       <div className="p-6 rounded-2xl bg-[#141414] border border-[#2D2D2D] space-y-6">
         <div className="flex items-center justify-between border-b border-[#2D2D2D] pb-4">
           <div>
-            <h3 className="text-lg font-bold tracking-tight">Earnings Comparison</h3>
-            <p className="text-xs text-[#878C9F]">Comparing previous period vs this period's performance</p>
+            <h3 className="text-lg font-bold tracking-tight">Balance Distribution</h3>
+            <p className="text-xs text-[#878C9F]">Live breakdown of your wallet across categories</p>
           </div>
           <div className="flex items-center gap-3">
             <div className="flex items-center gap-1.5">
-              <div className="w-3 h-3 rounded-sm bg-neutral-600" />
-              <span className="text-[10px] text-gray-400 font-bold uppercase tracking-wider">Previous Period</span>
+              <div className="w-3 h-3 rounded-sm bg-[#BFF367]" />
+              <span className="text-[10px] text-gray-400 font-bold uppercase tracking-wider">Active Balance</span>
             </div>
             <div className="flex items-center gap-1.5">
-              <div className="w-3 h-3 rounded-sm bg-[#BFF367]" />
-              <span className="text-[10px] text-gray-400 font-bold uppercase tracking-wider font-inter">Current Period</span>
+              <div className="w-3 h-3 rounded-sm bg-neutral-600" />
+              <span className="text-[10px] text-gray-400 font-bold uppercase tracking-wider font-inter">Withdrawn</span>
             </div>
           </div>
         </div>
 
         <div className="h-64 w-full">
           <ResponsiveContainer width="100%" height="100%">
-            <AreaChart data={chartData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+            <BarChart data={chartData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
               <defs>
-                <linearGradient id="colorThis" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="#BFF367" stopOpacity={0.2}/>
-                  <stop offset="95%" stopColor="#BFF367" stopOpacity={0}/>
+                <linearGradient id="colorBalance" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="5%" stopColor="#BFF367" stopOpacity={0.9}/>
+                  <stop offset="95%" stopColor="#BFF367" stopOpacity={0.4}/>
                 </linearGradient>
-                <linearGradient id="colorPrev" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="#878C9F" stopOpacity={0.1}/>
-                  <stop offset="95%" stopColor="#878C9F" stopOpacity={0}/>
+                <linearGradient id="colorWithdrawn" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="5%" stopColor="#878C9F" stopOpacity={0.7}/>
+                  <stop offset="95%" stopColor="#878C9F" stopOpacity={0.3}/>
                 </linearGradient>
               </defs>
               <CartesianGrid strokeDasharray="3 3" stroke="#2D2D2D" vertical={false} />
@@ -565,10 +562,11 @@ const PayoutsTab = ({ role }) => {
                 contentStyle={{ backgroundColor: "#111", border: "1px solid #2D2D2D", borderRadius: "10px" }}
                 itemStyle={{ color: "#fff", fontSize: "12px" }}
                 labelStyle={{ color: "#878C9F", fontSize: "11px", fontWeight: "bold" }}
+                formatter={(value) => [`₹${Number(value).toLocaleString()}`, undefined]}
               />
-              <Area type="monotone" dataKey="This Month" stroke="#BFF367" strokeWidth={2} fillOpacity={1} fill="url(#colorThis)" name="Current Period" />
-              <Area type="monotone" dataKey="Previous Month" stroke="#878C9F" strokeWidth={2} strokeDasharray="5 5" fillOpacity={1} fill="url(#colorPrev)" name="Previous Period" />
-            </AreaChart>
+              <Bar dataKey="Current Balance" fill="url(#colorBalance)" radius={[6, 6, 0, 0]} name="Active Balance" />
+              <Bar dataKey="Withdrawn" fill="url(#colorWithdrawn)" radius={[6, 6, 0, 0]} name="Withdrawn" />
+            </BarChart>
           </ResponsiveContainer>
         </div>
       </div>
