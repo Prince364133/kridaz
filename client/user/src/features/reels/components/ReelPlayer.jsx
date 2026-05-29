@@ -139,7 +139,7 @@ const ReelPlayer = ({ reelId, hlsUrl, isVisible, poster }) => {
       <video
         ref={videoRef}
         poster={poster}
-        className="w-full h-full object-cover"
+        className="w-full h-full object-contain"
         loop
         muted={isMuted}
         playsInline
@@ -159,7 +159,7 @@ const ReelPlayer = ({ reelId, hlsUrl, isVisible, poster }) => {
       {/* Mute/Unmute Button */}
       <button 
         onClick={toggleMute}
-        className="absolute bottom-4 right-4 p-2 bg-black/40 rounded-[8px] text-white backdrop-blur-sm z-10"
+        className="absolute bottom-10 right-4 p-2 bg-black/40 rounded-[8px] text-white backdrop-blur-sm z-10"
       >
         {isMuted ? <VolumeX size={20} /> : <Volume2 size={20} />}
       </button>

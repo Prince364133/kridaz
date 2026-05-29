@@ -246,7 +246,7 @@ const ReelItem = ({ reel, isVisible }) => {
       </AnimatePresence>
 
       {/* Right Side Actions */}
-      <div className="absolute right-3 bottom-20 flex flex-col items-center gap-5 z-20">
+      <div className="absolute right-3 bottom-28 flex flex-col items-center gap-5 z-20">
         
         <button 
           className="flex flex-col items-center gap-1 active:scale-125 transition-transform duration-300 group" 
@@ -327,7 +327,7 @@ const ReelItem = ({ reel, isVisible }) => {
       </div>
 
       {/* Bottom Info Overlay */}
-      <div className="absolute bottom-0 left-0 right-16 p-4 pt-12 bg-gradient-to-t from-black/80 via-black/30 to-transparent z-10 pointer-events-none">
+      <div className="absolute bottom-0 left-0 right-16 p-4 pt-12 pb-8 bg-gradient-to-t from-black/80 via-black/30 to-transparent z-10 pointer-events-none">
         <div className="flex flex-col gap-2 pointer-events-auto">
           {/* Profile Section */}
           <div className="flex items-center gap-3 cursor-pointer group" onClick={navigateToProfile}>
