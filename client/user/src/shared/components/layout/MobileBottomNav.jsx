@@ -44,12 +44,12 @@ const MobileBottomNav = () => {
               to={item.path}
               onMouseEnter={item.onMouseEnter}
               onTouchStart={item.onTouchStart}
-              className={`flex flex-col items-center justify-center gap-1 flex-1 transition-all duration-300 ${ isActive ? "text-[#55DEE8]" : "text-white/40 hover:text-white/60" }`}
+              className={`flex flex-col items-center justify-center gap-1 flex-1 transition-all duration-300 ${ isActive ? "text-[#BFF367]" : "text-white/40 hover:text-white/60" }`}
             >
-              <div className={`relative p-1.5 rounded-[8px] transition-all duration-300 ${ isActive ? "bg-[#55DEE8]/10 scale-110" : "" }`}>
+              <div className={`relative p-1.5 rounded-[8px] transition-all duration-300 ${ isActive ? "bg-[#BFF367]/10 scale-110" : "" }`}>
                 <item.icon size={20} strokeWidth={isActive ? 2.5 : 2} />
                 {isActive && (
-                  <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-1 h-1 bg-[#55DEE8] rounded-full shadow-[0_0_8px_#55DEE8]" />
+                  <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-1 h-1 bg-[#BFF367] rounded-full shadow-[0_0_8px_#BFF367]" />
                 )}
               </div>
               <span className={`text-[10px] font-bold uppercase tracking-widest ${ isActive ? "opacity-100" : "opacity-60" }`}>

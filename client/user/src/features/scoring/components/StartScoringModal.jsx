@@ -73,10 +73,10 @@ const STEPS = [
 // ─── Field/Select components ─────────────────────────────────────────────────
 
 const inputClass =
-  'w-full bg-white/5 border border-white/10 rounded-xl p-3 text-white focus:border-[#55DEE8]/50 outline-none transition-colors placeholder:text-white/30';
+  'w-full bg-white/5 border border-white/10 rounded-xl p-3 text-white focus:border-[#BFF367]/50 outline-none transition-colors placeholder:text-white/30';
 const labelClass = 'text-xs text-white/50 mb-1 block font-medium uppercase tracking-wider';
 const selectClass =
-  'w-full bg-[#0a0a0a] border border-white/10 rounded-xl p-3 text-white outline-none transition-colors focus:border-[#55DEE8]/50';
+  'w-full bg-[#0a0a0a] border border-white/10 rounded-xl p-3 text-white outline-none transition-colors focus:border-[#BFF367]/50';
 
 // ─── Main Component ──────────────────────────────────────────────────────────
 
@@ -696,7 +696,7 @@ const StartScoringModal = ({ isOpen, onClose, onSuccess, initialData }) => {
             <div className="flex gap-2 p-1 bg-white/[0.03] rounded-[8px] border border-white/5">
               {['myTeams', 'opponentTeams'].map(tab => (
                 <button key={tab} onClick={() => setTeamTab(tab)}
-                  className={`flex-1 py-2 text-xs font-bold uppercase tracking-wider rounded-lg transition-all ${teamTab === tab ? 'bg-gradient-to-r from-[#55DEE8] to-[#BFF367] text-black shadow-lg' : 'text-white/40 hover:text-white'}`}>
+                  className={`flex-1 py-2 text-xs font-bold uppercase tracking-wider rounded-lg transition-all ${teamTab === tab ? 'bg-gradient-to-r from-[#BFF367] to-[#BFF367] text-black shadow-lg' : 'text-white/40 hover:text-white'}`}>
                   {tab === 'myTeams' ? 'My Teams' : 'Opponents'}
                 </button>
               ))}
@@ -755,12 +755,12 @@ const StartScoringModal = ({ isOpen, onClose, onSuccess, initialData }) => {
                   })}
                   {searchedTeamData?.team && (
                     <button onClick={() => selectTeam(searchedTeamData.team._id || searchedTeamData.team.id)}
-                      className="w-full flex items-center justify-between p-3 rounded-[8px] bg-gradient-to-r from-[#55DEE8]/10 to-[#BFF367]/10 border border-[#55DEE8]/30 hover:border-[#55DEE8] transition-all text-left mt-2">
+                      className="w-full flex items-center justify-between p-3 rounded-[8px] bg-gradient-to-r from-[#BFF367]/10 to-[#BFF367]/10 border border-[#BFF367]/30 hover:border-[#BFF367] transition-all text-left mt-2">
                       <div>
                         <div className="font-bold text-white text-sm">{searchedTeamData.team.name}</div>
-                        <div className="text-[10px] text-[#55DEE8]">Search Result · {searchedTeamData.team.teamCode}</div>
+                        <div className="text-[10px] text-[#BFF367]">Search Result · {searchedTeamData.team.teamCode}</div>
                       </div>
-                      <Check size={14} className="text-[#55DEE8]" />
+                      <Check size={14} className="text-[#BFF367]" />
                     </button>
                   )}
                 </>
@@ -925,9 +925,9 @@ const StartScoringModal = ({ isOpen, onClose, onSuccess, initialData }) => {
               <div className="space-y-4">
                 {!customInviteData ? (
                   <form onSubmit={handleAddCustomPlayerSubmit} className="space-y-4">
-                    <div className="bg-[#55DEE8]/10 border border-[#55DEE8]/20 rounded-[8px] p-4 flex gap-3">
-                      <Sparkles size={20} className="text-[#55DEE8] flex-shrink-0 mt-0.5" />
-                      <div className="text-sm text-[#55DEE8]">
+                    <div className="bg-[#BFF367]/10 border border-[#BFF367]/20 rounded-[8px] p-4 flex gap-3">
+                      <Sparkles size={20} className="text-[#BFF367] flex-shrink-0 mt-0.5" />
+                      <div className="text-sm text-[#BFF367]">
                         Create a custom player placeholder. If you add their phone number, they'll get an invite to join Kridaz!
                       </div>
                     </div>
@@ -969,7 +969,7 @@ const StartScoringModal = ({ isOpen, onClose, onSuccess, initialData }) => {
                       </p>
                     </div>
                     <button type="submit" disabled={isAddingCustom || !customPlayerName.trim()}
-                      className="w-full py-3.5 bg-gradient-to-r from-[#55DEE8] to-[#BFF367] text-black font-black rounded-[8px] uppercase tracking-wider text-sm hover:opacity-90 transition-all flex items-center justify-center gap-2 mt-2">
+                      className="w-full py-3.5 bg-gradient-to-r from-[#BFF367] to-[#BFF367] text-black font-black rounded-[8px] uppercase tracking-wider text-sm hover:opacity-90 transition-all flex items-center justify-center gap-2 mt-2">
                       {isAddingCustom ? <Loader2 size={16} className="animate-spin" /> : <Check size={16} />}
                       Add Custom Player
                     </button>
@@ -1121,7 +1121,7 @@ const StartScoringModal = ({ isOpen, onClose, onSuccess, initialData }) => {
                           setFormData(f => ({ ...f, location: displayName }));
                           setShowLocationSuggestions(false);
                         }}
-                        className="w-full text-left px-4 py-3 text-xs font-bold text-gray-300 hover:bg-[#55DEE8] hover:text-black transition-colors"
+                        className="w-full text-left px-4 py-3 text-xs font-bold text-gray-300 hover:bg-[#BFF367] hover:text-black transition-colors"
                       >
                         {typeof loc === 'object' ? loc.display_name : loc}
                       </button>
@@ -1185,7 +1185,7 @@ const StartScoringModal = ({ isOpen, onClose, onSuccess, initialData }) => {
         return (
           <div className="space-y-4">
             <h3 className="text-lg font-black text-white uppercase tracking-wide">Select Competing Teams</h3>
-            {[{ key: 'A', label: 'Team A', color: '#55DEE8' }, { key: 'B', label: 'Team B', color: '#BFF367' }].map(({ key, label, color }) => {
+            {[{ key: 'A', label: 'Team A', color: '#BFF367' }, { key: 'B', label: 'Team B', color: '#BFF367' }].map(({ key, label, color }) => {
               const id = key === 'A' ? formData.teamAId : formData.teamBId;
               const name = id ? getTeamName(id) : null;
               const team = allTeams.find(t => (t._id || t.id) === id);
@@ -1222,7 +1222,7 @@ const StartScoringModal = ({ isOpen, onClose, onSuccess, initialData }) => {
             <div className="flex border-b border-white/10 flex-shrink-0">
               <button
                 onClick={() => setXiTab('A')}
-                className={`flex-1 py-3 text-sm font-bold uppercase tracking-wider transition-colors truncate px-2 ${xiTab === 'A' ? 'text-[#55DEE8] border-b-2 border-[#55DEE8]' : 'text-white/40 hover:text-white/80'}`}
+                className={`flex-1 py-3 text-sm font-bold uppercase tracking-wider transition-colors truncate px-2 ${xiTab === 'A' ? 'text-[#BFF367] border-b-2 border-[#BFF367]' : 'text-white/40 hover:text-white/80'}`}
               >
                 {getTeamName(formData.teamAId) || 'TBD'}
               </button>
@@ -1286,11 +1286,11 @@ const StartScoringModal = ({ isOpen, onClose, onSuccess, initialData }) => {
 
             <div className="flex gap-2 p-1 bg-white/[0.03] rounded-[8px] border border-white/5 flex-shrink-0">
               <button onClick={() => setAddonsTab('VENUE')}
-                className={`flex-1 py-2 text-xs font-bold uppercase tracking-wider rounded-lg transition-all ${addonsTab === 'VENUE' ? 'bg-gradient-to-r from-[#55DEE8] to-[#BFF367] text-black shadow-lg' : 'text-white/40 hover:text-white'}`}>
+                className={`flex-1 py-2 text-xs font-bold uppercase tracking-wider rounded-lg transition-all ${addonsTab === 'VENUE' ? 'bg-gradient-to-r from-[#BFF367] to-[#BFF367] text-black shadow-lg' : 'text-white/40 hover:text-white'}`}>
                 Venue
               </button>
               <button onClick={() => setAddonsTab('PROFESSIONALS')}
-                className={`flex-1 py-2 text-xs font-bold uppercase tracking-wider rounded-lg transition-all ${addonsTab === 'PROFESSIONALS' ? 'bg-gradient-to-r from-[#55DEE8] to-[#BFF367] text-black shadow-lg' : 'text-white/40 hover:text-white'}`}>
+                className={`flex-1 py-2 text-xs font-bold uppercase tracking-wider rounded-lg transition-all ${addonsTab === 'PROFESSIONALS' ? 'bg-gradient-to-r from-[#BFF367] to-[#BFF367] text-black shadow-lg' : 'text-white/40 hover:text-white'}`}>
                 Professionals
               </button>
             </div>
@@ -1345,15 +1345,15 @@ const StartScoringModal = ({ isOpen, onClose, onSuccess, initialData }) => {
                       return filteredVenues.length > 0 ? (
                         filteredVenues.map(g => (
                           <button key={g.id} onClick={() => setFormData(f => ({ ...f, venueId: f.venueId === g.id ? null : g.id, customVenue: '' }))}
-                            className={`w-full flex items-center justify-between p-3 rounded-[8px] border transition-all text-left ${formData.venueId === g.id ? 'bg-[#55DEE8]/10 border-[#55DEE8]' : 'bg-white/5 border-white/10 hover:border-white/20'}`}>
+                            className={`w-full flex items-center justify-between p-3 rounded-[8px] border transition-all text-left ${formData.venueId === g.id ? 'bg-[#BFF367]/10 border-[#BFF367]' : 'bg-white/5 border-white/10 hover:border-white/20'}`}>
                             <div className="flex items-center gap-3">
-                              <MapPin size={18} className={formData.venueId === g.id ? 'text-[#55DEE8]' : 'text-white/40'} />
+                              <MapPin size={18} className={formData.venueId === g.id ? 'text-[#BFF367]' : 'text-white/40'} />
                               <div>
                                 <div className="font-bold text-white text-sm">{g.name}</div>
                                 <div className="text-[10px] text-white/40">{g.city}</div>
                               </div>
                             </div>
-                            {formData.venueId === g.id && <Check size={16} className="text-[#55DEE8]" />}
+                            {formData.venueId === g.id && <Check size={16} className="text-[#BFF367]" />}
                           </button>
                         ))
                       ) : (
@@ -1419,7 +1419,7 @@ const StartScoringModal = ({ isOpen, onClose, onSuccess, initialData }) => {
                     </div>
                   </div>
 
-                  <button onClick={() => setShowCustomProInvite(true)} className="w-full py-3 rounded-[8px] border border-dashed border-[#55DEE8]/50 text-[#55DEE8] flex items-center justify-center gap-2 text-sm font-bold hover:bg-[#55DEE8]/10 transition-colors">
+                  <button onClick={() => setShowCustomProInvite(true)} className="w-full py-3 rounded-[8px] border border-dashed border-[#BFF367]/50 text-[#BFF367] flex items-center justify-center gap-2 text-sm font-bold hover:bg-[#BFF367]/10 transition-colors">
                     <UserPlus size={16} />
                     Invite Custom Professional
                   </button>
@@ -1595,7 +1595,7 @@ const StartScoringModal = ({ isOpen, onClose, onSuccess, initialData }) => {
                           setCustomProfessionalPhone('');
                         }}
                         disabled={!customProfessionalName || !customProfessionalPhone}
-                        className="w-full py-4 rounded-[8px] bg-gradient-to-r from-[#55DEE8] to-[#BFF367] text-black font-black uppercase tracking-wider disabled:opacity-50 mt-auto hover:opacity-90 transition-opacity shadow-lg shadow-[#55DEE8]/20"
+                        className="w-full py-4 rounded-[8px] bg-gradient-to-r from-[#BFF367] to-[#BFF367] text-black font-black uppercase tracking-wider disabled:opacity-50 mt-auto hover:opacity-90 transition-opacity shadow-lg shadow-[#BFF367]/20"
                       >
                         Add to Match & Invite
                       </button>
@@ -1605,9 +1605,9 @@ const StartScoringModal = ({ isOpen, onClose, onSuccess, initialData }) => {
               )}
             </AnimatePresence>
 
-            <div className="bg-[#55DEE8]/10 border border-[#55DEE8]/20 rounded-[8px] p-4 flex gap-3 flex-shrink-0">
-              <Sparkles size={20} className="text-[#55DEE8] flex-shrink-0 mt-0.5" />
-              <div className="text-sm text-[#55DEE8]">
+            <div className="bg-[#BFF367]/10 border border-[#BFF367]/20 rounded-[8px] p-4 flex gap-3 flex-shrink-0">
+              <Sparkles size={20} className="text-[#BFF367] flex-shrink-0 mt-0.5" />
+              <div className="text-sm text-[#BFF367]">
                 Venues and professionals selected here are added to your scoring match directly. No payment or coin transaction is required.
               </div>
             </div>
@@ -1629,7 +1629,7 @@ const StartScoringModal = ({ isOpen, onClose, onSuccess, initialData }) => {
             <div className="bg-white/[0.03] rounded-[8px] border border-white/5 p-4 space-y-3">
               <div className="flex items-center justify-between">
                 <span className="text-white font-black text-lg truncate">{formData.matchName}</span>
-                <span className="text-xs px-2 py-1 rounded-lg bg-[#55DEE8]/10 text-[#55DEE8] border border-[#55DEE8]/20 font-bold">{formatLabel}</span>
+                <span className="text-xs px-2 py-1 rounded-lg bg-[#BFF367]/10 text-[#BFF367] border border-[#BFF367]/20 font-bold">{formatLabel}</span>
               </div>
               <div className="flex items-center gap-2 text-white/80 font-bold">
                 <span className="truncate">{teamAName}</span>
@@ -1705,7 +1705,7 @@ const StartScoringModal = ({ isOpen, onClose, onSuccess, initialData }) => {
         {/* Step indicator */}
         <div className="flex gap-1.5 px-6 py-3 border-b border-white/5 flex-shrink-0">
           {STEPS.map(s => (
-            <div key={s.id} className={`h-1 flex-1 rounded-full transition-all duration-500 ${step > s.id ? 'bg-[#BFF367]' : step === s.id ? 'bg-[#55DEE8]' : 'bg-white/10'}`} />
+            <div key={s.id} className={`h-1 flex-1 rounded-full transition-all duration-500 ${step > s.id ? 'bg-[#BFF367]' : step === s.id ? 'bg-[#BFF367]' : 'bg-white/10'}`} />
           ))}
         </div>
 
@@ -1740,12 +1740,12 @@ const StartScoringModal = ({ isOpen, onClose, onSuccess, initialData }) => {
           )}
           {step < STEPS.length ? (
             <button onClick={handleNext} disabled={!canGoNext()}
-              className="flex-1 py-3 px-4 rounded-[8px] bg-gradient-to-r from-[#55DEE8] to-[#BFF367] text-black font-black hover:opacity-90 transition-all flex items-center justify-center gap-2 uppercase text-sm tracking-wider disabled:opacity-40 disabled:cursor-not-allowed">
+              className="flex-1 py-3 px-4 rounded-[8px] bg-gradient-to-r from-[#BFF367] to-[#BFF367] text-black font-black hover:opacity-90 transition-all flex items-center justify-center gap-2 uppercase text-sm tracking-wider disabled:opacity-40 disabled:cursor-not-allowed">
               Next <ChevronRight size={14} />
             </button>
           ) : (
             <button onClick={handleSubmit} disabled={isLoading || !canGoNext()}
-              className="flex-1 py-3 px-4 rounded-[8px] bg-gradient-to-r from-[#55DEE8] to-[#BFF367] text-black font-black hover:opacity-90 transition-all flex items-center justify-center gap-2 uppercase text-sm tracking-wider disabled:opacity-40 disabled:cursor-not-allowed">
+              className="flex-1 py-3 px-4 rounded-[8px] bg-gradient-to-r from-[#BFF367] to-[#BFF367] text-black font-black hover:opacity-90 transition-all flex items-center justify-center gap-2 uppercase text-sm tracking-wider disabled:opacity-40 disabled:cursor-not-allowed">
               {isLoading ? <><Loader2 size={16} className="animate-spin" /> Creating...</> : <><Trophy size={16} /> Create Match</>}
             </button>
           )}
@@ -1760,7 +1760,7 @@ const StartScoringModal = ({ isOpen, onClose, onSuccess, initialData }) => {
 // ─── Playing XI Sub-component ─────────────────────────────────────────────────
 
 const PlayingXIStep = ({ teamKey, teamName, players, maxMembers, teamDetails, onInit, onRemove, onAdd, onReplace, onRoleChange }) => {
-  const color = teamKey === 'A' ? '#55DEE8' : '#BFF367';
+  const color = teamKey === 'A' ? '#BFF367' : '#BFF367';
   const hasAutoLoaded = players.length > 0;
 
   return (

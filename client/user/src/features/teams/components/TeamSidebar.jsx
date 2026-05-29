@@ -65,7 +65,7 @@ const TeamSidebar = ({ onSelectTeam, selectedTeamId, onCreateTeam }) => {
           <div className="flex items-center gap-2">
             <button 
               onClick={() => setIsStartScoringOpen(true)}
-              className="flex items-center justify-center px-4 h-8 bg-gradient-to-r from-[#55DEE8] to-[#BFF367] text-black rounded-[8px] hover:scale-105 shadow-lg shadow-[#55DEE8]/10 hover:shadow-[#BFF367]/15 transition-all duration-300 shrink-0"
+              className="flex items-center justify-center px-4 h-8 bg-gradient-to-r from-[#BFF367] to-[#BFF367] text-black rounded-[8px] hover:scale-105 shadow-lg shadow-[#BFF367]/10 hover:shadow-[#BFF367]/15 transition-all duration-300 shrink-0"
               title="Start Scoring"
             >
               <span className="text-[9px] font-black uppercase tracking-widest">Start Scoring</span>
@@ -73,7 +73,7 @@ const TeamSidebar = ({ onSelectTeam, selectedTeamId, onCreateTeam }) => {
             <div className="relative">
             <button 
               onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-              className="w-8 h-8 flex items-center justify-center bg-gradient-to-r from-[#55DEE8] to-[#BFF367] text-black rounded-[8px] shadow-lg shadow-[#55DEE8]/10 hover:shadow-[#BFF367]/15 hover:scale-105 transition-all duration-300 shrink-0"
+              className="w-8 h-8 flex items-center justify-center bg-gradient-to-r from-[#BFF367] to-[#BFF367] text-black rounded-[8px] shadow-lg shadow-[#BFF367]/10 hover:shadow-[#BFF367]/15 hover:scale-105 transition-all duration-300 shrink-0"
               title="Add New"
             >
               <Plus size={18} strokeWidth={3} className={`transition-transform duration-300 ${isDropdownOpen ? 'rotate-45' : ''}`} />
@@ -94,7 +94,7 @@ const TeamSidebar = ({ onSelectTeam, selectedTeamId, onCreateTeam }) => {
                         onClick={() => { onCreateTeam(); setIsDropdownOpen(false); }}
                         className="px-4 py-2.5 text-left text-sm text-white/80 hover:text-white hover:bg-white/5 font-medium transition-colors"
                       >
-                        <span className="text-[#55DEE8] font-bold text-[10px] uppercase tracking-wider block mb-0.5">My Teams</span>
+                        <span className="text-[#BFF367] font-bold text-[10px] uppercase tracking-wider block mb-0.5">My Teams</span>
                         Create New Squad
                       </button>
                       <div className="h-px bg-white/5 w-full" />
@@ -130,7 +130,7 @@ const TeamSidebar = ({ onSelectTeam, selectedTeamId, onCreateTeam }) => {
               type="text" 
               placeholder="Search..." 
               style={{ fontFamily: "'Inter', sans-serif" }}
-              className="w-full bg-white/[0.03] border border-white/10 rounded-[8px] py-2.5 pl-10 pr-4 text-white text-sm focus:outline-none focus:border-[#55DEE8]/30 transition-colors uppercase font-bold tracking-widest"
+              className="w-full bg-white/[0.03] border border-white/10 rounded-[8px] py-2.5 pl-10 pr-4 text-white text-sm focus:outline-none focus:border-[#BFF367]/30 transition-colors uppercase font-bold tracking-widest"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
             />
@@ -142,21 +142,21 @@ const TeamSidebar = ({ onSelectTeam, selectedTeamId, onCreateTeam }) => {
           <button 
             onClick={() => setActiveTab('myTeams')}
             style={{ fontFamily: "'Inter', sans-serif" }}
-            className={`flex-1 py-1.5 text-[10px] font-black uppercase tracking-widest rounded-[8px] transition-all ${ activeTab === 'myTeams' ? 'bg-gradient-to-r from-[#55DEE8] to-[#BFF367] text-black shadow-lg shadow-[#55DEE8]/10' : 'text-white/40 hover:text-white' }`}
+            className={`flex-1 py-1.5 text-[10px] font-black uppercase tracking-widest rounded-[8px] transition-all ${ activeTab === 'myTeams' ? 'bg-gradient-to-r from-[#BFF367] to-[#BFF367] text-black shadow-lg shadow-[#BFF367]/10' : 'text-white/40 hover:text-white' }`}
           >
             My Teams
           </button>
           <button 
             onClick={() => setActiveTab('opponentTeams')}
             style={{ fontFamily: "'Inter', sans-serif" }}
-            className={`flex-1 py-1.5 text-[10px] font-black uppercase tracking-widest rounded-[8px] transition-all ${ activeTab === 'opponentTeams' ? 'bg-gradient-to-r from-[#55DEE8] to-[#BFF367] text-black shadow-lg shadow-[#55DEE8]/10' : 'text-white/40 hover:text-white' }`}
+            className={`flex-1 py-1.5 text-[10px] font-black uppercase tracking-widest rounded-[8px] transition-all ${ activeTab === 'opponentTeams' ? 'bg-gradient-to-r from-[#BFF367] to-[#BFF367] text-black shadow-lg shadow-[#BFF367]/10' : 'text-white/40 hover:text-white' }`}
           >
             Opponents
           </button>
           <button 
             onClick={() => setActiveTab('scoringMatches')}
             style={{ fontFamily: "'Inter', sans-serif" }}
-            className={`flex-1 py-1.5 text-[10px] font-black uppercase tracking-widest rounded-[8px] transition-all ${ activeTab === 'scoringMatches' ? 'bg-gradient-to-r from-[#55DEE8] to-[#BFF367] text-black shadow-lg shadow-[#55DEE8]/10' : 'text-white/40 hover:text-white' }`}
+            className={`flex-1 py-1.5 text-[10px] font-black uppercase tracking-widest rounded-[8px] transition-all ${ activeTab === 'scoringMatches' ? 'bg-gradient-to-r from-[#BFF367] to-[#BFF367] text-black shadow-lg shadow-[#BFF367]/10' : 'text-white/40 hover:text-white' }`}
           >
             Matches
           </button>
@@ -187,7 +187,7 @@ const TeamSidebar = ({ onSelectTeam, selectedTeamId, onCreateTeam }) => {
               if (isMatch) return (
                 <div key={itemId} className="w-full flex flex-col p-3 rounded-[8px] bg-white/[0.02] border border-white/5 mb-2 hover:border-white/10 transition-colors">
                   <div className="flex items-center justify-between mb-2">
-                    <h4 className="font-black text-[#55DEE8] text-sm truncate flex-1 mr-2">{item.name || item.title}</h4>
+                    <h4 className="font-black text-[#BFF367] text-sm truncate flex-1 mr-2">{item.name || item.title}</h4>
                     <div className="flex items-center gap-1.5 flex-shrink-0">
                       <span className={`text-[9px] font-black px-1.5 py-0.5 rounded uppercase ${statusStyle.bg} ${statusStyle.text}`}>
                         {item.scoringStatus === 'NOT_STARTED' ? 'SETUP' : item.scoringStatus}
@@ -210,7 +210,7 @@ const TeamSidebar = ({ onSelectTeam, selectedTeamId, onCreateTeam }) => {
                     </div>
                   </div>
                   <div className="flex gap-2 mt-auto">
-                    <a href={`/scoring/${item.id}`} className="flex-1 text-center text-[10px] uppercase font-black tracking-widest text-[#55DEE8] border border-[#55DEE8]/30 rounded-lg py-1.5 hover:bg-[#55DEE8]/10 transition-colors">Launch App</a>
+                    <a href={`/scoring/${item.id}`} className="flex-1 text-center text-[10px] uppercase font-black tracking-widest text-[#BFF367] border border-[#BFF367]/30 rounded-lg py-1.5 hover:bg-[#BFF367]/10 transition-colors">Launch App</a>
                     <a href={`/analytics/${item.shortId || item.id}`} target="_blank" rel="noreferrer" className="flex-1 text-center text-[10px] uppercase font-black tracking-widest text-[#BFF367] border border-[#BFF367]/30 rounded-lg py-1.5 hover:bg-[#BFF367]/10 transition-colors">Watch Live</a>
                   </div>
                 </div>
@@ -223,23 +223,23 @@ const TeamSidebar = ({ onSelectTeam, selectedTeamId, onCreateTeam }) => {
                 whileTap={{ scale: 0.98 }}
                 onClick={() => onSelectTeam(item)}
                 style={{ fontFamily: "'Inter', sans-serif" }}
-                className={`w-full flex items-center gap-3 p-3 rounded-[8px] transition-all group ${ isSelected ? 'bg-gradient-to-r from-[#55DEE8]/5 to-[#BFF367]/5 border border-[#55DEE8]/20 shadow-[0_0_15px_rgba(85,222,232,0.06)]' : 'hover:bg-white/[0.03] border border-transparent' }`}
+                className={`w-full flex items-center gap-3 p-3 rounded-[8px] transition-all group ${ isSelected ? 'bg-gradient-to-r from-[#BFF367]/5 to-[#BFF367]/5 border border-[#BFF367]/20 shadow-[0_0_15px_rgba(85,222,232,0.06)]' : 'hover:bg-white/[0.03] border border-transparent' }`}
               >
                 <div className="relative shrink-0">
-                  <div className={`w-12 h-12 rounded-[8px] bg-black border-2 flex items-center justify-center text-[#55DEE8] font-bold overflow-hidden transition-colors ${isSelected ? 'border-[#55DEE8]' : 'border-white/10 group-hover:border-[#55DEE8]/50'}`}>
+                  <div className={`w-12 h-12 rounded-[8px] bg-black border-2 flex items-center justify-center text-[#BFF367] font-bold overflow-hidden transition-colors ${isSelected ? 'border-[#BFF367]' : 'border-white/10 group-hover:border-[#BFF367]/50'}`}>
                     {item.image ? (
                       <img src={item.image} alt={item.name} className="w-full h-full object-cover" />
                     ) : (
                       <span className="text-lg">{item.name.charAt(0).toUpperCase()}</span>
                     )}
                   </div>
-                  <div className="absolute -bottom-1 -right-1 bg-black text-[#55DEE8] text-[8px] px-1.5 py-0.5 rounded-full border border-white/10 font-black uppercase">
+                  <div className="absolute -bottom-1 -right-1 bg-black text-[#BFF367] text-[8px] px-1.5 py-0.5 rounded-full border border-white/10 font-black uppercase">
                     {item.sportType?.slice(0, 3)}
                   </div>
                 </div>
                 <div className="flex-1 text-left overflow-hidden">
                   <div className="flex items-center justify-between gap-2">
-                    <h4 className={`font-black truncate transition-colors ${isSelected ? 'text-[#55DEE8]' : 'text-white/80 group-hover:text-white'}`}>
+                    <h4 className={`font-black truncate transition-colors ${isSelected ? 'text-[#BFF367]' : 'text-white/80 group-hover:text-white'}`}>
                       {item.name}
                     </h4>
                     <span className="text-[8px] font-black text-white/20 uppercase bg-white/5 px-1 rounded">{item.teamCode}</span>
@@ -250,7 +250,7 @@ const TeamSidebar = ({ onSelectTeam, selectedTeamId, onCreateTeam }) => {
                     <span className="text-[10px] text-white/40 font-bold">{item.members?.length + (item.customMembers?.length || 0)} Members</span>
                   </div>
                 </div>
-                <ChevronRight size={14} className={`transition-all ${isSelected ? 'text-[#55DEE8]' : 'text-white/20 -rotate-90 md:rotate-0'}`} />
+                <ChevronRight size={14} className={`transition-all ${isSelected ? 'text-[#BFF367]' : 'text-white/20 -rotate-90 md:rotate-0'}`} />
               </motion.button>
             );
           })

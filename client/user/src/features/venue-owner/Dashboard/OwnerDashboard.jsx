@@ -40,7 +40,7 @@ const OwnerDashboard = () => {
   const { dashboardData, loading, error } = useOwnerDashboard();
   const { role, user } = useSelector((state) => state.auth);
   const isScorer = role?.toLowerCase().includes("scorer");
-  const themeColor = isScorer ? "#00C187" : "#BFF367";
+  const themeColor = isScorer ? "#BFF367" : "#BFF367";
   const dashboardTitle = isScorer ? "SCORER Dashboard" : "Dashboard Overview";
 
   const [timeFilter, setTimeFilter] = useState("Month");

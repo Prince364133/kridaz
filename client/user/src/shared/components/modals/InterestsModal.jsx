@@ -63,7 +63,7 @@ const InterestsModal = ({ isOpen, onClose, onSaved }) => {
  <button
  key={sport}
  onClick={() => toggleSport(sport)}
- className={`flex items-center justify-between p-4 rounded-[8px] border transition-all duration-300 ${ isSelected ? "bg-[#55DEE8] border-[#55DEE8] text-black scale-[1.02]" : "bg-[#000000] border-[#2D2D2D] text-white/60 hover:border-white/20" }`}
+ className={`flex items-center justify-between p-4 rounded-[8px] border transition-all duration-300 ${ isSelected ? "bg-[#BFF367] border-[#BFF367] text-black scale-[1.02]" : "bg-[#000000] border-[#2D2D2D] text-white/60 hover:border-white/20" }`}
  >
  <span className="text-xs font-black uppercase tracking-wider">{sport}</span>
  {isSelected ? <Check size={14} strokeWidth={3} /> : <div className="w-3.5 h-3.5 rounded-full border border-current opacity-20" />}

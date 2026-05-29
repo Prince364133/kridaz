@@ -47,7 +47,7 @@ export default function ProfessionalProfile() {
   const { user, role } = useSelector((state) => state.auth);
 
   const isScorer = role?.toLowerCase().includes("scorer");
-  const themeColor = isScorer ? "#00C187" : "#55DEE8";
+  const themeColor = "#BFF367";
   const portalName = role?.toUpperCase() || "PROFESSIONAL";
 
   const [loading, setLoading] = useState(false);
@@ -764,7 +764,7 @@ export default function ProfessionalProfile() {
   );
 
   if (fetching) return (
-    <div className="py-20 flex justify-center"><Loader2 className="animate-spin text-[#55DEE8]" size={48} /></div>
+    <div className="py-20 flex justify-center"><Loader2 className="animate-spin text-[#BFF367]" size={48} /></div>
   );
 
   const StepIndicator = () => (
@@ -1386,7 +1386,7 @@ export default function ProfessionalProfile() {
                     {/* Role-conditioned streaming specs */}
                     {role?.toLowerCase().includes("streamer") && (
                       <div className="md:col-span-2 border-t border-white/5 pt-4 space-y-4">
-                        <h4 className="text-[9px] font-black uppercase tracking-widest text-[#55DEE8]">Streamer Specifications</h4>
+                        <h4 className="text-[9px] font-black uppercase tracking-widest text-[#BFF367]">Streamer Specifications</h4>
                         <div className="grid grid-cols-2 gap-3">
                           <div>
                             <label className="text-[9px] font-bold text-neutral-500 uppercase tracking-wider block mb-1">Max Stream Quality</label>
@@ -1425,7 +1425,7 @@ export default function ProfessionalProfile() {
                                     const updated = current.includes(platform) ? current.filter(p => p !== platform) : [...current, platform];
                                     setFormData({ ...formData, streamPlatforms: updated });
                                   }}
-                                  className={`px-2.5 py-1.5 rounded border text-[9px] font-bold uppercase tracking-wider transition-colors ${isSelected ? 'border-[#55DEE8] bg-[#55DEE8]/10 text-white font-black' : 'border-white/5 bg-black/20 text-neutral-500 hover:text-white'}`}
+                                  className={`px-2.5 py-1.5 rounded border text-[9px] font-bold uppercase tracking-wider transition-colors ${isSelected ? 'border-[#BFF367] bg-[#BFF367]/10 text-white font-black' : 'border-white/5 bg-black/20 text-neutral-500 hover:text-white'}`}
                                 >
                                   {platform}
                                 </button>
@@ -1439,11 +1439,11 @@ export default function ProfessionalProfile() {
                     {/* Role-conditioned scoring specs */}
                     {(role?.toLowerCase().includes("scorer") || role?.toLowerCase().includes("umpire")) && (
                       <div className="md:col-span-2 border-t border-white/5 pt-4 space-y-3">
-                        <h4 className="text-[9px] font-black uppercase tracking-widest text-[#55DEE8]">Scoring Integration</h4>
+                        <h4 className="text-[9px] font-black uppercase tracking-widest text-[#BFF367]">Scoring Integration</h4>
                         <label className="flex items-center gap-2.5 cursor-pointer group">
                           <input
                             type="checkbox"
-                            className="peer appearance-none w-4 h-4 border border-white/10 rounded checked:bg-[#55DEE8] checked:border-[#55DEE8] cursor-pointer"
+                            className="peer appearance-none w-4 h-4 border border-white/10 rounded checked:bg-[#BFF367] checked:border-[#BFF367] cursor-pointer"
                             checked={formData.liveScoringSupport}
                             onChange={(e) => setFormData({ ...formData, liveScoringSupport: e.target.checked })}
                           />
@@ -1455,12 +1455,12 @@ export default function ProfessionalProfile() {
                     {/* Role-conditioned commentator specs */}
                     {role?.toLowerCase().includes("commentator") && (
                       <div className="md:col-span-2 border-t border-white/5 pt-4 space-y-3">
-                        <h4 className="text-[9px] font-black uppercase tracking-widest text-[#55DEE8]">Commentary Features</h4>
+                        <h4 className="text-[9px] font-black uppercase tracking-widest text-[#BFF367]">Commentary Features</h4>
                         <div className="flex flex-col gap-2">
                           <label className="flex items-center gap-2.5 cursor-pointer group">
                             <input
                               type="checkbox"
-                              className="peer appearance-none w-4 h-4 border border-white/10 rounded checked:bg-[#55DEE8] checked:border-[#55DEE8] cursor-pointer"
+                              className="peer appearance-none w-4 h-4 border border-white/10 rounded checked:bg-[#BFF367] checked:border-[#BFF367] cursor-pointer"
                               checked={formData.liveCommentarySupported}
                               onChange={(e) => setFormData({ ...formData, liveCommentarySupported: e.target.checked })}
                             />
@@ -1469,7 +1469,7 @@ export default function ProfessionalProfile() {
                           <label className="flex items-center gap-2.5 cursor-pointer group">
                             <input
                               type="checkbox"
-                              className="peer appearance-none w-4 h-4 border border-white/10 rounded checked:bg-[#55DEE8] checked:border-[#55DEE8] cursor-pointer"
+                              className="peer appearance-none w-4 h-4 border border-white/10 rounded checked:bg-[#BFF367] checked:border-[#BFF367] cursor-pointer"
                               checked={formData.panelDiscussionEnabled}
                               onChange={(e) => setFormData({ ...formData, panelDiscussionEnabled: e.target.checked })}
                             />
@@ -1546,7 +1546,7 @@ export default function ProfessionalProfile() {
                                         type="checkbox"
                                         checked={isSelected}
                                         readOnly
-                                        className="peer appearance-none w-3.5 h-3.5 border border-white/20 rounded checked:bg-[#55DEE8] checked:border-[#55DEE8]"
+                                        className="peer appearance-none w-3.5 h-3.5 border border-white/20 rounded checked:bg-[#BFF367] checked:border-[#BFF367]"
                                         style={{
                                           backgroundColor: isSelected ? themeColor : 'transparent',
                                           borderColor: isSelected ? themeColor : 'rgba(255,255,255,0.2)'
@@ -1578,7 +1578,7 @@ export default function ProfessionalProfile() {
                             // Search Location mode
                             <div className="space-y-4">
                               <div className="flex items-center justify-between border-b border-white/5 pb-2">
-                                <h4 className="text-[10px] font-black uppercase tracking-widest text-[#55DEE8] flex items-center gap-1.5 leading-none">
+                                <h4 className="text-[10px] font-black uppercase tracking-widest text-[#BFF367] flex items-center gap-1.5 leading-none">
                                   <MapPin size={12} /> Search Location
                                 </h4>
                                 <button
@@ -1601,7 +1601,7 @@ export default function ProfessionalProfile() {
                                   e.stopPropagation();
                                   detectGPSLocation();
                                 }}
-                                className="w-full py-2 bg-white/[0.02] border border-white/5 hover:border-white/10 rounded-lg text-[9px] font-black uppercase tracking-[0.2em] flex items-center justify-center gap-2 text-[#55DEE8] transition-all"
+                                className="w-full py-2 bg-white/[0.02] border border-white/5 hover:border-white/10 rounded-lg text-[9px] font-black uppercase tracking-[0.2em] flex items-center justify-center gap-2 text-[#BFF367] transition-all"
                                 style={{ color: themeColor, borderColor: `${themeColor}22` }}
                               >
                                 <MapPin size={12} /> Detect My GPS Location

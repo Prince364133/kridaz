@@ -26,7 +26,7 @@ const ReelReports = () => {
   if (isLoading) {
     return (
       <div className="flex items-center justify-center min-h-[60vh]">
-        <div className="w-12 h-12 border-4 border-[#55DEE8] border-t-transparent rounded-full animate-spin"></div>
+        <div className="w-12 h-12 border-4 border-[#BFF367] border-t-transparent rounded-full animate-spin"></div>
       </div>
     );
   }
@@ -82,7 +82,7 @@ const ReelReports = () => {
                     <td className="px-6 py-4">
                       {report.reel ? (
                         <div>
-                          <p className="font-medium truncate max-w-[200px] text-[#55DEE8]">
+                          <p className="font-medium truncate max-w-[200px] text-[#BFF367]">
                             {report.reel.id}
                           </p>
                           <p className="text-sm text-zinc-400 truncate max-w-[200px]">

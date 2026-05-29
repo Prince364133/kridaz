@@ -18,7 +18,7 @@ const mapStyles = `
     width: 24px;
     height: 24px;
     border-radius: 50%;
-    background: #55DEE8;
+    background: #BFF367;
     border: 3px solid white;
     box-shadow: 0 0 0 4px rgba(85,222,232,0.3);
     animation: pulse 2s infinite;
@@ -93,7 +93,7 @@ const MapController = ({ userLocation, radiusKm }) => {
       }
       circleRef.current = L.circle([userLocation.lat, userLocation.lng], {
         radius: radiusKm * 1000,
-        color: '#55DEE8',
+        color: '#BFF367',
         fillOpacity: 0.05,
         strokeOpacity: 0.3,
         weight: 1
@@ -117,7 +117,7 @@ const getValidAvatar = (url) => {
 const createClusterIcon = (count, previews) => {
   const avatarsHtml = previews.map(p =>
     `<img src="${getValidAvatar(p.profilePicture)}" 
-          style="width:14px;height:14px;border-radius:50%;object-fit:cover;border:1px solid #55DEE8" 
+          style="width:14px;height:14px;border-radius:50%;object-fit:cover;border:1px solid #BFF367" 
           onerror="this.src='https://pngimg.com/d/cricket_PNG102.png'; this.onerror=null;" />`
   ).join('');
 
@@ -127,7 +127,7 @@ const createClusterIcon = (count, previews) => {
         width: 56px; height: 56px;
         border-radius: 50%;
         background: rgba(0,0,0,0.85);
-        border: 2.5px solid #55DEE8;
+        border: 2.5px solid #BFF367;
         display: flex; align-items: center; justify-content: center;
         flex-wrap: wrap; gap: 2px; padding: 4px;
         box-shadow: 0 0 0 3px rgba(85,222,232,0.2);
@@ -135,7 +135,7 @@ const createClusterIcon = (count, previews) => {
         ${avatarsHtml}
         <div style="
           position:absolute; top:-6px; right:-6px;
-          background:#55DEE8; color:black;
+          background:#BFF367; color:black;
           border-radius:99px; padding:1px 5px;
           font-size:10px; font-weight:900;
         ">${count}</div>
@@ -157,7 +157,7 @@ const createPlayerIcon = (profilePicture) => {
         width: 40px;
         height: 40px;
         border-radius: 50%;
-        border: 2.5px solid #55DEE8;
+        border: 2.5px solid #BFF367;
         overflow: hidden;
         box-shadow: 0 2px 8px rgba(0,0,0,0.5);
         background: #0a0a0a;
@@ -171,7 +171,7 @@ const createPlayerIcon = (profilePicture) => {
         width: 0; height: 0;
         border-left: 6px solid transparent;
         border-right: 6px solid transparent;
-        border-top: 8px solid #55DEE8;
+        border-top: 8px solid #BFF367;
         margin: 0 auto;
       "></div>
     </div>
@@ -257,7 +257,7 @@ const MapInner = ({ nearbyPlayers, onPlayerClick, userLocation, radiusKm, onMapM
               e.preventDefault();
               map.flyTo([userLocation.lat, userLocation.lng], 14, { duration: 1.5 });
             }}
-            className="w-10 h-10 bg-black/80 backdrop-blur-xl border border-white/10 rounded-full flex items-center justify-center text-[#55DEE8] hover:bg-[#55DEE8]/20 transition-all shadow-[0_4px_20px_rgba(0,0,0,0.5)] cursor-pointer"
+            className="w-10 h-10 bg-black/80 backdrop-blur-xl border border-white/10 rounded-full flex items-center justify-center text-[#BFF367] hover:bg-[#BFF367]/20 transition-all shadow-[0_4px_20px_rgba(0,0,0,0.5)] cursor-pointer"
             title="Locate me"
           >
             <Navigation size={18} className="-ml-0.5 mt-0.5" />

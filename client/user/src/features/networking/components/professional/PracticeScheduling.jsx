@@ -8,7 +8,7 @@ import { format, addDays, subDays } from "date-fns";
 export default function PracticeScheduling() {
   const { role } = useSelector((state) => state.auth);
   const isScorer = role?.toLowerCase().includes("scorer");
-  const themeColor = isScorer ? "#00C187" : "#55DEE8";
+  const themeColor = isScorer ? "#BFF367" : "#BFF367";
 
   const [loading, setLoading] = useState(true);
   const [tasks, setTasks] = useState([]);

@@ -18,8 +18,8 @@ import useLoginOnDemand from "@hooks/useLoginOnDemand";
 import Community from "../features/networking/pages/Community";
 import { useGetReelsFeedQuery } from "@redux/api/reelsApi";
 
-const PRI = "#55DEE8";
-const GRAD = "linear-gradient(90deg, #55DEE8 0%, #BFF367 100%)";
+const PRI = "#BFF367";
+const GRAD = "linear-gradient(90deg, #BFF367 0%, #BFF367 100%)";
 const S2 = "#1A1A1A";
 const BDR = "#2A2A2A";
 
@@ -496,7 +496,7 @@ export default function Home() {
  <div className="relative">
  <h2 className="text-3xl md:text-5xl lg:text-6xl font-black text-white uppercase tracking-tighter leading-none" style={{ fontFamily: "'Open Sans', sans-serif" }}>
   VENUES {userLocation?.city || userLocation?.state ? 'IN ' : 'NEAR '}
-  <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#55DEE8] to-[#BFF367]">
+  <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#BFF367] to-[#BFF367]">
     {userLocation?.city || userLocation?.state || 'YOU'}
   </span>
  </h2>
@@ -510,7 +510,7 @@ export default function Home() {
  <div className="flex flex-col gap-6 mb-10 w-full">
  <div className="w-full animate-fade-in relative z-20">
     <div className="flex items-center gap-2 bg-[#111] border border-white/10 rounded-full px-4 py-2 w-full md:w-1/2">
-      <Search size={18} className="text-[#55DEE8]" />
+      <Search size={18} className="text-[#BFF367]" />
       <input 
         type="text" 
         placeholder="Search arenas..." 
@@ -539,7 +539,7 @@ export default function Home() {
  <p className="text-gray-500 text-sm uppercase tracking-wider mb-8">Try adjusting your search or filters</p>
  <button
  onClick={() => setTurfFilters({ searchTerm: "", city: "", state: "" })}
- className="px-8 py-3 text-black font-black uppercase text-[10px] tracking-[0.2em] rounded-[8px] hover:scale-105 transition-all shadow-[0_0_20px_rgba(85,222,e32,0.2)]" style={{ background: "linear-gradient(90deg, #55DEE8 0%, #BFF367 100%)" }}
+ className="px-8 py-3 text-black font-black uppercase text-[10px] tracking-[0.2em] rounded-[8px] hover:scale-105 transition-all shadow-[0_0_20px_rgba(85,222,e32,0.2)]" style={{ background: "linear-gradient(90deg, #BFF367 0%, #BFF367 100%)" }}
  >
  View All Venues
  </button>
@@ -558,7 +558,7 @@ export default function Home() {
   )}
 
  <div className="text-center mt-6 lg:mt-10">
- <Link to="/venues" className="inline-flex items-center gap-2 font-semibold text-sm py-3 px-10 rounded-[6px] border transition-all hover:border-[#55DEE8] hover:text-[#55DEE8]"
+ <Link to="/venues" className="inline-flex items-center gap-2 font-semibold text-sm py-3 px-10 rounded-[6px] border transition-all hover:border-[#BFF367] hover:text-[#BFF367]"
  style={{ borderColor: BDR, color: "#888" }}>
  View All Venues <ChevronRight size={16} />
  </Link>
@@ -595,7 +595,7 @@ export default function Home() {
  <p className="font-display text-2xl">No Players Yet</p>
  <p className="text-sm mt-1">Be the first to join the community!</p>
  <Link to="/signup" className="inline-flex items-center gap-2 mt-4 font-bold text-black px-6 py-2.5 rounded-full"
- style={{ background: "linear-gradient(90deg, #55DEE8 0%, #BFF367 100%)" }}>Join Now</Link>
+ style={{ background: "linear-gradient(90deg, #BFF367 0%, #BFF367 100%)" }}>Join Now</Link>
  </div>
  ) : (
  <div className="flex gap-3 overflow-x-auto no-scrollbar pb-2">
@@ -610,11 +610,11 @@ export default function Home() {
  
  return (
  <div key={p.id || p._id} className="shrink-0 w-[160px] md:w-[190px] group">
- <div className="relative rounded-[8px] p-[1px] bg-white/5 transition-all duration-500 group-hover:bg-gradient-to-r group-hover:from-[#55DEE8] group-hover:to-[#BFF367] group-hover:shadow-[0_15px_30px_rgba(0,0,0,0.4)]">
+ <div className="relative rounded-[8px] p-[1px] bg-white/5 transition-all duration-500 group-hover:bg-gradient-to-r group-hover:from-[#BFF367] group-hover:to-[#BFF367] group-hover:shadow-[0_15px_30px_rgba(0,0,0,0.4)]">
  {/* Profile Image */}
  <div className="relative bg-[#121212] rounded-[8px] p-2.5 h-full">
  <Link to={`/profile/${p.id || p._id}`} className="relative aspect-[1/1.1] rounded-[8px] overflow-hidden block mb-4">
- <div className="absolute top-2 right-2 z-20 px-1.5 py-0.5 bg-gradient-to-r from-[#55DEE8] to-[#BFF367] rounded border border-black/20 text-[8px] font-black text-black uppercase tracking-widest shadow-[0_4px_10px_rgba(0,0,0,0.5)]">
+ <div className="absolute top-2 right-2 z-20 px-1.5 py-0.5 bg-gradient-to-r from-[#BFF367] to-[#BFF367] rounded border border-black/20 text-[8px] font-black text-black uppercase tracking-widest shadow-[0_4px_10px_rgba(0,0,0,0.5)]">
  {p.preferredSport || "ATHLETE"}
  </div>
  <div className="w-full h-full bg-[#1A1A1A] flex items-center justify-center">
@@ -633,7 +633,7 @@ export default function Home() {
  className="relative z-10 flex items-center justify-center w-full h-full bg-gradient-to-br from-[#1a1a1a] to-[#0a0a0a]"
  style={{ display: (p.profilePicture || p.profileImage) ? 'none' : 'flex' }}
  >
- <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#55DEE8] to-[#BFF367] font-black text-5xl tracking-tighter opacity-40 group-hover:opacity-80 transition-opacity duration-500">
+ <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#BFF367] to-[#BFF367] font-black text-5xl tracking-tighter opacity-40 group-hover:opacity-80 transition-opacity duration-500">
  {initials}
  </span>
  </div>
@@ -644,7 +644,7 @@ export default function Home() {
  <div className="px-2 pb-1.5">
  <div className="flex items-center gap-1.5 mb-1">
  <Link to={`/profile/${p._id}`}>
- <h3 className="text-white font-bold text-[15px] tracking-tight group-hover:text-[#55DEE8] transition-colors line-clamp-1 font-open-sans">
+ <h3 className="text-white font-bold text-[15px] tracking-tight group-hover:text-[#BFF367] transition-colors line-clamp-1 font-open-sans">
  {p.name || "Anonymous"}
  </h3>
  </Link>
@@ -678,7 +678,7 @@ export default function Home() {
 
  {/* View More Players btn */}
  <div className="text-center mt-6 lg:mt-10">
- <Link to="/players" className="inline-flex items-center gap-2 font-semibold text-sm py-3 px-10 rounded-[6px] border transition-all hover:border-[#55DEE8] hover:text-[#55DEE8]"
+ <Link to="/players" className="inline-flex items-center gap-2 font-semibold text-sm py-3 px-10 rounded-[6px] border transition-all hover:border-[#BFF367] hover:text-[#BFF367]"
  style={{ borderColor: BDR, color: "#888" }}>
  View More Players <ChevronRight size={16} />
  </Link>
@@ -745,7 +745,7 @@ export default function Home() {
  </p>
  </div>
 
- <Link to="/join-games" className="group flex items-center gap-3 px-6 py-3 bg-white/5 border border-white/10 rounded-[6px] hover:bg-[#55DEE8] hover:text-black hover:border-[#55DEE8] transition-all duration-500">
+ <Link to="/join-games" className="group flex items-center gap-3 px-6 py-3 bg-white/5 border border-white/10 rounded-[6px] hover:bg-[#BFF367] hover:text-black hover:border-[#BFF367] transition-all duration-500">
  <span className="text-[11px] font-black uppercase tracking-widest">View More Games</span>
  <div className="w-6 h-6 rounded-full bg-white/5 group-hover:bg-black/10 flex items-center justify-center transition-colors">
  <ChevronRight size={14} />
@@ -756,7 +756,7 @@ export default function Home() {
  {/* Location Filters */}
  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
  <div className="relative">
- <MapPin className="absolute left-4 top-1/2 -translate-y-1/2 text-neutral-500 group-focus-within:text-[#55DEE8] transition-colors pointer-events-none" size={18} />
+ <MapPin className="absolute left-4 top-1/2 -translate-y-1/2 text-neutral-500 group-focus-within:text-[#BFF367] transition-colors pointer-events-none" size={18} />
  <select
  value={selectedHomeState}
  onChange={(e) => {
@@ -764,7 +764,7 @@ export default function Home() {
  setSelectedHomeCity("");
  }}
  disabled={loadingStates}
- className="w-full bg-[#111] border border-white/10 rounded-[8px] py-3 pl-12 pr-4 appearance-none text-sm text-white focus:border-[#55DEE8] outline-none transition-all font-bold disabled:opacity-50"
+ className="w-full bg-[#111] border border-white/10 rounded-[8px] py-3 pl-12 pr-4 appearance-none text-sm text-white focus:border-[#BFF367] outline-none transition-all font-bold disabled:opacity-50"
  >
  <option value="">{loadingStates ? 'Loading States...' : 'Select State'}</option>
  {states.map(s => <option key={s} value={s}>{s}</option>)}
@@ -772,12 +772,12 @@ export default function Home() {
  </div>
 
  <div className="relative">
- <MapPin className="absolute left-4 top-1/2 -translate-y-1/2 text-neutral-500 group-focus-within:text-[#55DEE8] transition-colors pointer-events-none" size={18} />
+ <MapPin className="absolute left-4 top-1/2 -translate-y-1/2 text-neutral-500 group-focus-within:text-[#BFF367] transition-colors pointer-events-none" size={18} />
  <select
  value={selectedHomeCity}
  onChange={(e) => setSelectedHomeCity(e.target.value)}
  disabled={!selectedHomeState || loadingCities}
- className="w-full bg-[#111] border border-white/10 rounded-[8px] py-3 pl-12 pr-4 appearance-none text-sm text-white focus:border-[#55DEE8] outline-none transition-all font-bold disabled:opacity-50"
+ className="w-full bg-[#111] border border-white/10 rounded-[8px] py-3 pl-12 pr-4 appearance-none text-sm text-white focus:border-[#BFF367] outline-none transition-all font-bold disabled:opacity-50"
  >
  <option value="">
  {loadingCities ? 'Loading Cities...' : !selectedHomeState ? 'Select state first' : 'Select City'}
@@ -851,8 +851,8 @@ export default function Home() {
  <div className="flex items-start justify-between">
  <div className="flex flex-col gap-1">
  <div className="flex gap-2">
- <div className="px-3 py-1 bg-[#55DEE8]/20 border border-[#55DEE8]/40 rounded-full inline-flex">
- <span className="text-[9px] font-black text-[#55DEE8] uppercase tracking-widest">{g.gameType}</span>
+ <div className="px-3 py-1 bg-[#BFF367]/20 border border-[#BFF367]/40 rounded-full inline-flex">
+ <span className="text-[9px] font-black text-[#BFF367] uppercase tracking-widest">{g.gameType}</span>
  </div>
  {isQuick && (
  <div className="px-3 py-1 bg-blue-500/20 border border-blue-500/40 rounded-full inline-flex">
@@ -863,10 +863,10 @@ export default function Home() {
  <div className="flex items-center gap-2">
  <button
  onClick={(e) => { e.stopPropagation(); navigator.clipboard?.writeText(g.shortId || g._id); toast.success('Game ID copied!'); }}
- className="px-2.5 py-1 bg-black/50 border border-white/15 hover:border-[#55DEE8]/40 rounded-[6px] inline-flex items-center gap-1 transition-all"
+ className="px-2.5 py-1 bg-black/50 border border-white/15 hover:border-[#BFF367]/40 rounded-[6px] inline-flex items-center gap-1 transition-all"
  title="Click to copy"
  >
- <Info size={9} className="text-[#55DEE8]/70" />
+ <Info size={9} className="text-[#BFF367]/70" />
  <span className="text-[9px] font-black text-white/60 uppercase tracking-widest">ID: {g.shortId || g._id.slice(-6).toUpperCase()}</span>
  </button>
  <button
@@ -889,24 +889,24 @@ export default function Home() {
  toast.success('Link copied to clipboard!');
  }
  }}
- className="p-1.5 bg-black/50 border border-white/15 hover:border-[#55DEE8]/40 rounded-[8px] flex items-center justify-center transition-all"
+ className="p-1.5 bg-black/50 border border-white/15 hover:border-[#BFF367]/40 rounded-[8px] flex items-center justify-center transition-all"
  title="Share Match"
  >
- <Share2 size={10} className="text-[#55DEE8]/70" />
+ <Share2 size={10} className="text-[#BFF367]/70" />
  </button>
  </div>
  </div>
  <div className="flex items-center gap-1 bg-black/40 px-2.5 py-1 rounded-[6px] border border-white/10">
- <span className="text-[10px] font-black text-[#55DEE8]">₹</span>
+ <span className="text-[10px] font-black text-[#BFF367]">₹</span>
  <span className="text-xs font-black text-white">{g.perPlayerCharge || 'FREE'}</span>
  </div>
  </div>
 
  {/* Rivalry ledger */}
  <div className="flex items-center gap-2 mt-1">
- <div className="h-px flex-1 bg-[#55DEE8]/20" />
- <span className="text-[8px] font-black text-[#55DEE8]/60 uppercase tracking-[0.2em]">✦ {isQuick ? 'Casual Pool' : 'Rivalry Ledger'}</span>
- <div className="h-px flex-1 bg-[#55DEE8]/20" />
+ <div className="h-px flex-1 bg-[#BFF367]/20" />
+ <span className="text-[8px] font-black text-[#BFF367]/60 uppercase tracking-[0.2em]">✦ {isQuick ? 'Casual Pool' : 'Rivalry Ledger'}</span>
+ <div className="h-px flex-1 bg-[#BFF367]/20" />
  </div>
 
  {/* Team matchup */}
@@ -916,12 +916,12 @@ export default function Home() {
  <>Casual {g.gameType} Match</>
  ) : (
  <>{g.teams?.teamA?.name || 'TBD'}{' '}
- <span className="text-[#55DEE8]">VS</span>{' '}
+ <span className="text-[#BFF367]">VS</span>{' '}
  {g.teams?.teamB?.name || 'TBD'}</>
  )}
  </h3>
  <div className="flex items-center gap-1.5 mt-1.5">
- <MapPin size={10} className="text-[#55DEE8]" />
+ <MapPin size={10} className="text-[#BFF367]" />
  <span className="text-[10px] text-white/50 truncate">
  {g.ground?.name || g.city || 'Self-Arranged Venue'}
  </span>
@@ -943,7 +943,7 @@ export default function Home() {
  {/* Open slots + avatar row */}
  <div className="flex items-center justify-between">
  <div className="flex items-center gap-2">
- <Users size={12} className="text-[#55DEE8]" />
+ <Users size={12} className="text-[#BFF367]" />
  <div>
  <span className="text-sm font-black text-white">{openSlots} Open</span>
  <p className="text-[8px] font-black text-white/30 uppercase tracking-widest leading-none">Available Capacity</p>
@@ -953,7 +953,7 @@ export default function Home() {
  <div className="flex gap-1">
  {Array.from({ length: Math.min(totalSlots, 5) }).map((_, idx) => (
  <div key={idx}
- className={`w-5 h-5 rounded-full border ${idx < (totalSlots - openSlots) ? 'bg-[#55DEE8]/30 border-[#55DEE8]/50' : 'bg-white/5 border-white/10'}`}
+ className={`w-5 h-5 rounded-full border ${idx < (totalSlots - openSlots) ? 'bg-[#BFF367]/30 border-[#BFF367]/50' : 'bg-white/5 border-white/10'}`}
  />
  ))}
  </div>
@@ -962,8 +962,8 @@ export default function Home() {
  {/* Host + JOIN */}
  <div className="flex items-center justify-between mt-1">
  <div className="flex items-center gap-2">
- <div className="w-7 h-7 rounded-full bg-[#55DEE8]/20 border border-[#55DEE8]/40 flex items-center justify-center">
- <span className="text-[10px] font-black text-[#55DEE8]">{hostInitial}</span>
+ <div className="w-7 h-7 rounded-full bg-[#BFF367]/20 border border-[#BFF367]/40 flex items-center justify-center">
+ <span className="text-[10px] font-black text-[#BFF367]">{hostInitial}</span>
  </div>
  <div>
  <p className="text-[8px] font-black text-white/30 uppercase tracking-widest">Commanded By</p>
@@ -975,7 +975,7 @@ export default function Home() {
  <button
  onClick={(e) => { e.stopPropagation(); navigate('/join-games'); }}
  className="flex items-center gap-2 text-black px-5 py-2 rounded-[6px] font-black text-xs uppercase tracking-widest transition-all shadow-[0_0_20px_rgba(85,222,232,0.4)] hover:scale-105"
- style={{ background: "linear-gradient(90deg, #55DEE8 0%, #BFF367 100%)" }}
+ style={{ background: "linear-gradient(90deg, #BFF367 0%, #BFF367 100%)" }}
  >
  JOIN <ChevronRight size={14} />
  </button>
@@ -1021,7 +1021,7 @@ export default function Home() {
  {["ALL SPORTS", "CRICKET", "BADMINTON", "FOOTBALL", "TENNIS"].map((tab, i) => (
  <button 
  key={tab} 
- className={`px-6 py-2.5 rounded-full font-black text-[10px] shrink-0 transition-all duration-300 uppercase tracking-widest border ${i === 0 ? "text-black shadow-[0_0_15px_rgba(85,222,232,0.3)]" : "bg-white/5 text-white/40 border-white/5 hover:border-white/10 hover:text-white"}`} style={i === 0 ? { background: "linear-gradient(90deg, #55DEE8 0%, #BFF367 100%)", borderColor: "#55DEE8" } : {}}
+ className={`px-6 py-2.5 rounded-full font-black text-[10px] shrink-0 transition-all duration-300 uppercase tracking-widest border ${i === 0 ? "text-black shadow-[0_0_15px_rgba(85,222,232,0.3)]" : "bg-white/5 text-white/40 border-white/5 hover:border-white/10 hover:text-white"}`} style={i === 0 ? { background: "linear-gradient(90deg, #BFF367 0%, #BFF367 100%)", borderColor: "#BFF367" } : {}}
  >
  {tab}
  </button>
@@ -1046,7 +1046,7 @@ export default function Home() {
  className="group cursor-pointer"
  onClick={() => navigate(`/professionals/${pro._id}`)}
  >
- <div className="relative bg-[#121212] rounded-[8px] p-1.5 border border-white/5 transition-all duration-500 hover:border-[#55DEE8]/20 hover:shadow-[0_15px_30px_rgba(0,0,0,0.4)]">
+ <div className="relative bg-[#121212] rounded-[8px] p-1.5 border border-white/5 transition-all duration-500 hover:border-[#BFF367]/20 hover:shadow-[0_15px_30px_rgba(0,0,0,0.4)]">
  
  {/* Compact Profile Image Section */}
  <div className="relative aspect-[1/1.2] rounded-[8px] overflow-hidden block mb-2.5">
@@ -1066,7 +1066,7 @@ export default function Home() {
  className="relative z-10 flex items-center justify-center w-full h-full bg-gradient-to-br from-[#1a1a1a] to-[#0a0a0a]"
  style={{ display: pro.profilePicture ? 'none' : 'flex' }}
  >
- <span className="text-[#55DEE8] font-black text-3xl tracking-tighter opacity-20 group-hover:opacity-40 transition-opacity duration-500">
+ <span className="text-[#BFF367] font-black text-3xl tracking-tighter opacity-20 group-hover:opacity-40 transition-opacity duration-500">
  {pro.name?.split(" ").map(w => w[0]).join("").toUpperCase().slice(0, 2)}
  </span>
  </div>
@@ -1074,7 +1074,7 @@ export default function Home() {
  
  {/* Price Badge */}
  <div className="absolute top-2 right-2 z-20">
- <div className="px-2 py-1 rounded-[6px] bg-black/60 backdrop-blur-md border border-white/10 flex items-center justify-center text-[#55DEE8] text-[8px] font-bold shadow-lg">
+ <div className="px-2 py-1 rounded-[6px] bg-black/60 backdrop-blur-md border border-white/10 flex items-center justify-center text-[#BFF367] text-[8px] font-bold shadow-lg">
  ₹{pro.price || "500"}/{pro.role === "coach" ? "hr" : "match"}
  </div>
  </div>
@@ -1082,11 +1082,11 @@ export default function Home() {
  {/* Role Badge */}
  <div className="absolute top-2 left-2 z-20">
  <div className="px-2 py-1 rounded-[6px] bg-black/60 backdrop-blur-md border border-white/10 flex items-center justify-center text-white text-[8px] font-black tracking-widest gap-1 shadow-lg">
- {pro.role === 'umpire' ? <Shield size={8} className="text-[#55DEE8]" /> : 
- pro.role === 'streamer' ? <Video size={8} className="text-[#55DEE8]" /> : 
- pro.role === 'scorer' ? <Activity size={8} className="text-[#55DEE8]" /> : 
- <Award size={8} className="text-[#55DEE8]" />}
- <span className="text-[#55DEE8]">{pro.role?.toUpperCase()}</span>
+ {pro.role === 'umpire' ? <Shield size={8} className="text-[#BFF367]" /> : 
+ pro.role === 'streamer' ? <Video size={8} className="text-[#BFF367]" /> : 
+ pro.role === 'scorer' ? <Activity size={8} className="text-[#BFF367]" /> : 
+ <Award size={8} className="text-[#BFF367]" />}
+ <span className="text-[#BFF367]">{pro.role?.toUpperCase()}</span>
  </div>
  </div>
  </div>
@@ -1094,7 +1094,7 @@ export default function Home() {
  {/* Content Section */}
  <div className="px-1.5 pb-1">
  <div className="flex items-center gap-1 mb-0.5">
- <h3 className="text-white font-bold text-[13px] tracking-tight group-hover:text-[#55DEE8] transition-colors line-clamp-1 font-open-sans capitalize">
+ <h3 className="text-white font-bold text-[13px] tracking-tight group-hover:text-[#BFF367] transition-colors line-clamp-1 font-open-sans capitalize">
  {pro.name?.toLowerCase()}
  </h3>
  <div className="flex items-center justify-center w-3 h-3 rounded-full bg-blue-500 shadow-[0_0_8px_rgba(59,130,246,0.5)] shrink-0">
@@ -1110,7 +1110,7 @@ export default function Home() {
  <div className="flex items-center justify-between">
  <div className="flex items-center gap-2">
  <div className="flex items-center gap-1 text-white/80">
- <Star size={12} className="text-[#55DEE8] fill-[#55DEE8]" />
+ <Star size={12} className="text-[#BFF367] fill-[#BFF367]" />
  <span className="text-[10px] font-bold">{pro.rating?.toFixed(1) || "5.0"}</span>
  </div>
  <div className="flex items-center text-white/30">
@@ -1159,7 +1159,7 @@ export default function Home() {
  <div className="w-full px-4 lg:px-12">
  <div className="text-center">
  <h2 className="text-5xl md:text-8xl font-bold uppercase leading-none tracking-tight">
- WHY CHOOSE <span className="text-[#55DEE8]">BMSPORTZ?</span>
+ WHY CHOOSE <span className="text-[#BFF367]">BMSPORTZ?</span>
  </h2>
  <p className="text-white/60 mt-10 text-lg md:text-2xl max-w-4xl mx-auto leading-relaxed font-light">
  BMSPORTZ is the only unified ecosystem designed to handle everything from your first booking to your last-minute matchmaking. We’ve eliminated the messy WhatsApp groups and endless phone calls. With real-time slot tracking, AI-powered skill matching, and a pro-level community, we provide the technology that lets you focus entirely on your game.
@@ -1191,7 +1191,7 @@ export default function Home() {
  </div>
  </div>
  <div className="p-6 flex flex-col flex-1">
- <h3 className="font-display text-2xl mb-2 group-hover:text-[#55DEE8] transition-colors leading-none uppercase">{f.title}</h3>
+ <h3 className="font-display text-2xl mb-2 group-hover:text-[#BFF367] transition-colors leading-none uppercase">{f.title}</h3>
  <p className="text-sm leading-relaxed" style={{ color: "#888" }}>{f.desc}</p>
  </div>
  </div>

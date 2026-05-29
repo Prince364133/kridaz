@@ -101,13 +101,13 @@ const Login = () => {
                   
                   <div className="space-y-2 group/field">
                     <div className="relative">
-                      <Lock size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-white/20 group-focus-within/field:text-[#55DEE8] transition-colors" />
+                      <Lock size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-white/20 group-focus-within/field:text-[#BFF367] transition-colors" />
                       <input 
                         {...register("otp")}
                         type="text" 
                         placeholder="000000"
                         maxLength={6}
-                        className="w-full bg-white/[0.03] border border-white/5 focus:border-[#55DEE8]/50 rounded-[8px] h-14 pl-12 pr-4 text-white text-center tracking-widest text-lg outline-none transition-all"
+                        className="w-full bg-white/[0.03] border border-white/5 focus:border-[#BFF367]/50 rounded-[8px] h-14 pl-12 pr-4 text-white text-center tracking-widest text-lg outline-none transition-all"
                       />
                     </div>
                     {errors.otp && <p className="text-xs text-red-500 mt-1 ml-1 text-center">{errors.otp.message}</p>}
@@ -116,7 +116,7 @@ const Login = () => {
                   <button 
                     type="submit" 
                     disabled={loading}
-                    className="w-full bg-[#55DEE8] hover:bg-[#a3e635] text-black h-14 rounded-[8px] font-bold text-lg flex items-center justify-center gap-2 active:scale-[0.98] transition-all disabled:opacity-50 mt-4 group/btn" 
+                    className="w-full bg-[#BFF367] hover:bg-[#a3e635] text-black h-14 rounded-[8px] font-bold text-lg flex items-center justify-center gap-2 active:scale-[0.98] transition-all disabled:opacity-50 mt-4 group/btn" 
                   >
                     {loading ? "Verifying..." : "Verify & Login"}
                     {!loading && <ArrowRight className="w-5 h-5 group-hover/btn:translate-x-1 transition-transform" />}
@@ -145,10 +145,10 @@ const Login = () => {
                       {/* Email Input */}
                       <div className="space-y-2">
                         <div className="flex justify-between px-1">
-                          <label className="text-sm font-medium text-white/60 group-focus-within/input:text-[#55DEE8] transition-colors">Email Address or Phone Number</label>
+                          <label className="text-sm font-medium text-white/60 group-focus-within/input:text-[#BFF367] transition-colors">Email Address or Phone Number</label>
                         </div>
                         <div className="relative group/input">
-                          <div className="absolute left-4 top-1/2 -translate-y-1/2 text-white/20 group-focus-within/input:text-[#55DEE8] transition-colors">
+                          <div className="absolute left-4 top-1/2 -translate-y-1/2 text-white/20 group-focus-within/input:text-[#BFF367] transition-colors">
                             <User size={16} />
                           </div>
                           <input
@@ -162,7 +162,7 @@ const Login = () => {
                               register("email").onChange(e);
                             }}
                             placeholder="name@example.com or 9876543210"
-                            className="w-full bg-white/[0.03] border border-white/5 focus:border-[#55DEE8]/50 rounded-[8px] h-14 pl-12 pr-4 text-white text-sm placeholder:text-white/20 outline-none transition-all group-hover/input:bg-white/[0.05]"
+                            className="w-full bg-white/[0.03] border border-white/5 focus:border-[#BFF367]/50 rounded-[8px] h-14 pl-12 pr-4 text-white text-sm placeholder:text-white/20 outline-none transition-all group-hover/input:bg-white/[0.05]"
                           />
                           {errors.email && <p className="text-xs text-red-500 mt-1 ml-1">{errors.email.message}</p>}
                         </div>
@@ -171,18 +171,18 @@ const Login = () => {
                       {/* Password Input */}
                       <div className="space-y-2">
                         <div className="flex justify-between px-1">
-                          <label className="text-sm font-medium text-white/60 group-focus-within/input:text-[#55DEE8] transition-colors">Password</label>
-                          <Link to="/forgot-password" size="sm" className="text-xs text-white/40 hover:text-[#55DEE8] transition-colors">Forgot Password?</Link>
+                          <label className="text-sm font-medium text-white/60 group-focus-within/input:text-[#BFF367] transition-colors">Password</label>
+                          <Link to="/forgot-password" size="sm" className="text-xs text-white/40 hover:text-[#BFF367] transition-colors">Forgot Password?</Link>
                         </div>
                         <div className="relative group/input">
-                          <div className="absolute left-4 top-1/2 -translate-y-1/2 text-white/20 group-focus-within/input:text-[#55DEE8] transition-colors">
+                          <div className="absolute left-4 top-1/2 -translate-y-1/2 text-white/20 group-focus-within/input:text-[#BFF367] transition-colors">
                             <Lock size={16} />
                           </div>
                           <input
                             {...register("password")}
                             type="password"
                             placeholder="Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½"
-                            className="w-full bg-white/[0.03] border border-white/5 focus:border-[#55DEE8]/50 rounded-[8px] h-14 pl-12 pr-4 text-white text-sm placeholder:text-white/20 outline-none transition-all group-hover/input:bg-white/[0.05]"
+                            className="w-full bg-white/[0.03] border border-white/5 focus:border-[#BFF367]/50 rounded-[8px] h-14 pl-12 pr-4 text-white text-sm placeholder:text-white/20 outline-none transition-all group-hover/input:bg-white/[0.05]"
                           />
                           {errors.password && <p className="text-xs text-red-500 mt-1 ml-1">{errors.password.message}</p>}
                         </div>
@@ -209,7 +209,7 @@ const Login = () => {
                       <button 
                         type="submit" 
                         disabled={loading}
-                        className="w-full bg-[#55DEE8] hover:bg-[#a3e635] text-black h-14 rounded-[8px] font-bold text-lg flex items-center justify-center gap-2 active:scale-[0.98] transition-all disabled:opacity-50 group/btn" 
+                        className="w-full bg-[#BFF367] hover:bg-[#a3e635] text-black h-14 rounded-[8px] font-bold text-lg flex items-center justify-center gap-2 active:scale-[0.98] transition-all disabled:opacity-50 group/btn" 
                       >
                         {loading ? "Sending OTP..." : "Continue"}
                         {!loading && <ArrowRight className="w-5 h-5 group-hover/btn:translate-x-1 transition-transform" />}
@@ -223,7 +223,7 @@ const Login = () => {
             {/* Footer Sign Up Link */}
             <div className="pt-8 mt-10 border-t border-white/5 flex flex-col items-center justify-center text-center">
               <p className="text-sm text-white/60">
-                Don't have an account? <Link to="/signup" className="text-[#55DEE8] hover:underline ml-2 font-semibold">Sign up</Link>
+                Don't have an account? <Link to="/signup" className="text-[#BFF367] hover:underline ml-2 font-semibold">Sign up</Link>
               </p>
             </div>
           </div>

@@ -85,7 +85,7 @@ const WalletPage = () => {
           email: user?.email || "",
         },
         theme: {
-          color: "#55DEE8",
+          color: "#BFF367",
         },
       };
 
@@ -106,7 +106,7 @@ const WalletPage = () => {
   if (loading) {
     return (
       <div className="min-h-screen bg-black flex items-center justify-center">
-        <Loader2 className="w-10 h-10 text-[#55DEE8] animate-spin" />
+        <Loader2 className="w-10 h-10 text-[#BFF367] animate-spin" />
       </div>
     );
   }
@@ -123,7 +123,7 @@ const WalletPage = () => {
         <div className="grid grid-cols-1 md:grid-cols-12 gap-8">
           {/* Balance Card */}
           <div className="md:col-span-5 space-y-6">
-            <div className="relative group overflow-hidden bg-gradient-to-br from-[#55DEE8] to-[#BFF367] p-8 rounded-[8px] shadow-2xl shadow-[#55DEE8]/20 animate-slide-in-left text-black">
+            <div className="relative group overflow-hidden bg-gradient-to-br from-[#BFF367] to-[#BFF367] p-8 rounded-[8px] shadow-2xl shadow-[#BFF367]/20 animate-slide-in-left text-black">
               <div className="absolute top-0 right-0 p-8 opacity-10 group-hover:scale-110 transition-transform duration-500">
                 <Wallet className="w-32 h-32 text-black" />
               </div>
@@ -161,7 +161,7 @@ const WalletPage = () => {
             {/* Top-up Form */}
             <div className="bg-zinc-900/50 border border-zinc-800 p-8 rounded-[8px] space-y-6">
               <h2 className="text-lg font-bold uppercase tracking-tight flex items-center gap-3 font-open-sans">
-                <Plus className="w-5 h-5 text-[#55DEE8]" />
+                <Plus className="w-5 h-5 text-[#BFF367]" />
                 Top-up Wallet
               </h2>
               <div className="space-y-4 font-inter">
@@ -172,7 +172,7 @@ const WalletPage = () => {
                     value={topupAmount}
                     onChange={(e) => setTopupAmount(e.target.value)}
                     placeholder="Enter amount (e.g. 500)"
-                    className="w-full bg-zinc-950 border border-zinc-800 rounded-[8px] py-4 pl-11 pr-3 text-sm font-bold focus:border-[#55DEE8] focus:ring-1 focus:ring-[#55DEE8] transition-all outline-none text-white font-inter"
+                    className="w-full bg-zinc-950 border border-zinc-800 rounded-[8px] py-4 pl-11 pr-3 text-sm font-bold focus:border-[#BFF367] focus:ring-1 focus:ring-[#BFF367] transition-all outline-none text-white font-inter"
                   />
                 </div>
                 <div className="grid grid-cols-3 gap-2 font-inter">
@@ -180,7 +180,7 @@ const WalletPage = () => {
                     <button
                       key={amt}
                       onClick={() => setTopupAmount(amt.toString())}
-                      className="py-3 rounded-[8px] border border-zinc-800 hover:border-[#55DEE8] hover:text-[#55DEE8] font-bold text-xs uppercase transition-all"
+                      className="py-3 rounded-[8px] border border-zinc-800 hover:border-[#BFF367] hover:text-[#BFF367] font-bold text-xs uppercase transition-all"
                     >
                       +{amt}
                     </button>
@@ -189,7 +189,7 @@ const WalletPage = () => {
                 <button
                   onClick={handleTopup}
                   disabled={isProcessing}
-                  className="w-full bg-gradient-to-r from-[#55DEE8] to-[#BFF367] text-black h-16 rounded-[8px] font-black uppercase tracking-wider flex items-center justify-center gap-3 hover:scale-[1.02] active:scale-[0.98] transition-all disabled:opacity-50 disabled:grayscale font-open-sans shadow-[0_10px_25px_rgba(85,222,232,0.25)]"
+                  className="w-full bg-gradient-to-r from-[#BFF367] to-[#BFF367] text-black h-16 rounded-[8px] font-black uppercase tracking-wider flex items-center justify-center gap-3 hover:scale-[1.02] active:scale-[0.98] transition-all disabled:opacity-50 disabled:grayscale font-open-sans shadow-[0_10px_25px_rgba(85,222,232,0.25)]"
                 >
                   {isProcessing ? (
                     <Loader2 className="w-6 h-6 animate-spin" />
@@ -208,7 +208,7 @@ const WalletPage = () => {
           <div className="md:col-span-7 bg-zinc-900/50 border border-zinc-800 rounded-[8px] overflow-hidden flex flex-col font-inter">
             <div className="p-8 border-b border-zinc-800 flex items-center justify-between">
               <h2 className="text-lg font-bold uppercase tracking-tight flex items-center gap-3 font-open-sans">
-                <History className="w-5 h-5 text-[#55DEE8]" />
+                <History className="w-5 h-5 text-[#BFF367]" />
                 Coin Activity
               </h2>
               <span className="font-inter text-xs font-bold text-zinc-500 uppercase">Recent 20 entries</span>
@@ -235,7 +235,7 @@ const WalletPage = () => {
                           <p className="font-bold text-sm text-zinc-200 font-inter">
                             {tx.description || tx.type}
                             {tx.description?.toLowerCase().includes("bonus") && (
-                              <span className="ml-2 px-2 py-0.5 bg-gradient-to-r from-[#55DEE8]/10 to-[#BFF367]/10 text-transparent bg-clip-text bg-gradient-to-r from-[#55DEE8] to-[#BFF367] text-[8px] font-black uppercase rounded-md border border-[#55DEE8]/20 font-inter">
+                              <span className="ml-2 px-2 py-0.5 bg-gradient-to-r from-[#BFF367]/10 to-[#BFF367]/10 text-transparent bg-clip-text bg-gradient-to-r from-[#BFF367] to-[#BFF367] text-[8px] font-black uppercase rounded-md border border-[#BFF367]/20 font-inter">
                                 Platform Offer
                               </span>
                             )}
@@ -250,7 +250,7 @@ const WalletPage = () => {
                           {isPositive ? "+" : "-"}{tx.amount}
                         </p>
                         <div className="flex flex-col items-end gap-1 font-inter">
-                          <span className={`text-[8px] font-black uppercase px-2 py-0.5 rounded-full font-inter ${ tx.status === "SUCCESS" ? "bg-[#55DEE8]/10 text-[#55DEE8]" : tx.status === "PENDING" ? "bg-amber-500/10 text-amber-500" : "bg-rose-500/10 text-rose-500" }`}>
+                          <span className={`text-[8px] font-black uppercase px-2 py-0.5 rounded-full font-inter ${ tx.status === "SUCCESS" ? "bg-[#BFF367]/10 text-[#BFF367]" : tx.status === "PENDING" ? "bg-amber-500/10 text-amber-500" : "bg-rose-500/10 text-rose-500" }`}>
                             {tx.status}
                           </span>
                           {tx.status === "PENDING" && tx.type === "TOPUP" && (
@@ -269,7 +269,7 @@ const WalletPage = () => {
                                     toast.error("Failed to check status");
                                   }
                                 }}
-                                className="text-[8px] font-bold text-[#55DEE8] hover:underline uppercase"
+                                className="text-[8px] font-bold text-[#BFF367] hover:underline uppercase"
                               >
                                 Check Status
                               </button>

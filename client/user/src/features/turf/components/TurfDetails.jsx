@@ -234,7 +234,7 @@ const TurfDetails = () => {
             return (
               <div
                 key={dateStr}
-                className={`flex-none rounded-[12px] p-[2px] transition-all duration-300 ${isActive ? "bg-gradient-to-r from-[#55DEE8] to-[#BFF367] shadow-[0_0_15px_rgba(85,222,232,0.2)]" : "bg-transparent" }`}
+                className={`flex-none rounded-[12px] p-[2px] transition-all duration-300 ${isActive ? "bg-gradient-to-r from-[#BFF367] to-[#BFF367] shadow-[0_0_15px_rgba(85,222,232,0.2)]" : "bg-transparent" }`}
                 style={{ width: '68px', height: '85px' }}
               >
                 <button
@@ -244,7 +244,7 @@ const TurfDetails = () => {
                   <span className={`text-[28px] font-bold leading-none tracking-tight ${isActive ? "text-white" : "text-zinc-200"}`}>
                     {String(date.getDate()).padStart(2, '0')}
                   </span>
-                  <span className={`text-[13px] font-medium ${isActive ? "text-[#55DEE8]" : "text-zinc-400"}`}>
+                  <span className={`text-[13px] font-medium ${isActive ? "text-[#BFF367]" : "text-zinc-400"}`}>
                     {date.toLocaleDateString('en-US', { weekday: 'short' })}
                   </span>
                 </button>
@@ -281,7 +281,7 @@ const TurfDetails = () => {
               return (
                 <div
                   key={idx}
-                  className={`rounded-[8px] p-[1.5px] transition-all duration-300 ${isSelected ? "bg-gradient-to-r from-[#55DEE8] to-[#BFF367] shadow-[0_0_10px_rgba(85,222,232,0.2)]" : "bg-transparent" }`}
+                  className={`rounded-[8px] p-[1.5px] transition-all duration-300 ${isSelected ? "bg-gradient-to-r from-[#BFF367] to-[#BFF367] shadow-[0_0_10px_rgba(85,222,232,0.2)]" : "bg-transparent" }`}
                 >
                   <button
                     disabled={!isAvailable}
@@ -311,7 +311,7 @@ const TurfDetails = () => {
         <button
           onClick={handleReservation}
           disabled={bookingLoading || !selectedStartTime}
-          className="bg-gradient-to-r from-[#55DEE8] to-[#BFF367] text-black px-8 h-12 rounded-[10px] font-bold text-[14px] hover:scale-[1.02] active:scale-[0.98] transition-all duration-300 disabled:opacity-50 disabled:grayscale shadow-[0_0_15px_rgba(85,222,232,0.3)] hover:shadow-[0_0_25px_rgba(191,243,103,0.5)]"
+          className="bg-gradient-to-r from-[#BFF367] to-[#BFF367] text-black px-8 h-12 rounded-[10px] font-bold text-[14px] hover:scale-[1.02] active:scale-[0.98] transition-all duration-300 disabled:opacity-50 disabled:grayscale shadow-[0_0_15px_rgba(85,222,232,0.3)] hover:shadow-[0_0_25px_rgba(191,243,103,0.5)]"
         >
           {bookingLoading ? "..." : (searchParams.get('returnTo') ? "Add this slot to my host game" : "Proceed")}
         </button>
@@ -336,7 +336,7 @@ const TurfDetails = () => {
 
         <svg width="0" height="0" className="absolute">
           <linearGradient id="theme-gradient" x1="0%" y1="0%" x2="100%" y2="0%">
-            <stop stopColor="#55DEE8" offset="0%" />
+            <stop stopColor="#BFF367" offset="0%" />
             <stop stopColor="#BFF367" offset="100%" />
           </linearGradient>
         </svg>
@@ -365,7 +365,7 @@ const TurfDetails = () => {
             <div className="flex flex-wrap items-center justify-start md:justify-between gap-y-3 gap-x-4 text-[10px] md:text-[12px] font-bold uppercase tracking-widest px-2 font-inter w-full">
               <div className="flex items-center gap-2 shrink-0">
                 <Star className="w-4 h-4" style={{ stroke: "url(#theme-gradient)", fill: "url(#theme-gradient)" }} />
-                <span className="bg-gradient-to-r from-[#55DEE8] to-[#BFF367] inline-block text-transparent bg-clip-text">{averageRating ? averageRating.toFixed(1) : "5.0"}</span>
+                <span className="bg-gradient-to-r from-[#BFF367] to-[#BFF367] inline-block text-transparent bg-clip-text">{averageRating ? averageRating.toFixed(1) : "5.0"}</span>
                 <span className="text-zinc-500 font-medium">({reviews?.length || 0} REVIEWS)</span>
               </div>
               <div className="w-px h-3 bg-zinc-800" />
@@ -471,12 +471,12 @@ const TurfDetails = () => {
                 <div className="space-y-3">
                   <div className="flex flex-wrap items-center gap-4 md:gap-6">
                     <div className="flex items-baseline gap-2">
-                      <span className="bg-gradient-to-r from-[#55DEE8] to-[#BFF367] inline-block text-transparent bg-clip-text text-2xl md:text-3xl font-inter font-bold">₹{turf.pricePerHour}</span>
+                      <span className="bg-gradient-to-r from-[#BFF367] to-[#BFF367] inline-block text-transparent bg-clip-text text-2xl md:text-3xl font-inter font-bold">₹{turf.pricePerHour}</span>
                       <span className="text-zinc-500 text-[10px] md:text-xs font-inter font-bold uppercase tracking-widest">onwards</span>
                     </div>
                     <div className="flex items-center gap-2">
                       <Star className="w-4 h-4 md:w-5 md:h-5" style={{ stroke: "url(#theme-gradient)", fill: "url(#theme-gradient)" }} />
-                      <span className="bg-gradient-to-r from-[#55DEE8] to-[#BFF367] inline-block text-transparent bg-clip-text text-lg md:text-xl font-inter font-bold">{averageRating ? averageRating.toFixed(1) : "5.0"}</span>
+                      <span className="bg-gradient-to-r from-[#BFF367] to-[#BFF367] inline-block text-transparent bg-clip-text text-lg md:text-xl font-inter font-bold">{averageRating ? averageRating.toFixed(1) : "5.0"}</span>
                       <span className="text-zinc-500 text-[10px] md:text-xs font-inter font-bold uppercase tracking-widest">Star</span>
                     </div>
                   </div>
@@ -500,7 +500,7 @@ const TurfDetails = () => {
                   <div className="flex flex-wrap gap-3">
                     {turf.sportTypes?.map((sport, i) => (
                       <div key={i} className="px-4 py-1.5 rounded-[6px] bg-zinc-900/50 border border-zinc-800 flex items-center gap-2 text-white group hover:border-[#BFF367] transition-all duration-300">
-                        <div className="w-1.5 h-1.5 rounded-full bg-gradient-to-r from-[#55DEE8] to-[#BFF367]" />
+                        <div className="w-1.5 h-1.5 rounded-full bg-gradient-to-r from-[#BFF367] to-[#BFF367]" />
                         <span className="text-[10px] font-bold uppercase tracking-wider font-inter">{sport}</span>
                       </div>
                     ))}
@@ -529,7 +529,7 @@ const TurfDetails = () => {
               {/* Personnel & Support Section */}
               <div className="space-y-4 pt-2">
                 <div className="flex items-center gap-2.5">
-                  <div className="w-1 h-5 bg-gradient-to-b from-[#55DEE8] to-[#BFF367] rounded-full" />
+                  <div className="w-1 h-5 bg-gradient-to-b from-[#BFF367] to-[#BFF367] rounded-full" />
                   <h2 className="text-[13px] font-inter font-bold uppercase tracking-[0.1em] text-white">Personnel & Support</h2>
                 </div>
 
@@ -541,7 +541,7 @@ const TurfDetails = () => {
                       <p className="text-[12px] font-black text-white uppercase font-inter">{turf.name?.split(' ')[0] || "Princess"}</p>
                       <p className="text-[10px] font-bold text-zinc-500 font-inter tracking-tight">7896541230</p>
                     </div>
-                    <button className="w-9 h-9 rounded-[8px] bg-gradient-to-br from-[#55DEE8] to-[#BFF367] flex items-center justify-center text-black hover:brightness-110 transition-all shadow-[0_0_15px_rgba(85,222,232,0.2)]">
+                    <button className="w-9 h-9 rounded-[8px] bg-gradient-to-br from-[#BFF367] to-[#BFF367] flex items-center justify-center text-black hover:brightness-110 transition-all shadow-[0_0_15px_rgba(85,222,232,0.2)]">
                       <Phone size={16} fill="currentColor" />
                     </button>
                   </div>
@@ -554,7 +554,7 @@ const TurfDetails = () => {
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                   {turf.facilities?.map((facility, index) => (
                     <div key={index} className="flex items-center gap-3 group">
-                      <div className="w-5 h-5 rounded-full bg-gradient-to-r from-[#55DEE8] to-[#BFF367] flex items-center justify-center shrink-0 shadow-[0_0_15px_rgba(85,222,232,0.3)]">
+                      <div className="w-5 h-5 rounded-full bg-gradient-to-r from-[#BFF367] to-[#BFF367] flex items-center justify-center shrink-0 shadow-[0_0_15px_rgba(85,222,232,0.3)]">
                         <Check className="w-3 h-3 text-black" strokeWidth={4} />
                       </div>
                       <span className="text-xs font-inter font-bold text-zinc-400 uppercase tracking-tight group-hover:text-white transition-colors">{facility}</span>
@@ -635,7 +635,7 @@ const TurfDetails = () => {
                 <h2 className="text-xl md:text-2xl font-black uppercase tracking-tighter">Athlete Reviews</h2>
                 <div className="flex items-center gap-2 font-black">
                   <Star className="w-5 h-5" style={{ stroke: "url(#theme-gradient)", fill: "url(#theme-gradient)" }} />
-                  <span className="bg-gradient-to-r from-[#55DEE8] to-[#BFF367] inline-block text-transparent bg-clip-text text-xl md:text-2xl">{averageRating ? averageRating.toFixed(1) : "5.0"}</span>
+                  <span className="bg-gradient-to-r from-[#BFF367] to-[#BFF367] inline-block text-transparent bg-clip-text text-xl md:text-2xl">{averageRating ? averageRating.toFixed(1) : "5.0"}</span>
                   <span className="text-zinc-600 text-base md:text-lg">/ 5.0</span>
                 </div>
               </div>
@@ -698,7 +698,7 @@ const TurfDetails = () => {
           <div className="fixed bottom-24 md:bottom-6 left-1/2 -translate-x-1/2 z-[90] w-[90%] max-w-sm lg:hidden">
             <button
               onClick={() => setIsBookingModalOpen(true)}
-              className="w-full py-4 rounded-full bg-gradient-to-r from-[#55DEE8] to-[#BFF367] text-black font-black uppercase tracking-widest shadow-[0_10px_30px_rgba(191,243,103,0.3)] hover:scale-105 transition-transform flex items-center justify-center gap-2"
+              className="w-full py-4 rounded-full bg-gradient-to-r from-[#BFF367] to-[#BFF367] text-black font-black uppercase tracking-widest shadow-[0_10px_30px_rgba(191,243,103,0.3)] hover:scale-105 transition-transform flex items-center justify-center gap-2"
             >
               Book Venue Now <ArrowRight size={20} />
             </button>
@@ -750,7 +750,7 @@ const VenueMap = ({ turf }) => {
         className="pointer-events-none"
       />
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-10">
-        <div className="w-12 h-12 rounded-full bg-gradient-to-r from-[#55DEE8] to-[#BFF367] flex items-center justify-center shadow-[0_0_30px_rgba(85,222,232,0.6)] animate-bounce">
+        <div className="w-12 h-12 rounded-full bg-gradient-to-r from-[#BFF367] to-[#BFF367] flex items-center justify-center shadow-[0_0_30px_rgba(85,222,232,0.6)] animate-bounce">
           <MapPin className="w-6 h-6 text-black" />
         </div>
       </div>
@@ -802,7 +802,7 @@ const PoliciesModal = ({ isOpen, onClose, rules, turfName }) => {
 
             <div className="space-y-6">
               <div className="p-4 bg-zinc-900/50 rounded-[12px] border border-zinc-800">
-                <p className="text-[10px] font-black text-[#55DEE8] uppercase tracking-[0.2em] mb-2">Venue</p>
+                <p className="text-[10px] font-black text-[#BFF367] uppercase tracking-[0.2em] mb-2">Venue</p>
                 <p className="text-sm font-bold text-white uppercase">{turfName}</p>
               </div>
 
@@ -814,7 +814,7 @@ const PoliciesModal = ({ isOpen, onClose, rules, turfName }) => {
 
               <button
                 onClick={onClose}
-                className="w-full bg-gradient-to-r from-[#55DEE8] to-[#BFF367] text-black py-4 rounded-[8px] font-black uppercase text-xs tracking-widest hover:brightness-110 transition-all shadow-lg"
+                className="w-full bg-gradient-to-r from-[#BFF367] to-[#BFF367] text-black py-4 rounded-[8px] font-black uppercase text-xs tracking-widest hover:brightness-110 transition-all shadow-lg"
               >
                 I Understand
               </button>

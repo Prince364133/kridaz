@@ -51,7 +51,7 @@ export const handlePayment = async (order, user) => {
         contact: user?.phone || "",
       },
       theme: {
-        color: "#55DEE8",
+        color: "#BFF367",
       },
       modal: {
         ondismiss: function() {

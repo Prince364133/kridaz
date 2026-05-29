@@ -9,11 +9,11 @@ import {
 } from 'lucide-react';
 
 const SPORT_COLORS = {
-  Cricket: 'from-[#55DEE8] to-[#BFF367]',
+  Cricket: 'from-[#BFF367] to-[#BFF367]',
   Football: 'from-emerald-500 to-teal-600',
   Basketball: 'from-orange-500 to-red-600',
   Volleyball: 'from-blue-500 to-indigo-600',
-  Badminton: 'from-[#55DEE8] to-[#BFF367]',
+  Badminton: 'from-[#BFF367] to-[#BFF367]',
   Tennis: 'from-lime-500 to-emerald-600',
   'Table Tennis': 'from-rose-500 to-pink-600',
   Pickleball: 'from-violet-500 to-purple-600',

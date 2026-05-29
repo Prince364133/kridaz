@@ -136,7 +136,7 @@ const MyHostedGames = () => {
   return (
     <div className="min-h-screen bg-neutral-900 text-white p-4 pb-24">
       <div className="max-w-4xl mx-auto mb-8">
-        <h1 className="text-3xl font-black tracking-tighter font-open-sans text-transparent bg-clip-text bg-gradient-to-r from-[#55DEE8] to-[#BFF367] mb-2 uppercase">MY HOSTED GAMES</h1>
+        <h1 className="text-3xl font-black tracking-tighter font-open-sans text-transparent bg-clip-text bg-gradient-to-r from-[#BFF367] to-[#BFF367] mb-2 uppercase">MY HOSTED GAMES</h1>
         <p className="text-neutral-400 text-[20px]" style={SUBHEADING_STYLE}>Manage your matches and approve players</p>
       </div>
 
@@ -148,13 +148,13 @@ const MyHostedGames = () => {
             placeholder="Search by ID, Team or Match Type..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full bg-neutral-800/50 border border-neutral-800 rounded-[8px] py-3 pl-12 pr-4 text-white focus:outline-none focus:border-[#55DEE8] transition-colors placeholder:text-neutral-600 font-inter"
+            className="w-full bg-neutral-800/50 border border-neutral-800 rounded-[8px] py-3 pl-12 pr-4 text-white focus:outline-none focus:border-[#BFF367] transition-colors placeholder:text-neutral-600 font-inter"
           />
         </div>
         <select
           value={filterStatus}
           onChange={(e) => setFilterStatus(e.target.value)}
-          className="bg-neutral-800/50 border border-neutral-800 rounded-[8px] py-3 px-4 text-white focus:outline-none focus:border-[#55DEE8] transition-colors appearance-none min-w-[150px] font-inter font-bold"
+          className="bg-neutral-800/50 border border-neutral-800 rounded-[8px] py-3 px-4 text-white focus:outline-none focus:border-[#BFF367] transition-colors appearance-none min-w-[150px] font-inter font-bold"
         >
           <option value="ALL">All Status</option>
           <option value="PENDING">Pending</option>
@@ -169,14 +169,14 @@ const MyHostedGames = () => {
         ) : filteredGames.length === 0 ? (
           <div className="py-20 text-center bg-neutral-800/20 rounded-[8px] border-2 border-dashed border-neutral-800">
             <Trophy size={48} className="mx-auto mb-4 text-neutral-700" />
-            <h3 className="text-2xl md:text-3xl font-black tracking-tighter font-open-sans text-transparent bg-clip-text bg-gradient-to-r from-[#55DEE8] to-[#BFF367] mb-2 uppercase">
+            <h3 className="text-2xl md:text-3xl font-black tracking-tighter font-open-sans text-transparent bg-clip-text bg-gradient-to-r from-[#BFF367] to-[#BFF367] mb-2 uppercase">
               {myGames.length === 0 ? "No games hosted yet" : "No matches found"}
             </h3>
             <p className="text-neutral-500 mb-6 text-[20px]" style={SUBHEADING_STYLE}>
               {myGames.length === 0 ? "Start hosting and build your community!" : "Try adjusting your search filters"}
             </p>
             {myGames.length === 0 && (
-              <button onClick={() => window.location.href='/host-game'} className="px-8 py-3 bg-gradient-to-r from-[#55DEE8] to-[#BFF367] text-black font-bold rounded-[8px] uppercase tracking-wider shadow-lg hover:scale-105 transition-all">
+              <button onClick={() => window.location.href='/host-game'} className="px-8 py-3 bg-gradient-to-r from-[#BFF367] to-[#BFF367] text-black font-bold rounded-[8px] uppercase tracking-wider shadow-lg hover:scale-105 transition-all">
                 Host Now
               </button>
             )}
@@ -203,7 +203,7 @@ const MyHostedGames = () => {
                 <div className="flex justify-between items-start mb-4">
                   <div>
                     <div className="flex items-center gap-2 flex-wrap">
-                      <span className="bg-gradient-to-r from-[#55DEE8]/10 to-[#BFF367]/10 text-transparent bg-clip-text bg-gradient-to-r from-[#55DEE8] to-[#BFF367] text-[10px] font-black px-2 py-0.5 rounded-full uppercase tracking-wider">
+                      <span className="bg-gradient-to-r from-[#BFF367]/10 to-[#BFF367]/10 text-transparent bg-clip-text bg-gradient-to-r from-[#BFF367] to-[#BFF367] text-[10px] font-black px-2 py-0.5 rounded-full uppercase tracking-wider">
                         {game.gameType}
                       </span>
                       {game.shortId && (
@@ -248,7 +248,7 @@ const MyHostedGames = () => {
                       <div className="flex items-center gap-1 bg-neutral-900 px-3 py-1.5 rounded-[6px]">
                         <MapPin size={14} className="text-[#BFF367] min-w-[14px]" /> 
                         {game.turf?.mapUrl ? (
-                          <a href={game.turf.mapUrl} target="_blank" rel="noopener noreferrer" className="hover:text-[#55DEE8] hover:underline transition-colors flex items-center gap-1 truncate max-w-[200px]" title={game.turf?.location || game.turf?.name}>
+                          <a href={game.turf.mapUrl} target="_blank" rel="noopener noreferrer" className="hover:text-[#BFF367] hover:underline transition-colors flex items-center gap-1 truncate max-w-[200px]" title={game.turf?.location || game.turf?.name}>
                             {game.turf?.name || game.customVenue || 'Self-Arranged'}
                             {game.turf?.location && <span className="text-neutral-500 text-[10px] hidden md:inline ml-1">- {game.turf.location}</span>}
                           </a>
@@ -280,7 +280,7 @@ const MyHostedGames = () => {
                            {game.gameType?.toLowerCase() === 'cricket' && game.scoringStatus !== 'NOT_STARTED' && game.scoringStatus !== 'ENDED' && (
                              <button
                                onClick={() => navigate(`/scoring/${game._id}`)}
-                               className="px-4 py-1.5 bg-[#00C187]/20 text-[#00C187] border border-[#00C187]/30 text-[10px] font-black rounded-[6px] hover:bg-[#00C187]/30 transition-all uppercase tracking-wider flex items-center gap-1"
+                               className="px-4 py-1.5 bg-[#BFF367]/20 text-[#BFF367] border border-[#BFF367]/30 text-[10px] font-black rounded-[6px] hover:bg-[#BFF367]/30 transition-all uppercase tracking-wider flex items-center gap-1"
                              >
                                <PlayCircle size={14} /> Resume Scoring
                              </button>
@@ -304,7 +304,7 @@ const MyHostedGames = () => {
                   <div className="grid grid-cols-2 md:grid-cols-4 gap-2 border-t border-neutral-800/50 pt-4">
                     <div className="bg-neutral-900/50 p-2 rounded-[8px] flex flex-col items-center justify-center">
                       <p className="text-[9px] text-neutral-500 font-bold uppercase tracking-wider mb-1">Slot Collections</p>
-                      <p className="text-xs font-black text-[#55DEE8]">{collectedCoins} / {totalPossibleCoins} Coins</p>
+                      <p className="text-xs font-black text-[#BFF367]">{collectedCoins} / {totalPossibleCoins} Coins</p>
                       <p className="text-[8px] text-neutral-500 mt-0.5">{game.perPlayerCharge || 0} Coins per slot</p>
                     </div>
                     <div className="bg-neutral-900/50 p-2 rounded-[8px] flex flex-col items-center justify-center">

@@ -84,7 +84,7 @@ const SavedPage = () => {
                   onClick={() => setActiveTab(tab.id)}
                   className={`flex-none flex items-center gap-2 px-5 py-2.5 rounded-full text-sm font-bold tracking-wide uppercase transition-all duration-300 ${
                     isActive 
-                      ? 'bg-gradient-to-r from-[#55DEE8] to-[#BFF367] text-black shadow-[0_0_15px_rgba(191,243,103,0.3)]' 
+                      ? 'bg-gradient-to-r from-[#BFF367] to-[#BFF367] text-black shadow-[0_0_15px_rgba(191,243,103,0.3)]' 
                       : 'bg-zinc-900 border border-zinc-800 text-zinc-400 hover:text-white hover:border-zinc-700'
                   }`}
                 >

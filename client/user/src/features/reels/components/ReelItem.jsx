@@ -207,8 +207,8 @@ const ReelItem = ({ reel, isVisible }) => {
             
             {/* Processing Overlay */}
             <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/20 backdrop-blur-sm">
-              <div className="w-16 h-16 border-4 border-[#55DEE8] border-t-transparent rounded-full animate-spin mb-4" />
-              <p className="text-[#55DEE8] font-bold text-lg">Optimizing Reel...</p>
+              <div className="w-16 h-16 border-4 border-[#BFF367] border-t-transparent rounded-full animate-spin mb-4" />
+              <p className="text-[#BFF367] font-bold text-lg">Optimizing Reel...</p>
               <p className="text-white/60 text-sm mt-2">{reel.processingProgress || 0}% Complete</p>
               
               {/* Progress Bar */}
@@ -216,7 +216,7 @@ const ReelItem = ({ reel, isVisible }) => {
                 <motion.div 
                   initial={{ width: 0 }}
                   animate={{ width: `${reel.processingProgress || 0}%` }}
-                  className="h-full bg-[#55DEE8]"
+                  className="h-full bg-[#BFF367]"
                 />
               </div>
             </div>
@@ -402,7 +402,7 @@ const ReelItem = ({ reel, isVisible }) => {
                 <div className="flex flex-col gap-4">
                   {commentsFetching && !localComments ? (
                     <div className="text-white/40 text-center py-10">
-                      <div className="w-6 h-6 border-2 border-white/20 border-t-[#55DEE8] rounded-full animate-spin mx-auto mb-3" />
+                      <div className="w-6 h-6 border-2 border-white/20 border-t-[#BFF367] rounded-full animate-spin mx-auto mb-3" />
                       <p className="text-sm">Loading comments...</p>
                     </div>
                   ) : (localComments ?? serverComments).length === 0 ? (
@@ -476,7 +476,7 @@ const ReelItem = ({ reel, isVisible }) => {
                   <button 
                     key={reason}
                     onClick={() => setReportReason(reason)}
-                    className={`text-left px-4 py-3 rounded-[8px] text-sm font-medium transition-colors ${reportReason === reason ? 'bg-[#55DEE8] text-black' : 'bg-white/5 text-white hover:bg-white/10'}`}
+                    className={`text-left px-4 py-3 rounded-[8px] text-sm font-medium transition-colors ${reportReason === reason ? 'bg-[#BFF367] text-black' : 'bg-white/5 text-white hover:bg-white/10'}`}
                   >
                     {reason}
                   </button>

@@ -23,7 +23,7 @@ const ReelAnalytics = () => {
       {/* Overview Cards */}
       <div className="grid grid-cols-2 gap-4 mb-8">
         <StatCard icon={<Play size={20} />} label="Total Views" value={stats.views} color="blue" />
-        <StatCard icon={<ThumbsUp size={20} />} label="Likes" value={stats.likes} color="#55DEE8" />
+        <StatCard icon={<ThumbsUp size={20} />} label="Likes" value={stats.likes} color="#BFF367" />
         <StatCard icon={<MessageCircle size={20} />} label="Comments" value={stats.comments} color="green" />
         <StatCard icon={<Share2 size={20} />} label="Shares" value={stats.shares} color="purple" />
       </div>
@@ -31,7 +31,7 @@ const ReelAnalytics = () => {
       <div className="bg-white/5 rounded-[8px] p-6 mb-8">
         <div className="flex items-center justify-between mb-6">
           <h2 className="text-lg font-bold">Recent Reels</h2>
-          <TrendingUp size={20} className="text-[#55DEE8]" />
+          <TrendingUp size={20} className="text-[#BFF367]" />
         </div>
         
         <div className="flex flex-col gap-4">
@@ -44,7 +44,7 @@ const ReelAnalytics = () => {
                 <p className="text-sm font-semibold truncate">{reel.caption || 'No caption'}</p>
                 <p className="text-xs text-gray-400">{new Date(reel.createdAt).toLocaleDateString()}</p>
               </div>
-              <div className="flex items-center gap-2 text-xs font-bold text-[#55DEE8]">
+              <div className="flex items-center gap-2 text-xs font-bold text-[#BFF367]">
                 <Play size={12} />
                 {reel.stats?.views || 0}
               </div>

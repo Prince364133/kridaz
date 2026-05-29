@@ -22,7 +22,7 @@ import DashboardSkeleton from "@features/venue-owner/Dashboard/DashboardSkeleton
 import axiosInstance from "@hooks/useAxiosInstance";
 import { toast } from "react-hot-toast";
 
-const ACCENT = "#00C187";
+const ACCENT = "#BFF367";
 
 export default function ScorerMatches() {
   const { dashboardData, loading, error } = useScorerDashboard();
@@ -106,25 +106,25 @@ export default function ScorerMatches() {
       
       {/* PROFESSIONAL STATUS BANNER */}
       {isLimitedScorer && (
-        <div className="bg-[#000000] border border-[#2D2D2D] rounded-[8px] p-6 lg:p-8 flex flex-col md:flex-row items-center justify-between gap-8 group hover:border-[#00C187]/20 transition-all duration-500 shadow-[var(--shadow-2)] relative overflow-hidden">
-          <div className="absolute top-0 right-0 w-32 h-32 bg-[#00C187]/5 blur-[60px]"></div>
+        <div className="bg-[#000000] border border-[#2D2D2D] rounded-[8px] p-6 lg:p-8 flex flex-col md:flex-row items-center justify-between gap-8 group hover:border-[#BFF367]/20 transition-all duration-500 shadow-[var(--shadow-2)] relative overflow-hidden">
+          <div className="absolute top-0 right-0 w-32 h-32 bg-[#BFF367]/5 blur-[60px]"></div>
           <div className="flex items-center gap-6 relative z-10">
-            <div className="w-16 h-16 rounded-[8px] bg-[#00C187]/10 flex items-center justify-center shrink-0 border border-[#00C187]/20 shadow-sm">
-              <Shield className={`text-[#00C187] ${!upgradeRequested ? "animate-pulse" : ""}`} size={32} />
+            <div className="w-16 h-16 rounded-[8px] bg-[#BFF367]/10 flex items-center justify-center shrink-0 border border-[#BFF367]/20 shadow-sm">
+              <Shield className={`text-[#BFF367] ${!upgradeRequested ? "animate-pulse" : ""}`} size={32} />
             </div>
             <div className="space-y-1.5">
               {upgradeRequested ? (
                 <>
                   <h3 className="text-xl font-bold text-white tracking-tight font-inter">PRO APPLICATION PENDING</h3>
                   <p className="text-[#999999] text-xs font-medium uppercase tracking-wider font-inter">
-                    Your professional scorer application is <span className="text-[#00C187]">under review</span>.
+                    Your professional scorer application is <span className="text-[#BFF367]">under review</span>.
                   </p>
                 </>
               ) : (
                 <>
                   <h3 className="text-xl font-bold text-white tracking-tight font-inter">QUICK-SCORING MODE</h3>
                   <p className="text-[#999999] text-xs font-medium uppercase tracking-wider font-inter">
-                    Complete your professional registration to <span className="text-[#00C187]">earn from matches</span>.
+                    Complete your professional registration to <span className="text-[#BFF367]">earn from matches</span>.
                   </p>
                 </>
               )}
@@ -134,7 +134,7 @@ export default function ScorerMatches() {
             <button 
               onClick={() => setShowUpgradeModal(true)}
               disabled={requestingUpgrade}
-              className="w-full md:w-auto px-8 py-3.5 bg-[#00C187] text-black font-bold uppercase text-[11px] tracking-widest rounded-[6px] hover:scale-[0.98] transition-all shadow-[var(--shadow-2)] relative z-10 font-inter"
+              className="w-full md:w-auto px-8 py-3.5 bg-[#BFF367] text-black font-bold uppercase text-[11px] tracking-widest rounded-[6px] hover:scale-[0.98] transition-all shadow-[var(--shadow-2)] relative z-10 font-inter"
             >
               Unlock Professional Access
             </button>
@@ -149,7 +149,7 @@ export default function ScorerMatches() {
           <div className="relative w-full max-w-2xl bg-[#000000] border border-[#2D2D2D] rounded-[8px] shadow-[var(--shadow-4)] overflow-hidden animate-in zoom-in-95 duration-300">
             <div className="p-8 md:p-12 space-y-8">
               <div className="space-y-2">
-                <h2 className="text-3xl font-bold text-white tracking-tight font-inter">Scorer <span className="text-[#00C187]">Registration</span></h2>
+                <h2 className="text-3xl font-bold text-white tracking-tight font-inter">Scorer <span className="text-[#BFF367]">Registration</span></h2>
                 <p className="text-[#999999] text-xs font-semibold uppercase tracking-wider font-inter">Upgrade to a professional digital scorer</p>
               </div>
 
@@ -163,7 +163,7 @@ export default function ScorerMatches() {
                       value={formData.phone}
                       onChange={(e) => setFormData({...formData, phone: e.target.value})}
                       placeholder="Contact Number"
-                      className="w-full h-12 bg-transparent border border-[#2D2D2D] rounded-[6px] px-4 text-sm text-white focus:border-[#00C187]/50 outline-none transition-all font-inter"
+                      className="w-full h-12 bg-transparent border border-[#2D2D2D] rounded-[6px] px-4 text-sm text-white focus:border-[#BFF367]/50 outline-none transition-all font-inter"
                     />
                   </div>
                   <div className="space-y-2">
@@ -174,7 +174,7 @@ export default function ScorerMatches() {
                       value={formData.city}
                       onChange={(e) => setFormData({...formData, city: e.target.value})}
                       placeholder="Current Location"
-                      className="w-full h-12 bg-transparent border border-[#2D2D2D] rounded-[6px] px-4 text-sm text-white focus:border-[#00C187]/50 outline-none transition-all font-inter"
+                      className="w-full h-12 bg-transparent border border-[#2D2D2D] rounded-[6px] px-4 text-sm text-white focus:border-[#BFF367]/50 outline-none transition-all font-inter"
                     />
                   </div>
                 </div>
@@ -187,7 +187,7 @@ export default function ScorerMatches() {
                     value={formData.bio}
                     onChange={(e) => setFormData({...formData, bio: e.target.value})}
                     placeholder="Tell us about your scoring experience..."
-                    className="w-full bg-transparent border border-[#2D2D2D] rounded-[6px] p-4 text-sm text-white focus:border-[#00C187]/50 outline-none transition-all resize-none font-inter"
+                    className="w-full bg-transparent border border-[#2D2D2D] rounded-[6px] p-4 text-sm text-white focus:border-[#BFF367]/50 outline-none transition-all resize-none font-inter"
                   />
                 </div>
 
@@ -202,7 +202,7 @@ export default function ScorerMatches() {
                   <button 
                     type="submit"
                     disabled={requestingUpgrade}
-                    className="flex-[2] h-12 bg-[#00C187] text-black font-bold uppercase text-[11px] tracking-widest rounded-[6px] shadow-[var(--shadow-2)] hover:scale-[0.98] transition-all flex items-center justify-center gap-3 disabled:opacity-60 font-inter"
+                    className="flex-[2] h-12 bg-[#BFF367] text-black font-bold uppercase text-[11px] tracking-widest rounded-[6px] shadow-[var(--shadow-2)] hover:scale-[0.98] transition-all flex items-center justify-center gap-3 disabled:opacity-60 font-inter"
                   >
                     {requestingUpgrade ? <Loader2 size={16} className="animate-spin" /> : "Submit Application"}
                   </button>
@@ -217,7 +217,7 @@ export default function ScorerMatches() {
       <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6 pb-6 border-b border-white/5">
         <div className="space-y-1">
           <h1 className="text-3xl lg:text-4xl font-bold tracking-tight text-white font-inter">
-            Scoring <span className="text-[#00C187]">Center</span>
+            Scoring <span className="text-[#BFF367]">Center</span>
           </h1>
           <p className="text-[#999999] text-xs font-semibold uppercase tracking-wider font-inter mt-1">Live Match Management & Digital Analytics</p>
         </div>
@@ -228,9 +228,9 @@ export default function ScorerMatches() {
             placeholder="Search Match ID (KRZ-XXXX)"
             value={searchId}
             onChange={(e) => setSearchId(e.target.value.toUpperCase())}
-            className="w-full h-12 bg-transparent border border-[#2D2D2D] rounded-[6px] px-4 text-sm text-white focus:border-[#00C187]/50 outline-none transition-all pr-12 font-inter"
+            className="w-full h-12 bg-transparent border border-[#2D2D2D] rounded-[6px] px-4 text-sm text-white focus:border-[#BFF367]/50 outline-none transition-all pr-12 font-inter"
           />
-          <div className="absolute right-4 top-1/2 -translate-y-1/2 text-[#878C9F] group-focus-within:text-[#00C187] transition-colors">
+          <div className="absolute right-4 top-1/2 -translate-y-1/2 text-[#878C9F] group-focus-within:text-[#BFF367] transition-colors">
             <Search size={18} />
           </div>
         </div>
@@ -239,7 +239,7 @@ export default function ScorerMatches() {
       {/* MATCH ASSIGNMENTS */}
       <section className="space-y-8">
         <div className="flex items-center gap-3">
-          <div className="w-1.5 h-1.5 rounded-full bg-[#00C187] animate-pulse" />
+          <div className="w-1.5 h-1.5 rounded-full bg-[#BFF367] animate-pulse" />
           <h2 className="text-[11px] font-bold uppercase tracking-widest text-[#878C9F] font-inter">
             {searchId ? "Search Results" : "Current Assignments"}
           </h2>
@@ -247,19 +247,19 @@ export default function ScorerMatches() {
         
         {searching && (
           <div className="p-20 bg-[#000000] border border-[#2D2D2D] border-dashed rounded-[8px] text-center flex flex-col items-center gap-4">
-             <Loader2 className="animate-spin text-[#00C187]" size={32} />
+             <Loader2 className="animate-spin text-[#BFF367]" size={32} />
              <p className="text-[11px] font-bold uppercase tracking-widest text-[#555] font-inter">Synchronizing Network Data...</p>
           </div>
         )}
 
         {/* Global Search Result */}
         {!searching && globalMatch && !activeMatches.some(m => m._id === globalMatch._id) && (
-          <div className="bg-[#000000] border border-[#2D2D2D] rounded-[8px] p-6 lg:p-8 group hover:border-[#00C187]/30 transition-all duration-500 shadow-[var(--shadow-2)] relative overflow-hidden animate-in slide-in-from-bottom-4">
-            <div className="absolute top-0 right-0 w-32 h-32 bg-[#00C187]/5 blur-[60px]"></div>
+          <div className="bg-[#000000] border border-[#2D2D2D] rounded-[8px] p-6 lg:p-8 group hover:border-[#BFF367]/30 transition-all duration-500 shadow-[var(--shadow-2)] relative overflow-hidden animate-in slide-in-from-bottom-4">
+            <div className="absolute top-0 right-0 w-32 h-32 bg-[#BFF367]/5 blur-[60px]"></div>
             <div className="flex flex-col md:flex-row justify-between items-center gap-8 relative z-10">
               <div className="space-y-3 flex-1">
                 <div className="flex items-center gap-3">
-                  <span className="px-2 py-0.5 bg-[#00C187]/10 text-[#00C187] text-[9px] font-bold uppercase tracking-widest rounded-[4px] border border-[#00C187]/20">
+                  <span className="px-2 py-0.5 bg-[#BFF367]/10 text-[#BFF367] text-[9px] font-bold uppercase tracking-widest rounded-[4px] border border-[#BFF367]/20">
                     NETWORK MATCH: {globalMatch.shortId}
                   </span>
                 </div>
@@ -269,7 +269,7 @@ export default function ScorerMatches() {
               </div>
               <button 
                 onClick={() => handleRequestScorer(globalMatch._id)}
-                className="w-full md:w-auto px-8 py-3 bg-[#00C187] text-black font-bold uppercase text-[11px] tracking-widest rounded-[6px] hover:scale-[0.98] transition-all flex items-center justify-center gap-2 font-inter"
+                className="w-full md:w-auto px-8 py-3 bg-[#BFF367] text-black font-bold uppercase text-[11px] tracking-widest rounded-[6px] hover:scale-[0.98] transition-all flex items-center justify-center gap-2 font-inter"
               >
                 Request Access <Zap size={14} fill="currentColor" />
               </button>
@@ -291,13 +291,13 @@ export default function ScorerMatches() {
             {filteredMatches.map((match) => (
               <div 
                 key={match._id} 
-                className="group relative bg-[#000000] border border-[#2D2D2D] rounded-[8px] p-6 hover:border-[#00C187]/30 transition-all duration-500 shadow-[var(--shadow-2)]"
+                className="group relative bg-[#000000] border border-[#2D2D2D] rounded-[8px] p-6 hover:border-[#BFF367]/30 transition-all duration-500 shadow-[var(--shadow-2)]"
               >
                 <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
                   <div className="flex gap-6 flex-1">
                     {/* Date Block */}
                     <div className="flex flex-col items-center justify-center w-20 h-20 bg-[#2D2D2D]/30 rounded-[6px] border border-[#2D2D2D] text-center shrink-0">
-                      <span className="text-[#00C187] text-[9px] font-bold uppercase tracking-wider mb-1 font-inter">
+                      <span className="text-[#BFF367] text-[9px] font-bold uppercase tracking-wider mb-1 font-inter">
                         {new Date(match.date).toLocaleString('default', { month: 'short' })}
                       </span>
                       <span className="text-xl font-bold text-white leading-none font-inter">
@@ -307,26 +307,26 @@ export default function ScorerMatches() {
 
                     <div className="space-y-3">
                       <div className="flex items-center gap-3">
-                        <div className="px-2 py-0.5 bg-[#00C187]/10 text-[#00C187] text-[9px] font-bold uppercase tracking-widest rounded-[4px] border border-[#00C187]/20 font-inter">
+                        <div className="px-2 py-0.5 bg-[#BFF367]/10 text-[#BFF367] text-[9px] font-bold uppercase tracking-widest rounded-[4px] border border-[#BFF367]/20 font-inter">
                           {match.shortId || 'KRZ-XXXX'}
                         </div>
                         <div className="flex items-center gap-2 text-[#878C9F] text-xs font-medium font-inter">
-                          <Clock size={14} className="text-[#00C187]" />
+                          <Clock size={14} className="text-[#BFF367]" />
                           {match.time}
                         </div>
                       </div>
                       
-                      <h3 className="text-lg font-bold text-white group-hover:text-[#00C187] transition-colors font-inter tracking-tight leading-tight">
+                      <h3 className="text-lg font-bold text-white group-hover:text-[#BFF367] transition-colors font-inter tracking-tight leading-tight">
                         {match.name || "Untitled Match"}
                       </h3>
                       
                       <div className="flex flex-wrap gap-6 text-[13px] text-[#878C9F] font-inter">
                         <div className="flex items-center gap-2">
-                          <MapPin size={14} className="text-[#00C187]" />
+                          <MapPin size={14} className="text-[#BFF367]" />
                           {match.venue || "Global Arena"}
                         </div>
                         <div className="flex items-center gap-2">
-                          <Activity size={14} className="text-[#00C187]" />
+                          <Activity size={14} className="text-[#BFF367]" />
                           Live Status Ready
                         </div>
                       </div>
@@ -336,13 +336,13 @@ export default function ScorerMatches() {
                   <div className="w-full md:w-auto flex flex-col items-stretch gap-3">
                     <button 
                       onClick={() => window.open(`/scoring/${match._id}`, '_blank', 'noopener,noreferrer')}
-                      className="px-6 py-2.5 bg-[#00C187] text-black text-xs font-bold uppercase tracking-widest rounded-[6px] shadow-[var(--shadow-2)] hover:scale-[0.98] transition-all flex items-center justify-center gap-2 font-inter"
+                      className="px-6 py-2.5 bg-[#BFF367] text-black text-xs font-bold uppercase tracking-widest rounded-[6px] shadow-[var(--shadow-2)] hover:scale-[0.98] transition-all flex items-center justify-center gap-2 font-inter"
                     >
                       Open Console <Zap size={14} fill="currentColor" />
                     </button>
                     <button 
                       onClick={() => navigate(`/match/${match._id}`)}
-                      className="px-6 py-2.5 bg-transparent hover:bg-[#00C187]/10 text-[#999999] hover:text-[#00C187] text-xs font-bold uppercase tracking-widest rounded-[6px] border border-[#2D2D2D] hover:border-[#00C187]/30 transition-all flex items-center justify-center gap-2 font-inter"
+                      className="px-6 py-2.5 bg-transparent hover:bg-[#BFF367]/10 text-[#999999] hover:text-[#BFF367] text-xs font-bold uppercase tracking-widest rounded-[6px] border border-[#2D2D2D] hover:border-[#BFF367]/30 transition-all flex items-center justify-center gap-2 font-inter"
                     >
                       Match Details <ArrowRight size={14} />
                     </button>
@@ -362,13 +362,13 @@ export default function ScorerMatches() {
             {completedMatches.map((match) => (
               <div 
                 key={match._id} 
-                className="bg-[#000000] border border-[#2D2D2D] rounded-[8px] p-5 flex justify-between items-center group hover:border-[#00C187]/20 transition-all shadow-sm"
+                className="bg-[#000000] border border-[#2D2D2D] rounded-[8px] p-5 flex justify-between items-center group hover:border-[#BFF367]/20 transition-all shadow-sm"
               >
                  <div className="space-y-1">
-                   <h4 className="text-sm font-bold text-white uppercase font-inter tracking-tight group-hover:text-[#00C187] transition-colors">{match.name}</h4>
+                   <h4 className="text-sm font-bold text-white uppercase font-inter tracking-tight group-hover:text-[#BFF367] transition-colors">{match.name}</h4>
                    <p className="text-[10px] text-[#878C9F] font-semibold uppercase tracking-widest font-inter">{new Date(match.date).toLocaleDateString()}</p>
                  </div>
-                 <div className="flex items-center gap-2 text-[#00C187]">
+                 <div className="flex items-center gap-2 text-[#BFF367]">
                     <CheckCircle2 size={16} />
                     <span className="text-[10px] font-bold uppercase tracking-widest font-inter">Verified</span>
                  </div>

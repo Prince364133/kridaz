@@ -5,7 +5,7 @@ const BALL_STYLES = {
   boundary: { bg: '#10b981', color: '#fff' },
   six: { bg: '#8b5cf6', color: '#fff' },
   four: { bg: '#3b82f6', color: '#fff' },
-  wide: { bg: '#55DEE8', color: '#000' },
+  wide: { bg: '#BFF367', color: '#000' },
   no_ball: { bg: '#f97316', color: '#fff' },
   dot: { bg: '#475569', color: '#cbd5e1' },
   run: { bg: '#1e293b', color: '#fff' },
@@ -44,10 +44,10 @@ function BallPill({ ball, size = 32 }) {
 }
 
 const BADGE_CFG = {
-  six: { label: 'SIX', bg: 'linear-gradient(135deg, #55DEE8, #d97706)', color: '#000', dur: 2800, size: 70 },
+  six: { label: 'SIX', bg: 'linear-gradient(135deg, #BFF367, #d97706)', color: '#000', dur: 2800, size: 70 },
   four: { label: 'FOUR', bg: 'linear-gradient(135deg, #3b82f6, #1d4ed8)', color: '#fff', dur: 2400, size: 60 },
   wicket: { label: 'OUT', bg: 'linear-gradient(135deg, #e11d48, #9f1239)', color: '#fff', dur: 3200, size: 55 },
-  wide: { label: 'WIDE', bg: '#55DEE8', color: '#000', dur: 1600, size: 45 },
+  wide: { label: 'WIDE', bg: '#BFF367', color: '#000', dur: 1600, size: 45 },
   no_ball: { label: 'NO BALL', bg: '#f97316', color: '#fff', dur: 1600, size: 45 },
 };
 
@@ -92,7 +92,7 @@ function EventBadge({ event }) {
           transform: 'skewX(-12deg)',
           animation: `extraBadge ${cfg.dur}ms ease-in-out forwards`,
           whiteSpace: 'nowrap',
-          borderRight: '4px solid #55DEE8',
+          borderRight: '4px solid #BFF367',
           boxShadow: '0 8px 20px rgba(0,0,0,0.3)',
         }}>
           <span style={{ transform: 'skewX(12deg)', display: 'inline-block' }}>{event.description.toUpperCase()}</span>
@@ -217,7 +217,7 @@ export default function SportsNetworkTicker({ score, connected, badge }) {
           bottom: clamp(52px, 8.4vh, 90px);
           left: 0; right: 0;
           height: clamp(24px, 3.4vh, 38px);
-          background: #55DEE8;
+          background: #BFF367;
           display: flex; alignItems: center; overflow: hidden;
           white-space: nowrap; 
           border-top: 2px solid #fff;
@@ -272,11 +272,11 @@ export default function SportsNetworkTicker({ score, connected, badge }) {
               background: 'linear-gradient(90deg, #1e3a8a, #172554)',
               transform: 'skewX(-12deg)',
               zIndex: 1,
-              borderRight: '4px solid #55DEE8'
+              borderRight: '4px solid #BFF367'
             }} />
             
             <div style={{ position: 'relative', zIndex: 2, display: 'flex', flexDirection: 'column' }}>
-              <span style={{ fontSize: '9px', fontWeight: 700, color: '#55DEE8', letterSpacing: '2px' }}>LIVE MATCH</span>
+              <span style={{ fontSize: '9px', fontWeight: 700, color: '#BFF367', letterSpacing: '2px' }}>LIVE MATCH</span>
               <span style={{ fontSize: 'clamp(11px, 1.2vw, 18px)', fontWeight: 700, color: '#fff', textTransform: 'uppercase' }}>
                 {score.battingTeamName}
               </span>
@@ -296,14 +296,14 @@ export default function SportsNetworkTicker({ score, connected, badge }) {
               <span style={{ fontSize: 'clamp(24px, 3.8vw, 48px)', fontWeight: 700, lineHeight: 1, color: '#fff' }}>
                 {score.totalRuns}
               </span>
-              <span style={{ fontSize: 'clamp(16px, 2.2vw, 28px)', fontWeight: 600, color: '#55DEE8' }}>-</span>
+              <span style={{ fontSize: 'clamp(16px, 2.2vw, 28px)', fontWeight: 600, color: '#BFF367' }}>-</span>
               <span style={{ fontSize: 'clamp(20px, 3vw, 38px)', fontWeight: 700, color: '#fff' }}>
                 {score.totalWickets}
               </span>
             </div>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
               <div style={{ fontSize: '7px', color: '#94a3b8', fontWeight: 600 }}>OVERS</div>
-              <div style={{ fontSize: 'clamp(12px, 1.4vw, 20px)', fontWeight: 700, color: '#55DEE8' }}>{score.overString}</div>
+              <div style={{ fontSize: 'clamp(12px, 1.4vw, 20px)', fontWeight: 700, color: '#BFF367' }}>{score.overString}</div>
             </div>
             {score.target && (
               <div style={{
@@ -332,13 +332,13 @@ export default function SportsNetworkTicker({ score, connected, badge }) {
           }}>
             {striker && (
               <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                <div style={{ width: 4, height: 12, background: '#55DEE8', transform: 'skewX(-10deg)', flexShrink: 0 }} />
+                <div style={{ width: 4, height: 12, background: '#BFF367', transform: 'skewX(-10deg)', flexShrink: 0 }} />
                 <span style={{ fontSize: 'clamp(9px, 0.9vw, 14px)', fontWeight: 600, color: '#fff', textTransform: 'uppercase', flex: 1, overflow: 'hidden', whiteSpace: 'nowrap', textOverflow: 'ellipsis' }}>
                   {striker.name}
                 </span>
                 <span style={{ fontSize: 'clamp(12px, 1.1vw, 17px)', fontWeight: 700, color: '#fff', flexShrink: 0 }}>{striker.runs}</span>
                 <span style={{ fontSize: '9px', color: '#94a3b8', fontWeight: 600, flexShrink: 0 }}>({striker.balls})</span>
-                <span style={{ fontSize: '9px', color: '#55DEE8', fontWeight: 600, flexShrink: 0 }}>{strikerSR}</span>
+                <span style={{ fontSize: '9px', color: '#BFF367', fontWeight: 600, flexShrink: 0 }}>{strikerSR}</span>
               </div>
             )}
             {nonStriker && (
@@ -368,7 +368,7 @@ export default function SportsNetworkTicker({ score, connected, badge }) {
               <div style={{ fontSize: 'clamp(9px, 0.9vw, 14px)', fontWeight: 600, color: '#fff', textTransform: 'uppercase', overflow: 'hidden', whiteSpace: 'nowrap', textOverflow: 'ellipsis' }}>
                 {bowler.name}
               </div>
-              <div style={{ fontSize: '9px', color: '#55DEE8', fontWeight: 600, whiteSpace: 'nowrap' }}>
+              <div style={{ fontSize: '9px', color: '#BFF367', fontWeight: 600, whiteSpace: 'nowrap' }}>
                 Overs: {bowler.overs}.{bowler.balls} * {bowler.wickets} Wkts / {bowler.runs} Runs
               </div>
             </div>

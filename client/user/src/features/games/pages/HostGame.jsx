@@ -591,7 +591,7 @@ const HostGame = () => {
             {[1, 2, 3, 4, 5].map(s => (
               <div 
                 key={s}
-                className={`w-8 h-1.5 rounded-full transition-all duration-500 ${ step >= s ? 'bg-gradient-to-r from-[#55DEE8] to-[#BFF367]' : 'bg-neutral-800' }`}
+                className={`w-8 h-1.5 rounded-full transition-all duration-500 ${ step >= s ? 'bg-gradient-to-r from-[#BFF367] to-[#BFF367]' : 'bg-neutral-800' }`}
               />
             ))}
           </div>
@@ -613,7 +613,7 @@ const HostGame = () => {
                   gameData.gameMode === 'QUICK'
                   ? {
                       border: '1.5px solid transparent',
-                      backgroundImage: 'linear-gradient(#0c0d0f, #0c0d0f), linear-gradient(90deg, #55DEE8, #BFF367)',
+                      backgroundImage: 'linear-gradient(#0c0d0f, #0c0d0f), linear-gradient(90deg, #BFF367, #BFF367)',
                       backgroundClip: 'padding-box, border-box',
                       backgroundOrigin: 'border-box',
                     }
@@ -626,7 +626,7 @@ const HostGame = () => {
                     gameData.gameMode === 'QUICK'
                     ? {
                         border: '2px solid transparent',
-                        backgroundImage: 'linear-gradient(#0c0d0f, #0c0d0f), linear-gradient(135deg, #BFF367, #55DEE8, transparent, transparent)',
+                        backgroundImage: 'linear-gradient(#0c0d0f, #0c0d0f), linear-gradient(135deg, #BFF367, #BFF367, transparent, transparent)',
                         backgroundClip: 'padding-box, border-box',
                         backgroundOrigin: 'border-box',
                       }
@@ -643,7 +643,7 @@ const HostGame = () => {
                 </div>
                 {gameData.gameMode === 'QUICK' && (
                   <div className="absolute top-2 right-2 sm:top-4 sm:right-4">
-                    <CheckCircle2 className="text-[#55DEE8] w-4 h-4 sm:w-5 sm:h-5" />
+                    <CheckCircle2 className="text-[#BFF367] w-4 h-4 sm:w-5 sm:h-5" />
                   </div>
                 )}
               </button>
@@ -655,7 +655,7 @@ const HostGame = () => {
                   gameData.gameMode === 'PROFESSIONAL'
                   ? {
                       border: '1.5px solid transparent',
-                      backgroundImage: 'linear-gradient(#0c0d0f, #0c0d0f), linear-gradient(90deg, #55DEE8, #BFF367)',
+                      backgroundImage: 'linear-gradient(#0c0d0f, #0c0d0f), linear-gradient(90deg, #BFF367, #BFF367)',
                       backgroundClip: 'padding-box, border-box',
                       backgroundOrigin: 'border-box',
                     }
@@ -668,7 +668,7 @@ const HostGame = () => {
                     gameData.gameMode === 'PROFESSIONAL'
                     ? {
                         border: '2px solid transparent',
-                        backgroundImage: 'linear-gradient(#0c0d0f, #0c0d0f), linear-gradient(135deg, #BFF367, #55DEE8, transparent, transparent)',
+                        backgroundImage: 'linear-gradient(#0c0d0f, #0c0d0f), linear-gradient(135deg, #BFF367, #BFF367, transparent, transparent)',
                         backgroundClip: 'padding-box, border-box',
                         backgroundOrigin: 'border-box',
                       }
@@ -685,7 +685,7 @@ const HostGame = () => {
                 </div>
                 {gameData.gameMode === 'PROFESSIONAL' && (
                   <div className="absolute top-2 right-2 sm:top-4 sm:right-4">
-                    <CheckCircle2 className="text-[#55DEE8] w-4 h-4 sm:w-5 sm:h-5" />
+                    <CheckCircle2 className="text-[#BFF367] w-4 h-4 sm:w-5 sm:h-5" />
                   </div>
                 )}
               </button>
@@ -695,7 +695,7 @@ const HostGame = () => {
               <button
                 onClick={() => setStep(2)}
                 disabled={!gameData.gameMode}
-                className="flex-1 py-3 sm:py-3.5 bg-gradient-to-r from-[#55DEE8] to-[#BFF367] text-black font-black rounded-[8px] sm:rounded-[8px] hover:scale-[1.01] active:scale-[0.99] transition-all duration-300 text-sm sm:text-base font-open-sans shadow-[0_10px_25px_rgba(85,222,232,0.25)] uppercase tracking-wider disabled:opacity-40 disabled:pointer-events-none disabled:shadow-none"
+                className="flex-1 py-3 sm:py-3.5 bg-gradient-to-r from-[#BFF367] to-[#BFF367] text-black font-black rounded-[8px] sm:rounded-[8px] hover:scale-[1.01] active:scale-[0.99] transition-all duration-300 text-sm sm:text-base font-open-sans shadow-[0_10px_25px_rgba(85,222,232,0.25)] uppercase tracking-wider disabled:opacity-40 disabled:pointer-events-none disabled:shadow-none"
               >
                 NEXT: SPORT & TIME
               </button>
@@ -982,7 +982,7 @@ const HostGame = () => {
               </button>
               <button
                 onClick={() => setStep(4)}
-                className="flex-[2] py-3 sm:py-3.5 bg-gradient-to-r from-[#55DEE8] to-[#BFF367] text-black font-black rounded-[8px] sm:rounded-[8px] hover:scale-[1.01] active:scale-[0.99] transition-all duration-300 text-sm sm:text-base font-open-sans shadow-[0_10px_25px_rgba(85,222,232,0.25)] uppercase tracking-wider"
+                className="flex-[2] py-3 sm:py-3.5 bg-gradient-to-r from-[#BFF367] to-[#BFF367] text-black font-black rounded-[8px] sm:rounded-[8px] hover:scale-[1.01] active:scale-[0.99] transition-all duration-300 text-sm sm:text-base font-open-sans shadow-[0_10px_25px_rgba(85,222,232,0.25)] uppercase tracking-wider"
               >
                 Continue to Player Setup
               </button>
@@ -995,8 +995,8 @@ const HostGame = () => {
           <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} className="space-y-8 max-w-2xl mx-auto">
             <div className="bg-neutral-900/40 border border-neutral-800/80 rounded-[8px] p-8 sm:p-12 text-center space-y-10 shadow-xl shadow-black/30">
               <div className="max-w-md mx-auto space-y-4">
-                <div className="w-16 h-16 bg-[#55DEE8]/8 rounded-full flex items-center justify-center mx-auto border border-[#55DEE8]/20 shadow-[0_0_20px_rgba(85,222,232,0.08)]">
-                  <Users className="text-[#55DEE8]" size={28} />
+                <div className="w-16 h-16 bg-[#BFF367]/8 rounded-full flex items-center justify-center mx-auto border border-[#BFF367]/20 shadow-[0_0_20px_rgba(85,222,232,0.08)]">
+                  <Users className="text-[#BFF367]" size={28} />
                 </div>
                 <h2 className="text-3xl font-bold tracking-tight text-white font-open-sans uppercase tracking-wider">Total Players</h2>
                 <p className="hidden sm:block text-neutral-400 font-inter text-[20px] max-w-md mx-auto leading-relaxed">
@@ -1008,9 +1008,9 @@ const HostGame = () => {
               <div className="flex items-center justify-center gap-10 py-4">
                 <button 
                   onClick={() => setGameData(prev => ({ ...prev, quickPlayerCount: Math.max(2, prev.quickPlayerCount - 1) }))}
-                  className="w-14 h-14 rounded-full bg-neutral-950 border border-[#55DEE8]/30 text-[#55DEE8] hover:bg-[#55DEE8]/10 transition-all duration-300 flex items-center justify-center shadow-[0_4px_20px_rgba(85,222,232,0.15)] active:scale-95 cursor-pointer"
+                  className="w-14 h-14 rounded-full bg-neutral-950 border border-[#BFF367]/30 text-[#BFF367] hover:bg-[#BFF367]/10 transition-all duration-300 flex items-center justify-center shadow-[0_4px_20px_rgba(85,222,232,0.15)] active:scale-95 cursor-pointer"
                 >
-                  <Minus size={22} className="text-[#55DEE8]" />
+                  <Minus size={22} className="text-[#BFF367]" />
                 </button>
                 <div className="w-24 text-center">
                   <span className="text-7xl font-black text-white font-open-sans tracking-tight select-none tabular-nums">
@@ -1032,8 +1032,8 @@ const HostGame = () => {
                     <span className="font-inter text-[20px] font-bold text-neutral-300">Entry Fee per Player</span>
                     <p className="hidden sm:block font-inter text-[20px] text-neutral-500">What each player pays to join (₹)</p>
                   </div>
-                  <div className="flex items-center gap-3 bg-neutral-900/60 p-3 px-4 rounded-[8px] border border-neutral-800 focus-within:border-[#55DEE8] focus-within:shadow-[0_0_15px_rgba(85,222,232,0.1)] transition-all duration-300">
-                    <Coins className="text-[#55DEE8]" size={18} />
+                  <div className="flex items-center gap-3 bg-neutral-900/60 p-3 px-4 rounded-[8px] border border-neutral-800 focus-within:border-[#BFF367] focus-within:shadow-[0_0_15px_rgba(85,222,232,0.1)] transition-all duration-300">
+                    <Coins className="text-[#BFF367]" size={18} />
                     <input 
                       type="number"
                       placeholder="0"
@@ -1057,7 +1057,7 @@ const HostGame = () => {
               <button
                 disabled={gameData.quickPlayerCount < 2}
                 onClick={initQuickSlots}
-                className="flex-[2] py-4 bg-gradient-to-r from-[#55DEE8] to-[#BFF367] text-black font-black rounded-[8px] hover:scale-[1.01] active:scale-[0.99] transition-all duration-300 text-base font-open-sans shadow-[0_10px_25px_rgba(85,222,232,0.25)] disabled:opacity-50 uppercase tracking-wider"
+                className="flex-[2] py-4 bg-gradient-to-r from-[#BFF367] to-[#BFF367] text-black font-black rounded-[8px] hover:scale-[1.01] active:scale-[0.99] transition-all duration-300 text-base font-open-sans shadow-[0_10px_25px_rgba(85,222,232,0.25)] disabled:opacity-50 uppercase tracking-wider"
               >
                 SETUP SLOTS
               </button>
@@ -1078,7 +1078,7 @@ const HostGame = () => {
                   setFillingTeamKey('quick');
                   setShowTeamFillModal(true);
                 }}
-                className="flex items-center gap-2 px-6 py-3 bg-[#55DEE8]/10 border border-[#55DEE8]/20 rounded-[8px] text-[#55DEE8] font-black text-xs uppercase tracking-widest hover:bg-gradient-to-r hover:from-[#55DEE8] hover:to-[#BFF367] hover:text-black transition-all"
+                className="flex items-center gap-2 px-6 py-3 bg-[#BFF367]/10 border border-[#BFF367]/20 rounded-[8px] text-[#BFF367] font-black text-xs uppercase tracking-widest hover:bg-gradient-to-r hover:from-[#BFF367] hover:to-[#BFF367] hover:text-black transition-all"
               >
                 <ShieldCheck size={16} /> Fill <span className="hidden sm:inline">from My </span>Team
               </button>
@@ -1089,9 +1089,9 @@ const HostGame = () => {
                 <div 
                   key={idx}
                   onClick={() => idx !== 0 && setActiveSlotPicker({ idx })}
-                  className={`relative p-6 rounded-[8px] border-2 transition-all cursor-pointer group flex flex-col items-center justify-center text-center h-48 ${ slot.userId || slot.customPlayer ? 'border-[#55DEE8]/30 bg-[#55DEE8]/5' : 'border-neutral-800 bg-neutral-900/50 hover:border-neutral-700' }`}
+                  className={`relative p-6 rounded-[8px] border-2 transition-all cursor-pointer group flex flex-col items-center justify-center text-center h-48 ${ slot.userId || slot.customPlayer ? 'border-[#BFF367]/30 bg-[#BFF367]/5' : 'border-neutral-800 bg-neutral-900/50 hover:border-neutral-700' }`}
                 >
-                  <div className={`w-16 h-16 rounded-[8px] flex items-center justify-center mb-3 transition-transform duration-500 group-hover:scale-110 ${ slot.userId || slot.customPlayer ? 'bg-gradient-to-r from-[#55DEE8] to-[#BFF367] text-black font-black' : 'bg-neutral-800 text-neutral-500' }`}>
+                  <div className={`w-16 h-16 rounded-[8px] flex items-center justify-center mb-3 transition-transform duration-500 group-hover:scale-110 ${ slot.userId || slot.customPlayer ? 'bg-gradient-to-r from-[#BFF367] to-[#BFF367] text-black font-black' : 'bg-neutral-800 text-neutral-500' }`}>
                     {slot.userId === user?._id ? <ShieldCheck size={28} /> : (slot.userId || slot.customPlayer ? <UserCheck size={28} /> : <Plus size={28} />)}
                   </div>
                   
@@ -1117,7 +1117,7 @@ const HostGame = () => {
                   )}
 
                   {idx === 0 && (
-                    <div className="absolute top-4 right-4 text-[#55DEE8]">
+                    <div className="absolute top-4 right-4 text-[#BFF367]">
                       <CheckCircle2 size={16} />
                     </div>
                   )}
@@ -1135,7 +1135,7 @@ const HostGame = () => {
               <button onClick={() => setStep(4)} className="flex-1 py-5 bg-neutral-900 text-neutral-400 font-black rounded-[8px] border-2 border-neutral-800 hover:border-neutral-700 transition-all text-lg uppercase tracking-widest">Back</button>
               <button
                 onClick={() => setStep(5)}
-                className="flex-[2] py-5 bg-gradient-to-r from-[#55DEE8] to-[#BFF367] text-black font-black rounded-[8px] hover:scale-[1.01] active:scale-[0.99] transition-all duration-300 text-lg shadow-[0_10px_30px_rgba(85,222,232,0.25)] uppercase tracking-widest"
+                className="flex-[2] py-5 bg-gradient-to-r from-[#BFF367] to-[#BFF367] text-black font-black rounded-[8px] hover:scale-[1.01] active:scale-[0.99] transition-all duration-300 text-lg shadow-[0_10px_30px_rgba(85,222,232,0.25)] uppercase tracking-widest"
               >
                 PREVIEW MATCH
               </button>
@@ -1176,7 +1176,7 @@ const HostGame = () => {
                           setFillingTeamKey(teamKey);
                           setShowTeamFillModal(true);
                         }}
-                        className="px-4 py-2 bg-gradient-to-r from-[#55DEE8] to-[#BFF367] rounded-[8px] text-black font-black uppercase tracking-widest text-xs hover:scale-105 transition-all shadow-lg"
+                        className="px-4 py-2 bg-gradient-to-r from-[#BFF367] to-[#BFF367] rounded-[8px] text-black font-black uppercase tracking-widest text-xs hover:scale-105 transition-all shadow-lg"
                         title="Add Team"
                       >
                         Add Team
@@ -1202,12 +1202,12 @@ const HostGame = () => {
                         {/* Upload button */}
                         <label
                           htmlFor={`img-upload-${teamKey}`}
-                          className="flex-1 flex flex-col items-center justify-center gap-2 p-4 border-2 border-dashed border-[#55DEE8]/30 rounded-[8px] cursor-pointer hover:border-[#BFF367]/60 hover:bg-[#55DEE8]/5 transition-all group"
+                          className="flex-1 flex flex-col items-center justify-center gap-2 p-4 border-2 border-dashed border-[#BFF367]/30 rounded-[8px] cursor-pointer hover:border-[#BFF367]/60 hover:bg-[#BFF367]/5 transition-all group"
                         >
-                          <div className="w-8 h-8 rounded-full bg-[#55DEE8]/10 border border-[#55DEE8]/20 flex items-center justify-center group-hover:bg-[#BFF367]/20 transition-all">
-                            <ImageIcon size={16} className="text-[#55DEE8] group-hover:text-[#BFF367] transition-colors" />
+                          <div className="w-8 h-8 rounded-full bg-[#BFF367]/10 border border-[#BFF367]/20 flex items-center justify-center group-hover:bg-[#BFF367]/20 transition-all">
+                            <ImageIcon size={16} className="text-[#BFF367] group-hover:text-[#BFF367] transition-colors" />
                           </div>
-                          <span className="text-[10px] font-black bg-gradient-to-r from-[#55DEE8] to-[#BFF367] bg-clip-text text-transparent uppercase tracking-widest">
+                          <span className="text-[10px] font-black bg-gradient-to-r from-[#BFF367] to-[#BFF367] bg-clip-text text-transparent uppercase tracking-widest">
                             {gameData[teamKey].imageName ? 'Change Photo' : 'Upload Photo'}
                           </span>
                           {gameData[teamKey].imageName && (
@@ -1319,7 +1319,7 @@ const HostGame = () => {
               <button onClick={() => setStep(3)} className="flex-1 py-5 bg-neutral-900 text-neutral-400 font-black rounded-[8px] border-2 border-neutral-800 hover:border-neutral-700 transition-all text-lg uppercase tracking-widest">Back</button>
               <button
                 onClick={() => setStep(5)}
-                className="flex-[2] py-5 bg-gradient-to-r from-[#55DEE8] to-[#BFF367] text-black font-black rounded-[8px] hover:scale-[1.01] active:scale-[0.99] transition-all text-lg shadow-[0_20px_40px_rgba(85,222,232,0.25)] font-open-sans uppercase tracking-wider"
+                className="flex-[2] py-5 bg-gradient-to-r from-[#BFF367] to-[#BFF367] text-black font-black rounded-[8px] hover:scale-[1.01] active:scale-[0.99] transition-all text-lg shadow-[0_20px_40px_rgba(85,222,232,0.25)] font-open-sans uppercase tracking-wider"
               >
                 PREVIEW MATCH
               </button>
@@ -1332,11 +1332,11 @@ const HostGame = () => {
           <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="space-y-10">
             <div className="flex items-center justify-between gap-4">
               <div className="text-left space-y-2">
-                <span className="bg-gradient-to-r from-[#55DEE8] to-[#BFF367] text-black text-[10px] font-black px-3 py-1 rounded-full uppercase tracking-widest font-open-sans inline-block">
+                <span className="bg-gradient-to-r from-[#BFF367] to-[#BFF367] text-black text-[10px] font-black px-3 py-1 rounded-full uppercase tracking-widest font-open-sans inline-block">
                   {gameData.gameMode === 'QUICK' ? 'Quick Game' : 'Professional Match'}
                 </span>
                 <h2 className="text-4xl font-black tracking-tight font-open-sans uppercase">{gameData.gameType} Battle</h2>
-                <div className="flex flex-wrap items-center gap-2 sm:gap-4 text-[#55DEE8] font-black text-xs sm:text-sm uppercase tracking-widest font-inter">
+                <div className="flex flex-wrap items-center gap-2 sm:gap-4 text-[#BFF367] font-black text-xs sm:text-sm uppercase tracking-widest font-inter">
                   <span className="flex items-center gap-1.5 sm:gap-2 bg-neutral-900/50 px-2.5 py-1.5 rounded-[8px] border border-neutral-800"><Calendar size={14} className="sm:w-4 sm:h-4" /> {gameData.date}</span>
                   <span className="flex items-center gap-1.5 sm:gap-2 bg-neutral-900/50 px-2.5 py-1.5 rounded-[8px] border border-neutral-800"><Clock size={14} className="sm:w-4 sm:h-4" /> {gameData.time}</span>
                 </div>
@@ -1344,7 +1344,7 @@ const HostGame = () => {
               <div className="bg-neutral-900/50 border border-neutral-800 p-4 sm:p-6 rounded-[8px] sm:rounded-[8px] text-center min-w-[120px] sm:min-w-[180px] shrink-0">
                 <p className="text-[8px] sm:text-[10px] text-neutral-500 uppercase font-black tracking-widest mb-1 font-inter">Total Reservation</p>
                 <p className="text-2xl sm:text-4xl font-black text-[#BFF367] flex items-center justify-center gap-1 sm:gap-2 font-open-sans">
-                  <Coins size={20} className="text-[#55DEE8] sm:w-8 sm:h-8" /> {totalCost}
+                  <Coins size={20} className="text-[#BFF367] sm:w-8 sm:h-8" /> {totalCost}
                 </p>
               </div>
             </div>
@@ -1353,7 +1353,7 @@ const HostGame = () => {
               {/* Venue */}
               <div className="bg-neutral-900/50 border border-neutral-800 p-2.5 sm:p-6 rounded-[8px] sm:rounded-[8px] flex flex-col items-center text-center gap-2 sm:gap-3">
                 <div className="w-10 h-10 sm:w-16 sm:h-16 bg-neutral-800 rounded-[8px] sm:rounded-[8px] flex items-center justify-center shrink-0">
-                  <MapPin className="text-[#55DEE8] w-5 h-5 sm:w-8 sm:h-8" />
+                  <MapPin className="text-[#BFF367] w-5 h-5 sm:w-8 sm:h-8" />
                 </div>
                 <div className="min-w-0 w-full">
                   <p className="text-[7px] sm:text-[10px] text-neutral-500 uppercase font-black tracking-wider sm:tracking-widest mb-0.5 sm:mb-1 font-inter">Venue</p>
@@ -1380,7 +1380,7 @@ const HostGame = () => {
               <div className="p-8 bg-neutral-900/50 border border-neutral-800 rounded-[8px] text-center space-y-4">
                 <div className="flex items-center justify-center -space-x-4">
                   {Array.from({ length: Math.min(gameData.quickPlayerCount, 8) }).map((_, i) => (
-                    <div key={i} className="w-14 h-14 rounded-full border-4 border-neutral-900 bg-neutral-800 flex items-center justify-center text-[#55DEE8]">
+                    <div key={i} className="w-14 h-14 rounded-full border-4 border-neutral-900 bg-neutral-800 flex items-center justify-center text-[#BFF367]">
                       <Users size={20} />
                     </div>
                   ))}
@@ -1438,7 +1438,7 @@ const HostGame = () => {
                 <div className="w-full h-[1px] bg-neutral-800 my-2" />
                 <div className="flex justify-between text-lg font-black text-white font-open-sans">
                   <span>Total Cost</span>
-                  <span className="text-[#55DEE8]">{totalCost.toFixed(2)} coins</span>
+                  <span className="text-[#BFF367]">{totalCost.toFixed(2)} coins</span>
                 </div>
               </div>
 
@@ -1451,7 +1451,7 @@ const HostGame = () => {
                     value={couponCode}
                     onChange={(e) => setCouponCode(e.target.value.toUpperCase())}
                     disabled={!!couponData}
-                    className="flex-1 bg-black border border-neutral-800 rounded-[8px] px-4 py-3 text-sm text-white font-bold outline-none focus:border-[#55DEE8] uppercase tracking-wider disabled:opacity-50"
+                    className="flex-1 bg-black border border-neutral-800 rounded-[8px] px-4 py-3 text-sm text-white font-bold outline-none focus:border-[#BFF367] uppercase tracking-wider disabled:opacity-50"
                   />
                   {!couponData ? (
                     <button
@@ -1479,7 +1479,7 @@ const HostGame = () => {
               <button onClick={() => setStep(gameData.gameMode === 'QUICK' ? 4.5 : 4)} className="flex-1 py-5 bg-neutral-900 text-neutral-400 font-black rounded-[8px] border-2 border-neutral-800 hover:border-neutral-700 transition-all text-lg uppercase tracking-widest font-open-sans">Back</button>
               <button
                 onClick={() => setShowConfirm(true)}
-                className="flex-[2] py-5 bg-gradient-to-r from-[#55DEE8] to-[#BFF367] text-black font-black rounded-[8px] hover:scale-[1.01] active:scale-[0.99] transition-all text-xl shadow-[0_20px_40px_rgba(85,222,232,0.25)] font-open-sans uppercase tracking-wider"
+                className="flex-[2] py-5 bg-gradient-to-r from-[#BFF367] to-[#BFF367] text-black font-black rounded-[8px] hover:scale-[1.01] active:scale-[0.99] transition-all text-xl shadow-[0_20px_40px_rgba(85,222,232,0.25)] font-open-sans uppercase tracking-wider"
               >
                 CONFIRM GAME
               </button>
@@ -1518,11 +1518,11 @@ const HostGame = () => {
                         <img src={team.logo || `https://api.dicebear.com/7.x/initials/svg?seed=${team.name}`} alt={team.name} className="w-full h-full object-cover" />
                       </div>
                       <div>
-                        <h4 className="font-black text-sm group-hover:text-transparent bg-clip-text bg-gradient-to-r from-[#55DEE8] to-[#BFF367] transition-colors">{team.name}</h4>
+                        <h4 className="font-black text-sm group-hover:text-transparent bg-clip-text bg-gradient-to-r from-[#BFF367] to-[#BFF367] transition-colors">{team.name}</h4>
                         <p className="text-[10px] text-neutral-500 font-black uppercase tracking-widest">{team.members?.length || 0} Members</p>
                       </div>
                     </div>
-                    <div className="p-2 bg-gradient-to-r from-[#55DEE8]/10 to-[#BFF367]/10 rounded-lg text-transparent bg-clip-text bg-gradient-to-r from-[#55DEE8] to-[#BFF367] group-hover:bg-gradient-to-r from-[#55DEE8] to-[#BFF367] group-hover:text-black transition-all">
+                    <div className="p-2 bg-gradient-to-r from-[#BFF367]/10 to-[#BFF367]/10 rounded-lg text-transparent bg-clip-text bg-gradient-to-r from-[#BFF367] to-[#BFF367] group-hover:bg-gradient-to-r from-[#BFF367] to-[#BFF367] group-hover:text-black transition-all">
                       <Plus size={16} />
                     </div>
                   </div>
@@ -1579,7 +1579,7 @@ const HostGame = () => {
               exit={{ scale: 0.9, y: 30 }} 
               className="relative bg-[#0a0a0a] border border-neutral-800 p-8 rounded-[8px] max-w-md w-full shadow-2xl overflow-hidden"
             >
-              <div className="absolute -top-24 -right-24 w-48 h-48 bg-gradient-to-r from-[#55DEE8]/10 to-[#BFF367]/10 blur-[100px] rounded-full" />
+              <div className="absolute -top-24 -right-24 w-48 h-48 bg-gradient-to-r from-[#BFF367]/10 to-[#BFF367]/10 blur-[100px] rounded-full" />
               
               <div className="flex items-center gap-4 mb-8">
                 <div className="w-12 h-12 bg-yellow-500/10 rounded-[8px] flex items-center justify-center">
@@ -1670,7 +1670,7 @@ const HostGame = () => {
                     setShowConfirm(false);
                     handleCreateGame();
                   }}
-                  className="flex-1 py-4 bg-gradient-to-r from-[#55DEE8] to-[#BFF367] text-black font-black rounded-[8px] shadow-[0_10px_25px_rgba(85,222,232,0.25)] text-xs uppercase tracking-widest hover:scale-[1.02] transition-all"
+                  className="flex-1 py-4 bg-gradient-to-r from-[#BFF367] to-[#BFF367] text-black font-black rounded-[8px] shadow-[0_10px_25px_rgba(85,222,232,0.25)] text-xs uppercase tracking-widest hover:scale-[1.02] transition-all"
                 >
                   Confirm
                 </button>
@@ -1694,10 +1694,10 @@ const HostGame = () => {
         <div className="fixed inset-0 z-[200] bg-black/60 backdrop-blur-sm flex items-center justify-center">
           <div className="flex flex-col items-center gap-6">
             <div className="relative w-20 h-20">
-              <div className="absolute inset-0 border-4 border-[#55DEE8]/20 rounded-full" />
-              <div className="absolute inset-0 border-4 border-[#55DEE8] border-t-transparent rounded-full animate-spin" />
+              <div className="absolute inset-0 border-4 border-[#BFF367]/20 rounded-full" />
+              <div className="absolute inset-0 border-4 border-[#BFF367] border-t-transparent rounded-full animate-spin" />
             </div>
-            <p className="text-transparent bg-clip-text bg-gradient-to-r from-[#55DEE8] to-[#BFF367] font-black uppercase tracking-[0.3em] text-xs">Reserving Coins...</p>
+            <p className="text-transparent bg-clip-text bg-gradient-to-r from-[#BFF367] to-[#BFF367] font-black uppercase tracking-[0.3em] text-xs">Reserving Coins...</p>
           </div>
         </div>
       )}

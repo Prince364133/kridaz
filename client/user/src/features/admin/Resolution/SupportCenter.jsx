@@ -26,7 +26,7 @@ const SupportCenter = () => {
     switch (priority) {
       case "URGENT": return "text-red-500 bg-red-500/10";
       case "HIGH": return "text-orange-500 bg-orange-500/10";
-      case "MEDIUM": return "text-transparent bg-clip-text bg-gradient-to-r from-[#55DEE8] to-[#BFF367] bg-gradient-to-r from-[#55DEE8]/10 to-[#BFF367]/10";
+      case "MEDIUM": return "text-transparent bg-clip-text bg-gradient-to-r from-[#BFF367] to-[#BFF367] bg-gradient-to-r from-[#BFF367]/10 to-[#BFF367]/10";
       default: return "text-blue-500 bg-blue-500/10";
     }
   };
@@ -36,7 +36,7 @@ const SupportCenter = () => {
       case "RESOLVED": return "text-green-500 bg-green-500/10";
       case "IN_PROGRESS": return "text-blue-500 bg-blue-500/10";
       case "CLOSED": return "text-gray-500 bg-gray-500/10";
-      default: return "text-transparent bg-clip-text bg-gradient-to-r from-[#55DEE8] to-[#BFF367] bg-gradient-to-r from-[#55DEE8]/10 to-[#BFF367]/10";
+      default: return "text-transparent bg-clip-text bg-gradient-to-r from-[#BFF367] to-[#BFF367] bg-gradient-to-r from-[#BFF367]/10 to-[#BFF367]/10";
     }
   };
 
@@ -47,7 +47,7 @@ const SupportCenter = () => {
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
           <div>
             <h1 className="text-4xl md:text-5xl font-bold tracking-tight uppercase">
-              Support <span className="text-[#55DEE8]">Center</span>
+              Support <span className="text-[#BFF367]">Center</span>
             </h1>
             <p className="text-gray-400 text-sm mt-2 font-medium tracking-wide">Manage customer inquiries and partner issues</p>
           </div>
@@ -57,7 +57,7 @@ const SupportCenter = () => {
              <input 
                type="text"
                placeholder="Search tickets..."
-               className="bg-[#111] border border-white/10 rounded-lg pl-10 pr-4 py-2.5 text-sm w-full md:w-80 focus:outline-none focus:border-[#55DEE8] transition-all"
+               className="bg-[#111] border border-white/10 rounded-lg pl-10 pr-4 py-2.5 text-sm w-full md:w-80 focus:outline-none focus:border-[#BFF367] transition-all"
                value={searchTerm}
                onChange={(e) => setSearchTerm(e.target.value)}
              />
@@ -70,7 +70,7 @@ const SupportCenter = () => {
              <div className="bg-[#111] border border-white/10 rounded-[8px] overflow-hidden">
                 <div className="px-4 py-3 bg-white/5 border-b border-white/10 flex justify-between items-center">
                    <p className="text-xs font-bold uppercase tracking-widest text-gray-400">All Tickets</p>
-                   <span className="text-[10px] bg-[#55DEE8] text-black px-1.5 py-0.5 rounded font-black">{filteredTickets.length}</span>
+                   <span className="text-[10px] bg-[#BFF367] text-black px-1.5 py-0.5 rounded font-black">{filteredTickets.length}</span>
                 </div>
                 <div className="max-h-[600px] overflow-y-auto no-scrollbar">
                    {loading ? (
@@ -82,7 +82,7 @@ const SupportCenter = () => {
                        <button 
                          key={ticket._id}
                          onClick={() => setSelectedTicket(ticket)}
-                         className={`w-full text-left p-4 border-b border-white/5 transition-all hover:bg-white/[0.03] ${selectedTicket?._id === ticket._id ? 'bg-[#55DEE8]/5 border-l-4 border-l-[#55DEE8]' : ''}`}
+                         className={`w-full text-left p-4 border-b border-white/5 transition-all hover:bg-white/[0.03] ${selectedTicket?._id === ticket._id ? 'bg-[#BFF367]/5 border-l-4 border-l-[#BFF367]' : ''}`}
                        >
                           <div className="flex justify-between items-start mb-1">
                              <span className={`text-[9px] px-1.5 py-0.5 rounded-full font-bold tracking-tighter uppercase ${getPriorityColor(ticket.priority)}`}>
@@ -128,7 +128,7 @@ const SupportCenter = () => {
                         {selectedTicket.status !== 'RESOLVED' && (
                           <button 
                             onClick={() => handleUpdateStatus(selectedTicket._id, 'RESOLVED')}
-                            className="bg-[#55DEE8]/10 text-[#55DEE8] hover:bg-[#55DEE8] hover:text-black px-4 py-2 rounded-[6px] text-xs font-bold transition-all"
+                            className="bg-[#BFF367]/10 text-[#BFF367] hover:bg-[#BFF367] hover:text-black px-4 py-2 rounded-[6px] text-xs font-bold transition-all"
                           >
                              Resolve
                           </button>
@@ -143,7 +143,7 @@ const SupportCenter = () => {
                         <div className="flex items-center gap-2 bg-white/5 p-1 rounded-[8px] border border-white/10 ml-2">
                           <button
                             onClick={() => handleToggleAgentStatus(selectedTicket._id, true)}
-                            className={`px-3 py-1.5 rounded-md text-[10px] font-black uppercase tracking-widest transition-all ${selectedTicket.isAgentOnline ? 'bg-[#55DEE8] text-black shadow-[0_0_10px_rgba(85, 222, 232,0.4)]' : 'text-gray-500 hover:text-white'}`}
+                            className={`px-3 py-1.5 rounded-md text-[10px] font-black uppercase tracking-widest transition-all ${selectedTicket.isAgentOnline ? 'bg-[#BFF367] text-black shadow-[0_0_10px_rgba(85, 222, 232,0.4)]' : 'text-gray-500 hover:text-white'}`}
                           >
                             Online
                           </button>
@@ -168,7 +168,7 @@ const SupportCenter = () => {
                            {selectedTicket.images && selectedTicket.images.length > 0 && (
                              <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 mt-2">
                                {selectedTicket.images.map((img, i) => (
-                                 <a key={i} href={img} target="_blank" rel="noreferrer" className="block relative aspect-video rounded-lg overflow-hidden border border-white/10 hover:border-[#55DEE8]/50 transition-colors">
+                                 <a key={i} href={img} target="_blank" rel="noreferrer" className="block relative aspect-video rounded-lg overflow-hidden border border-white/10 hover:border-[#BFF367]/50 transition-colors">
                                    <img src={img} alt={`attachment-${i}`} className="w-full h-full object-cover" />
                                    <div className="absolute inset-0 bg-black/40 opacity-0 hover:opacity-100 flex items-center justify-center transition-opacity">
                                       <span className="text-[8px] font-black uppercase text-white bg-black/60 px-2 py-1 rounded">View Full</span>
@@ -186,7 +186,7 @@ const SupportCenter = () => {
                      {/* Replies */}
                      {(selectedTicket.replies || []).map((reply, idx) => (
                        <div key={idx} className={`flex flex-col ${reply.sender === 'ADMIN' ? 'items-end' : 'items-start'} max-w-[80%] ${reply.sender === 'ADMIN' ? 'ml-auto' : ''}`}>
-                          <div className={`p-4 rounded-[8px] border shadow-xl ${ reply.sender === 'ADMIN' ? 'bg-[#55DEE8]/10 border-[#55DEE8]/20 rounded-tr-none' : 'bg-[#1a1a1a] border-white/5 rounded-tl-none' }`}>
+                          <div className={`p-4 rounded-[8px] border shadow-xl ${ reply.sender === 'ADMIN' ? 'bg-[#BFF367]/10 border-[#BFF367]/20 rounded-tr-none' : 'bg-[#1a1a1a] border-white/5 rounded-tl-none' }`}>
                              <p className="text-sm leading-relaxed">{reply.message}</p>
                           </div>
                           <span className="text-[10px] text-gray-500 mt-2 font-bold uppercase tracking-wider">
@@ -202,7 +202,7 @@ const SupportCenter = () => {
                         <input 
                           type="text"
                           placeholder="Type your response..."
-                          className="flex-1 bg-white/5 border border-white/10 rounded-[8px] px-4 py-3 text-sm focus:outline-none focus:border-[#55DEE8] transition-all"
+                          className="flex-1 bg-white/5 border border-white/10 rounded-[8px] px-4 py-3 text-sm focus:outline-none focus:border-[#BFF367] transition-all"
                           value={replyText}
                           onChange={(e) => setReplyText(e.target.value)}
                           onKeyPress={(e) => e.key === 'Enter' && handleReply(selectedTicket._id, replyText).then(() => setReplyText(""))}
@@ -210,7 +210,7 @@ const SupportCenter = () => {
                         <button 
                           onClick={() => handleReply(selectedTicket._id, replyText).then(() => setReplyText(""))}
                           disabled={processingId === selectedTicket._id || !replyText.trim()}
-                          className="bg-[#55DEE8] text-black p-3 rounded-[8px] hover:bg-[#b3ff00] transition-all disabled:opacity-50 shadow-[0_0_15px_rgba(85, 222, 232,0.3)]"
+                          className="bg-[#BFF367] text-black p-3 rounded-[8px] hover:bg-[#b3ff00] transition-all disabled:opacity-50 shadow-[0_0_15px_rgba(85, 222, 232,0.3)]"
                         >
                            <Send size={18} />
                         </button>

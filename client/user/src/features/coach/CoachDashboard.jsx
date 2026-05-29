@@ -87,7 +87,7 @@ const CoachDashboard = () => {
       
       {/* Global Gradient Background Glow */}
       <div className="fixed top-0 left-0 w-full h-full pointer-events-none overflow-hidden z-0">
-        <div className="absolute top-[-20%] left-[-10%] w-[50%] h-[50%] bg-[#55DEE8] rounded-full blur-[150px] opacity-[0.08]"></div>
+        <div className="absolute top-[-20%] left-[-10%] w-[50%] h-[50%] bg-[#BFF367] rounded-full blur-[150px] opacity-[0.08]"></div>
         <div className="absolute bottom-[-20%] right-[-10%] w-[50%] h-[50%] bg-[#BFF367] rounded-full blur-[150px] opacity-[0.08]"></div>
       </div>
 
@@ -95,8 +95,8 @@ const CoachDashboard = () => {
         {/* HEADER SECTION */}
         <header className="flex flex-col lg:flex-row justify-between items-start lg:items-center mb-8 gap-6 border-b border-white/5 pb-6">
           <div>
-            <h1 className="text-3xl font-bold tracking-tight mb-1 bg-gradient-to-r from-[#55DEE8] to-[#BFF367] text-transparent bg-clip-text">Performance Overview</h1>
-            <p className="text-[#55DEE8] text-sm font-medium">Umpire Analytics Dashboard</p>
+            <h1 className="text-3xl font-bold tracking-tight mb-1 bg-gradient-to-r from-[#BFF367] to-[#BFF367] text-transparent bg-clip-text">Performance Overview</h1>
+            <p className="text-[#BFF367] text-sm font-medium">Umpire Analytics Dashboard</p>
           </div>
         
         <div className="flex flex-wrap items-center gap-4">
@@ -115,7 +115,7 @@ const CoachDashboard = () => {
           growth="+12% vs last 6 months" 
           isPositive={true}
           icon={ClipboardList} 
-          accent="#55DEE8" 
+          accent="#BFF367" 
         />
         <KpiCard 
           title="Tournaments Officiated" 
@@ -131,7 +131,7 @@ const CoachDashboard = () => {
           growth="+15% vs last 6 months" 
           isPositive={true}
           icon={Wallet} 
-          accent="#55DEE8" 
+          accent="#BFF367" 
         />
         <KpiCard 
           title="Amount / Dispute Money" 
@@ -153,8 +153,8 @@ const CoachDashboard = () => {
       {/* MAIN ANALYTICS SECTION */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
         {/* Matches Trend */}
-        <div className="bg-[#11141D] border border-white/5 rounded-xl p-6 relative overflow-hidden group hover:border-[#55DEE8]/30 transition-all">
-          <div className="absolute -top-20 -right-20 w-40 h-40 bg-[#55DEE8]/5 blur-[60px] rounded-full"></div>
+        <div className="bg-[#11141D] border border-white/5 rounded-xl p-6 relative overflow-hidden group hover:border-[#BFF367]/30 transition-all">
+          <div className="absolute -top-20 -right-20 w-40 h-40 bg-[#BFF367]/5 blur-[60px] rounded-full"></div>
           <div className="flex justify-between items-start mb-6 relative z-10">
             <h2 className="text-lg font-bold">Matches Trend <span className="text-xs font-normal text-gray-400 ml-2">(Last 12 Months)</span></h2>
             <div className="bg-[#1A1D27] border border-white/10 px-3 py-1.5 rounded-lg text-center">
@@ -167,8 +167,8 @@ const CoachDashboard = () => {
               <AreaChart data={matchesTrendData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
                 <defs>
                   <linearGradient id="colorMatches" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#55DEE8" stopOpacity={0.3}/>
-                    <stop offset="95%" stopColor="#55DEE8" stopOpacity={0}/>
+                    <stop offset="5%" stopColor="#BFF367" stopOpacity={0.3}/>
+                    <stop offset="95%" stopColor="#BFF367" stopOpacity={0}/>
                   </linearGradient>
                 </defs>
                 <CartesianGrid strokeDasharray="3 3" stroke="#2A2D35" vertical={false} />
@@ -176,9 +176,9 @@ const CoachDashboard = () => {
                 <YAxis axisLine={false} tickLine={false} tick={{fill: '#717582', fontSize: 12}} />
                 <Tooltip 
                   contentStyle={{ backgroundColor: '#1A1D27', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '8px' }}
-                  itemStyle={{ color: '#55DEE8' }}
+                  itemStyle={{ color: '#BFF367' }}
                 />
-                <Area type="monotone" dataKey="matches" stroke="#55DEE8" strokeWidth={3} fillOpacity={1} fill="url(#colorMatches)" activeDot={{ r: 6, fill: '#55DEE8', stroke: '#07090E', strokeWidth: 2 }} />
+                <Area type="monotone" dataKey="matches" stroke="#BFF367" strokeWidth={3} fillOpacity={1} fill="url(#colorMatches)" activeDot={{ r: 6, fill: '#BFF367', stroke: '#07090E', strokeWidth: 2 }} />
               </AreaChart>
             </ResponsiveContainer>
           </div>
@@ -288,7 +288,7 @@ const CoachDashboard = () => {
             </table>
           </div>
           <div className="mt-6 flex justify-end">
-            <button className="text-[#55DEE8] text-sm font-semibold hover:text-[#BFF367] transition-colors flex items-center gap-2">
+            <button className="text-[#BFF367] text-sm font-semibold hover:text-[#BFF367] transition-colors flex items-center gap-2">
               View All Matches <ArrowRight size={16} />
             </button>
           </div>
@@ -326,7 +326,7 @@ const CoachDashboard = () => {
 
           <div className="space-y-4">
             {reviews.map((review) => (
-              <div key={review.id} className="bg-[#1A1D27] p-4 rounded-lg border border-white/5 hover:border-[#55DEE8]/30 transition-all group">
+              <div key={review.id} className="bg-[#1A1D27] p-4 rounded-lg border border-white/5 hover:border-[#BFF367]/30 transition-all group">
                 <div className="flex justify-between items-start mb-2">
                   <div className="flex items-center gap-3">
                     <img src={review.avatar} alt={review.name} className="w-8 h-8 rounded-full border border-white/10" />
@@ -347,7 +347,7 @@ const CoachDashboard = () => {
           </div>
 
           <div className="mt-6 flex justify-end">
-            <button className="text-[#55DEE8] text-sm font-semibold hover:text-[#BFF367] transition-colors flex items-center gap-2">
+            <button className="text-[#BFF367] text-sm font-semibold hover:text-[#BFF367] transition-colors flex items-center gap-2">
               View All Reviews <ArrowRight size={16} />
             </button>
           </div>
@@ -412,7 +412,7 @@ const RatingBar = ({ stars, percentage }) => {
       <div className="flex-1 h-1.5 bg-[#2A2D35] rounded-full overflow-hidden">
         <div 
           className="h-full rounded-full drop-shadow-[0_0_4px_rgba(191,243,103,0.5)]" 
-          style={{ width: `${percentage}%`, backgroundColor: percentage > 10 ? '#BFF367' : (percentage > 0 ? '#55DEE8' : '#2A2D35') }}
+          style={{ width: `${percentage}%`, backgroundColor: percentage > 10 ? '#BFF367' : (percentage > 0 ? '#BFF367' : '#2A2D35') }}
         ></div>
       </div>
       <span className="text-gray-400 w-8 text-right">{percentage}%</span>

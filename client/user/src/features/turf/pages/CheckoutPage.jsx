@@ -215,7 +215,7 @@ const CheckoutPage = () => {
         <svg width="0" height="0" className="hidden">
           <defs>
             <linearGradient id="theme-gradient" x1="0%" y1="0%" x2="100%" y2="0%">
-              <stop offset="0%" stopColor="#55DEE8" />
+              <stop offset="0%" stopColor="#BFF367" />
               <stop offset="100%" stopColor="#BFF367" />
             </linearGradient>
           </defs>
@@ -225,8 +225,8 @@ const CheckoutPage = () => {
           animate={{ opacity: 1, scale: 1 }}
           className="bg-zinc-900 border border-zinc-800 p-12 rounded-[8px] text-center max-w-xl w-full relative overflow-hidden"
         >
-          <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-[#55DEE8] to-[#BFF367]" />
-          <div className="w-24 h-24 bg-gradient-to-r from-[#55DEE8] to-[#BFF367] rounded-full flex items-center justify-center mx-auto mb-8 shadow-[0_0_50px_rgba(85,222,232,0.3)]">
+          <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-[#BFF367] to-[#BFF367]" />
+          <div className="w-24 h-24 bg-gradient-to-r from-[#BFF367] to-[#BFF367] rounded-full flex items-center justify-center mx-auto mb-8 shadow-[0_0_50px_rgba(85,222,232,0.3)]">
             <Check size={48} className="text-black stroke-[3px]" />
           </div>
           
@@ -236,7 +236,7 @@ const CheckoutPage = () => {
           <div className="grid grid-cols-1 gap-4">
             <Link 
               to={`/booking-pass/${bookingId}`}
-              className="bg-gradient-to-r from-[#55DEE8] to-[#BFF367] text-black h-16 rounded-[8px] font-black uppercase text-sm tracking-widest flex items-center justify-center gap-3 hover:scale-[1.02] transition-all"
+              className="bg-gradient-to-r from-[#BFF367] to-[#BFF367] text-black h-16 rounded-[8px] font-black uppercase text-sm tracking-widest flex items-center justify-center gap-3 hover:scale-[1.02] transition-all"
             >
               Download Digital Pass
               <ArrowRight size={20} />
@@ -259,7 +259,7 @@ const CheckoutPage = () => {
       <svg width="0" height="0" className="hidden">
         <defs>
           <linearGradient id="theme-gradient" x1="0%" y1="0%" x2="100%" y2="0%">
-            <stop offset="0%" stopColor="#55DEE8" />
+            <stop offset="0%" stopColor="#BFF367" />
             <stop offset="100%" stopColor="#BFF367" />
           </linearGradient>
         </defs>
@@ -290,7 +290,7 @@ const CheckoutPage = () => {
             {/* Turf Title & Time */}
             <div className="p-6 border-b border-zinc-800/50">
               <div className="flex items-center gap-5">
-                <div className="w-12 h-12 rounded-[8px] bg-[#55DEE8]/10 border border-[#55DEE8]/20 flex items-center justify-center shrink-0">
+                <div className="w-12 h-12 rounded-[8px] bg-[#BFF367]/10 border border-[#BFF367]/20 flex items-center justify-center shrink-0">
                   <Calendar className="w-6 h-6" style={{ stroke: 'url(#theme-gradient)' }} />
                 </div>
                 <div>
@@ -318,7 +318,7 @@ const CheckoutPage = () => {
                 <span className="text-white">₹ {serviceCharge}</span>
               </div>
               {appliedCoupon && (
-                <div className="flex justify-between text-sm font-medium text-transparent bg-clip-text bg-gradient-to-r from-[#55DEE8] to-[#BFF367]">
+                <div className="flex justify-between text-sm font-medium text-transparent bg-clip-text bg-gradient-to-r from-[#BFF367] to-[#BFF367]">
                   <span>Discount ({appliedCoupon.code})</span>
                   <span>-₹ {discount}</span>
                 </div>
@@ -328,7 +328,7 @@ const CheckoutPage = () => {
             {/* Total Amount */}
             <div className="px-6 py-5 border-b border-zinc-800/50 flex justify-between items-center">
               <span className="text-zinc-300 font-bold uppercase text-sm tracking-wide font-open-sans">Total Amount</span>
-              <span className="font-black text-2xl tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-[#55DEE8] to-[#BFF367]">₹ {total}</span>
+              <span className="font-black text-2xl tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-[#BFF367] to-[#BFF367]">₹ {total}</span>
             </div>
 
             {/* Coupon Box & Secure Label */}
@@ -342,7 +342,7 @@ const CheckoutPage = () => {
                     placeholder="ENTER COUPON CODE"
                     value={couponCode}
                     onChange={(e) => setCouponCode(e.target.value.toUpperCase())}
-                    className="w-full bg-[#0a0a0a] border border-zinc-800 rounded-[8px] py-3.5 pl-12 pr-4 text-xs uppercase tracking-widest font-bold text-white outline-none focus:border-[#55DEE8]/50 transition-all placeholder:text-zinc-600"
+                    className="w-full bg-[#0a0a0a] border border-zinc-800 rounded-[8px] py-3.5 pl-12 pr-4 text-xs uppercase tracking-widest font-bold text-white outline-none focus:border-[#BFF367]/50 transition-all placeholder:text-zinc-600"
                   />
                 </div>
                 <button 
@@ -368,7 +368,7 @@ const CheckoutPage = () => {
                 </div>
                 <div className="bg-[#BFF367]/10 px-2 py-1 rounded-[6px] flex items-center gap-1.5 border border-[#BFF367]/20">
                   <Zap size={12} style={{ stroke: 'url(#theme-gradient)', fill: 'url(#theme-gradient)' }} />
-                  <span className="text-[9px] font-black uppercase tracking-widest text-transparent bg-clip-text bg-gradient-to-r from-[#55DEE8] to-[#BFF367]">Secure Pay</span>
+                  <span className="text-[9px] font-black uppercase tracking-widest text-transparent bg-clip-text bg-gradient-to-r from-[#BFF367] to-[#BFF367]">Secure Pay</span>
                 </div>
               </div>
 
@@ -379,7 +379,7 @@ const CheckoutPage = () => {
                     onClick={() => setPaymentPercentage(pct)}
                     className={`relative p-4 rounded-[8px] border transition-all flex flex-col items-center gap-1.5 ${ paymentPercentage === pct ? "bg-[#1C1C1C] border-[#BFF367] shadow-[0_0_10px_rgba(191,243,103,0.1)]" : "bg-[#0A0A0A] border-zinc-800 hover:border-zinc-700" }`}
                   >
-                    <span className={`text-xl font-black ${paymentPercentage === pct ? "text-transparent bg-clip-text bg-gradient-to-r from-[#55DEE8] to-[#BFF367]" : "text-zinc-500"}`}>
+                    <span className={`text-xl font-black ${paymentPercentage === pct ? "text-transparent bg-clip-text bg-gradient-to-r from-[#BFF367] to-[#BFF367]" : "text-zinc-500"}`}>
                       {pct}%
                     </span>
                     <span className="text-[9px] font-bold uppercase tracking-widest text-zinc-400">
@@ -388,7 +388,7 @@ const CheckoutPage = () => {
                     {paymentPercentage === pct && (
                       <motion.div 
                         layoutId="active-plan"
-                        className="absolute -top-2 -right-2 w-5 h-5 rounded-full flex items-center justify-center text-black shadow-lg bg-gradient-to-r from-[#55DEE8] to-[#BFF367]"
+                        className="absolute -top-2 -right-2 w-5 h-5 rounded-full flex items-center justify-center text-black shadow-lg bg-gradient-to-r from-[#BFF367] to-[#BFF367]"
                       >
                         <Check size={12} strokeWidth={4} />
                       </motion.div>
@@ -400,7 +400,7 @@ const CheckoutPage = () => {
               <div className="grid grid-cols-2 gap-3 mt-5">
                 <div className="bg-[#0A0A0A] p-3 rounded-[8px] border border-zinc-800/50 flex flex-col items-center text-center">
                   <p className="text-[9px] font-bold text-zinc-500 uppercase tracking-widest mb-1">Pay Now</p>
-                  <p className="text-lg font-black text-transparent bg-clip-text bg-gradient-to-r from-[#55DEE8] to-[#BFF367]">₹{amountToPay}</p>
+                  <p className="text-lg font-black text-transparent bg-clip-text bg-gradient-to-r from-[#BFF367] to-[#BFF367]">₹{amountToPay}</p>
                 </div>
                 <div className="bg-[#0A0A0A] p-3 rounded-[8px] border border-zinc-800/50 flex flex-col items-center text-center">
                   <p className="text-[9px] font-bold text-zinc-500 uppercase tracking-widest mb-1">Pay at Venue</p>
@@ -423,7 +423,7 @@ const CheckoutPage = () => {
                   className={`w-full flex items-center justify-between p-4 rounded-[8px] border transition-all ${ paymentMode === "WALLET" ? "bg-[#BFF367]/5 border-[#BFF367]" : "bg-[#0A0A0A] border-zinc-800 hover:border-zinc-700" }`}
                 >
                   <div className="flex items-center gap-4">
-                    <div className={`w-12 h-12 rounded-[8px] flex items-center justify-center shrink-0 ${paymentMode === "WALLET" ? "bg-gradient-to-r from-[#55DEE8] to-[#BFF367] text-black" : "bg-zinc-800 text-zinc-400"}`}>
+                    <div className={`w-12 h-12 rounded-[8px] flex items-center justify-center shrink-0 ${paymentMode === "WALLET" ? "bg-gradient-to-r from-[#BFF367] to-[#BFF367] text-black" : "bg-zinc-800 text-zinc-400"}`}>
                       <Wallet className="w-6 h-6" />
                     </div>
                     <div className="text-left">
@@ -446,7 +446,7 @@ const CheckoutPage = () => {
                     className="w-full flex items-center justify-between p-4 cursor-pointer"
                   >
                     <div className="flex items-center gap-4">
-                      <div className={`w-12 h-12 rounded-[8px] flex items-center justify-center shrink-0 ${paymentMode === "UPI" ? "bg-gradient-to-r from-[#55DEE8] to-[#BFF367] text-black" : "bg-zinc-800 text-zinc-400"}`}>
+                      <div className={`w-12 h-12 rounded-[8px] flex items-center justify-center shrink-0 ${paymentMode === "UPI" ? "bg-gradient-to-r from-[#BFF367] to-[#BFF367] text-black" : "bg-zinc-800 text-zinc-400"}`}>
                         <Smartphone className="w-6 h-6" />
                       </div>
                       <div className="text-left">
@@ -470,7 +470,7 @@ const CheckoutPage = () => {
                           <input 
                             type="text" 
                             placeholder="username@bank"
-                            className="w-full bg-[#121212] border border-zinc-800 rounded-[8px] py-3 px-4 text-sm text-white outline-none focus:border-[#55DEE8]/50 transition-all placeholder:text-zinc-700"
+                            className="w-full bg-[#121212] border border-zinc-800 rounded-[8px] py-3 px-4 text-sm text-white outline-none focus:border-[#BFF367]/50 transition-all placeholder:text-zinc-700"
                           />
                         </div>
                       </motion.div>
@@ -487,7 +487,7 @@ const CheckoutPage = () => {
                     className="w-full flex items-center justify-between p-4 cursor-pointer"
                   >
                     <div className="flex items-center gap-4">
-                      <div className={`w-12 h-12 rounded-[8px] flex items-center justify-center shrink-0 ${paymentMode === "CARD" ? "bg-gradient-to-r from-[#55DEE8] to-[#BFF367] text-black" : "bg-zinc-800 text-zinc-400"}`}>
+                      <div className={`w-12 h-12 rounded-[8px] flex items-center justify-center shrink-0 ${paymentMode === "CARD" ? "bg-gradient-to-r from-[#BFF367] to-[#BFF367] text-black" : "bg-zinc-800 text-zinc-400"}`}>
                         <CardIcon className="w-6 h-6" />
                       </div>
                       <div className="text-left">
@@ -512,7 +512,7 @@ const CheckoutPage = () => {
                             <input 
                               type="text" 
                               placeholder="0000 0000 0000 0000"
-                              className="w-full bg-[#121212] border border-zinc-800 rounded-[8px] py-3 px-4 text-sm text-white outline-none focus:border-[#55DEE8]/50 transition-all placeholder:text-zinc-700"
+                              className="w-full bg-[#121212] border border-zinc-800 rounded-[8px] py-3 px-4 text-sm text-white outline-none focus:border-[#BFF367]/50 transition-all placeholder:text-zinc-700"
                             />
                           </div>
                           <div className="grid grid-cols-2 gap-3">
@@ -521,7 +521,7 @@ const CheckoutPage = () => {
                               <input 
                                 type="text" 
                                 placeholder="MM/YY"
-                                className="w-full bg-[#121212] border border-zinc-800 rounded-[8px] py-3 px-4 text-sm text-white outline-none focus:border-[#55DEE8]/50 transition-all placeholder:text-zinc-700"
+                                className="w-full bg-[#121212] border border-zinc-800 rounded-[8px] py-3 px-4 text-sm text-white outline-none focus:border-[#BFF367]/50 transition-all placeholder:text-zinc-700"
                               />
                             </div>
                             <div>
@@ -530,7 +530,7 @@ const CheckoutPage = () => {
                                 type="password" 
                                 placeholder="123"
                                 maxLength="3"
-                                className="w-full bg-[#121212] border border-zinc-800 rounded-[8px] py-3 px-4 text-sm text-white outline-none focus:border-[#55DEE8]/50 transition-all placeholder:text-zinc-700"
+                                className="w-full bg-[#121212] border border-zinc-800 rounded-[8px] py-3 px-4 text-sm text-white outline-none focus:border-[#BFF367]/50 transition-all placeholder:text-zinc-700"
                               />
                             </div>
                           </div>
@@ -554,7 +554,7 @@ const CheckoutPage = () => {
                     </div>
                     <button
                       onClick={() => navigate("/wallet")}
-                      className="w-full bg-gradient-to-r from-[#55DEE8] to-[#BFF367] text-black py-4 rounded-[8px] flex items-center justify-center px-6 hover:brightness-110 font-bold transition-all gap-2 tracking-wide"
+                      className="w-full bg-gradient-to-r from-[#BFF367] to-[#BFF367] text-black py-4 rounded-[8px] flex items-center justify-center px-6 hover:brightness-110 font-bold transition-all gap-2 tracking-wide"
                     >
                       <PlusCircle className="w-5 h-5" /> RECHARGE WALLET
                     </button>
@@ -563,7 +563,7 @@ const CheckoutPage = () => {
                   <button
                     onClick={handleConfirmPayment}
                     disabled={isProcessing}
-                    className="w-full bg-gradient-to-r from-[#55DEE8] to-[#BFF367] text-black py-4 rounded-[8px] flex items-center justify-between px-6 hover:brightness-110 font-bold transition-all disabled:opacity-50"
+                    className="w-full bg-gradient-to-r from-[#BFF367] to-[#BFF367] text-black py-4 rounded-[8px] flex items-center justify-between px-6 hover:brightness-110 font-bold transition-all disabled:opacity-50"
                   >
                     <div className="flex items-center gap-2 tracking-wide">
                       {isProcessing ? <Loader2 className="w-5 h-5 animate-spin" /> : <Lock className="w-5 h-5" />} 

@@ -101,7 +101,7 @@ export default function UmpireMatches() {
                 <>
                   <h3 className="text-xl font-black text-white uppercase tracking-tight">Application Pending Review</h3>
                   <p className="text-gray-400 text-[10px] font-bold uppercase tracking-widest leading-relaxed">
-                    Your umpire application is <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#55DEE8] to-[#BFF367]">under admin review</span>.<br />
+                    Your umpire application is <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#BFF367] to-[#BFF367]">under admin review</span>.<br />
                     You'll be notified once your full access is approved.
                   </p>
                 </>

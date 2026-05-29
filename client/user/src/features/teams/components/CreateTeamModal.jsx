@@ -168,7 +168,7 @@ const CreateTeamModal = ({ isOpen, onClose, onSuccess }) => {
 
       // 3. Cyber Gradient border
       const gradient = ctx.createLinearGradient(0, 40, 512, 470);
-      gradient.addColorStop(0, '#55DEE8');
+      gradient.addColorStop(0, '#BFF367');
       gradient.addColorStop(1, '#BFF367');
 
       ctx.beginPath();
@@ -204,7 +204,7 @@ const CreateTeamModal = ({ isOpen, onClose, onSuccess }) => {
       const words = formData.name.trim().split(/\s+/);
       const initials = words.slice(0, 3).map(w => w[0]).join('').toUpperCase();
 
-      ctx.shadowColor = '#55DEE8';
+      ctx.shadowColor = '#BFF367';
       ctx.shadowBlur = 12;
       ctx.fillStyle = '#ffffff';
       ctx.font = 'italic 900 110px "Space Mono", "Bebas Neue", sans-serif';
@@ -311,7 +311,7 @@ const CreateTeamModal = ({ isOpen, onClose, onSuccess }) => {
               </div>
               <button 
                 onClick={onClose} 
-                className="w-9 h-9 rounded-[8px] bg-white/5 flex items-center justify-center text-white/40 hover:text-white hover:bg-white/10 border border-white/5 transition-all hover:shadow-[0_0_15px_rgba(85,222,232,0.3)] hover:border-[#55DEE8]/30 duration-300"
+                className="w-9 h-9 rounded-[8px] bg-white/5 flex items-center justify-center text-white/40 hover:text-white hover:bg-white/10 border border-white/5 transition-all hover:shadow-[0_0_15px_rgba(85,222,232,0.3)] hover:border-[#BFF367]/30 duration-300"
               >
                 <X size={18} />
               </button>
@@ -329,7 +329,7 @@ const CreateTeamModal = ({ isOpen, onClose, onSuccess }) => {
                       type="button"
                       disabled={isGeneratingEmblem || isUploading}
                       onClick={generateEsportsEmblem}
-                      className="text-[9px] font-black text-[#55DEE8] hover:text-[#BFF367] disabled:text-white/20 uppercase tracking-wider flex items-center gap-1 transition-all duration-200 hover:scale-105 active:scale-95 disabled:pointer-events-none hover:shadow-[0_0_8px_rgba(85,222,232,0.4)]"
+                      className="text-[9px] font-black text-[#BFF367] hover:text-[#BFF367] disabled:text-white/20 uppercase tracking-wider flex items-center gap-1 transition-all duration-200 hover:scale-105 active:scale-95 disabled:pointer-events-none hover:shadow-[0_0_8px_rgba(85,222,232,0.4)]"
                     >
                       <Sparkles size={10} className="animate-pulse" /> Generate Esports Emblem
                     </button>
@@ -340,7 +340,7 @@ const CreateTeamModal = ({ isOpen, onClose, onSuccess }) => {
                   onDragOver={handleDragOver}
                   onDragLeave={handleDragLeave}
                   onDrop={handleDrop}
-                  className={`relative h-24 rounded-[8px] bg-white/[0.02] border border-dashed flex flex-col items-center justify-center cursor-pointer overflow-hidden transition-all duration-300 group ${ isDragging ? 'border-[#55DEE8] bg-[#55DEE8]/5 shadow-[0_0_20px_rgba(85,222,232,0.15)]' : 'border-white/10 hover:border-[#55DEE8]/40 hover:bg-white/[0.04] hover:shadow-[0_0_15px_rgba(85,222,232,0.05)]' }`}
+                  className={`relative h-24 rounded-[8px] bg-white/[0.02] border border-dashed flex flex-col items-center justify-center cursor-pointer overflow-hidden transition-all duration-300 group ${ isDragging ? 'border-[#BFF367] bg-[#BFF367]/5 shadow-[0_0_20px_rgba(85,222,232,0.15)]' : 'border-white/10 hover:border-[#BFF367]/40 hover:bg-white/[0.04] hover:shadow-[0_0_15px_rgba(85,222,232,0.05)]' }`}
                 >
                   <input 
                     type="file" 
@@ -365,15 +365,15 @@ const CreateTeamModal = ({ isOpen, onClose, onSuccess }) => {
                     </div>
                   ) : isUploading || isGeneratingEmblem ? (
                     <div className="flex flex-col items-center gap-2">
-                      <Loader2 className="text-[#55DEE8] animate-spin" size={24} />
+                      <Loader2 className="text-[#BFF367] animate-spin" size={24} />
                       <span className="text-[10px] text-white/50 font-bold uppercase tracking-wider animate-pulse" style={{ fontFamily: "'Inter', sans-serif" }}>
                         {isGeneratingEmblem ? 'Forging Emblem...' : 'Uploading Logo...'}
                       </span>
                     </div>
                   ) : (
                     <div className="flex flex-col items-center text-center p-3">
-                      <div className="w-8 h-8 rounded-[8px] bg-white/5 flex items-center justify-center mb-1 group-hover:scale-105 group-hover:bg-[#55DEE8]/10 group-hover:text-[#55DEE8] transition-all duration-300">
-                        <Upload size={14} className="text-white/40 group-hover:text-[#55DEE8] transition-colors" />
+                      <div className="w-8 h-8 rounded-[8px] bg-white/5 flex items-center justify-center mb-1 group-hover:scale-105 group-hover:bg-[#BFF367]/10 group-hover:text-[#BFF367] transition-all duration-300">
+                        <Upload size={14} className="text-white/40 group-hover:text-[#BFF367] transition-colors" />
                       </div>
                       <span className="text-[11px] font-bold text-white/80 tracking-wide uppercase" style={{ fontFamily: "'Inter', sans-serif" }}>
                         Upload Team Logo
@@ -399,14 +399,14 @@ const CreateTeamModal = ({ isOpen, onClose, onSuccess }) => {
                     </span>
                   </div>
                   <div className="relative group">
-                    <Users className="absolute left-4 top-1/2 -translate-y-1/2 text-white/20 group-focus-within:text-[#55DEE8] transition-colors duration-300" size={15} />
+                    <Users className="absolute left-4 top-1/2 -translate-y-1/2 text-white/20 group-focus-within:text-[#BFF367] transition-colors duration-300" size={15} />
                     <input 
                       type="text" 
                       name="name"
                       placeholder="e.g. Royal Strikers"
                       maxLength={30}
                       style={{ fontFamily: "'Inter', sans-serif" }}
-                      className="w-full bg-white/[0.02] border border-white/10 rounded-[8px] py-2.5 pl-11 pr-4 text-white text-xs focus:outline-none focus:border-[#55DEE8]/40 focus:shadow-[0_0_15px_rgba(85,222,232,0.1)] transition-all duration-300"
+                      className="w-full bg-white/[0.02] border border-white/10 rounded-[8px] py-2.5 pl-11 pr-4 text-white text-xs focus:outline-none focus:border-[#BFF367]/40 focus:shadow-[0_0_15px_rgba(85,222,232,0.1)] transition-all duration-300"
                       value={formData.name}
                       onChange={handleChange}
                       required
@@ -428,7 +428,7 @@ const CreateTeamModal = ({ isOpen, onClose, onSuccess }) => {
                     <select 
                       name="sport"
                       style={{ fontFamily: "'Inter', sans-serif" }}
-                      className="w-full bg-[#111] border border-white/10 rounded-[8px] py-2.5 px-4 text-white text-xs focus:outline-none focus:border-[#55DEE8]/40 focus:shadow-[0_0_15px_rgba(85,222,232,0.1)] transition-all duration-300 appearance-none cursor-pointer"
+                      className="w-full bg-[#111] border border-white/10 rounded-[8px] py-2.5 px-4 text-white text-xs focus:outline-none focus:border-[#BFF367]/40 focus:shadow-[0_0_15px_rgba(85,222,232,0.1)] transition-all duration-300 appearance-none cursor-pointer"
                       value={formData.sport}
                       onChange={handleChange}
                     >
@@ -455,11 +455,11 @@ const CreateTeamModal = ({ isOpen, onClose, onSuccess }) => {
                     </label>
                   </div>
                   <div className="relative group">
-                    <Map className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-white/20 group-focus-within:text-[#55DEE8] transition-colors duration-300" size={15} />
+                    <Map className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-white/20 group-focus-within:text-[#BFF367] transition-colors duration-300" size={15} />
                     <select 
                       name="state"
                       style={{ fontFamily: "'Inter', sans-serif" }}
-                      className="w-full bg-[#111] border border-white/10 rounded-[8px] py-2.5 pl-11 pr-8 text-white text-xs focus:outline-none focus:border-[#55DEE8]/40 focus:shadow-[0_0_15px_rgba(85,222,232,0.1)] transition-all duration-300 appearance-none cursor-pointer"
+                      className="w-full bg-[#111] border border-white/10 rounded-[8px] py-2.5 pl-11 pr-8 text-white text-xs focus:outline-none focus:border-[#BFF367]/40 focus:shadow-[0_0_15px_rgba(85,222,232,0.1)] transition-all duration-300 appearance-none cursor-pointer"
                       value={formData.state}
                       onChange={handleStateChange}
                     >
@@ -482,12 +482,12 @@ const CreateTeamModal = ({ isOpen, onClose, onSuccess }) => {
                     </label>
                   </div>
                   <div className="relative group">
-                    <MapPin className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-white/20 group-focus-within:text-[#55DEE8] transition-colors duration-300" size={15} />
+                    <MapPin className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-white/20 group-focus-within:text-[#BFF367] transition-colors duration-300" size={15} />
                     <select 
                       name="city"
                       disabled={!formData.state}
                       style={{ fontFamily: "'Inter', sans-serif" }}
-                      className="w-full bg-[#111] border border-white/10 rounded-[8px] py-2.5 pl-11 pr-8 text-white text-xs focus:outline-none focus:border-[#55DEE8]/40 focus:shadow-[0_0_15px_rgba(85,222,232,0.1)] transition-all duration-300 appearance-none cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
+                      className="w-full bg-[#111] border border-white/10 rounded-[8px] py-2.5 pl-11 pr-8 text-white text-xs focus:outline-none focus:border-[#BFF367]/40 focus:shadow-[0_0_15px_rgba(85,222,232,0.1)] transition-all duration-300 appearance-none cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
                       value={formData.city}
                       onChange={handleChange}
                     >
@@ -514,7 +514,7 @@ const CreateTeamModal = ({ isOpen, onClose, onSuccess }) => {
                   </span>
                 </div>
                 <div className="relative group">
-                  <MessageSquare className="absolute left-4 top-3 text-white/20 group-focus-within:text-[#55DEE8] transition-colors duration-300" size={15} />
+                  <MessageSquare className="absolute left-4 top-3 text-white/20 group-focus-within:text-[#BFF367] transition-colors duration-300" size={15} />
                   <textarea 
                     name="description"
                     ref={textareaRef}
@@ -522,7 +522,7 @@ const CreateTeamModal = ({ isOpen, onClose, onSuccess }) => {
                     maxLength={200}
                     rows={2}
                     style={{ fontFamily: "'Inter', sans-serif" }}
-                    className="w-full bg-white/[0.02] border border-white/10 rounded-[8px] py-2.5 pl-11 pr-4 text-white text-xs focus:outline-none focus:border-[#55DEE8]/40 focus:shadow-[0_0_15px_rgba(85,222,232,0.1)] transition-all duration-300 resize-none min-h-[64px] leading-relaxed"
+                    className="w-full bg-white/[0.02] border border-white/10 rounded-[8px] py-2.5 pl-11 pr-4 text-white text-xs focus:outline-none focus:border-[#BFF367]/40 focus:shadow-[0_0_15px_rgba(85,222,232,0.1)] transition-all duration-300 resize-none min-h-[64px] leading-relaxed"
                     value={formData.description}
                     onChange={handleTextareaChange}
                   />
@@ -536,13 +536,13 @@ const CreateTeamModal = ({ isOpen, onClose, onSuccess }) => {
                     Captain Name
                   </label>
                   <div className="relative group">
-                    <Shield className="absolute left-4 top-1/2 -translate-y-1/2 text-white/20 group-focus-within:text-[#55DEE8] transition-colors duration-300" size={15} />
+                    <Shield className="absolute left-4 top-1/2 -translate-y-1/2 text-white/20 group-focus-within:text-[#BFF367] transition-colors duration-300" size={15} />
                     <input 
                       type="text" 
                       name="captainName"
                       placeholder="Name"
                       style={{ fontFamily: "'Inter', sans-serif" }}
-                      className="w-full bg-white/[0.02] border border-white/10 rounded-[8px] py-2.5 pl-11 pr-4 text-white text-xs focus:outline-none focus:border-[#55DEE8]/40 focus:shadow-[0_0_15px_rgba(85,222,232,0.1)] transition-all duration-300"
+                      className="w-full bg-white/[0.02] border border-white/10 rounded-[8px] py-2.5 pl-11 pr-4 text-white text-xs focus:outline-none focus:border-[#BFF367]/40 focus:shadow-[0_0_15px_rgba(85,222,232,0.1)] transition-all duration-300"
                       value={formData.captainName}
                       onChange={handleChange}
                     />
@@ -554,13 +554,13 @@ const CreateTeamModal = ({ isOpen, onClose, onSuccess }) => {
                     Captain Phone (Optional)
                   </label>
                   <div className="relative group">
-                    <Phone className="absolute left-4 top-1/2 -translate-y-1/2 text-white/20 group-focus-within:text-[#55DEE8] transition-colors duration-300" size={15} />
+                    <Phone className="absolute left-4 top-1/2 -translate-y-1/2 text-white/20 group-focus-within:text-[#BFF367] transition-colors duration-300" size={15} />
                     <input 
                       type="text" 
                       name="captainPhone"
                       placeholder="Phone number"
                       style={{ fontFamily: "'Inter', sans-serif" }}
-                      className="w-full bg-white/[0.02] border border-white/10 rounded-[8px] py-2.5 pl-11 pr-4 text-white text-xs focus:outline-none focus:border-[#55DEE8]/40 focus:shadow-[0_0_15px_rgba(85,222,232,0.1)] transition-all duration-300"
+                      className="w-full bg-white/[0.02] border border-white/10 rounded-[8px] py-2.5 pl-11 pr-4 text-white text-xs focus:outline-none focus:border-[#BFF367]/40 focus:shadow-[0_0_15px_rgba(85,222,232,0.1)] transition-all duration-300"
                       value={formData.captainPhone}
                       onChange={handleChange}
                     />
@@ -582,7 +582,7 @@ const CreateTeamModal = ({ isOpen, onClose, onSuccess }) => {
                   type="submit" 
                   disabled={isSubmitDisabled}
                   style={{ fontFamily: "'Inter', sans-serif" }}
-                  className="flex-[2] py-2.5 bg-gradient-to-r from-[#55DEE8] to-[#BFF367] hover:brightness-[1.04] text-black font-black uppercase tracking-wider rounded-[8px] shadow-lg shadow-[#55DEE8]/10 hover:shadow-[#BFF367]/15 transition-all duration-300 flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed hover:-translate-y-0.5 active:translate-y-0 text-xs"
+                  className="flex-[2] py-2.5 bg-gradient-to-r from-[#BFF367] to-[#BFF367] hover:brightness-[1.04] text-black font-black uppercase tracking-wider rounded-[8px] shadow-lg shadow-[#BFF367]/10 hover:shadow-[#BFF367]/15 transition-all duration-300 flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed hover:-translate-y-0.5 active:translate-y-0 text-xs"
                 >
                   {isCreating ? (
                     <>

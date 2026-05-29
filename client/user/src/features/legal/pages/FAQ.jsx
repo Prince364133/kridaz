@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { ChevronDown, HelpCircle, Search } from "lucide-react";
 
-const GRAD = "linear-gradient(135deg, #55DEE8 0%, #BFF367 100%)";
+const GRAD = "linear-gradient(135deg, #BFF367 0%, #BFF367 100%)";
 const BDR = "rgba(255,255,255,0.08)";
 
 const faqs = [
@@ -138,12 +138,12 @@ const FAQ = () => {
 
         {/* Header */}
         <div className="text-center mb-14">
-          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-[6px] mb-6 border text-xs font-black uppercase tracking-widest" style={{ borderColor: BDR, background: "rgba(85,222,232,0.07)", color: "#55DEE8" }}>
+          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-[6px] mb-6 border text-xs font-black uppercase tracking-widest" style={{ borderColor: BDR, background: "rgba(85,222,232,0.07)", color: "#BFF367" }}>
             <HelpCircle size={12} /> Help Center
           </div>
           <h1 className="text-5xl md:text-7xl font-black uppercase leading-[0.9] mb-6" style={{ fontFamily: "'Open Sans', sans-serif" }}>
             Frequently{" "}
-            <span className="bg-gradient-to-br from-[#55DEE8] to-[#BFF367] bg-clip-text text-transparent">
+            <span className="bg-gradient-to-br from-[#BFF367] to-[#BFF367] bg-clip-text text-transparent">
               Asked
             </span>
             <br />Questions

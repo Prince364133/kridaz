@@ -99,7 +99,7 @@ const ShareTurfModal = ({ isOpen, onClose, turf }) => {
               placeholder="Search friends..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full bg-white/5 border border-white/10 rounded-[8px] py-2.5 pl-10 pr-4 text-sm text-white placeholder-white/40 focus:outline-none focus:border-[#55DEE8]/50 transition-colors"
+              className="w-full bg-white/5 border border-white/10 rounded-[8px] py-2.5 pl-10 pr-4 text-sm text-white placeholder-white/40 focus:outline-none focus:border-[#BFF367]/50 transition-colors"
             />
           </div>
         </div>
@@ -120,7 +120,7 @@ const ShareTurfModal = ({ isOpen, onClose, turf }) => {
                 <div 
                   key={user._id}
                   onClick={() => toggleUser(user._id)}
-                  className={`flex items-center justify-between p-2 rounded-[8px] cursor-pointer transition-all ${ isSelected ? 'bg-[#55DEE8]/10' : 'hover:bg-white/5' }`}
+                  className={`flex items-center justify-between p-2 rounded-[8px] cursor-pointer transition-all ${ isSelected ? 'bg-[#BFF367]/10' : 'hover:bg-white/5' }`}
                 >
                   <div className="flex items-center gap-3">
                     <img 
@@ -133,7 +133,7 @@ const ShareTurfModal = ({ isOpen, onClose, turf }) => {
                       <p className="text-white/40 text-xs">@{user.username || user.name.toLowerCase().replace(' ', '')}</p>
                     </div>
                   </div>
-                  <div className={`w-6 h-6 rounded-full border flex items-center justify-center transition-colors ${ isSelected ? 'bg-[#55DEE8] border-[#55DEE8]' : 'border-white/20' }`}>
+                  <div className={`w-6 h-6 rounded-full border flex items-center justify-center transition-colors ${ isSelected ? 'bg-[#BFF367] border-[#BFF367]' : 'border-white/20' }`}>
                     {isSelected && <Check size={14} className="text-black" />}
                   </div>
                 </div>
@@ -147,7 +147,7 @@ const ShareTurfModal = ({ isOpen, onClose, turf }) => {
             <button
               onClick={handleShare}
               disabled={isSending}
-              className="w-full flex items-center justify-center gap-2 py-3 bg-[#55DEE8] text-black font-black uppercase tracking-wider text-sm rounded-[8px] hover:bg-[#95e61a] transition-colors disabled:opacity-50"
+              className="w-full flex items-center justify-center gap-2 py-3 bg-[#BFF367] text-black font-black uppercase tracking-wider text-sm rounded-[8px] hover:bg-[#95e61a] transition-colors disabled:opacity-50"
             >
               <Send size={16} />
               {isSending ? "Sharing..." : `Share with ${selectedUsers.length} friend${selectedUsers.length > 1 ? 's' : ''}`}

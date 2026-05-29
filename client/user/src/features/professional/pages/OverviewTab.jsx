@@ -282,17 +282,17 @@ const OverviewTab = ({ role, profile }) => {
             <button
               type="button"
               aria-label="Kridaz points regulations"
-              className="relative flex h-[58px] w-[170px] max-w-[45vw] items-center justify-between overflow-hidden rounded-xl border border-[#55DEE8]/70 bg-[#061413]/95 px-3 text-left shadow-[0_0_24px_rgba(85,222,232,0.16)] outline-none transition-all focus:border-[#BFF367] focus:ring-2 focus:ring-[#55DEE8]/30"
+              className="relative flex h-[58px] w-[170px] max-w-[45vw] items-center justify-between overflow-hidden rounded-xl border border-[#BFF367]/70 bg-[#061413]/95 px-3 text-left shadow-[0_0_24px_rgba(85,222,232,0.16)] outline-none transition-all focus:border-[#BFF367] focus:ring-2 focus:ring-[#BFF367]/30"
             >
-              <span className="absolute inset-y-0 right-0 w-16 bg-[#55DEE8]/10 blur-2xl" />
+              <span className="absolute inset-y-0 right-0 w-16 bg-[#BFF367]/10 blur-2xl" />
               <span className="relative min-w-0">
                 <span className="block text-[9px] font-medium uppercase leading-none tracking-[0.18em] text-white/75">Trust Score</span>
-                <span className="mt-1 block text-xl font-black leading-none text-[#55DEE8]">104 XP</span>
+                <span className="mt-1 block text-xl font-black leading-none text-[#BFF367]">104 XP</span>
                 <span className="mt-1 block truncate text-[10px] font-bold uppercase leading-none tracking-[0.12em] text-white/75">
-                  Level: <span className="text-[#55DEE8]">Elite</span>
+                  Level: <span className="text-[#BFF367]">Elite</span>
                 </span>
               </span>
-              <span className="relative ml-2 flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-[#55DEE8]/60 bg-[#55DEE8]/10 text-[7px] font-black uppercase tracking-wide text-[#BFF367] shadow-[0_0_14px_rgba(85,222,232,0.25)]">
+              <span className="relative ml-2 flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-[#BFF367]/60 bg-[#BFF367]/10 text-[7px] font-black uppercase tracking-wide text-[#BFF367] shadow-[0_0_14px_rgba(85,222,232,0.25)]">
                 Elite
               </span>
             </button>
@@ -300,15 +300,15 @@ const OverviewTab = ({ role, profile }) => {
               <h3 className="mb-3 text-xs font-bold uppercase tracking-wider text-white">Kridaz Points</h3>
               <div className="space-y-3">
                 <div className="flex items-start gap-3">
-                  <div className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-[#55DEE8]/10 text-[10px] font-bold text-[#55DEE8]">1</div>
+                  <div className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-[#BFF367]/10 text-[10px] font-bold text-[#BFF367]">1</div>
                   <p className="text-xs text-gray-300">No points will be reduced if rejected.</p>
                 </div>
                 <div className="flex items-start gap-3">
-                  <div className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-[#55DEE8]/10 text-[10px] font-bold text-[#55DEE8]">2</div>
+                  <div className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-[#BFF367]/10 text-[10px] font-bold text-[#BFF367]">2</div>
                   <p className="text-xs text-gray-300">There will be an increase in point for every successful booking.</p>
                 </div>
                 <div className="flex items-start gap-3">
-                  <div className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-[#55DEE8]/10 text-[10px] font-bold text-[#55DEE8]">3</div>
+                  <div className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-[#BFF367]/10 text-[10px] font-bold text-[#BFF367]">3</div>
                   <p className="text-xs text-gray-300">There will be a 0.5 point reduction for skipping.</p>
                 </div>
               </div>
@@ -316,14 +316,14 @@ const OverviewTab = ({ role, profile }) => {
           </div>
 
           <div className="flex items-center gap-2 bg-[#222222] px-3 py-2 sm:gap-4 sm:px-5 sm:py-3 rounded-xl border border-[#2D2D2D]">
-            <span className={`text-[11px] sm:text-sm font-semibold tracking-wide ${isOnline ? "text-[#55DEE8]" : "text-gray-400"}`}>
+            <span className={`text-[11px] sm:text-sm font-semibold tracking-wide ${isOnline ? "text-[#BFF367]" : "text-gray-400"}`}>
               <span className="sm:hidden">{isOnline ? "ONLINE" : "OFFLINE"}</span>
               <span className="hidden sm:inline">{isOnline ? "ONLINE & AVAILABLE" : "OFFLINE / BUSY"}</span>
             </span>
             <button 
               onClick={handleToggleOnline} 
               disabled={isToggling}
-              className={`w-12 h-7 sm:w-14 sm:h-8 rounded-full p-1 transition-all duration-300 ${isOnline ? "bg-[#55DEE8]" : "bg-gray-600"}`}
+              className={`w-12 h-7 sm:w-14 sm:h-8 rounded-full p-1 transition-all duration-300 ${isOnline ? "bg-[#BFF367]" : "bg-gray-600"}`}
             >
               <div className={`h-5 w-5 sm:w-6 sm:h-6 rounded-full bg-black shadow-md transform transition-all duration-300 ${isOnline ? "translate-x-5 sm:translate-x-6" : "translate-x-0"}`} />
             </button>
@@ -369,7 +369,7 @@ const OverviewTab = ({ role, profile }) => {
                 onChange={(update) => setCustomDates(prev => ({...prev, bookings: update}))}
                 isClearable={true}
                 placeholderText="Select date range"
-                className="bg-[#1A1D27] text-[10px] text-white border border-[#2D2D2D] rounded px-2 py-1 outline-none w-full z-50 focus:border-[#55DEE8] transition-colors"
+                className="bg-[#1A1D27] text-[10px] text-white border border-[#2D2D2D] rounded px-2 py-1 outline-none w-full z-50 focus:border-[#BFF367] transition-colors"
               />
             </div>
           )}
@@ -379,12 +379,12 @@ const OverviewTab = ({ role, profile }) => {
         <div className="p-5 rounded-2xl bg-[#141414] border border-[#2D2D2D] flex flex-col justify-between h-36 relative">
           <div className="flex justify-between items-start">
             <span className="text-xs text-[#878C9F] font-semibold uppercase tracking-wider">Earnings</span>
-            <div className="p-2 bg-[#55DEE8]/10 rounded-lg absolute top-4 right-4">
-              <IndianRupee size={16} className="text-[#55DEE8]" />
+            <div className="p-2 bg-[#BFF367]/10 rounded-lg absolute top-4 right-4">
+              <IndianRupee size={16} className="text-[#BFF367]" />
             </div>
           </div>
           <div className="mt-1">
-            <h3 className="text-3xl font-bold text-[#55DEE8]">₹{getEarningsValue()}</h3>
+            <h3 className="text-3xl font-bold text-[#BFF367]">₹{getEarningsValue()}</h3>
           </div>
           <div className="mt-3 flex items-center border-t border-[#2D2D2D] pt-3">
             <div className="relative inline-flex items-center w-full">
@@ -411,7 +411,7 @@ const OverviewTab = ({ role, profile }) => {
                 onChange={(update) => setCustomDates(prev => ({...prev, earnings: update}))}
                 isClearable={true}
                 placeholderText="Select date range"
-                className="bg-[#1A1D27] text-[10px] text-white border border-[#2D2D2D] rounded px-2 py-1 outline-none w-full z-50 focus:border-[#55DEE8] transition-colors"
+                className="bg-[#1A1D27] text-[10px] text-white border border-[#2D2D2D] rounded px-2 py-1 outline-none w-full z-50 focus:border-[#BFF367] transition-colors"
               />
             </div>
           )}
@@ -496,7 +496,7 @@ const OverviewTab = ({ role, profile }) => {
                 onChange={(update) => setCustomDates(prev => ({...prev, rating: update}))}
                 isClearable={true}
                 placeholderText="Select date range"
-                className="bg-[#1A1D27] text-[10px] text-white border border-[#2D2D2D] rounded px-2 py-1 outline-none w-full z-50 focus:border-[#55DEE8] transition-colors"
+                className="bg-[#1A1D27] text-[10px] text-white border border-[#2D2D2D] rounded px-2 py-1 outline-none w-full z-50 focus:border-[#BFF367] transition-colors"
               />
             </div>
           )}
@@ -529,13 +529,13 @@ const OverviewTab = ({ role, profile }) => {
         <div className="lg:col-span-2 space-y-6">
           {/* Active Assigned Booking Card */}
           {activeBooking ? (
-            <div className="p-6 rounded-2xl bg-gradient-to-br from-[#1A1A1A] to-[#121212] border border-[#55DEE8]/40 shadow-lg shadow-[#55DEE8]/5 space-y-6">
+            <div className="p-6 rounded-2xl bg-gradient-to-br from-[#1A1A1A] to-[#121212] border border-[#BFF367]/40 shadow-lg shadow-[#BFF367]/5 space-y-6">
               <div className="flex justify-between items-center border-b border-[#2D2D2D] pb-4">
                 <div className="flex items-center gap-3">
-                  <span className="animate-ping w-2.5 h-2.5 rounded-full bg-[#55DEE8]" />
+                  <span className="animate-ping w-2.5 h-2.5 rounded-full bg-[#BFF367]" />
                   <h2 className="text-lg font-bold tracking-tight">Active Match Assignment</h2>
                 </div>
-                <span className={`text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider ${activeBooking.status === "IN_PROGRESS" ? "bg-green-500/10 text-green-400 border border-green-500/20" : "bg-[#55DEE8]/10 text-[#55DEE8] border border-[#55DEE8]/20"}`}>
+                <span className={`text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider ${activeBooking.status === "IN_PROGRESS" ? "bg-green-500/10 text-green-400 border border-green-500/20" : "bg-[#BFF367]/10 text-[#BFF367] border border-[#BFF367]/20"}`}>
                   {activeBooking.status === "IN_PROGRESS" ? "In Progress" : "Assigned"}
                 </span>
               </div>
@@ -557,7 +557,7 @@ const OverviewTab = ({ role, profile }) => {
                 <div className="space-y-1">
                   <span className="text-xs text-[#878C9F] uppercase tracking-wider">Location / Ground</span>
                   <div className="flex items-center gap-2 mt-1">
-                    <MapPin size={16} className="text-[#55DEE8]" />
+                    <MapPin size={16} className="text-[#BFF367]" />
                     <span className="text-sm font-medium">
                       {activeBooking.ground?.name || activeBooking.customLocation?.address || "Custom Location"}
                     </span>
@@ -583,12 +583,12 @@ const OverviewTab = ({ role, profile }) => {
                       placeholder="Enter 6-Digit OTP"
                       value={otp}
                       onChange={(e) => setOtp(e.target.value.replace(/\D/g, ""))}
-                      className="flex-1 bg-black border border-[#2D2D2D] rounded-xl px-4 py-2.5 text-center font-mono tracking-widest text-lg focus:outline-none focus:border-[#55DEE8] transition-colors"
+                      className="flex-1 bg-black border border-[#2D2D2D] rounded-xl px-4 py-2.5 text-center font-mono tracking-widest text-lg focus:outline-none focus:border-[#BFF367] transition-colors"
                     />
                     <button 
                       onClick={() => handleVerifyOtp(activeBooking.id)}
                       disabled={isVerifying}
-                      className="bg-[#55DEE8] hover:bg-[#44cdd7] text-black font-semibold rounded-xl px-6 py-2.5 transition-colors text-sm"
+                      className="bg-[#BFF367] hover:bg-[#44cdd7] text-black font-semibold rounded-xl px-6 py-2.5 transition-colors text-sm"
                     >
                       Verify
                     </button>
@@ -612,12 +612,12 @@ const OverviewTab = ({ role, profile }) => {
               <h3 className="text-lg font-bold text-white">Bookings Pending</h3>
 
               <div className="space-y-3">
-                <h4 className="text-xs font-bold uppercase tracking-wider text-[#55DEE8]">Skipped Requests</h4>
+                <h4 className="text-xs font-bold uppercase tracking-wider text-[#BFF367]">Skipped Requests</h4>
                 <div className="grid grid-cols-1 xl:grid-cols-2 gap-3">
                   {skippedRequests.map((request, index) => (
                     <div
                       key={request.title}
-                      className="rounded-xl border border-[#55DEE8]/40 bg-black/20 p-4 transition-all hover:border-[#BFF367]/60 hover:bg-[#BFF367]/[0.03]"
+                      className="rounded-xl border border-[#BFF367]/40 bg-black/20 p-4 transition-all hover:border-[#BFF367]/60 hover:bg-[#BFF367]/[0.03]"
                     >
                       <div className="space-y-2">
                         <h5 className="text-sm font-bold text-white">
@@ -692,7 +692,7 @@ const OverviewTab = ({ role, profile }) => {
                   onChange={(update) => setCustomDates(prev => ({...prev, graph: update}))}
                   isClearable={true}
                   placeholderText="Select date range"
-                  className="bg-[#1A1D27] text-[10px] text-white border border-[#2D2D2D] rounded px-2 py-1 outline-none w-48 z-50 focus:border-[#55DEE8] transition-colors"
+                  className="bg-[#1A1D27] text-[10px] text-white border border-[#2D2D2D] rounded px-2 py-1 outline-none w-48 z-50 focus:border-[#BFF367] transition-colors"
                 />
               </div>
             )}
@@ -701,8 +701,8 @@ const OverviewTab = ({ role, profile }) => {
                 <AreaChart data={graphData[graphTimeline] || graphData["This Week"]} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
                   <defs>
                     <linearGradient id="colorIncome" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor="#55DEE8" stopOpacity={0.3}/>
-                      <stop offset="95%" stopColor="#55DEE8" stopOpacity={0}/>
+                      <stop offset="5%" stopColor="#BFF367" stopOpacity={0.3}/>
+                      <stop offset="95%" stopColor="#BFF367" stopOpacity={0}/>
                     </linearGradient>
                     <linearGradient id="colorBookings" x1="0" y1="0" x2="0" y2="1">
                       <stop offset="5%" stopColor="#BFF367" stopOpacity={0.3}/>
@@ -719,7 +719,7 @@ const OverviewTab = ({ role, profile }) => {
                   />
                   <Legend iconType="circle" wrapperStyle={{ fontSize: '12px', paddingTop: '10px' }} />
                   <Area yAxisId="left" type="monotone" dataKey="bookings" name="Bookings" stroke="#BFF367" fillOpacity={1} fill="url(#colorBookings)" strokeWidth={2} />
-                  <Area yAxisId="right" type="monotone" dataKey="income" name="Income (₹)" stroke="#55DEE8" fillOpacity={1} fill="url(#colorIncome)" strokeWidth={2} />
+                  <Area yAxisId="right" type="monotone" dataKey="income" name="Income (₹)" stroke="#BFF367" fillOpacity={1} fill="url(#colorIncome)" strokeWidth={2} />
                 </AreaChart>
               </ResponsiveContainer>
             </div>
@@ -744,15 +744,15 @@ const OverviewTab = ({ role, profile }) => {
             {/* Guidelines */}
             <div className="space-y-3 w-full">
               <div className="flex items-start gap-3">
-                <div className="w-5 h-5 rounded-full bg-[#55DEE8]/10 text-[#55DEE8] flex shrink-0 items-center justify-center text-[10px] font-bold mt-0.5">1</div>
+                <div className="w-5 h-5 rounded-full bg-[#BFF367]/10 text-[#BFF367] flex shrink-0 items-center justify-center text-[10px] font-bold mt-0.5">1</div>
                 <p className="text-xs text-gray-300">No points will be reduced if rejected.</p>
               </div>
               <div className="flex items-start gap-3">
-                <div className="w-5 h-5 rounded-full bg-[#55DEE8]/10 text-[#55DEE8] flex shrink-0 items-center justify-center text-[10px] font-bold mt-0.5">2</div>
+                <div className="w-5 h-5 rounded-full bg-[#BFF367]/10 text-[#BFF367] flex shrink-0 items-center justify-center text-[10px] font-bold mt-0.5">2</div>
                 <p className="text-xs text-gray-300">There will be an increase in point for every successful booking.</p>
               </div>
               <div className="flex items-start gap-3">
-                <div className="w-5 h-5 rounded-full bg-[#55DEE8]/10 text-[#55DEE8] flex shrink-0 items-center justify-center text-[10px] font-bold mt-0.5">3</div>
+                <div className="w-5 h-5 rounded-full bg-[#BFF367]/10 text-[#BFF367] flex shrink-0 items-center justify-center text-[10px] font-bold mt-0.5">3</div>
                 <p className="text-xs text-gray-300">There will be a 0.5 point reduction for skipping.</p>
               </div>
             </div>
@@ -764,7 +764,7 @@ const OverviewTab = ({ role, profile }) => {
       {visibleOffer && (
         <div className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto bg-black/85 p-4 backdrop-blur-md">
           <div className="w-full max-w-xl animate-in zoom-in-95 duration-200">
-            <div className="relative overflow-hidden rounded-[22px] border border-[#55DEE8]/80 bg-[#061413]/95 p-4 shadow-[0_0_36px_rgba(85,222,232,0.28),0_0_30px_rgba(191,243,103,0.14)]">
+            <div className="relative overflow-hidden rounded-[22px] border border-[#BFF367]/80 bg-[#061413]/95 p-4 shadow-[0_0_36px_rgba(85,222,232,0.28),0_0_30px_rgba(191,243,103,0.14)]">
               <div className="absolute inset-y-0 right-0 w-1/2 bg-[#BFF367]/[0.06] blur-3xl" />
               <div className="relative grid grid-cols-1 items-center gap-5 md:grid-cols-[180px_1fr]">
                 <div className="mx-auto space-y-3">
@@ -783,7 +783,7 @@ const OverviewTab = ({ role, profile }) => {
                         cy="50"
                         r="42"
                         fill="none"
-                        stroke="#55DEE8"
+                        stroke="#BFF367"
                         strokeWidth="7"
                         strokeLinecap="round"
                         strokeDasharray={offerStrokeLength}
@@ -793,7 +793,7 @@ const OverviewTab = ({ role, profile }) => {
                     </svg>
                     <div className="relative text-center">
                       <p className="text-[11px] font-medium text-white/80">{visibleOfferCountdown}/{offerDuration}</p>
-                      <p className="text-4xl font-black leading-none text-[#55DEE8]">{visibleOfferCountdown}s</p>
+                      <p className="text-4xl font-black leading-none text-[#BFF367]">{visibleOfferCountdown}s</p>
                       <p className="mt-1 text-xs text-white/75">Remaining</p>
                     </div>
                   </div>
@@ -814,7 +814,7 @@ const OverviewTab = ({ role, profile }) => {
 
 	                <div className="space-y-4">
                   <div className="flex items-center gap-3 rounded-2xl border border-white/10 bg-black/20 p-3">
-                    <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-[#55DEE8] text-base font-black uppercase text-black shadow-[0_0_18px_rgba(85,222,232,0.32)]">
+                    <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-[#BFF367] text-base font-black uppercase text-black shadow-[0_0_18px_rgba(85,222,232,0.32)]">
                       {(visibleOffer.userName || visibleOffer.user?.name || "U").charAt(0)}
                     </div>
                     <div className="min-w-0">
@@ -825,7 +825,7 @@ const OverviewTab = ({ role, profile }) => {
                   </div>
 
                   <div>
-                    <div className="mb-2 flex items-center gap-2 text-[#55DEE8]">
+                    <div className="mb-2 flex items-center gap-2 text-[#BFF367]">
                       <Bell size={16} className="animate-bounce" />
                       <p className="text-sm font-medium uppercase tracking-[0.16em] text-white/70">Active Booking Request</p>
                     </div>

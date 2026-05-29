@@ -7,13 +7,13 @@ import { format } from "date-fns";
 
 /**
  * ProfessionalBookings ΓÇö Rebranded for the Scorer Portal.
- * Enforces Teal Green (#00C187) and Inter typography.
+ * Enforces Teal Green (#BFF367) and Inter typography.
  */
 
 export default function ProfessionalBookings() {
   const { role } = useSelector((state) => state.auth);
   const isScorer = role?.toLowerCase().includes("scorer");
-  const themeColor = isScorer ? "#00C187" : "#55DEE8";
+  const themeColor = isScorer ? "#BFF367" : "#BFF367";
 
   const [bookings, setBookings] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -108,7 +108,7 @@ export default function ProfessionalBookings() {
                   </div>
 
                   <div className="flex flex-col md:items-end gap-3">
-                    <div className={`px-4 py-1.5 rounded-full text-[9px] font-black uppercase tracking-widest border font-inter ${ booking.status === 'PENDING' ? 'bg-orange-500/10 border-orange-500/20 text-orange-500' : booking.status === 'ACCEPTED' ? 'bg-[#00C187]/10 border-[#00C187]/20' : 'bg-red-500/10 border-red-500/20 text-red-500' }`}
+                    <div className={`px-4 py-1.5 rounded-full text-[9px] font-black uppercase tracking-widest border font-inter ${ booking.status === 'PENDING' ? 'bg-orange-500/10 border-orange-500/20 text-orange-500' : booking.status === 'ACCEPTED' ? 'bg-[#BFF367]/10 border-[#BFF367]/20' : 'bg-red-500/10 border-red-500/20 text-red-500' }`}
                     style={{ 
                       color: booking.status === 'ACCEPTED' ? themeColor : undefined,
                       borderColor: booking.status === 'ACCEPTED' ? themeColor : undefined 

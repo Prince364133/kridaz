@@ -96,7 +96,7 @@ const SelectVenueModal = ({ isOpen, onClose, gameId, onVenueSelected }) => {
               <div className="space-y-3 max-h-[300px] overflow-y-auto pr-2 no-scrollbar">
                 {loading ? (
                   <div className="py-10 text-center">
-                    <Loader2 className="mx-auto mb-2 animate-spin text-transparent bg-clip-text bg-gradient-to-r from-[#55DEE8] to-[#BFF367]" size={24} />
+                    <Loader2 className="mx-auto mb-2 animate-spin text-transparent bg-clip-text bg-gradient-to-r from-[#BFF367] to-[#BFF367]" size={24} />
                     <p className="text-xs text-neutral-500 uppercase font-black">Finding venues...</p>
                   </div>
                 ) : results.length > 0 ? (

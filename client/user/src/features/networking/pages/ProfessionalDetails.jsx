@@ -175,7 +175,7 @@ export default function ProfessionalDetails() {
     if (count >= 500) badge = { label: "Supreme Master", desc: "Completed 500+ Bookings", color: "#FF007F", icon: "💎" };
     else if (count >= 200) badge = { label: "Elite Professional", desc: "Completed 200+ Bookings", color: "#BFF367", icon: "⚡" };
     else if (count >= 100) badge = { label: "Master Scorer/Umpire", desc: "Completed 100+ Bookings", color: "#BFF367", icon: "🏆" };
-    else if (count >= 50) badge = { label: "Master Pro", desc: "Completed 50+ Bookings", color: "#00C187", icon: "🛡️" };
+    else if (count >= 50) badge = { label: "Master Pro", desc: "Completed 50+ Bookings", color: "#BFF367", icon: "🛡️" };
     else if (count >= 10) badge = { label: "Consistent Associate", desc: "Completed 10+ Bookings", color: "#F59E0B", icon: "🟢" };
 
     if (!badge) return null;
@@ -201,7 +201,7 @@ export default function ProfessionalDetails() {
   if (!pro) return (
     <div className="min-h-screen bg-black flex flex-col items-center justify-center font-sans">
       <h2 className="text-white text-2xl font-bold mb-4">Professional Not Found</h2>
-      <button onClick={() => navigate(-1)} className="px-6 py-2 bg-gradient-to-r from-[#55DEE8] to-[#BFF367] text-black font-bold rounded-lg hover:opacity-90 transition-opacity">
+      <button onClick={() => navigate(-1)} className="px-6 py-2 bg-gradient-to-r from-[#BFF367] to-[#BFF367] text-black font-bold rounded-lg hover:opacity-90 transition-opacity">
         Go Back
       </button>
     </div>
@@ -251,7 +251,7 @@ export default function ProfessionalDetails() {
                       {pro.profilePicture ? (
                         <img src={pro.profilePicture} alt={pro.name} className="w-full h-full object-cover" />
                       ) : (
-                        <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#55DEE8] to-[#BFF367] font-black text-4xl tracking-tighter">
+                        <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#BFF367] to-[#BFF367] font-black text-4xl tracking-tighter">
                           {pro.name?.split(" ").map(w => w[0]).join("").toUpperCase().slice(0, 2) || "P"}
                         </span>
                       )}
@@ -309,8 +309,8 @@ export default function ProfessionalDetails() {
                   
                   {/* Followers and Following */}
                   <div className="flex flex-wrap items-center gap-5 text-xs text-white/90 font-sans font-bold mb-5">
-                    <span className="flex items-center gap-1.5 cursor-pointer hover:text-[#BFF367] transition-colors"><Users size={14} className="text-[#55DEE8]" /> {followersCount.toLocaleString()} Followers</span>
-                    <span className="flex items-center gap-1.5 cursor-pointer hover:text-[#BFF367] transition-colors"><UserPlus size={14} className="text-[#55DEE8]" /> {followingCount.toLocaleString()} Following</span>
+                    <span className="flex items-center gap-1.5 cursor-pointer hover:text-[#BFF367] transition-colors"><Users size={14} className="text-[#BFF367]" /> {followersCount.toLocaleString()} Followers</span>
+                    <span className="flex items-center gap-1.5 cursor-pointer hover:text-[#BFF367] transition-colors"><UserPlus size={14} className="text-[#BFF367]" /> {followingCount.toLocaleString()} Following</span>
                   </div>
                 </div>
 
@@ -378,7 +378,7 @@ export default function ProfessionalDetails() {
                     key={tab.id}
                     onClick={() => setActiveTab(tab.id)}
                     className={`flex-1 py-3 text-[9px] font-black uppercase tracking-widest rounded-lg transition-all flex items-center justify-center gap-2 ${
-                      isSelected ? "bg-gradient-to-r from-[#55DEE8] to-[#BFF367] text-black shadow-lg" : "text-neutral-500 hover:text-white"
+                      isSelected ? "bg-gradient-to-r from-[#BFF367] to-[#BFF367] text-black shadow-lg" : "text-neutral-500 hover:text-white"
                     }`}
                   >
                     <Icon size={12} /> {tab.label}
@@ -679,7 +679,7 @@ export default function ProfessionalDetails() {
                           {cert.description && cert.description.length > 80 && (
                             <button
                               onClick={(e) => { e.stopPropagation(); setActiveCertificate(cert); }}
-                              className="text-[9px] font-black uppercase tracking-widest text-[#55DEE8] hover:text-[#BFF367] transition-colors pt-0.5"
+                              className="text-[9px] font-black uppercase tracking-widest text-[#BFF367] hover:text-[#BFF367] transition-colors pt-0.5"
                             >
                               Read More →
                             </button>
@@ -840,7 +840,7 @@ export default function ProfessionalDetails() {
 
                 <button 
                   onClick={() => navigate(`/professionals?role=${pro.role}`)}
-                  className="w-full bg-gradient-to-r from-[#55DEE8] to-[#BFF367] text-black py-4 rounded-lg font-black text-xs uppercase tracking-widest hover:opacity-90 active:scale-95 transition-all shadow-lg"
+                  className="w-full bg-gradient-to-r from-[#BFF367] to-[#BFF367] text-black py-4 rounded-lg font-black text-xs uppercase tracking-widest hover:opacity-90 active:scale-95 transition-all shadow-lg"
                 >
                   ⚡ Request Matching Now
                 </button>
@@ -995,7 +995,7 @@ export default function ProfessionalDetails() {
                 </div>
                 <div className="space-y-1">
                   <h3 className="text-sm font-black text-white uppercase tracking-tight">{activeCertificate.title}</h3>
-                  <span className="text-[8px] font-black text-[#55DEE8] uppercase tracking-widest">Verified Certification</span>
+                  <span className="text-[8px] font-black text-[#BFF367] uppercase tracking-widest">Verified Certification</span>
                 </div>
               </div>
               

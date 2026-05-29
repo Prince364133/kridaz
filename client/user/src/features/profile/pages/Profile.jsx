@@ -21,7 +21,7 @@ import { useSocket } from "@context/SocketContext";
 import { isProfessionalRole, getDynamicProfileRoute } from "@utils/routeUtils";
 
 const PRI = "#BFF367"; // New primary lime accent matching the gradient vibrant stop
-const SEC = "#55DEE8"; // Secondary cyan accent matching the gradient cool stop
+const SEC = "#BFF367"; // Secondary cyan accent matching the gradient cool stop
 
 // --- STYLE TOKENS ---
 const HEADING_STYLE = { fontFamily: "'Open Sans', sans-serif" };
@@ -36,7 +36,7 @@ const QuickStatCard = ({ icon: Icon, label, value, showDivider }) => (
       <div className="flex items-center gap-2 mb-1">
         <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wider whitespace-nowrap">{label}</span>
       </div>
-      <div className="text-2xl font-black bg-gradient-to-r from-[#55DEE8] to-[#BFF367] bg-clip-text text-transparent tracking-tighter leading-none">{value}</div>
+      <div className="text-2xl font-black bg-gradient-to-r from-[#BFF367] to-[#BFF367] bg-clip-text text-transparent tracking-tighter leading-none">{value}</div>
     </div>
   </div>
 );
@@ -44,13 +44,13 @@ const QuickStatCard = ({ icon: Icon, label, value, showDivider }) => (
 const AchievementCard = ({ icon: Icon, title, rarity, year }) => {
   const rarityColors = {
     platinum: 'from-cyan-400 to-blue-400',
-    gold: 'from-[#55DEE8] to-[#BFF367]',
+    gold: 'from-[#BFF367] to-[#BFF367]',
     silver: 'from-gray-300 to-gray-400',
   };
   return (
     <div className="group relative rounded-[8px] p-[1px] transition-all duration-300 cursor-pointer overflow-hidden">
       {/* Gradient Border Overlay - Only visible on hover */}
-      <div className="absolute inset-0 bg-gradient-to-r from-[#55DEE8] to-[#BFF367] opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-[8px]" />
+      <div className="absolute inset-0 bg-gradient-to-r from-[#BFF367] to-[#BFF367] opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-[8px]" />
       
       {/* Normal Border Overlay - Fades out on hover */}
       <div className="absolute inset-0 border border-white/10 group-hover:opacity-0 transition-opacity duration-300 rounded-[8px] animate-in" />
@@ -144,7 +144,7 @@ const MatchDetailModal = ({ isOpen, onClose, match, userId }) => {
           {activeSubTab === "impact" ? (
             <div className="space-y-6">
               {/* Highlight Banner */}
-              <div className={`p-6 rounded-[8px] border ${won ? 'bg-[#55DEE8]/5 border-[#55DEE8]/10 text-[#55DEE8]' : 'bg-red-500/5 border-red-500/10 text-red-400'} flex items-center justify-between`}>
+              <div className={`p-6 rounded-[8px] border ${won ? 'bg-[#BFF367]/5 border-[#BFF367]/10 text-[#BFF367]' : 'bg-red-500/5 border-red-500/10 text-red-400'} flex items-center justify-between`}>
                 <div>
                   <p className="text-[9px] font-bold uppercase tracking-widest opacity-60">Result</p>
                   <p className="text-xl font-black uppercase tracking-tight">{outcomeText}</p>
@@ -221,7 +221,7 @@ const MatchDetailModal = ({ isOpen, onClose, match, userId }) => {
                     </div>
                     <div className="text-center">
                       <p className="text-[8px] font-bold text-gray-500 uppercase tracking-widest">Wickets</p>
-                      <p className="text-lg font-black text-[#55DEE8]">{playerStat.bowlingWickets}</p>
+                      <p className="text-lg font-black text-[#BFF367]">{playerStat.bowlingWickets}</p>
                     </div>
                     <div className="text-center">
                       <p className="text-[8px] font-bold text-gray-500 uppercase tracking-widest">Economy</p>
@@ -360,14 +360,14 @@ const ConnectionsModal = ({ isOpen, onClose, followersList = [], followingList =
                 
                 <div className="flex items-center gap-3 shrink-0">
                   {player.sportTypes && player.sportTypes.length > 0 && (
-                    <span className="px-2 py-0.5 bg-[#55DEE8]/10 text-[#55DEE8] rounded-full border border-[#55DEE8]/20 text-[8px] font-black uppercase">
+                    <span className="px-2 py-0.5 bg-[#BFF367]/10 text-[#BFF367] rounded-full border border-[#BFF367]/20 text-[8px] font-black uppercase">
                       {player.sportTypes[0]}
                     </span>
                   )}
                   {player.id !== (currentUser?.id || currentUser?._id) && (
                     <button
                       onClick={() => handlePlayerFollowToggle(player)}
-                      className={`px-3 py-1.5 rounded-[12px] font-black uppercase tracking-wider text-[9px] transition-all ${ followingIds.includes(player.id) ? 'bg-white/10 text-white/40 border border-white/5' : 'bg-gradient-to-r from-[#55DEE8] to-[#BFF367] text-black hover:scale-105 active:scale-95' }`}
+                      className={`px-3 py-1.5 rounded-[12px] font-black uppercase tracking-wider text-[9px] transition-all ${ followingIds.includes(player.id) ? 'bg-white/10 text-white/40 border border-white/5' : 'bg-gradient-to-r from-[#BFF367] to-[#BFF367] text-black hover:scale-105 active:scale-95' }`}
                     >
                       {followingIds.includes(player.id) ? "Following" : "Follow"}
                     </button>
@@ -584,7 +584,7 @@ export default function Profile() {
       <svg width="0" height="0" className="absolute">
         <defs>
           <linearGradient id="cyan-lime-gradient" x1="0%" y1="0%" x2="100%" y2="0%">
-            <stop offset="0%" stopColor="#55DEE8" />
+            <stop offset="0%" stopColor="#BFF367" />
             <stop offset="100%" stopColor="#BFF367" />
           </linearGradient>
         </defs>
@@ -617,7 +617,7 @@ export default function Profile() {
           <div className="flex flex-col md:flex-row items-end gap-6">
             <div className="relative group shrink-0">
               <div 
-                className="w-32 h-32 md:w-40 md:h-40 rounded-full border-[4px] border-black bg-gradient-to-br from-[#55DEE8] to-[#BFF367] p-[2px] shadow-[0_0_35px_rgba(85,222,232,0.35)] overflow-hidden cursor-pointer"
+                className="w-32 h-32 md:w-40 md:h-40 rounded-full border-[4px] border-black bg-gradient-to-br from-[#BFF367] to-[#BFF367] p-[2px] shadow-[0_0_35px_rgba(85,222,232,0.35)] overflow-hidden cursor-pointer"
                 onClick={handleAvatarClick}
               >
                 {profileUser?.profilePicture ? (
@@ -632,7 +632,7 @@ export default function Profile() {
               {isOwnProfile && (
                 <button 
                   onClick={() => setIsEditModalOpen(true)}
-                  className="absolute bottom-1 right-1 w-9 h-9 bg-gradient-to-br from-[#55DEE8] to-[#BFF367] rounded-full border-[4px] border-black flex items-center justify-center text-black hover:scale-110 transition-all shadow-lg z-20"
+                  className="absolute bottom-1 right-1 w-9 h-9 bg-gradient-to-br from-[#BFF367] to-[#BFF367] rounded-full border-[4px] border-black flex items-center justify-center text-black hover:scale-110 transition-all shadow-lg z-20"
                 >
                   <Edit2 size={16} strokeWidth={3} />
                 </button>
@@ -693,8 +693,8 @@ export default function Profile() {
                       })()
                     : null;
                   return online ? (
-                    <span className="px-3 py-0.5 bg-[#55DEE8]/10 text-[#55DEE8] rounded-[6px] border border-[#55DEE8]/20 text-[9px] flex items-center gap-1">
-                      <span className="w-1.5 h-1.5 rounded-full bg-[#55DEE8] animate-pulse" />
+                    <span className="px-3 py-0.5 bg-[#BFF367]/10 text-[#BFF367] rounded-[6px] border border-[#BFF367]/20 text-[9px] flex items-center gap-1">
+                      <span className="w-1.5 h-1.5 rounded-full bg-[#BFF367] animate-pulse" />
                       Online
                     </span>
                   ) : lastSeenText ? (
@@ -748,7 +748,7 @@ export default function Profile() {
             {profileUser?.teams && profileUser.teams.length > 0 && (
               <div className="mb-6 bg-white/[0.02] border border-white/5 p-5 rounded-[8px] backdrop-blur-md">
                 <h3 className="text-xs font-black uppercase tracking-wider text-gray-400 mb-4 flex items-center gap-2">
-                  <Users className="w-4 h-4 text-[#55DEE8]" />
+                  <Users className="w-4 h-4 text-[#BFF367]" />
                   My Teams
                 </h3>
                 <div className="flex items-center gap-6 overflow-x-auto pb-2 scrollbar-thin scrollbar-thumb-white/10 scrollbar-track-transparent">
@@ -758,7 +758,7 @@ export default function Profile() {
                       to={`/team/${team.id}`}
                       className="flex flex-col items-center gap-2 group shrink-0"
                     >
-                      <div className="w-16 h-16 rounded-[12px] bg-black border border-white/10 flex items-center justify-center text-[#55DEE8] font-bold overflow-hidden group-hover:border-[#55DEE8]/50 transition-all">
+                      <div className="w-16 h-16 rounded-[12px] bg-black border border-white/10 flex items-center justify-center text-[#BFF367] font-bold overflow-hidden group-hover:border-[#BFF367]/50 transition-all">
                         {team.logo || team.image ? (
                           <img src={team.logo || team.image} alt={team.name} className="w-full h-full object-cover" />
                         ) : (
@@ -776,13 +776,13 @@ export default function Profile() {
 
             {/* ── Live Playing Matches Section */}
             {profileUser?.liveMatches && profileUser.liveMatches.length > 0 && (
-              <div className="mb-6 relative overflow-hidden rounded-[8px] border border-[#55DEE8]/30 bg-gradient-to-br from-[#55DEE8]/10 via-black/80 to-[#BFF367]/5 backdrop-blur-md p-5">
+              <div className="mb-6 relative overflow-hidden rounded-[8px] border border-[#BFF367]/30 bg-gradient-to-br from-[#BFF367]/10 via-black/80 to-[#BFF367]/5 backdrop-blur-md p-5">
                 {/* Animated background pulse */}
-                <div className="absolute inset-0 rounded-[8px] bg-gradient-to-r from-[#55DEE8]/5 to-[#BFF367]/5 animate-pulse pointer-events-none" />
+                <div className="absolute inset-0 rounded-[8px] bg-gradient-to-r from-[#BFF367]/5 to-[#BFF367]/5 animate-pulse pointer-events-none" />
 
-                <h3 className="text-xs font-black uppercase tracking-wider text-[#55DEE8] mb-4 flex items-center gap-2 relative z-10">
+                <h3 className="text-xs font-black uppercase tracking-wider text-[#BFF367] mb-4 flex items-center gap-2 relative z-10">
                   <span className="relative flex items-center justify-center">
-                    <span className="absolute w-4 h-4 rounded-full bg-[#55DEE8]/30 animate-ping" />
+                    <span className="absolute w-4 h-4 rounded-full bg-[#BFF367]/30 animate-ping" />
                     <Wifi className="w-4 h-4 relative" />
                   </span>
                   Live Now — Playing a Match
@@ -802,7 +802,7 @@ export default function Profile() {
                       <Link
                         key={match.id}
                         to={`/analytics/${match.id}`}
-                        className="group flex items-center justify-between gap-4 bg-black/50 border border-[#55DEE8]/20 hover:border-[#55DEE8]/60 rounded-[8px] px-5 py-4 transition-all duration-300 hover:bg-black/70 hover:shadow-[0_0_20px_rgba(85,222,232,0.15)]"
+                        className="group flex items-center justify-between gap-4 bg-black/50 border border-[#BFF367]/20 hover:border-[#BFF367]/60 rounded-[8px] px-5 py-4 transition-all duration-300 hover:bg-black/70 hover:shadow-[0_0_20px_rgba(85,222,232,0.15)]"
                       >
                         <div className="flex-1 min-w-0">
                           {/* Teams vs */}
@@ -820,7 +820,7 @@ export default function Profile() {
 
                           {/* Format & Location row */}
                           <div className="flex items-center gap-3 flex-wrap">
-                            <span className="px-2 py-0.5 rounded-[6px] bg-[#55DEE8]/10 border border-[#55DEE8]/20 text-[#55DEE8] text-[9px] font-black uppercase tracking-widest">
+                            <span className="px-2 py-0.5 rounded-[6px] bg-[#BFF367]/10 border border-[#BFF367]/20 text-[#BFF367] text-[9px] font-black uppercase tracking-widest">
                               {matchFormat}
                             </span>
                             <span className="flex items-center gap-1 text-[9px] font-bold text-gray-500 uppercase tracking-widest">
@@ -838,7 +838,7 @@ export default function Profile() {
 
                         {/* CTA */}
                         <div className="flex items-center gap-2 shrink-0">
-                          <div className="px-3 py-1.5 bg-gradient-to-r from-[#55DEE8] to-[#BFF367] text-black text-[9px] font-black uppercase tracking-widest rounded-[8px] flex items-center gap-1.5 group-hover:scale-105 transition-transform">
+                          <div className="px-3 py-1.5 bg-gradient-to-r from-[#BFF367] to-[#BFF367] text-black text-[9px] font-black uppercase tracking-widest rounded-[8px] flex items-center gap-1.5 group-hover:scale-105 transition-transform">
                             <Radio size={10} strokeWidth={2.5} />
                             Watch Live
                           </div>
@@ -862,7 +862,7 @@ export default function Profile() {
               <select 
                 value={sportFilter} 
                 onChange={(e) => setSportFilter(e.target.value)} 
-                className="bg-black border border-white/10 text-white text-[10px] font-black uppercase tracking-widest px-4 py-2.5 rounded-[8px] focus:outline-none focus:border-[#55DEE8] transition-all cursor-pointer"
+                className="bg-black border border-white/10 text-white text-[10px] font-black uppercase tracking-widest px-4 py-2.5 rounded-[8px] focus:outline-none focus:border-[#BFF367] transition-all cursor-pointer"
               >
                 <option value="CRICKET">Cricket Stats</option>
                 <option value="FOOTBALL">Football (Coming Soon)</option>
@@ -882,8 +882,8 @@ export default function Profile() {
               {profileUser?.badges && profileUser.badges.length > 0 ? (
                 <div className="flex items-center gap-6 overflow-x-auto pb-2 scrollbar-thin scrollbar-thumb-white/10 scrollbar-track-transparent">
                   {profileUser.badges.map((badge, idx) => (
-                    <div key={idx} className="group relative rounded-[8px] p-[1px] transition-all duration-300 cursor-pointer overflow-hidden shadow-lg hover:shadow-[#55DEE8]/10 shrink-0 min-w-[200px] max-w-[240px]">
-                      <div className="absolute inset-0 bg-gradient-to-r from-[#55DEE8] to-[#BFF367] opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-[8px]" />
+                    <div key={idx} className="group relative rounded-[8px] p-[1px] transition-all duration-300 cursor-pointer overflow-hidden shadow-lg hover:shadow-[#BFF367]/10 shrink-0 min-w-[200px] max-w-[240px]">
+                      <div className="absolute inset-0 bg-gradient-to-r from-[#BFF367] to-[#BFF367] opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-[8px]" />
                       <div className="absolute inset-0 border border-white/10 group-hover:opacity-0 transition-opacity duration-300 rounded-[8px]" />
                       <div className="relative bg-[#0d0d0d] rounded-[8px] p-4 h-full flex flex-col justify-between text-center min-h-[130px]">
                         <div>
@@ -893,7 +893,7 @@ export default function Profile() {
                           <h3 className="text-white text-center mb-1 font-black text-[11px] uppercase tracking-tight truncate">{badge.name}</h3>
                           <p className="text-[9px] text-gray-500 leading-normal font-bold line-clamp-2">{badge.description}</p>
                         </div>
-                        <p className="text-[8px] text-[#55DEE8] font-black uppercase tracking-widest mt-2">{badge.category || 'MILESTONE'}</p>
+                        <p className="text-[8px] text-[#BFF367] font-black uppercase tracking-widest mt-2">{badge.category || 'MILESTONE'}</p>
                       </div>
                     </div>
                   ))}
@@ -953,19 +953,19 @@ export default function Profile() {
                         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-6 animate-in fade-in duration-300">
                           {[
                             { label: 'Matches Played', value: currentStats.matchesPlayed, color: '#white' },
-                            { label: 'Win/Loss Spell', value: `${currentStats.matchesWon}W - ${currentStats.matchesLost}L`, color: '#55DEE8' },
+                            { label: 'Win/Loss Spell', value: `${currentStats.matchesWon}W - ${currentStats.matchesLost}L`, color: '#BFF367' },
                             { label: 'Win Ratio', value: `${currentStats.winPercentage}%`, color: '#BFF367' },
                             { label: 'Runs Scored', value: currentStats.totalRuns, color: '#white' },
                             { label: 'Batting Avg', value: currentStats.battingAverage || "0.0", color: '#white' },
                             { label: 'Strike Rate', value: currentStats.battingStrikeRate || "0.0", color: '#BFF367' },
                             { label: 'High Score', value: currentStats.highestScore || "0", color: '#white' },
                             { label: 'Centuries (100s)', value: currentStats.centuries, color: '#white' },
-                            { label: 'Wickets Taken', value: currentStats.wickets, color: '#55DEE8' },
+                            { label: 'Wickets Taken', value: currentStats.wickets, color: '#BFF367' },
                             { label: 'Economy', value: currentStats.bowlingEconomy || currentStats.economyRate || "0.00", color: '#white' },
                             { label: 'Bowling Avg', value: currentStats.bowlingAverage || "0.00", color: '#white' },
                             { label: 'Best Bowling', value: currentStats.bestBowlingWickets ? `${currentStats.bestBowlingWickets}/${currentStats.bestBowlingRuns}` : "N/A", color: '#white' },
                           ].map((stat, idx) => (
-                            <div key={idx} className="bg-black/40 rounded-[8px] p-4 border border-white/5 hover:border-[#55DEE8]/30 transition-all group">
+                            <div key={idx} className="bg-black/40 rounded-[8px] p-4 border border-white/5 hover:border-[#BFF367]/30 transition-all group">
                               <p className="text-xs font-bold text-gray-500 uppercase tracking-widest mb-1">{stat.label}</p>
                               <p className="text-lg font-black tracking-tight" style={{ color: stat.color }}>{stat.value}</p>
                             </div>
@@ -1061,12 +1061,12 @@ export default function Profile() {
                                   onClick={() => setSelectedMatch(match)}
                                   className="group relative rounded-[8px] p-[1px] transition-all duration-300 cursor-pointer overflow-hidden hover:shadow-[#BFF367]/5"
                                 >
-                                  <div className="absolute inset-0 bg-gradient-to-r from-[#55DEE8] to-[#BFF367] opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-[8px]" />
+                                  <div className="absolute inset-0 bg-gradient-to-r from-[#BFF367] to-[#BFF367] opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-[8px]" />
                                   <div className="absolute inset-0 border border-white/10 group-hover:opacity-0 transition-opacity duration-300 rounded-[8px]" />
                                   <div className="relative bg-[#0d0d0d] rounded-[8px] p-5 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                                     <div>
                                       <div className="flex items-center gap-2 mb-2">
-                                        <span className={`px-2 py-0.5 rounded-[8px] text-[8px] font-black uppercase tracking-widest border ${won ? 'text-[#55DEE8] bg-[#55DEE8]/10 border-[#55DEE8]/20' : 'text-red-400 bg-red-500/10 border-red-500/20'}`}>
+                                        <span className={`px-2 py-0.5 rounded-[8px] text-[8px] font-black uppercase tracking-widest border ${won ? 'text-[#BFF367] bg-[#BFF367]/10 border-[#BFF367]/20' : 'text-red-400 bg-red-500/10 border-red-500/20'}`}>
                                           {won ? 'WON' : 'LOST'}
                                         </span>
                                         <span className="text-[8px] font-bold text-gray-500 uppercase tracking-widest">{new Date(match.date).toLocaleDateString('en-GB')}</span>
@@ -1117,7 +1117,7 @@ export default function Profile() {
                 {isOwnProfile && (
                   <Link 
                     to="/community?createPost=true"
-                    className="px-4 py-2 bg-gradient-to-r from-[#55DEE8] to-[#BFF367] text-black rounded-[8px] text-[10px] font-black uppercase tracking-widest hover:scale-105 active:scale-95 transition-all shadow-[0_4px_12px_rgba(85,222,232,0.2)] flex items-center justify-center"
+                    className="px-4 py-2 bg-gradient-to-r from-[#BFF367] to-[#BFF367] text-black rounded-[8px] text-[10px] font-black uppercase tracking-widest hover:scale-105 active:scale-95 transition-all shadow-[0_4px_12px_rgba(85,222,232,0.2)] flex items-center justify-center"
                   >
                     Create New Post
                   </Link>
@@ -1134,7 +1134,7 @@ export default function Profile() {
                     const postImage = post.mediaUrls?.[0] || post.image || post.imageUrl || "https://images.unsplash.com/photo-1517466787929-bc90951d0974?q=80&w=2070";
                     const postDate = post.createdAt ? new Date(post.createdAt).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' }) : 'Recent';
                     return (
-                      <div key={post.id || post._id} className="bg-gradient-to-br from-white/5 to-white/[0.02] backdrop-blur-sm rounded-[8px] border border-white/10 overflow-hidden hover:border-[#55DEE8]/40 transition-all group">
+                      <div key={post.id || post._id} className="bg-gradient-to-br from-white/5 to-white/[0.02] backdrop-blur-sm rounded-[8px] border border-white/10 overflow-hidden hover:border-[#BFF367]/40 transition-all group">
                         <div className="h-40 relative overflow-hidden bg-zinc-900/50">
                           {post.mediaType === 'video' ? (
                             <div className="w-full h-full relative">
@@ -1169,11 +1169,11 @@ export default function Profile() {
                           <p className="text-[10px] text-gray-500 mb-3 line-clamp-2 leading-relaxed">{post.content}</p>
                           <div className="flex items-center justify-between pt-3 border-t border-white/5">
                             <div className="flex items-center gap-3">
-                              <button className="flex items-center gap-1 text-gray-500 hover:text-[#55DEE8] transition-colors">
+                              <button className="flex items-center gap-1 text-gray-500 hover:text-[#BFF367] transition-colors">
                                 <Heart size={12} />
                                 <span className="text-[9px] font-bold">{post.likes?.length || 0}</span>
                               </button>
-                              <button className="flex items-center gap-1 text-gray-500 hover:text-[#55DEE8] transition-colors">
+                              <button className="flex items-center gap-1 text-gray-500 hover:text-[#BFF367] transition-colors">
                                 <MessageSquare size={12} />
                                 <span className="text-[9px] font-bold">{post.comments?.length || 0}</span>
                               </button>

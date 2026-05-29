@@ -244,12 +244,12 @@ h2, h3, .font-display {
 }
 
 .messages-page {
-  --messages-gradient: linear-gradient(90deg, #55DEE8 0%, #BFF367 100%);
+  --messages-gradient: linear-gradient(90deg, #BFF367 0%, #BFF367 100%);
   --messages-gradient-soft: linear-gradient(90deg, rgba(85, 222, 232, 0.1) 0%, rgba(191, 243, 103, 0.12) 100%);
   --messages-gradient-border: rgba(191, 243, 103, 0.45);
 }
 
-.messages-page :not(svg):not(path)[class*="text-[#55DEE8]"] {
+.messages-page :not(svg):not(path)[class*="text-[#BFF367]"] {
   background: var(--messages-gradient) !important;
   background-clip: text !important;
   -webkit-background-clip: text !important;
@@ -257,33 +257,33 @@ h2, h3, .font-display {
   -webkit-text-fill-color: transparent !important;
 }
 
-.messages-page svg[class*="text-[#55DEE8]"],
-.messages-page [class*="text-[#55DEE8]"] svg {
+.messages-page svg[class*="text-[#BFF367]"],
+.messages-page [class*="text-[#BFF367]"] svg {
   color: #BFF367 !important;
 }
 
-.messages-page [class*="bg-[#55DEE8]"] {
+.messages-page [class*="bg-[#BFF367]"] {
   background: var(--messages-gradient) !important;
 }
 
-.messages-page [class*="bg-[#55DEE8]/10"],
-.messages-page [class*="bg-[#55DEE8]/20"] {
+.messages-page [class*="bg-[#BFF367]/10"],
+.messages-page [class*="bg-[#BFF367]/20"] {
   background: var(--messages-gradient-soft) !important;
 }
 
-.messages-page [class*="border-[#55DEE8]"],
-.messages-page [class*="border-[#55DEE8]/20"],
-.messages-page [class*="border-[#55DEE8]/30"],
-.messages-page [class*="border-[#55DEE8]/40"],
-.messages-page [class*="border-[#55DEE8]/50"] {
+.messages-page [class*="border-[#BFF367]"],
+.messages-page [class*="border-[#BFF367]/20"],
+.messages-page [class*="border-[#BFF367]/30"],
+.messages-page [class*="border-[#BFF367]/40"],
+.messages-page [class*="border-[#BFF367]/50"] {
   border-color: var(--messages-gradient-border) !important;
 }
 
-.messages-page [class*="hover:bg-[#55DEE8]"]:hover {
+.messages-page [class*="hover:bg-[#BFF367]"]:hover {
   background: var(--messages-gradient) !important;
 }
 
-.messages-page [class*="hover:border-[#55DEE8]"]:hover {
+.messages-page [class*="hover:border-[#BFF367]"]:hover {
   border-color: #BFF367 !important;
 }
 

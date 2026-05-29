@@ -29,7 +29,7 @@ const CommunityPosts = () => {
       {/* Header */}
       <div className="flex flex-col gap-2">
         <h1 className="text-3xl font-black text-white flex items-center gap-3">
-          <ShieldAlert className="text-[#55DEE8]" size={32} />
+          <ShieldAlert className="text-[#BFF367]" size={32} />
           Reported Posts
         </h1>
         <p className="text-white/50 font-medium">Manage and review community posts reported by users.</p>
@@ -37,7 +37,7 @@ const CommunityPosts = () => {
 
       {isLoading ? (
         <div className="flex items-center justify-center py-20">
-          <div className="w-8 h-8 rounded-full border-2 border-[#55DEE8] border-t-transparent animate-spin" />
+          <div className="w-8 h-8 rounded-full border-2 border-[#BFF367] border-t-transparent animate-spin" />
         </div>
       ) : reports.length === 0 ? (
         <div className="bg-[#0A0A0A] border border-white/5 rounded-[8px] p-16 text-center">

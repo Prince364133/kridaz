@@ -7,7 +7,7 @@ import toast from "react-hot-toast";
 export default function ProfessionalCustomers() {
   const { role } = useSelector((state) => state.auth);
   const isScorer = role?.toLowerCase().includes("scorer");
-  const themeColor = isScorer ? "#00C187" : "#55DEE8";
+  const themeColor = isScorer ? "#BFF367" : "#BFF367";
 
   const [customers, setCustomers] = useState([]);
   const [loading, setLoading] = useState(true);

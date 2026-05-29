@@ -6,8 +6,8 @@ import axiosInstance from "@hooks/useAxiosInstance.js";
 import ScrollToTop from "@components/common/ScrollToTop";
 import toast from "react-hot-toast";
 
-const GRADIENT = "linear-gradient(90deg, #55DEE8 0%, #BFF367 100%)";
-const GRADIENT_START = "#55DEE8";
+const GRADIENT = "linear-gradient(90deg, #BFF367 0%, #BFF367 100%)";
+const GRADIENT_START = "#BFF367";
 
 const benefits = [
   { icon: Users, title: "Manage Roster", desc: "Easily track student progress, manage subscriptions, and organize batches." },
@@ -136,7 +136,7 @@ export default function ProfessionalLanding() {
       <svg width="0" height="0" className="absolute pointer-events-none">
         <defs>
           <linearGradient id="primaryGradient" x1="0%" y1="0%" x2="100%" y2="0%">
-            <stop offset="0%" stopColor="#55DEE8" />
+            <stop offset="0%" stopColor="#BFF367" />
             <stop offset="100%" stopColor="#BFF367" />
           </linearGradient>
         </defs>
@@ -219,8 +219,8 @@ export default function ProfessionalLanding() {
               { icon: Target, title: "Manage Bookings", desc: "Digital calendar, match reports, and client communication tools." },
               { icon: CheckCircle, title: "Automate Billing", desc: "Automatic invoices and payment reminders so you can focus on the game." }
             ].map((step, i) => (
-              <div key={i} className="p-6 md:p-8 bg-white/5 backdrop-blur-sm rounded-[8px] md:rounded-[8px] border border-white/10 hover:border-[#55DEE8]/30 transition-all group">
-                <div className="flex items-center justify-center w-12 h-12 md:w-14 md:h-14 mx-auto mb-4 md:mb-6 rounded-[8px] md:rounded-[8px] bg-white/10 group-hover:bg-[#55DEE8]/20 transition-colors">
+              <div key={i} className="p-6 md:p-8 bg-white/5 backdrop-blur-sm rounded-[8px] md:rounded-[8px] border border-white/10 hover:border-[#BFF367]/30 transition-all group">
+                <div className="flex items-center justify-center w-12 h-12 md:w-14 md:h-14 mx-auto mb-4 md:mb-6 rounded-[8px] md:rounded-[8px] bg-white/10 group-hover:bg-[#BFF367]/20 transition-colors">
                   <step.icon className="w-6 h-6 md:w-7 md:h-7 text-white transition-colors" stroke="currentColor" />
                 </div>
                 <h3 className="text-lg md:text-xl font-bold text-white mb-2 md:mb-3 uppercase tracking-wider" style={{ fontFamily: "'Open Sans'" }}>{step.title}</h3>
@@ -293,7 +293,7 @@ export default function ProfessionalLanding() {
             ) : user?.applicationStatus === "pending" ? (
               <div className="text-center py-8">
                 <div className="w-16 h-16 rounded-full border flex items-center justify-center mx-auto mb-6" style={{ borderColor: "rgba(85,222,232,0.3)", backgroundColor: "rgba(85,222,232,0.1)" }}>
-                  <Loader2 size={32} className="text-[#55DEE8] animate-spin" />
+                  <Loader2 size={32} className="text-[#BFF367] animate-spin" />
                 </div>
                 <h2 className="text-2xl font-bold mb-4 uppercase tracking-wider text-white" style={{ fontFamily: "'Open Sans'" }}>Application Pending</h2>
                 <p className="text-gray-400 text-sm mb-6 leading-relaxed">
@@ -319,9 +319,9 @@ export default function ProfessionalLanding() {
                       <button
                         key={role.id}
                         onClick={() => toggleRole(role.id)}
-                        className={`flex flex-col items-center justify-center p-6 border rounded-[10px] transition-all ${ isSelected ? 'border-[#55DEE8] bg-[#55DEE8]/10 text-white' : 'border-white/10 bg-white/5 text-gray-400 hover:border-white/30 hover:bg-white/10' }`}
+                        className={`flex flex-col items-center justify-center p-6 border rounded-[10px] transition-all ${ isSelected ? 'border-[#BFF367] bg-[#BFF367]/10 text-white' : 'border-white/10 bg-white/5 text-gray-400 hover:border-white/30 hover:bg-white/10' }`}
                       >
-                        <role.icon size={32} className={`mb-3 ${isSelected ? 'text-[#55DEE8]' : ''}`} />
+                        <role.icon size={32} className={`mb-3 ${isSelected ? 'text-[#BFF367]' : ''}`} />
                         <span className="font-bold uppercase tracking-wider text-sm">{role.label}</span>
                       </button>
                     )
@@ -358,11 +358,11 @@ export default function ProfessionalLanding() {
                 {/* Aadhaar Upload Box */}
                 <label className={`flex flex-col items-center gap-3 md:gap-4 cursor-pointer group ${aadharFront && aadharBack ? 'opacity-80' : ''}`}>
                   <span className="text-white font-black tracking-wider uppercase text-center text-sm md:text-base" style={{ fontFamily: "'Inter'" }}>AADHAAR CARD</span>
-                  <div className={`relative w-full h-[110px] md:h-[130px] bg-[#D9D9D9] rounded-[10px] p-2 md:p-3 overflow-hidden shadow-inner flex flex-col justify-between transition-all ${aadharFront && aadharBack ? 'ring-2 ring-[#55DEE8]' : 'group-hover:ring-2 group-hover:ring-[#55DEE8]'}`}>
+                  <div className={`relative w-full h-[110px] md:h-[130px] bg-[#D9D9D9] rounded-[10px] p-2 md:p-3 overflow-hidden shadow-inner flex flex-col justify-between transition-all ${aadharFront && aadharBack ? 'ring-2 ring-[#BFF367]' : 'group-hover:ring-2 group-hover:ring-[#BFF367]'}`}>
                     {/* Hover Overlay & Upload Logic */}
                     {aadharFront && aadharBack ? (
                       <div className="absolute inset-0 bg-black/80 flex flex-col items-center justify-center z-10 backdrop-blur-sm">
-                        <FileCheck className="text-[#55DEE8] mb-2" size={32} />
+                        <FileCheck className="text-[#BFF367] mb-2" size={32} />
                         <span className="text-white font-bold tracking-wider uppercase text-center text-xs" style={{ fontFamily: "'Inter'" }}>Aadhaar Uploaded</span>
                       </div>
                     ) : (

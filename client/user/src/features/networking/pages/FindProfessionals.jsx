@@ -415,7 +415,7 @@ export default function FindProfessionals() {
                 
                 {/* Gradient line for selected state */}
                 {selectedSport === sport.name && (
-                  <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 w-12 h-1 bg-gradient-to-r from-[#55DEE8] to-[#BFF367] rounded-full shadow-[0_0_10px_rgba(191,243,103,0.6)]" />
+                  <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 w-12 h-1 bg-gradient-to-r from-[#BFF367] to-[#BFF367] rounded-full shadow-[0_0_10px_rgba(191,243,103,0.6)]" />
                 )}
               </div>
             ))}
@@ -450,7 +450,7 @@ export default function FindProfessionals() {
                 className="group cursor-pointer"
                 onClick={() => navigate(`/professionals/${pro.id || pro._id}`)}
               >
-                <div className="relative bg-[#0d0d0e] rounded-[8px] p-2.5 border border-white/5 transition-all duration-300 hover:border-[#55DEE8]/30">
+                <div className="relative bg-[#0d0d0e] rounded-[8px] p-2.5 border border-white/5 transition-all duration-300 hover:border-[#BFF367]/30">
                   {/* Image Box */}
                   <div className="relative aspect-[1/1.2] rounded-md overflow-hidden block mb-3 bg-[#161618]">
                     {pro.profilePicture ? (
@@ -477,7 +477,7 @@ export default function FindProfessionals() {
 
                     {/* Role Badges */}
                     <div className="absolute top-2 left-2">
-                      <div className="px-1.5 py-0.5 rounded-[4px] bg-black/85 border border-white/10 flex items-center justify-center text-[#55DEE8] text-[9px] font-black tracking-wider gap-1">
+                      <div className="px-1.5 py-0.5 rounded-[4px] bg-black/85 border border-white/10 flex items-center justify-center text-[#BFF367] text-[9px] font-black tracking-wider gap-1">
                         {pro.role === 'umpire' ? <Shield size={8} /> :
                           pro.role === 'streamer' ? <Video size={8} /> :
                             pro.role === 'scorer' ? <Activity size={8} /> :
@@ -531,7 +531,7 @@ export default function FindProfessionals() {
             }
             setShowMatchModal(true);
           }}
-          className="fixed bottom-24 md:bottom-8 left-1/2 -translate-x-1/2 z-[60] flex items-center gap-2.5 px-6 py-3.5 rounded-full bg-gradient-to-r from-[#55DEE8] to-[#BFF367] text-black font-black text-xs uppercase tracking-widest shadow-[0_8px_32px_rgba(85,222,232,0.3)] hover:shadow-[0_8px_40px_rgba(85,222,232,0.5)] hover:scale-105 active:scale-95 transition-all duration-300 group"
+          className="fixed bottom-24 md:bottom-8 left-1/2 -translate-x-1/2 z-[60] flex items-center gap-2.5 px-6 py-3.5 rounded-full bg-gradient-to-r from-[#BFF367] to-[#BFF367] text-black font-black text-xs uppercase tracking-widest shadow-[0_8px_32px_rgba(85,222,232,0.3)] hover:shadow-[0_8px_40px_rgba(85,222,232,0.5)] hover:scale-105 active:scale-95 transition-all duration-300 group"
         >
           <Zap size={16} className="group-hover:animate-pulse" />
           Request Match
@@ -819,12 +819,12 @@ export default function FindProfessionals() {
                     value={locationQuery}
                     onChange={(e) => handleLocationSearch(e.target.value)}
                     onFocus={() => locationResults.length > 0 && setShowLocationDropdown(true)}
-                    className="w-full bg-neutral-900 border border-white/10 rounded-xl pl-10 pr-10 py-3.5 text-sm text-white outline-none focus:border-[#55DEE8] transition-colors placeholder-white/30 shadow-inner"
+                    className="w-full bg-neutral-900 border border-white/10 rounded-xl pl-10 pr-10 py-3.5 text-sm text-white outline-none focus:border-[#BFF367] transition-colors placeholder-white/30 shadow-inner"
                     autoComplete="off"
                     autoFocus
                   />
                   {locationSearching && (
-                    <Loader2 size={16} className="absolute right-3.5 top-1/2 -translate-y-1/2 text-[#55DEE8] animate-spin" />
+                    <Loader2 size={16} className="absolute right-3.5 top-1/2 -translate-y-1/2 text-[#BFF367] animate-spin" />
                   )}
                 </div>
 
@@ -842,9 +842,9 @@ export default function FindProfessionals() {
                           onClick={() => handleSelectLocation(place)}
                           className="w-full flex items-start gap-3 px-4 py-3 hover:bg-white/5 text-left transition-colors border-b border-white/5 last:border-b-0 group"
                         >
-                          <MapPin size={16} className="text-[#55DEE8]/60 mt-0.5 shrink-0 group-hover:text-[#55DEE8]" />
+                          <MapPin size={16} className="text-[#BFF367]/60 mt-0.5 shrink-0 group-hover:text-[#BFF367]" />
                           <div className="min-w-0 flex-1">
-                            <p className="text-sm font-bold text-white truncate group-hover:text-[#55DEE8] transition-colors">{primary}</p>
+                            <p className="text-sm font-bold text-white truncate group-hover:text-[#BFF367] transition-colors">{primary}</p>
                             <p className="text-[11px] text-white/40 truncate mt-0.5">{secondary}</p>
                           </div>
                         </button>

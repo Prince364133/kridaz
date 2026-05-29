@@ -19,7 +19,7 @@ import { useSelector } from "react-redux";
 const StreamerBanking = () => {
   const { role } = useSelector((state) => state.auth);
   const isScorer = role?.toLowerCase().includes("scorer");
-  const themeColor = isScorer ? "#00C187" : "#55DEE8";
+  const themeColor = isScorer ? "#BFF367" : "#BFF367";
   const vaultTitle = isScorer ? "Payout & Settlement" : "Marketplace Vault";
 
   const { bankingDetails, walletBalance, payoutSettings, loading: bankingLoading, isPayoutDay, updateBanking, requestPayout, verifyPassword } = useBanking();
@@ -180,7 +180,7 @@ const StreamerBanking = () => {
              
              {/* Payout Trigger Card */}
              <div className="bg-white/[0.03] backdrop-blur-xl border border-white/5 rounded-[8px] p-8 shadow-2xl relative overflow-hidden group">
-                <div className="absolute top-0 right-0 w-64 h-64 bg-[#00C187]/5 blur-[100px] pointer-events-none" />
+                <div className="absolute top-0 right-0 w-64 h-64 bg-[#BFF367]/5 blur-[100px] pointer-events-none" />
                 <div className="flex flex-col md:flex-row justify-between items-center gap-8 relative z-10">
                    <div className="space-y-4 text-center md:text-left">
                       <div className="flex items-center justify-center md:justify-start gap-2">
@@ -285,7 +285,7 @@ const StreamerBanking = () => {
                         <label className="text-[9px] font-black text-neutral-500 uppercase tracking-widest ml-1">Account Holder</label>
                         <input 
                           type="text" required
-                          className="w-full bg-black border border-white/5 rounded-lg px-5 py-4 text-[13px] text-white focus:outline-none focus:border-[#00C187]/30 transition-all font-black placeholder-neutral-800"
+                          className="w-full bg-black border border-white/5 rounded-lg px-5 py-4 text-[13px] text-white focus:outline-none focus:border-[#BFF367]/30 transition-all font-black placeholder-neutral-800"
                           value={bankForm.accountName}
                           onChange={e => setBankForm({...bankForm, accountName: e.target.value})}
                           placeholder="Full Legal Name"
@@ -297,7 +297,7 @@ const StreamerBanking = () => {
                               <label className="text-[9px] font-black text-neutral-500 uppercase tracking-widest ml-1">Account Number</label>
                               <input 
                                 type="text" required
-                                className="w-full bg-black border border-white/5 rounded-lg px-5 py-4 text-[13px] text-white focus:outline-none focus:border-[#00C187]/30 transition-all font-black placeholder-neutral-800"
+                                className="w-full bg-black border border-white/5 rounded-lg px-5 py-4 text-[13px] text-white focus:outline-none focus:border-[#BFF367]/30 transition-all font-black placeholder-neutral-800"
                                 value={bankForm.accountNumber}
                                 onChange={e => setBankForm({...bankForm, accountNumber: e.target.value})}
                                 placeholder="Account Number"
@@ -307,7 +307,7 @@ const StreamerBanking = () => {
                               <label className="text-[9px] font-black text-neutral-500 uppercase tracking-widest ml-1">IFSC Code</label>
                               <input 
                                 type="text" required
-                                className="w-full bg-black border border-white/5 rounded-lg px-5 py-4 text-[13px] text-white focus:outline-none focus:border-[#00C187]/30 transition-all font-black uppercase placeholder-neutral-800"
+                                className="w-full bg-black border border-white/5 rounded-lg px-5 py-4 text-[13px] text-white focus:outline-none focus:border-[#BFF367]/30 transition-all font-black uppercase placeholder-neutral-800"
                                 value={bankForm.ifscCode}
                                 onChange={e => setBankForm({...bankForm, ifscCode: e.target.value})}
                                 placeholder="IFSC CODE"
@@ -320,7 +320,7 @@ const StreamerBanking = () => {
                            <input 
                              type="text" required
                              placeholder="username@bank"
-                             className="w-full bg-black border border-white/5 rounded-lg px-5 py-4 text-[13px] text-white focus:outline-none focus:border-[#00C187]/30 transition-all font-black"
+                             className="w-full bg-black border border-white/5 rounded-lg px-5 py-4 text-[13px] text-white focus:outline-none focus:border-[#BFF367]/30 transition-all font-black"
                              value={bankForm.upiId}
                              onChange={e => setBankForm({...bankForm, upiId: e.target.value})}
                            />
@@ -454,7 +454,7 @@ const StreamerBanking = () => {
                           <label className="text-[10px] font-black text-neutral-500 uppercase tracking-widest ml-1">Confirm Identity Password</label>
                           <input 
                             type="password"
-                            className="w-full bg-black border border-white/5 rounded-lg px-6 py-5 text-lg focus:outline-none focus:border-[#00C187]/30 text-white font-black"
+                            className="w-full bg-black border border-white/5 rounded-lg px-6 py-5 text-lg focus:outline-none focus:border-[#BFF367]/30 text-white font-black"
                             placeholder="Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �"
                             value={password}
                             onChange={e => setPassword(e.target.value)}

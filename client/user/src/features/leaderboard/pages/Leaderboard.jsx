@@ -9,8 +9,8 @@ import {
 import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 
-const PRI = "#55DEE8";
-const GRAD = "linear-gradient(90deg, #55DEE8 0%, #BFF367 100%)";
+const PRI = "#BFF367";
+const GRAD = "linear-gradient(90deg, #BFF367 0%, #BFF367 100%)";
 
 const HEADING_STYLE = { fontFamily: "'Open Sans', sans-serif" };
 const SUBHEADING_STYLE = { fontFamily: "'Inter 28pt Light', sans-serif", fontWeight: 300 };
@@ -74,9 +74,9 @@ const Leaderboard = () => {
   }, [category, selectedSport]);
 
   const getRankIcon = (rank) => {
-    if (rank === 1) return <div className="w-8 h-10 bg-gradient-to-b from-[#55DEE8] to-[#BFF367] rounded-lg flex items-center justify-center shadow-[0_0_15px_rgba(85,222,232,0.4)] border border-[#55DEE8]/30 text-black font-black">1</div>;
+    if (rank === 1) return <div className="w-8 h-10 bg-gradient-to-b from-[#BFF367] to-[#BFF367] rounded-lg flex items-center justify-center shadow-[0_0_15px_rgba(85,222,232,0.4)] border border-[#BFF367]/30 text-black font-black">1</div>;
     if (rank === 2) return <div className="w-8 h-10 bg-gradient-to-b from-gray-300 to-gray-500 rounded-lg flex items-center justify-center shadow-[0_0_15px_rgba(148,163,184,0.4)] border border-gray-200/30 text-black font-black">2</div>;
-    if (rank === 3) return <div className="w-8 h-10 bg-gradient-to-b from-[#55DEE8] to-[#BFF367] rounded-lg flex items-center justify-center shadow-[0_0_15px_rgba(180,83,9,0.4)] border border-[#55DEE8]/30 text-black font-black">3</div>;
+    if (rank === 3) return <div className="w-8 h-10 bg-gradient-to-b from-[#BFF367] to-[#BFF367] rounded-lg flex items-center justify-center shadow-[0_0_15px_rgba(180,83,9,0.4)] border border-[#BFF367]/30 text-black font-black">3</div>;
     return <span className="text-gray-500 font-bold ml-3">{rank}</span>;
   };
 
@@ -115,7 +115,7 @@ const Leaderboard = () => {
           
           {/* Header Section */}
           <div className="flex flex-col items-center mb-12">
-            <Trophy size={40} className="text-[#55DEE8] mb-4 drop-shadow-[0_0_10px_rgba(85,222,232,0.5)]" />
+            <Trophy size={40} className="text-[#BFF367] mb-4 drop-shadow-[0_0_10px_rgba(85,222,232,0.5)]" />
             <h1 className="text-5xl font-black tracking-tighter uppercase mb-2" style={HEADING_STYLE}>
               {selectedSport} <span style={{ background: GRAD, WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", backgroundClip: "text" }}>Leaderboard</span>
             </h1>
@@ -129,20 +129,20 @@ const Leaderboard = () => {
               <select 
                 value={category}
                 onChange={(e) => setCategory(e.target.value)}
-                className="w-full bg-[#0A0A0A] border border-white/5 rounded-[8px] px-6 py-4 text-[11px] font-black uppercase tracking-[0.2em] outline-none focus:border-[#55DEE8]/50 transition-all appearance-none cursor-pointer shadow-2xl text-[#55DEE8]"
+                className="w-full bg-[#0A0A0A] border border-white/5 rounded-[8px] px-6 py-4 text-[11px] font-black uppercase tracking-[0.2em] outline-none focus:border-[#BFF367]/50 transition-all appearance-none cursor-pointer shadow-2xl text-[#BFF367]"
               >
                 {sportCategories[selectedSport].map((cat) => (
                   <option key={cat} value={cat}>{cat.replace('_', ' ')} CATEGORY</option>
                 ))}
               </select>
               <div className="absolute right-6 top-1/2 -translate-y-1/2 pointer-events-none">
-                <ChevronLeft className="rotate-[-90deg] text-[#55DEE8]" size={16} />
+                <ChevronLeft className="rotate-[-90deg] text-[#BFF367]" size={16} />
               </div>
             </div>
 
             <div className="flex gap-4 w-full lg:w-auto">
               <div className="relative flex-1 lg:flex-none">
-                <select className="w-full bg-[#0A0A0A] border border-white/5 rounded-[8px] px-4 py-3 text-[10px] font-black uppercase tracking-widest outline-none focus:border-[#55DEE8]/50 transition-all appearance-none cursor-pointer pr-10">
+                <select className="w-full bg-[#0A0A0A] border border-white/5 rounded-[8px] px-4 py-3 text-[10px] font-black uppercase tracking-widest outline-none focus:border-[#BFF367]/50 transition-all appearance-none cursor-pointer pr-10">
                   <option>All Time</option>
                   <option>Monthly</option>
                   <option>Weekly</option>
@@ -152,7 +152,7 @@ const Leaderboard = () => {
                 </div>
               </div>
               <div className="relative flex-1 lg:flex-none">
-                <select className="w-full bg-[#0A0A0A] border border-white/5 rounded-[8px] px-4 py-3 text-[10px] font-black uppercase tracking-widest outline-none focus:border-[#55DEE8]/50 transition-all appearance-none cursor-pointer pr-10">
+                <select className="w-full bg-[#0A0A0A] border border-white/5 rounded-[8px] px-4 py-3 text-[10px] font-black uppercase tracking-widest outline-none focus:border-[#BFF367]/50 transition-all appearance-none cursor-pointer pr-10">
                   <option>Worldwide</option>
                   <option>National</option>
                   <option>Regional</option>
@@ -172,11 +172,11 @@ const Leaderboard = () => {
               <div className="grid grid-cols-[80px_2fr_1fr_1fr_1fr_1fr_1fr] p-6 border-b border-white/5 bg-white/[0.02]">
                 <div className="text-[10px] font-black text-gray-500 uppercase tracking-widest">Rank</div>
                 <div className="text-[10px] font-black text-gray-500 uppercase tracking-widest">Player</div>
-                <div className="text-[10px] font-black text-gray-500 uppercase tracking-widest flex items-center gap-2"><Clock size={12} className="text-[#55DEE8]" /> Matches</div>
-                <div className="text-[10px] font-black text-gray-500 uppercase tracking-widest flex items-center gap-2"><Target size={12} className="text-[#55DEE8]" /> {category}</div>
-                <div className="text-[10px] font-black text-gray-500 uppercase tracking-widest flex items-center gap-2"><Star size={12} className="text-[#55DEE8]" /> Highest</div>
-                <div className="text-[10px] font-black text-gray-500 uppercase tracking-widest flex items-center gap-2"><BarChart3 size={12} className="text-[#55DEE8]" /> Average</div>
-                <div className="text-[10px] font-black text-gray-500 uppercase tracking-widest flex items-center gap-2"><Activity size={12} className="text-[#55DEE8]" /> Strike</div>
+                <div className="text-[10px] font-black text-gray-500 uppercase tracking-widest flex items-center gap-2"><Clock size={12} className="text-[#BFF367]" /> Matches</div>
+                <div className="text-[10px] font-black text-gray-500 uppercase tracking-widest flex items-center gap-2"><Target size={12} className="text-[#BFF367]" /> {category}</div>
+                <div className="text-[10px] font-black text-gray-500 uppercase tracking-widest flex items-center gap-2"><Star size={12} className="text-[#BFF367]" /> Highest</div>
+                <div className="text-[10px] font-black text-gray-500 uppercase tracking-widest flex items-center gap-2"><BarChart3 size={12} className="text-[#BFF367]" /> Average</div>
+                <div className="text-[10px] font-black text-gray-500 uppercase tracking-widest flex items-center gap-2"><Activity size={12} className="text-[#BFF367]" /> Strike</div>
               </div>
 
               <div className="divide-y divide-white/5 min-h-[500px]">
@@ -193,17 +193,17 @@ const Leaderboard = () => {
                       whileInView={{ opacity: 1, y: 0 }}
                       transition={{ delay: idx * 0.05 }}
                       onClick={() => navigate(`/profile/${player._id}`)}
-                      className="grid grid-cols-[80px_2fr_1fr_1fr_1fr_1fr_1fr] p-5 items-center hover:bg-[#55DEE8]/5 transition-all group cursor-pointer border-l-2 border-transparent hover:border-[#55DEE8]"
+                      className="grid grid-cols-[80px_2fr_1fr_1fr_1fr_1fr_1fr] p-5 items-center hover:bg-[#BFF367]/5 transition-all group cursor-pointer border-l-2 border-transparent hover:border-[#BFF367]"
                     >
                       <div className="flex items-center">{getRankIcon(idx + 1)}</div>
                       <div className="flex items-center gap-4">
-                        <div className="w-12 h-12 rounded-full overflow-hidden border-2 border-white/10 group-hover:border-[#55DEE8]/50 transition-all">
+                        <div className="w-12 h-12 rounded-full overflow-hidden border-2 border-white/10 group-hover:border-[#BFF367]/50 transition-all">
                           <img src={player.profilePicture || `https://api.dicebear.com/7.x/avataaars/svg?seed=${player.name}`} alt="" className="w-full h-full object-cover" />
                         </div>
                         <div>
-                          <p className="text-sm font-black uppercase tracking-tight group-hover:text-[#55DEE8] transition-colors">{player.name}</p>
+                          <p className="text-sm font-black uppercase tracking-tight group-hover:text-[#BFF367] transition-colors">{player.name}</p>
                           <p className="text-[9px] font-bold text-gray-500 uppercase tracking-widest flex items-center gap-1">
-                            <MapPin size={10} className="text-[#55DEE8]/50" /> {player.city || 'Global Elite'}
+                            <MapPin size={10} className="text-[#BFF367]/50" /> {player.city || 'Global Elite'}
                           </p>
                         </div>
                       </div>
@@ -247,9 +247,9 @@ const Leaderboard = () => {
 
               {/* Table Footer */}
               <div className="p-4 bg-white/[0.01] border-t border-white/5 flex items-center justify-center gap-2">
-                 <Shield size={12} className="text-[#55DEE8]" />
+                 <Shield size={12} className="text-[#BFF367]" />
                  <p className="text-[8px] font-black text-gray-600 uppercase tracking-widest">Rankings are updated periodically based on verified {selectedSport} matches.</p>
-                 <Shield size={12} className="text-[#55DEE8]" />
+                 <Shield size={12} className="text-[#BFF367]" />
               </div>
             </div>
 
@@ -257,13 +257,13 @@ const Leaderboard = () => {
             <div className="w-full xl:w-[320px] space-y-6">
               
               <div className="bg-[#0A0A0A] rounded-[8px] border border-white/5 p-6 shadow-2xl">
-                <h3 className="text-xs font-black text-[#55DEE8] uppercase tracking-[0.2em] mb-8 text-center" style={HEADING_STYLE}>{selectedSport} Overview</h3>
+                <h3 className="text-xs font-black text-[#BFF367] uppercase tracking-[0.2em] mb-8 text-center" style={HEADING_STYLE}>{selectedSport} Overview</h3>
                 
                 <div className="flex flex-col items-center mb-8 relative">
-                  <div className="w-32 h-32 rounded-full border-[8px] border-white/5 border-t-[#55DEE8] animate-[spin_10s_linear_infinite] flex items-center justify-center"></div>
+                  <div className="w-32 h-32 rounded-full border-[8px] border-white/5 border-t-[#BFF367] animate-[spin_10s_linear_infinite] flex items-center justify-center"></div>
                   <div className="absolute inset-0 flex items-center justify-center">
                   <div className="w-24 h-24 rounded-full bg-black flex items-center justify-center" style={{ boxShadow: '0 0 20px rgba(85,222,232,0.3)' }}>
-                    <Trophy size={32} style={{ color: '#55DEE8' }} />
+                    <Trophy size={32} style={{ color: '#BFF367' }} />
                     </div>
                   </div>
                 </div>
@@ -279,7 +279,7 @@ const Leaderboard = () => {
                   ].map((stat, idx) => (
                     <div key={idx} className="flex items-center justify-between group">
                       <div className="flex items-center gap-3">
-                        <stat.icon size={16} className="text-[#55DEE8]/60 group-hover:text-[#55DEE8] transition-colors" />
+                        <stat.icon size={16} className="text-[#BFF367]/60 group-hover:text-[#BFF367] transition-colors" />
                         <span className="text-[10px] font-black text-gray-500 uppercase tracking-widest">{stat.label}</span>
                       </div>
                       <span className="text-xs font-black text-white font-mono">---</span>
@@ -288,14 +288,14 @@ const Leaderboard = () => {
                 </div>
               </div>
 
-              <div className="bg-gradient-to-br from-[#111] to-[#050505] rounded-[8px] border border-[#55DEE8]/20 p-6 shadow-2xl relative overflow-hidden group">
-                <div className="absolute top-[-20px] right-[-20px] w-32 h-32 bg-[#55DEE8]/5 rounded-full blur-3xl group-hover:bg-[#55DEE8]/10 transition-all"></div>
+              <div className="bg-gradient-to-br from-[#111] to-[#050505] rounded-[8px] border border-[#BFF367]/20 p-6 shadow-2xl relative overflow-hidden group">
+                <div className="absolute top-[-20px] right-[-20px] w-32 h-32 bg-[#BFF367]/5 rounded-full blur-3xl group-hover:bg-[#BFF367]/10 transition-all"></div>
                 <div className="flex items-start gap-4">
-                  <div className="p-3 rounded-[8px] bg-[#55DEE8]/10 text-[#55DEE8] shadow-inner shadow-[#55DEE8]/20">
+                  <div className="p-3 rounded-[8px] bg-[#BFF367]/10 text-[#BFF367] shadow-inner shadow-[#BFF367]/20">
                     <Crown size={24} strokeWidth={2.5} />
                   </div>
                   <div>
-                    <h4 className="text-[10px] font-black text-[#55DEE8] uppercase tracking-widest mb-1" style={HEADING_STYLE}>Be the next champion</h4>
+                    <h4 className="text-[10px] font-black text-[#BFF367] uppercase tracking-widest mb-1" style={HEADING_STYLE}>Be the next champion</h4>
                     <p className="text-[9px] text-gray-500 leading-relaxed font-bold uppercase tracking-tight">Play more matches and climb the leaderboard!</p>
                   </div>
                 </div>

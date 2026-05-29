@@ -28,7 +28,7 @@ const BookingsTab = ({ role }) => {
   const getStatusStyle = (status) => {
     switch (status) {
       case "ASSIGNED":
-        return "bg-[#55DEE8]/10 text-[#55DEE8] border border-[#55DEE8]/20";
+        return "bg-[#BFF367]/10 text-[#BFF367] border border-[#BFF367]/20";
       case "IN_PROGRESS":
         return "bg-green-500/10 text-green-400 border border-green-500/20";
       case "COMPLETED":
@@ -51,13 +51,13 @@ const BookingsTab = ({ role }) => {
         <div className="flex gap-4">
           <button
             onClick={() => setActiveSubTab("active")}
-            className={`pb-3 text-sm font-semibold border-b-2 transition-colors relative ${activeSubTab === "active" ? "text-[#55DEE8] border-[#55DEE8]" : "text-[#878C9F] border-transparent hover:text-white"}`}
+            className={`pb-3 text-sm font-semibold border-b-2 transition-colors relative ${activeSubTab === "active" ? "text-[#BFF367] border-[#BFF367]" : "text-[#878C9F] border-transparent hover:text-white"}`}
           >
             Active Assignments ({activeBookings.length})
           </button>
           <button
             onClick={() => setActiveSubTab("history")}
-            className={`pb-3 text-sm font-semibold border-b-2 transition-colors relative ${activeSubTab === "history" ? "text-[#55DEE8] border-[#55DEE8]" : "text-[#878C9F] border-transparent hover:text-white"}`}
+            className={`pb-3 text-sm font-semibold border-b-2 transition-colors relative ${activeSubTab === "history" ? "text-[#BFF367] border-[#BFF367]" : "text-[#878C9F] border-transparent hover:text-white"}`}
           >
             Booking History ({completedBookings.length})
           </button>
@@ -65,7 +65,7 @@ const BookingsTab = ({ role }) => {
 
         <button 
           onClick={refetch}
-          className="text-xs text-[#878C9F] hover:text-[#55DEE8] transition-colors"
+          className="text-xs text-[#878C9F] hover:text-[#BFF367] transition-colors"
         >
           Refresh List
         </button>
@@ -92,7 +92,7 @@ const BookingsTab = ({ role }) => {
           {currentList.map((booking) => (
             <div 
               key={booking.id} 
-              className="p-5 rounded-2xl bg-[#141414] border border-[#2D2D2D] hover:border-[#55DEE8]/30 transition-all duration-300 space-y-4"
+              className="p-5 rounded-2xl bg-[#141414] border border-[#2D2D2D] hover:border-[#BFF367]/30 transition-all duration-300 space-y-4"
             >
               <div className="flex justify-between items-start">
                 <div className="space-y-1">
@@ -104,12 +104,12 @@ const BookingsTab = ({ role }) => {
                     <span>{new Date(booking.createdAt).toLocaleDateString("en-IN", { dateStyle: "medium" })}</span>
                   </div>
                 </div>
-                <h4 className="text-[#55DEE8] font-bold text-lg">₹{booking.hourlyRate}</h4>
+                <h4 className="text-[#BFF367] font-bold text-lg">₹{booking.hourlyRate}</h4>
               </div>
 
               {/* Location details */}
               <div className="flex gap-2">
-                <MapPin size={16} className="text-[#55DEE8] flex-shrink-0 mt-0.5" />
+                <MapPin size={16} className="text-[#BFF367] flex-shrink-0 mt-0.5" />
                 <div>
                   <h5 className="text-sm font-semibold text-white">
                     {booking.ground?.name || "Custom Venue"}
@@ -123,7 +123,7 @@ const BookingsTab = ({ role }) => {
               {/* Client information */}
               <div className="p-3 bg-[#1e1e1e] rounded-xl border border-[#2D2D2D] flex items-center justify-between">
                 <div className="flex items-center gap-2">
-                  <div className="w-8 h-8 rounded-full bg-[#55DEE8]/10 text-[#55DEE8] flex items-center justify-center font-bold text-xs uppercase">
+                  <div className="w-8 h-8 rounded-full bg-[#BFF367]/10 text-[#BFF367] flex items-center justify-center font-bold text-xs uppercase">
                     {booking.user?.name?.charAt(0) || "U"}
                   </div>
                   <div>
@@ -136,7 +136,7 @@ const BookingsTab = ({ role }) => {
                     href={`tel:${booking.user.phone}`} 
                     className="p-2 bg-black hover:bg-[#222] rounded-lg transition-colors border border-[#2d2d2d]"
                   >
-                    <User size={14} className="text-[#878C9F] hover:text-[#55DEE8]" />
+                    <User size={14} className="text-[#878C9F] hover:text-[#BFF367]" />
                   </a>
                 )}
               </div>

@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import { ChevronRight, Eye, ThumbsUp, ArrowLeft, Search, Calendar, Clock, Tag } from 'lucide-react';
 import axios from 'axios';
 
-const PRI = "#55DEE8";
+const PRI = "#BFF367";
 const BDR = "#2A2A2A";
 const SUBHEADING_STYLE = { fontFamily: "'Inter 28pt Light', sans-serif", fontWeight: 300 };
 

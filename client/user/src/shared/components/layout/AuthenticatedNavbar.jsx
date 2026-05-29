@@ -30,7 +30,7 @@ import { getDynamicProfileRoute } from "@utils/routeUtils";
 
 /**
  * AuthenticatedNavbar Rs � Role-aware top navigation.
- * Fully rebranded for Scorer users with Teal Green (#00C187) and Inter typography.
+ * Fully rebranded for Scorer users with Teal Green (#BFF367) and Inter typography.
  */
 
 const AuthenticatedNavbar = ({ toggleSidebar }) => {
@@ -45,7 +45,7 @@ const AuthenticatedNavbar = ({ toggleSidebar }) => {
   const user = useSelector((state) => state?.auth?.user);
   const role = useSelector((state) => state?.auth?.role);
   const isScorer = role?.toLowerCase().includes("scorer");
-  const themeColor = isScorer ? "#00C187" : "#BFF367";
+  const themeColor = isScorer ? "#BFF367" : "#BFF367";
 
   const { notifications, loading, unreadCount, markRead, markAllRead, clearAll } = useNotifications();
 
@@ -167,7 +167,7 @@ const AuthenticatedNavbar = ({ toggleSidebar }) => {
               <button 
                 onClick={() => setIsManualBookingOpen(true)}
                 className="hidden md:flex items-center gap-2 px-6 py-2.5 rounded-lg font-black text-[10px] uppercase tracking-widest transition-all shadow-xl active:scale-95"
-                style={{ background: 'linear-gradient(90deg, #55DEE8 0%, #BFF367 100%)', color: '#000', boxShadow: `0 5px 15px ${themeColor}33` }}
+                style={{ background: 'linear-gradient(90deg, #BFF367 0%, #BFF367 100%)', color: '#000', boxShadow: `0 5px 15px ${themeColor}33` }}
               >
                 <Plus size={14} strokeWidth={3} />
                 <span>Manual Booking</span>

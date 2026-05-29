@@ -74,7 +74,7 @@ const ScorerSidebar = ({ isOpen, toggleSidebar, isMinimized, className }) => {
         }}
       >
         {isActive && !isLogout && (
-          <div className="absolute inset-x-2 inset-y-1 bg-[#00C187] rounded-[8px] -z-10 shadow-[0_0_15px_rgba(0,193,135,0.3)] transition-all duration-300" />
+          <div className="absolute inset-x-2 inset-y-1 bg-[#BFF367] rounded-[8px] -z-10 shadow-[0_0_15px_rgba(0,193,135,0.3)] transition-all duration-300" />
         )}
         
         {!isActive && !isLogout && (
@@ -84,7 +84,7 @@ const ScorerSidebar = ({ isOpen, toggleSidebar, isMinimized, className }) => {
         <div className="flex-shrink-0 flex items-center justify-center w-6">
           <Icon 
             size={18} 
-            className={`transition-colors duration-300 ${ isLogout ? "text-white/20 group-hover:text-red-500" : isActive ? "text-black" : "text-white/20 group-hover:text-[#00C187]" }`} 
+            className={`transition-colors duration-300 ${ isLogout ? "text-white/20 group-hover:text-red-500" : isActive ? "text-black" : "text-white/20 group-hover:text-[#BFF367]" }`} 
           />
         </div>
 
@@ -109,7 +109,7 @@ const ScorerSidebar = ({ isOpen, toggleSidebar, isMinimized, className }) => {
       >
         <div className="flex flex-col p-4 border-b border-white/5 bg-black/20 gap-4 lg:hidden">
           <div className="flex items-center justify-end">
-            <button onClick={toggleSidebar} className="text-white hover:text-[#00C187] transition-colors">
+            <button onClick={toggleSidebar} className="text-white hover:text-[#BFF367] transition-colors">
               <X size={20} />
             </button>
           </div>
@@ -117,11 +117,11 @@ const ScorerSidebar = ({ isOpen, toggleSidebar, isMinimized, className }) => {
 
         <div className={`px-4 py-6 border-b border-white/5 transition-all duration-300 ${isMinimized ? "items-center" : ""}`}>
           <div className="flex items-center gap-3">
-             <div className={`flex-shrink-0 w-2 h-2 rounded-full ${isLimitedScorer ? "bg-gradient-to-r from-[#55DEE8] to-[#BFF367] animate-pulse" : "bg-[#00C187] shadow-[0_0_10px_rgba(0,193,135,0.5)]"}`} />
+             <div className={`flex-shrink-0 w-2 h-2 rounded-full ${isLimitedScorer ? "bg-gradient-to-r from-[#BFF367] to-[#BFF367] animate-pulse" : "bg-[#BFF367] shadow-[0_0_10px_rgba(0,193,135,0.5)]"}`} />
              {!isMinimized && (
                <div className="animate-in fade-in slide-in-from-left-2 duration-300">
                   <p className="text-[9px] font-bold uppercase tracking-[0.2em] text-[#878C9F] leading-none mb-1">Professional Status</p>
-                  <p className={`text-[10px] font-black uppercase tracking-tight ${isLimitedScorer ? "text-transparent bg-clip-text bg-gradient-to-r from-[#55DEE8] to-[#BFF367]" : "text-[#00C187]"}`}>
+                  <p className={`text-[10px] font-black uppercase tracking-tight ${isLimitedScorer ? "text-transparent bg-clip-text bg-gradient-to-r from-[#BFF367] to-[#BFF367]" : "text-[#BFF367]"}`}>
                     {isLimitedScorer ? "Limited Access" : "Verified Scorer"}
                   </p>
                </div>

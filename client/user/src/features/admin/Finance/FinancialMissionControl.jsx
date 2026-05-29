@@ -59,7 +59,7 @@ const FinancialMissionControl = () => {
 
   const getStatusColor = (status) => {
     switch (status) {
-      case "PENDING": return "text-transparent bg-clip-text bg-gradient-to-r from-[#55DEE8] to-[#BFF367] bg-gradient-to-r from-[#55DEE8]/10 to-[#BFF367]/10 border-[#55DEE8]/20";
+      case "PENDING": return "text-transparent bg-clip-text bg-gradient-to-r from-[#BFF367] to-[#BFF367] bg-gradient-to-r from-[#BFF367]/10 to-[#BFF367]/10 border-[#BFF367]/20";
       case "COMPLETED": return "text-[#CCFF00] bg-[#CCFF00]/10 border-[#CCFF00]/20";
       case "REJECTED": return "text-red-500 bg-red-500/10 border-red-500/20";
       default: return "text-gray-500 bg-gray-500/10 border-gray-500/20";
@@ -127,7 +127,7 @@ const FinancialMissionControl = () => {
             value={withdrawalRequests.filter(r => r.status === "PENDING").reduce((acc, curr) => acc + curr.amount, 0)}
             icon={Clock}
             trend={`${pendingCount} Requests`}
-            trendColor="text-transparent bg-clip-text bg-gradient-to-r from-[#55DEE8] to-[#BFF367]"
+            trendColor="text-transparent bg-clip-text bg-gradient-to-r from-[#BFF367] to-[#BFF367]"
             prefix="Rs "
           />
           <FinanceStatsCard 

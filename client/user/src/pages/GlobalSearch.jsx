@@ -111,7 +111,7 @@ const GlobalSearch = () => {
             <div>
               <div className="flex items-center gap-1.5">
                 <span className="text-[13px] font-bold text-white transition-colors">{authorName}</span>
-                <ShieldCheck size={14} className="text-[#55DEE8]" />
+                <ShieldCheck size={14} className="text-[#BFF367]" />
               </div>
               <div className="text-[11px] font-bold text-white/40 mt-0.5">
                 {new Date(post.createdAt).toLocaleDateString()}

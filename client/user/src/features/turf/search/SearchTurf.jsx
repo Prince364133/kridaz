@@ -135,7 +135,7 @@ const SearchTurf = ({ onSearch }) => {
                     <button
                       key={s}
                       onClick={() => { setSport(s); setShowSportDropdown(false); }}
-                      className={`flex items-center px-4 py-2.5 rounded-[8px] transition-all text-left ${sport === s ? "bg-gradient-to-r from-[#55DEE8] to-[#BFF367] text-black shadow-[0_0_15px_rgba(85,222,232,0.3)]" : "hover:bg-white/5 text-gray-400 hover:text-white"}`}
+                      className={`flex items-center px-4 py-2.5 rounded-[8px] transition-all text-left ${sport === s ? "bg-gradient-to-r from-[#BFF367] to-[#BFF367] text-black shadow-[0_0_15px_rgba(85,222,232,0.3)]" : "hover:bg-white/5 text-gray-400 hover:text-white"}`}
                     >
                       <span className={`text-[11px] font-bold uppercase tracking-wider font-inter ${sport === s ? "text-black" : ""}`}>{s}</span>
                     </button>
@@ -176,7 +176,7 @@ const SearchTurf = ({ onSearch }) => {
                     <button
                       key={st}
                       onClick={() => { setSelectedState(st); setShowStateDropdown(false); }}
-                      className={`flex items-center px-4 py-2.5 rounded-[8px] transition-all text-left ${selectedState === st ? "bg-gradient-to-r from-[#55DEE8] to-[#BFF367] text-black shadow-[0_0_15px_rgba(85,222,232,0.3)]" : "hover:bg-white/5 text-gray-400 hover:text-white"}`}
+                      className={`flex items-center px-4 py-2.5 rounded-[8px] transition-all text-left ${selectedState === st ? "bg-gradient-to-r from-[#BFF367] to-[#BFF367] text-black shadow-[0_0_15px_rgba(85,222,232,0.3)]" : "hover:bg-white/5 text-gray-400 hover:text-white"}`}
                     >
                       <span className={`text-[11px] font-bold uppercase tracking-wider font-inter ${selectedState === st ? "text-black" : ""}`}>{st}</span>
                     </button>
@@ -227,7 +227,7 @@ const SearchTurf = ({ onSearch }) => {
                     <button
                       key={ct}
                       onClick={() => { setSelectedCity(ct); setShowCityDropdown(false); }}
-                      className={`flex items-center px-4 py-2.5 rounded-[8px] transition-all text-left ${selectedCity === ct ? "bg-gradient-to-r from-[#55DEE8] to-[#BFF367] text-black shadow-[0_0_15px_rgba(85,222,232,0.3)]" : "hover:bg-white/5 text-gray-400 hover:text-white"}`}
+                      className={`flex items-center px-4 py-2.5 rounded-[8px] transition-all text-left ${selectedCity === ct ? "bg-gradient-to-r from-[#BFF367] to-[#BFF367] text-black shadow-[0_0_15px_rgba(85,222,232,0.3)]" : "hover:bg-white/5 text-gray-400 hover:text-white"}`}
                     >
                       <span className={`text-[11px] font-bold uppercase tracking-wider font-inter ${selectedCity === ct ? "text-black" : ""}`}>{ct}</span>
                     </button>

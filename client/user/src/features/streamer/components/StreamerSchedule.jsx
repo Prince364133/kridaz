@@ -46,8 +46,8 @@ export default function StreamerSchedule() {
 
                   <div className="space-y-4">
                     <div className="flex items-center gap-3">
-                      <div className="px-3 py-1 bg-gradient-to-r from-[#55DEE8]/10 to-[#BFF367]/10 rounded-full border border-[#55DEE8]/20">
-                        <span className="text-[10px] font-bold text-transparent bg-clip-text bg-gradient-to-r from-[#55DEE8] to-[#BFF367] uppercase tracking-widest">Upcoming</span>
+                      <div className="px-3 py-1 bg-gradient-to-r from-[#BFF367]/10 to-[#BFF367]/10 rounded-full border border-[#BFF367]/20">
+                        <span className="text-[10px] font-bold text-transparent bg-clip-text bg-gradient-to-r from-[#BFF367] to-[#BFF367] uppercase tracking-widest">Upcoming</span>
                       </div>
                       <div className="flex items-center gap-2 text-gray-500 text-xs font-medium">
                         <Clock size={14} className="text-violet-500" />

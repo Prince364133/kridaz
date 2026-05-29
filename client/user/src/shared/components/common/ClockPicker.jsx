@@ -146,10 +146,10 @@ const ClockPicker = ({ value, onChange, placeholder = "Select time", disabled = 
         type="button"
         onClick={open}
         disabled={disabled}
-        className={`w-full bg-[#111111] border ${isOpen ? "border-[#55DEE8]/60" : "border-[#2D2D2D]"} text-white text-sm h-12 rounded-[8px] px-4 transition-all flex items-center justify-between ${disabled ? "opacity-30 cursor-not-allowed" : "cursor-pointer hover:border-[#55DEE8]/40"}`}
+        className={`w-full bg-[#111111] border ${isOpen ? "border-[#BFF367]/60" : "border-[#2D2D2D]"} text-white text-sm h-12 rounded-[8px] px-4 transition-all flex items-center justify-between ${disabled ? "opacity-30 cursor-not-allowed" : "cursor-pointer hover:border-[#BFF367]/40"}`}
       >
         <span className={value instanceof Date && !isNaN(value) ? "text-white font-medium" : "text-[#555]"}>{fmt()}</span>
-        <Clock size={14} className="text-[#55DEE8] opacity-60 shrink-0" />
+        <Clock size={14} className="text-[#BFF367] opacity-60 shrink-0" />
       </button>
 
       {isOpen && createPortal(
@@ -170,17 +170,17 @@ const ClockPicker = ({ value, onChange, placeholder = "Select time", disabled = 
 
           {/* Time Display */}
           <div className="flex items-center justify-center gap-1 pt-4 pb-1">
-            <button onClick={() => setMode("hours")} className={`text-[32px] font-black transition-colors ${mode === "hours" ? "text-[#55DEE8]" : "text-white/40 hover:text-white"}`}>
+            <button onClick={() => setMode("hours")} className={`text-[32px] font-black transition-colors ${mode === "hours" ? "text-[#BFF367]" : "text-white/40 hover:text-white"}`}>
               {String(hour).padStart(2, "0")}
             </button>
             <span className="text-[32px] font-black text-white/20">:</span>
-            <button onClick={() => setMode("minutes")} className={`text-[32px] font-black transition-colors ${mode === "minutes" ? "text-[#55DEE8]" : "text-white/40 hover:text-white"}`}>
+            <button onClick={() => setMode("minutes")} className={`text-[32px] font-black transition-colors ${mode === "minutes" ? "text-[#BFF367]" : "text-white/40 hover:text-white"}`}>
               {String(minute).padStart(2, "0")}
             </button>
             <div className="flex flex-col gap-1 ml-3">
               {["AM", "PM"].map((p) => (
                 <button key={p} onClick={() => setPeriod(p)}
-                  className={`text-[9px] font-black px-2 py-1 rounded-[4px] uppercase tracking-wider transition-all ${period === p ? "bg-[#55DEE8] text-black" : "text-[#555] hover:text-white"}`}>
+                  className={`text-[9px] font-black px-2 py-1 rounded-[4px] uppercase tracking-wider transition-all ${period === p ? "bg-[#BFF367] text-black" : "text-[#555] hover:text-white"}`}>
                   {p}
                 </button>
               ))}
@@ -200,16 +200,16 @@ const ClockPicker = ({ value, onChange, placeholder = "Select time", disabled = 
               
               {/* The Hand */}
               <g>
-                <line x1="50" y1="50" x2={handEnd.x} y2={handEnd.y} stroke="#55DEE8" strokeWidth="2" strokeLinecap="round" />
-                <circle cx={handEnd.x} cy={handEnd.y} r="3" fill="#55DEE8" />
-                <circle cx="50" cy="50" r="2.5" fill="#55DEE8" />
+                <line x1="50" y1="50" x2={handEnd.x} y2={handEnd.y} stroke="#BFF367" strokeWidth="2" strokeLinecap="round" />
+                <circle cx={handEnd.x} cy={handEnd.y} r="3" fill="#BFF367" />
+                <circle cx="50" cy="50" r="2.5" fill="#BFF367" />
               </g>
 
               {mode === "hours" && Array.from({ length: 12 }, (_, i) => {
                 const h = i + 1, p = pos12(h), sel = h === hour;
                 return (
                   <g key={h}>
-                    <circle cx={p.x} cy={p.y} r="6.5" fill={sel ? "#55DEE8" : "transparent"} />
+                    <circle cx={p.x} cy={p.y} r="6.5" fill={sel ? "#BFF367" : "transparent"} />
                     <text x={p.x} y={p.y + 0.5} textAnchor="middle" dominantBaseline="middle"
                       fontSize="6" font-weight="900" fill={sel ? "#000" : "#fff"} style={{ userSelect: "none" }}>{h}</text>
                   </g>
@@ -220,7 +220,7 @@ const ClockPicker = ({ value, onChange, placeholder = "Select time", disabled = 
                 const p = posMin(m), sel = m === minute;
                 return (
                   <g key={m}>
-                    <circle cx={p.x} cy={p.y} r="6.5" fill={sel ? "#55DEE8" : "transparent"} />
+                    <circle cx={p.x} cy={p.y} r="6.5" fill={sel ? "#BFF367" : "transparent"} />
                     <text x={p.x} y={p.y + 0.5} textAnchor="middle" dominantBaseline="middle"
                       fontSize="5" font-weight="900" fill={sel ? "#000" : "#fff"} style={{ userSelect: "none" }}>
                       {m === 0 ? "00" : m}
@@ -235,7 +235,7 @@ const ClockPicker = ({ value, onChange, placeholder = "Select time", disabled = 
           <div className="px-5 pb-4 flex gap-3">
             {mode === "hours" && (
               <button onClick={() => setMode("minutes")}
-                className="flex-1 py-2.5 bg-[#55DEE8]/10 border border-[#55DEE8]/20 text-[#55DEE8] text-[9px] font-black uppercase tracking-widest rounded-[8px] hover:bg-[#55DEE8]/20 transition-all">
+                className="flex-1 py-2.5 bg-[#BFF367]/10 border border-[#BFF367]/20 text-[#BFF367] text-[9px] font-black uppercase tracking-widest rounded-[8px] hover:bg-[#BFF367]/20 transition-all">
                 Next ΓåÆ
               </button>
             )}
@@ -246,7 +246,7 @@ const ClockPicker = ({ value, onChange, placeholder = "Select time", disabled = 
                   ΓåÉ Back
                 </button>
                 <button onClick={() => confirm(minute)}
-                  className="flex-1 py-2.5 bg-[#55DEE8] text-black text-[9px] font-black uppercase tracking-widest rounded-[8px] hover:bg-white transition-all">
+                  className="flex-1 py-2.5 bg-[#BFF367] text-black text-[9px] font-black uppercase tracking-widest rounded-[8px] hover:bg-white transition-all">
                   Confirm
                 </button>
               </>

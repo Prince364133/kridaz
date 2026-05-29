@@ -240,7 +240,7 @@ const MyJoinedGames = () => {
                       <div className="flex items-center gap-1 bg-neutral-900 px-3 py-1.5 rounded-[6px]">
                         <MapPin size={14} className="text-yellow-500 min-w-[14px]" /> 
                         {game.turf?.mapUrl ? (
-                          <a href={game.turf.mapUrl} target="_blank" rel="noopener noreferrer" className="hover:text-[#55DEE8] hover:underline transition-colors flex items-center gap-1 truncate max-w-[200px]" title={game.turf?.location || game.turf?.name}>
+                          <a href={game.turf.mapUrl} target="_blank" rel="noopener noreferrer" className="hover:text-[#BFF367] hover:underline transition-colors flex items-center gap-1 truncate max-w-[200px]" title={game.turf?.location || game.turf?.name}>
                             {game.turf?.name || game.customVenue || game.ground?.name || 'Self-Arranged'}
                             {game.turf?.location && <span className="text-neutral-500 text-[10px] hidden md:inline ml-1">- {game.turf.location}</span>}
                           </a>
@@ -305,7 +305,7 @@ const MyJoinedGames = () => {
                   <div className="grid grid-cols-2 md:grid-cols-3 gap-2 border-t border-neutral-800/50 pt-4">
                     <div className="bg-neutral-900/50 p-2 rounded-[8px] flex flex-col items-center justify-center">
                       <p className="text-[9px] text-neutral-500 font-bold uppercase tracking-wider mb-1">Slot Collections</p>
-                      <p className="text-xs font-black text-[#55DEE8]">{collectedCoins} / {totalPossibleCoins} Coins</p>
+                      <p className="text-xs font-black text-[#BFF367]">{collectedCoins} / {totalPossibleCoins} Coins</p>
                       <p className="text-[8px] text-neutral-500 mt-0.5">{game.perPlayerCharge || 0} Coins per slot</p>
                     </div>
                     <div className="bg-neutral-900/50 p-2 rounded-[8px] flex flex-col items-center justify-center">
@@ -496,7 +496,7 @@ const MyJoinedGames = () => {
 
               <div className="p-4 bg-neutral-900/50 flex items-center justify-between border-t border-neutral-800">
                 <div className="flex items-center gap-3">
-                   <div className="w-8 h-8 bg-[#55DEE8]/10 rounded-full flex items-center justify-center border border-white/10 overflow-hidden shrink-0">
+                   <div className="w-8 h-8 bg-[#BFF367]/10 rounded-full flex items-center justify-center border border-white/10 overflow-hidden shrink-0">
                       {game.host?.profilePicture ? (
                         <img 
                           src={game.host.profilePicture} 
@@ -511,7 +511,7 @@ const MyJoinedGames = () => {
                         className="w-full h-full flex items-center justify-center"
                         style={{ display: game.host?.profilePicture ? 'none' : 'flex' }}
                       >
-                        <User size={16} className="text-[#55DEE8]" />
+                        <User size={16} className="text-[#BFF367]" />
                       </div>
                    </div>
                    <div className="text-[10px]">

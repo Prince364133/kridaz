@@ -177,7 +177,7 @@ const SlotPickerPopup = ({ isOpen, onClose, onSelect, gameId, slotId }) => {
                   <div className="space-y-3 max-h-[250px] overflow-y-auto pr-2 custom-scrollbar">
                     {loading ? (
                       <div className="flex flex-col items-center justify-center py-12 gap-4">
-                        <Loader2 className="animate-spin text-transparent bg-clip-text bg-gradient-to-r from-[#55DEE8] to-[#BFF367]" size={32} />
+                        <Loader2 className="animate-spin text-transparent bg-clip-text bg-gradient-to-r from-[#BFF367] to-[#BFF367]" size={32} />
                         <p className="text-sm text-neutral-500 font-black uppercase tracking-widest">Searching Network...</p>
                       </div>
                     ) : filteredFollowers.length > 0 ? (
@@ -246,7 +246,7 @@ const SlotPickerPopup = ({ isOpen, onClose, onSelect, gameId, slotId }) => {
                                 <button
                                   disabled={sending}
                                   onClick={() => handleInvitePlayer(member.user || { _id: member._id, name: member.name, isCustom: true })}
-                                  className="p-2 bg-gradient-to-r from-[#55DEE8]/10 to-[#BFF367]/10 text-transparent bg-clip-text bg-gradient-to-r from-[#55DEE8] to-[#BFF367] rounded-lg hover:bg-gradient-to-r from-[#55DEE8] to-[#BFF367] hover:text-black transition-all disabled:opacity-50"
+                                  className="p-2 bg-gradient-to-r from-[#BFF367]/10 to-[#BFF367]/10 text-transparent bg-clip-text bg-gradient-to-r from-[#BFF367] to-[#BFF367] rounded-lg hover:bg-gradient-to-r from-[#BFF367] to-[#BFF367] hover:text-black transition-all disabled:opacity-50"
                                 >
                                   <Check size={16} />
                                 </button>

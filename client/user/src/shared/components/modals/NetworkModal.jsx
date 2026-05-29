@@ -86,7 +86,7 @@ const NetworkModal = ({ isOpen, onClose, userId, type, initialCount }) => {
         <div className="flex items-center justify-between p-4 border-b border-[#2D2D2D]">
           <h2 className="text-sm font-bold text-white uppercase tracking-widest flex items-center gap-2">
             {type === "followers" ? "Followers" : "Following"}
-            <span className="text-[#55DEE8] bg-[#55DEE8]/10 px-2 py-0.5 rounded-full text-[10px]">
+            <span className="text-[#BFF367] bg-[#BFF367]/10 px-2 py-0.5 rounded-full text-[10px]">
               {initialCount}
             </span>
           </h2>
@@ -103,7 +103,7 @@ const NetworkModal = ({ isOpen, onClose, userId, type, initialCount }) => {
               placeholder="SEARCH..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full bg-[#000000] border border-[#2D2D2D] rounded-[6px] py-2.5 pl-10 pr-4 text-xs text-white placeholder:text-white/20 outline-none focus:border-[#55DEE8]/50 transition-all uppercase tracking-widest"
+              className="w-full bg-[#000000] border border-[#2D2D2D] rounded-[6px] py-2.5 pl-10 pr-4 text-xs text-white placeholder:text-white/20 outline-none focus:border-[#BFF367]/50 transition-all uppercase tracking-widest"
             />
           </div>
         </div>
@@ -111,7 +111,7 @@ const NetworkModal = ({ isOpen, onClose, userId, type, initialCount }) => {
         <div className="h-[400px] overflow-y-auto no-scrollbar p-2">
           {loading ? (
             <div className="h-full flex items-center justify-center">
-              <Loader2 className="animate-spin text-[#55DEE8]" size={32} />
+              <Loader2 className="animate-spin text-[#BFF367]" size={32} />
             </div>
           ) : sortedUsers.length > 0 ? (
             <div className="space-y-1">
@@ -136,16 +136,16 @@ const NetworkModal = ({ isOpen, onClose, userId, type, initialCount }) => {
                           />
                         ) : null}
                         <div 
-                          className="w-full h-full flex items-center justify-center bg-[#55DEE8]/10"
+                          className="w-full h-full flex items-center justify-center bg-[#BFF367]/10"
                           style={{ display: user.profilePicture ? 'none' : 'flex' }}
                         >
-                          <span className="text-[#55DEE8] font-black text-[10px]">
+                          <span className="text-[#BFF367] font-black text-[10px]">
                             {user.name?.split(" ").map(w => w[0]).join("").toUpperCase().slice(0, 2)}
                           </span>
                         </div>
                       </Link>
                       <div className="overflow-hidden">
-                        <Link to={`/profile/${user.id || user._id}`} onClick={onClose} className="block font-bold text-xs text-white hover:text-[#55DEE8] transition-colors truncate">
+                        <Link to={`/profile/${user.id || user._id}`} onClick={onClose} className="block font-bold text-xs text-white hover:text-[#BFF367] transition-colors truncate">
                           {user.name}
                         </Link>
                         <div className="flex items-center gap-2 text-[10px] text-white/40 uppercase tracking-widest truncate">
@@ -153,7 +153,7 @@ const NetworkModal = ({ isOpen, onClose, userId, type, initialCount }) => {
                           {isFollowing && (
                             <>
                               <span className="text-white/20">ΓÇó</span>
-                              <span className="text-[#55DEE8]/60">Following</span>
+                              <span className="text-[#BFF367]/60">Following</span>
                             </>
                           )}
                         </div>
@@ -163,7 +163,7 @@ const NetworkModal = ({ isOpen, onClose, userId, type, initialCount }) => {
                     {!isSelf && (
                       <button
                         onClick={() => handleFollowToggle(user)}
-                        className={`shrink-0 px-3 py-1.5 rounded-[6px] text-[9px] font-bold uppercase tracking-widest transition-all ${ isFollowing ? "bg-[#000000] text-white/40 border border-[#2D2D2D] hover:bg-white/10" : "bg-[#55DEE8] text-black hover:scale-105 active:scale-95 shadow-[0_0_15px_rgba(85,222,232,0.15)]" }`}
+                        className={`shrink-0 px-3 py-1.5 rounded-[6px] text-[9px] font-bold uppercase tracking-widest transition-all ${ isFollowing ? "bg-[#000000] text-white/40 border border-[#2D2D2D] hover:bg-white/10" : "bg-[#BFF367] text-black hover:scale-105 active:scale-95 shadow-[0_0_15px_rgba(85,222,232,0.15)]" }`}
                       >
                         {isFollowing ? "Following" : "Follow"}
                       </button>

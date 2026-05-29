@@ -170,19 +170,19 @@ const OwnerBookings = () => {
                     </td>
                     <td className="px-6 py-4">
                       <div className="flex items-center gap-2 text-[14px] font-medium text-white tracking-tight">
-                        <Clock size={14} className="text-[#55DEE8]" />
+                        <Clock size={14} className="text-[#BFF367]" />
                         {formatTime(booking.startTime)}
                       </div>
                     </td>
                     <td className="px-6 py-4">
                       <div className="flex items-center gap-2 text-[14px] font-medium text-white tracking-tight">
-                        <Clock size={14} className="text-[#55DEE8]/50" />
+                        <Clock size={14} className="text-[#BFF367]/50" />
                         {formatTime(booking.endTime)}
                       </div>
                     </td>
                     <td className="px-6 py-4">
                       <div className="flex items-center gap-2 text-[14px] font-medium text-white tracking-tight">
-                        <Calendar size={14} className="text-[#55DEE8]" />
+                        <Calendar size={14} className="text-[#BFF367]" />
                         {format(new Date(booking.bookingDate), "dd MMM yyyy")}
                       </div>
                     </td>
@@ -200,7 +200,7 @@ const OwnerBookings = () => {
                           to={`/booking-pass/${booking.id}`}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="p-2 bg-[#2D2D2D] hover:bg-gradient-to-r hover:from-[#55DEE8] hover:to-[#BFF367] hover:text-[#000] rounded-[4px] transition-all text-[#999999] group/btn"
+                          className="p-2 bg-[#2D2D2D] hover:bg-gradient-to-r hover:from-[#BFF367] hover:to-[#BFF367] hover:text-[#000] rounded-[4px] transition-all text-[#999999] group/btn"
                           title="Open Ticket"
                         >
                           <Ticket size={14} className="group-hover/btn:scale-110 transition-transform" />
@@ -209,7 +209,7 @@ const OwnerBookings = () => {
                           to={`/booking-invoice/${booking.id}`}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="p-2 bg-[#2D2D2D] hover:bg-gradient-to-r hover:from-[#55DEE8] hover:to-[#BFF367] hover:text-[#000] rounded-[4px] transition-all text-[#999999] group/btn"
+                          className="p-2 bg-[#2D2D2D] hover:bg-gradient-to-r hover:from-[#BFF367] hover:to-[#BFF367] hover:text-[#000] rounded-[4px] transition-all text-[#999999] group/btn"
                           title="See Invoice"
                         >
                           <FileText size={14} className="group-hover/btn:scale-110 transition-transform" />

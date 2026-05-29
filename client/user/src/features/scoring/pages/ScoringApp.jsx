@@ -21,17 +21,17 @@ import MatchReportModal from '../components/MatchReportModal';
 const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:6001';
 /**
  * ScoringApp — The primary match scoring console.
- * Fully rebranded for the Scorer Portal with Teal Green (#00C187) and Inter font.
+ * Fully rebranded for the Scorer Portal with Teal Green (#BFF367) and Inter font.
  */
 
-const THEME_COLOR = '#00C187';
+const THEME_COLOR = '#BFF367';
 
 /* ─── Helpers ─── */
 const ballColor = (ball) => {
   if (ball.isWicket) return 'bg-red-500/20 text-red-500 border border-red-500/30';
-  if (ball.isExtra) return 'bg-[#00C187]/20 text-[#00C187] border border-[#00C187]/30';
-  if (ball.runs === 6) return 'bg-[#00C187] text-black shadow-[0_0_15px_rgba(0,193,135,0.4)]';
-  if (ball.runs === 4) return 'bg-[#00C187]/80 text-black';
+  if (ball.isExtra) return 'bg-[#BFF367]/20 text-[#BFF367] border border-[#BFF367]/30';
+  if (ball.runs === 6) return 'bg-[#BFF367] text-black shadow-[0_0_15px_rgba(0,193,135,0.4)]';
+  if (ball.runs === 4) return 'bg-[#BFF367]/80 text-black';
   if (ball.runs === 0) return 'bg-white/5 text-neutral-600 border border-white/5';
   return 'bg-white/10 text-white border border-white/10';
 };
@@ -76,7 +76,7 @@ function MembersTab({ matchData }) {
       <div className="flex gap-2 bg-white/5 rounded-[8px] p-1.5 border border-white/5">
         {[['teamA', teamA?.name || 'TBD'], ['teamB', teamB?.name || 'TBD']].map(([key, label]) => (
           <button key={key} onClick={() => setTeamTab(key)}
-            className={`flex-1 py-2.5 rounded-[8px] text-[10px] font-black uppercase tracking-[0.2em] transition-all ${teamTab === key ? 'bg-[#00C187] text-black shadow-lg' : 'text-neutral-500 hover:text-white'}`}>
+            className={`flex-1 py-2.5 rounded-[8px] text-[10px] font-black uppercase tracking-[0.2em] transition-all ${teamTab === key ? 'bg-[#BFF367] text-black shadow-lg' : 'text-neutral-500 hover:text-white'}`}>
             {label}
           </button>
         ))}
@@ -90,7 +90,7 @@ function MembersTab({ matchData }) {
             const bowl = getBowlingStats(uid);
             return (
               <div key={i} className="flex items-center gap-4 p-4 bg-white/[0.02] rounded-[8px] border border-white/5 hover:bg-white/[0.04] transition-all">
-                <div className="w-11 h-11 rounded-[8px] bg-[#00C187]/10 border border-[#00C187]/20 flex items-center justify-center shrink-0 overflow-hidden shadow-inner">
+                <div className="w-11 h-11 rounded-[8px] bg-[#BFF367]/10 border border-[#BFF367]/20 flex items-center justify-center shrink-0 overflow-hidden shadow-inner">
                   {slot.user?.profilePicture
                     ? <img src={slot.user.profilePicture} className="w-full h-full object-cover" alt="" />
                     : <User size={18} style={{ color: THEME_COLOR }} />}
@@ -450,8 +450,8 @@ const ScoringApp = () => {
   if (scoringLock === 'PENDING' && passwordVerified) return (
     <div className="min-h-screen bg-black flex items-center justify-center font-inter">
       <div className="text-center">
-        <div className="w-10 h-10 border-4 border-[#00C187]/20 border-t-[#00C187] rounded-full animate-spin mx-auto mb-4" />
-        <h2 className="text-[13px] font-black uppercase tracking-widest text-[#00C187]">Acquiring Scoring Lock</h2>
+        <div className="w-10 h-10 border-4 border-[#BFF367]/20 border-t-[#BFF367] rounded-full animate-spin mx-auto mb-4" />
+        <h2 className="text-[13px] font-black uppercase tracking-widest text-[#BFF367]">Acquiring Scoring Lock</h2>
       </div>
     </div>
   );
@@ -463,16 +463,16 @@ const ScoringApp = () => {
       <p className="text-[13px] text-neutral-400 font-medium mb-8 max-w-sm">
         Someone else is currently scoring this game. Please wait until they leave to gain access.
       </p>
-      <div className="flex items-center gap-3 bg-[#00C187]/10 border border-[#00C187]/20 px-6 py-4 rounded-[8px]">
-        <div className="w-4 h-4 border-2 border-[#00C187]/30 border-t-[#00C187] rounded-full animate-spin" />
-        <span className="text-[11px] font-black uppercase tracking-widest text-[#00C187]">Waiting in queue...</span>
+      <div className="flex items-center gap-3 bg-[#BFF367]/10 border border-[#BFF367]/20 px-6 py-4 rounded-[8px]">
+        <div className="w-4 h-4 border-2 border-[#BFF367]/30 border-t-[#BFF367] rounded-full animate-spin" />
+        <span className="text-[11px] font-black uppercase tracking-widest text-[#BFF367]">Waiting in queue...</span>
       </div>
     </div>
   );
 
   if (loading) return (
     <div className="min-h-screen bg-black flex items-center justify-center font-inter">
-      <div className="w-10 h-10 border-4 border-[#00C187]/20 border-t-[#00C187] rounded-full animate-spin" />
+      <div className="w-10 h-10 border-4 border-[#BFF367]/20 border-t-[#BFF367] rounded-full animate-spin" />
     </div>
   );
 
@@ -480,7 +480,7 @@ const ScoringApp = () => {
     <div className="min-h-screen bg-black flex flex-col items-center justify-center p-6 text-center font-inter">
       <AlertCircle style={{ color: THEME_COLOR }} className="mb-6" size={56} />
       <h2 className="text-2xl font-black uppercase tracking-tighter mb-3">Sync Interrupted</h2>
-      <button onClick={() => navigate(-1)} className="px-6 py-3 bg-white/5 rounded-[8px] text-[10px] font-black uppercase tracking-widest text-[#00C187] border border-[#00C187]/20">Establish New Link</button>
+      <button onClick={() => navigate(-1)} className="px-6 py-3 bg-white/5 rounded-[8px] text-[10px] font-black uppercase tracking-widest text-[#BFF367] border border-[#BFF367]/20">Establish New Link</button>
     </div>
   );
 
@@ -501,8 +501,8 @@ const ScoringApp = () => {
           )}
           {needsMatchStart && (
             <div className="p-8 bg-white/[0.02] border border-white/5 rounded-[8px] space-y-6 text-center relative overflow-hidden shadow-2xl">
-              <div className="absolute top-0 right-0 w-32 h-32 bg-[#00C187]/5 blur-3xl pointer-events-none" />
-              <div className="w-16 h-16 bg-[#00C187]/10 border border-[#00C187]/20 rounded-[8px] flex items-center justify-center mx-auto shadow-lg">
+              <div className="absolute top-0 right-0 w-32 h-32 bg-[#BFF367]/5 blur-3xl pointer-events-none" />
+              <div className="w-16 h-16 bg-[#BFF367]/10 border border-[#BFF367]/20 rounded-[8px] flex items-center justify-center mx-auto shadow-lg">
                 <Play size={28} style={{ color: THEME_COLOR }} />
               </div>
               <div>
@@ -511,7 +511,7 @@ const ScoringApp = () => {
               </div>
               <button
                 onClick={() => setShowTossModal(true)}
-                className="w-full py-5 bg-[#00C187]/10 border border-[#00C187]/30 rounded-[8px] text-center text-[#00C187] text-[13px] font-black uppercase tracking-[0.2em] shadow-xl"
+                className="w-full py-5 bg-[#BFF367]/10 border border-[#BFF367]/30 rounded-[8px] text-center text-[#BFF367] text-[13px] font-black uppercase tracking-[0.2em] shadow-xl"
               >
                 ⚡ Start Match
               </button>
@@ -521,7 +521,7 @@ const ScoringApp = () => {
           {needsInningsSetup && !needsMatchStart && !isFirstInningsComplete && (
             <button
               onClick={() => setShowInningsSetup(true)}
-              className="w-full py-5 bg-[#00C187]/10 border border-[#00C187]/30 rounded-[8px] text-center text-[#00C187] text-[11px] font-black uppercase tracking-[0.2em] animate-pulse shadow-xl"
+              className="w-full py-5 bg-[#BFF367]/10 border border-[#BFF367]/30 rounded-[8px] text-center text-[#BFF367] text-[11px] font-black uppercase tracking-[0.2em] animate-pulse shadow-xl"
             >
               ⚡ Setup Next Pair & Bowler
             </button>
@@ -529,8 +529,8 @@ const ScoringApp = () => {
 
           {isFirstInningsComplete && (
             <div className="p-8 bg-white/[0.02] border border-white/5 rounded-[8px] space-y-6 text-center relative overflow-hidden shadow-2xl">
-              <div className="absolute top-0 right-0 w-32 h-32 bg-[#00C187]/5 blur-3xl pointer-events-none" />
-              <div className="w-16 h-16 bg-[#00C187]/10 border border-[#00C187]/20 rounded-[8px] flex items-center justify-center mx-auto shadow-lg">
+              <div className="absolute top-0 right-0 w-32 h-32 bg-[#BFF367]/5 blur-3xl pointer-events-none" />
+              <div className="w-16 h-16 bg-[#BFF367]/10 border border-[#BFF367]/20 rounded-[8px] flex items-center justify-center mx-auto shadow-lg">
                 <Trophy size={28} style={{ color: THEME_COLOR }} />
               </div>
               <div>
@@ -571,9 +571,9 @@ const ScoringApp = () => {
           )}
 
           <div className="grid grid-cols-2 gap-4">
-            <div className="bg-white/[0.02] border border-[#00C187]/30 rounded-[8px] p-6 space-y-4 shadow-xl">
+            <div className="bg-white/[0.02] border border-[#BFF367]/30 rounded-[8px] p-6 space-y-4 shadow-xl">
               <div className="flex items-center gap-3">
-                <div className="w-9 h-9 rounded-[8px] bg-[#00C187]/10 border border-[#00C187]/20 flex items-center justify-center shadow-inner">
+                <div className="w-9 h-9 rounded-[8px] bg-[#BFF367]/10 border border-[#BFF367]/20 flex items-center justify-center shadow-inner">
                   <User size={16} style={{ color: THEME_COLOR }} />
                 </div>
                 <div>
@@ -603,10 +603,10 @@ const ScoringApp = () => {
             </div>
           </div>
 
-          <div className="bg-gradient-to-r from-[#00C187]/15 to-transparent border border-[#00C187]/30 rounded-[8px] p-6 flex items-center justify-between shadow-2xl relative overflow-hidden">
-            <div className="absolute top-0 right-0 w-32 h-32 bg-[#00C187]/5 blur-3xl pointer-events-none" />
+          <div className="bg-gradient-to-r from-[#BFF367]/15 to-transparent border border-[#BFF367]/30 rounded-[8px] p-6 flex items-center justify-between shadow-2xl relative overflow-hidden">
+            <div className="absolute top-0 right-0 w-32 h-32 bg-[#BFF367]/5 blur-3xl pointer-events-none" />
             <div className="flex items-center gap-5 relative z-10">
-              <div className="w-12 h-12 rounded-[8px] bg-[#00C187]/20 border border-[#00C187]/30 flex items-center justify-center shadow-lg">
+              <div className="w-12 h-12 rounded-[8px] bg-[#BFF367]/20 border border-[#BFF367]/30 flex items-center justify-center shadow-lg">
                 <Zap size={22} style={{ color: THEME_COLOR }} />
               </div>
               <div>
@@ -615,7 +615,7 @@ const ScoringApp = () => {
               </div>
             </div>
             <div className="text-right relative z-10">
-              <p className="text-3xl font-black text-white">{bowlerStats?.wickets ?? 0}<span className="text-[#00C187] text-xl mx-1">-</span>{bowlerStats?.runs ?? 0}</p>
+              <p className="text-3xl font-black text-white">{bowlerStats?.wickets ?? 0}<span className="text-[#BFF367] text-xl mx-1">-</span>{bowlerStats?.runs ?? 0}</p>
               <p className="text-[10px] font-black text-neutral-500 uppercase tracking-widest mt-1.5">{bowlerStats?.overs ?? 0}.{bowlerStats?.balls ?? 0} OVERS</p>
             </div>
           </div>
@@ -634,7 +634,7 @@ const ScoringApp = () => {
                       setWagonWheelData({ runs: run, isBoundary: false, isFour: false, isSix: false });
                     }
                   }}
-                  className={`h-16 bg-white/[0.03] border border-white/5 rounded-[8px] flex items-center justify-center text-2xl font-black text-white hover:bg-[#00C187]/10 hover:border-[#00C187]/40 transition-all transform active:scale-90 shadow-lg ${isMutating ? 'opacity-40 cursor-not-allowed' : ''}`}>
+                  className={`h-16 bg-white/[0.03] border border-white/5 rounded-[8px] flex items-center justify-center text-2xl font-black text-white hover:bg-[#BFF367]/10 hover:border-[#BFF367]/40 transition-all transform active:scale-90 shadow-lg ${isMutating ? 'opacity-40 cursor-not-allowed' : ''}`}>
                   {run}
                 </button>
               ))}
@@ -654,11 +654,11 @@ const ScoringApp = () => {
                 </button>
               ))}
               <button disabled={isMutating} onClick={() => { if (!isMutating && checkTimerActive()) setExtraModal('WIDE'); }}
-                className={`h-16 bg-white/[0.03] border border-white/5 text-[#00C187] rounded-[8px] flex items-center justify-center text-[10px] font-black uppercase tracking-widest hover:bg-[#00C187]/10 transition-all border-[#00C187]/20 ${isMutating ? 'opacity-40 cursor-not-allowed' : ''}`}>
+                className={`h-16 bg-white/[0.03] border border-white/5 text-[#BFF367] rounded-[8px] flex items-center justify-center text-[10px] font-black uppercase tracking-widest hover:bg-[#BFF367]/10 transition-all border-[#BFF367]/20 ${isMutating ? 'opacity-40 cursor-not-allowed' : ''}`}>
                 WIDE
               </button>
               <button disabled={isMutating} onClick={() => { if (!isMutating && checkTimerActive()) setExtraModal('NO_BALL'); }}
-                className={`h-16 bg-white/[0.03] border border-white/5 text-[#00C187] rounded-[8px] flex items-center justify-center text-[10px] font-black uppercase tracking-widest hover:bg-[#00C187]/10 transition-all border-[#00C187]/20 ${isMutating ? 'opacity-40 cursor-not-allowed' : ''}`}>
+                className={`h-16 bg-white/[0.03] border border-white/5 text-[#BFF367] rounded-[8px] flex items-center justify-center text-[10px] font-black uppercase tracking-widest hover:bg-[#BFF367]/10 transition-all border-[#BFF367]/20 ${isMutating ? 'opacity-40 cursor-not-allowed' : ''}`}>
                 NB
               </button>
             </div>
@@ -706,7 +706,7 @@ const ScoringApp = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#000] text-white selection:bg-[#00C187] selection:text-black font-inter">
+    <div className="min-h-screen bg-[#000] text-white selection:bg-[#BFF367] selection:text-black font-inter">
       {/* Header */}
       <div className="sticky top-0 z-50 bg-black/80 backdrop-blur-2xl border-b border-white/5 p-5">
         <div className="max-w-xl mx-auto flex items-center justify-between">
@@ -746,19 +746,19 @@ const ScoringApp = () => {
                       toast.error(res.message || 'Failed to toggle timer');
                     }
                   }}
-                  className="p-1.5 bg-[#00C187]/20 rounded-[8px] hover:bg-[#00C187]/40 transition-all text-[#00C187]"
+                  className="p-1.5 bg-[#BFF367]/20 rounded-[8px] hover:bg-[#BFF367]/40 transition-all text-[#BFF367]"
                 >
                   {matchData?.timerState === 'RUNNING' ? <Pause size={16} /> : <Play size={16} className="ml-0.5" />}
                 </button>
               </div>
             )}
-            <div className={`px-3 py-1.5 rounded-[8px] flex items-center gap-2 border transition-all ${liveEnabled ? 'bg-[#00C187]/10 border-[#00C187]/30 shadow-[0_0_15px_rgba(0,193,135,0.1)]' : 'bg-white/5 border-white/5'}`}>
-              <div className={`w-1.5 h-1.5 rounded-full ${liveEnabled ? 'bg-[#00C187] animate-pulse' : 'bg-neutral-700'}`} />
-              <span className={`text-[9px] font-black uppercase tracking-widest ${liveEnabled ? 'text-[#00C187]' : 'text-neutral-500'}`}>
+            <div className={`px-3 py-1.5 rounded-[8px] flex items-center gap-2 border transition-all ${liveEnabled ? 'bg-[#BFF367]/10 border-[#BFF367]/30 shadow-[0_0_15px_rgba(0,193,135,0.1)]' : 'bg-white/5 border-white/5'}`}>
+              <div className={`w-1.5 h-1.5 rounded-full ${liveEnabled ? 'bg-[#BFF367] animate-pulse' : 'bg-neutral-700'}`} />
+              <span className={`text-[9px] font-black uppercase tracking-widest ${liveEnabled ? 'text-[#BFF367]' : 'text-neutral-500'}`}>
                 {liveEnabled ? 'ON AIR' : 'LOCAL'}
               </span>
             </div>
-            <button onClick={() => setShowSettings(true)} className="p-2.5 bg-white/5 rounded-[8px] border border-white/5 hover:border-[#00C187]/30 transition-all">
+            <button onClick={() => setShowSettings(true)} className="p-2.5 bg-white/5 rounded-[8px] border border-white/5 hover:border-[#BFF367]/30 transition-all">
               <Settings size={20} className="text-neutral-500 hover:text-white" />
             </button>
           </div>
@@ -781,7 +781,7 @@ const ScoringApp = () => {
             <span style={{ color: THEME_COLOR }}>CRR: {score.crr}</span>
           </div>
 
-          <div className="absolute bottom-0 right-0 w-48 h-48 bg-[#00C187]/5 rounded-full blur-[80px] pointer-events-none" />
+          <div className="absolute bottom-0 right-0 w-48 h-48 bg-[#BFF367]/5 rounded-full blur-[80px] pointer-events-none" />
           <div className="absolute top-0 left-0 w-48 h-48 bg-blue-500/5 rounded-full blur-[80px] pointer-events-none" />
         </div>
 
@@ -795,7 +795,7 @@ const ScoringApp = () => {
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
-              className={`flex-1 flex items-center justify-center gap-3 py-3.5 rounded-[8px] transition-all border ${activeTab === tab.id ? 'bg-white/10 text-[#00C187] border-[#00C187]/20 shadow-lg' : 'text-neutral-500 hover:text-white border-transparent'}`}
+              className={`flex-1 flex items-center justify-center gap-3 py-3.5 rounded-[8px] transition-all border ${activeTab === tab.id ? 'bg-white/10 text-[#BFF367] border-[#BFF367]/20 shadow-lg' : 'text-neutral-500 hover:text-white border-transparent'}`}
             >
               <tab.icon size={16} />
               <span className="text-[10px] font-black uppercase tracking-widest">{tab.label}</span>
@@ -852,7 +852,7 @@ const ScoringApp = () => {
       {showSettings && (
         <div className="fixed inset-0 z-[100] bg-black/95 backdrop-blur-3xl p-6 flex items-center justify-center animate-in fade-in duration-500">
           <div className="w-full max-w-sm max-h-[90vh] overflow-y-auto bg-[#000] border border-white/10 rounded-[8px] p-10 space-y-10 shadow-2xl relative">
-            <div className="absolute top-0 right-0 w-32 h-32 bg-[#00C187]/5 blur-3xl pointer-events-none" />
+            <div className="absolute top-0 right-0 w-32 h-32 bg-[#BFF367]/5 blur-3xl pointer-events-none" />
             <div className="flex justify-between items-center">
               <h3 className="text-2xl font-black uppercase tracking-tighter text-white">Interface Config</h3>
               <button onClick={() => setShowSettings(false)} className="p-3 bg-white/5 rounded-[8px] border border-white/5 hover:text-white transition-all">
@@ -863,7 +863,7 @@ const ScoringApp = () => {
             <div className="space-y-6">
               {matchData?.hostedGameId && !liveEnabled && (
                 <div className="py-12 text-center bg-white/[0.02] rounded-[8px] border border-dashed border-white/10">
-                  <div className="w-8 h-8 border-2 border-[#00C187] border-t-transparent rounded-full animate-spin mx-auto mb-4" />
+                  <div className="w-8 h-8 border-2 border-[#BFF367] border-t-transparent rounded-full animate-spin mx-auto mb-4" />
                   <p className="text-[10px] font-black text-neutral-500 uppercase tracking-[0.2em]">Establishing Sync...</p>
                 </div>
               )}
@@ -877,7 +877,7 @@ const ScoringApp = () => {
                       placeholder="YouTube ID..."
                       defaultValue={matchData?.hostedGameId?.youtubeVideoId}
                       id="ytVideoId"
-                      className="w-full bg-black/50 border border-white/5 rounded-[8px] px-6 py-4 text-xs focus:border-[#00C187] outline-none text-white font-bold"
+                      className="w-full bg-black/50 border border-white/5 rounded-[8px] px-6 py-4 text-xs focus:border-[#BFF367] outline-none text-white font-bold"
                     />
                     <button
                       onClick={async () => {
@@ -909,7 +909,7 @@ const ScoringApp = () => {
                           toast.error('Network failure');
                         }
                       }}
-                      className="w-full py-3 bg-[#00C187]/10 border border-[#00C187]/20 text-[#00C187] text-[10px] font-black uppercase tracking-widest rounded-[8px] hover:bg-[#00C187] hover:text-black transition-all"
+                      className="w-full py-3 bg-[#BFF367]/10 border border-[#BFF367]/20 text-[#BFF367] text-[10px] font-black uppercase tracking-widest rounded-[8px] hover:bg-[#BFF367] hover:text-black transition-all"
                     >
                       Authorize Stream
                     </button>
@@ -921,12 +921,12 @@ const ScoringApp = () => {
                         <p className="text-[8px] font-black text-neutral-600 uppercase tracking-widest">OBS Overlay (Copy this)</p>
                         <div className="flex gap-2">
                           <input readOnly value={liveUrls.obsOverlay} className="flex-1 bg-black/40 border border-white/5 rounded-[8px] px-4 py-2.5 text-[9px] text-neutral-400 font-bold truncate outline-none" />
-                          <button onClick={() => { navigator.clipboard.writeText(liveUrls.obsOverlay); toast.success('Copied!'); }} className="px-4 py-2 bg-[#00C187]/10 text-[#00C187] text-[8px] font-black uppercase rounded-[8px] border border-[#00C187]/20 hover:bg-[#00C187] hover:text-black transition-all">Copy</button>
+                          <button onClick={() => { navigator.clipboard.writeText(liveUrls.obsOverlay); toast.success('Copied!'); }} className="px-4 py-2 bg-[#BFF367]/10 text-[#BFF367] text-[8px] font-black uppercase rounded-[8px] border border-[#BFF367]/20 hover:bg-[#BFF367] hover:text-black transition-all">Copy</button>
                         </div>
                         <button
                           type="button"
                           onClick={() => setShowThemeStore(true)}
-                          className="w-full mt-2 py-2.5 bg-[#00C187]/10 text-[#00C187] text-[9px] font-black uppercase tracking-widest rounded-[8px] border border-[#00C187]/20 hover:bg-[#00C187] hover:text-black hover:shadow-[0_0_15px_rgba(0,193,135,0.15)] transition-all flex items-center justify-center gap-2"
+                          className="w-full mt-2 py-2.5 bg-[#BFF367]/10 text-[#BFF367] text-[9px] font-black uppercase tracking-widest rounded-[8px] border border-[#BFF367]/20 hover:bg-[#BFF367] hover:text-black hover:shadow-[0_0_15px_rgba(0,193,135,0.15)] transition-all flex items-center justify-center gap-2"
                         >
                           <Sparkles size={12} />
                           Change Ticker Theme
@@ -936,14 +936,14 @@ const ScoringApp = () => {
                         <p className="text-[8px] font-black text-neutral-600 uppercase tracking-widest">Public Match Analytics</p>
                         <div className="flex gap-2">
                           <input readOnly value={liveUrls.publicScoreboard} className="flex-1 bg-black/40 border border-white/5 rounded-[8px] px-4 py-2.5 text-[9px] text-neutral-400 font-bold truncate outline-none" />
-                          <button onClick={() => { navigator.clipboard.writeText(liveUrls.publicScoreboard); toast.success('Copied!'); }} className="px-4 py-2 bg-[#00C187]/10 text-[#00C187] text-[8px] font-black uppercase rounded-[8px] border border-[#00C187]/20 hover:bg-[#00C187] hover:text-black transition-all">Copy</button>
+                          <button onClick={() => { navigator.clipboard.writeText(liveUrls.publicScoreboard); toast.success('Copied!'); }} className="px-4 py-2 bg-[#BFF367]/10 text-[#BFF367] text-[8px] font-black uppercase rounded-[8px] border border-[#BFF367]/20 hover:bg-[#BFF367] hover:text-black transition-all">Copy</button>
                         </div>
                         <div className="flex gap-2 w-full mt-2">
                           <a
                             href={`/live-overlay/${matchId}/preview?theme=${matchData?.hostedGameId?.tickerTheme || 'neon_classic'}`}
                             target="_blank"
                             rel="noreferrer"
-                            className="w-full bg-[#00C187]/20 text-[#00C187] border border-[#00C187]/50 rounded-[8px] px-4 py-2 text-xs font-bold text-center hover:bg-[#00C187]/30 transition-colors"
+                            className="w-full bg-[#BFF367]/20 text-[#BFF367] border border-[#BFF367]/50 rounded-[8px] px-4 py-2 text-xs font-bold text-center hover:bg-[#BFF367]/30 transition-colors"
                           >
                             Preview Theme
                           </a>
@@ -964,7 +964,7 @@ const ScoringApp = () => {
                         if (res.success) toast.success('Match Resumed!');
                         else toast.error('Failed to update status');
                       }}
-                      className={`py-2 rounded-[8px] text-[9px] font-black uppercase transition-all ${matchData?.status === 'LIVE' ? 'bg-[#00C187]/20 text-[#00C187] border border-[#00C187]/30' : 'bg-white/5 text-neutral-400 hover:bg-white/10'}`}
+                      className={`py-2 rounded-[8px] text-[9px] font-black uppercase transition-all ${matchData?.status === 'LIVE' ? 'bg-[#BFF367]/20 text-[#BFF367] border border-[#BFF367]/30' : 'bg-white/5 text-neutral-400 hover:bg-white/10'}`}
                     >
                       Live
                     </button>
@@ -994,7 +994,7 @@ const ScoringApp = () => {
                 <div className="space-y-4 pt-4 border-t border-white/5">
                   <p className="text-[8px] font-black text-neutral-600 uppercase tracking-widest flex items-center justify-between">
                     <span>AI Commentator (OpenAI TTS)</span>
-                    <span className={`px-2 py-0.5 rounded text-[8px] ${isAiCommentaryEnabled ? 'bg-[#00C187]/20 text-[#00C187]' : 'bg-white/5 text-neutral-500'}`}>
+                    <span className={`px-2 py-0.5 rounded text-[8px] ${isAiCommentaryEnabled ? 'bg-[#BFF367]/20 text-[#BFF367]' : 'bg-white/5 text-neutral-500'}`}>
                       {isAiCommentaryEnabled ? 'ACTIVE' : 'OFF'}
                     </span>
                   </p>
@@ -1002,7 +1002,7 @@ const ScoringApp = () => {
                   <div className="flex gap-2">
                     <button
                       onClick={() => setIsAiCommentaryEnabled(!isAiCommentaryEnabled)}
-                      className={`flex-1 py-2.5 rounded-[8px] text-[9px] font-black uppercase tracking-widest transition-all ${isAiCommentaryEnabled ? 'bg-[#00C187] text-black shadow-[0_0_15px_rgba(0,193,135,0.3)]' : 'bg-white/5 border border-white/10 text-white'}`}
+                      className={`flex-1 py-2.5 rounded-[8px] text-[9px] font-black uppercase tracking-widest transition-all ${isAiCommentaryEnabled ? 'bg-[#BFF367] text-black shadow-[0_0_15px_rgba(0,193,135,0.3)]' : 'bg-white/5 border border-white/10 text-white'}`}
                     >
                       {isAiCommentaryEnabled ? 'Disable' : 'Enable Commentary'}
                     </button>
@@ -1014,7 +1014,7 @@ const ScoringApp = () => {
                         <select
                           value={commentaryLanguage}
                           onChange={(e) => setCommentaryLanguage(e.target.value)}
-                          className="flex-1 bg-black/40 border border-white/5 rounded-[8px] px-4 py-2.5 text-[10px] text-white font-bold outline-none focus:border-[#00C187]"
+                          className="flex-1 bg-black/40 border border-white/5 rounded-[8px] px-4 py-2.5 text-[10px] text-white font-bold outline-none focus:border-[#BFF367]"
                         >
                           <option value="en">English (Default)</option>
                           <option value="hi">Hindi</option>
@@ -1029,7 +1029,7 @@ const ScoringApp = () => {
                         <select
                           value={commentaryVoice}
                           onChange={(e) => setCommentaryVoice(e.target.value)}
-                          className="flex-1 bg-black/40 border border-white/5 rounded-[8px] px-4 py-2.5 text-[10px] text-white font-bold outline-none focus:border-[#00C187]"
+                          className="flex-1 bg-black/40 border border-white/5 rounded-[8px] px-4 py-2.5 text-[10px] text-white font-bold outline-none focus:border-[#BFF367]"
                         >
                           <option value="alloy">Alloy (Neutral)</option>
                           <option value="echo">Echo (Male, Warm)</option>
@@ -1043,7 +1043,7 @@ const ScoringApp = () => {
                         <select
                           value={commentaryStyle}
                           onChange={(e) => setCommentaryStyle(e.target.value)}
-                          className="w-full bg-black/40 border border-white/5 rounded-[8px] px-4 py-2.5 text-[10px] text-white font-bold outline-none focus:border-[#00C187]"
+                          className="w-full bg-black/40 border border-white/5 rounded-[8px] px-4 py-2.5 text-[10px] text-white font-bold outline-none focus:border-[#BFF367]"
                         >
                           <option value="professional">Professional Broadcast</option>
                           <option value="natural">Natural Human (Casual)</option>
@@ -1071,7 +1071,7 @@ const ScoringApp = () => {
                             toast.error('Network error saving settings');
                           }
                         }}
-                        className="w-full py-2 bg-[#00C187]/10 text-[#00C187] text-[9px] font-black uppercase tracking-widest rounded-[8px] border border-[#00C187]/20 hover:bg-[#00C187] hover:text-black transition-all"
+                        className="w-full py-2 bg-[#BFF367]/10 text-[#BFF367] text-[9px] font-black uppercase tracking-widest rounded-[8px] border border-[#BFF367]/20 hover:bg-[#BFF367] hover:text-black transition-all"
                       >
                         Save Commentary Profile
                       </button>
@@ -1087,7 +1087,7 @@ const ScoringApp = () => {
                       id="revisedTarget"
                       placeholder="Revised Target"
                       defaultValue={matchData?.revisedTarget || ''}
-                      className="flex-1 bg-black/40 border border-white/5 rounded-[8px] px-4 py-2.5 text-[10px] text-white font-bold outline-none focus:border-[#00C187]"
+                      className="flex-1 bg-black/40 border border-white/5 rounded-[8px] px-4 py-2.5 text-[10px] text-white font-bold outline-none focus:border-[#BFF367]"
                     />
                     <input
                       type="number"
@@ -1095,7 +1095,7 @@ const ScoringApp = () => {
                       id="revisedOvers"
                       placeholder="Revised Overs"
                       defaultValue={matchData?.revisedOvers || ''}
-                      className="flex-1 bg-black/40 border border-white/5 rounded-[8px] px-4 py-2.5 text-[10px] text-white font-bold outline-none focus:border-[#00C187]"
+                      className="flex-1 bg-black/40 border border-white/5 rounded-[8px] px-4 py-2.5 text-[10px] text-white font-bold outline-none focus:border-[#BFF367]"
                     />
                   </div>
                   <button
@@ -1121,14 +1121,14 @@ const ScoringApp = () => {
                       id="umpire1"
                       placeholder="Umpire 1"
                       defaultValue={matchData?.matchOfficials?.umpire1 || ''}
-                      className="flex-1 bg-black/40 border border-white/5 rounded-[8px] px-4 py-2.5 text-[10px] text-white font-bold outline-none focus:border-[#00C187]"
+                      className="flex-1 bg-black/40 border border-white/5 rounded-[8px] px-4 py-2.5 text-[10px] text-white font-bold outline-none focus:border-[#BFF367]"
                     />
                     <input
                       type="text"
                       id="umpire2"
                       placeholder="Umpire 2"
                       defaultValue={matchData?.matchOfficials?.umpire2 || ''}
-                      className="flex-1 bg-black/40 border border-white/5 rounded-[8px] px-4 py-2.5 text-[10px] text-white font-bold outline-none focus:border-[#00C187]"
+                      className="flex-1 bg-black/40 border border-white/5 rounded-[8px] px-4 py-2.5 text-[10px] text-white font-bold outline-none focus:border-[#BFF367]"
                     />
                   </div>
                   <div className="flex gap-2">
@@ -1137,7 +1137,7 @@ const ScoringApp = () => {
                       id="matchReferee"
                       placeholder="Match Referee"
                       defaultValue={matchData?.matchOfficials?.matchReferee || ''}
-                      className="flex-1 bg-black/40 border border-white/5 rounded-[8px] px-4 py-2.5 text-[10px] text-white font-bold outline-none focus:border-[#00C187]"
+                      className="flex-1 bg-black/40 border border-white/5 rounded-[8px] px-4 py-2.5 text-[10px] text-white font-bold outline-none focus:border-[#BFF367]"
                     />
                     <button
                       onClick={async () => {
@@ -1164,7 +1164,7 @@ const ScoringApp = () => {
                       id="powerplayOvers"
                       placeholder="Powerplay Overs"
                       defaultValue={matchData?.powerplayOvers || 0}
-                      className="flex-1 bg-black/40 border border-white/5 rounded-[8px] px-4 py-2.5 text-[10px] text-white font-bold outline-none focus:border-[#00C187]"
+                      className="flex-1 bg-black/40 border border-white/5 rounded-[8px] px-4 py-2.5 text-[10px] text-white font-bold outline-none focus:border-[#BFF367]"
                     />
                     <button
                       onClick={async () => {
@@ -1174,7 +1174,7 @@ const ScoringApp = () => {
                         if (res.success) toast.success('Powerplay Overs Updated!');
                         else toast.error('Failed to update powerplay');
                       }}
-                      className="px-6 py-2.5 bg-[#00C187]/10 text-[#00C187] text-[9px] font-black uppercase tracking-widest rounded-[8px] border border-[#00C187]/20 hover:bg-[#00C187] hover:text-black transition-all"
+                      className="px-6 py-2.5 bg-[#BFF367]/10 text-[#BFF367] text-[9px] font-black uppercase tracking-widest rounded-[8px] border border-[#BFF367]/20 hover:bg-[#BFF367] hover:text-black transition-all"
                     >
                       Set Powerplay
                     </button>
@@ -1214,7 +1214,7 @@ const ScoringApp = () => {
                         setShowSettings(false);
                         setShowMatchReport(true);
                       }}
-                      className="w-full py-3 bg-[#00C187]/10 text-[#00C187] text-[9px] font-black uppercase tracking-widest rounded-[8px] border border-[#00C187]/20 hover:bg-[#00C187] hover:text-black hover:shadow-[0_0_15px_rgba(0,193,135,0.15)] transition-all flex items-center justify-center gap-2"
+                      className="w-full py-3 bg-[#BFF367]/10 text-[#BFF367] text-[9px] font-black uppercase tracking-widest rounded-[8px] border border-[#BFF367]/20 hover:bg-[#BFF367] hover:text-black hover:shadow-[0_0_15px_rgba(0,193,135,0.15)] transition-all flex items-center justify-center gap-2"
                     >
                       <FileText size={14} />
                       Match Report
@@ -1224,7 +1224,7 @@ const ScoringApp = () => {
                       onClick={() => {
                         window.open(`/analytics/${matchData?.hostedGameId?.shortId || matchId}`, '_blank');
                       }}
-                      className="w-full py-3 bg-[#55DEE8]/10 text-[#55DEE8] text-[9px] font-black uppercase tracking-widest rounded-[8px] border border-[#55DEE8]/20 hover:bg-[#55DEE8] hover:text-black hover:shadow-[0_0_15px_rgba(85,222,232,0.15)] transition-all flex items-center justify-center gap-2"
+                      className="w-full py-3 bg-[#BFF367]/10 text-[#BFF367] text-[9px] font-black uppercase tracking-widest rounded-[8px] border border-[#BFF367]/20 hover:bg-[#BFF367] hover:text-black hover:shadow-[0_0_15px_rgba(85,222,232,0.15)] transition-all flex items-center justify-center gap-2"
                     >
                       <TrendingUp size={14} />
                       Live Analytics
@@ -1346,7 +1346,7 @@ const ScoringApp = () => {
                   toast.error("Failed to advance innings: " + res.message);
                 }
               }}
-              className="w-full py-4 bg-gradient-to-r from-[#55DEE8] to-[#BFF367] text-black font-black text-sm uppercase tracking-wider rounded-[8px] hover:opacity-90 transition-opacity"
+              className="w-full py-4 bg-gradient-to-r from-[#BFF367] to-[#BFF367] text-black font-black text-sm uppercase tracking-wider rounded-[8px] hover:opacity-90 transition-opacity"
             >
               Start Next Innings
             </button>

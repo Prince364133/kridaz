@@ -33,12 +33,12 @@ const TeamMembersModal = ({ isOpen, onClose, team }) => {
                   {team.logo ? (
                     <img src={team.logo} alt="" className="w-full h-full object-cover" />
                   ) : (
-                    <Users className="text-[#55DEE8]" size={20} />
+                    <Users className="text-[#BFF367]" size={20} />
                   )}
                 </div>
                 <div>
                   <h3 className="font-bold text-lg text-white">{team.name}</h3>
-                  <p className="text-[10px] text-[#55DEE8] font-black uppercase tracking-widest">{team.memberCount} Squad Members</p>
+                  <p className="text-[10px] text-[#BFF367] font-black uppercase tracking-widest">{team.memberCount} Squad Members</p>
                 </div>
               </div>
               <button 
@@ -62,7 +62,7 @@ const TeamMembersModal = ({ isOpen, onClose, team }) => {
                         onClick={() => {
                           if (member.user?._id) navigate(`/profile/${member.user._id}`);
                         }}
-                        className="w-10 h-10 rounded-full border border-white/10 overflow-hidden cursor-pointer hover:border-[#55DEE8] transition-all"
+                        className="w-10 h-10 rounded-full border border-white/10 overflow-hidden cursor-pointer hover:border-[#BFF367] transition-all"
                       >
                         {member.user?.profilePicture ? (
                            <img src={member.user.profilePicture} alt="" className="w-full h-full object-cover" />
@@ -74,9 +74,9 @@ const TeamMembersModal = ({ isOpen, onClose, team }) => {
                       </div>
                       <div>
                         <div className="flex items-center gap-2">
-                          <p className="text-sm font-bold text-white group-hover:text-[#55DEE8] transition-colors">{member.user?.name}</p>
+                          <p className="text-sm font-bold text-white group-hover:text-[#BFF367] transition-colors">{member.user?.name}</p>
                           {member.role === 'OWNER' && (
-                            <Shield size={10} className="text-[#55DEE8]" />
+                            <Shield size={10} className="text-[#BFF367]" />
                           )}
                         </div>
                         <p className="text-[10px] text-white/20 font-medium uppercase tracking-wider">@{member.user?.username || 'player'}</p>
@@ -87,7 +87,7 @@ const TeamMembersModal = ({ isOpen, onClose, team }) => {
                       onClick={() => {
                         if (member.user?._id) navigate(`/profile/${member.user._id}`);
                       }}
-                      className="p-2 rounded-[8px] bg-white/5 text-white/40 opacity-0 group-hover:opacity-100 transition-all hover:bg-[#55DEE8] hover:text-black"
+                      className="p-2 rounded-[8px] bg-white/5 text-white/40 opacity-0 group-hover:opacity-100 transition-all hover:bg-[#BFF367] hover:text-black"
                     >
                       <ExternalLink size={14} />
                     </button>
@@ -100,7 +100,7 @@ const TeamMembersModal = ({ isOpen, onClose, team }) => {
             <div className="p-6 border-t border-white/5 bg-white/[0.01]">
               <button 
                 onClick={() => navigate(`/team/${team._id}`)}
-                className="w-full py-4 bg-gradient-to-r from-[#55DEE8] to-[#BFF367] hover:brightness-[1.04] text-black font-black text-xs uppercase tracking-[0.2em] rounded-[8px] shadow-lg shadow-[#55DEE8]/10 hover:shadow-[#BFF367]/15 transition-all hover:scale-[1.02] active:scale-[0.98] duration-300"
+                className="w-full py-4 bg-gradient-to-r from-[#BFF367] to-[#BFF367] hover:brightness-[1.04] text-black font-black text-xs uppercase tracking-[0.2em] rounded-[8px] shadow-lg shadow-[#BFF367]/10 hover:shadow-[#BFF367]/15 transition-all hover:scale-[1.02] active:scale-[0.98] duration-300"
               >
                 View Full Team Profile
               </button>

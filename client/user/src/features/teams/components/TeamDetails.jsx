@@ -12,8 +12,8 @@ const TeamDetails = ({ team, onInviteClick, onCreateClick, onBack }) => {
     return (
       <div className="flex-1 flex flex-col items-center justify-center bg-[#0a0a0a] text-white/40 p-12">
         <div className="w-24 h-24 rounded-[8px] bg-white/[0.03] border border-white/5 flex items-center justify-center mb-8 shadow-2xl relative overflow-hidden group">
-          <div className="absolute inset-0 bg-[#55DEE8]/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-          <Users className="text-white/20 text-4xl group-hover:text-[#55DEE8]/50 transition-colors duration-500 relative z-10" />
+          <div className="absolute inset-0 bg-[#BFF367]/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+          <Users className="text-white/20 text-4xl group-hover:text-[#BFF367]/50 transition-colors duration-500 relative z-10" />
         </div>
         <h2 className="text-3xl font-bold text-white mb-3 tracking-tight" style={{ fontFamily: "'Open Sans', sans-serif" }}>Select a Team</h2>
         <p className="text-white/30 max-w-sm text-center text-sm font-medium leading-relaxed mb-10" style={{ fontFamily: "'Inter', sans-serif" }}>
@@ -22,7 +22,7 @@ const TeamDetails = ({ team, onInviteClick, onCreateClick, onBack }) => {
         
         <button 
           onClick={onCreateClick}
-          className="group relative px-8 py-4 bg-gradient-to-r from-[#55DEE8] to-[#BFF367] text-black font-black rounded-[8px] flex items-center gap-3 shadow-lg shadow-[#55DEE8]/10 hover:shadow-[#BFF367]/15 hover:brightness-[1.04] transition-all hover:-translate-y-0.5 active:translate-y-0 overflow-hidden duration-300"
+          className="group relative px-8 py-4 bg-gradient-to-r from-[#BFF367] to-[#BFF367] text-black font-black rounded-[8px] flex items-center gap-3 shadow-lg shadow-[#BFF367]/10 hover:shadow-[#BFF367]/15 hover:brightness-[1.04] transition-all hover:-translate-y-0.5 active:translate-y-0 overflow-hidden duration-300"
         >
           <div className="absolute inset-0 bg-white/20 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000 skew-x-[30deg]" />
           <UserPlus className="text-lg" />
@@ -73,32 +73,32 @@ const TeamDetails = ({ team, onInviteClick, onCreateClick, onBack }) => {
 
       {/* Team Header Banner */}
       <div className="relative h-48 md:h-64 shrink-0 overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-b from-[#55DEE8]/15 via-[#BFF367]/5 to-[#0a0a0a]" />
+        <div className="absolute inset-0 bg-gradient-to-b from-[#BFF367]/15 via-[#BFF367]/5 to-[#0a0a0a]" />
         <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')] opacity-20" />
         
-        <div className="absolute top-6 right-6 z-10 flex items-center gap-2 px-4 py-2 bg-black/60 backdrop-blur-xl border border-white/10 rounded-[8px] group cursor-pointer hover:border-[#55DEE8]/50 transition-all" onClick={copyToClipboard}>
+        <div className="absolute top-6 right-6 z-10 flex items-center gap-2 px-4 py-2 bg-black/60 backdrop-blur-xl border border-white/10 rounded-[8px] group cursor-pointer hover:border-[#BFF367]/50 transition-all" onClick={copyToClipboard}>
           <div className="flex flex-col items-end">
             <span className="text-[8px] font-black text-white/40 uppercase tracking-widest" style={{ fontFamily: "'Inter', sans-serif" }}>Unique Team ID</span>
-            <span className="text-sm font-black text-[#55DEE8] tracking-[0.2em]">{team.teamCode}</span>
+            <span className="text-sm font-black text-[#BFF367] tracking-[0.2em]">{team.teamCode}</span>
           </div>
-          <Copy size={16} className="text-white/20 group-hover:text-[#55DEE8] transition-colors" />
+          <Copy size={16} className="text-white/20 group-hover:text-[#BFF367] transition-colors" />
         </div>
 
         <div className="absolute bottom-0 left-0 right-0 p-6 flex flex-col md:flex-row items-end gap-6">
-          <div className="w-24 h-24 md:w-32 md:h-32 rounded-[8px] bg-black border-4 border-[#0a0a0a] shadow-2xl flex items-center justify-center text-[#55DEE8] text-4xl font-bold overflow-hidden shrink-0">
+          <div className="w-24 h-24 md:w-32 md:h-32 rounded-[8px] bg-black border-4 border-[#0a0a0a] shadow-2xl flex items-center justify-center text-[#BFF367] text-4xl font-bold overflow-hidden shrink-0">
             {team.image ? <img src={team.image} alt={team.name} className="w-full h-full object-cover" /> : team.name.charAt(0).toUpperCase()}
           </div>
           <div className="flex-1 pb-2">
             <div className="flex items-center gap-3 mb-1">
               <h1 className="text-2xl md:text-4xl font-bold text-white tracking-tight" style={{ fontFamily: "'Open Sans', sans-serif" }}>{team.name}</h1>
-              <span className="px-3 py-1 rounded-full bg-gradient-to-r from-[#55DEE8]/10 to-[#BFF367]/10 border border-[#55DEE8]/10 text-[#55DEE8] text-[10px] font-black uppercase tracking-widest" style={{ fontFamily: "'Inter', sans-serif" }}>{team.sportType}</span>
+              <span className="px-3 py-1 rounded-full bg-gradient-to-r from-[#BFF367]/10 to-[#BFF367]/10 border border-[#BFF367]/10 text-[#BFF367] text-[10px] font-black uppercase tracking-widest" style={{ fontFamily: "'Inter', sans-serif" }}>{team.sportType}</span>
             </div>
             <p className="text-white/60 text-sm md:text-base max-w-2xl line-clamp-2" style={{ fontFamily: "'Inter', sans-serif" }}>{team.description || "No description provided."}</p>
           </div>
           <div className="pb-2">
             <button 
               onClick={onInviteClick}
-              className="px-6 py-3 bg-gradient-to-r from-[#55DEE8] to-[#BFF367] hover:brightness-[1.04] text-black font-black rounded-[8px] flex items-center gap-2 shadow-lg shadow-[#55DEE8]/10 hover:shadow-[#BFF367]/15 transition-all hover:-translate-y-0.5 active:translate-y-0 duration-300 whitespace-nowrap uppercase tracking-widest text-xs"
+              className="px-6 py-3 bg-gradient-to-r from-[#BFF367] to-[#BFF367] hover:brightness-[1.04] text-black font-black rounded-[8px] flex items-center gap-2 shadow-lg shadow-[#BFF367]/10 hover:shadow-[#BFF367]/15 transition-all hover:-translate-y-0.5 active:translate-y-0 duration-300 whitespace-nowrap uppercase tracking-widest text-xs"
               style={{ fontFamily: "'Inter', sans-serif" }}
             >
               <UserPlus size={16} /> Add Members
@@ -193,24 +193,24 @@ const TeamDetails = ({ team, onInviteClick, onCreateClick, onBack }) => {
             {pendingMembers.length > 0 && (
               <div className="space-y-4">
                 <h3 className="text-white font-bold text-lg tracking-tight flex items-center gap-2" style={{ fontFamily: "'Inter', sans-serif" }}>
-                  <span className="w-1 h-5 bg-[#55DEE8] rounded-full" />
+                  <span className="w-1 h-5 bg-[#BFF367] rounded-full" />
                   Join Requests ({pendingMembers.length})
                 </h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   {pendingMembers.map((req) => (
-                    <div key={req._id} className="bg-[#55DEE8]/5 border border-[#55DEE8]/20 p-4 rounded-[8px] flex items-center gap-4">
+                    <div key={req._id} className="bg-[#BFF367]/5 border border-[#BFF367]/20 p-4 rounded-[8px] flex items-center gap-4">
                       <div className="w-10 h-10 rounded-[10px] bg-white/5 overflow-hidden border border-white/10 shrink-0">
                         <img src={req.profilePic || `https://api.dicebear.com/7.x/avataaars/svg?seed=${req.username}`} alt={req.username} className="w-full h-full object-cover" />
                       </div>
                       <div className="flex-1 min-w-0">
                         <p className="text-white font-bold text-sm truncate uppercase tracking-tight">{req.username}</p>
-                        <p className="text-[#55DEE8]/60 text-[9px] font-bold uppercase tracking-widest mt-0.5">Wants to join</p>
+                        <p className="text-[#BFF367]/60 text-[9px] font-bold uppercase tracking-widest mt-0.5">Wants to join</p>
                       </div>
                       <div className="flex gap-2">
                         <button 
                           disabled={isHandlingJoin}
                           onClick={() => onHandleJoin(req.user?._id || req.userId, 'ACCEPT')}
-                          className="w-8 h-8 bg-[#55DEE8] text-black rounded-[8px] flex items-center justify-center hover:brightness-110 transition-colors"
+                          className="w-8 h-8 bg-[#BFF367] text-black rounded-[8px] flex items-center justify-center hover:brightness-110 transition-colors"
                         >
                           <Check size={12} />
                         </button>
@@ -231,18 +231,18 @@ const TeamDetails = ({ team, onInviteClick, onCreateClick, onBack }) => {
             {/* Platform Members */}
             <div>
               <h3 className="text-white font-bold text-lg tracking-tight mb-4 flex items-center gap-2" style={{ fontFamily: "'Inter', sans-serif" }}>
-                <span className="w-1 h-5 bg-gradient-to-b from-[#55DEE8] to-[#BFF367] rounded-full" />
+                <span className="w-1 h-5 bg-gradient-to-b from-[#BFF367] to-[#BFF367] rounded-full" />
                 Platform Members ({members.length})
               </h3>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 {members.map((member) => (
-                  <div key={member._id} className="bg-white/[0.02] p-4 rounded-[8px] border border-white/5 hover:border-[#55DEE8]/20 transition-all flex items-center gap-4 group">
+                  <div key={member._id} className="bg-white/[0.02] p-4 rounded-[8px] border border-white/5 hover:border-[#BFF367]/20 transition-all flex items-center gap-4 group">
                     <div className="w-12 h-12 rounded-[8px] bg-white/5 overflow-hidden border border-white/10">
                       <img src={member.profilePic || `https://api.dicebear.com/7.x/avataaars/svg?seed=${member.username}`} alt={member.username} className="w-full h-full object-cover" />
                     </div>
                     <div className="flex-1 min-w-0">
                       <h4 className="text-white font-black text-sm truncate uppercase tracking-tight" style={{ fontFamily: "'Inter', sans-serif" }}>@{member.username}</h4>
-                      <p className="text-[#55DEE8] text-[9px] font-black uppercase tracking-widest mt-0.5" style={{ fontFamily: "'Inter', sans-serif" }}>{member.role}</p>
+                      <p className="text-[#BFF367] text-[9px] font-black uppercase tracking-widest mt-0.5" style={{ fontFamily: "'Inter', sans-serif" }}>{member.role}</p>
                     </div>
                   </div>
                 ))}

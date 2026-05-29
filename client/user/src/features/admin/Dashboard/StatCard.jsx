@@ -8,9 +8,9 @@ const StatCard = ({ title, value, icon: Icon, className, prefix = "", trend, tre
     
     <div className="relative z-10 flex justify-between items-start mb-4">
       <div className="space-y-1">
-        <p className="text-[8px] md:text-xs font-bold text-gray-500 uppercase tracking-widest group-hover:text-[#55DEE8] transition-colors">{title}</p>
+        <p className="text-[8px] md:text-xs font-bold text-gray-500 uppercase tracking-widest group-hover:text-[#BFF367] transition-colors">{title}</p>
         <div className="flex items-baseline gap-1">
-          {prefix && <span className="text-xl font-bold text-[#55DEE8]">{prefix}</span>}
+          {prefix && <span className="text-xl font-bold text-[#BFF367]">{prefix}</span>}
           <div className="text-lg md:text-4xl font-bold tracking-tight text-white leading-none">
             <CountUp end={value || 0} duration={2.5} separator="," />
           </div>
@@ -18,14 +18,14 @@ const StatCard = ({ title, value, icon: Icon, className, prefix = "", trend, tre
       </div>
       
       {Icon && (
-        <div className="w-8 h-8 md:w-12 md:h-12 flex items-center justify-center bg-white/5 rounded-lg md:rounded-[8px] border border-white/5 group-hover:border-[#55DEE8]/30 transition-all">
-          <Icon className="text-[#55DEE8] group-hover:scale-110 transition-transform" size={16} md:size={20} />
+        <div className="w-8 h-8 md:w-12 md:h-12 flex items-center justify-center bg-white/5 rounded-lg md:rounded-[8px] border border-white/5 group-hover:border-[#BFF367]/30 transition-all">
+          <Icon className="text-[#BFF367] group-hover:scale-110 transition-transform" size={16} md:size={20} />
         </div>
       )}
     </div>
 
     {trend && (
-      <div className={`flex items-center gap-2 mb-4 text-[10px] font-bold uppercase tracking-[0.2em] ${trend === 'up' ? 'text-[#55DEE8]' : 'text-red-500'}`}>
+      <div className={`flex items-center gap-2 mb-4 text-[10px] font-bold uppercase tracking-[0.2em] ${trend === 'up' ? 'text-[#BFF367]' : 'text-red-500'}`}>
         <div className={`flex items-center ${trend === 'up' ? 'rotate-0' : 'rotate-180'}`}>
            <TrendingUp size={12} />
         </div>

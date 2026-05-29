@@ -119,7 +119,7 @@ const InningsSetupModal = ({
                   {player.name?.charAt(0)?.toUpperCase() || '?'}
                 </div>
                 <span className="flex-1 font-bold text-white text-sm">{player.name || 'Unnamed'}</span>
-                <ChevronRight size={16} className="text-neutral-600 group-hover:text-transparent bg-clip-text bg-gradient-to-r from-[#55DEE8] to-[#BFF367] transition-colors" />
+                <ChevronRight size={16} className="text-neutral-600 group-hover:text-transparent bg-clip-text bg-gradient-to-r from-[#BFF367] to-[#BFF367] transition-colors" />
               </button>
             ))}
           </div>

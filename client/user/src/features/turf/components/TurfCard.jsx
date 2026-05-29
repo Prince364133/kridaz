@@ -85,7 +85,7 @@ const TurfCard = ({ turf, featured = false, distance = "1.2km Away" }) => {
       <div className="absolute top-3 md:top-5 left-3 md:left-5 z-20 flex flex-col gap-2 md:gap-2.5 items-start">
         <div className="flex items-center gap-1.5 md:gap-2.5">
           {/* Sport Tag */}
-          <span className="bg-gradient-to-r from-[#55DEE8] to-[#BFF367] text-black text-[8px] md:text-[10px] font-black px-2 md:px-3 py-1 md:py-1.5 rounded-[10px] uppercase tracking-widest shadow-2xl">
+          <span className="bg-gradient-to-r from-[#BFF367] to-[#BFF367] text-black text-[8px] md:text-[10px] font-black px-2 md:px-3 py-1 md:py-1.5 rounded-[10px] uppercase tracking-widest shadow-2xl">
             {turf.sportTypes?.[0] || "SPORT"}
           </span>
 
@@ -108,7 +108,7 @@ const TurfCard = ({ turf, featured = false, distance = "1.2km Away" }) => {
       <div className="absolute top-3 md:top-5 right-3 md:right-5 z-20">
         <button 
           onClick={toggleWishlist}
-          className="p-2 md:p-2.5 rounded-[8px] bg-black/40 backdrop-blur-md border border-white/10 hover:bg-gradient-to-r hover:from-[#55DEE8] hover:to-[#BFF367] transition-all duration-300 group/heart"
+          className="p-2 md:p-2.5 rounded-[8px] bg-black/40 backdrop-blur-md border border-white/10 hover:bg-gradient-to-r hover:from-[#BFF367] hover:to-[#BFF367] transition-all duration-300 group/heart"
         >
           <Heart 
             size={14} md:size={18} 
@@ -143,7 +143,7 @@ const TurfCard = ({ turf, featured = false, distance = "1.2km Away" }) => {
               </h3>
               <div className="flex items-center justify-between gap-2">
                 <div className="flex items-center gap-1.5 md:gap-2 overflow-hidden">
-                  <MapPin size={10} md:size={12} className="text-[#55DEE8] shrink-0" />
+                  <MapPin size={10} md:size={12} className="text-[#BFF367] shrink-0" />
                   <p className="text-[10px] md:text-sm font-semibold text-white/60 truncate font-inter">
                     {turf.city || turf.location || "Nearby Venue"}
                   </p>

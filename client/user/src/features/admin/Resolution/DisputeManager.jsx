@@ -40,7 +40,7 @@ const DisputeManager = () => {
   const getStatusColor = (status) => {
     switch (status) {
       case "RESOLVED": return "text-green-500 bg-green-500/10 border-green-500/20";
-      case "PENDING": return "text-transparent bg-clip-text bg-gradient-to-r from-[#55DEE8] to-[#BFF367] bg-gradient-to-r from-[#55DEE8]/10 to-[#BFF367]/10 border-[#55DEE8]/20";
+      case "PENDING": return "text-transparent bg-clip-text bg-gradient-to-r from-[#BFF367] to-[#BFF367] bg-gradient-to-r from-[#BFF367]/10 to-[#BFF367]/10 border-[#BFF367]/20";
       case "INVESTIGATING": return "text-orange-500 bg-orange-500/10 border-orange-500/20";
       default: return "text-gray-500 bg-gray-500/10 border-gray-500/20";
     }

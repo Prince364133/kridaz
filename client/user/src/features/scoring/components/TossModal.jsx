@@ -100,7 +100,7 @@ const TossModal = ({ teamA, teamB, hasPassword, onConfirm, onCancel }) => {
                   <div className="flex flex-col gap-3">
                     <button
                       onClick={handleFlip}
-                      className="px-8 py-4 bg-[#00C187] text-black font-black uppercase tracking-widest rounded-[8px] hover:bg-[#00e39f] hover:scale-105 transition-all shadow-[0_0_20px_rgba(0,193,135,0.4)]"
+                      className="px-8 py-4 bg-[#BFF367] text-black font-black uppercase tracking-widest rounded-[8px] hover:bg-[#00e39f] hover:scale-105 transition-all shadow-[0_0_20px_rgba(0,193,135,0.4)]"
                     >
                       Flip Coin
                     </button>
@@ -122,7 +122,7 @@ const TossModal = ({ teamA, teamB, hasPassword, onConfirm, onCancel }) => {
                     <p className="text-2xl font-black text-white">It's {coinResult}!</p>
                     <button
                       onClick={() => setStep('WINNER_SELECT')}
-                      className="px-8 py-4 bg-[#00C187]/20 border border-[#00C187]/40 text-[#00C187] font-black uppercase tracking-widest rounded-[8px] hover:bg-[#00C187]/30 transition-all"
+                      className="px-8 py-4 bg-[#BFF367]/20 border border-[#BFF367]/40 text-[#BFF367] font-black uppercase tracking-widest rounded-[8px] hover:bg-[#BFF367]/30 transition-all"
                     >
                       Continue
                     </button>
@@ -140,10 +140,10 @@ const TossModal = ({ teamA, teamB, hasPassword, onConfirm, onCancel }) => {
                       setWinnerTeam(team.id);
                       setStep('DECISION_SELECT');
                     }}
-                    className="w-full flex items-center gap-4 px-4 py-4 rounded-[8px] border border-white/8 bg-white/4 hover:border-[#00C187]/50 hover:bg-[#00C187]/8 transition-all group text-left"
+                    className="w-full flex items-center gap-4 px-4 py-4 rounded-[8px] border border-white/8 bg-white/4 hover:border-[#BFF367]/50 hover:bg-[#BFF367]/8 transition-all group text-left"
                   >
                     <span className="flex-1 font-bold text-white text-base">{team.name}</span>
-                    <ChevronRight size={20} className="text-neutral-600 group-hover:text-[#00C187] transition-colors" />
+                    <ChevronRight size={20} className="text-neutral-600 group-hover:text-[#BFF367] transition-colors" />
                   </button>
                 ))}
               </div>
@@ -156,7 +156,7 @@ const TossModal = ({ teamA, teamB, hasPassword, onConfirm, onCancel }) => {
                     setDecision('BAT');
                     setStep('SUMMARY');
                   }}
-                  className="flex flex-col items-center justify-center py-6 rounded-[8px] border border-white/8 bg-white/4 hover:border-[#00C187]/50 hover:bg-[#00C187]/8 transition-all"
+                  className="flex flex-col items-center justify-center py-6 rounded-[8px] border border-white/8 bg-white/4 hover:border-[#BFF367]/50 hover:bg-[#BFF367]/8 transition-all"
                 >
                   <span className="text-lg font-black text-white">BAT</span>
                 </button>
@@ -165,7 +165,7 @@ const TossModal = ({ teamA, teamB, hasPassword, onConfirm, onCancel }) => {
                     setDecision('BOWL');
                     setStep('SUMMARY');
                   }}
-                  className="flex flex-col items-center justify-center py-6 rounded-[8px] border border-white/8 bg-white/4 hover:border-[#00C187]/50 hover:bg-[#00C187]/8 transition-all"
+                  className="flex flex-col items-center justify-center py-6 rounded-[8px] border border-white/8 bg-white/4 hover:border-[#BFF367]/50 hover:bg-[#BFF367]/8 transition-all"
                 >
                   <span className="text-lg font-black text-white">BOWL</span>
                 </button>
@@ -177,13 +177,13 @@ const TossModal = ({ teamA, teamB, hasPassword, onConfirm, onCancel }) => {
                 <div className="text-center space-y-1">
                   <p className="text-xs font-black text-neutral-500 uppercase tracking-widest">Matchup</p>
                   <p className="text-lg font-black text-white">
-                    {teamA?.name} <span className="text-[#00C187] mx-2">VS</span> {teamB?.name}
+                    {teamA?.name} <span className="text-[#BFF367] mx-2">VS</span> {teamB?.name}
                   </p>
                 </div>
                 
                 <div className="bg-white/5 border border-white/10 rounded-[8px] p-4 text-center">
                   <p className="text-sm font-bold text-white">
-                    <span className="text-[#00C187]">{teams.find(t => t.id === winnerTeam)?.name}</span> won the toss and chose to <span className="text-[#00C187]">{decision}</span>.
+                    <span className="text-[#BFF367]">{teams.find(t => t.id === winnerTeam)?.name}</span> won the toss and chose to <span className="text-[#BFF367]">{decision}</span>.
                   </p>
                 </div>
 
@@ -197,7 +197,7 @@ const TossModal = ({ teamA, teamB, hasPassword, onConfirm, onCancel }) => {
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
                       placeholder="Enter password..."
-                      className="w-full bg-black/40 border border-white/10 rounded-[8px] px-4 py-4 text-sm font-bold text-white focus:outline-none focus:border-[#00C187]/50 transition-all text-center tracking-[0.2em]"
+                      className="w-full bg-black/40 border border-white/10 rounded-[8px] px-4 py-4 text-sm font-bold text-white focus:outline-none focus:border-[#BFF367]/50 transition-all text-center tracking-[0.2em]"
                     />
                   </div>
                 )}

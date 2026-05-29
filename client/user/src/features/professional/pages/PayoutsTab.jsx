@@ -137,7 +137,7 @@ const PayoutsTab = ({ role }) => {
             <IndianRupee size={80} />
           </div>
           <span className="text-xs text-[#878C9F] font-semibold uppercase tracking-wider">Usable Balance</span>
-          <h2 className="text-3xl font-extrabold text-[#55DEE8] mt-2">₹{walletBalance.toFixed(2)}</h2>
+          <h2 className="text-3xl font-extrabold text-[#BFF367] mt-2">₹{walletBalance.toFixed(2)}</h2>
           <p className="text-[10px] text-[#878C9F] mt-2">Available for immediate withdrawal</p>
         </div>
 
@@ -166,7 +166,7 @@ const PayoutsTab = ({ role }) => {
         {/* Request Payout Form */}
         <div className="p-6 rounded-2xl bg-[#141414] border border-[#2D2D2D] space-y-6">
           <div className="flex items-center gap-2.5 border-b border-[#2D2D2D] pb-4">
-            <ArrowUpRight size={20} className="text-[#55DEE8]" />
+            <ArrowUpRight size={20} className="text-[#BFF367]" />
             <h3 className="text-lg font-bold tracking-tight">Withdraw Funds</h3>
           </div>
 
@@ -182,7 +182,7 @@ const PayoutsTab = ({ role }) => {
                   placeholder="0.00"
                   value={withdrawAmount}
                   onChange={(e) => setWithdrawAmount(e.target.value)}
-                  className="w-full bg-black border border-[#2D2D2D] rounded-xl pl-10 pr-4 py-3 text-lg font-bold text-white focus:outline-none focus:border-[#55DEE8] transition-colors"
+                  className="w-full bg-black border border-[#2D2D2D] rounded-xl pl-10 pr-4 py-3 text-lg font-bold text-white focus:outline-none focus:border-[#BFF367] transition-colors"
                 />
               </div>
             </div>
@@ -190,7 +190,7 @@ const PayoutsTab = ({ role }) => {
             <button 
               type="submit"
               disabled={isSubmittingPayout || walletBalance <= 0}
-              className="w-full bg-[#55DEE8] hover:bg-[#44cdd7] disabled:bg-gray-600 disabled:text-gray-400 text-black font-semibold rounded-xl py-3.5 transition-colors text-sm"
+              className="w-full bg-[#BFF367] hover:bg-[#44cdd7] disabled:bg-gray-600 disabled:text-gray-400 text-black font-semibold rounded-xl py-3.5 transition-colors text-sm"
             >
               {isSubmittingPayout ? "Processing Payout..." : "Withdraw to Bank"}
             </button>
@@ -200,20 +200,20 @@ const PayoutsTab = ({ role }) => {
         {/* Banking Config Form */}
         <div className="p-6 rounded-2xl bg-[#141414] border border-[#2D2D2D] space-y-6">
           <div className="flex items-center gap-2.5 border-b border-[#2D2D2D] pb-4">
-            <Landmark size={20} className="text-[#55DEE8]" />
+            <Landmark size={20} className="text-[#BFF367]" />
             <h3 className="text-lg font-bold tracking-tight">Payout Account Settings</h3>
           </div>
 
           <div className="flex bg-black p-1 rounded-xl border border-[#2D2D2D] gap-2">
             <button
               onClick={() => setPayoutMode("BANK")}
-              className={`flex-1 font-semibold text-xs py-2 rounded-lg transition-all ${payoutMode === "BANK" ? "bg-[#222] text-[#55DEE8]" : "text-[#878C9F] hover:text-white"}`}
+              className={`flex-1 font-semibold text-xs py-2 rounded-lg transition-all ${payoutMode === "BANK" ? "bg-[#222] text-[#BFF367]" : "text-[#878C9F] hover:text-white"}`}
             >
               Bank Account
             </button>
             <button
               onClick={() => setPayoutMode("UPI")}
-              className={`flex-1 font-semibold text-xs py-2 rounded-lg transition-all ${payoutMode === "UPI" ? "bg-[#222] text-[#55DEE8]" : "text-[#878C9F] hover:text-white"}`}
+              className={`flex-1 font-semibold text-xs py-2 rounded-lg transition-all ${payoutMode === "UPI" ? "bg-[#222] text-[#BFF367]" : "text-[#878C9F] hover:text-white"}`}
             >
               UPI ID
             </button>
@@ -228,7 +228,7 @@ const PayoutsTab = ({ role }) => {
                 value={accountName}
                 onChange={(e) => setAccountName(e.target.value)}
                 placeholder="Name as in Bank Account"
-                className="w-full bg-black border border-[#2D2D2D] rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-[#55DEE8] transition-colors"
+                className="w-full bg-black border border-[#2D2D2D] rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-[#BFF367] transition-colors"
               />
             </div>
 
@@ -243,7 +243,7 @@ const PayoutsTab = ({ role }) => {
                       value={bankName}
                       onChange={(e) => setBankName(e.target.value)}
                       placeholder="e.g., HDFC Bank"
-                      className="w-full bg-black border border-[#2D2D2D] rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-[#55DEE8] transition-colors"
+                      className="w-full bg-black border border-[#2D2D2D] rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-[#BFF367] transition-colors"
                     />
                   </div>
                   <div className="space-y-1">
@@ -254,7 +254,7 @@ const PayoutsTab = ({ role }) => {
                       value={ifscCode}
                       onChange={(e) => setIfscCode(e.target.value.toUpperCase())}
                       placeholder="IFSC Code"
-                      className="w-full bg-black border border-[#2D2D2D] rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-[#55DEE8] transition-colors"
+                      className="w-full bg-black border border-[#2D2D2D] rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-[#BFF367] transition-colors"
                     />
                   </div>
                 </div>
@@ -267,7 +267,7 @@ const PayoutsTab = ({ role }) => {
                     value={accountNumber}
                     onChange={(e) => setAccountNumber(e.target.value.replace(/\D/g, ""))}
                     placeholder="Enter Account Number"
-                    className="w-full bg-black border border-[#2D2D2D] rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-[#55DEE8] transition-colors"
+                    className="w-full bg-black border border-[#2D2D2D] rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-[#BFF367] transition-colors"
                   />
                 </div>
               </>
@@ -280,7 +280,7 @@ const PayoutsTab = ({ role }) => {
                   value={upiId}
                   onChange={(e) => setUpiId(e.target.value)}
                   placeholder="username@bank"
-                  className="w-full bg-black border border-[#2D2D2D] rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-[#55DEE8] transition-colors"
+                  className="w-full bg-black border border-[#2D2D2D] rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-[#BFF367] transition-colors"
                 />
               </div>
             )}
@@ -288,7 +288,7 @@ const PayoutsTab = ({ role }) => {
             <button 
               type="submit"
               disabled={isSavingDetails}
-              className="w-full bg-[#222] border border-[#2D2D2D] hover:bg-[#333] hover:border-[#55DEE8]/30 text-white font-semibold rounded-xl py-3.5 transition-colors text-sm"
+              className="w-full bg-[#222] border border-[#2D2D2D] hover:bg-[#333] hover:border-[#BFF367]/30 text-white font-semibold rounded-xl py-3.5 transition-colors text-sm"
             >
               {isSavingDetails ? "Saving Configuration..." : "Save Settings"}
             </button>

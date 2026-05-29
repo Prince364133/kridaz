@@ -2,7 +2,7 @@
 import { Play, Youtube } from "lucide-react";
 import { gsap } from "gsap";
 
-const PRI = "#55DEE8";
+const PRI = "#BFF367";
 
 export const VideoSection = ({ videos = [] }) => {
  const scrollRef = useRef(null);

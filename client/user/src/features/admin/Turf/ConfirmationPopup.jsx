@@ -21,10 +21,10 @@ const ConfirmationPopup = ({
   const themes = {
     warning: {
       icon: AlertCircle,
-      color: "text-transparent bg-clip-text bg-gradient-to-r from-[#55DEE8] to-[#BFF367]",
-      bg: "bg-gradient-to-r from-[#55DEE8]/10 to-[#BFF367]/10",
-      border: "border-[#55DEE8]/20",
-      btn: "bg-gradient-to-r from-[#55DEE8] to-[#BFF367] hover:bg-gradient-to-r from-[#55DEE8] to-[#BFF367] text-black",
+      color: "text-transparent bg-clip-text bg-gradient-to-r from-[#BFF367] to-[#BFF367]",
+      bg: "bg-gradient-to-r from-[#BFF367]/10 to-[#BFF367]/10",
+      border: "border-[#BFF367]/20",
+      btn: "bg-gradient-to-r from-[#BFF367] to-[#BFF367] hover:bg-gradient-to-r from-[#BFF367] to-[#BFF367] text-black",
     },
     danger: {
       icon: XCircle,

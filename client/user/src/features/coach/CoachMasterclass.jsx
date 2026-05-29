@@ -28,7 +28,7 @@ export default function CoachMasterclass() {
 
   if (loading) return <DashboardSkeleton />;
 
-  const themeColor = "#55DEE8";
+  const themeColor = "#BFF367";
 
   return (
     <div className="h-full custom-scrollbar bg-[#000000] text-white font-inter pb-24">
@@ -80,7 +80,7 @@ export default function CoachMasterclass() {
                </div>
                <div className="p-8 space-y-5">
                   <div className="space-y-2">
-                     <h3 className="text-[20px] font-black text-white group-hover:text-[#55DEE8] transition-colors uppercase tracking-widest leading-tight font-inter">Advanced Batting Mechanics</h3>
+                     <h3 className="text-[20px] font-black text-white group-hover:text-[#BFF367] transition-colors uppercase tracking-widest leading-tight font-inter">Advanced Batting Mechanics</h3>
                      <p className="text-neutral-500 text-[11px] font-bold uppercase leading-relaxed tracking-widest line-clamp-2">Mastering the professional stride and follow-through sequence.</p>
                   </div>
                   <div className="flex justify-between items-center pt-5 border-t border-white/5">

@@ -96,13 +96,13 @@ const ForgotPassword = () => {
         </Link>
 
         <div className="bg-[#0A0A0A] border border-white/5 rounded-[8px] p-8 md:p-12 shadow-2xl relative overflow-hidden">
-          <div className="absolute -top-32 -right-32 w-64 h-64 bg-[#55DEE8]/10 blur-[100px] rounded-full pointer-events-none" />
+          <div className="absolute -top-32 -right-32 w-64 h-64 bg-[#BFF367]/10 blur-[100px] rounded-full pointer-events-none" />
 
           <div className="mb-10 text-center">
-            <div className="w-16 h-16 bg-[#55DEE8]/10 rounded-[8px] flex items-center justify-center mx-auto mb-6 border border-[#55DEE8]/20">
-              {step === 1 && <Mail size={32} className="text-[#55DEE8]" />}
-              {step === 2 && <ShieldCheck size={32} className="text-[#55DEE8]" />}
-              {step === 3 && <KeyRound size={32} className="text-[#55DEE8]" />}
+            <div className="w-16 h-16 bg-[#BFF367]/10 rounded-[8px] flex items-center justify-center mx-auto mb-6 border border-[#BFF367]/20">
+              {step === 1 && <Mail size={32} className="text-[#BFF367]" />}
+              {step === 2 && <ShieldCheck size={32} className="text-[#BFF367]" />}
+              {step === 3 && <KeyRound size={32} className="text-[#BFF367]" />}
             </div>
             <h1 className="text-3xl font-black text-white uppercase tracking-tighter mb-2">
               {step === 1 && "Reset Password"}
@@ -122,7 +122,7 @@ const ForgotPassword = () => {
               <div className="space-y-2">
                 <label className="text-[10px] font-black text-white/40 uppercase tracking-widest ml-1">Email or Phone Number</label>
                 <div className="relative group">
-                  <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-white/30 group-focus-within:text-[#55DEE8] transition-colors">
+                  <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-white/30 group-focus-within:text-[#BFF367] transition-colors">
                     <Mail size={18} />
                   </div>
                   <input
@@ -130,13 +130,13 @@ const ForgotPassword = () => {
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     placeholder="Enter registered email or phone"
-                    className="w-full bg-white/5 border border-white/10 rounded-[8px] py-4 pl-12 pr-4 text-white focus:outline-none focus:border-[#55DEE8]/50 transition-all text-sm font-bold"
+                    className="w-full bg-white/5 border border-white/10 rounded-[8px] py-4 pl-12 pr-4 text-white focus:outline-none focus:border-[#BFF367]/50 transition-all text-sm font-bold"
                   />
                 </div>
               </div>
               <button
                 type="submit" disabled={loading}
-                className="w-full h-14 bg-[#55DEE8] text-black font-black uppercase tracking-[0.2em] text-[10px] rounded-[8px] flex items-center justify-center gap-2 hover:bg-[#a3e635] transition-all"
+                className="w-full h-14 bg-[#BFF367] text-black font-black uppercase tracking-[0.2em] text-[10px] rounded-[8px] flex items-center justify-center gap-2 hover:bg-[#a3e635] transition-all"
               >
                 {loading ? <div className="w-5 h-5 border-2 border-black border-t-transparent rounded-full animate-spin" /> : <>Send Code <ArrowRight size={16} /></>}
               </button>
@@ -149,7 +149,7 @@ const ForgotPassword = () => {
               <div className="space-y-2">
                 <label className="text-[10px] font-black text-white/40 uppercase tracking-widest ml-1">6-Digit Code</label>
                 <div className="relative group">
-                  <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-white/30 group-focus-within:text-[#55DEE8] transition-colors">
+                  <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-white/30 group-focus-within:text-[#BFF367] transition-colors">
                     <ShieldCheck size={18} />
                   </div>
                   <input
@@ -158,13 +158,13 @@ const ForgotPassword = () => {
                     onChange={(e) => setOtp(e.target.value)}
                     placeholder="ΓÇóΓÇóΓÇóΓÇóΓÇóΓÇó"
                     maxLength={6}
-                    className="w-full bg-white/5 border border-white/10 rounded-[8px] py-4 pl-12 pr-4 text-white focus:outline-none focus:border-[#55DEE8]/50 transition-all text-center text-xl font-black tracking-[0.5em]"
+                    className="w-full bg-white/5 border border-white/10 rounded-[8px] py-4 pl-12 pr-4 text-white focus:outline-none focus:border-[#BFF367]/50 transition-all text-center text-xl font-black tracking-[0.5em]"
                   />
                 </div>
               </div>
               <button
                 type="submit"
-                className="w-full h-14 bg-[#55DEE8] text-black font-black uppercase tracking-[0.2em] text-[10px] rounded-[8px] flex items-center justify-center gap-2 hover:bg-[#a3e635] transition-all"
+                className="w-full h-14 bg-[#BFF367] text-black font-black uppercase tracking-[0.2em] text-[10px] rounded-[8px] flex items-center justify-center gap-2 hover:bg-[#a3e635] transition-all"
               >
                 Verify Code <CheckCircle2 size={16} />
               </button>
@@ -179,7 +179,7 @@ const ForgotPassword = () => {
                 <div className="space-y-2">
                   <label className="text-[10px] font-black text-white/40 uppercase tracking-widest ml-1">New Password</label>
                   <div className="relative group">
-                    <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-white/30 group-focus-within:text-[#55DEE8] transition-colors">
+                    <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-white/30 group-focus-within:text-[#BFF367] transition-colors">
                       <KeyRound size={18} />
                     </div>
                     <input
@@ -187,14 +187,14 @@ const ForgotPassword = () => {
                       value={newPassword}
                       onChange={(e) => setNewPassword(e.target.value)}
                       placeholder="Min 8 characters"
-                      className="w-full bg-white/5 border border-white/10 rounded-[8px] py-4 pl-12 pr-4 text-white focus:outline-none focus:border-[#55DEE8]/50 transition-all text-sm font-bold"
+                      className="w-full bg-white/5 border border-white/10 rounded-[8px] py-4 pl-12 pr-4 text-white focus:outline-none focus:border-[#BFF367]/50 transition-all text-sm font-bold"
                     />
                   </div>
                 </div>
                 <div className="space-y-2">
                   <label className="text-[10px] font-black text-white/40 uppercase tracking-widest ml-1">Confirm Password</label>
                   <div className="relative group">
-                    <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-white/30 group-focus-within:text-[#55DEE8] transition-colors">
+                    <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-white/30 group-focus-within:text-[#BFF367] transition-colors">
                       <KeyRound size={18} />
                     </div>
                     <input
@@ -202,14 +202,14 @@ const ForgotPassword = () => {
                       value={confirmPassword}
                       onChange={(e) => setConfirmPassword(e.target.value)}
                       placeholder="Repeat new password"
-                      className="w-full bg-white/5 border border-white/10 rounded-[8px] py-4 pl-12 pr-4 text-white focus:outline-none focus:border-[#55DEE8]/50 transition-all text-sm font-bold"
+                      className="w-full bg-white/5 border border-white/10 rounded-[8px] py-4 pl-12 pr-4 text-white focus:outline-none focus:border-[#BFF367]/50 transition-all text-sm font-bold"
                     />
                   </div>
                 </div>
               </div>
               <button
                 type="submit" disabled={loading}
-                className="w-full h-14 bg-[#55DEE8] text-black font-black uppercase tracking-[0.2em] text-[10px] rounded-[8px] flex items-center justify-center gap-2 hover:bg-[#a3e635] transition-all"
+                className="w-full h-14 bg-[#BFF367] text-black font-black uppercase tracking-[0.2em] text-[10px] rounded-[8px] flex items-center justify-center gap-2 hover:bg-[#a3e635] transition-all"
               >
                 {loading ? <div className="w-5 h-5 border-2 border-black border-t-transparent rounded-full animate-spin" /> : "Update Password"}
               </button>

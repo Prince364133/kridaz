@@ -171,7 +171,7 @@ export default function EditProfileModal({ isOpen, onClose, user }) {
       <svg width="0" height="0" className="absolute">
         <defs>
           <linearGradient id="modal-cyan-lime-gradient" x1="0%" y1="0%" x2="100%" y2="0%">
-            <stop offset="0%" stopColor="#55DEE8" />
+            <stop offset="0%" stopColor="#BFF367" />
             <stop offset="100%" stopColor="#BFF367" />
           </linearGradient>
         </defs>
@@ -186,10 +186,10 @@ export default function EditProfileModal({ isOpen, onClose, user }) {
       {/* Modal Container - Upgraded to max-w-xl per Mockup */}
       <div className="relative w-full max-w-xl bg-[#0a0a0a] border border-white/10 rounded-[8px] overflow-hidden shadow-2xl animate-in zoom-in-95 duration-300">
         {/* Header - Compact */}
-        <div className="px-6 py-4 border-b border-white/10 flex items-center justify-between bg-gradient-to-r from-[#55DEE8]/5 to-transparent">
+        <div className="px-6 py-4 border-b border-white/10 flex items-center justify-between bg-gradient-to-r from-[#BFF367]/5 to-transparent">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-[8px] bg-[#55DEE8]/10 flex items-center justify-center shrink-0">
-              <User size={18} className="text-[#55DEE8]" />
+            <div className="w-10 h-10 rounded-[8px] bg-[#BFF367]/10 flex items-center justify-center shrink-0">
+              <User size={18} className="text-[#BFF367]" />
             </div>
             <div>
               <h2 className="text-lg font-black uppercase tracking-tight text-white leading-none" style={{ fontFamily: "'Open Sans', sans-serif" }}>Edit Profile</h2>
@@ -213,7 +213,7 @@ export default function EditProfileModal({ isOpen, onClose, user }) {
             <div className="flex flex-col">
               <label className="text-[9px] font-black uppercase tracking-[0.2em] text-white/30 mb-1.5 ml-1">Profile Picture</label>
               <div className="relative group shrink-0 w-20 h-20">
-                <div className="w-20 h-20 rounded-[8px] bg-gradient-to-br from-[#55DEE8]/10 to-[#BFF367]/10 border border-white/10 overflow-hidden flex items-center justify-center group-hover:border-[#55DEE8]/30 transition-all p-[1px]">
+                <div className="w-20 h-20 rounded-[8px] bg-gradient-to-br from-[#BFF367]/10 to-[#BFF367]/10 border border-white/10 overflow-hidden flex items-center justify-center group-hover:border-[#BFF367]/30 transition-all p-[1px]">
                   {user?.profilePicture ? (
                     <img 
                       src={user.profilePicture} 
@@ -228,7 +228,7 @@ export default function EditProfileModal({ isOpen, onClose, user }) {
 
                   {uploading && (
                     <div className="absolute inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-10">
-                      <Loader2 size={20} className="animate-spin text-[#55DEE8]" />
+                      <Loader2 size={20} className="animate-spin text-[#BFF367]" />
                     </div>
                   )}
                 </div>
@@ -256,13 +256,13 @@ export default function EditProfileModal({ isOpen, onClose, user }) {
               <div className="space-y-1.5">
                 <label className="text-[9px] font-black uppercase tracking-[0.2em] text-white/30 ml-1">Full Name</label>
                 <div className="relative group">
-                  <User className="absolute left-3.5 top-1/2 -translate-y-1/2 text-white/20 group-focus-within:text-[#55DEE8] transition-colors" size={14} />
+                  <User className="absolute left-3.5 top-1/2 -translate-y-1/2 text-white/20 group-focus-within:text-[#BFF367] transition-colors" size={14} />
                   <input
                     type="text"
                     name="name"
                     value={formData.name}
                     onChange={handleChange}
-                    className="w-full bg-[#0d0d0d] border border-white/10 rounded-[8px] py-2.5 pl-10 pr-3 text-xs text-white focus:outline-none focus:border-[#55DEE8] focus:ring-4 focus:ring-[#55DEE8]/10 transition-all placeholder-white/20"
+                    className="w-full bg-[#0d0d0d] border border-white/10 rounded-[8px] py-2.5 pl-10 pr-3 text-xs text-white focus:outline-none focus:border-[#BFF367] focus:ring-4 focus:ring-[#BFF367]/10 transition-all placeholder-white/20"
                     placeholder="Enter your name"
                     required
                   />
@@ -289,13 +289,13 @@ export default function EditProfileModal({ isOpen, onClose, user }) {
                     name="username"
                     value={formData.username}
                     onChange={handleChange}
-                    className={`w-full bg-[#0d0d0d] border rounded-[8px] py-2.5 pl-9 pr-10 text-xs text-white focus:outline-none focus:ring-4 transition-all placeholder-white/20 ${ usernameStatus === 'available' ? 'border-[#BFF367]/50 focus:border-[#BFF367] focus:ring-[#BFF367]/10' : usernameStatus === 'taken' ? 'border-red-500/50 focus:border-red-500 focus:ring-red-500/10' : 'border-white/10 focus:border-[#55DEE8] focus:ring-[#55DEE8]/10' }`}
+                    className={`w-full bg-[#0d0d0d] border rounded-[8px] py-2.5 pl-9 pr-10 text-xs text-white focus:outline-none focus:ring-4 transition-all placeholder-white/20 ${ usernameStatus === 'available' ? 'border-[#BFF367]/50 focus:border-[#BFF367] focus:ring-[#BFF367]/10' : usernameStatus === 'taken' ? 'border-red-500/50 focus:border-red-500 focus:ring-red-500/10' : 'border-white/10 focus:border-[#BFF367] focus:ring-[#BFF367]/10' }`}
                     placeholder="username"
                     required
                   />
                   {isCheckingUsername && (
                     <div className="absolute right-3.5 top-1/2 -translate-y-1/2">
-                      <Loader2 size={12} className="animate-spin text-[#55DEE8]" />
+                      <Loader2 size={12} className="animate-spin text-[#BFF367]" />
                     </div>
                   )}
                   {!isCheckingUsername && usernameStatus === 'available' && (
@@ -314,13 +314,13 @@ export default function EditProfileModal({ isOpen, onClose, user }) {
             <div className="space-y-1.5">
               <label className="text-[9px] font-black uppercase tracking-[0.2em] text-white/30 ml-1">Contact Number</label>
               <div className="relative group">
-                <Phone className="absolute left-3.5 top-1/2 -translate-y-1/2 text-white/20 group-focus-within:text-[#55DEE8] transition-colors" size={14} />
+                <Phone className="absolute left-3.5 top-1/2 -translate-y-1/2 text-white/20 group-focus-within:text-[#BFF367] transition-colors" size={14} />
                 <input
                   type="text"
                   name="phone"
                   value={formData.phone}
                   onChange={handleChange}
-                  className="w-full bg-[#0d0d0d] border border-white/10 rounded-[8px] py-2.5 pl-10 pr-3 text-xs text-white focus:outline-none focus:border-[#55DEE8] focus:ring-4 focus:ring-[#55DEE8]/10 transition-all placeholder-white/20"
+                  className="w-full bg-[#0d0d0d] border border-white/10 rounded-[8px] py-2.5 pl-10 pr-3 text-xs text-white focus:outline-none focus:border-[#BFF367] focus:ring-4 focus:ring-[#BFF367]/10 transition-all placeholder-white/20"
                   placeholder="Phone number"
                 />
               </div>
@@ -330,12 +330,12 @@ export default function EditProfileModal({ isOpen, onClose, user }) {
             <div className="space-y-1.5">
               <label className="text-[9px] font-black uppercase tracking-[0.2em] text-white/30 ml-1">Gender</label>
               <div className="relative group">
-                <User className="absolute left-3.5 top-1/2 -translate-y-1/2 text-white/20 group-focus-within:text-[#55DEE8] transition-colors pointer-events-none" size={14} />
+                <User className="absolute left-3.5 top-1/2 -translate-y-1/2 text-white/20 group-focus-within:text-[#BFF367] transition-colors pointer-events-none" size={14} />
                 <select
                   name="gender"
                   value={formData.gender}
                   onChange={handleChange}
-                  className="w-full bg-[#0d0d0d] border border-white/10 rounded-[8px] py-2.5 pl-10 pr-10 text-xs text-white focus:outline-none focus:border-[#55DEE8] focus:ring-4 focus:ring-[#55DEE8]/10 transition-all appearance-none cursor-pointer"
+                  className="w-full bg-[#0d0d0d] border border-white/10 rounded-[8px] py-2.5 pl-10 pr-10 text-xs text-white focus:outline-none focus:border-[#BFF367] focus:ring-4 focus:ring-[#BFF367]/10 transition-all appearance-none cursor-pointer"
                 >
                   <option value="" className="bg-[#000000]">Select Gender</option>
                   <option value="Male" className="bg-[#000000]">Male</option>
@@ -354,13 +354,13 @@ export default function EditProfileModal({ isOpen, onClose, user }) {
           <div className="space-y-1.5">
             <label className="text-[9px] font-black uppercase tracking-[0.2em] text-white/30 ml-1">Short Bio</label>
             <div className="relative group">
-              <AlignLeft className="absolute left-3.5 top-3 text-white/20 group-focus-within:text-[#55DEE8] transition-colors" size={14} />
+              <AlignLeft className="absolute left-3.5 top-3 text-white/20 group-focus-within:text-[#BFF367] transition-colors" size={14} />
               <textarea
                 name="bio"
                 maxLength={150}
                 value={formData.bio}
                 onChange={handleChange}
-                className="w-full bg-[#0d0d0d] border border-white/10 rounded-[8px] py-2.5 pl-10 pr-3 text-xs text-white focus:outline-none focus:border-[#55DEE8] focus:ring-4 focus:ring-[#55DEE8]/10 transition-all min-h-[60px] resize-none placeholder-white/20"
+                className="w-full bg-[#0d0d0d] border border-white/10 rounded-[8px] py-2.5 pl-10 pr-3 text-xs text-white focus:outline-none focus:border-[#BFF367] focus:ring-4 focus:ring-[#BFF367]/10 transition-all min-h-[60px] resize-none placeholder-white/20"
                 placeholder="Tell us about yourself..."
               />
             </div>
@@ -373,7 +373,7 @@ export default function EditProfileModal({ isOpen, onClose, user }) {
           <div className="space-y-1.5" ref={locationRef}>
             <label className="text-[9px] font-black uppercase tracking-[0.2em] text-white/30 ml-1">Location</label>
             <div className="relative group">
-              <MapPin className="absolute left-3.5 top-1/2 -translate-y-1/2 text-white/20 group-focus-within:text-[#55DEE8] transition-colors" size={14} />
+              <MapPin className="absolute left-3.5 top-1/2 -translate-y-1/2 text-white/20 group-focus-within:text-[#BFF367] transition-colors" size={14} />
               <input
                 type="text"
                 value={formData.location}
@@ -383,11 +383,11 @@ export default function EditProfileModal({ isOpen, onClose, user }) {
                 }}
                 onFocus={() => setShowSuggestions(locationSuggestions.length > 0)}
                 placeholder="e.g. Mumbai, Maharashtra"
-                className="w-full bg-[#0d0d0d] border border-white/10 rounded-[8px] py-2.5 pl-10 pr-10 text-xs text-white focus:outline-none focus:border-[#55DEE8] focus:ring-4 focus:ring-[#55DEE8]/10 transition-all placeholder-white/20"
+                className="w-full bg-[#0d0d0d] border border-white/10 rounded-[8px] py-2.5 pl-10 pr-10 text-xs text-white focus:outline-none focus:border-[#BFF367] focus:ring-4 focus:ring-[#BFF367]/10 transition-all placeholder-white/20"
               />
               {isSearchingLocation && (
                 <div className="absolute right-3.5 top-1/2 -translate-y-1/2">
-                  <Loader2 className="w-3.5 h-3.5 text-[#55DEE8] animate-spin" />
+                  <Loader2 className="w-3.5 h-3.5 text-[#BFF367] animate-spin" />
                 </div>
               )}
 
@@ -399,7 +399,7 @@ export default function EditProfileModal({ isOpen, onClose, user }) {
                       type="button"
                       key={idx}
                       onClick={() => handleSelectLocation(suggestion)}
-                      className="w-full px-4 py-2.5 text-left hover:bg-[#55DEE8]/10 text-white/80 hover:text-white border-b border-white/10 last:border-0 transition-colors flex flex-col gap-0.5"
+                      className="w-full px-4 py-2.5 text-left hover:bg-[#BFF367]/10 text-white/80 hover:text-white border-b border-white/10 last:border-0 transition-colors flex flex-col gap-0.5"
                     >
                       <span className="text-xs font-bold uppercase tracking-wider">{suggestion.city || suggestion.display_name.split(',')[0]}</span>
                       <span className="text-[9px] text-white/40 truncate">{suggestion.display_name}</span>
@@ -415,7 +415,7 @@ export default function EditProfileModal({ isOpen, onClose, user }) {
             <label className="text-[9px] font-black uppercase tracking-[0.2em] text-white/30 ml-1">Sports & Interests</label>
             <div className="flex flex-wrap gap-1.5 mb-1.5">
               {(formData.interests || []).map((interest, idx) => (
-                <span key={idx} className="px-2.5 py-0.5 bg-[#55DEE8]/15 border border-[#55DEE8]/30 rounded-[8px] text-[9px] font-bold text-[#55DEE8] flex items-center gap-1.5">
+                <span key={idx} className="px-2.5 py-0.5 bg-[#BFF367]/15 border border-[#BFF367]/30 rounded-[8px] text-[9px] font-bold text-[#BFF367] flex items-center gap-1.5">
                   {interest}
                   <button 
                     type="button"
@@ -433,7 +433,7 @@ export default function EditProfileModal({ isOpen, onClose, user }) {
               ))}
             </div>
             <div className="relative group">
-              <Star className="absolute left-3.5 top-1/2 -translate-y-1/2 text-white/20 group-focus-within:text-[#55DEE8] transition-colors pointer-events-none" size={14} />
+              <Star className="absolute left-3.5 top-1/2 -translate-y-1/2 text-white/20 group-focus-within:text-[#BFF367] transition-colors pointer-events-none" size={14} />
               <select
                 onChange={(e) => {
                   if (e.target.value && !formData.interests.includes(e.target.value)) {
@@ -444,7 +444,7 @@ export default function EditProfileModal({ isOpen, onClose, user }) {
                   }
                   e.target.value = "";
                 }}
-                className="w-full bg-[#0d0d0d] border border-white/10 rounded-[8px] py-2.5 pl-10 pr-10 text-xs text-white focus:outline-none focus:border-[#55DEE8] focus:ring-4 focus:ring-[#55DEE8]/10 transition-all appearance-none cursor-pointer"
+                className="w-full bg-[#0d0d0d] border border-white/10 rounded-[8px] py-2.5 pl-10 pr-10 text-xs text-white focus:outline-none focus:border-[#BFF367] focus:ring-4 focus:ring-[#BFF367]/10 transition-all appearance-none cursor-pointer"
               >
                 <option value="">Add your sports or interests</option>
                 {["Cricket", "Football", "Badminton", "Tennis", "Basketball", "Volleyball", "Table Tennis", "Swimming", "Gym", "Yoga"].filter(s => !formData.interests.includes(s)).map((sport, idx) => (
@@ -469,7 +469,7 @@ export default function EditProfileModal({ isOpen, onClose, user }) {
             <button
               type="submit"
               disabled={loading || isCheckingUsername || usernameStatus === 'taken' || usernameStatus === 'short'}
-              className="flex-[2] px-6 py-2.5 rounded-[8px] bg-gradient-to-r from-[#55DEE8] to-[#BFF367] text-black text-[9px] font-black uppercase tracking-widest hover:scale-[1.02] active:scale-[0.98] transition-all flex items-center justify-center gap-2 shadow-lg shadow-[#55DEE8]/20 disabled:opacity-50 disabled:grayscale disabled:hover:scale-100"
+              className="flex-[2] px-6 py-2.5 rounded-[8px] bg-gradient-to-r from-[#BFF367] to-[#BFF367] text-black text-[9px] font-black uppercase tracking-widest hover:scale-[1.02] active:scale-[0.98] transition-all flex items-center justify-center gap-2 shadow-lg shadow-[#BFF367]/20 disabled:opacity-50 disabled:grayscale disabled:hover:scale-100"
             >
               {loading ? (
                 <>

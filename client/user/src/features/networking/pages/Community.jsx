@@ -42,7 +42,7 @@ import ReelItem from "@features/reels/components/ReelItem";
 import { useSocket } from "@context/SocketContext";
 import { uploadFileToR2 } from "@utils/mediaUpload";
 
-const PRI = "#55DEE8";
+const PRI = "#BFF367";
 const HEADING_STYLE = { fontFamily: "'Open Sans', sans-serif" };
 const SUBHEADING_STYLE = { fontFamily: "'Inter 28pt Light', sans-serif", fontWeight: 300 };
 
@@ -908,7 +908,7 @@ const Community = ({ children, onSearchActive }) => {
               onClick={e => e.stopPropagation()}
             >
               <div className="flex items-center gap-3 p-5 border-b border-white/5 bg-[#111]">
-                <Search size={20} className="text-[#55DEE8]" />
+                <Search size={20} className="text-[#BFF367]" />
                 <input
                   type="text"
                   autoFocus
@@ -925,7 +925,7 @@ const Community = ({ children, onSearchActive }) => {
               <div className="max-h-[50vh] overflow-y-auto no-scrollbar">
                 {isSearching ? (
                   <div className="flex justify-center p-12">
-                    <Loader2 size={32} className="text-[#55DEE8] animate-spin" />
+                    <Loader2 size={32} className="text-[#BFF367] animate-spin" />
                   </div>
                 ) : searchResults.length > 0 ? (
                   <div className="p-2 space-y-1">
@@ -945,10 +945,10 @@ const Community = ({ children, onSearchActive }) => {
                           />
                         </div>
                         <div className="flex-1 min-w-0">
-                          <div className="text-[14px] font-bold text-white group-hover:text-[#55DEE8] transition-colors truncate">{player.name}</div>
+                          <div className="text-[14px] font-bold text-white group-hover:text-[#BFF367] transition-colors truncate">{player.name}</div>
                           <div className="text-[12px] font-medium text-white/40 truncate">@{player.username || player.name.toLowerCase().replace(/\s+/g, '')}</div>
                         </div>
-                        <div className="px-3 py-1.5 rounded-full border border-white/10 text-[10px] font-bold text-white/50 group-hover:border-[#55DEE8] group-hover:text-[#55DEE8] transition-all">
+                        <div className="px-3 py-1.5 rounded-full border border-white/10 text-[10px] font-bold text-white/50 group-hover:border-[#BFF367] group-hover:text-[#BFF367] transition-all">
                           View Profile
                         </div>
                       </div>
@@ -994,11 +994,11 @@ const Community = ({ children, onSearchActive }) => {
                         onClick={() => gateInteraction(() => setShowStoryModal(true))}
                         className="flex flex-col items-center gap-2.5 shrink-0 cursor-pointer group"
                       >
-                        <div className="w-[68px] h-[68px] rounded-full border border-dashed border-white/30 flex items-center justify-center group-hover:border-[#55DEE8]/50 transition-all relative p-0.5">
+                        <div className="w-[68px] h-[68px] rounded-full border border-dashed border-white/30 flex items-center justify-center group-hover:border-[#BFF367]/50 transition-all relative p-0.5">
                           <div className="w-full h-full rounded-full bg-[#111] flex items-center justify-center overflow-hidden border border-white/10">
                             <img src={user?.profilePicture || "/default-avatar.png"} className="w-full h-full object-cover opacity-60" />
                           </div>
-                          <div className="absolute bottom-0 right-0 w-[22px] h-[22px] bg-gradient-to-r from-[#55DEE8] to-[#BFF367] rounded-full flex items-center justify-center border-2 border-[#0A0A0A]">
+                          <div className="absolute bottom-0 right-0 w-[22px] h-[22px] bg-gradient-to-r from-[#BFF367] to-[#BFF367] rounded-full flex items-center justify-center border-2 border-[#0A0A0A]">
                             <Plus size={12} strokeWidth={4} className="text-black" />
                           </div>
                         </div>
@@ -1012,7 +1012,7 @@ const Community = ({ children, onSearchActive }) => {
                           onClick={() => { setSelectedStoryGroup(group); setCurrentStoryIndex(0); }}
                           className="flex flex-col items-center gap-2.5 shrink-0 cursor-pointer group"
                         >
-                          <div className={`w-[68px] h-[68px] rounded-full p-[2px] relative hover:scale-105 transition-transform ${idx === 0 ? 'bg-gradient-to-r from-[#55DEE8] to-[#BFF367]' : 'bg-white/20'}`}>
+                          <div className={`w-[68px] h-[68px] rounded-full p-[2px] relative hover:scale-105 transition-transform ${idx === 0 ? 'bg-gradient-to-r from-[#BFF367] to-[#BFF367]' : 'bg-white/20'}`}>
                             <div className="w-full h-full rounded-full bg-[#0A0A0A] p-[2px]">
                               <div className="w-full h-full rounded-full overflow-hidden bg-[#111]">
                                 {group.stories[0].mediaUrl ? (
@@ -1022,7 +1022,7 @@ const Community = ({ children, onSearchActive }) => {
                                     className={`w-full h-full object-cover ${(group.stories.some(s => s.status === 'pending' || s.status === 'processing')) ? 'blur-sm opacity-50' : ''}`}
                                   />
                                 ) : (
-                                  <div className="w-full h-full flex items-center justify-center text-[7px] p-2 text-center text-[#55DEE8] font-bold bg-[#111]">
+                                  <div className="w-full h-full flex items-center justify-center text-[7px] p-2 text-center text-[#BFF367] font-bold bg-[#111]">
                                     {group.stories[0].content?.slice(0, 15)}
                                   </div>
                                 )}
@@ -1034,7 +1034,7 @@ const Community = ({ children, onSearchActive }) => {
                               </div>
                             )}
                           </div>
-                          <span className="text-[10px] font-bold text-white/80 group-hover:text-[#55DEE8] transition-colors truncate max-w-[68px]">
+                          <span className="text-[10px] font-bold text-white/80 group-hover:text-[#BFF367] transition-colors truncate max-w-[68px]">
                             {group.user?.name?.split(' ')[0] || "Player"}
                           </span>
                         </div>
@@ -1056,7 +1056,7 @@ const Community = ({ children, onSearchActive }) => {
                         <button
                           key={filter}
                           onClick={() => handleSetActiveFilter(filter)}
-                          className={`px-4 py-2 rounded-[6px] text-[11px] font-bold whitespace-nowrap transition-all border ${activeFilter === filter ? 'bg-gradient-to-r from-[#55DEE8] to-[#BFF367] text-black border-transparent hover:brightness-110' : 'bg-transparent text-white/70 border-white/10 hover:bg-white/5 hover:text-white'}`}
+                          className={`px-4 py-2 rounded-[6px] text-[11px] font-bold whitespace-nowrap transition-all border ${activeFilter === filter ? 'bg-gradient-to-r from-[#BFF367] to-[#BFF367] text-black border-transparent hover:brightness-110' : 'bg-transparent text-white/70 border-white/10 hover:bg-white/5 hover:text-white'}`}
                         >
                           {filter}
                         </button>
@@ -1065,7 +1065,7 @@ const Community = ({ children, onSearchActive }) => {
                         {/* Categories Dropdown â€” desktop */}
                         <div className="relative">
                           <select
-                            className="bg-neutral-900 border border-white/10 rounded-full py-2 pl-3 pr-7 text-white text-[11px] font-bold focus:outline-none focus:border-[#55DEE8]/40 transition-all appearance-none cursor-pointer"
+                            className="bg-neutral-900 border border-white/10 rounded-full py-2 pl-3 pr-7 text-white text-[11px] font-bold focus:outline-none focus:border-[#BFF367]/40 transition-all appearance-none cursor-pointer"
                             style={{ fontFamily: "'Inter', sans-serif" }}
                             value={activeSportFilter}
                             onChange={(e) => setActiveSportFilter(e.target.value)}
@@ -1091,25 +1091,25 @@ const Community = ({ children, onSearchActive }) => {
                       {/* Mobile Reels Button */}
                       <button
                         onClick={() => handleSetActiveFilter(activeFilter === "Reels" ? "All" : "Reels")}
-                        className={`relative flex items-center gap-1.5 px-3 py-1.5 rounded-[8px] text-[10px] font-bold uppercase tracking-wider transition-all shrink-0 z-10 group ${activeFilter === 'Reels' ? 'text-[#55DEE8] bg-[#55DEE8]/10' : 'text-white/70 hover:text-white'}`}
+                        className={`relative flex items-center gap-1.5 px-3 py-1.5 rounded-[8px] text-[10px] font-bold uppercase tracking-wider transition-all shrink-0 z-10 group ${activeFilter === 'Reels' ? 'text-[#BFF367] bg-[#BFF367]/10' : 'text-white/70 hover:text-white'}`}
                       >
                         <svg className="absolute inset-0 w-full h-full pointer-events-none z-[-1]">
                           <defs>
                             <linearGradient id="mob-reels-grad" x1="0%" y1="0%" x2="100%" y2="0%">
-                              <stop stopColor="#55DEE8" offset="0%" />
+                              <stop stopColor="#BFF367" offset="0%" />
                               <stop stopColor="#BFF367" offset="100%" />
                             </linearGradient>
                           </defs>
                           <rect x="1" y="1" width="calc(100% - 2px)" height="calc(100% - 2px)" rx="14" fill="none" stroke="url(#mob-reels-grad)" strokeWidth="1.5" strokeDasharray="3 4" strokeLinecap="round" className={`transition-opacity ${activeFilter === 'Reels' ? 'opacity-100' : 'opacity-70 group-hover:opacity-100'}`} />
                         </svg>
-                        <PlaySquare size={12} className={activeFilter === 'Reels' ? 'text-[#55DEE8]' : 'text-white/70 group-hover:text-white transition-colors'} />
+                        <PlaySquare size={12} className={activeFilter === 'Reels' ? 'text-[#BFF367]' : 'text-white/70 group-hover:text-white transition-colors'} />
                         Reels
                       </button>
 
                       {/* Features Dropdown */}
                       <div className="relative w-[115px]">
                         <select
-                          className="w-full bg-neutral-900 border border-white/10 rounded-[8px] py-1.5 pl-2.5 pr-6 text-white text-[10px] font-bold focus:outline-none focus:border-[#55DEE8]/40 transition-all appearance-none cursor-pointer"
+                          className="w-full bg-neutral-900 border border-white/10 rounded-[8px] py-1.5 pl-2.5 pr-6 text-white text-[10px] font-bold focus:outline-none focus:border-[#BFF367]/40 transition-all appearance-none cursor-pointer"
                           style={{ fontFamily: "'Inter', sans-serif" }}
                           value={activeFilter}
                           onChange={(e) => handleSetActiveFilter(e.target.value)}
@@ -1129,7 +1129,7 @@ const Community = ({ children, onSearchActive }) => {
                           className="w-full border border-transparent rounded-[8px] py-1.5 pl-2.5 pr-6 text-white text-[10px] font-bold focus:outline-none transition-all appearance-none cursor-pointer shadow-[0_0_15px_rgba(85,222,232,0.1)]"
                           style={{
                             fontFamily: "'Inter', sans-serif",
-                            backgroundImage: "linear-gradient(rgba(10, 10, 10, 0.95), rgba(10, 10, 10, 0.95)), linear-gradient(to right, #55DEE8, #BFF367)",
+                            backgroundImage: "linear-gradient(rgba(10, 10, 10, 0.95), rgba(10, 10, 10, 0.95)), linear-gradient(to right, #BFF367, #BFF367)",
                             backgroundOrigin: "border-box",
                             backgroundClip: "padding-box, border-box"
                           }}
@@ -1153,10 +1153,10 @@ const Community = ({ children, onSearchActive }) => {
                 {debouncedSearchQuery.trim() !== "" && (
                   <div className="flex flex-col gap-3 bg-[#0A0A0A] border border-white/5 rounded-[8px] p-5">
                     <div className="flex items-center justify-between mb-1">
-                      <h3 className="text-xs font-black uppercase tracking-widest text-[#55DEE8]" style={HEADING_STYLE}>
+                      <h3 className="text-xs font-black uppercase tracking-widest text-[#BFF367]" style={HEADING_STYLE}>
                         PLAYERS MATCHING "{debouncedSearchQuery}"
                       </h3>
-                      {playersLoading && <Loader2 size={16} className="text-[#55DEE8] animate-spin" />}
+                      {playersLoading && <Loader2 size={16} className="text-[#BFF367] animate-spin" />}
                     </div>
 
                     {loadedPlayers.length === 0 && !playersLoading ? (
@@ -1173,7 +1173,7 @@ const Community = ({ children, onSearchActive }) => {
                           <div
                             key={player.id}
                             onClick={() => navigate(`/profile/${player.id}`)}
-                            className="flex items-center gap-3 bg-neutral-900/50 hover:bg-neutral-900 border border-white/5 hover:border-[#55DEE8]/30 p-3 rounded-[8px] cursor-pointer transition-all min-w-[220px] max-w-[280px] group shrink-0"
+                            className="flex items-center gap-3 bg-neutral-900/50 hover:bg-neutral-900 border border-white/5 hover:border-[#BFF367]/30 p-3 rounded-[8px] cursor-pointer transition-all min-w-[220px] max-w-[280px] group shrink-0"
                           >
                             <div className="w-[42px] h-[42px] rounded-full bg-[#111] border border-white/10 overflow-hidden shrink-0">
                               <img
@@ -1183,14 +1183,14 @@ const Community = ({ children, onSearchActive }) => {
                               />
                             </div>
                             <div className="flex-1 min-w-0">
-                              <div className="text-[13px] font-bold text-white group-hover:text-[#55DEE8] transition-colors truncate">
+                              <div className="text-[13px] font-bold text-white group-hover:text-[#BFF367] transition-colors truncate">
                                 {player.name}
                               </div>
                               <div className="text-[11px] font-medium text-white/40 truncate">
                                 @{player.username || player.name.toLowerCase().replace(/\s+/g, '')}
                               </div>
                               {(player.city || player.state) && (
-                                <div className="text-[9px] font-semibold text-[#55DEE8] mt-0.5 uppercase tracking-wider truncate">
+                                <div className="text-[9px] font-semibold text-[#BFF367] mt-0.5 uppercase tracking-wider truncate">
                                   {player.city}{player.city && player.state ? ', ' : ''}{player.state}
                                 </div>
                               )}
@@ -1199,7 +1199,7 @@ const Community = ({ children, onSearchActive }) => {
                         ))}
                         {hasMorePlayers && playersLoading && (
                           <div className="flex items-center justify-center px-6 shrink-0 h-full">
-                            <Loader2 size={24} className="text-[#55DEE8] animate-spin" />
+                            <Loader2 size={24} className="text-[#BFF367] animate-spin" />
                           </div>
                         )}
                       </div>
@@ -1210,7 +1210,7 @@ const Community = ({ children, onSearchActive }) => {
                 {/* Posts Matching Heading */}
                 {debouncedSearchQuery.trim() !== "" && (
                   <div className="pt-2">
-                    <h3 className="text-xs font-black uppercase tracking-widest text-[#55DEE8]" style={HEADING_STYLE}>
+                    <h3 className="text-xs font-black uppercase tracking-widest text-[#BFF367]" style={HEADING_STYLE}>
                       POSTS MATCHING "{debouncedSearchQuery}"
                     </h3>
                   </div>
@@ -1231,14 +1231,14 @@ const Community = ({ children, onSearchActive }) => {
                       <ArrowLeft size={14} strokeWidth={2.5} />
                       <span>Community</span>
                     </button>
-                    <div className="flex items-center gap-1.5 bg-black/60 backdrop-blur-md border border-[#55DEE8]/20 text-[#55DEE8] px-3 py-2 rounded-[8px] text-xs font-black uppercase tracking-widest">
+                    <div className="flex items-center gap-1.5 bg-black/60 backdrop-blur-md border border-[#BFF367]/20 text-[#BFF367] px-3 py-2 rounded-[8px] text-xs font-black uppercase tracking-widest">
                       <PlaySquare size={13} />
                       <span>Shots</span>
                     </div>
                   </div>
                   <button
                     onClick={() => gateInteraction(() => navigate('/reels/upload'))}
-                    className="flex items-center gap-1.5 bg-[#55DEE8] text-black px-3 py-2 rounded-[8px] text-xs font-black uppercase tracking-widest hover:bg-[#BFF367] transition-colors shadow-lg shadow-[#55DEE8]/20"
+                    className="flex items-center gap-1.5 bg-[#BFF367] text-black px-3 py-2 rounded-[8px] text-xs font-black uppercase tracking-widest hover:bg-[#BFF367] transition-colors shadow-lg shadow-[#BFF367]/20"
                   >
                     <Plus size={14} strokeWidth={3} />
                     <span>Upload</span>
@@ -1257,7 +1257,7 @@ const Community = ({ children, onSearchActive }) => {
                 >
                   {reelsLoading ? (
                     <div className="h-full flex items-center justify-center bg-black">
-                      <Loader2 size={36} className="text-[#55DEE8] animate-spin" />
+                      <Loader2 size={36} className="text-[#BFF367] animate-spin" />
                     </div>
                   ) : reels.length > 0 ? reels.map((reel, index) => (
                     <div key={reel._id} className="w-full h-full snap-start snap-always relative bg-black overflow-hidden flex-shrink-0">
@@ -1275,14 +1275,14 @@ const Community = ({ children, onSearchActive }) => {
                   )}
                   {reelsFetching && (
                     <div className="h-20 flex items-center justify-center snap-start">
-                      <Loader2 size={24} className="text-[#55DEE8] animate-spin" />
+                      <Loader2 size={24} className="text-[#BFF367] animate-spin" />
                     </div>
                   )}
                 </div>
               </div>
             ) : postsLoading ? (
               <div className="py-20 flex flex-col items-center justify-center gap-4">
-                <Loader2 size={32} className="text-[#55DEE8] animate-spin" />
+                <Loader2 size={32} className="text-[#BFF367] animate-spin" />
               </div>
             ) : loadedPosts.length === 0 ? (
               <div className="bg-[#0A0A0A] border border-white/5 rounded-[8px] p-16 text-center text-white/30 font-bold uppercase tracking-widest text-sm">
@@ -1297,12 +1297,12 @@ const Community = ({ children, onSearchActive }) => {
                       <Link to={`/profile/${post.adminId?.id || post.adminId?._id || post.author?.id || post.author?._id || post.authorId}`} className="flex items-center gap-3 group">
                         <img
                           src={post.adminId?.profilePicture || "/default-avatar.png"}
-                          className="w-10 h-10 rounded-full object-cover border border-white/10 group-hover:border-[#55DEE8]/50 transition-colors"
+                          className="w-10 h-10 rounded-full object-cover border border-white/10 group-hover:border-[#BFF367]/50 transition-colors"
                         />
                         <div>
                           <div className="flex items-center gap-1.5">
                             <span className="text-[13px] font-bold text-white transition-colors">{post.adminId?.name || "Player"}</span>
-                            <ShieldCheck size={14} className="text-[#55DEE8]" />
+                            <ShieldCheck size={14} className="text-[#BFF367]" />
                           </div>
                           <div className="text-[11px] font-bold text-white/40 mt-0.5">
                             2h ago
@@ -1381,7 +1381,7 @@ const Community = ({ children, onSearchActive }) => {
                                   cx="48"
                                   cy="48"
                                   r="40"
-                                  stroke="#55DEE8"
+                                  stroke="#BFF367"
                                   strokeWidth="6"
                                   fill="transparent"
                                   strokeDasharray={2 * Math.PI * 40}
@@ -1394,13 +1394,13 @@ const Community = ({ children, onSearchActive }) => {
                               </div>
                             </div>
                             <div className="mt-4 flex flex-col items-center gap-1">
-                              <span className="text-[10px] font-black uppercase tracking-[0.2em] text-[#55DEE8] animate-pulse">
+                              <span className="text-[10px] font-black uppercase tracking-[0.2em] text-[#BFF367] animate-pulse">
                                 {post.status === 'processing' ? 'Optimizing Media' : 'Preparing Upload'}
                               </span>
                               <div className="flex gap-1">
-                                <span className="w-1 h-1 bg-gradient-to-r from-[#55DEE8] to-[#BFF367] rounded-full animate-bounce [animation-delay:-0.3s]"></span>
-                                <span className="w-1 h-1 bg-gradient-to-r from-[#55DEE8] to-[#BFF367] rounded-full animate-bounce [animation-delay:-0.15s]"></span>
-                                <span className="w-1 h-1 bg-gradient-to-r from-[#55DEE8] to-[#BFF367] rounded-full animate-bounce"></span>
+                                <span className="w-1 h-1 bg-gradient-to-r from-[#BFF367] to-[#BFF367] rounded-full animate-bounce [animation-delay:-0.3s]"></span>
+                                <span className="w-1 h-1 bg-gradient-to-r from-[#BFF367] to-[#BFF367] rounded-full animate-bounce [animation-delay:-0.15s]"></span>
+                                <span className="w-1 h-1 bg-gradient-to-r from-[#BFF367] to-[#BFF367] rounded-full animate-bounce"></span>
                               </div>
                             </div>
                           </div>
@@ -1531,7 +1531,7 @@ const Community = ({ children, onSearchActive }) => {
                                   );
                                 })}
                                 {post.comments.length > 4 && (
-                                  <button className="text-[11px] text-[#55DEE8] font-bold hover:underline">
+                                  <button className="text-[11px] text-[#BFF367] font-bold hover:underline">
                                     View all {post.comments.length} comments
                                   </button>
                                 )}
@@ -1575,7 +1575,7 @@ const Community = ({ children, onSearchActive }) => {
                 ))}
                 {hasMorePosts && postsLoading && (
                   <div className="py-6 flex justify-center">
-                    <Loader2 size={24} className="text-[#55DEE8] animate-spin" />
+                    <Loader2 size={24} className="text-[#BFF367] animate-spin" />
                   </div>
                 )}
               </div>
@@ -1634,7 +1634,7 @@ const Community = ({ children, onSearchActive }) => {
                         <button
                           type="button"
                           onClick={() => handleShareToPlatform(app.id, sharePostId)}
-                          className="flex h-14 w-14 items-center justify-center rounded-full border border-[#55DEE8]/25 bg-gradient-to-br from-[#55DEE8]/10 to-[#BFF367]/10 text-white/80 shadow-[0_0_18px_rgba(85,222,232,0.08)] transition-all hover:border-[#BFF367]/50 hover:from-[#55DEE8]/20 hover:to-[#BFF367]/20 hover:text-[#BFF367] active:scale-95"
+                          className="flex h-14 w-14 items-center justify-center rounded-full border border-[#BFF367]/25 bg-gradient-to-br from-[#BFF367]/10 to-[#BFF367]/10 text-white/80 shadow-[0_0_18px_rgba(85,222,232,0.08)] transition-all hover:border-[#BFF367]/50 hover:from-[#BFF367]/20 hover:to-[#BFF367]/20 hover:text-[#BFF367] active:scale-95"
                           aria-label={`Share to ${app.name}`}
                         >
                           <Icon size={23} strokeWidth={2.2} />
@@ -1669,7 +1669,7 @@ const Community = ({ children, onSearchActive }) => {
               className="relative w-full max-w-lg bg-neutral-950/80 border border-white/5 rounded-[8px] overflow-hidden shadow-[0_25px_60px_rgba(0,0,0,0.8)] backdrop-blur-2xl"
             >
               {/* Dual Glowing Spots using the new gradient stops */}
-              <div className="absolute -top-24 -left-24 w-52 h-52 bg-[#55DEE8]/10 blur-[80px] rounded-full pointer-events-none" />
+              <div className="absolute -top-24 -left-24 w-52 h-52 bg-[#BFF367]/10 blur-[80px] rounded-full pointer-events-none" />
               <div className="absolute -bottom-24 -right-24 w-52 h-52 bg-[#BFF367]/5 blur-[80px] rounded-full pointer-events-none" />
 
               {/* Redesigned Premium Header */}
@@ -1689,7 +1689,7 @@ const Community = ({ children, onSearchActive }) => {
                       className="border border-transparent rounded-[8px] py-1.5 pl-3 pr-8 text-white text-[10px] font-bold focus:outline-none transition-all appearance-none cursor-pointer shadow-[0_0_15px_rgba(85,222,232,0.1)]"
                       style={{
                         fontFamily: "'Inter', sans-serif",
-                        backgroundImage: "linear-gradient(rgba(10, 10, 10, 0.95), rgba(10, 10, 10, 0.95)), linear-gradient(to right, #55DEE8, #BFF367)",
+                        backgroundImage: "linear-gradient(rgba(10, 10, 10, 0.95), rgba(10, 10, 10, 0.95)), linear-gradient(to right, #BFF367, #BFF367)",
                         backgroundOrigin: "border-box",
                         backgroundClip: "padding-box, border-box"
                       }}
@@ -1728,7 +1728,7 @@ const Community = ({ children, onSearchActive }) => {
                   <span className="text-xs font-bold text-white block tracking-wide" style={SUBHEADING_STYLE}>
                     {user?.username || user?.name || "Gamer"}
                   </span>
-                  <div className="flex items-center gap-1 text-[9px] font-bold text-[#55DEE8] uppercase tracking-wider mt-0.5" style={SUBHEADING_STYLE}>
+                  <div className="flex items-center gap-1 text-[9px] font-bold text-[#BFF367] uppercase tracking-wider mt-0.5" style={SUBHEADING_STYLE}>
                     <Globe size={10} />
                     <span>Posting publicly</span>
                   </div>
@@ -1745,7 +1745,7 @@ const Community = ({ children, onSearchActive }) => {
                     placeholder="Title (Optional)"
                     maxLength={80}
                     style={SUBHEADING_STYLE}
-                    className="w-full bg-white/[0.01] hover:bg-white/[0.02] border border-white/5 focus:border-[#55DEE8]/30 focus:bg-white/[0.03] rounded-[8px] h-10 px-3.5 text-white text-xs outline-none transition-all duration-300 placeholder:text-white/20"
+                    className="w-full bg-white/[0.01] hover:bg-white/[0.02] border border-white/5 focus:border-[#BFF367]/30 focus:bg-white/[0.03] rounded-[8px] h-10 px-3.5 text-white text-xs outline-none transition-all duration-300 placeholder:text-white/20"
                   />
                   {newPost.title.length > 0 && (
                     <span className="absolute right-3.5 top-3 text-[9px] font-bold text-neutral-500" style={SUBHEADING_STYLE}>
@@ -1804,9 +1804,9 @@ const Community = ({ children, onSearchActive }) => {
                       <motion.button
                         type="button"
                         style={SUBHEADING_STYLE}
-                        whileHover={{ scale: 1.05, backgroundColor: "rgba(85,222,232,0.08)", border: "1px solid rgba(85,222,232,0.2)", color: "#55DEE8" }}
+                        whileHover={{ scale: 1.05, backgroundColor: "rgba(85,222,232,0.08)", border: "1px solid rgba(85,222,232,0.2)", color: "#BFF367" }}
                         whileTap={{ scale: 0.95 }}
-                        className="p-2.5 bg-white/[0.02] border border-white/5 rounded-[8px] text-neutral-400 hover:text-[#55DEE8] transition-all flex items-center justify-center cursor-pointer"
+                        className="p-2.5 bg-white/[0.02] border border-white/5 rounded-[8px] text-neutral-400 hover:text-[#BFF367] transition-all flex items-center justify-center cursor-pointer"
                         title="Add Image"
                       >
                         <ImageIcon size={16} />
@@ -1822,7 +1822,7 @@ const Community = ({ children, onSearchActive }) => {
                         className="hidden sm:flex items-center gap-1.5 bg-neutral-900/60 border border-neutral-800 rounded-[8px] px-2.5 py-1.5 text-[9px] font-black uppercase tracking-wider text-neutral-400"
                         style={SUBHEADING_STYLE}
                       >
-                        <ShieldCheck size={12} className="text-[#55DEE8]" />
+                        <ShieldCheck size={12} className="text-[#BFF367]" />
                         <span className="truncate max-w-[80px]">{newPost.image.name || "media.jpg"}</span>
                       </motion.div>
                     )}
@@ -1846,7 +1846,7 @@ const Community = ({ children, onSearchActive }) => {
                       style={SUBHEADING_STYLE}
                       whileHover={{ scale: 1.03, boxShadow: "0px 8px 25px rgba(85,222,232,0.18)", filter: "brightness(1.04)" }}
                       whileTap={{ scale: 0.97 }}
-                      className="bg-gradient-to-r from-[#55DEE8] to-[#BFF367] text-black px-5 h-9 rounded-[8px] font-black uppercase tracking-wider flex items-center justify-center gap-1.5 transition-all disabled:opacity-25 disabled:cursor-not-allowed text-xs cursor-pointer group/publish"
+                      className="bg-gradient-to-r from-[#BFF367] to-[#BFF367] text-black px-5 h-9 rounded-[8px] font-black uppercase tracking-wider flex items-center justify-center gap-1.5 transition-all disabled:opacity-25 disabled:cursor-not-allowed text-xs cursor-pointer group/publish"
                     >
                       {isPublishing ? (
                         <Loader2 size={13} className="animate-spin" />
@@ -1880,7 +1880,7 @@ const Community = ({ children, onSearchActive }) => {
               className="relative w-full max-w-lg bg-neutral-950/80 border border-white/5 rounded-[8px] overflow-hidden shadow-[0_25px_60px_rgba(0,0,0,0.8)] backdrop-blur-2xl"
             >
               {/* Dual Glowing Spots using the same brand gradient stops */}
-              <div className="absolute -top-24 -left-24 w-52 h-52 bg-[#55DEE8]/10 blur-[80px] rounded-full pointer-events-none" />
+              <div className="absolute -top-24 -left-24 w-52 h-52 bg-[#BFF367]/10 blur-[80px] rounded-full pointer-events-none" />
               <div className="absolute -bottom-24 -right-24 w-52 h-52 bg-[#BFF367]/5 blur-[80px] rounded-full pointer-events-none" />
 
               {/* Premium Header */}
@@ -1923,7 +1923,7 @@ const Community = ({ children, onSearchActive }) => {
                     onChange={(e) => setNewStory({ ...newStory, content: e.target.value })}
                     placeholder="Share a quick moment, match update, highlight, or announcement..."
                     style={SUBHEADING_STYLE}
-                    className="w-full bg-white/[0.01] hover:bg-white/[0.02] border border-white/5 focus:border-[#55DEE8]/30 focus:bg-white/[0.03] rounded-[8px] h-20 p-3 text-white text-xs outline-none transition-all duration-300 resize-none placeholder:text-white/20"
+                    className="w-full bg-white/[0.01] hover:bg-white/[0.02] border border-white/5 focus:border-[#BFF367]/30 focus:bg-white/[0.03] rounded-[8px] h-20 p-3 text-white text-xs outline-none transition-all duration-300 resize-none placeholder:text-white/20"
                   />
                 </div>
 
@@ -1935,7 +1935,7 @@ const Community = ({ children, onSearchActive }) => {
                       className="border border-transparent rounded-[8px] py-1.5 pl-3 pr-8 text-white text-[10px] font-bold focus:outline-none transition-all appearance-none cursor-pointer"
                       style={{
                         fontFamily: "'Inter', sans-serif",
-                        backgroundImage: "linear-gradient(rgba(10, 10, 10, 0.95), rgba(10, 10, 10, 0.95)), linear-gradient(to right, #55DEE8, #BFF367)",
+                        backgroundImage: "linear-gradient(rgba(10, 10, 10, 0.95), rgba(10, 10, 10, 0.95)), linear-gradient(to right, #BFF367, #BFF367)",
                         backgroundOrigin: "border-box",
                         backgroundClip: "padding-box, border-box"
                       }}
@@ -1990,9 +1990,9 @@ const Community = ({ children, onSearchActive }) => {
                       <motion.button
                         type="button"
                         style={SUBHEADING_STYLE}
-                        whileHover={{ scale: 1.05, backgroundColor: "rgba(85,222,232,0.08)", border: "1px solid rgba(85,222,232,0.2)", color: "#55DEE8" }}
+                        whileHover={{ scale: 1.05, backgroundColor: "rgba(85,222,232,0.08)", border: "1px solid rgba(85,222,232,0.2)", color: "#BFF367" }}
                         whileTap={{ scale: 0.95 }}
-                        className="p-2.5 bg-white/[0.02] border border-white/5 rounded-[8px] text-neutral-400 hover:text-[#55DEE8] transition-all flex items-center justify-center cursor-pointer"
+                        className="p-2.5 bg-white/[0.02] border border-white/5 rounded-[8px] text-neutral-400 hover:text-[#BFF367] transition-all flex items-center justify-center cursor-pointer"
                         title="Upload Photo/Video"
                       >
                         <ImageIcon size={16} />
@@ -2007,7 +2007,7 @@ const Community = ({ children, onSearchActive }) => {
                         className="hidden sm:flex items-center gap-1.5 bg-neutral-900/60 border border-neutral-800 rounded-[8px] px-2.5 py-1.5 text-[9px] font-black uppercase tracking-wider text-neutral-400"
                         style={SUBHEADING_STYLE}
                       >
-                        <ShieldCheck size={12} className="text-[#55DEE8]" />
+                        <ShieldCheck size={12} className="text-[#BFF367]" />
                         <span>{storyMediaPreviews.length} Selected</span>
                       </motion.div>
                     )}
@@ -2031,7 +2031,7 @@ const Community = ({ children, onSearchActive }) => {
                       style={SUBHEADING_STYLE}
                       whileHover={{ scale: 1.03, boxShadow: "0px 8px 25px rgba(85,222,232,0.18)", filter: "brightness(1.04)" }}
                       whileTap={{ scale: 0.97 }}
-                      className="bg-gradient-to-r from-[#55DEE8] to-[#BFF367] text-black px-5 h-9 rounded-[8px] font-black uppercase tracking-wider flex items-center justify-center gap-1.5 transition-all disabled:opacity-25 disabled:cursor-not-allowed text-xs cursor-pointer group/story"
+                      className="bg-gradient-to-r from-[#BFF367] to-[#BFF367] text-black px-5 h-9 rounded-[8px] font-black uppercase tracking-wider flex items-center justify-center gap-1.5 transition-all disabled:opacity-25 disabled:cursor-not-allowed text-xs cursor-pointer group/story"
                     >
                       {isPublishing ? (
                         <Loader2 size={13} className="animate-spin" />

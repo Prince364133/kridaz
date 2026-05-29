@@ -13,14 +13,14 @@ import { useSelector } from "react-redux";
 
 /**
  * OwnerRevenue Rs � Financial intelligence and earnings portal.
- * Fully rebranded for the Scorer Portal with Teal Green (#00C187) and Inter font.
+ * Fully rebranded for the Scorer Portal with Teal Green (#BFF367) and Inter font.
  * Layout optimized: 6 cards in one line.
  */
 
 export default function OwnerRevenue() {
   const { role } = useSelector((state) => state.auth);
   const isScorer = role?.toLowerCase().includes("scorer");
-  const themeColor = isScorer ? "#00C187" : "#BFF367";
+  const themeColor = isScorer ? "#BFF367" : "#BFF367";
   const portalTitle = isScorer ? "Earnings Dossier" : "Revenue Engine";
 
   const { revenueData, loading: revenueLoading } = useOwnerRevenue();
@@ -93,7 +93,7 @@ export default function OwnerRevenue() {
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
         
         <div className="bg-white/[0.03] backdrop-blur-xl border border-white/5 rounded-[8px] p-5 flex flex-col relative overflow-hidden transition-all duration-500 shadow-2xl group hover:border-white/10">
-          <div className="w-10 h-10 rounded-lg flex items-center justify-center mb-5 border border-white/10 bg-white/[0.05] group-hover:border-[#00C187]/30 transition-all shadow-inner" style={{ color: themeColor }}>
+          <div className="w-10 h-10 rounded-lg flex items-center justify-center mb-5 border border-white/10 bg-white/[0.05] group-hover:border-[#BFF367]/30 transition-all shadow-inner" style={{ color: themeColor }}>
              <CheckCircle2 size={18} />
           </div>
           <p className="text-[11px] font-black text-neutral-500 uppercase tracking-widest mb-1">Usable Assets</p>
@@ -287,7 +287,7 @@ export default function OwnerRevenue() {
                     <div className="space-y-3">
                        <label className="text-[9px] font-black text-neutral-500 uppercase tracking-widest ml-1">Withdrawal Quantum</label>
                        <div className="relative group">
-                          <IndianRupee className="absolute left-5 top-1/2 -translate-y-1/2 text-neutral-700 group-focus-within:text-[#00C187] transition-colors" size={20} />
+                          <IndianRupee className="absolute left-5 top-1/2 -translate-y-1/2 text-neutral-700 group-focus-within:text-[#BFF367] transition-colors" size={20} />
                           <input 
                             type="number"
                             required
@@ -295,7 +295,7 @@ export default function OwnerRevenue() {
                             max={balances?.usable || 0}
                             value={withdrawAmount}
                             onChange={(e) => setWithdrawAmount(e.target.value)}
-                            className="w-full bg-white/[0.03] border border-white/5 rounded-lg pl-14 pr-6 py-5 text-white focus:outline-none focus:border-[#00C187]/30 transition-all font-black text-3xl placeholder-neutral-800 shadow-inner"
+                            className="w-full bg-white/[0.03] border border-white/5 rounded-lg pl-14 pr-6 py-5 text-white focus:outline-none focus:border-[#BFF367]/30 transition-all font-black text-3xl placeholder-neutral-800 shadow-inner"
                             placeholder="0.00"
                           />
                        </div>
@@ -310,7 +310,7 @@ export default function OwnerRevenue() {
                             type="text" required
                             value={bankDetails.accountName}
                             onChange={(e) => setBankDetails({...bankDetails, accountName: e.target.value})}
-                            className="w-full bg-black border border-white/5 rounded-lg px-5 py-4 text-[13px] text-white focus:outline-none focus:border-[#00C187]/30 transition-all font-black placeholder-neutral-800"
+                            className="w-full bg-black border border-white/5 rounded-lg px-5 py-4 text-[13px] text-white focus:outline-none focus:border-[#BFF367]/30 transition-all font-black placeholder-neutral-800"
                             placeholder="Full Legal Name"
                           />
                        </div>
@@ -321,7 +321,7 @@ export default function OwnerRevenue() {
                             type="text" required
                             value={bankDetails.accountNumber}
                             onChange={(e) => setBankDetails({...bankDetails, accountNumber: e.target.value})}
-                            className="w-full bg-black border border-white/5 rounded-lg px-5 py-4 text-[13px] text-white focus:outline-none focus:border-[#00C187]/30 transition-all font-black placeholder-neutral-800"
+                            className="w-full bg-black border border-white/5 rounded-lg px-5 py-4 text-[13px] text-white focus:outline-none focus:border-[#BFF367]/30 transition-all font-black placeholder-neutral-800"
                             placeholder="Primary Account Number"
                           />
                        </div>
@@ -333,7 +333,7 @@ export default function OwnerRevenue() {
                                type="text" required
                                value={bankDetails.ifscCode}
                                onChange={(e) => setBankDetails({...bankDetails, ifscCode: e.target.value})}
-                               className="w-full bg-black border border-white/5 rounded-lg px-5 py-4 text-[13px] text-white focus:outline-none focus:border-[#00C187]/30 transition-all font-black uppercase placeholder-neutral-800"
+                               className="w-full bg-black border border-white/5 rounded-lg px-5 py-4 text-[13px] text-white focus:outline-none focus:border-[#BFF367]/30 transition-all font-black uppercase placeholder-neutral-800"
                                placeholder="IFSC CODE"
                              />
                           </div>
@@ -343,7 +343,7 @@ export default function OwnerRevenue() {
                                type="text" required
                                value={bankDetails.bankName}
                                onChange={(e) => setBankDetails({...bankDetails, bankName: e.target.value})}
-                               className="w-full bg-black border border-white/5 rounded-lg px-5 py-4 text-[13px] text-white focus:outline-none focus:border-[#00C187]/30 transition-all font-black placeholder-neutral-800"
+                               className="w-full bg-black border border-white/5 rounded-lg px-5 py-4 text-[13px] text-white focus:outline-none focus:border-[#BFF367]/30 transition-all font-black placeholder-neutral-800"
                                placeholder="Bank Name"
                              />
                           </div>

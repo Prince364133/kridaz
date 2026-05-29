@@ -34,7 +34,7 @@ const NOTIF_CONFIG = {
   },
   BOOKING: {
     icon: Calendar,
-    color: "#55DEE8",
+    color: "#BFF367",
     bgColor: "rgba(85,222,232,0.08)",
     getRoute: (notif) => notif.link || `/booking-pass/${notif.metadata?.bookingId || ""}`,
   },
@@ -58,7 +58,7 @@ const NOTIF_CONFIG = {
   },
   REVIEW: {
     icon: Star,
-    color: "#55DEE8",
+    color: "#BFF367",
     bgColor: "rgba(251,191,36,0.08)",
     getRoute: (notif) => notif.link || "/profile",
   },
@@ -82,13 +82,13 @@ const NOTIF_CONFIG = {
   },
   TEAM_INVITE: {
     icon: Users,
-    color: "#55DEE8",
+    color: "#BFF367",
     bgColor: "rgba(85,222,232,0.08)",
     getRoute: (notif) => notif.link || "/profile?tab=connections",
   },
   TEAM_JOIN_REQUEST: {
     icon: Users,
-    color: "#55DEE8",
+    color: "#BFF367",
     bgColor: "rgba(85,222,232,0.08)",
     getRoute: (notif) => notif.link || "/profile?tab=connections",
   },

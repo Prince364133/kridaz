@@ -278,7 +278,7 @@ const OnboardingModal = ({ isOpen, onClose, initialData, onComplete }) => {
         {/* Progress Bar */}
         <div className="flex h-1.5 bg-[#000000]">
           <div 
-            className="bg-[#55DEE8] transition-all duration-500 shadow-[0_0_10px_#55DEE8]" 
+            className="bg-[#BFF367] transition-all duration-500 shadow-[0_0_10px_#BFF367]" 
             style={{ width: `${(step / 3) * 100}%` }}
           />
         </div>
@@ -311,7 +311,7 @@ const OnboardingModal = ({ isOpen, onClose, initialData, onComplete }) => {
                       value={formData.name}
                       onChange={(e) => setFormData({...formData, name: e.target.value})}
                       placeholder="Your name"
-                      className="w-full bg-white/[0.03] border border-[#2D2D2D] rounded-[8px] py-4 pl-12 pr-4 text-white placeholder:text-white/10 focus:border-[#55DEE8] focus:ring-1 focus:ring-[#55DEE8] outline-none transition-all"
+                      className="w-full bg-white/[0.03] border border-[#2D2D2D] rounded-[8px] py-4 pl-12 pr-4 text-white placeholder:text-white/10 focus:border-[#BFF367] focus:ring-1 focus:ring-[#BFF367] outline-none transition-all"
                     />
                   </div>
                 </label>
@@ -326,7 +326,7 @@ const OnboardingModal = ({ isOpen, onClose, initialData, onComplete }) => {
                         value={formData.email}
                         onChange={(e) => setFormData({...formData, email: e.target.value})}
                         placeholder="your@email.com"
-                        className="w-full bg-white/[0.03] border border-[#2D2D2D] rounded-[8px] py-4 pl-12 pr-4 text-white placeholder:text-white/10 focus:border-[#55DEE8] focus:ring-1 focus:ring-[#55DEE8] outline-none transition-all"
+                        className="w-full bg-white/[0.03] border border-[#2D2D2D] rounded-[8px] py-4 pl-12 pr-4 text-white placeholder:text-white/10 focus:border-[#BFF367] focus:ring-1 focus:ring-[#BFF367] outline-none transition-all"
                       />
                     </div>
                     <p className="text-[10px] text-white/40 mt-1.5 ml-1 font-medium">* Required for invoices and bills</p>
@@ -352,7 +352,7 @@ const OnboardingModal = ({ isOpen, onClose, initialData, onComplete }) => {
                             }
                           }}
                           placeholder="10-digit mobile number"
-                          className="w-full bg-white/[0.03] border border-[#2D2D2D] rounded-[8px] py-4 pl-12 pr-4 text-white placeholder:text-white/10 focus:border-[#55DEE8] focus:ring-1 focus:ring-[#55DEE8] outline-none transition-all disabled:opacity-60 disabled:cursor-not-allowed"
+                          className="w-full bg-white/[0.03] border border-[#2D2D2D] rounded-[8px] py-4 pl-12 pr-4 text-white placeholder:text-white/10 focus:border-[#BFF367] focus:ring-1 focus:ring-[#BFF367] outline-none transition-all disabled:opacity-60 disabled:cursor-not-allowed"
                         />
                       </div>
                       
@@ -361,7 +361,7 @@ const OnboardingModal = ({ isOpen, onClose, initialData, onComplete }) => {
                           type="button"
                           onClick={handleSendPhoneOtp}
                           disabled={sendingPhoneOtp || !formData.phone || formData.phone.length < 10}
-                          className="px-4 bg-[#55DEE8]/10 hover:bg-[#55DEE8]/20 border border-[#55DEE8]/30 rounded-[8px] font-bold text-xs uppercase tracking-wider text-[#55DEE8] transition-all disabled:opacity-40 disabled:cursor-not-allowed whitespace-nowrap animate-pulse"
+                          className="px-4 bg-[#BFF367]/10 hover:bg-[#BFF367]/20 border border-[#BFF367]/30 rounded-[8px] font-bold text-xs uppercase tracking-wider text-[#BFF367] transition-all disabled:opacity-40 disabled:cursor-not-allowed whitespace-nowrap animate-pulse"
                         >
                           {sendingPhoneOtp ? <Loader2 className="animate-spin w-4 h-4" /> : (phoneOtpSent ? "Resend" : "Get OTP")}
                         </button>
@@ -385,13 +385,13 @@ const OnboardingModal = ({ isOpen, onClose, initialData, onComplete }) => {
                             value={phoneOtp}
                             onChange={(e) => setPhoneOtp(e.target.value.replace(/\D/g, ''))}
                             placeholder="Enter 6-digit OTP"
-                            className="flex-1 bg-white/[0.03] border border-[#2D2D2D] rounded-[8px] py-3 px-4 text-white placeholder:text-white/10 focus:border-[#55DEE8] focus:ring-1 focus:ring-[#55DEE8] outline-none transition-all text-center tracking-widest font-black"
+                            className="flex-1 bg-white/[0.03] border border-[#2D2D2D] rounded-[8px] py-3 px-4 text-white placeholder:text-white/10 focus:border-[#BFF367] focus:ring-1 focus:ring-[#BFF367] outline-none transition-all text-center tracking-widest font-black"
                           />
                           <button
                             type="button"
                             onClick={handleVerifyPhoneOtp}
                             disabled={verifyingPhoneOtp || phoneOtp.length < 6}
-                            className="px-6 bg-[#55DEE8] hover:scale-[1.02] active:scale-[0.98] rounded-[8px] font-black text-xs uppercase tracking-wider text-black transition-all disabled:opacity-40 disabled:scale-100"
+                            className="px-6 bg-[#BFF367] hover:scale-[1.02] active:scale-[0.98] rounded-[8px] font-black text-xs uppercase tracking-wider text-black transition-all disabled:opacity-40 disabled:scale-100"
                           >
                             {verifyingPhoneOtp ? <Loader2 className="animate-spin w-4 h-4" /> : "Verify"}
                           </button>
@@ -409,7 +409,7 @@ const OnboardingModal = ({ isOpen, onClose, initialData, onComplete }) => {
                       type="date"
                       value={formData.dob}
                       onChange={(e) => setFormData({...formData, dob: e.target.value})}
-                      className="w-full bg-white/[0.03] border border-[#2D2D2D] rounded-[8px] py-4 pl-12 pr-4 text-white focus:border-[#55DEE8] focus:ring-1 focus:ring-[#55DEE8] outline-none transition-all [color-scheme:dark]"
+                      className="w-full bg-white/[0.03] border border-[#2D2D2D] rounded-[8px] py-4 pl-12 pr-4 text-white focus:border-[#BFF367] focus:ring-1 focus:ring-[#BFF367] outline-none transition-all [color-scheme:dark]"
                     />
                   </div>
                 </label>
@@ -421,7 +421,7 @@ const OnboardingModal = ({ isOpen, onClose, initialData, onComplete }) => {
                       <button
                         key={g}
                         onClick={() => setFormData({...formData, gender: g})}
-                        className={`py-3 rounded-[8px] border font-bold text-xs uppercase tracking-wider transition-all duration-300 ${ formData.gender === g ? "bg-[#55DEE8] border-[#55DEE8] text-black shadow-[0_0_20px_rgba(85,222,232,0.2)]" : "bg-white/[0.03] border-[#2D2D2D] text-white/40 hover:border-[#2D2D2D]" }`}
+                        className={`py-3 rounded-[8px] border font-bold text-xs uppercase tracking-wider transition-all duration-300 ${ formData.gender === g ? "bg-[#BFF367] border-[#BFF367] text-black shadow-[0_0_20px_rgba(85,222,232,0.2)]" : "bg-white/[0.03] border-[#2D2D2D] text-white/40 hover:border-[#2D2D2D]" }`}
                       >
                         {g}
                       </button>
@@ -437,7 +437,7 @@ const OnboardingModal = ({ isOpen, onClose, initialData, onComplete }) => {
                       value={formData.password}
                       onChange={(e) => setFormData({...formData, password: e.target.value})}
                       placeholder="Must be at least 6 characters"
-                      className="w-full bg-white/[0.03] border border-[#2D2D2D] rounded-[8px] py-4 px-4 text-white placeholder:text-white/10 focus:border-[#55DEE8] focus:ring-1 focus:ring-[#55DEE8] outline-none transition-all"
+                      className="w-full bg-white/[0.03] border border-[#2D2D2D] rounded-[8px] py-4 px-4 text-white placeholder:text-white/10 focus:border-[#BFF367] focus:ring-1 focus:ring-[#BFF367] outline-none transition-all"
                     />
                   </div>
                 </label>
@@ -446,8 +446,8 @@ const OnboardingModal = ({ isOpen, onClose, initialData, onComplete }) => {
 
             {step === 2 && (
               <div className="space-y-6 animate-in slide-in-from-right-4 duration-300">
-                <div className="p-6 rounded-[8px] bg-[#55DEE8]/5 border border-[#55DEE8]/20 flex items-start gap-4">
-                  <div className="p-3 rounded-[8px] bg-[#55DEE8]/10 text-[#55DEE8]">
+                <div className="p-6 rounded-[8px] bg-[#BFF367]/5 border border-[#BFF367]/20 flex items-start gap-4">
+                  <div className="p-3 rounded-[8px] bg-[#BFF367]/10 text-[#BFF367]">
                     <MapPin size={24} />
                   </div>
                   <div className="space-y-1">
@@ -469,11 +469,11 @@ const OnboardingModal = ({ isOpen, onClose, initialData, onComplete }) => {
                       }}
                       onFocus={() => setShowSuggestions(locationSuggestions.length > 0)}
                       placeholder="e.g. Mumbai, Maharashtra"
-                      className="w-full bg-white/[0.03] border border-[#2D2D2D] rounded-[8px] py-4 pl-12 pr-12 text-white placeholder:text-white/10 focus:border-[#55DEE8] focus:ring-1 focus:ring-[#55DEE8] outline-none transition-all"
+                      className="w-full bg-white/[0.03] border border-[#2D2D2D] rounded-[8px] py-4 pl-12 pr-12 text-white placeholder:text-white/10 focus:border-[#BFF367] focus:ring-1 focus:ring-[#BFF367] outline-none transition-all"
                     />
                     {isSearchingLocation && (
                       <div className="absolute right-4 top-1/2 -translate-y-1/2">
-                        <Loader2 className="w-4 h-4 text-[#55DEE8] animate-spin" />
+                        <Loader2 className="w-4 h-4 text-[#BFF367] animate-spin" />
                       </div>
                     )}
 
@@ -484,7 +484,7 @@ const OnboardingModal = ({ isOpen, onClose, initialData, onComplete }) => {
                           <button
                             key={idx}
                             onClick={() => handleSelectLocation(suggestion)}
-                            className="w-full px-5 py-3 text-left hover:bg-[#55DEE8]/10 text-white/80 hover:text-white border-b border-[#2D2D2D] last:border-0 transition-colors flex flex-col gap-0.5"
+                            className="w-full px-5 py-3 text-left hover:bg-[#BFF367]/10 text-white/80 hover:text-white border-b border-[#2D2D2D] last:border-0 transition-colors flex flex-col gap-0.5"
                           >
                             <span className="text-xs font-bold uppercase tracking-wider">{suggestion.city || suggestion.display_name.split(',')[0]}</span>
                             <span className="text-[9px] text-white/40 truncate">{suggestion.display_name}</span>
@@ -503,9 +503,9 @@ const OnboardingModal = ({ isOpen, onClose, initialData, onComplete }) => {
                   <button
                     key={sport.name}
                     onClick={() => toggleSport(sport.name)}
-                    className={`flex items-center gap-3 p-4 rounded-[8px] border transition-all duration-300 ${ formData.sportTypes.includes(sport.name) ? "bg-[#55DEE8] border-[#55DEE8] text-black scale-[1.02] shadow-[0_0_20px_rgba(85,222,232,0.2)]" : "bg-white/[0.03] border-[#2D2D2D] text-white/40 hover:border-[#2D2D2D] hover:bg-white/[0.05]" }`}
+                    className={`flex items-center gap-3 p-4 rounded-[8px] border transition-all duration-300 ${ formData.sportTypes.includes(sport.name) ? "bg-[#BFF367] border-[#BFF367] text-black scale-[1.02] shadow-[0_0_20px_rgba(85,222,232,0.2)]" : "bg-white/[0.03] border-[#2D2D2D] text-white/40 hover:border-[#2D2D2D] hover:bg-white/[0.05]" }`}
                   >
-                    <div className={formData.sportTypes.includes(sport.name) ? "text-black" : "text-[#55DEE8]"}>
+                    <div className={formData.sportTypes.includes(sport.name) ? "text-black" : "text-[#BFF367]"}>
                       {sport.icon}
                     </div>
                     <span className="font-black text-[10px] uppercase tracking-widest flex-1 text-left">{sport.name}</span>
@@ -542,7 +542,7 @@ const OnboardingModal = ({ isOpen, onClose, initialData, onComplete }) => {
               <button
                 onClick={handleSubmit}
                 disabled={loading || formData.sportTypes.length === 0}
-                className="flex-[2] bg-[#55DEE8] text-black h-16 rounded-[8px] font-black uppercase tracking-widest text-xs flex items-center justify-center gap-3 hover:scale-[1.02] active:scale-[0.98] transition-all shadow-[0_0_30px_rgba(85,222,232,0.3)] disabled:opacity-50 disabled:grayscale"
+                className="flex-[2] bg-[#BFF367] text-black h-16 rounded-[8px] font-black uppercase tracking-widest text-xs flex items-center justify-center gap-3 hover:scale-[1.02] active:scale-[0.98] transition-all shadow-[0_0_30px_rgba(85,222,232,0.3)] disabled:opacity-50 disabled:grayscale"
               >
                 {loading ? (
                   <Loader2 className="animate-spin" size={20} />

@@ -8,14 +8,14 @@ import ClockPicker from "@components/common/ClockPicker";
 
 /**
  * ProfessionalAvailability ΓÇö Role-aware schedule management.
- * Fully rebranded for Scorer users with Teal Green (#00C187) and Inter typography.
+ * Fully rebranded for Scorer users with Teal Green (#BFF367) and Inter typography.
  */
 
 export default function ProfessionalAvailability() {
   const { user, role } = useSelector((state) => state.auth);
   
   const isScorer = role?.toLowerCase().includes("scorer");
-  const themeColor = isScorer ? "#00C187" : "#55DEE8";
+  const themeColor = isScorer ? "#BFF367" : "#BFF367";
 
   const [loading, setLoading] = useState(false);
   const [fetching, setFetching] = useState(false);
@@ -212,7 +212,7 @@ export default function ProfessionalAvailability() {
                     <button 
                       key={dateStr}
                       onClick={() => setSelectedDate(dateStr)}
-                      className={`relative flex flex-col items-center justify-center p-3 rounded-[8px] border transition-all duration-300 ${ isSelected ? "text-black shadow-lg" : "bg-[#2D2D2D]/30 border-[#2D2D2D] text-[#878C9F] hover:border-[#55DEE8]/30 hover:bg-[#2D2D2D]/50" }`}
+                      className={`relative flex flex-col items-center justify-center p-3 rounded-[8px] border transition-all duration-300 ${ isSelected ? "text-black shadow-lg" : "bg-[#2D2D2D]/30 border-[#2D2D2D] text-[#878C9F] hover:border-[#BFF367]/30 hover:bg-[#2D2D2D]/50" }`}
                       style={{ 
                         backgroundColor: isSelected ? themeColor : undefined,
                         borderColor: isSelected ? themeColor : undefined,

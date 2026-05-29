@@ -2,7 +2,7 @@ import { ArrowRight, CheckCircle, BarChart3, CalendarDays, Trophy } from "lucide
 import { Link } from "react-router-dom";
 import ScrollToTop from "@components/common/ScrollToTop";
 
-const PRI = "#55DEE8";
+const PRI = "#BFF367";
 
 const benefits = [
   { icon: CalendarDays, title: "Automated Bookings", desc: "No more phone calls. Let players book your turf 24/7." },

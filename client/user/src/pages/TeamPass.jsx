@@ -11,7 +11,7 @@ import toast from "react-hot-toast";
 import { useSelector } from "react-redux";
 import { motion, AnimatePresence } from "framer-motion";
 
-const PRI = "#55DEE8";
+const PRI = "#BFF367";
 const HEADING_STYLE = { fontFamily: "'Open Sans', sans-serif" };
 const SUBHEADING_STYLE = { fontFamily: "'Inter 28pt Light', sans-serif", fontWeight: 300 };
 
@@ -63,7 +63,7 @@ const TeamPass = () => {
     return (
       <div className="min-h-screen bg-black flex items-center justify-center">
         <div className="flex flex-col items-center gap-4">
-          <div className="w-10 h-10 border-4 border-[#55DEE8]/20 border-t-[#55DEE8] rounded-full animate-spin" />
+          <div className="w-10 h-10 border-4 border-[#BFF367]/20 border-t-[#BFF367] rounded-full animate-spin" />
           <p className="text-white/40 text-[10px] font-black uppercase tracking-[0.3em] animate-pulse">Scanning Pass...</p>
         </div>
       </div>
@@ -86,8 +86,8 @@ const TeamPass = () => {
       <div className="w-full max-w-[480px] relative">
         
         {/* Background Glows */}
-        <div className="absolute -top-24 -left-24 w-64 h-64 bg-[#55DEE8]/5 blur-[100px] rounded-full pointer-events-none" />
-        <div className="absolute -bottom-24 -right-24 w-64 h-64 bg-[#55DEE8]/5 blur-[100px] rounded-full pointer-events-none" />
+        <div className="absolute -top-24 -left-24 w-64 h-64 bg-[#BFF367]/5 blur-[100px] rounded-full pointer-events-none" />
+        <div className="absolute -bottom-24 -right-24 w-64 h-64 bg-[#BFF367]/5 blur-[100px] rounded-full pointer-events-none" />
 
         {/* The Ticket Card */}
         <div className="bg-[#050505] border border-white/5 rounded-[8px] overflow-hidden shadow-[0_0_100px_rgba(0,0,0,0.8)] relative p-1">
@@ -104,11 +104,11 @@ const TeamPass = () => {
               <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-[#0A0A0A]/60 to-[#0A0A0A]" />
               <div className="absolute inset-x-8 top-8 flex items-center justify-between z-10">
                 <div>
-                  <h3 className="text-xl font-black tracking-tighter text-[#55DEE8]" style={HEADING_STYLE}>KRIDAZ</h3>
+                  <h3 className="text-xl font-black tracking-tighter text-[#BFF367]" style={HEADING_STYLE}>KRIDAZ</h3>
                   <p className="text-[8px] font-black uppercase tracking-[0.4em] text-white/40 mt-1">Team Invitation Rs � {team.teamCode || id.slice(-8).toUpperCase()}</p>
                 </div>
                 <div className="flex items-center gap-2 px-4 py-2 bg-white/[0.03] border border-white/10 rounded-[8px] backdrop-blur-sm">
-                  <Mail size={12} className="text-[#55DEE8]" />
+                  <Mail size={12} className="text-[#BFF367]" />
                   <span className="text-[9px] font-black uppercase tracking-widest text-white">Open Invite</span>
                 </div>
               </div>
@@ -127,7 +127,7 @@ const TeamPass = () => {
               </div>
               <div className="flex-1">
                 <h1 className="text-3xl font-black text-white uppercase tracking-tighter mb-1" style={HEADING_STYLE}>{team.name}</h1>
-                <div className="flex items-center gap-2 text-[#55DEE8]">
+                <div className="flex items-center gap-2 text-[#BFF367]">
                   <Trophy size={16} />
                   <span className="text-[11px] font-black uppercase tracking-[0.2em]">{team.sportType || 'Cricket'} Rs � {team.members?.length || 0} Members</span>
                 </div>
@@ -145,7 +145,7 @@ const TeamPass = () => {
                 ].map(({ label, icon: Icon, value }) => (
                   <div key={label} className="bg-white/[0.02] border border-white/5 rounded-[8px] p-5 flex flex-col gap-3">
                     <div className="flex items-center gap-2">
-                      <Icon size={16} className="text-[#55DEE8]" />
+                      <Icon size={16} className="text-[#BFF367]" />
                       <span className="text-[9px] font-black uppercase tracking-[0.2em] text-white/30">{label}</span>
                     </div>
                     <p className="text-xs font-black text-white uppercase truncate">{value}</p>
@@ -166,7 +166,7 @@ const TeamPass = () => {
                   </div>
                   {/* Decorative Ball Overlay */}
                   <div className="absolute top-1/2 -right-8 -translate-y-1/2 opacity-[0.05] pointer-events-none">
-                    <Target size={140} strokeWidth={1} className="text-[#55DEE8]" />
+                    <Target size={140} strokeWidth={1} className="text-[#BFF367]" />
                   </div>
                </div>
             </div>
@@ -176,12 +176,12 @@ const TeamPass = () => {
               <div className="bg-white/[0.02] border border-white/5 rounded-[8px] p-8 flex flex-col md:flex-row items-center gap-10">
                  {/* QR Frame with Pulse Glow */}
                  <div className="relative p-2">
-                    <div className="absolute inset-0 bg-[#55DEE8]/20 blur-2xl rounded-full animate-pulse" />
+                    <div className="absolute inset-0 bg-[#BFF367]/20 blur-2xl rounded-full animate-pulse" />
                     {/* Corners */}
-                    <div className="absolute top-0 left-0 w-6 h-6 border-t-4 border-l-4 border-[#55DEE8] rounded-tl-2xl" />
-                    <div className="absolute top-0 right-0 w-6 h-6 border-t-4 border-r-4 border-[#55DEE8] rounded-tr-2xl" />
-                    <div className="absolute bottom-0 left-0 w-6 h-6 border-b-4 border-l-4 border-[#55DEE8] rounded-bl-2xl" />
-                    <div className="absolute bottom-0 right-0 w-6 h-6 border-b-4 border-r-4 border-[#55DEE8] rounded-br-2xl" />
+                    <div className="absolute top-0 left-0 w-6 h-6 border-t-4 border-l-4 border-[#BFF367] rounded-tl-2xl" />
+                    <div className="absolute top-0 right-0 w-6 h-6 border-t-4 border-r-4 border-[#BFF367] rounded-tr-2xl" />
+                    <div className="absolute bottom-0 left-0 w-6 h-6 border-b-4 border-l-4 border-[#BFF367] rounded-bl-2xl" />
+                    <div className="absolute bottom-0 right-0 w-6 h-6 border-b-4 border-r-4 border-[#BFF367] rounded-br-2xl" />
                     
                     <div className="bg-white p-4 rounded-[8px] relative z-10 shadow-[0_0_50px_rgba(85,222,232,0.2)]">
                       {team.qrCode ? (
@@ -196,7 +196,7 @@ const TeamPass = () => {
 
                  <div className="flex-1 space-y-6">
                     <div className="space-y-2 text-center md:text-left">
-                      <div className="flex items-center justify-center md:justify-start gap-2 text-[#55DEE8]">
+                      <div className="flex items-center justify-center md:justify-start gap-2 text-[#BFF367]">
                         <QrIcon size={18} strokeWidth={2.5} />
                         <h4 className="text-[12px] font-black uppercase tracking-widest">Scan to Join Team</h4>
                       </div>
@@ -210,7 +210,7 @@ const TeamPass = () => {
                         { icon: Zap, l: "Play & Win" }
                       ].map((feat, i) => (
                         <div key={i} className="flex flex-col items-center md:items-start gap-3">
-                          <div className="w-10 h-10 rounded-[8px] bg-white/5 border border-white/10 flex items-center justify-center text-[#55DEE8] shadow-lg">
+                          <div className="w-10 h-10 rounded-[8px] bg-white/5 border border-white/10 flex items-center justify-center text-[#BFF367] shadow-lg">
                             <feat.icon size={14} />
                           </div>
                           <p className="text-[7px] font-black text-white/30 uppercase tracking-[0.15em] leading-tight text-center md:text-left">{feat.l}</p>
@@ -226,7 +226,7 @@ const TeamPass = () => {
               <button
                 onClick={handleJoinTeam}
                 disabled={isJoining}
-                className="w-full flex items-center justify-center gap-4 py-6 rounded-[8px] bg-[#55DEE8] text-black font-black uppercase text-[14px] tracking-[0.2em] transition-all hover:scale-[1.01] active:scale-[0.99] shadow-[0_15px_40px_rgba(85,222,232,0.4)] relative group overflow-hidden"
+                className="w-full flex items-center justify-center gap-4 py-6 rounded-[8px] bg-[#BFF367] text-black font-black uppercase text-[14px] tracking-[0.2em] transition-all hover:scale-[1.01] active:scale-[0.99] shadow-[0_15px_40px_rgba(85,222,232,0.4)] relative group overflow-hidden"
               >
                 <div className="absolute inset-0 bg-white/20 -translate-x-full group-hover:translate-x-full transition-transform duration-700 skew-x-12" />
                 {isJoining ? <Loader2 size={24} className="animate-spin" /> : (

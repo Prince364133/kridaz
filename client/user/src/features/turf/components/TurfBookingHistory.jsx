@@ -31,7 +31,7 @@ const STATUS_META = {
  CONFIRMED: { label: "Confirmed", color: ACCENT, bg: `${ACCENT}15`, border: `${ACCENT}30` },
  CANCELLED: { label: "Cancelled", color: "#EF4444", bg: "#EF444415", border: "#EF444430" },
  COMPLETED: { label: "Completed", color: "#10B981", bg: "#10B98115", border: "#10B98130" },
- DISPUTED: { label: "Under Review", color: "#55DEE8", bg: "#55DEE815", border: "#55DEE830" },
+ DISPUTED: { label: "Under Review", color: "#BFF367", bg: "#BFF36715", border: "#BFF36730" },
  PLAYING: { label: "In Progress", color: "#3B82F6", bg: "#3B82F615", border: "#3B82F630" },
 };
 
@@ -427,7 +427,7 @@ const TurfBookingHistory = () => {
 
                   return (
                     <div key={game._id} className="group relative rounded-[8px] p-[1px] transition-all duration-300 cursor-pointer overflow-hidden">
-                      <div className="absolute inset-0 bg-gradient-to-r from-[#55DEE8] to-[#CCFF00] opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-[8px]" />
+                      <div className="absolute inset-0 bg-gradient-to-r from-[#BFF367] to-[#CCFF00] opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-[8px]" />
                       <div className="absolute inset-0 border border-white/10 group-hover:opacity-0 transition-opacity duration-300 rounded-[8px]" />
                       
                       <div className="relative bg-[#0d0d0d] rounded-[8px] p-4 flex flex-col md:flex-row gap-6 w-full">
@@ -513,16 +513,16 @@ const TurfBookingHistory = () => {
                   {/* Section 1: Active Match Requests */}
                   {activeRequests.length > 0 && (
                     <div className="space-y-3">
-                      <h4 className="text-[10px] font-black uppercase text-[#55DEE8] tracking-widest flex items-center gap-2">
+                      <h4 className="text-[10px] font-black uppercase text-[#BFF367] tracking-widest flex items-center gap-2">
                         <span className="flex h-2 w-2 relative">
-                          <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#55DEE8] opacity-75"></span>
-                          <span className="relative inline-flex rounded-full h-2 w-2 bg-[#55DEE8]"></span>
+                          <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#BFF367] opacity-75"></span>
+                          <span className="relative inline-flex rounded-full h-2 w-2 bg-[#BFF367]"></span>
                         </span>
                         Live Match Search ({activeRequests.length})
                       </h4>
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         {activeRequests.map((req) => (
-                          <div key={req.id} className="bg-[#111] border border-[#55DEE8]/20 rounded-lg p-5 relative overflow-hidden">
+                          <div key={req.id} className="bg-[#111] border border-[#BFF367]/20 rounded-lg p-5 relative overflow-hidden">
                             <div className="space-y-3 font-sans">
                               <div>
                                 <span className="text-[8px] uppercase tracking-wider text-white/40 block">Target Roles</span>
@@ -549,8 +549,8 @@ const TurfBookingHistory = () => {
                               </div>
                               <div className="pt-3 border-t border-white/5 flex items-center justify-between flex-wrap gap-2 mt-2">
                                 <div className="flex items-center gap-1.5 text-[10px] text-gray-500 uppercase font-bold tracking-widest">
-                                  <Calendar size={10} className="text-[#55DEE8]" /> {req.matchDate || "Flexible"}
-                                  <Clock size={10} className="text-[#55DEE8] ml-2" /> {req.matchStartTime || "TBD"} - {req.matchEndTime || "TBD"}
+                                  <Calendar size={10} className="text-[#BFF367]" /> {req.matchDate || "Flexible"}
+                                  <Clock size={10} className="text-[#BFF367] ml-2" /> {req.matchStartTime || "TBD"} - {req.matchEndTime || "TBD"}
                                 </div>
                               </div>
                             </div>
@@ -652,7 +652,7 @@ const TurfBookingHistory = () => {
                                   )}
                                   <div>
                                     <h3 className="text-xs font-bold text-white capitalize">{booking.professional?.name?.toLowerCase()}</h3>
-                                    <span className="px-1.5 py-0.5 rounded bg-[#55DEE8]/10 text-[#55DEE8] border border-[#55DEE8]/20 text-[8px] font-black uppercase tracking-wider block mt-1 w-max">
+                                    <span className="px-1.5 py-0.5 rounded bg-[#BFF367]/10 text-[#BFF367] border border-[#BFF367]/20 text-[8px] font-black uppercase tracking-wider block mt-1 w-max">
                                       {booking.role}
                                     </span>
                                   </div>
@@ -745,7 +745,7 @@ const TurfBookingHistory = () => {
                             APPROVED: 'text-[#CCFF00] bg-[#CCFF00]/10 border-[#CCFF00]/20',
                             PENDING: 'text-yellow-500 bg-yellow-500/10 border-yellow-500/20',
                             REJECTED: 'text-red-500 bg-red-500/10 border-red-500/20',
-                            COMPLETED: 'text-[#55DEE8] bg-[#55DEE8]/10 border-[#55DEE8]/20'
+                            COMPLETED: 'text-[#BFF367] bg-[#BFF367]/10 border-[#BFF367]/20'
                           };
                           const statusClass = statusColors[booking.status] || 'text-gray-400 bg-white/5 border-white/10';
                           const profName = booking.professional?.user?.name || booking.professional?.businessName || "Professional";
@@ -764,7 +764,7 @@ const TurfBookingHistory = () => {
 
                           return (
                             <div key={booking.id} className="group relative rounded-[8px] p-[1px] transition-all duration-300 cursor-pointer overflow-hidden">
-                              <div className="absolute inset-0 bg-gradient-to-r from-[#55DEE8] to-[#CCFF00] opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-[8px]" />
+                              <div className="absolute inset-0 bg-gradient-to-r from-[#BFF367] to-[#CCFF00] opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-[8px]" />
                               <div className="absolute inset-0 border border-white/10 group-hover:opacity-0 transition-opacity duration-300 rounded-[8px]" />
                               
                               <div className="relative bg-[#0d0d0d] rounded-[8px] p-4 flex flex-col md:flex-row gap-6 w-full">
@@ -779,7 +779,7 @@ const TurfBookingHistory = () => {
                                 <div className="flex-1 flex flex-col justify-between py-1">
                                   <div>
                                     <div className="flex items-center gap-2 mb-2">
-                                      <span className="px-1.5 py-0.5 bg-[#55DEE8]/10 text-[#55DEE8] rounded text-[8px] font-black uppercase tracking-widest border border-[#55DEE8]/20">
+                                      <span className="px-1.5 py-0.5 bg-[#BFF367]/10 text-[#BFF367] rounded text-[8px] font-black uppercase tracking-widest border border-[#BFF367]/20">
                                         {booking.bookingType || 'PROFESSIONAL'}
                                       </span>
                                       <span className="text-[8px] font-bold text-gray-500 uppercase tracking-widest">

@@ -41,14 +41,14 @@ export default function PenaltyModal({ matchData, onClose, onConfirm }) {
               <button
                 type="button"
                 onClick={() => setSelectedTeam(teamA?.id || teamA?._id)}
-                className={`flex-1 py-3 px-2 rounded-[8px] text-[11px] font-black uppercase tracking-widest transition-all ${selectedTeam === (teamA?.id || teamA?._id) ? 'bg-[#00C187]/20 border border-[#00C187]/50 text-[#00C187]' : 'bg-white/5 border border-white/5 text-neutral-400 hover:text-white'}`}
+                className={`flex-1 py-3 px-2 rounded-[8px] text-[11px] font-black uppercase tracking-widest transition-all ${selectedTeam === (teamA?.id || teamA?._id) ? 'bg-[#BFF367]/20 border border-[#BFF367]/50 text-[#BFF367]' : 'bg-white/5 border border-white/5 text-neutral-400 hover:text-white'}`}
               >
                 {teamA?.name || 'TBD'}
               </button>
               <button
                 type="button"
                 onClick={() => setSelectedTeam(teamB?.id || teamB?._id)}
-                className={`flex-1 py-3 px-2 rounded-[8px] text-[11px] font-black uppercase tracking-widest transition-all ${selectedTeam === (teamB?.id || teamB?._id) ? 'bg-[#00C187]/20 border border-[#00C187]/50 text-[#00C187]' : 'bg-white/5 border border-white/5 text-neutral-400 hover:text-white'}`}
+                className={`flex-1 py-3 px-2 rounded-[8px] text-[11px] font-black uppercase tracking-widest transition-all ${selectedTeam === (teamB?.id || teamB?._id) ? 'bg-[#BFF367]/20 border border-[#BFF367]/50 text-[#BFF367]' : 'bg-white/5 border border-white/5 text-neutral-400 hover:text-white'}`}
               >
                 {teamB?.name || 'TBD'}
               </button>
@@ -63,7 +63,7 @@ export default function PenaltyModal({ matchData, onClose, onConfirm }) {
               value={runs}
               onChange={(e) => setRuns(e.target.value)}
               placeholder="e.g. 5"
-              className="w-full bg-white/5 border border-white/10 rounded-[8px] p-4 text-center text-2xl font-black text-white focus:outline-none focus:border-[#00C187]/50 transition-all placeholder:text-neutral-700"
+              className="w-full bg-white/5 border border-white/10 rounded-[8px] p-4 text-center text-2xl font-black text-white focus:outline-none focus:border-[#BFF367]/50 transition-all placeholder:text-neutral-700"
               required
             />
           </div>

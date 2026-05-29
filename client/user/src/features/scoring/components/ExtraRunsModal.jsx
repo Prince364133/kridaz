@@ -9,7 +9,7 @@ import { X } from 'lucide-react';
  * Lets the umpire specify how many runs were scored off the delivery.
  */
 
-const THEME_COLOR = '#55DEE8';
+const THEME_COLOR = '#BFF367';
 
 const EXTRA_META = {
   WIDE:    { label: 'Wide',     color: THEME_COLOR, note: '1 wide penalty already included' },
@@ -77,7 +77,7 @@ const ExtraRunsModal = ({ extraType = 'WIDE', onConfirm, onClose }) => {
             {/* Manual input */}
             <div className="space-y-2">
               <label className="text-[10px] font-black text-neutral-500 uppercase tracking-widest ml-1">Overthrows / Manual</label>
-              <div className="flex items-center gap-3 bg-neutral-900/50 border border-white/5 rounded-[8px] px-5 py-4 focus-within:border-[#00C187] transition-all">
+              <div className="flex items-center gap-3 bg-neutral-900/50 border border-white/5 rounded-[8px] px-5 py-4 focus-within:border-[#BFF367] transition-all">
                 <span className="text-neutral-500 text-sm font-bold uppercase">Other</span>
                 <input
                   type="number"

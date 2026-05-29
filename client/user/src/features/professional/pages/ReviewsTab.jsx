@@ -95,7 +95,7 @@ const ReviewsTab = ({ role }) => {
       {/* Overall Score Card */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 p-6 rounded-2xl bg-[#141414] border border-[#2D2D2D] items-center">
         <div className="text-center space-y-2 md:border-r md:border-[#2D2D2D] py-4">
-          <h2 className="text-5xl font-black text-[#55DEE8]">{rating.toFixed(1)}</h2>
+          <h2 className="text-5xl font-black text-[#BFF367]">{rating.toFixed(1)}</h2>
           <div className="flex justify-center gap-1">
             {[1, 2, 3, 4, 5].map((s) => (
               <Star 
@@ -118,7 +118,7 @@ const ReviewsTab = ({ role }) => {
                 <Star size={12} className="text-yellow-400 fill-yellow-400" />
                 <div className="flex-1 h-2 bg-black rounded-full overflow-hidden border border-[#2D2D2D]">
                   <div 
-                    className="h-full bg-[#55DEE8] rounded-full transition-all duration-500" 
+                    className="h-full bg-[#BFF367] rounded-full transition-all duration-500" 
                     style={{ width: `${percentage}%` }}
                   />
                 </div>
@@ -165,7 +165,7 @@ const ReviewsTab = ({ role }) => {
               >
                 <div className="flex justify-between items-start">
                   <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-full bg-[#55DEE8]/10 text-[#55DEE8] flex items-center justify-center font-bold text-sm uppercase">
+                    <div className="w-10 h-10 rounded-full bg-[#BFF367]/10 text-[#BFF367] flex items-center justify-center font-bold text-sm uppercase">
                       {review.user?.name?.charAt(0) || "U"}
                     </div>
                     <div>
@@ -193,7 +193,7 @@ const ReviewsTab = ({ role }) => {
                 {/* Reply section */}
                 {review.reply ? (
                   <div className="ml-8 p-4 rounded-xl bg-black/40 border border-[#2D2D2D] space-y-2">
-                    <div className="flex items-center gap-2 text-xs text-[#55DEE8] font-bold">
+                    <div className="flex items-center gap-2 text-xs text-[#BFF367] font-bold">
                       <CornerDownRight size={14} />
                       <span>Your Response</span>
                       {review.replyDate && (
@@ -216,7 +216,7 @@ const ReviewsTab = ({ role }) => {
                       placeholder="Write your response to the user..."
                       value={replyText}
                       onChange={(e) => setReplyText(e.target.value)}
-                      className="w-full bg-black border border-[#2D2D2D] rounded-xl px-4 py-2.5 text-xs text-white focus:outline-none focus:border-[#55DEE8] min-h-[80px]"
+                      className="w-full bg-black border border-[#2D2D2D] rounded-xl px-4 py-2.5 text-xs text-white focus:outline-none focus:border-[#BFF367] min-h-[80px]"
                     />
                     <div className="flex gap-2 justify-end">
                       <button 
@@ -229,7 +229,7 @@ const ReviewsTab = ({ role }) => {
                       <button 
                         type="submit"
                         disabled={isSubmittingReply}
-                        className="bg-[#55DEE8] hover:bg-[#44cdd7] text-black font-semibold rounded-lg px-4 py-1.5 text-xs"
+                        className="bg-[#BFF367] hover:bg-[#44cdd7] text-black font-semibold rounded-lg px-4 py-1.5 text-xs"
                       >
                         Submit Response
                       </button>
@@ -242,7 +242,7 @@ const ReviewsTab = ({ role }) => {
                         setReplyingTo(review.id);
                         setReplyText("");
                       }}
-                      className="text-xs text-[#55DEE8] hover:text-white font-semibold flex items-center gap-1 transition-colors"
+                      className="text-xs text-[#BFF367] hover:text-white font-semibold flex items-center gap-1 transition-colors"
                     >
                       <span>Reply to testimonial</span>
                       <ArrowRight size={12} />
