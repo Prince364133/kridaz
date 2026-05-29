@@ -738,13 +738,13 @@ const Community = ({ children, onSearchActive }) => {
             ...post,
             likes: alreadyLiked
               ? (post.likes || []).filter(l => (l.id || l._id || l) !== userId)
-              : [...(post.likes || []), { 
-                  id: userId, 
-                  _id: userId,
-                  name: user?.name,
-                  username: user?.username,
-                  profilePicture: user?.profilePicture
-                }],
+              : [...(post.likes || []), {
+                id: userId,
+                _id: userId,
+                name: user?.name,
+                username: user?.username,
+                profilePicture: user?.profilePicture
+              }],
           };
         }
         return post;
@@ -773,13 +773,13 @@ const Community = ({ children, onSearchActive }) => {
               ...post,
               likes: wasLiked
                 ? (post.likes || []).filter(l => (l.id || l._id || l) !== userId)
-                : [...(post.likes || []), { 
-                    id: userId, 
-                    _id: userId,
-                    name: user?.name,
-                    username: user?.username,
-                    profilePicture: user?.profilePicture
-                  }],
+                : [...(post.likes || []), {
+                  id: userId,
+                  _id: userId,
+                  name: user?.name,
+                  username: user?.username,
+                  profilePicture: user?.profilePicture
+                }],
             };
           }
           return post;
@@ -885,7 +885,7 @@ const Community = ({ children, onSearchActive }) => {
   };
 
   return (
-    <div className={`min-h-screen bg-[#050505] text-white pt-4 pb-12 ${activeFilter === 'Reels' ? 'px-0 md:px-4' : 'px-2 md:px-4'} font-sans relative`}>
+    <div className={`min-h-screen bg-[#050505] text-white pt-4 pb-12 ${activeFilter === 'Reels' ? 'px-0 md:px-3' : 'px-1 md:px-3'} font-sans relative`}>
 
 
 
@@ -1311,7 +1311,7 @@ const Community = ({ children, onSearchActive }) => {
                       </Link>
                       <div className="flex items-center gap-3">
                         <div className="relative">
-                          <button 
+                          <button
                             onClick={() => setActiveDropdownId(activeDropdownId === getPostId(post) ? null : getPostId(post))}
                             className="text-white/40 hover:text-white transition-colors p-2"
                           >
@@ -1557,11 +1557,10 @@ const Community = ({ children, onSearchActive }) => {
                               <button
                                 onClick={() => handleAddComment(getPostId(post))}
                                 disabled={!commentInputs[getPostId(post)]?.trim()}
-                                className={`text-[12px] font-bold px-3 py-1.5 rounded-full transition-all ${
-                                  commentInputs[getPostId(post)]?.trim()
+                                className={`text-[12px] font-bold px-3 py-1.5 rounded-full transition-all ${commentInputs[getPostId(post)]?.trim()
                                     ? 'bg-[#BFF367] text-black hover:bg-[#BFF367]/80 cursor-pointer'
                                     : 'bg-white/5 text-white/20 cursor-not-allowed'
-                                }`}
+                                  }`}
                               >
                                 Post
                               </button>

@@ -405,7 +405,7 @@ export default function Home() {
 
 
     {/* Community Feed Added Below Stores Section */}
-    <div className={`${isReelsView ? 'mt-0 mb-0' : 'mt-2 mb-2'} -mx-4 md:-mx-8`}>
+    <div className={`${isReelsView ? 'mt-0 mb-0' : 'mt-0 mb-2'} -mx-4 md:-mx-8`}>
       <Community onSearchActive={setIsCommunitySearchActive}>
         {/* Dashboard Buttons Grid */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4 mb-6 w-full">
