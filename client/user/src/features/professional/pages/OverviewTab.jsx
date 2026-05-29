@@ -1,6 +1,4 @@
 import React, { useState, useEffect } from "react";
-import DatePicker from "react-datepicker";
-import "react-datepicker/dist/react-datepicker.css";
 import {
   AreaChart,
   Area,
@@ -99,15 +97,6 @@ const OverviewTab = ({ role, profile }) => {
   const [timeTimeline, setTimeTimeline] = useState("This Week");
   const [ratingTimeline, setRatingTimeline] = useState("This Week");
   const [graphTimeline, setGraphTimeline] = useState("This Week");
-
-  // Custom date ranges for timelines
-  const [customDates, setCustomDates] = useState({
-    bookings: [null, null],
-    earnings: [null, null],
-    time: [null, null],
-    rating: [null, null],
-    graph: [null, null],
-  });
 
   // Real-time match offers state
   const [activeOffer, setActiveOffer] = useState(null);
@@ -232,7 +221,7 @@ const OverviewTab = ({ role, profile }) => {
     }
   };
 
-  const getFilteredBookings = (timeline, dates) => {
+  const getFilteredBookings = (timeline) => {
     const completed = bookingsData?.bookings?.filter((b) => b.status === "COMPLETED") || [];
     const now = new Date();
     
@@ -248,29 +237,20 @@ const OverviewTab = ({ role, profile }) => {
       const oneMonthAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
       return completed.filter(b => new Date(b.createdAt) >= oneMonthAgo);
     }
-    if (timeline === "Custom Time" && dates[0] && dates[1]) {
-      const start = new Date(dates[0]);
-      const end = new Date(dates[1]);
-      end.setHours(23, 59, 59, 999);
-      return completed.filter(b => {
-        const d = new Date(b.createdAt);
-        return d >= start && d <= end;
-      });
-    }
     return completed;
   };
 
   const getBookingsValue = () => {
-    return getFilteredBookings(bookingsTimeline, customDates.bookings).length;
+    return getFilteredBookings(bookingsTimeline).length;
   };
 
   const getEarningsValue = () => {
-    const filtered = getFilteredBookings(earningsTimeline, customDates.earnings);
+    const filtered = getFilteredBookings(earningsTimeline);
     return filtered.reduce((sum, b) => sum + parseFloat(b.hourlyRate || 0), 0);
   };
 
   const getAvgTimeValue = () => {
-    const filtered = getFilteredBookings(timeTimeline, customDates.time);
+    const filtered = getFilteredBookings(timeTimeline);
     if (filtered.length === 0) return "0%";
     
     let totalMinutes = 0;
@@ -335,25 +315,10 @@ const OverviewTab = ({ role, profile }) => {
                 <option className="bg-[#141414] text-white" value="This Week">This Week</option>
                 <option className="bg-[#141414] text-white" value="This Month">This Month</option>
                 <option className="bg-[#141414] text-white" value="All Time">All Time</option>
-                <option className="bg-[#141414] text-white" value="Custom Time">Custom Time</option>
               </select>
               <ChevronDown size={12} className="text-[#878C9F] absolute right-0 pointer-events-none" />
             </div>
           </div>
-          {bookingsTimeline === "Custom Time" && (
-            <div className="mt-2 relative z-50">
-              <DatePicker
-                selectsRange={true}
-                startDate={customDates.bookings[0]}
-                endDate={customDates.bookings[1]}
-                onChange={(update) => setCustomDates(prev => ({...prev, bookings: update}))}
-                isClearable={true}
-                placeholderText="Select date range"
-                className="bg-black text-xs text-white border border-[#2D2D2D] rounded-lg px-3 py-1.5 outline-none w-full z-50 focus:border-[#BFF367] transition-colors shadow-lg"
-                withPortal
-              />
-            </div>
-          )}
         </div>
 
         {/* Earnings */}
@@ -378,25 +343,10 @@ const OverviewTab = ({ role, profile }) => {
                 <option className="bg-[#141414] text-white" value="This Week">This Week</option>
                 <option className="bg-[#141414] text-white" value="This Month">This Month</option>
                 <option className="bg-[#141414] text-white" value="All Time">All Time</option>
-                <option className="bg-[#141414] text-white" value="Custom Time">Custom Time</option>
               </select>
               <ChevronDown size={12} className="text-[#878C9F] absolute right-0 pointer-events-none" />
             </div>
           </div>
-          {earningsTimeline === "Custom Time" && (
-            <div className="mt-2 relative z-50">
-              <DatePicker
-                selectsRange={true}
-                startDate={customDates.earnings[0]}
-                endDate={customDates.earnings[1]}
-                onChange={(update) => setCustomDates(prev => ({...prev, earnings: update}))}
-                isClearable={true}
-                placeholderText="Select date range"
-                className="bg-black text-xs text-white border border-[#2D2D2D] rounded-lg px-3 py-1.5 outline-none w-full z-50 focus:border-[#BFF367] transition-colors shadow-lg"
-                withPortal
-              />
-            </div>
-          )}
         </div>
 
         {/* Daily Avg Time */}
@@ -421,25 +371,10 @@ const OverviewTab = ({ role, profile }) => {
                 <option className="bg-[#141414] text-white" value="This Week">This Week</option>
                 <option className="bg-[#141414] text-white" value="This Month">This Month</option>
                 <option className="bg-[#141414] text-white" value="All Time">All Time</option>
-                <option className="bg-[#141414] text-white" value="Custom Time">Custom Time</option>
               </select>
               <ChevronDown size={12} className="text-[#878C9F] absolute right-0 pointer-events-none" />
             </div>
           </div>
-          {timeTimeline === "Custom Time" && (
-            <div className="mt-2 relative z-50">
-              <DatePicker
-                selectsRange={true}
-                startDate={customDates.time[0]}
-                endDate={customDates.time[1]}
-                onChange={(update) => setCustomDates(prev => ({...prev, time: update}))}
-                isClearable={true}
-                placeholderText="Select date range"
-                className="bg-black text-xs text-white border border-[#2D2D2D] rounded-lg px-3 py-1.5 outline-none w-full z-50 focus:border-[#BFF367] transition-colors shadow-lg"
-                withPortal
-              />
-            </div>
-          )}
         </div>
 
         {/* Rating */}
@@ -465,25 +400,10 @@ const OverviewTab = ({ role, profile }) => {
                 <option className="bg-[#141414] text-white" value="This Week">This Week</option>
                 <option className="bg-[#141414] text-white" value="This Month">This Month</option>
                 <option className="bg-[#141414] text-white" value="All Time">All Time</option>
-                <option className="bg-[#141414] text-white" value="Custom Time">Custom Time</option>
               </select>
               <ChevronDown size={12} className="text-[#878C9F] absolute right-0 pointer-events-none" />
             </div>
           </div>
-          {ratingTimeline === "Custom Time" && (
-            <div className="mt-2 relative z-50">
-              <DatePicker
-                selectsRange={true}
-                startDate={customDates.rating[0]}
-                endDate={customDates.rating[1]}
-                onChange={(update) => setCustomDates(prev => ({...prev, rating: update}))}
-                isClearable={true}
-                placeholderText="Select date range"
-                className="bg-black text-xs text-white border border-[#2D2D2D] rounded-lg px-3 py-1.5 outline-none w-full z-50 focus:border-[#BFF367] transition-colors shadow-lg"
-                withPortal
-              />
-            </div>
-          )}
         </div>
 
         {/* Requests */}
@@ -669,24 +589,10 @@ const OverviewTab = ({ role, profile }) => {
                   <option className="bg-[#141414] text-white" value="This Week">This Week</option>
                   <option className="bg-[#141414] text-white" value="This Month">This Month</option>
                   <option className="bg-[#141414] text-white" value="All Time">All Time</option>
-                  <option className="bg-[#141414] text-white" value="Custom Time">Custom Time</option>
                 </select>
                 <ChevronDown size={12} className="text-[#878C9F] absolute right-0 pointer-events-none" />
               </div>
             </div>
-            {graphTimeline === "Custom Time" && (
-              <div className="relative z-50 flex justify-end">
-                <DatePicker
-                  selectsRange={true}
-                  startDate={customDates.graph[0]}
-                  endDate={customDates.graph[1]}
-                  onChange={(update) => setCustomDates(prev => ({...prev, graph: update}))}
-                  isClearable={true}
-                  placeholderText="Select date range"
-                  className="bg-[#1A1D27] text-[10px] text-white border border-[#2D2D2D] rounded px-2 py-1 outline-none w-48 z-50 focus:border-[#BFF367] transition-colors"
-                />
-              </div>
-            )}
             <div className="h-[250px] w-full relative z-10">
               <ResponsiveContainer width="100%" height="100%">
                 <AreaChart data={statsData?.stats?.graphData?.[graphTimeline] || graphData[graphTimeline] || []} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
