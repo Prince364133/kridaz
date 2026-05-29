@@ -1,10 +1,10 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useMemo } from 'react';
 import { useSelector } from 'react-redux';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion, AnimatePresence, useMotionValue, animate } from 'framer-motion';
 import {
   X, ChevronRight, ChevronLeft, Shield, Video, Users, Trophy,
   Search, Check, MapPin, UserCheck, SkipForward, Loader2,
-  Swords, Circle, Phone, MessageCircle, Sparkles, UserPlus, Plus
+  Swords, Circle, Phone, MessageCircle, Sparkles, UserPlus, Plus, EyeOff, CheckSquare, Mic, Star, Heart
 } from 'lucide-react';
 import { useSetupScoringMatchMutation } from '@redux/api/scoringApi';
 import {
@@ -16,7 +16,7 @@ import {
   useInviteMemberMutation,
   useAddCustomMemberMutation,
 } from '@redux/api/teamApi';
-import { useGetGroundsQuery, useGetUmpiresQuery } from '@redux/api/gamesApi';
+import { useGetGroundsQuery, useGetUmpiresQuery, useGetMyHostedGamesQuery, useGetMyJoinedGamesQuery } from '@redux/api/gamesApi';
 import toast from 'react-hot-toast';
 import { fetchStates, fetchCities, searchLocations } from '../../../shared/utils/locationService';
 
@@ -73,16 +73,84 @@ const STEPS = [
 // ─── Field/Select components ─────────────────────────────────────────────────
 
 const inputClass =
-  'w-full bg-white/5 border border-white/10 rounded-xl p-3 text-white focus:border-[#55DEE8]/50 outline-none transition-colors placeholder:text-white/30';
-const labelClass = 'text-xs text-white/50 mb-1 block font-medium uppercase tracking-wider';
+  'w-full bg-white/[0.03] border border-white/10 rounded-[8px] p-3 h-[48px] text-white focus:border-[#55DEE8]/30 outline-none transition-colors placeholder:text-white/30';
+const labelClass = 'text-[10px] text-white/40 mb-1 block font-black uppercase tracking-widest';
 const selectClass =
-  'w-full bg-[#0a0a0a] border border-white/10 rounded-xl p-3 text-white outline-none transition-colors focus:border-[#55DEE8]/50';
+  'w-full bg-[#0a0a0a] border border-white/10 rounded-[8px] p-3 h-[48px] text-white outline-none transition-colors focus:border-[#55DEE8]/30';
+
+// ─── Custom Dropdown ──────────────────────────────────────────────────────────
+const CustomDropdown = ({ value, onChange, options, placeholder, className, disabled }) => {
+  const [isOpen, setIsOpen] = useState(false);
+  const containerRef = useRef(null);
+
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (containerRef.current && !containerRef.current.contains(event.target)) {
+        setIsOpen(false);
+      }
+    };
+    if (isOpen) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, [isOpen]);
+
+  const normalizedOptions = options.map(o => typeof o === 'string' ? { value: o, label: o } : o);
+  const selectedLabel = normalizedOptions.find(o => String(o.value) === String(value))?.label || placeholder;
+
+  return (
+    <div className={`relative ${className}`} ref={containerRef}>
+      <button
+        type="button"
+        disabled={disabled}
+        onClick={() => setIsOpen(!isOpen)}
+        className={`w-full h-[40px] bg-[#0a0a0a] border border-white/10 rounded-[8px] px-3 flex items-center justify-between transition-colors focus:border-[#55DEE8]/30 ${disabled ? 'opacity-50 cursor-not-allowed' : 'hover:border-white/20'}`}
+      >
+        <span className="truncate text-white text-sm font-bold">{selectedLabel}</span>
+      </button>
+
+      <AnimatePresence>
+        {isOpen && (
+          <motion.div
+            initial={{ opacity: 0, y: -5 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -5 }}
+            transition={{ duration: 0.15 }}
+            className="absolute z-50 top-full mt-1 left-0 w-full min-w-[120px] bg-[#1A1A1A] border border-white/10 rounded-[8px] shadow-xl overflow-hidden max-h-48 overflow-y-auto scrollbar-hide"
+          >
+            {normalizedOptions.map((opt, i) => (
+              <button
+                key={i}
+                type="button"
+                onClick={() => {
+                  onChange(opt.value);
+                  setIsOpen(false);
+                }}
+                className={`w-full text-left px-3 py-2.5 text-sm transition-colors hover:bg-white/5 ${String(value) === String(opt.value) ? 'text-[#55DEE8] font-bold bg-[#55DEE8]/5' : 'text-white'}`}
+              >
+                {opt.label}
+              </button>
+            ))}
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
+  );
+};
 
 // ─── Main Component ──────────────────────────────────────────────────────────
 
 const StartScoringModal = ({ isOpen, onClose, onSuccess, initialData }) => {
   const { user } = useSelector((state) => state.auth);
   const [step, setStep] = useState(1);
+  const [showCustomVenuePopup, setShowCustomVenuePopup] = useState(false);
+  const [customVenueNameInput, setCustomVenueNameInput] = useState('');
+  const [customVenueLocationInput, setCustomVenueLocationInput] = useState('');
+  const [showLocationPopup, setShowLocationPopup] = useState(false);
+  const [mapCoordinates, setMapCoordinates] = useState(null);
+  const [isDetectingLocation, setIsDetectingLocation] = useState(false);
+  const [showGroundsDropdown, setShowGroundsDropdown] = useState(false);
+  const [groundSearchQuery, setGroundSearchQuery] = useState('');
   const [formData, setFormData] = useState({
     matchName: '',
     sportType: 'CRICKET',
@@ -181,7 +249,88 @@ const StartScoringModal = ({ isOpen, onClose, onSuccess, initialData }) => {
   // Team selector popup state
   const [selectingTeam, setSelectingTeam] = useState(null); // 'A' | 'B'
   const [teamTab, setTeamTab] = useState('myTeams');
+  const [showMatchSettingsPopup, setShowMatchSettingsPopup] = useState(false);
   const [teamSearchQuery, setTeamSearchQuery] = useState('');
+
+  // Custom Date/Time Picker popup state
+  const [showDatePickerPopup, setShowDatePickerPopup] = useState(false);
+  const [calendarMonth, setCalendarMonth] = useState(new Date().getMonth());
+  const [calendarYear, setCalendarYear] = useState(new Date().getFullYear());
+  const [tempDate, setTempDate] = useState(null);
+  const [tempHour, setTempHour] = useState(12);
+  const [tempMinute, setTempMinute] = useState(0);
+  const [tempPeriod, setTempPeriod] = useState('PM');
+
+  const getDaysInMonth = (y, m) => new Date(y, m + 1, 0).getDate();
+  const getFirstDayOfMonth = (y, m) => new Date(y, m, 1).getDay();
+
+  const openDatePicker = () => {
+    const base = formData.matchDateTime ? new Date(formData.matchDateTime) : new Date();
+    const now = new Date();
+    const activeDate = base < now ? now : base;
+
+    setTempDate(new Date(activeDate.getFullYear(), activeDate.getMonth(), activeDate.getDate()));
+    
+    let h = activeDate.getHours();
+    const period = h >= 12 ? 'PM' : 'AM';
+    h = h % 12;
+    if (h === 0) h = 12;
+    
+    const m = Math.round(activeDate.getMinutes() / 5) * 5;
+    
+    setTempHour(h);
+    setTempMinute(m >= 60 ? 55 : m);
+    setTempPeriod(period);
+    
+    setCalendarMonth(activeDate.getMonth());
+    setCalendarYear(activeDate.getFullYear());
+    setShowDatePickerPopup(true);
+  };
+
+  const applyDatePicker = () => {
+    if (!tempDate) return;
+    
+    let hour24 = tempHour % 12;
+    if (tempPeriod === 'PM') hour24 += 12;
+    
+    const finalDate = new Date(
+      tempDate.getFullYear(),
+      tempDate.getMonth(),
+      tempDate.getDate(),
+      hour24,
+      tempMinute
+    );
+    
+    const pad = (num) => String(num).padStart(2, '0');
+    const formatted = `${finalDate.getFullYear()}-${pad(finalDate.getMonth() + 1)}-${pad(finalDate.getDate())}T${pad(finalDate.padHours ? pad(finalDate.getHours()) : pad(finalDate.getHours()))}:${pad(finalDate.getMinutes())}`;
+    
+    setFormData(f => ({ ...f, matchDateTime: formatted }));
+    setShowDatePickerPopup(false);
+  };
+
+  // Custom Members per Team Inline state and handlers
+  const [showCustomMembersInline, setShowCustomMembersInline] = useState(false);
+  const [customMembersInput, setCustomMembersInput] = useState('');
+  const customMembersTimerRef = useRef(null);
+
+  const handleCustomMembersChange = (valStr) => {
+    const cleaned = valStr.replace(/\D/g, '');
+    setCustomMembersInput(cleaned);
+    const num = parseInt(cleaned);
+    
+    if (customMembersTimerRef.current) {
+      clearTimeout(customMembersTimerRef.current);
+    }
+    
+    if (!isNaN(num) && num > 0) {
+      setFormData(f => ({ ...f, maxMembers: num }));
+      
+      // Auto-collapse after 800ms debounce
+      customMembersTimerRef.current = setTimeout(() => {
+        setShowCustomMembersInline(false);
+      }, 800);
+    }
+  };
 
   // Player selection popup state
   const [playerPopup, setPlayerPopup] = useState(null); // { teamKey: 'A' | 'B', action: 'ADD' | 'REPLACE', replaceId: null }
@@ -275,6 +424,7 @@ const StartScoringModal = ({ isOpen, onClose, onSuccess, initialData }) => {
                 const locString = userCity ? `${userCity}, ${userState}` : userState;
                 setLocationInput(locString);
                 setFormData(f => ({ ...f, location: locString }));
+                setMapCoordinates({ lat: pos.coords.latitude, lon: pos.coords.longitude });
               }
             } catch (err) {
               console.log('Reverse geocoding failed', err);
@@ -307,13 +457,42 @@ const StartScoringModal = ({ isOpen, onClose, onSuccess, initialData }) => {
   // Addons queries
   const { data: groundsData, isLoading: isLoadingGrounds } = useGetGroundsQuery(
     {
-      sportType: formData.sportType,
-      state: venueStateFilter || undefined,
-      city: venueCityFilter || undefined,
-      query: venueSearchQuery || undefined
+      sportType: formData.sportType
     },
-    { skip: step !== 4 && step !== 5 }
+    { skip: !isOpen }
   );
+
+  const { data: hostedGamesData } = useGetMyHostedGamesQuery(undefined, { skip: !isOpen });
+  const { data: joinedGamesData } = useGetMyJoinedGamesQuery(undefined, { skip: !isOpen });
+
+  // Extract unique prebooked turfs from hosted and joined games
+  const prebookedTurfs = useMemo(() => {
+    const turfsMap = new Map();
+    const hostedGames = hostedGamesData?.games || [];
+    const joinedGames = joinedGamesData?.games || [];
+    
+    [...hostedGames, ...joinedGames].forEach(game => {
+      if (game.turf) {
+        const id = game.turf.id || game.turf._id;
+        if (id) {
+          turfsMap.set(id, {
+            id: id,
+            _id: id,
+            name: game.turf.name,
+            city: game.turf.city || '',
+            state: game.turf.state || '',
+            images: game.turf.images || [],
+            latitude: game.turf.latitude || game.turf.lat,
+            longitude: game.turf.longitude || game.turf.lon,
+            lat: game.turf.lat || game.turf.latitude,
+            lon: game.turf.lon || game.turf.longitude
+          });
+        }
+      }
+    });
+    
+    return Array.from(turfsMap.values());
+  }, [hostedGamesData, joinedGamesData]);
   const { data: umpiresData, isLoading: isLoadingUmpires } = useGetUmpiresQuery(
     {
       gameType: formData.sportType,
@@ -615,12 +794,15 @@ const StartScoringModal = ({ isOpen, onClose, onSuccess, initialData }) => {
     setFormData(f => {
       let players = [...f[key]];
 
-      // Enforce unique roles
+      // Enforce unique role assignment
       if (role !== 'PLAYER') {
         players = players.map(p => p.role === role ? { ...p, role: 'PLAYER' } : p);
       }
 
-      players = players.map(p => p.id === playerId ? { ...p, role } : p);
+      // Assign the new role (which also unassigns them from any previous role because p.role is a single string)
+      if (playerId) {
+        players = players.map(p => p.id === playerId ? { ...p, role } : p);
+      }
       return { ...f, [key]: players };
     });
   };
@@ -671,27 +853,725 @@ const StartScoringModal = ({ isOpen, onClose, onSuccess, initialData }) => {
     }
   };
 
+  const handleDetectLiveLocation = () => {
+    if (!navigator.geolocation) {
+      toast.error('Geolocation is not supported by your browser');
+      return;
+    }
+    
+    setIsDetectingLocation(true);
+    
+    navigator.geolocation.getCurrentPosition(
+      async (pos) => {
+        try {
+          const res = await fetch(`https://nominatim.openstreetmap.org/reverse?lat=${pos.coords.latitude}&lon=${pos.coords.longitude}&format=json&addressdetails=1`);
+          const data = await res.json();
+          const userState = data.address?.state;
+          let userCity = data.address?.city || data.address?.town || data.address?.village || data.address?.suburb;
+          
+          if (userState) {
+            const locString = userCity ? `${userCity}, ${userState}` : userState;
+            setLocationInput(locString);
+            setMapCoordinates({ lat: pos.coords.latitude, lon: pos.coords.longitude });
+            toast.success('Live location detected!');
+          } else {
+            toast.error('Failed to get address for live location.');
+          }
+        } catch (err) {
+          console.error(err);
+          toast.error('Reverse geocoding failed.');
+        } finally {
+          setIsDetectingLocation(false);
+        }
+      },
+      (error) => {
+        console.error(error);
+        toast.error(error.message || 'Geolocation access denied.');
+        setIsDetectingLocation(false);
+      },
+      { enableHighAccuracy: true, timeout: 10000 }
+    );
+  };
+
   if (!isOpen) return null;
+
+  // ─── Custom Location & Map Picker Popup ───────────────────────────────────────
+  if (showLocationPopup) {
+    const handleApplyLocation = () => {
+      setFormData(f => ({ ...f, location: locationInput }));
+      setShowLocationPopup(false);
+    };
+
+    return (
+      <div className="fixed inset-0 z-[10000] flex items-center justify-center p-0">
+        <div className="absolute inset-0 bg-black/85 backdrop-blur-sm" onClick={() => setShowLocationPopup(false)} />
+        <motion.div
+          initial={{ opacity: 0, scale: 0.95, y: 20 }}
+          animate={{ opacity: 1, scale: 1, y: 0 }}
+          exit={{ opacity: 0, scale: 0.95, y: 20 }}
+          className="relative w-full max-w-[390px] h-screen bg-[#0a0a0a] border-x border-white/10 rounded-none shadow-2xl overflow-hidden flex flex-col flex-shrink-0"
+        >
+          <div className="flex-1 overflow-y-auto px-6 pb-6 pt-[35px] space-y-6 bg-[#0a0a0a] scrollbar-hide">
+            {/* Search and Locate Me Row */}
+            <div className="space-y-2">
+              <label className={labelClass}>Search City, State or Turf</label>
+              <div className="flex gap-2">
+                {/* Search Input Box */}
+                <div className="relative flex-1">
+                  <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-white/40 text-[16px]" size={16} />
+                  <input
+                    type="text"
+                    value={locationInput}
+                    onChange={(e) => {
+                      setLocationInput(e.target.value);
+                      setShowLocationSuggestions(true);
+                    }}
+                    className="w-full h-11 bg-[#0a0a0a] border border-white/10 rounded-[8px] pl-11 pr-4 text-white focus:outline-none focus:border-[#55DEE8]/30 transition-all text-sm font-semibold placeholder:text-white/30"
+                    placeholder="Enter location (e.g. Indiranagar, Bengaluru)"
+                  />
+                  
+                  {/* Suggestions dropdown inside modal */}
+                  {showLocationSuggestions && locationSuggestions.length > 0 && (
+                    <div className="absolute top-full left-0 right-0 mt-2 bg-[#121212] border border-white/10 rounded-lg overflow-hidden shadow-2xl z-[100]">
+                      <div className="max-h-[160px] overflow-y-auto font-sans">
+                        {locationSuggestions.map((loc, idx) => (
+                          <button
+                            key={idx}
+                            type="button"
+                            onClick={(e) => {
+                              e.preventDefault();
+                              const displayName = typeof loc === 'object' ? loc.display_name : loc;
+                              setLocationInput(displayName);
+                              if (loc.lat && loc.lon) {
+                                setMapCoordinates({ lat: loc.lat, lon: loc.lon });
+                              }
+                              setShowLocationSuggestions(false);
+                            }}
+                            className="w-full text-left px-4 py-3 text-xs font-bold text-gray-300 hover:bg-[#55DEE8] hover:text-black transition-colors"
+                          >
+                            {typeof loc === 'object' ? loc.display_name : loc}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                {/* GPS Live Geolocation Button - Premium Non-AI Styling */}
+                <button
+                  type="button"
+                  onClick={handleDetectLiveLocation}
+                  disabled={isDetectingLocation}
+                  className="px-4 h-11 bg-white/[0.03] hover:bg-white/[0.06] border border-white/10 rounded-[8px] text-white hover:text-[#55DEE8] font-semibold text-sm transition-all flex items-center justify-center gap-2 group disabled:opacity-50 flex-shrink-0"
+                >
+                  {isDetectingLocation && (
+                    <Loader2 size={14} className="animate-spin text-[#55DEE8]" />
+                  )}
+                  <span>Locate Me</span>
+                </button>
+              </div>
+            </div>
+
+            {/* Dedicated Turf/Venue Selector Field */}
+            <div className="space-y-2 relative">
+              <label className={labelClass}>Select listed turf or venue</label>
+              
+              {/* Clickable Select Field */}
+              <button
+                type="button"
+                onClick={() => setShowGroundsDropdown(!showGroundsDropdown)}
+                className={`w-full flex items-center justify-between p-3.5 rounded-[8px] border text-sm font-semibold transition-all text-left ${
+                  formData.venueId 
+                    ? 'bg-[#55DEE8]/10 border-[#55DEE8]/30 text-[#55DEE8]' 
+                    : 'bg-white/[0.03] border-white/10 text-white/60 hover:border-white/20'
+                }`}
+              >
+                <div className="flex items-center gap-2.5 truncate">
+                  <MapPin size={16} className={formData.venueId ? 'text-[#55DEE8]' : 'text-white/40'} />
+                  <span className="truncate">
+                    {groundsData?.grounds?.find(g => g.id === formData.venueId)?.name ||
+                     prebookedTurfs.find(g => g.id === formData.venueId || g._id === formData.venueId)?.name ||
+                     'Select or Search Listed Turf...'}
+                  </span>
+                </div>
+                <ChevronRight 
+                  size={16} 
+                  className={`text-white/40 transition-transform duration-200 ${showGroundsDropdown ? 'rotate-90' : ''}`} 
+                />
+              </button>
+
+              {/* Collapsible Search and List Drawer */}
+              <AnimatePresence>
+                {showGroundsDropdown && (
+                  <motion.div
+                    initial={{ opacity: 0, height: 0 }}
+                    animate={{ opacity: 1, height: 'auto' }}
+                    exit={{ opacity: 0, height: 0 }}
+                    className="overflow-hidden mt-2 bg-[#121212] border border-white/10 rounded-[8px] p-3 space-y-3 z-50 shadow-2xl relative"
+                  >
+                    {/* Dedicated search bar for listed grounds */}
+                    <div className="relative">
+                      <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-white/40" size={14} />
+                      <input
+                        type="text"
+                        placeholder="Search turfs by name or city..."
+                        value={groundSearchQuery}
+                        onChange={(e) => setGroundSearchQuery(e.target.value)}
+                        className="w-full bg-white/[0.02] border border-white/10 rounded-md pl-9 pr-3 py-2 text-xs text-white focus:outline-none focus:border-[#55DEE8]/30"
+                      />
+                      {groundSearchQuery && (
+                        <button
+                          type="button"
+                          onClick={() => setGroundSearchQuery('')}
+                          className="absolute right-3 top-1/2 -translate-y-1/2 text-[10px] text-white/40 hover:text-white"
+                        >
+                          Clear
+                        </button>
+                      )}
+                    </div>
+
+                    {/* Scrollable list of grounds filtered ONLY by this search bar */}
+                    <div className="max-h-52 overflow-y-auto space-y-3 pr-1 scrollbar-hide">
+                      {isLoadingGrounds ? (
+                        <div className="flex justify-center py-4">
+                          <Loader2 className="animate-spin text-[#55DEE8]" size={14} />
+                        </div>
+                      ) : (() => {
+                        const query = groundSearchQuery.toLowerCase().trim();
+                        
+                        // Filter matching prebooked grounds
+                        const matchingPrebooked = prebookedTurfs.filter(g => {
+                          if (!query) return true;
+                          return g.name.toLowerCase().includes(query) || 
+                                 g.city.toLowerCase().includes(query) || 
+                                 (g.state && g.state.toLowerCase().includes(query));
+                        });
+
+                        // Filter matching listed grounds
+                        const matchingListed = groundsData?.grounds?.filter(g => {
+                          if (!query) return true;
+                          return g.name.toLowerCase().includes(query) || 
+                                 g.city.toLowerCase().includes(query) || 
+                                 (g.state && g.state.toLowerCase().includes(query));
+                        }) || [];
+
+                        // Exclude prebooked grounds from the listed grounds section to prevent double display
+                        const prebookedIds = new Set(prebookedTurfs.map(g => g.id || g._id));
+                        const filteredListed = matchingListed.filter(g => !prebookedIds.has(g.id) && !prebookedIds.has(g._id));
+
+                        const hasPrebooked = matchingPrebooked.length > 0;
+                        const hasListed = filteredListed.length > 0;
+
+                        if (!hasPrebooked && !hasListed) {
+                          return (
+                            <div className="text-center py-6 text-[10px] font-bold text-white/30 uppercase tracking-wider">
+                              No matching grounds or turfs found
+                            </div>
+                          );
+                        }
+
+                        const renderGroundItem = (g, isPrebooked = false) => {
+                          const isSelected = formData.venueId === g.id || formData.venueId === g._id;
+                          return (
+                            <button
+                              key={g.id || g._id}
+                              type="button"
+                              onClick={() => {
+                                if (isSelected) {
+                                  setFormData(f => ({ ...f, venueId: null, location: '' }));
+                                  setLocationInput('');
+                                  setMapCoordinates(null);
+                                } else {
+                                  setFormData(f => ({ ...f, venueId: g.id || g._id, location: `${g.name}, ${g.city}` }));
+                                  setLocationInput(`${g.name}, ${g.city}`);
+                                  
+                                  // Set map coordinates instantly
+                                  if (g.latitude && g.longitude) {
+                                    setMapCoordinates({ lat: g.latitude, lon: g.longitude });
+                                  } else if (g.lat && g.lon) {
+                                    setMapCoordinates({ lat: g.lat, lon: g.lon });
+                                  } else {
+                                    setMapCoordinates(null);
+                                  }
+                                }
+                                setShowGroundsDropdown(false);
+                                setGroundSearchQuery('');
+                              }}
+                              className={`w-full flex items-center justify-between p-2.5 rounded-md border text-left transition-all ${
+                                isSelected 
+                                  ? 'bg-[#55DEE8]/10 border-[#55DEE8]/30 text-[#55DEE8]' 
+                                  : 'bg-white/5 border-white/10 hover:border-white/20'
+                              }`}
+                            >
+                              <div className="flex items-center gap-2.5 truncate">
+                                <MapPin size={12} className={isSelected ? 'text-[#55DEE8]' : 'text-white/40'} />
+                                <div className="truncate">
+                                  <div className="font-bold text-white text-xs truncate flex items-center gap-1.5">
+                                    {g.name}
+                                    {isPrebooked && (
+                                      <span className="px-1.5 py-0.5 bg-[#BFF367]/15 text-[#BFF367] text-[8px] font-black uppercase rounded tracking-wider">
+                                        Prebooked
+                                      </span>
+                                    )}
+                                  </div>
+                                  <div className="text-[9px] text-white/40 truncate">{g.city}{g.state ? `, ${g.state}` : ''}</div>
+                                </div>
+                              </div>
+                              {isSelected && <Check size={12} className="text-[#55DEE8]" />}
+                            </button>
+                          );
+                        };
+
+                        return (
+                          <div className="space-y-4">
+                            {/* Prebooked grounds section */}
+                            {hasPrebooked && (
+                              <div className="space-y-1.5">
+                                <div className="flex items-center gap-1.5 px-1">
+                                  <Trophy size={11} className="text-[#BFF367]" />
+                                  <span className="text-[9px] font-black uppercase tracking-widest text-[#BFF367]">
+                                    Your Prebooked Grounds
+                                  </span>
+                                </div>
+                                <div className="space-y-1">
+                                  {matchingPrebooked.map(g => renderGroundItem(g, true))}
+                                </div>
+                              </div>
+                            )}
+
+                            {/* Standard listed grounds section */}
+                            {hasListed && (
+                              <div className="space-y-1.5">
+                                {hasPrebooked && <div className="border-t border-white/5 my-2" />}
+                                <div className="flex items-center gap-1.5 px-1">
+                                  <MapPin size={11} className="text-white/40" />
+                                  <span className="text-[9px] font-black uppercase tracking-widest text-white/40">
+                                    Listed Turfs & Venues
+                                  </span>
+                                </div>
+                                <div className="space-y-1">
+                                  {filteredListed.map(g => renderGroundItem(g, false))}
+                                </div>
+                              </div>
+                            )}
+                          </div>
+                        );
+                      })()}
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
+
+            {/* Google Interactive Map Embed Frame */}
+            <div className="space-y-2">
+              <label className={labelClass}>Location Map Preview</label>
+              <div className="relative w-full h-52 bg-white/[0.01] border border-white/10 rounded-[8px] overflow-hidden shadow-inner flex items-center justify-center">
+                <iframe
+                  title="Location Map"
+                  src={
+                    mapCoordinates 
+                      ? `https://maps.google.com/maps?q=${mapCoordinates.lat},${mapCoordinates.lon}&t=&z=15&ie=UTF8&iwloc=&output=embed`
+                      : `https://maps.google.com/maps?q=${encodeURIComponent(locationInput || 'India')}&t=&z=13&ie=UTF8&iwloc=&output=embed`
+                  }
+                  className="w-full h-full border-none opacity-80"
+                  allowFullScreen=""
+                  loading="lazy"
+                />
+                {/* Clean border overlay for premium styling */}
+                <div className="absolute inset-0 pointer-events-none border border-white/5 rounded-[8px]" />
+              </div>
+            </div>
+
+            {/* Action Buttons Nav */}
+            <div className="flex gap-3 pt-2">
+              <button
+                type="button"
+                onClick={() => setShowLocationPopup(false)}
+                className="px-6 py-3.5 rounded-[8px] border border-white/10 text-white font-bold hover:bg-white/5 hover:border-white/20 transition-all flex items-center justify-center gap-2 text-xs uppercase tracking-widest"
+              >
+                <ChevronLeft size={14} /> Back
+              </button>
+              
+              <button
+                type="button"
+                onClick={handleApplyLocation}
+                className="flex-1 py-3.5 bg-gradient-to-r from-[#55DEE8] to-[#BFF367] text-black font-black rounded-[8px] uppercase tracking-widest text-xs hover:opacity-90 hover:scale-[1.02] transition-all flex items-center justify-center gap-2 shadow-lg shadow-[#55DEE8]/10"
+              >
+                Confirm Location
+              </button>
+            </div>
+          </div>
+        </motion.div>
+      </div>
+    );
+  }
+
+  // ─── Custom Date & Time Picker Popup ──────────────────────────────────────────
+  if (showDatePickerPopup) {
+    const months = [
+      'January', 'February', 'March', 'April', 'May', 'June',
+      'July', 'August', 'September', 'October', 'November', 'December'
+    ];
+    
+    const totalDays = getDaysInMonth(calendarYear, calendarMonth);
+    const firstDayIndex = getFirstDayOfMonth(calendarYear, calendarMonth);
+    const daysArray = [];
+    
+    for (let i = 0; i < firstDayIndex; i++) {
+      daysArray.push(null);
+    }
+    
+    for (let i = 1; i <= totalDays; i++) {
+      daysArray.push(new Date(calendarYear, calendarMonth, i));
+    }
+    
+    const now = new Date();
+    const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+
+    const isPrevMonthDisabled = () => {
+      return calendarYear <= now.getFullYear() && calendarMonth <= now.getMonth();
+    };
+
+    const handlePrevMonth = () => {
+      if (isPrevMonthDisabled()) return;
+      if (calendarMonth === 0) {
+        setCalendarMonth(11);
+        setCalendarYear(calendarYear - 1);
+      } else {
+        setCalendarMonth(calendarMonth - 1);
+      }
+    };
+
+    const handleNextMonth = () => {
+      if (calendarMonth === 11) {
+        setCalendarMonth(0);
+        setCalendarYear(calendarYear + 1);
+      } else {
+        setCalendarMonth(calendarMonth + 1);
+      }
+    };
+
+    const isPastTime = (hour, minute, period) => {
+      if (!tempDate) return false;
+      const isToday = tempDate.getFullYear() === now.getFullYear() &&
+                      tempDate.getMonth() === now.getMonth() &&
+                      tempDate.getDate() === now.getDate();
+      if (!isToday) return false;
+
+      let hr24 = hour % 12;
+      if (period === 'PM') hr24 += 12;
+      
+      const compDate = new Date(tempDate.getFullYear(), tempDate.getMonth(), tempDate.getDate(), hr24, minute);
+      return compDate < now;
+    };
+
+    return (
+      <div className="fixed inset-0 z-[10000] flex items-center justify-center p-0">
+        <div className="absolute inset-0 bg-black/85 backdrop-blur-sm" onClick={() => setShowDatePickerPopup(false)} />
+        <motion.div
+          initial={{ opacity: 0, scale: 0.95, y: 20 }}
+          animate={{ opacity: 1, scale: 1, y: 0 }}
+          exit={{ opacity: 0, scale: 0.95, y: 20 }}
+          className="relative w-full max-w-[390px] h-screen bg-[#0a0a0a] border-x border-white/10 rounded-none shadow-2xl overflow-hidden flex flex-col flex-shrink-0"
+        >
+          <div className="flex items-center justify-between px-6 pt-[35px] pb-5 border-b border-white/10 bg-black/40 flex-shrink-0">
+            <div>
+              <h2 className="text-xl font-black text-white uppercase tracking-widest font-display" style={{ fontFamily: "'Open Sans', sans-serif" }}>
+                Select Match Date & Time
+              </h2>
+            </div>
+          </div>
+
+          <div className="flex-1 overflow-y-auto p-6 space-y-6 bg-[#0a0a0a] scrollbar-hide">
+            {/* Calendar Month Header */}
+            <div className="flex items-center justify-between">
+              <span className="text-sm font-black text-white uppercase tracking-widest">
+                {months[calendarMonth]} {calendarYear}
+              </span>
+              <div className="flex gap-2">
+                <button
+                  type="button"
+                  onClick={handlePrevMonth}
+                  disabled={isPrevMonthDisabled()}
+                  className="p-1.5 bg-white/5 hover:bg-white/10 rounded-full text-white disabled:opacity-20 disabled:cursor-not-allowed transition-colors"
+                >
+                  <ChevronLeft size={16} />
+                </button>
+                <button
+                  type="button"
+                  onClick={handleNextMonth}
+                  className="p-1.5 bg-white/5 hover:bg-white/10 rounded-full text-white transition-colors"
+                >
+                  <ChevronRight size={16} />
+                </button>
+              </div>
+            </div>
+
+            {/* Calendar Grid */}
+            <div>
+              <div className="grid grid-cols-7 gap-1 text-center text-[10px] font-bold text-white/30 uppercase tracking-widest mb-2">
+                {['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'].map(day => (
+                  <div key={day} className="py-1">{day}</div>
+                ))}
+              </div>
+              <div className="grid grid-cols-7 gap-1">
+                {daysArray.map((dateVal, idx) => {
+                  if (!dateVal) {
+                    return <div key={`empty-${idx}`} />;
+                  }
+                  
+                  const isPast = dateVal < todayStart;
+                  const isSelected = tempDate && 
+                    tempDate.getDate() === dateVal.getDate() &&
+                    tempDate.getMonth() === dateVal.getMonth() &&
+                    tempDate.getFullYear() === dateVal.getFullYear();
+                  
+                  return (
+                    <button
+                      key={idx}
+                      type="button"
+                      disabled={isPast}
+                      onClick={() => {
+                        setTempDate(dateVal);
+                        let hr24 = tempHour % 12;
+                        if (tempPeriod === 'PM') hr24 += 12;
+                        const compDate = new Date(dateVal.getFullYear(), dateVal.getMonth(), dateVal.getDate(), hr24, tempMinute);
+                        if (compDate < now) {
+                          let activeNow = new Date();
+                          let h = activeNow.getHours();
+                          const period = h >= 12 ? 'PM' : 'AM';
+                          h = h % 12;
+                          if (h === 0) h = 12;
+                          const m = Math.round(activeNow.getMinutes() / 5) * 5;
+                          setTempHour(h);
+                          setTempMinute(m >= 60 ? 55 : m);
+                          setTempPeriod(period);
+                        }
+                      }}
+                      className={`py-2 text-xs font-bold rounded-[8px] transition-all ${
+                        isSelected 
+                          ? 'bg-gradient-to-r from-[#55DEE8] to-[#BFF367] text-black shadow-lg shadow-[#55DEE8]/20'
+                          : isPast
+                            ? 'text-white/20 cursor-not-allowed'
+                            : 'text-white hover:bg-white/5'
+                      }`}
+                    >
+                      {dateVal.getDate()}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* Time Picker */}
+            <div className="border-t border-white/10 pt-5 space-y-4">
+              <span className="text-[10px] font-black text-white/40 uppercase tracking-widest block">
+                Select Time
+              </span>
+              
+              <div className="flex gap-4">
+                <div className="flex-1 space-y-2">
+                  <label className="text-[9px] font-bold text-white/40 uppercase tracking-widest">Hour</label>
+                  <select
+                    value={tempHour}
+                    onChange={e => setTempHour(parseInt(e.target.value))}
+                    className="w-full bg-[#0a0a0a] border border-white/10 rounded-[8px] px-3 py-2 text-white focus:outline-none focus:ring-1 focus:ring-[#55DEE8]/30 focus:border-[#55DEE8]/30 text-xs font-bold form-select-custom"
+                  >
+                    {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12].map(h => {
+                      const isDisabled = isPastTime(h, tempMinute, tempPeriod);
+                      return (
+                        <option key={h} value={h} disabled={isDisabled}>
+                          {String(h).padStart(2, '0')}
+                        </option>
+                      );
+                    })}
+                  </select>
+                </div>
+
+                <div className="flex-1 space-y-2">
+                  <label className="text-[9px] font-bold text-white/40 uppercase tracking-widest">Minute</label>
+                  <select
+                    value={tempMinute}
+                    onChange={e => setTempMinute(parseInt(e.target.value))}
+                    className="w-full bg-[#0a0a0a] border border-white/10 rounded-[8px] px-3 py-2 text-white focus:outline-none focus:ring-1 focus:ring-[#55DEE8]/30 focus:border-[#55DEE8]/30 text-xs font-bold form-select-custom"
+                  >
+                    {[0, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55].map(m => {
+                      const isDisabled = isPastTime(tempHour, m, tempPeriod);
+                      return (
+                        <option key={m} value={m} disabled={isDisabled}>
+                          {String(m).padStart(2, '0')}
+                        </option>
+                      );
+                    })}
+                  </select>
+                </div>
+
+                <div className="w-24 space-y-2">
+                  <label className="text-[9px] font-bold text-white/40 uppercase tracking-widest">Period</label>
+                  <select
+                    value={tempPeriod}
+                    onChange={e => setTempPeriod(e.target.value)}
+                    className="w-full bg-[#0a0a0a] border border-white/10 rounded-[8px] px-3 py-2 text-white focus:outline-none focus:ring-1 focus:ring-[#55DEE8]/30 focus:border-[#55DEE8]/30 text-xs font-bold form-select-custom"
+                  >
+                    {['AM', 'PM'].map(p => {
+                      const isDisabled = isPastTime(tempHour, tempMinute, p);
+                      return (
+                        <option key={p} value={p} disabled={isDisabled}>
+                          {p}
+                        </option>
+                      );
+                    })}
+                  </select>
+                </div>
+              </div>
+            </div>
+
+            <div className="flex gap-3 pt-2 flex-shrink-0">
+              <button
+                type="button"
+                onClick={() => setShowDatePickerPopup(false)}
+                className="px-6 py-3.5 rounded-[8px] border border-white/10 text-white font-bold hover:bg-white/5 hover:border-white/20 transition-all flex items-center justify-center gap-2 text-xs uppercase tracking-widest"
+              >
+                <ChevronLeft size={14} /> Back
+              </button>
+              <button
+                type="button"
+                onClick={applyDatePicker}
+                disabled={!tempDate}
+                className="flex-1 py-3.5 bg-gradient-to-r from-[#55DEE8] to-[#BFF367] text-black font-black rounded-[8px] uppercase tracking-widest text-xs hover:opacity-90 hover:scale-[1.02] transition-all flex items-center justify-center gap-2 shadow-lg shadow-[#55DEE8]/10"
+              >
+                Apply Date & Time
+              </button>
+            </div>
+          </div>
+        </motion.div>
+      </div>
+    );
+  }
+
+  // ─── Match Setup Settings Popup ──────────────────────────────────────────────
+  if (showMatchSettingsPopup) {
+    return (
+      <div className="fixed inset-0 z-[10000] flex items-center justify-center p-0">
+        <div className="absolute inset-0 bg-black/85 backdrop-blur-sm" onClick={() => setShowMatchSettingsPopup(false)} />
+        <motion.div
+          initial={{ opacity: 0, scale: 0.95, y: 20 }}
+          animate={{ opacity: 1, scale: 1, y: 0 }}
+          exit={{ opacity: 0, scale: 0.95, y: 20 }}
+          className="relative w-full max-w-[390px] h-screen bg-[#0a0a0a] border-x border-white/10 rounded-none shadow-2xl overflow-hidden flex flex-col flex-shrink-0"
+        >
+          <div className="flex items-center justify-between px-6 pt-[35px] pb-5 border-b border-white/10 bg-black/40 flex-shrink-0">
+            <div>
+              <h2 className="text-xl font-black text-white uppercase tracking-widest font-display" style={{ fontFamily: "'Open Sans', sans-serif" }}>
+                Match Setup Settings
+              </h2>
+            </div>
+          </div>
+
+          <div className="flex-1 overflow-y-auto p-6 space-y-6 bg-[#0a0a0a] scrollbar-hide">
+            <div className="grid grid-cols-2 gap-4">
+              {/* Ball Type */}
+              <div className="space-y-1">
+                <label htmlFor="ballType" className={labelClass}>
+                  Ball Type
+                </label>
+                <select
+                  id="ballType"
+                  value={formData.ballType}
+                  onChange={e => setFormData(f => ({ ...f, ballType: e.target.value }))}
+                  className={selectClass}
+                >
+                  {BALL_TYPES.map(b => <option key={b.value} value={b.value}>{b.label}</option>)}
+                </select>
+              </div>
+
+              {/* Ground Type */}
+              <div className="space-y-1">
+                <label htmlFor="groundType" className={labelClass}>
+                  Ground Type
+                </label>
+                <select
+                  id="groundType"
+                  value={formData.groundType}
+                  onChange={e => setFormData(f => ({ ...f, groundType: e.target.value }))}
+                  className={selectClass}
+                >
+                  {GROUND_TYPES.map(g => <option key={g.value} value={g.value}>{g.label}</option>)}
+                </select>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              {/* Pitch Type */}
+              <div className="space-y-1">
+                <label htmlFor="pitchType" className={labelClass}>
+                  Pitch Type
+                </label>
+                <select
+                  id="pitchType"
+                  value={formData.pitchType}
+                  onChange={e => setFormData(f => ({ ...f, pitchType: e.target.value }))}
+                  className={selectClass}
+                >
+                  {PITCH_TYPES.map(p => <option key={p.value} value={p.value}>{p.label}</option>)}
+                </select>
+              </div>
+
+              {/* Match Timing */}
+              <div className="space-y-1">
+                <label htmlFor="matchTiming" className={labelClass}>
+                  Match Timing
+                </label>
+                <select
+                  id="matchTiming"
+                  value={formData.matchTiming}
+                  onChange={e => setFormData(f => ({ ...f, matchTiming: e.target.value }))}
+                  className={selectClass}
+                >
+                  {MATCH_TIMINGS.map(m => <option key={m.value} value={m.value}>{m.label}</option>)}
+                </select>
+              </div>
+            </div>
+
+            <div className="flex gap-3 pt-2 flex-shrink-0">
+              <button
+                type="button"
+                onClick={() => setShowMatchSettingsPopup(false)}
+                className="px-6 py-3.5 rounded-[8px] border border-white/10 text-white font-bold hover:bg-white/5 hover:border-white/20 transition-all flex items-center justify-center gap-2 text-xs uppercase tracking-widest"
+              >
+                <ChevronLeft size={14} /> Back
+              </button>
+              <button
+                type="button"
+                onClick={() => setShowMatchSettingsPopup(false)}
+                className="flex-1 py-3.5 bg-gradient-to-r from-[#55DEE8] to-[#BFF367] text-black font-black rounded-[8px] uppercase tracking-widest text-xs hover:opacity-90 hover:scale-[1.02] transition-all flex items-center justify-center gap-2 shadow-lg shadow-[#55DEE8]/10"
+              >
+                Apply Settings
+              </button>
+            </div>
+          </div>
+        </motion.div>
+      </div>
+    );
+  }
 
   // ─── Team Selection Popup ────────────────────────────────────────────────────
   if (selectingTeam) {
     return (
-      <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+      <div className="fixed inset-0 z-[10000] flex items-center justify-center p-0">
         <div className="absolute inset-0 bg-black/80 backdrop-blur-sm" onClick={() => setSelectingTeam(null)} />
         <motion.div
           initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}
-          className="relative w-full max-w-md bg-[#0F0F0F] border border-white/10 rounded-[8px] shadow-2xl overflow-hidden"
+          className="relative w-full max-w-[390px] h-screen bg-[#0F0F0F] border-x border-white/10 rounded-none shadow-2xl overflow-hidden flex flex-col flex-shrink-0"
         >
-          <div className="flex items-center justify-between p-5 border-b border-white/10">
+          <div className="flex items-center justify-between px-5 pt-[35px] pb-5 border-b border-white/10">
             <h3 className="text-lg font-black text-white uppercase tracking-wider">
               Select Team {selectingTeam}
             </h3>
-            <button onClick={() => setSelectingTeam(null)} className="p-1.5 text-white/40 hover:text-white bg-white/5 hover:bg-white/10 rounded-full transition-colors">
-              <X size={18} />
-            </button>
           </div>
-          <div className="p-5 space-y-4">
+          <div className="flex-1 overflow-y-auto p-5 space-y-4 scrollbar-hide">
             {/* Tabs */}
             <div className="flex gap-2 p-1 bg-white/[0.03] rounded-[8px] border border-white/5">
               {['myTeams', 'opponentTeams'].map(tab => (
@@ -701,6 +1581,15 @@ const StartScoringModal = ({ isOpen, onClose, onSuccess, initialData }) => {
                 </button>
               ))}
             </div>
+            
+            {/* Create Team Button */}
+            <button
+              onClick={() => window.open('/teams', '_blank')}
+              className="w-full py-2.5 bg-white/5 border border-white/10 hover:bg-white/10 transition-all rounded-[8px] text-[#BFF367] text-xs font-black uppercase tracking-widest flex items-center justify-center gap-2"
+            >
+              <Plus size={16} /> Create Team
+            </button>
+
             {/* Opponent search */}
             {teamTab === 'opponentTeams' && (
               <div className="flex gap-2">
@@ -767,12 +1656,22 @@ const StartScoringModal = ({ isOpen, onClose, onSuccess, initialData }) => {
               )}
             </div>
           </div>
+          <div className="p-5 border-t border-white/10 bg-black/40 flex-shrink-0">
+            <button
+              type="button"
+              onClick={() => setSelectingTeam(null)}
+              className="w-full py-3 rounded-[8px] border border-white/10 text-white font-bold hover:bg-white/5 hover:border-white/20 transition-all flex items-center justify-center gap-2 text-xs uppercase tracking-widest"
+            >
+              <ChevronLeft size={14} /> Back
+            </button>
+          </div>
         </motion.div>
       </div>
     );
   }
 
   // ─── Player Selection Popup ──────────────────────────────────────────────────
+  let playerPopupNode = null;
   if (playerPopup) {
     const teamDetailsForPopup = playerPopup.teamKey === 'A' ? teamADetails : teamBDetails;
     const rosterMembers = teamDetailsForPopup?.team ? [
@@ -793,27 +1692,24 @@ const StartScoringModal = ({ isOpen, onClose, onSuccess, initialData }) => {
       }))
     ] : [];
 
-    return (
-      <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+    playerPopupNode = (
+      <div className="fixed inset-0 z-[10000] flex items-center justify-center p-0">
         <div className="absolute inset-0 bg-black/80 backdrop-blur-sm" onClick={() => {
           setPlayerPopup(null);
           setCustomInviteData(null);
         }} />
         <motion.div
-          initial={{ opacity: 0, scale: 0.95 }}
-          animate={{ opacity: 1, scale: 1 }}
-          className="relative w-full max-w-md bg-[#0F0F0F] border border-white/10 rounded-[8px] shadow-2xl overflow-hidden flex flex-col max-h-[80vh]"
+          key="playerPopupAnim"
+          initial={{ opacity: 0, x: '-100%' }}
+          animate={{ opacity: 1, x: 0 }}
+          exit={{ opacity: 0, x: '-100%' }}
+          transition={{ type: 'spring', damping: 25, stiffness: 200 }}
+          className="relative w-full max-w-[390px] h-screen bg-[#0F0F0F] border-x border-white/10 rounded-none shadow-2xl overflow-hidden flex flex-col flex-shrink-0"
         >
-          <div className="flex items-center justify-between p-5 border-b border-white/10 flex-shrink-0">
+          <div className="flex items-center justify-between px-5 pt-[35px] pb-5 border-b border-white/10 flex-shrink-0">
             <h3 className="text-lg font-black text-white uppercase tracking-wider">
               {playerPopup.action === 'REPLACE' ? 'Replace Player' : 'Add Player'}
             </h3>
-            <button onClick={() => {
-              setPlayerPopup(null);
-              setCustomInviteData(null);
-            }} className="p-1.5 text-white/40 hover:text-white bg-white/5 hover:bg-white/10 rounded-full transition-colors">
-              <X size={18} />
-            </button>
           </div>
 
           {/* Tabs */}
@@ -838,7 +1734,7 @@ const StartScoringModal = ({ isOpen, onClose, onSuccess, initialData }) => {
             </button>
           </div>
 
-          <div className="p-5 overflow-y-auto space-y-4">
+          <div className="flex-1 overflow-y-auto p-5 space-y-4 scrollbar-hide">
             {activePlayerTab === 'roster' ? (
               <div className="space-y-2">
                 {rosterMembers.length > 0 ? rosterMembers.map(p => {
@@ -865,9 +1761,11 @@ const StartScoringModal = ({ isOpen, onClose, onSuccess, initialData }) => {
                           <div className="text-xs text-white/40">{p.isCustom ? 'Custom Player' : p.name}</div>
                         </div>
                       </div>
-                      <div className={`p-2 rounded-full ${isAdded ? 'bg-white/10 text-white/40' : 'bg-[#BFF367]/10 text-[#BFF367]'}`}>
-                        {isAdded ? <Check size={16} /> : <Plus size={16} />}
-                      </div>
+                      {!isAdded && (
+                        <div className="p-2 rounded-full bg-[#BFF367]/10 text-[#BFF367]">
+                          <Plus size={16} />
+                        </div>
+                      )}
                     </button>
                   );
                 }) : (
@@ -924,13 +1822,8 @@ const StartScoringModal = ({ isOpen, onClose, onSuccess, initialData }) => {
             ) : (
               <div className="space-y-4">
                 {!customInviteData ? (
-                  <form onSubmit={handleAddCustomPlayerSubmit} className="space-y-4">
-                    <div className="bg-[#55DEE8]/10 border border-[#55DEE8]/20 rounded-[8px] p-4 flex gap-3">
-                      <Sparkles size={20} className="text-[#55DEE8] flex-shrink-0 mt-0.5" />
-                      <div className="text-sm text-[#55DEE8]">
-                        Create a custom player placeholder. If you add their phone number, they'll get an invite to join Kridaz!
-                      </div>
-                    </div>
+                  <form id="customPlayerForm" onSubmit={handleAddCustomPlayerSubmit} className="space-y-4">
+
                     <div>
                       <label className={labelClass}>Player Name *</label>
                       <input
@@ -943,36 +1836,32 @@ const StartScoringModal = ({ isOpen, onClose, onSuccess, initialData }) => {
                       />
                     </div>
                     <div>
-                      <label className={labelClass}>Phone Number (Optional)</label>
-                      <div className="flex">
+                      <label className={labelClass}>Phone Number</label>
+                      <div className="flex bg-[#0a0a0a] border border-white/10 rounded-[8px] focus-within:border-[#55DEE8]/30 transition-colors h-[48px] overflow-hidden">
                         <select
                           value={customPlayerCountryCode}
                           onChange={e => setCustomPlayerCountryCode(e.target.value)}
-                          className={`${selectClass} w-24 rounded-r-none border-r-0`}
+                          className="w-[70px] bg-transparent text-white text-sm outline-none px-2 border-r border-white/10 cursor-pointer"
                         >
-                          <option value="91">+91</option>
-                          <option value="1">+1</option>
-                          <option value="44">+44</option>
-                          <option value="61">+61</option>
-                          <option value="971">+971</option>
+                          <option value="91" className="bg-[#0a0a0a] text-white">+91</option>
+                          <option value="1" className="bg-[#0a0a0a] text-white">+1</option>
+                          <option value="44" className="bg-[#0a0a0a] text-white">+44</option>
+                          <option value="61" className="bg-[#0a0a0a] text-white">+61</option>
+                          <option value="971" className="bg-[#0a0a0a] text-white">+971</option>
                         </select>
                         <input
                           type="tel"
                           value={customPlayerPhone}
                           onChange={e => setCustomPlayerPhone(e.target.value)}
                           placeholder="9876543210"
-                          className={`${inputClass} rounded-l-none`}
+                          className="flex-1 bg-transparent text-white text-sm px-3 outline-none placeholder:text-white/30"
                         />
                       </div>
                       <p className="text-[10px] text-white/40 mt-1.5 ml-1 flex items-center gap-1">
                         <Phone size={10} /> Add phone to send them a WhatsApp invite
                       </p>
                     </div>
-                    <button type="submit" disabled={isAddingCustom || !customPlayerName.trim()}
-                      className="w-full py-3.5 bg-gradient-to-r from-[#55DEE8] to-[#BFF367] text-black font-black rounded-[8px] uppercase tracking-wider text-sm hover:opacity-90 transition-all flex items-center justify-center gap-2 mt-2">
-                      {isAddingCustom ? <Loader2 size={16} className="animate-spin" /> : <Check size={16} />}
-                      Add Custom Player
-                    </button>
+
                   </form>
                 ) : (
                   <div className="text-center space-y-5 py-4">
@@ -1014,6 +1903,29 @@ const StartScoringModal = ({ isOpen, onClose, onSuccess, initialData }) => {
               </div>
             )}
           </div>
+          <div className="flex gap-3 p-5 border-t border-white/10 bg-black/40 flex-shrink-0">
+            <button
+              type="button"
+              onClick={() => {
+                setPlayerPopup(null);
+                setCustomInviteData(null);
+              }}
+              className={`${activePlayerTab === 'custom' && !customInviteData ? 'px-6' : 'w-full'} py-3 rounded-[8px] border border-white/10 text-white font-bold hover:bg-white/5 hover:border-white/20 transition-all flex items-center justify-center gap-2 text-xs uppercase tracking-widest`}
+            >
+              <ChevronLeft size={14} /> Back
+            </button>
+            {activePlayerTab === 'custom' && !customInviteData && (
+              <button 
+                type="submit" 
+                form="customPlayerForm"
+                disabled={isAddingCustom || !customPlayerName.trim()}
+                className="flex-1 py-3 bg-gradient-to-r from-[#55DEE8] to-[#BFF367] text-black font-black rounded-[8px] uppercase tracking-wider text-xs hover:opacity-90 transition-all flex items-center justify-center gap-2"
+              >
+                {isAddingCustom && <Loader2 size={16} className="animate-spin" />}
+                Add Custom Player
+              </button>
+            )}
+          </div>
         </motion.div>
       </div>
     );
@@ -1025,35 +1937,113 @@ const StartScoringModal = ({ isOpen, onClose, onSuccess, initialData }) => {
       // ── Step 1: Match Setup ───────────────────────────────────────────────────
       case 1:
         return (
-          <div className="space-y-5">
-            <div>
-              <label className={labelClass}>Match Name</label>
-              <input type="text" value={formData.matchName}
+          <div className="space-y-6 pt-2 pb-2">
+            {/* Match Name */}
+            <div className="space-y-1 mt-2">
+              <label htmlFor="matchName" className={labelClass}>
+                Match Name
+              </label>
+              <input
+                id="matchName"
+                type="text"
+                autoComplete="off"
+                value={formData.matchName}
                 onChange={e => setFormData(f => ({ ...f, matchName: e.target.value }))}
-                className={inputClass} placeholder="e.g. Weekend Championship Final" />
+                className={inputClass}
+                placeholder="e.g. Weekend Championship Final"
+              />
+            </div>
+
+            {/* Max Members */}
+            <div className="relative space-y-3">
+              <label className="text-[10px] font-black text-white/40 uppercase tracking-widest block">
+                Max Members per Team
+              </label>
+              
+              <div className="grid grid-cols-4 gap-2">
+                {[2, 6, 11].map(n => {
+                  const isActive = formData.maxMembers === n && !showCustomMembersInline;
+                  return (
+                    <button
+                      key={n}
+                      type="button"
+                      onClick={() => {
+                        setFormData(f => ({ ...f, maxMembers: n }));
+                        setShowCustomMembersInline(false);
+                      }}
+                      className={`py-3 px-2 rounded-[8px] border text-xs font-black uppercase tracking-widest transition-all text-center ${
+                        isActive
+                          ? 'bg-gradient-to-r from-[#55DEE8] to-[#BFF367] text-black border-transparent shadow-lg shadow-[#55DEE8]/10'
+                          : 'bg-white/[0.02] border-white/10 text-white/40 hover:border-white/20 hover:text-white'
+                      }`}
+                    >
+                      {n} <span className="hidden sm:inline">Players</span>
+                    </button>
+                  );
+                })}
+                
+                {/* Custom Box */}
+                {(() => {
+                  const isCustomActive = showCustomMembersInline || ![2, 6, 11].includes(formData.maxMembers);
+                  return (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setShowCustomMembersInline(!showCustomMembersInline);
+                        setCustomMembersInput('');
+                      }}
+                      className={`py-3 px-2 rounded-[8px] border text-xs font-black uppercase tracking-widest transition-all text-center truncate ${
+                        isCustomActive
+                          ? 'bg-gradient-to-r from-[#55DEE8] to-[#BFF367] text-black border-transparent shadow-lg shadow-[#55DEE8]/10'
+                          : 'bg-white/[0.02] border-white/10 text-white/40 hover:border-white/20 hover:text-white'
+                      }`}
+                    >
+                      {isCustomActive && ![2, 6, 11].includes(formData.maxMembers) ? <>{formData.maxMembers} <span className="hidden sm:inline">Players</span></> : 'Custom'}
+                    </button>
+                  );
+                })()}
+              </div>
+
+              {/* Inline Custom Input Drawer */}
+              <AnimatePresence>
+                {showCustomMembersInline && (
+                  <motion.div
+                    initial={{ opacity: 0, height: 0 }}
+                    animate={{ opacity: 1, height: 'auto' }}
+                    exit={{ opacity: 0, height: 0 }}
+                    className="overflow-hidden"
+                  >
+                    <div className="space-y-1 pt-2">
+                      <input
+                        type="text"
+                        inputMode="numeric"
+                        pattern="[0-9]*"
+                        value={customMembersInput}
+                        onChange={e => handleCustomMembersChange(e.target.value)}
+                        onKeyDown={e => {
+                          if (e.key === 'Enter') {
+                            setShowCustomMembersInline(false);
+                          }
+                        }}
+                        className="w-full bg-[#0a0a0a] text-white border border-white/10 rounded-[8px] px-4 py-3 text-sm font-semibold text-center focus:outline-none focus:border-[#55DEE8]/30 transition-all"
+                        placeholder="Enter number of players"
+                        autoFocus
+                      />
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
             </div>
 
             <div className="grid grid-cols-2 gap-4">
-              <div>
-                <label className={labelClass}>Sport Type</label>
-                <select value={formData.sportType}
-                  onChange={e => setFormData(f => ({ ...f, sportType: e.target.value }))}
-                  className={selectClass}>
-                  <option value="CRICKET">🏏 Cricket</option>
-                </select>
-              </div>
-              <div>
-                <label className={labelClass}>Match Date & Time</label>
-                <input type="datetime-local" value={formData.matchDateTime}
-                  onChange={e => setFormData(f => ({ ...f, matchDateTime: e.target.value }))}
-                  className={inputClass} />
-              </div>
-            </div>
-
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <label className={labelClass}>Match Format</label>
-                <select value={formData.format}
+              {/* Match Format */}
+              <div className="space-y-1">
+                <label htmlFor="format" className={labelClass}>
+                  Match Format
+                </label>
+                <select
+                  id="format"
+                  value={formData.format}
                   onChange={e => {
                     const format = e.target.value;
                     let defaultPowerPlay = 6;
@@ -1061,154 +2051,167 @@ const StartScoringModal = ({ isOpen, onClose, onSuccess, initialData }) => {
                     if (format === 'ODI') defaultPowerPlay = 10;
                     setFormData(f => ({ ...f, format, powerPlayOvers: defaultPowerPlay }));
                   }}
-                  className={selectClass}>
+                  className={selectClass}
+                >
                   {CRICKET_FORMATS.map(f => (
                     <option key={f.value} value={f.value}>{f.label} ({f.sub})</option>
                   ))}
                 </select>
               </div>
-              <div>
-                <label className={labelClass}>Power Play Overs</label>
-                <input type="number" min="0" max="100" value={formData.powerPlayOvers}
-                  onChange={e => setFormData(f => ({ ...f, powerPlayOvers: Math.min(100, Math.max(0, parseInt(e.target.value) || 0)) }))}
-                  className={inputClass} />
+
+              {/* Match Date & Time */}
+              <div className="space-y-1">
+                <label className={labelClass}>
+                  Match Date & Time
+                </label>
+                <button
+                  type="button"
+                  onClick={openDatePicker}
+                  className="w-full bg-[#0a0a0a] border border-white/10 rounded-[8px] px-4 py-3.5 text-left text-white focus:outline-none focus:border-[#55DEE8]/30 transition-all text-sm font-semibold animate-pulse-subtle"
+                >
+                  <span className="block truncate">
+                    {formData.matchDateTime ? (() => {
+                      const d = new Date(formData.matchDateTime);
+                      if (isNaN(d.getTime())) return 'Select Date & Time';
+                      return d.toLocaleString('en-US', {
+                        weekday: 'short',
+                        day: 'numeric',
+                        month: 'short',
+                        year: 'numeric',
+                        hour: 'numeric',
+                        minute: '2-digit',
+                        hour12: true
+                      });
+                    })() : 'Select Date & Time'}
+                  </span>
+                </button>
               </div>
             </div>
 
+            {/* Power Play Overs */}
+            <TouchSliderWheel
+              label="Power Play Overs"
+              value={formData.powerPlayOvers}
+              min={0}
+              max={(() => {
+                const format = formData.format;
+                if (format === 'T20') return 20;
+                if (format === 'T10') return 10;
+                if (format === 'ODI') return 50;
+                if (format === 'THE_HUNDRED') return 20;
+                if (format === 'CUSTOM') return formData.customOversPerDay || 20;
+                return 90;
+              })()}
+              onChange={val => setFormData(f => ({ ...f, powerPlayOvers: val }))}
+            />
+
             {formData.format === 'CUSTOM' && (
               <div className="grid grid-cols-2 gap-4 bg-white/5 p-4 rounded-[8px] border border-white/10">
-                <div>
-                  <label className={labelClass}>Days</label>
-                  <input type="number" min="1" max="10" value={formData.customDays}
+                <div className="space-y-1">
+                  <label htmlFor="customDays" className={labelClass}>
+                    Days
+                  </label>
+                  <input
+                    id="customDays"
+                    type="number"
+                    min="1"
+                    max="10"
+                    value={formData.customDays}
                     onChange={e => setFormData(f => ({ ...f, customDays: Math.min(10, Math.max(1, parseInt(e.target.value) || 1)) }))}
-                    className={inputClass} />
+                    className={inputClass}
+                  />
                 </div>
-                <div>
-                  <label className={labelClass}>Overs per Day</label>
-                  <input type="number" min="1" max="100" value={formData.customOversPerDay}
+                <div className="space-y-1">
+                  <label htmlFor="customOversPerDay" className={labelClass}>
+                    Overs per Day
+                  </label>
+                  <input
+                    id="customOversPerDay"
+                    type="number"
+                    min="1"
+                    max="100"
+                    value={formData.customOversPerDay}
                     onChange={e => setFormData(f => ({ ...f, customOversPerDay: Math.min(100, Math.max(1, parseInt(e.target.value) || 1)) }))}
-                    className={inputClass} />
+                    className={inputClass}
+                  />
                 </div>
               </div>
             )}
 
-            <div className="relative z-[90]" ref={locationRef}>
-              <label className={labelClass}>Location</label>
-              <div className="relative">
-                <input
-                  type="text"
-                  value={locationInput}
-                  onChange={(e) => {
-                    setLocationInput(e.target.value);
-                    setFormData(f => ({ ...f, location: e.target.value }));
-                    setShowLocationSuggestions(true);
-                  }}
-                  onFocus={() => locationInput.length >= 2 && setShowLocationSuggestions(true)}
-                  className={inputClass}
-                  placeholder="Search City or State"
-                />
-              </div>
-              {showLocationSuggestions && locationSuggestions.length > 0 && (
-                <div className="absolute top-full mt-2 w-full bg-[#0a0a0a] border border-white/10 rounded-[8px] overflow-hidden shadow-[0_20px_50px_rgba(0,0,0,0.9)] z-[100]">
-                  <div className="max-h-[200px] overflow-y-auto">
-                    {locationSuggestions.map((loc, idx) => (
-                      <button
-                        key={idx}
-                        onClick={(e) => {
-                          e.preventDefault();
-                          const displayName = typeof loc === 'object' ? loc.display_name : loc;
-                          setLocationInput(displayName);
-                          setFormData(f => ({ ...f, location: displayName }));
-                          setShowLocationSuggestions(false);
-                        }}
-                        className="w-full text-left px-4 py-3 text-xs font-bold text-gray-300 hover:bg-[#55DEE8] hover:text-black transition-colors"
-                      >
-                        {typeof loc === 'object' ? loc.display_name : loc}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              )}
+            {/* Location */}
+            <div className="space-y-1">
+              <label className={labelClass}>
+                Location
+              </label>
+              <button
+                type="button"
+                onClick={() => setShowLocationPopup(true)}
+                className="w-full bg-[#0a0a0a] border border-white/10 rounded-[8px] pl-12 pr-4 py-3 text-white text-left focus:outline-none focus:border-[#55DEE8]/30 transition-all text-sm font-semibold relative flex items-center min-h-[46px] hover:border-white/20 hover:scale-[1.005] transition-all"
+              >
+                <MapPin className="absolute left-4 text-white/40 text-[18px]" size={18} />
+                <span className="block truncate">
+                  {formData.location || 'Search City or State'}
+                </span>
+              </button>
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <label className={labelClass}>Ball Type</label>
-                <select value={formData.ballType}
-                  onChange={e => setFormData(f => ({ ...f, ballType: e.target.value }))}
-                  className={selectClass}>
-                  {BALL_TYPES.map(b => <option key={b.value} value={b.value}>{b.emoji} {b.label}</option>)}
-                </select>
-              </div>
-              <div>
-                <label className={labelClass}>Ground Type</label>
-                <select value={formData.groundType}
-                  onChange={e => setFormData(f => ({ ...f, groundType: e.target.value }))}
-                  className={selectClass}>
-                  {GROUND_TYPES.map(g => <option key={g.value} value={g.value}>{g.emoji} {g.label}</option>)}
-                </select>
-              </div>
+            <div className="space-y-1">
+              <label className={labelClass}>
+                Match Setup
+              </label>
+              <button
+                type="button"
+                onClick={() => setShowMatchSettingsPopup(true)}
+                className="w-full bg-[#0a0a0a] border border-white/10 rounded-[8px] px-4 py-3 text-left text-white focus:outline-none focus:border-[#55DEE8]/30 transition-all text-sm font-semibold"
+              >
+                <span className="block truncate">{`${BALL_TYPES.find(b => b.value === formData.ballType)?.label || 'Tennis Ball'} · ${GROUND_TYPES.find(g => g.value === formData.groundType)?.label || 'Outdoor Ground'} · ${PITCH_TYPES.find(p => p.value === formData.pitchType)?.label || 'Turf'} · ${MATCH_TIMINGS.find(m => m.value === formData.matchTiming)?.label || 'Day Match'}`}</span>
+              </button>
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <label className={labelClass}>Pitch Type</label>
-                <select value={formData.pitchType}
-                  onChange={e => setFormData(f => ({ ...f, pitchType: e.target.value }))}
-                  className={selectClass}>
-                  {PITCH_TYPES.map(p => <option key={p.value} value={p.value}>{p.label}</option>)}
-                </select>
-              </div>
-              <div>
-                <label className={labelClass}>Match Timing</label>
-                <select value={formData.matchTiming}
-                  onChange={e => setFormData(f => ({ ...f, matchTiming: e.target.value }))}
-                  className={selectClass}>
-                  {MATCH_TIMINGS.map(m => <option key={m.value} value={m.value}>{m.emoji} {m.label}</option>)}
-                </select>
-              </div>
-            </div>
 
-            <div>
-              <label className={labelClass}>Max Members per Team</label>
-              <select value={formData.maxMembers}
-                onChange={e => setFormData(f => ({ ...f, maxMembers: parseInt(e.target.value) || 11 }))}
-                className={selectClass}>
-                {[5, 6, 7, 8, 9, 10, 11, 12, 15].map(n => <option key={n} value={n}>{n} Players</option>)}
-              </select>
-            </div>
           </div>
         );
+
 
       // ── Step 2: Select Teams ──────────────────────────────────────────────────
       case 2:
         return (
-          <div className="space-y-4">
-            <h3 className="text-lg font-black text-white uppercase tracking-wide">Select Competing Teams</h3>
-            {[{ key: 'A', label: 'Team A', color: '#55DEE8' }, { key: 'B', label: 'Team B', color: '#BFF367' }].map(({ key, label, color }) => {
-              const id = key === 'A' ? formData.teamAId : formData.teamBId;
-              const name = id ? getTeamName(id) : null;
-              const team = allTeams.find(t => (t._id || t.id) === id);
-              return (
-                <button key={key} onClick={() => setSelectingTeam(key)}
-                  className="w-full flex items-center justify-between p-4 rounded-[8px] border border-white/10 hover:border-white/20 bg-white/5 hover:bg-white/10 transition-all">
-                  <div className="flex items-center gap-3">
-                    {team?.logo ? <img src={team.logo} className="w-10 h-10 rounded-[8px] object-cover" alt="" /> : (
-                      <div className="w-10 h-10 rounded-[8px] flex items-center justify-center" style={{ background: `${color}20`, border: `1px solid ${color}40` }}>
-                        <Users size={18} style={{ color }} />
+          <div className="space-y-4 pt-1">
+            <h3 className="text-[10px] text-white/40 font-black uppercase tracking-widest mb-3">SELECT COMPETING TEAMS</h3>
+            <div className="flex flex-col gap-4">
+              {[{ key: 'A', label: 'TEAM A', color: '#45DADA' }, { key: 'B', label: 'TEAM B', color: '#69DE80' }].map(({ key, label, color }) => {
+                const id = key === 'A' ? formData.teamAId : formData.teamBId;
+                const name = id ? getTeamName(id) : null;
+                const team = allTeams.find(t => (t._id || t.id) === id);
+                return (
+                  <button 
+                    key={key} 
+                    onClick={() => setSelectingTeam(key)}
+                    className="w-full bg-white/[0.02] border border-white/5 hover:bg-white/[0.05] hover:border-white/10 active:scale-[0.98] transition-all p-5 rounded-[12px] flex items-center justify-between group text-left"
+                  >
+                    <div className="flex items-center gap-4">
+                      {team?.logo ? (
+                        <img src={team.logo} className="w-16 h-16 rounded-[12px] object-cover border border-white/10" alt="" />
+                      ) : (
+                        <div 
+                          className="w-16 h-16 rounded-[12px] flex items-center justify-center transition-colors" 
+                          style={{ background: `${color}15`, border: `1px solid ${color}25` }}
+                        >
+                          <Users size={28} style={{ color }} />
+                        </div>
+                      )}
+                      <div>
+                        <span className="text-[10px] font-black uppercase tracking-widest block mb-1" style={{ color }}>{label}</span>
+                        <p className="text-white font-bold text-base transition-colors group-hover:text-[#45DADA]">{name || `Select ${label}`}</p>
                       </div>
-                    )}
-                    <div className="text-left">
-                      <div className="text-[10px] font-bold uppercase tracking-widest" style={{ color }}>{label}</div>
-                      <div className="text-white font-bold text-sm">{name || `Select ${label}`}</div>
                     </div>
-                  </div>
-                  <ChevronRight size={16} className="text-white/30" />
-                </button>
-              );
-            })}
+                    <ChevronRight size={20} className="text-white/30 group-hover:text-white transition-colors" />
+                  </button>
+                );
+              })}
+            </div>
             {formData.teamAId && formData.teamBId && formData.teamAId === formData.teamBId && (
-              <p className="text-xs text-red-400 bg-red-400/10 border border-red-400/20 rounded-[8px] p-3">
+              <p className="text-xs text-red-400 bg-red-400/10 border border-red-400/20 rounded-[8px] p-3 mt-2">
                 Team A and Team B cannot be the same team.
               </p>
             )}
@@ -1278,20 +2281,20 @@ const StartScoringModal = ({ isOpen, onClose, onSuccess, initialData }) => {
       // ── Step 4: Add-ons (Venue + Professionals) ───────────────────────────────
       case 4:
         return (
-          <div className="space-y-5 h-full flex flex-col">
+          <div className="space-y-5 h-full flex flex-col relative pb-16">
             <div>
               <h3 className="text-lg font-black text-white uppercase tracking-wide">Add-ons</h3>
               <p className="text-sm text-white/40">Optionally hire a venue or professionals. You can skip this step.</p>
             </div>
 
-            <div className="flex gap-2 p-1 bg-white/[0.03] rounded-[8px] border border-white/5 flex-shrink-0">
+            <div className="flex p-1 bg-[#1A1A1A] rounded-[8px] flex-shrink-0">
               <button onClick={() => setAddonsTab('VENUE')}
-                className={`flex-1 py-2 text-xs font-bold uppercase tracking-wider rounded-lg transition-all ${addonsTab === 'VENUE' ? 'bg-gradient-to-r from-[#55DEE8] to-[#BFF367] text-black shadow-lg' : 'text-white/40 hover:text-white'}`}>
-                Venue
+                className={`flex-1 py-3 text-xs font-bold uppercase tracking-wider rounded-[6px] transition-all ${addonsTab === 'VENUE' ? 'bg-gradient-to-r from-[#55DEE8] to-[#BFF367] text-black shadow-lg' : 'text-white/60 hover:text-white'}`}>
+                VENUE
               </button>
               <button onClick={() => setAddonsTab('PROFESSIONALS')}
-                className={`flex-1 py-2 text-xs font-bold uppercase tracking-wider rounded-lg transition-all ${addonsTab === 'PROFESSIONALS' ? 'bg-gradient-to-r from-[#55DEE8] to-[#BFF367] text-black shadow-lg' : 'text-white/40 hover:text-white'}`}>
-                Professionals
+                className={`flex-1 py-3 text-xs font-bold uppercase tracking-wider rounded-[6px] transition-all ${addonsTab === 'PROFESSIONALS' ? 'bg-gradient-to-r from-[#55DEE8] to-[#BFF367] text-black shadow-lg' : 'text-white/60 hover:text-white'}`}>
+                PROFESSIONALS
               </button>
             </div>
 
@@ -1310,29 +2313,46 @@ const StartScoringModal = ({ isOpen, onClose, onSuccess, initialData }) => {
                         onChange={e => setVenueSearchQuery(e.target.value)}
                       />
                     </div>
-                    <div className="flex gap-2">
-                      <select 
-                        className={`${selectClass} py-2 text-sm w-1/2`} 
-                        value={venueStateFilter} 
-                        onChange={e => setVenueStateFilter(e.target.value)}
-                      >
-                        <option value="">All States</option>
-                        {states.map(s => <option key={s} value={s}>{s}</option>)}
-                      </select>
-                      <select 
-                        className={`${selectClass} py-2 text-sm w-1/2`} 
-                        value={venueCityFilter} 
-                        onChange={e => setVenueCityFilter(e.target.value)}
+                    <div className="flex gap-2 relative z-10">
+                      <CustomDropdown
+                        className="w-1/2"
+                        value={venueStateFilter}
+                        onChange={setVenueStateFilter}
+                        placeholder="All States"
+                        options={[{value: '', label: 'All States'}, ...states]}
+                      />
+                      <CustomDropdown
+                        className="w-1/2"
+                        value={venueCityFilter}
+                        onChange={setVenueCityFilter}
+                        placeholder="All Cities"
+                        options={[{value: '', label: 'All Cities'}, ...venueCities]}
                         disabled={!venueStateFilter}
-                      >
-                        <option value="">All Cities</option>
-                        {venueCities.map(c => <option key={c} value={c}>{c}</option>)}
-                      </select>
+                      />
                     </div>
                   </div>
 
                   {/* Venue List */}
                   <div className="space-y-2">
+                    {formData.customVenue && (
+                      <button onClick={() => setFormData(f => ({ ...f, customVenue: '', location: '' }))}
+                        className="w-full flex items-center justify-between p-4 rounded-[12px] border border-dashed transition-all text-left bg-[#1a1a1a] border-white/20 hover:border-white/40 group relative overflow-hidden">
+                        <div className="absolute inset-0 bg-gradient-to-r from-white/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+                        
+                        <div className="flex items-center gap-4 relative z-10">
+                          <div className="w-10 h-10 rounded-[8px] bg-white/5 flex items-center justify-center border border-white/10 group-hover:scale-110 transition-transform">
+                            <MapPin size={18} className="text-white/60" />
+                          </div>
+                          <div>
+                            <div className="font-black text-white text-sm tracking-wide flex items-center gap-2">
+                              {formData.customVenue}
+                            </div>
+                            <div className="text-xs text-white/40 mt-0.5">{formData.location || 'Custom Location'}</div>
+                          </div>
+                        </div>
+                      </button>
+                    )}
+
                     {isLoadingGrounds ? (
                       <div className="flex justify-center p-4"><Loader2 className="animate-spin text-white/40" /></div>
                     ) : (() => {
@@ -1342,40 +2362,31 @@ const StartScoringModal = ({ isOpen, onClose, onSuccess, initialData }) => {
                         (!venueSearchQuery || g.name.toLowerCase().includes(venueSearchQuery.toLowerCase()))
                       ) || [];
 
-                      return filteredVenues.length > 0 ? (
-                        filteredVenues.map(g => (
-                          <button key={g.id} onClick={() => setFormData(f => ({ ...f, venueId: f.venueId === g.id ? null : g.id, customVenue: '' }))}
-                            className={`w-full flex items-center justify-between p-3 rounded-[8px] border transition-all text-left ${formData.venueId === g.id ? 'bg-[#55DEE8]/10 border-[#55DEE8]' : 'bg-white/5 border-white/10 hover:border-white/20'}`}>
-                            <div className="flex items-center gap-3">
-                              <MapPin size={18} className={formData.venueId === g.id ? 'text-[#55DEE8]' : 'text-white/40'} />
-                              <div>
-                                <div className="font-bold text-white text-sm">{g.name}</div>
-                                <div className="text-[10px] text-white/40">{g.city}</div>
-                              </div>
+                      if (filteredVenues.length === 0 && !formData.customVenue) {
+                        return (
+                          <div className="flex flex-col items-center justify-center py-12 opacity-40">
+                            <EyeOff size={40} className="mb-4" />
+                            <div className="text-sm italic font-medium">No listed venues match your filters.</div>
+                          </div>
+                        );
+                      }
+
+                      return filteredVenues.map(g => (
+                        <button key={g.id} onClick={() => setFormData(f => ({ ...f, venueId: f.venueId === g.id ? null : g.id, customVenue: '' }))}
+                          className={`w-full flex items-center justify-between p-3 rounded-[8px] border transition-all text-left ${formData.venueId === g.id ? 'bg-[#55DEE8]/10 border-[#55DEE8]' : 'bg-white/5 border-white/10 hover:border-white/20'}`}>
+                          <div className="flex items-center gap-3">
+                            <MapPin size={18} className={formData.venueId === g.id ? 'text-[#55DEE8]' : 'text-white/40'} />
+                            <div>
+                              <div className="font-bold text-white text-sm">{g.name}</div>
+                              <div className="text-[10px] text-white/40">{g.city}</div>
                             </div>
-                            {formData.venueId === g.id && <Check size={16} className="text-[#55DEE8]" />}
-                          </button>
-                        ))
-                      ) : (
-                        <div className="text-center p-4 text-sm text-white/40">No listed venues match your filters.</div>
-                      );
+                          </div>
+                          {formData.venueId === g.id && <Check size={16} className="text-[#55DEE8]" />}
+                        </button>
+                      ));
                     })()}
                   </div>
 
-                  {/* Custom Venue Input */}
-                  <div className="pt-4 border-t border-white/10">
-                    <label className={labelClass}>Add Custom Venue</label>
-                    <input
-                      type="text"
-                      placeholder="Enter custom venue name..."
-                      className={inputClass}
-                      value={formData.customVenue}
-                      onChange={e => {
-                        setFormData(f => ({ ...f, customVenue: e.target.value, venueId: null }));
-                      }}
-                    />
-                    {formData.customVenue && <div className="text-[#BFF367] text-[10px] mt-1 flex items-center gap-1"><Check size={12} /> Custom venue selected</div>}
-                  </div>
                 </div>
               )}
               {addonsTab === 'PROFESSIONALS' && (
@@ -1392,52 +2403,71 @@ const StartScoringModal = ({ isOpen, onClose, onSuccess, initialData }) => {
                         onChange={e => setProSearchQuery(e.target.value)}
                       />
                     </div>
-                    <div className="flex gap-2">
-                      <select 
-                        className={`${selectClass} py-2 text-sm w-1/3`} 
-                        value={proStateFilter} 
-                        onChange={e => handleProStateChange(e.target.value)}
-                      >
-                        <option value="">All States</option>
-                        {states.map(s => <option key={s} value={s}>{s}</option>)}
-                      </select>
-                      <select 
-                        className={`${selectClass} py-2 text-sm w-1/3`} 
-                        value={proCityFilter} 
-                        onChange={e => setProCityFilter(e.target.value)}
-                        disabled={!proStateFilter}
-                      >
-                        <option value="">All Cities</option>
-                        {proCities.map(c => <option key={c} value={c}>{c}</option>)}
-                      </select>
-                      <select className={`${selectClass} py-2 text-sm w-1/3`} value={proRoleFilter} onChange={e => setProRoleFilter(e.target.value)}>
-                        <option value="">All Roles</option>
-                        <option value="UMPIRE">Umpire</option>
-                        <option value="SCORER">Scorer</option>
-                        <option value="COMMENTATOR">Commentator</option>
-                      </select>
+                    <div className="flex gap-2 relative z-10">
+                      <CustomDropdown
+                        className="w-1/2"
+                        value={proCityFilter}
+                        onChange={setProCityFilter}
+                        placeholder="All Cities"
+                        options={[{value: '', label: 'All Cities'}, ...Array.from(new Set(umpiresData?.umpires?.map(u => u.city).filter(Boolean) || []))]}
+                      />
+                      <CustomDropdown
+                        className="w-1/2"
+                        value={proRoleFilter}
+                        onChange={setProRoleFilter}
+                        placeholder="All Roles"
+                        options={[
+                          {value: '', label: 'All Roles'},
+                          {value: 'UMPIRE', label: 'Umpire'},
+                          {value: 'SCORER', label: 'Scorer'},
+                          {value: 'COMMENTATOR', label: 'Commentator'}
+                        ]}
+                      />
                     </div>
                   </div>
 
-                  <button onClick={() => setShowCustomProInvite(true)} className="w-full py-3 rounded-[8px] border border-dashed border-[#55DEE8]/50 text-[#55DEE8] flex items-center justify-center gap-2 text-sm font-bold hover:bg-[#55DEE8]/10 transition-colors">
-                    <UserPlus size={16} />
-                    Invite Custom Professional
-                  </button>
-
-                  <div className="space-y-2">
+                  <div className="flex flex-col gap-[25px]">
                     {/* List Custom Professionals already added */}
                     {formData.customProfessionals?.map((cp, idx) => (
-                      <div key={`custom-${idx}`} className="w-full flex items-center justify-between p-3 rounded-[8px] border bg-[#BFF367]/10 border-[#BFF367]">
-                        <div className="flex items-center gap-3">
-                          <UserCheck size={18} className="text-[#BFF367]" />
-                          <div>
-                            <div className="font-bold text-white text-sm">{cp.name} <span className="text-[10px] text-[#BFF367] ml-1">(Custom)</span></div>
-                            <div className="text-[10px] text-white/40">{cp.role} • {cp.phone}</div>
+                      <div key={`custom-${idx}`} className="w-full flex flex-col p-0 rounded-[4px] overflow-hidden transition-all text-left bg-transparent relative">
+                        {/* Remove button */}
+                        <button onClick={() => setFormData(f => ({ ...f, customProfessionals: f.customProfessionals.filter((_, i) => i !== idx) }))}
+                          className="absolute top-3 right-3 z-10 w-8 h-8 rounded-full bg-black/40 backdrop-blur-md flex items-center justify-center hover:bg-red-500/80 transition-colors">
+                          <X size={16} className="text-white" />
+                        </button>
+                        
+                        {/* Image Section */}
+                        <div className="w-full aspect-[4/3] relative bg-white/5">
+                          {(() => {
+                            let roleImage = null;
+                            if (cp.role === 'UMPIRE') roleImage = '/images/roles/umpire.png';
+                            if (cp.role === 'SCORER') roleImage = '/images/roles/scorer.png';
+                            if (cp.role === 'COMMENTATOR') roleImage = '/images/roles/commentator.png';
+                            if (cp.role === 'STREAMER') roleImage = '/images/roles/streamer.png';
+                            
+                            if (roleImage) {
+                              return <img src={roleImage} alt={cp.role} className="w-full h-full object-cover" />;
+                            }
+                            return (
+                              <div className="w-full h-full flex flex-col items-center justify-center opacity-50 bg-[#1a1a1a]">
+                                {cp.role === 'COMMENTATOR' ? <Mic size={40} className="text-white/20 mb-2" /> : cp.role === 'SCORER' ? <CheckSquare size={40} className="text-white/20 mb-2" /> : <UserCheck size={40} className="text-white/20 mb-2" />}
+                                <span className="text-xs font-medium text-white/40">No Image</span>
+                              </div>
+                            );
+                          })()}
+                        </div>
+
+                        {/* Details Section */}
+                        <div className="pt-3 pb-4 px-3 flex flex-col gap-1 w-full bg-transparent">
+                          <div className="flex justify-between items-start w-full gap-2">
+                            <div className="flex items-center gap-2 flex-1 min-w-0">
+                              <span className="font-bold text-white text-[15px] truncate">{cp.name}</span>
+                            </div>
+                            <div className="flex items-center gap-1 shrink-0 mt-0.5">
+                              <span className="text-[10px] text-white/60 uppercase tracking-widest font-bold">{cp.role}</span>
+                            </div>
                           </div>
                         </div>
-                        <button onClick={() => setFormData(f => ({ ...f, customProfessionals: f.customProfessionals.filter((_, i) => i !== idx) }))}>
-                          <X size={16} className="text-white/40 hover:text-red-400" />
-                        </button>
                       </div>
                     ))}
 
@@ -1452,132 +2482,422 @@ const StartScoringModal = ({ isOpen, onClose, onSuccess, initialData }) => {
                         filteredPros.map(u => {
                           const isSelected = formData.professionals.includes(u.id);
                           return (
-                            <button key={u.id} onClick={() => setFormData(f => ({ ...f, professionals: isSelected ? f.professionals.filter(id => id !== u.id) : [...f.professionals, u.id] }))}
-                              className={`w-full flex items-center justify-between p-3 rounded-[8px] border transition-all text-left ${isSelected ? 'bg-[#BFF367]/10 border-[#BFF367]' : 'bg-white/5 border-white/10 hover:border-white/20'}`}>
-                              <div className="flex items-center gap-3">
-                                {u.profilePicture ? <img src={u.profilePicture} className="w-8 h-8 rounded-full object-cover" alt={u.name} /> : <UserCheck size={18} className={isSelected ? 'text-[#BFF367]' : 'text-white/40'} />}
-                                <div>
-                                  <div className="font-bold text-white text-sm">{u.name || 'Professional'}</div>
-                                  <div className="text-[10px] text-white/40">{(u.role || 'Umpire').toLowerCase()}{u.city ? ` • ${u.city}` : ''}</div>
+                              <button key={u.id} onClick={() => setFormData(f => ({ ...f, professionals: isSelected ? f.professionals.filter(id => id !== u.id) : [...f.professionals, u.id] }))}
+                                className={`w-full flex flex-col p-0 rounded-[16px] overflow-hidden transition-all text-left ${isSelected ? 'shadow-[0_0_15px_rgba(191,243,103,0.15)] ring-1 ring-[#BFF367]' : 'bg-transparent'}`}>
+                                {/* Image Section */}
+                                <div className="w-full aspect-[4/3] relative bg-white/5">
+                                  {u.profilePicture ? (
+                                    <img src={u.profilePicture} className="w-full h-full object-cover" alt={u.name} />
+                                  ) : (
+                                    <div className="w-full h-full flex flex-col items-center justify-center opacity-50 bg-[#1a1a1a]">
+                                      <UserCheck size={40} className="text-white/20 mb-2" />
+                                      <span className="text-xs font-medium text-white/40">No Image</span>
+                                    </div>
+                                  )}
+                                  
+                                  {/* Heart / Favorite Icon */}
+                                  <div className="absolute top-3 right-3 w-8 h-8 rounded-full bg-black/20 backdrop-blur-md flex items-center justify-center hover:bg-black/40 transition-colors">
+                                    <Heart size={16} className="text-white" />
+                                  </div>
+
+                                  {/* Selected Overlay */}
+                                  {isSelected && (
+                                    <div className="absolute inset-0 bg-[#BFF367]/10 flex items-center justify-center backdrop-blur-[1px]">
+                                      <div className="w-12 h-12 rounded-full bg-[#BFF367] flex items-center justify-center shadow-xl">
+                                        <Check size={24} className="text-black" />
+                                      </div>
+                                    </div>
+                                  )}
                                 </div>
-                              </div>
-                              {isSelected && <Check size={16} className="text-[#BFF367]" />}
-                            </button>
+
+                                {/* Details Section */}
+                                <div className="pt-3 pb-4 px-1 flex flex-col gap-1 w-full bg-transparent">
+                                  <div className="flex justify-between items-start w-full gap-2">
+                                    <div className="flex items-center gap-2 flex-1 min-w-0">
+                                      <div className="w-5 h-5 rounded-full bg-[#FFC107] flex items-center justify-center shrink-0">
+                                        <MapPin size={12} className="text-black fill-black" />
+                                      </div>
+                                      <span className="font-bold text-white text-[15px] truncate">{u.name || 'Professional'}</span>
+                                    </div>
+                                    <div className="flex items-center gap-1 shrink-0 mt-0.5">
+                                      <span className="text-[13px] text-[#FFC107] font-bold">{u.rating || '4.8'}</span>
+                                      <Star size={13} className="text-[#FFC107] fill-[#FFC107]" />
+                                    </div>
+                                  </div>
+                                  <div className="text-[13px] text-white/50 truncate">
+                                    {u.distance || '0.7 km away'}
+                                  </div>
+                                </div>
+                              </button>
                           );
                         })
                       ) : (
-                        formData.customProfessionals?.length === 0 && <div className="text-center p-4 text-sm text-white/40">No professionals match your search.</div>
+                        formData.customProfessionals?.length === 0 && (
+                          <div className="flex flex-col items-center justify-center py-12 opacity-40">
+                            <EyeOff size={40} className="mb-4" />
+                            <div className="text-sm italic font-medium">No professionals match your search.</div>
+                          </div>
+                        )
                       );
                     })()}
                   </div>
                 </div>
               )}
             </div>
+          </div>
+        );
 
-            {/* Custom Pro Invite Popup */}
-            <AnimatePresence>
-              {showCustomProInvite && (
-                <motion.div
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: 20 }}
-                  className="absolute inset-0 z-50 bg-[#0a0a0a] flex flex-col p-4"
+      // ── Step 5: Final Review + Confirm ─────────────────────────────────────────
+      case 5: {
+        const teamAName = getTeamName(formData.teamAId);
+        const teamBName = getTeamName(formData.teamBId);
+        const formatLabel = CRICKET_FORMATS.find(f => f.value === formData.format)?.label || formData.format;
+        const ballLabel = BALL_TYPES.find(b => b.value === formData.ballType)?.label || formData.ballType;
+        const groundLabel = GROUND_TYPES.find(g => g.value === formData.groundType)?.label || formData.groundType;
+        const timingLabel = MATCH_TIMINGS.find(t => t.value === formData.matchTiming)?.label || formData.matchTiming;
+        const selectedVenueName = formData.venueId ? groundsData?.grounds?.find(g => g.id === formData.venueId)?.name : null;
+        return (
+          <div className="space-y-5">
+            {/* Match Summary */}
+            <div className="bg-white/[0.03] rounded-[8px] border border-white/5 p-4 space-y-8">
+              <div className="flex items-center justify-between w-full text-white font-black text-xl">
+                <span className="truncate flex-1 text-left">{teamAName}</span>
+                <span className="text-white/30 text-sm px-4">vs</span>
+                <span className="truncate flex-1 text-right">{teamBName}</span>
+              </div>
+              <div className="flex flex-col gap-3">
+                <div className="bg-white/5 rounded-[8px] p-4 flex items-center justify-between">
+                  <div className="text-xs text-white/40 uppercase font-bold tracking-wider">Ball</div>
+                  <div className="text-white text-sm font-bold">{ballLabel}</div>
+                </div>
+                <div className="bg-white/5 rounded-[8px] p-4 flex items-center justify-between">
+                  <div className="text-xs text-white/40 uppercase font-bold tracking-wider">Ground</div>
+                  <div className="text-white text-sm font-bold truncate text-right max-w-[60%]" title={selectedVenueName || groundLabel}>
+                    {selectedVenueName || groundLabel}
+                  </div>
+                </div>
+                <div className="bg-white/5 rounded-[8px] p-4 flex items-center justify-between">
+                  <div className="text-xs text-white/40 uppercase font-bold tracking-wider">Players</div>
+                  <div className="text-white text-sm font-bold">{formData.maxMembers} per side</div>
+                </div>
+              </div>
+
+            </div>
+            {/* Security */}
+            <div>
+              <label className={labelClass}><Shield size={12} className="inline mr-1" />Scoring App Password</label>
+              <input type="password" value={formData.scoringPassword}
+                onChange={e => setFormData(f => ({ ...f, scoringPassword: e.target.value }))}
+                className={inputClass} placeholder="Leave blank for open access, or set min 4 chars" />
+            </div>
+            {/* YouTube Live URL */}
+            <div>
+              <label className={labelClass}><Video size={12} className="inline mr-1" />YouTube Live URL <span className="text-white/30">(Optional)</span></label>
+              <input type="url" value={formData.youtubeLiveUrl}
+                onChange={e => setFormData(f => ({ ...f, youtubeLiveUrl: e.target.value }))}
+                className={inputClass} placeholder="https://youtube.com/live/..." />
+            </div>
+          </div>
+        );
+      }
+
+      default:
+        return null;
+    }
+  };
+
+  // ─── Main Modal ───────────────────────────────────────────────────────────────
+  return (
+    <div className="fixed inset-0 z-[9999] flex items-center justify-center p-0">
+      <div className="absolute inset-0 bg-black/85 backdrop-blur-sm" onClick={handleClose} />
+      <motion.div
+        initial={{ opacity: 0, scale: 0.95, y: 20 }}
+        animate={{ opacity: 1, scale: 1, y: 0 }}
+        exit={{ opacity: 0, scale: 0.95, y: 20 }}
+        className="relative w-full max-w-[390px] h-screen bg-[#0a0a0a] border-x border-white/10 rounded-none shadow-2xl overflow-hidden flex flex-col flex-shrink-0"
+      >
+        {/* Header */}
+        <div className="flex items-center justify-between px-6 pt-[35px] pb-5 border-b border-white/10 bg-black/40 flex-shrink-0">
+          <div>
+            <h2 className="text-xl font-black text-white uppercase tracking-widest font-display" style={{ fontFamily: "'Open Sans', sans-serif" }}>Start Scoring Match</h2>
+          </div>
+        </div>
+
+
+        {/* Content */}
+        <div className="flex-1 overflow-y-auto p-6 pt-4 bg-[#0a0a0a] scrollbar-hide">
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={step}
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: -20 }}
+              transition={{ duration: 0.18 }}
+            >
+              {renderStep()}
+            </motion.div>
+          </AnimatePresence>
+        </div>
+
+        {/* Persistent Add Custom Venue / Pro Button */}
+        {step === 4 && addonsTab === 'VENUE' && (
+          <div className="px-6 pt-3 pb-3 border-t border-white/5 bg-[#0a0a0a] flex flex-shrink-0 z-40 justify-end">
+            <button
+              type="button"
+              onClick={() => {
+                setCustomVenueNameInput(formData.customVenue || '');
+                setCustomVenueLocationInput(formData.location || '');
+                setShowCustomVenuePopup(true);
+              }}
+              className="bg-[#1a1a1a] text-white border border-white/20 shadow-xl px-5 py-3 rounded-[8px] font-black text-xs uppercase tracking-widest hover:bg-[#2a2a2a] hover:border-white/50 hover:text-white hover:scale-105 transition-all flex items-center gap-2"
+            >
+              <Plus size={16} /> Add Custom Venue
+            </button>
+          </div>
+        )}
+        {step === 4 && addonsTab === 'PROFESSIONALS' && (
+          <div className="px-6 pt-3 pb-3 border-t border-white/5 bg-[#0a0a0a] flex flex-shrink-0 z-40 justify-end">
+            <button
+              type="button"
+              onClick={() => setShowCustomProInvite(true)}
+              className="bg-[#1a1a1a] text-white border border-white/20 shadow-xl px-5 py-3 rounded-[8px] font-black text-xs uppercase tracking-widest hover:bg-[#2a2a2a] hover:border-white/50 hover:text-white hover:scale-105 transition-all flex items-center gap-2"
+            >
+              <UserPlus size={16} /> Invite Professional
+            </button>
+          </div>
+        )}
+
+        <div className="flex gap-3 p-5 pb-10 border-t border-white/10 bg-black/40 flex-shrink-0">
+          <button onClick={step > 1 ? handlePrev : handleClose}
+            className="px-6 py-3 rounded-[8px] border border-white/10 text-white font-bold hover:bg-white/5 hover:border-white/20 transition-all flex items-center gap-2 text-xs uppercase tracking-widest">
+            <ChevronLeft size={14} /> Back
+          </button>
+          {step < STEPS.length ? (
+            <button onClick={handleNext} disabled={!canGoNext()}
+              className="flex-1 py-3 px-4 rounded-[8px] bg-gradient-to-r from-[#45dada] to-[#69de80] text-black font-black hover:opacity-90 hover:scale-[1.02] hover:-translate-y-0.5 transition-all flex items-center justify-center gap-2 uppercase text-xs tracking-widest disabled:opacity-40 disabled:cursor-not-allowed shadow-lg shadow-[#45dada]/20">
+              {step === 4 ? (
+                (formData.professionals.length > 0 || formData.venueId || formData.customVenue || (formData.customProfessionals && formData.customProfessionals.length > 0)) ? (
+                  <>Next <ChevronRight size={14} /></>
+                ) : (
+                  <>Skip <SkipForward size={14} /></>
+                )
+              ) : (
+                <>Next <ChevronRight size={14} /></>
+              )}
+            </button>
+          ) : (
+            <button onClick={handleSubmit} disabled={isLoading || !canGoNext()}
+              className="flex-1 py-3 px-4 rounded-[8px] bg-gradient-to-r from-[#45dada] to-[#69de80] text-black font-black hover:opacity-90 hover:scale-[1.02] hover:-translate-y-0.5 transition-all flex items-center justify-center gap-2 uppercase text-xs tracking-widest disabled:opacity-40 disabled:cursor-not-allowed shadow-lg shadow-[#45dada]/20">
+              {isLoading ? <><Loader2 size={16} className="animate-spin" /> Creating...</> : <><Trophy size={16} /> Create Match</>}
+            </button>
+          )}
+        </div>
+      </motion.div>
+      <AnimatePresence>
+        {playerPopupNode}
+      </AnimatePresence>
+      <AnimatePresence>
+        {showCustomVenuePopup && (
+          <>
+            <motion.div 
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="absolute inset-0 z-40 bg-black/60 backdrop-blur-sm" 
+              onClick={() => setShowCustomVenuePopup(false)}
+            />
+            <motion.div
+              initial={{ opacity: 0, y: "100%" }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: "100%" }}
+              transition={{ type: "spring", damping: 25, stiffness: 200 }}
+              className="absolute bottom-0 left-0 right-0 z-50 bg-[#121212] border-t border-white/10 rounded-t-[24px] flex flex-col px-6 pb-8 pt-4 shadow-2xl"
+            >
+              <div className="w-12 h-1 bg-white/20 rounded-full mx-auto mb-6" />
+              <div className="flex flex-col">
+                <div className="flex justify-between items-center mb-6">
+                  <h3 className="text-xl font-black text-white uppercase tracking-wider">Add Custom Venue</h3>
+                </div>
+                <div className="flex-1 space-y-4 mb-8">
+                <div>
+                  <label className={labelClass}>Venue Name</label>
+                  <input
+                    type="text"
+                    className={inputClass}
+                    placeholder="e.g. Lords Cricket Ground"
+                    value={customVenueNameInput}
+                    onChange={e => setCustomVenueNameInput(e.target.value)}
+                  />
+                </div>
+                <div>
+                  <label className={labelClass}>Venue Location (Optional)</label>
+                  <input
+                    type="text"
+                    className={inputClass}
+                    placeholder="e.g. Mumbai, Maharashtra"
+                    value={customVenueLocationInput}
+                    onChange={e => setCustomVenueLocationInput(e.target.value)}
+                  />
+                </div>
+              </div>
+              <div className="flex gap-3 pt-2 mt-auto">
+                <button
+                  type="button"
+                  onClick={() => setShowCustomVenuePopup(false)}
+                  className="px-6 py-4 rounded-[8px] border border-white/10 text-white font-bold hover:bg-white/5 hover:border-white/20 transition-all flex items-center justify-center gap-2 text-xs uppercase tracking-widest"
                 >
-                  {customProInviteData ? (
-                    <div className="flex flex-col h-full">
-                      <div className="flex justify-between items-center mb-6">
-                        <h3 className="text-xl font-black text-white uppercase tracking-wider">Invite Sent</h3>
-                        <button onClick={() => { setShowCustomProInvite(false); setCustomProInviteData(null); }} className="p-2 bg-white/10 rounded-full text-white/60 hover:text-white">
-                          <X size={20} />
-                        </button>
+                  <ChevronLeft size={14} /> Back
+                </button>
+                <button
+                  onClick={() => {
+                    if (!customVenueNameInput.trim()) {
+                      toast.error('Please enter a venue name');
+                      return;
+                    }
+                    setFormData(f => ({ 
+                      ...f, 
+                      customVenue: customVenueNameInput.trim(), 
+                      location: customVenueLocationInput.trim() || f.location, 
+                      venueId: null 
+                    }));
+                    setShowCustomVenuePopup(false);
+                  }}
+                  disabled={!customVenueNameInput.trim()}
+                  className="flex-1 py-4 rounded-[8px] bg-gradient-to-r from-[#55DEE8] to-[#BFF367] text-black font-black uppercase tracking-wider disabled:opacity-50 hover:opacity-90 transition-opacity shadow-lg shadow-[#55DEE8]/20"
+                >
+                  Add Venue
+                </button>
+              </div>
+            </div>
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
+
+      {/* Custom Pro Invite Popup (Bottom Sheet) */}
+      <AnimatePresence>
+        {showCustomProInvite && (
+          <>
+            <motion.div 
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="absolute inset-0 z-40 bg-black/60 backdrop-blur-sm" 
+              onClick={() => setShowCustomProInvite(false)}
+            />
+            <motion.div
+              initial={{ opacity: 0, y: "100%" }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: "100%" }}
+              transition={{ type: "spring", damping: 25, stiffness: 200 }}
+              className="absolute bottom-0 left-0 right-0 z-50 bg-[#121212] border-t border-white/10 rounded-t-[24px] flex flex-col px-6 pb-8 pt-4 shadow-2xl h-[90vh]"
+            >
+              <div className="w-12 h-1 bg-white/20 rounded-full mx-auto mb-6 shrink-0" />
+              <div className="flex-1 overflow-y-auto scrollbar-hide">
+                {customProInviteData ? (
+                  <div className="flex flex-col h-full">
+
+                    <div className="flex-1 flex flex-col items-center justify-center text-center space-y-4">
+                      <div className="w-16 h-16 bg-[#BFF367]/20 rounded-full flex items-center justify-center border border-[#BFF367]">
+                        <MessageCircle size={32} className="text-[#BFF367]" />
                       </div>
-                      <div className="flex-1 flex flex-col items-center justify-center text-center space-y-4">
-                        <div className="w-16 h-16 bg-[#BFF367]/20 rounded-full flex items-center justify-center border border-[#BFF367]">
-                          <MessageCircle size={32} className="text-[#BFF367]" />
-                        </div>
-                        <div>
-                          <h4 className="text-lg font-bold text-white">Send WhatsApp Invite</h4>
-                          <p className="text-sm text-white/50 mt-1">
-                            {customProInviteData.name} has been added to the match setup. Send them a WhatsApp message to join and onboard as {customProInviteData.role}.
-                          </p>
-                        </div>
-                        <div className="bg-white/5 p-3 rounded-[8px] text-left w-full mt-4 border border-white/10">
-                          <p className="text-xs text-white/60 font-mono break-words">
-                            Hey {customProInviteData.name}, I've invited you to officiate as a {customProInviteData.role} for an upcoming match on Kridaz! Click here to join:
-                            https://kridaz.com/invite?token=CUSTOM&role={customProInviteData.role}
-                          </p>
-                        </div>
-                        <button
-                          onClick={() => {
-                            const text = encodeURIComponent(`Hey ${customProInviteData.name}, I've invited you to officiate as a ${customProInviteData.role} for an upcoming match on Kridaz! Click here to join: https://kridaz.com/invite?token=CUSTOM&role=${customProInviteData.role}`);
-                            window.open(`https://wa.me/${customProInviteData.phone}?text=${text}`, '_blank');
-                            setShowCustomProInvite(false);
-                            setCustomProInviteData(null);
-                          }}
-                          className="w-full py-4 rounded-[8px] bg-[#BFF367] text-black font-black uppercase tracking-wider hover:bg-[#a5db4e] transition-colors mt-6"
-                        >
-                          Send via WhatsApp
-                        </button>
-                        <button onClick={() => { setShowCustomProInvite(false); setCustomProInviteData(null); }} className="text-sm text-white/40 hover:text-white uppercase font-bold tracking-wider mt-4">
-                          Skip for now
-                        </button>
+                      <div>
+                        <h4 className="text-lg font-bold text-white">Send WhatsApp Invite</h4>
                       </div>
+                      <div className="bg-white/5 p-3 rounded-[8px] text-left w-full mt-4 border border-white/10">
+                        <p className="text-xs text-white/60 font-mono break-words">
+                          Hey {customProInviteData.name}, I've invited you to officiate as a {customProInviteData.role} for an upcoming match on Kridaz! Click here to join:
+                          https://kridaz.com/invite?token=CUSTOM&role={customProInviteData.role}
+                        </p>
+                      </div>
+                      <button
+                        onClick={() => {
+                          const text = encodeURIComponent(`Hey ${customProInviteData.name}, I've invited you to officiate as a ${customProInviteData.role} for an upcoming match on Kridaz! Click here to join: https://kridaz.com/invite?token=CUSTOM&role=${customProInviteData.role}`);
+                          window.open(`https://wa.me/${customProInviteData.phone}?text=${text}`, '_blank');
+                          setShowCustomProInvite(false);
+                          setCustomProInviteData(null);
+                        }}
+                        className="w-full py-4 rounded-[8px] bg-[#BFF367] text-black font-black uppercase tracking-wider hover:bg-[#a5db4e] transition-colors mt-6"
+                      >
+                        Send via WhatsApp
+                      </button>
+                      <button onClick={() => { setShowCustomProInvite(false); setCustomProInviteData(null); }} className="text-sm text-white/40 hover:text-white uppercase font-bold tracking-wider mt-4">
+                        Skip for now
+                      </button>
                     </div>
-                  ) : (
-                    <div className="flex flex-col h-full">
-                      <div className="flex justify-between items-center mb-6">
-                        <h3 className="text-xl font-black text-white uppercase tracking-wider">Invite Professional</h3>
-                        <button onClick={() => setShowCustomProInvite(false)} className="p-2 bg-white/10 rounded-full text-white/60 hover:text-white">
-                          <X size={20} />
-                        </button>
+                  </div>
+                ) : (
+                  <div className="flex flex-col h-full">
+                    <div className="flex justify-between items-center mb-6 shrink-0">
+                      <h3 className="text-xl font-black text-white uppercase tracking-wider">Invite Professional</h3>
+                    </div>
+                    <div className="flex-1 space-y-4">
+                      <div>
+                        <label className={labelClass}>Professional's Name</label>
+                        <input
+                          type="text"
+                          className={inputClass}
+                          placeholder="e.g. John Doe"
+                          value={customProfessionalName}
+                          onChange={(e) => setCustomProfessionalName(e.target.value)}
+                        />
                       </div>
-                      <div className="flex-1 space-y-4">
-                        <div>
-                          <label className={labelClass}>Professional's Name</label>
+                      <div>
+                        <label className={labelClass}>WhatsApp Number</label>
+                        <div className="flex bg-[#0a0a0a] border border-white/10 rounded-[8px] focus-within:border-[#55DEE8]/30 transition-colors h-[48px] overflow-hidden">
+                          <select
+                            value={customPlayerCountryCode}
+                            onChange={e => setCustomPlayerCountryCode(e.target.value)}
+                            className="bg-transparent text-white px-3 border-r border-white/10 outline-none text-sm cursor-pointer hover:bg-white/5 appearance-none font-bold"
+                          >
+                            <option value="91" className="bg-[#0a0a0a] text-white">+91</option>
+                            <option value="1" className="bg-[#0a0a0a] text-white">+1</option>
+                            <option value="44" className="bg-[#0a0a0a] text-white">+44</option>
+                            <option value="61" className="bg-[#0a0a0a] text-white">+61</option>
+                          </select>
                           <input
-                            type="text"
-                            className={inputClass}
-                            placeholder="e.g. John Doe"
-                            value={customProfessionalName}
-                            onChange={(e) => setCustomProfessionalName(e.target.value)}
+                            type="tel"
+                            placeholder="9876543210"
+                            className="flex-1 bg-transparent text-white px-4 outline-none text-sm placeholder:text-white/30"
+                            value={customProfessionalPhone}
+                            onChange={e => setCustomProfessionalPhone(e.target.value.replace(/\D/g, '').slice(0, 10))}
                           />
                         </div>
-                        <div>
-                          <label className={labelClass}>WhatsApp Number</label>
-                          <div className="flex gap-2">
-                            <select
-                              className={`${selectClass} w-24`}
-                              value={customPlayerCountryCode}
-                              onChange={(e) => setCustomPlayerCountryCode(e.target.value)}
-                            >
-                              <option value="91">+91 (IN)</option>
-                              <option value="1">+1 (US)</option>
-                              <option value="44">+44 (UK)</option>
-                              <option value="61">+61 (AU)</option>
-                            </select>
-                            <input
-                              type="tel"
-                              className={`${inputClass} flex-1`}
-                              placeholder="9876543210"
-                              value={customProfessionalPhone}
-                              onChange={(e) => setCustomProfessionalPhone(e.target.value.replace(/\D/g, '').slice(0, 10))}
-                            />
-                          </div>
-                        </div>
-                        <div>
-                          <label className={labelClass}>Role</label>
-                          <select
-                            className={selectClass}
-                            value={customProfessionalRole}
-                            onChange={(e) => setCustomProfessionalRole(e.target.value)}
-                          >
-                            <option value="UMPIRE">Umpire</option>
-                            <option value="SCORER">Scorer</option>
-                            <option value="COMMENTATOR">Commentator</option>
-                            <option value="STREAMER">Streamer</option>
-                          </select>
+                      </div>
+                      <div>
+                        <label className={labelClass}>Role</label>
+                        <div className="grid grid-cols-2 gap-2">
+                          {[
+                            { id: 'UMPIRE', label: 'Umpire', icon: Shield },
+                            { id: 'SCORER', label: 'Scorer', icon: CheckSquare },
+                            { id: 'COMMENTATOR', label: 'Commentator', icon: Mic },
+                            { id: 'STREAMER', label: 'Streamer', icon: Video },
+                          ].map(role => {
+                            const isSelected = customProfessionalRole === role.id;
+                            const Icon = role.icon;
+                            return (
+                              <button
+                                key={role.id}
+                                type="button"
+                                onClick={() => setCustomProfessionalRole(role.id)}
+                                className={`flex flex-col items-center justify-center py-4 rounded-[8px] border transition-all ${isSelected ? 'bg-white/5 border-white/10 text-[#BFF367]' : 'bg-white/5 border-white/10 text-white/40 hover:border-white/20 hover:text-white'}`}
+                              >
+                                <Icon size={24} className="mb-2" />
+                                <span className="text-[10px] font-bold uppercase tracking-wider">{role.label}</span>
+                              </button>
+                            );
+                          })}
                         </div>
                       </div>
+                    </div>
+                    <div className="flex gap-3 pt-6 mt-auto shrink-0">
+                      <button
+                        type="button"
+                        onClick={() => setShowCustomProInvite(false)}
+                        className="px-6 py-4 rounded-[8px] border border-white/10 text-white font-bold hover:bg-white/5 hover:border-white/20 transition-all flex items-center justify-center gap-2 text-xs uppercase tracking-widest"
+                      >
+                        <ChevronLeft size={14} /> Back
+                      </button>
                       <button
                         onClick={() => {
                           if (!customProfessionalName || !customProfessionalPhone) {
@@ -1595,162 +2915,18 @@ const StartScoringModal = ({ isOpen, onClose, onSuccess, initialData }) => {
                           setCustomProfessionalPhone('');
                         }}
                         disabled={!customProfessionalName || !customProfessionalPhone}
-                        className="w-full py-4 rounded-[8px] bg-gradient-to-r from-[#55DEE8] to-[#BFF367] text-black font-black uppercase tracking-wider disabled:opacity-50 mt-auto hover:opacity-90 transition-opacity shadow-lg shadow-[#55DEE8]/20"
+                        className="flex-1 py-4 rounded-[8px] bg-gradient-to-r from-[#55DEE8] to-[#BFF367] text-black font-black uppercase tracking-wider disabled:opacity-50 hover:opacity-90 transition-opacity shadow-lg shadow-[#55DEE8]/20"
                       >
-                        Add to Match & Invite
+                        Invite
                       </button>
                     </div>
-                  )}
-                </motion.div>
-              )}
-            </AnimatePresence>
-
-            <div className="bg-[#55DEE8]/10 border border-[#55DEE8]/20 rounded-[8px] p-4 flex gap-3 flex-shrink-0">
-              <Sparkles size={20} className="text-[#55DEE8] flex-shrink-0 mt-0.5" />
-              <div className="text-sm text-[#55DEE8]">
-                Venues and professionals selected here are added to your scoring match directly. No payment or coin transaction is required.
-              </div>
-            </div>
-          </div>
-        );
-
-      // ── Step 5: Final Review + Confirm ─────────────────────────────────────────
-      case 5: {
-        const teamAName = getTeamName(formData.teamAId);
-        const teamBName = getTeamName(formData.teamBId);
-        const formatLabel = CRICKET_FORMATS.find(f => f.value === formData.format)?.label || formData.format;
-        const ballLabel = BALL_TYPES.find(b => b.value === formData.ballType)?.label || formData.ballType;
-        const groundLabel = GROUND_TYPES.find(g => g.value === formData.groundType)?.label || formData.groundType;
-        const timingLabel = MATCH_TIMINGS.find(t => t.value === formData.matchTiming)?.label || formData.matchTiming;
-        const selectedVenueName = formData.venueId ? groundsData?.grounds?.find(g => g.id === formData.venueId)?.name : null;
-        return (
-          <div className="space-y-5">
-            {/* Match Summary */}
-            <div className="bg-white/[0.03] rounded-[8px] border border-white/5 p-4 space-y-3">
-              <div className="flex items-center justify-between">
-                <span className="text-white font-black text-lg truncate">{formData.matchName}</span>
-                <span className="text-xs px-2 py-1 rounded-lg bg-[#55DEE8]/10 text-[#55DEE8] border border-[#55DEE8]/20 font-bold">{formatLabel}</span>
-              </div>
-              <div className="flex items-center gap-2 text-white/80 font-bold">
-                <span className="truncate">{teamAName}</span>
-                <span className="text-white/30 text-xs">vs</span>
-                <span className="truncate">{teamBName}</span>
-              </div>
-              <div className="grid grid-cols-3 gap-2 text-center">
-                <div className="bg-white/5 rounded-[8px] p-2">
-                  <div className="text-[10px] text-white/40 uppercase">Ball</div>
-                  <div className="text-white text-xs font-bold">{ballLabel}</div>
-                </div>
-                <div className="bg-white/5 rounded-[8px] p-2">
-                  <div className="text-[10px] text-white/40 uppercase">Ground</div>
-                  <div className="text-white text-xs font-bold truncate" title={selectedVenueName || groundLabel}>
-                    {selectedVenueName || groundLabel}
                   </div>
-                </div>
-                <div className="bg-white/5 rounded-[8px] p-2">
-                  <div className="text-[10px] text-white/40 uppercase">Players</div>
-                  <div className="text-white text-xs font-bold">{formData.maxMembers} per side</div>
-                </div>
+                )}
               </div>
-              <div className="text-xs text-white/40">
-                Team A: {formData.teamAPlayers.length} players · Team B: {formData.teamBPlayers.length} players
-              </div>
-            </div>
-            {/* Security */}
-            <div>
-              <label className={labelClass}><Shield size={12} className="inline mr-1" />Scoring App Password <span className="text-white/30">(Optional)</span></label>
-              <input type="password" value={formData.scoringPassword}
-                onChange={e => setFormData(f => ({ ...f, scoringPassword: e.target.value }))}
-                className={inputClass} placeholder="Leave blank for open access, or set min 4 chars" />
-              <p className="text-[10px] text-white/30 mt-1">If set, anyone opening the scoring terminal will need this password to start scoring.</p>
-            </div>
-            {/* YouTube Live URL */}
-            <div>
-              <label className={labelClass}><Video size={12} className="inline mr-1" />YouTube Live URL <span className="text-white/30">(Optional)</span></label>
-              <input type="url" value={formData.youtubeLiveUrl}
-                onChange={e => setFormData(f => ({ ...f, youtubeLiveUrl: e.target.value }))}
-                className={inputClass} placeholder="https://youtube.com/live/..." />
-              <p className="text-[10px] text-white/30 mt-1">Provide this after going live on YouTube. Viewers on the Watch Live page will see the stream.</p>
-            </div>
-          </div>
-        );
-      }
-
-      default:
-        return null;
-    }
-  };
-
-  // ─── Main Modal ───────────────────────────────────────────────────────────────
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-      <div className="absolute inset-0 bg-black/80 backdrop-blur-sm" onClick={handleClose} />
-      <motion.div
-        initial={{ opacity: 0, scale: 0.95, y: 20 }}
-        animate={{ opacity: 1, scale: 1, y: 0 }}
-        exit={{ opacity: 0, scale: 0.95, y: 20 }}
-        className="relative w-full max-w-2xl bg-[#0F0F0F] border border-white/10 rounded-[8px] shadow-2xl overflow-hidden max-h-[90vh] flex flex-col"
-      >
-        {/* Header */}
-        <div className="flex items-center justify-between px-6 py-5 border-b border-white/10 bg-white/[0.02] flex-shrink-0">
-          <div>
-            <h2 className="text-xl font-black text-white uppercase tracking-wider">Start Scoring Match</h2>
-            <p className="text-xs text-white/40 mt-0.5">{STEPS[step - 1].label}</p>
-          </div>
-          <button onClick={handleClose} className="p-2 text-white/40 hover:text-white transition-colors bg-white/5 hover:bg-white/10 rounded-full">
-            <X size={20} />
-          </button>
-        </div>
-
-        {/* Step indicator */}
-        <div className="flex gap-1.5 px-6 py-3 border-b border-white/5 flex-shrink-0">
-          {STEPS.map(s => (
-            <div key={s.id} className={`h-1 flex-1 rounded-full transition-all duration-500 ${step > s.id ? 'bg-[#BFF367]' : step === s.id ? 'bg-[#55DEE8]' : 'bg-white/10'}`} />
-          ))}
-        </div>
-
-        {/* Content */}
-        <div className="flex-1 overflow-y-auto p-6">
-          <AnimatePresence mode="wait">
-            <motion.div
-              key={step}
-              initial={{ opacity: 0, x: 20 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: -20 }}
-              transition={{ duration: 0.18 }}
-            >
-              {renderStep()}
             </motion.div>
-          </AnimatePresence>
-        </div>
-
-        {/* Footer nav */}
-        <div className="flex gap-3 p-5 border-t border-white/10 bg-white/[0.01] flex-shrink-0">
-          {step > 1 && (
-            <button onClick={handlePrev}
-              className="px-5 py-3 rounded-[8px] border border-white/10 text-white font-bold hover:bg-white/5 transition-all flex items-center gap-2 text-sm uppercase tracking-wider">
-              <ChevronLeft size={14} /> Back
-            </button>
-          )}
-          {step === 4 && (
-            <button onClick={handleNext}
-              className="px-5 py-3 rounded-[8px] border border-white/10 text-white/50 hover:text-white font-bold hover:bg-white/5 transition-all flex items-center gap-2 text-sm uppercase tracking-wider">
-              <SkipForward size={14} /> Skip
-            </button>
-          )}
-          {step < STEPS.length ? (
-            <button onClick={handleNext} disabled={!canGoNext()}
-              className="flex-1 py-3 px-4 rounded-[8px] bg-gradient-to-r from-[#55DEE8] to-[#BFF367] text-black font-black hover:opacity-90 transition-all flex items-center justify-center gap-2 uppercase text-sm tracking-wider disabled:opacity-40 disabled:cursor-not-allowed">
-              Next <ChevronRight size={14} />
-            </button>
-          ) : (
-            <button onClick={handleSubmit} disabled={isLoading || !canGoNext()}
-              className="flex-1 py-3 px-4 rounded-[8px] bg-gradient-to-r from-[#55DEE8] to-[#BFF367] text-black font-black hover:opacity-90 transition-all flex items-center justify-center gap-2 uppercase text-sm tracking-wider disabled:opacity-40 disabled:cursor-not-allowed">
-              {isLoading ? <><Loader2 size={16} className="animate-spin" /> Creating...</> : <><Trophy size={16} /> Create Match</>}
-            </button>
-          )}
-        </div>
-      </motion.div>
+          </>
+        )}
+      </AnimatePresence>
     </div>
   );
 };
@@ -1762,76 +2938,357 @@ const StartScoringModal = ({ isOpen, onClose, onSuccess, initialData }) => {
 const PlayingXIStep = ({ teamKey, teamName, players, maxMembers, teamDetails, onInit, onRemove, onAdd, onReplace, onRoleChange }) => {
   const color = teamKey === 'A' ? '#55DEE8' : '#BFF367';
   const hasAutoLoaded = players.length > 0;
+  const [activeRoleSelect, setActiveRoleSelect] = React.useState(null);
 
   return (
-    <div className="space-y-4 h-full flex flex-col">
+    <div className="space-y-5 h-full flex flex-col relative">
+      {/* Header */}
       <div className="flex items-center justify-between flex-shrink-0">
-        <div>
-          <h3 className="text-lg font-black text-white uppercase tracking-wide max-w-[200px] truncate" title={teamName ? `${teamName} Playing XI` : `Team ${teamKey} Playing XI`}>
-            {teamName ? `${teamName} Playing XI` : `Team ${teamKey} Playing XI`}
-          </h3>
-        </div>
-        <span className="text-sm font-bold bg-white/5 px-3 py-1 rounded-full border border-white/10" style={{ color }}>
+        <h2 className="text-lg font-black text-white uppercase tracking-wide truncate pr-4" title={teamName ? `${teamName} Playing XI` : `Team ${teamKey} Playing XI`}>
+          {teamName ? `${teamName} Playing XI` : `Team ${teamKey} Playing XI`}
+        </h2>
+        <span className="text-xs font-bold bg-white/5 px-3 py-1.5 rounded-full border border-white/10 flex-shrink-0" style={{ color }}>
           {players.length}/{maxMembers}
         </span>
       </div>
 
-      <div className="flex gap-2 flex-shrink-0">
+      {/* Modern Assign Roles UI */}
+      {players.length > 0 && (
+        <div className="flex flex-col gap-2 flex-shrink-0">
+          <h3 className="text-[10px] font-black text-white/50 uppercase tracking-widest px-1">Assign Roles</h3>
+          <div className="grid grid-cols-3 gap-2">
+            
+            {/* Captain */}
+            <button 
+              onClick={() => setActiveRoleSelect('CAPTAIN')}
+              className="bg-[#111] p-2 rounded-xl border border-white/5 flex flex-col items-center justify-center gap-1 relative group hover:bg-[#161616] transition-colors h-[64px] cursor-pointer"
+            >
+              <span className="text-[10px] font-black text-white/40 uppercase tracking-wider">C</span>
+              <span className="text-[11px] font-bold text-white w-full text-center truncate px-1">
+                {players.find(p => p.role === 'CAPTAIN')?.name || 'Select'}
+              </span>
+            </button>
+
+            {/* Wicket Keeper 1 */}
+            <button 
+              onClick={() => setActiveRoleSelect('WICKET_KEEPER_1')}
+              className="bg-[#111] p-2 rounded-xl border border-white/5 flex flex-col items-center justify-center gap-1 relative group hover:bg-[#161616] transition-colors h-[64px] cursor-pointer"
+            >
+              <span className="text-[10px] font-black text-white/40 uppercase tracking-wider">W1</span>
+              <span className="text-[11px] font-bold text-white w-full text-center truncate px-1">
+                {players.find(p => p.role === 'WICKET_KEEPER_1')?.name || 'Select'}
+              </span>
+            </button>
+
+            {/* Wicket Keeper 2 */}
+            <button 
+              onClick={() => setActiveRoleSelect('WICKET_KEEPER_2')}
+              className="bg-[#111] p-2 rounded-xl border border-white/5 flex flex-col items-center justify-center gap-1 relative group hover:bg-[#161616] transition-colors h-[64px] cursor-pointer"
+            >
+              <span className="text-[10px] font-black text-white/40 uppercase tracking-wider">W2</span>
+              <span className="text-[11px] font-bold text-white w-full text-center truncate px-1">
+                {players.find(p => p.role === 'WICKET_KEEPER_2')?.name || 'Select'}
+              </span>
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Modern Custom Role Selection List Modal */}
+      <AnimatePresence>
+        {activeRoleSelect && (
+          <div className="fixed inset-0 z-[100] flex flex-col justify-end">
+            <motion.div 
+              initial={{ opacity: 0 }} 
+              animate={{ opacity: 1 }} 
+              exit={{ opacity: 0 }} 
+              transition={{ duration: 0.2 }}
+              className="absolute inset-0 bg-black/80 backdrop-blur-sm" 
+              onClick={() => setActiveRoleSelect(null)} 
+            />
+            <motion.div 
+              initial={{ y: '100%' }}
+              animate={{ y: 0 }}
+              exit={{ y: '100%' }}
+              transition={{ type: 'spring', damping: 26, stiffness: 320 }}
+              className="relative bg-[#0a0a0a] border-t border-white/10 rounded-t-2xl p-5 flex flex-col max-h-[70vh] shadow-2xl"
+            >
+              <div className="flex justify-between items-center mb-4">
+                <h3 className="text-sm font-black text-white uppercase tracking-wider">
+                  Select {activeRoleSelect === 'CAPTAIN' ? 'Captain' : activeRoleSelect === 'WICKET_KEEPER_1' ? 'Wicket Keeper 1' : 'Wicket Keeper 2'}
+                </h3>
+                <button onClick={() => setActiveRoleSelect(null)} className="p-1.5 text-white/50 hover:text-white bg-white/5 hover:bg-white/10 rounded-full transition-colors">
+                  <X size={16} />
+                </button>
+              </div>
+              <div className="flex-1 overflow-y-auto flex flex-col gap-2 pr-1">
+                <button 
+                  onClick={() => {
+                    const oldRole = players.find(p => p.role === activeRoleSelect);
+                    if (oldRole) onRoleChange(oldRole.id, 'PLAYER');
+                    setActiveRoleSelect(null);
+                  }}
+                  className="bg-white/5 p-4 rounded-xl border border-white/10 flex items-center justify-between hover:border-white/20 transition-all text-left"
+                >
+                  <span className="text-white/60 font-bold text-sm">None</span>
+                </button>
+                {players.map(p => {
+                  const roleTag = p.role === 'CAPTAIN' ? 'Captain' : p.role === 'WICKET_KEEPER_1' ? 'Keeper 1' : p.role === 'WICKET_KEEPER_2' ? 'Keeper 2' : null;
+                  return (
+                    <button 
+                      key={p.id}
+                      onClick={() => {
+                        const oldRole = players.find(p => p.role === activeRoleSelect);
+                        if (oldRole) onRoleChange(oldRole.id, 'PLAYER');
+                        onRoleChange(p.id, activeRoleSelect);
+                        setActiveRoleSelect(null);
+                      }}
+                      className="bg-white/5 p-4 rounded-xl border border-white/10 flex items-center gap-3 hover:border-white/20 transition-all text-left"
+                    >
+                      {p.profilePicture ? (
+                        <img src={p.profilePicture} className="w-10 h-10 rounded-full object-cover border border-white/10" alt={p.name} />
+                      ) : (
+                        <div className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center text-white/40 text-sm font-bold border border-white/10 flex-shrink-0">
+                          {p.name?.[0]?.toUpperCase()}
+                        </div>
+                      )}
+                      <span className="text-white font-bold text-sm flex-1 truncate">
+                        {p.name}
+                      </span>
+                      {roleTag && (
+                        <span className="text-[10px] font-black tracking-widest uppercase text-white/40 mr-2">
+                          {roleTag}
+                        </span>
+                      )}
+                    </button>
+                  );
+                })}
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
+      {/* Add Player / Auto-load Buttons */}
+      <div className="flex flex-col gap-3 flex-shrink-0">
         {!hasAutoLoaded && teamDetails?.members?.length > 0 && (
           <button onClick={onInit}
-            className="flex-1 py-3 rounded-[8px] border text-xs font-bold uppercase tracking-wider transition-all flex items-center justify-center gap-1.5"
+            className="w-full py-4 rounded-lg border text-xs font-bold uppercase tracking-wider transition-all flex items-center justify-center gap-2"
             style={{ borderColor: `${color}40`, color, background: `${color}10` }}>
-            <Users size={14} /> Auto-load Roster
+            <Users size={16} /> Auto-load Roster
           </button>
         )}
         <button onClick={onAdd} disabled={players.length >= maxMembers}
-          className="flex-1 py-3 rounded-[8px] border border-white/10 text-white hover:bg-white/10 text-xs font-bold uppercase tracking-wider transition-all flex items-center justify-center gap-1.5 disabled:opacity-50">
-          + Add Player
+          className="w-full py-4 bg-white/5 border border-white/10 text-white hover:bg-white/10 text-xs font-bold uppercase tracking-wider rounded-lg transition-all flex items-center justify-center gap-2 disabled:opacity-50">
+          <Plus size={16} /> ADD PLAYER
         </button>
       </div>
 
+      {/* Empty State */}
       {players.length === 0 && (
-        <div className="text-center py-8 text-white/30 text-sm bg-white/5 rounded-[8px] border border-white/5 border-dashed flex-shrink-0">
+        <div className="text-center py-8 text-white/30 text-sm bg-white/5 rounded-lg border border-white/5 border-dashed flex-shrink-0">
           No players added yet.<br />Auto-load from roster or add manually.
         </div>
       )}
 
-      <div className="flex-1 overflow-y-auto space-y-2 pr-1">
-        {players.map((p, idx) => (
-          <div key={p.id} className="flex items-center gap-3 p-3 rounded-[8px] bg-white/5 border border-white/10 group hover:border-white/20 transition-all">
-            <span className="text-white/30 text-xs w-5 text-right font-mono">{idx + 1}</span>
-            {p.profilePicture
-              ? <img src={p.profilePicture} className="w-8 h-8 rounded-full object-cover border border-white/10" alt={p.name} />
-              : <div className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center text-white/40 text-xs font-bold border border-white/10">{p.name?.[0]?.toUpperCase()}</div>
-            }
-            <span className="text-white text-sm font-medium flex-1 truncate">{p.name}</span>
-            <select
-              value={p.role || 'PLAYER'}
-              onChange={(e) => onRoleChange && onRoleChange(p.id, e.target.value)}
-              className="bg-black/50 border border-white/10 text-[10px] text-white rounded p-1 focus:outline-none"
+      {/* Player List */}
+      <div className="flex-1 overflow-y-auto flex flex-col gap-3 pr-1 overflow-x-hidden">
+        <AnimatePresence>
+          {players.map((p, idx) => (
+            <motion.div 
+              key={p.id} 
+              initial={{ opacity: 0, scale: 0.95, y: 10 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.9, x: 50 }}
+              transition={{ duration: 0.2 }}
+              className="bg-white/5 p-4 rounded-xl border border-white/10 flex items-center gap-3 md:gap-4 hover:border-white/20 transition-all"
             >
-              <option value="PLAYER">Player</option>
-              <option value="CAPTAIN">Captain</option>
-              <option value="WICKET_KEEPER_1">Wicket Keeper</option>
-              <option value="WICKET_KEEPER_2">2nd Wicket Keeper</option>
-            </select>
-            <div className="flex items-center gap-1">
-              <button onClick={() => onReplace(p.id)} className="px-2 py-1 bg-white/5 hover:bg-white/10 text-white/50 hover:text-white rounded text-[10px] uppercase font-bold tracking-wider transition-colors">
-                Replace
-              </button>
-              <button onClick={() => onRemove(p.id)} className="p-1.5 bg-red-500/10 hover:bg-red-500/20 text-red-400 rounded-lg transition-colors">
-                <X size={14} />
-              </button>
-            </div>
-          </div>
-        ))}
+              {p.profilePicture
+                ? <img src={p.profilePicture} className="w-10 h-10 rounded-full object-cover border border-white/10 flex-shrink-0" alt={p.name} />
+                : <div className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center text-white/40 text-sm font-bold border border-white/10 flex-shrink-0">{p.name?.[0]?.toUpperCase()}</div>
+              }
+              
+              <div className="flex-1 min-w-0 flex flex-col">
+                <span className="text-white text-sm font-bold truncate block">{p.name}</span>
+              </div>
+              
+              <div className="flex items-center gap-2 flex-shrink-0">
+                <button onClick={() => onRemove(p.id)} className="bg-red-500/10 hover:bg-red-500/20 text-red-400 p-2 rounded-lg transition-colors flex items-center justify-center">
+                  <X size={14} />
+                </button>
+              </div>
+            </motion.div>
+          ))}
+        </AnimatePresence>
       </div>
 
-      {players.length > 0 && players.length < maxMembers && (
-        <p className="text-[10px] uppercase tracking-wider text-yellow-400/80 bg-yellow-400/10 border border-yellow-400/20 rounded-[8px] p-3 flex-shrink-0 text-center font-bold">
-          Needs {maxMembers - players.length} more player(s) for a full XI
-        </p>
+
+    </div>
+  );
+};
+
+// ─── Touch Slider Wheel Sub-component ──────────────────────────────────────────
+
+const TouchSliderWheel = ({ value, onChange, min = 0, max = 20, label }) => {
+  const containerRef = useRef(null);
+  const [containerWidth, setContainerWidth] = useState(400); // Robust fallback
+  const tickWidth = 56; // Spacing between each number for elegant breathing room
+  const isDragging = useRef(false);
+  const lastWheelTime = useRef(0);
+
+  const x = useMotionValue(0);
+
+  // ResizeObserver ensures exact measurement, syncing on load and resize
+  useEffect(() => {
+    if (!containerRef.current) return;
+    
+    const resizeObserver = new ResizeObserver((entries) => {
+      for (let entry of entries) {
+        const width = entry.contentRect.width;
+        if (width > 0) {
+          setContainerWidth(width);
+        }
+      }
+    });
+    
+    resizeObserver.observe(containerRef.current);
+    
+    const rect = containerRef.current.getBoundingClientRect();
+    if (rect.width > 0) {
+      setContainerWidth(rect.width);
+    }
+
+    return () => resizeObserver.disconnect();
+  }, []);
+
+  // Compute precise centering offset
+  const getTargetOffset = (val) => {
+    return (containerWidth / 2) - ((val - min) * tickWidth) - (tickWidth / 2);
+  };
+
+  // Sync visual slider offset with selected value state smoothly
+  useEffect(() => {
+    if (!isDragging.current) {
+      const target = getTargetOffset(value);
+      animate(x, target, { type: 'spring', stiffness: 350, damping: 30, restDelta: 0.1 });
+    }
+  }, [value, containerWidth]);
+
+  // Handle active touch/mouse dragging updates dynamically
+  const handleDrag = () => {
+    const currentX = x.get();
+    const calculatedVal = min + ((containerWidth / 2) - (tickWidth / 2) - currentX) / tickWidth;
+    const nearestVal = Math.max(min, Math.min(max, Math.round(calculatedVal)));
+    if (nearestVal !== value) {
+      onChange(nearestVal);
+    }
+  };
+
+  // Snap precisely into position on release
+  const handleDragEnd = () => {
+    isDragging.current = false;
+    const currentX = x.get();
+    const calculatedVal = min + ((containerWidth / 2) - (tickWidth / 2) - currentX) / tickWidth;
+    const nearestVal = Math.max(min, Math.min(max, Math.round(calculatedVal)));
+    onChange(nearestVal);
+    const target = getTargetOffset(nearestVal);
+    animate(x, target, { type: 'spring', stiffness: 350, damping: 28 });
+  };
+
+  const handleWheel = (e) => {
+    const now = Date.now();
+    if (now - lastWheelTime.current < 60) return; // Throttle wheel events
+    lastWheelTime.current = now;
+    
+    const delta = e.deltaY || e.deltaX;
+    if (Math.abs(delta) > 0) {
+      const step = delta > 0 ? 1 : -1;
+      const nextVal = Math.max(min, Math.min(max, value + step));
+      if (nextVal !== value) {
+        onChange(nextVal);
+      }
+    }
+  };
+
+  // Build ticks array
+  const ticks = [];
+  for (let i = min; i <= max; i++) {
+    ticks.push(i);
+  }
+
+  // Set drag limits to prevent dragging out of bounds
+  const leftLimit = getTargetOffset(max);
+  const rightLimit = getTargetOffset(min);
+
+  return (
+    <div className="space-y-1.5 w-full select-none">
+      {label && (
+        <label className="text-[10px] text-white/40 mb-1 block font-black uppercase tracking-widest">
+          {label}
+        </label>
       )}
+      <div
+        ref={containerRef}
+        className="relative w-full h-16 bg-white/[0.02] border border-white/10 rounded-[8px] overflow-hidden cursor-ew-resize flex items-center shadow-inner touch-none"
+        onWheel={handleWheel}
+      >
+        {/* Glow behind center selected number */}
+        <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-16 h-12 bg-[#BFF367]/10 blur-md rounded-full pointer-events-none z-10" />
+
+        {/* Center selection brackets / indicator frames */}
+        <div className="absolute left-1/2 -translate-x-1/2 top-1.5 bottom-1.5 w-14 border-x border-[#BFF367]/30 bg-[#BFF367]/[0.02] rounded-md pointer-events-none z-10" />
+
+        {/* Draggable Track */}
+        <motion.div
+          drag="x"
+          dragConstraints={{ left: leftLimit, right: rightLimit }}
+          dragElastic={0.1}
+          dragMomentum={false}
+          style={{ x }}
+          onDragStart={() => { isDragging.current = true; }}
+          onDrag={handleDrag}
+          onDragEnd={handleDragEnd}
+          className="absolute left-0 h-full flex items-center"
+        >
+          {ticks.map((tick) => {
+            const isSelected = tick === value;
+            const distanceFromCenter = Math.abs(tick - value);
+            
+            // Dynamic scale and opacity based on proximity to center
+            const opacity = Math.max(0.04, 1 - distanceFromCenter * 0.28);
+            const scale = Math.max(0.65, 1 - distanceFromCenter * 0.12);
+
+            return (
+              <div
+                key={tick}
+                className="absolute flex flex-col items-center justify-center pointer-events-none"
+                style={{
+                  left: (tick - min) * tickWidth,
+                  width: tickWidth,
+                  opacity,
+                  transform: `scale(${scale})`,
+                  transition: 'opacity 0.12s, transform 0.12s',
+                }}
+              >
+                {/* Pure text wheel - no lines, text size behaves dynamically */}
+                <span
+                  className={`font-mono transition-all duration-150 ${
+                    isSelected
+                      ? 'text-[#BFF367] text-2xl font-black drop-shadow-[0_0_8px_rgba(191,243,103,0.6)]'
+                      : 'text-white/30 text-sm font-semibold'
+                  }`}
+                >
+                  {tick}
+                </span>
+              </div>
+            );
+          })}
+        </motion.div>
+
+        {/* Left/Right fading vignettes */}
+        <div className="absolute left-0 top-0 bottom-0 w-20 bg-gradient-to-r from-[#0a0a0a] to-transparent pointer-events-none z-10" />
+        <div className="absolute right-0 top-0 bottom-0 w-20 bg-gradient-to-l from-[#0a0a0a] to-transparent pointer-events-none z-10" />
+      </div>
     </div>
   );
 };
