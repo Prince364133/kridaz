@@ -106,6 +106,12 @@ export default function ProfessionalProfile() {
 
   // Location search state
   const [locationSearchQuery, setLocationSearchQuery] = useState("");
+  
+  // Custom location search inside preferred dropdown
+  const [customSearchQuery, setCustomSearchQuery] = useState("");
+  const [customSearchResults, setCustomSearchResults] = useState([]);
+  const [customSearching, setCustomSearching] = useState(false);
+  const [customSearchTimer, setCustomSearchTimer] = useState(null);
   const [locationResults, setLocationResults] = useState([]);
   const [showLocationResults, setShowLocationResults] = useState(false);
   const [locationSearching, setLocationSearching] = useState(false);
@@ -246,6 +252,71 @@ export default function ProfessionalProfile() {
       }
     }, 400);
     setLocationSearchTimer(timer);
+  };
+
+  const handleCustomLocationSearch = (query) => {
+    if (customSearchTimer) clearTimeout(customSearchTimer);
+    if (!query || query.length < 3) {
+      setCustomSearchResults([]);
+      return;
+    }
+    const timer = setTimeout(async () => {
+      try {
+        setCustomSearching(true);
+        const res = await fetch(
+          `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(query)}&format=json&limit=5&featuretype=settlement&addressdetails=1`,
+          { headers: { "Accept-Language": "en" } }
+        );
+        const data = await res.json();
+        setCustomSearchResults(data);
+      } catch (err) {
+        console.error("Custom location search error:", err);
+      } finally {
+        setCustomSearching(false);
+      }
+    }, 400);
+    setCustomSearchTimer(timer);
+  };
+
+  const addSearchedCustomLocation = (result) => {
+    const addr = result.address || {};
+    const stateName = addr.state || "";
+    const cityName = addr.city || addr.town || addr.village || addr.county || "";
+    
+    if (!stateName || !cityName) {
+      toast.error("Could not resolve State and City. Try a more specific city search.");
+      return;
+    }
+
+    const currentLocs = formData.preferredLocations?.customLocations || [];
+    const stateObj = currentLocs.find(item => item.state === stateName);
+    let updated;
+    
+    if (stateObj) {
+      if (stateObj.cities.includes(cityName)) {
+        toast.error("City already added");
+        return;
+      }
+      updated = currentLocs.map(item => {
+        if (item.state === stateName) {
+          return { ...item, cities: [...item.cities, cityName] };
+        }
+        return item;
+      });
+    } else {
+      updated = [...currentLocs, { state: stateName, cities: [cityName] }];
+    }
+
+    setFormData({
+      ...formData,
+      preferredLocations: {
+        ...formData.preferredLocations,
+        customLocations: updated
+      }
+    });
+    setCustomSearchQuery("");
+    setCustomSearchResults([]);
+    toast.success(`Linked ${cityName}, ${stateName}`);
   };
 
   const selectLocation = (result) => {
@@ -951,51 +1022,38 @@ export default function ProfessionalProfile() {
                               <Globe size={12} /> Add Custom Service Area (City/State)
                             </p>
                             
-                            <div className="grid grid-cols-2 gap-2" onClick={(e) => e.stopPropagation()}>
-                              <div>
-                                <label className="text-[8px] font-black text-neutral-500 uppercase tracking-widest block mb-1">State</label>
-                                <select 
-                                  className="w-full bg-[#222] border border-white/5 rounded-lg px-2 py-1.5 text-xs text-white outline-none"
-                                  value={selectedState}
-                                  onChange={(e) => handleStateChange(e.target.value)}
-                                >
-                                  <option value="">Select State</option>
-                                  {states.map(st => (
-                                    <option key={st} value={st}>{st}</option>
-                                  ))}
-                                </select>
+                            <div className="relative" onClick={(e) => e.stopPropagation()}>
+                              <div className="relative flex items-center">
+                                <Search size={12} className="absolute left-2.5 text-neutral-500" />
+                                <input 
+                                  type="text"
+                                  placeholder="Search city, town, or region to add..."
+                                  className="w-full bg-[#222] border border-[#333] rounded-lg pl-8 pr-8 py-2 text-xs text-white outline-none focus:border-white/10"
+                                  value={customSearchQuery}
+                                  onChange={(e) => {
+                                    setCustomSearchQuery(e.target.value);
+                                    handleCustomLocationSearch(e.target.value);
+                                  }}
+                                />
+                                {customSearching && <Loader2 size={12} className="absolute right-2.5 text-neutral-500 animate-spin" />}
                               </div>
 
-                              <div>
-                                <label className="text-[8px] font-black text-neutral-500 uppercase tracking-widest block mb-1">City</label>
-                                <select 
-                                  className="w-full bg-[#222] border border-white/5 rounded-lg px-2 py-1.5 text-xs text-white outline-none"
-                                  value={selectedCity}
-                                  onChange={(e) => setSelectedCity(e.target.value)}
-                                  disabled={!selectedState}
-                                >
-                                  <option value="">Select City</option>
-                                  {cities.map(ct => (
-                                    <option key={ct} value={ct}>{ct}</option>
+                              {/* Search Results for Custom Location */}
+                              {customSearchResults.length > 0 && (
+                                <div className="absolute top-full left-0 right-0 mt-1 bg-[#1A1A1A] border border-white/10 rounded-lg shadow-2xl max-h-48 overflow-y-auto z-[60] custom-scrollbar">
+                                  {customSearchResults.map((result, idx) => (
+                                    <button
+                                      key={idx}
+                                      onClick={() => addSearchedCustomLocation(result)}
+                                      className="w-full text-left px-3 py-2 hover:bg-white/5 transition-colors border-b border-white/5 last:border-0 flex items-start gap-2"
+                                    >
+                                      <MapPin size={10} className="text-neutral-500 mt-0.5 shrink-0" />
+                                      <span className="text-[10px] text-white/80 font-medium leading-snug">{result.display_name}</span>
+                                    </button>
                                   ))}
-                                </select>
-                              </div>
+                                </div>
+                              )}
                             </div>
-
-                            <button 
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                addCustomLocation();
-                              }}
-                              disabled={!selectedState || !selectedCity}
-                              className="w-full py-2 rounded-lg text-[9px] font-black uppercase tracking-widest flex items-center justify-center gap-1.5 transition-transform active:scale-95"
-                              style={{ 
-                                backgroundColor: selectedState && selectedCity ? themeColor : '#222', 
-                                color: selectedState && selectedCity ? '#000' : '#444' 
-                              }}
-                            >
-                              <Plus size={14} /> Link Custom City
-                            </button>
                           </div>
 
                           {/* Section 2: Platform Venues / Grounds */}
