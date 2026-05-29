@@ -1,10 +1,12 @@
-﻿import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { X, Trash2, Eye, Calendar, User as UserIcon } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 const StoryViewer = ({ storyGroup, onClose, onDelete, currentUser, isAdmin, initialIndex = 0 }) => {
  const [currentStoryIndex, setCurrentStoryIndex] = useState(initialIndex);
  const [showViewers, setShowViewers] = useState(false);
+ const [touchStart, setTouchStart] = useState(null);
+ const [touchEnd, setTouchEnd] = useState(null);
 
  useEffect(() => {
  if (!storyGroup || showViewers) return;
@@ -25,20 +27,61 @@ const StoryViewer = ({ storyGroup, onClose, onDelete, currentUser, isAdmin, init
  const currentStory = storyGroup.stories[currentStoryIndex];
  const isOwner = currentUser && (storyGroup.user._id === currentUser._id || storyGroup.user === currentUser._id);
 
+ const minSwipeDistance = 50;
+
+ const onTouchStart = (e) => {
+ setTouchEnd(null);
+ setTouchStart({ x: e.targetTouches[0].clientX, y: e.targetTouches[0].clientY });
+ };
+
+ const onTouchMove = (e) => {
+ setTouchEnd({ x: e.targetTouches[0].clientX, y: e.targetTouches[0].clientY });
+ };
+
+ const onTouchEnd = () => {
+ if (!touchStart || !touchEnd) return;
+ const distanceX = touchStart.x - touchEnd.x;
+ const distanceY = touchStart.y - touchEnd.y;
+ const isLeftSwipe = distanceX > minSwipeDistance;
+ const isRightSwipe = distanceX < -minSwipeDistance;
+ const isDownSwipe = distanceY < -minSwipeDistance;
+
+ if (Math.abs(distanceY) > Math.abs(distanceX)) {
+ if (isDownSwipe) {
+ onClose();
+ }
+ } else {
+ if (isLeftSwipe) {
+ if (currentStoryIndex < storyGroup.stories.length - 1) {
+ setCurrentStoryIndex(currentStoryIndex + 1);
+ } else {
+ onClose();
+ }
+ } else if (isRightSwipe) {
+ setCurrentStoryIndex(Math.max(0, currentStoryIndex - 1));
+ }
+ }
+ };
+
  return (
- <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black animate-in fade-in duration-300">
- <div className="relative w-full h-full max-w-lg md:h-[90vh] md:rounded-[8px] overflow-hidden shadow-2xl flex flex-col bg-black">
+ <div className="fixed inset-0 z-[200] flex items-center justify-center bg-black animate-in fade-in duration-300">
+ <div 
+ className="relative w-full h-full max-w-lg md:h-[90vh] md:rounded-[8px] overflow-hidden shadow-2xl flex flex-col bg-black"
+ onTouchStart={onTouchStart}
+ onTouchMove={onTouchMove}
+ onTouchEnd={onTouchEnd}
+ >
  
  {/* Close Button */}
  <button 
  onClick={onClose}
- className="absolute top-6 right-6 z-[110] p-2 bg-black/40 hover:bg-black/60 text-white rounded-[8px] transition-all backdrop-blur-md"
+ className="absolute top-6 right-6 z-[210] p-2 bg-black/40 hover:bg-black/60 text-white rounded-[8px] transition-all backdrop-blur-md"
  >
  <X size={24} />
  </button>
 
  {/* Progress Bars */}
- <div className="absolute top-4 left-6 right-6 z-[110] flex gap-1">
+ <div className="absolute top-4 left-6 right-6 z-[210] flex gap-1">
  {storyGroup.stories.map((_, idx) => (
  <div key={idx} className="h-1 flex-1 bg-white/20 rounded-full overflow-hidden">
  <div 
@@ -95,7 +138,7 @@ const StoryViewer = ({ storyGroup, onClose, onDelete, currentUser, isAdmin, init
  </div>
 
  {/* Footer */}
- <div className="absolute bottom-0 left-0 right-0 p-6 bg-gradient-to-t from-black to-transparent flex items-center gap-4 z-[110]">
+ <div className="absolute bottom-0 left-0 right-0 p-6 bg-gradient-to-t from-black to-transparent flex items-center gap-4 z-[210]">
  <Link 
  to={`/profile/${storyGroup.user._id}`} 
  className="w-10 h-10 rounded-full border-2 border-[#BFF367] overflow-hidden hover:opacity-80 transition-opacity shrink-0"
@@ -154,7 +197,7 @@ const StoryViewer = ({ storyGroup, onClose, onDelete, currentUser, isAdmin, init
  {/* Viewers List Overlay */}
  {showViewers && (
  <div 
- className="absolute inset-0 z-[120] bg-black/90 backdrop-blur-xl animate-in slide-in-from-bottom duration-300 flex flex-col"
+ className="absolute inset-0 z-[220] bg-black/90 backdrop-blur-xl animate-in slide-in-from-bottom duration-300 flex flex-col"
  onClick={(e) => e.stopPropagation()}
  >
  <div className="p-6 border-b border-white/10 flex items-center justify-between bg-black/40">
