@@ -131,7 +131,7 @@ const useCricketScoring = (matchId) => {
         const isBye = ballData.extraType === 'BYE';
         const isLegBye = ballData.extraType === 'LEG_BYE';
         const isPenalty = ballData.extraType === 'PENALTY';
-        const isLegalBall = !isWide && !isNoBall && !isPenalty;
+        const isLegalBall = true; // Every delivery counts towards the 6 balls of the over
 
         // Update innings runs & wickets
         current.totalRuns = (current.totalRuns ?? 0) + runs + extraRuns;

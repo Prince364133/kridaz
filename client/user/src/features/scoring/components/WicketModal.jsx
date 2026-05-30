@@ -93,7 +93,7 @@ const WicketModal = ({
 
   return (
     <AnimatePresence>
-      <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center px-4 pb-6 sm:pb-0">
+      <div className="fixed inset-0 z-[100] flex items-end justify-center sm:items-center px-0 pb-0 sm:px-4 sm:pb-0 font-inter">
         <motion.div
           initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
           className="absolute inset-0 bg-black/85 backdrop-blur-sm"
@@ -101,18 +101,15 @@ const WicketModal = ({
         />
 
         <motion.div
-          initial={{ y: 100, opacity: 0 }} animate={{ y: 0, opacity: 1 }} exit={{ y: 100, opacity: 0 }}
-          transition={{ type: 'spring', damping: 22 }}
-          className="relative w-full max-w-md bg-[#111] rounded-[8px] border border-red-500/20 overflow-hidden z-10"
+          initial={{ y: '100%', opacity: 0 }} animate={{ y: 0, opacity: 1 }} exit={{ y: '100%', opacity: 0 }}
+          transition={{ type: 'spring', damping: 24 }}
+          className="relative w-full max-w-md bg-[#000] rounded-t-[20px] sm:rounded-[12px] overflow-hidden z-10 shadow-2xl pb-4 sm:pb-0"
         >
           {/* Header */}
           <div className="px-6 pt-6 pb-4 border-b border-white/10 flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <div className="w-8 h-8 rounded-[8px] bg-red-500/15 flex items-center justify-center">
-                <AlertTriangle size={16} className="text-red-400" />
-              </div>
               <div>
-                <h2 className="text-base font-black text-white leading-tight">
+                <h2 className="font-inter text-[24px] font-semibold tracking-tight uppercase text-white leading-tight">
                   {step === 'type' && 'How was the wicket?'}
                   {step === 'whoOut' && 'Who got out?'}
                   {step === 'runs' && 'Runs completed before run out?'}
@@ -128,7 +125,7 @@ const WicketModal = ({
           </div>
 
           {/* Body */}
-          <div className="px-4 py-4 max-h-80 overflow-y-auto space-y-2 custom-scrollbar">
+          <div className="px-4 py-4 max-h-[60vh] overflow-y-auto space-y-2 custom-scrollbar">
 
             {/* Step 1: Wicket type */}
             {step === 'type' && (
@@ -137,7 +134,7 @@ const WicketModal = ({
                   <button
                     key={wt.key}
                     onClick={() => handleTypeSelect(wt)}
-                    className="p-4 rounded-[8px] border border-white/8 bg-white/4 hover:border-red-500/50 hover:bg-red-500/8 transition-all text-left group"
+                    className="p-4 rounded-[8px] bg-[#222] hover:border-red-500/50 hover:bg-red-500/8 transition-all text-left group"
                   >
                     <span className="text-sm font-black text-white group-hover:text-red-400 transition-colors">{wt.label}</span>
                   </button>
@@ -152,7 +149,7 @@ const WicketModal = ({
                   <button
                     key={player.userId}
                     onClick={() => handleWhoOutSelect(player.userId)}
-                    className="w-full flex items-center gap-4 px-4 py-3 rounded-[8px] border border-white/8 bg-white/4 hover:border-red-500/40 hover:bg-red-500/8 transition-all group mb-2"
+                    className="w-full flex items-center gap-4 px-4 py-3 rounded-[8px] bg-[#222] hover:border-red-500/40 hover:bg-red-500/8 transition-all group mb-2"
                   >
                     <div className="w-9 h-9 rounded-[8px] bg-neutral-800 flex items-center justify-center text-sm font-black text-red-400 shrink-0">
                       {player.name?.charAt(0)?.toUpperCase()}
@@ -174,7 +171,7 @@ const WicketModal = ({
                   <button
                     key={run}
                     onClick={() => handleRunsSelect(run)}
-                    className="p-4 rounded-[8px] border border-white/8 bg-white/4 hover:border-red-500/50 hover:bg-red-500/8 transition-all text-center group"
+                    className="p-4 rounded-[8px] bg-[#222] hover:border-red-500/50 hover:bg-red-500/8 transition-all text-center group"
                   >
                     <span className="text-xl font-black text-white group-hover:text-red-400 transition-colors">{run}</span>
                   </button>
@@ -189,7 +186,7 @@ const WicketModal = ({
                   <button
                     key={player.userId}
                     onClick={() => handleFielderSelect(player.userId)}
-                    className="w-full flex items-center gap-4 px-4 py-3 rounded-[8px] border border-white/8 bg-white/4 hover:border-red-500/40 hover:bg-red-500/8 transition-all group"
+                    className="w-full flex items-center gap-4 px-4 py-3 rounded-[8px] bg-[#222] hover:border-red-500/40 hover:bg-red-500/8 transition-all group"
                   >
                     <div className="w-9 h-9 rounded-[8px] bg-neutral-800 flex items-center justify-center text-sm font-black text-red-400 shrink-0">
                       {player.name?.charAt(0)?.toUpperCase()}
@@ -198,12 +195,6 @@ const WicketModal = ({
                     <ChevronRight size={14} className="text-neutral-600 group-hover:text-red-400 transition-colors" />
                   </button>
                 ))}
-                <button
-                  onClick={() => setStep('nextBatter')}
-                  className="w-full py-3 rounded-[8px] border border-dashed border-white/15 text-neutral-500 text-sm font-bold hover:border-white/30 transition-colors"
-                >
-                  Skip (fielder unknown)
-                </button>
               </>
             )}
 
@@ -226,13 +217,13 @@ const WicketModal = ({
                     <button
                       key={player.userId}
                       onClick={() => handleNextBatterSelect(player.userId)}
-                      className="w-full flex items-center gap-4 px-4 py-3 rounded-[8px] border border-white/8 bg-white/4 hover:border-yellow-500/40 hover:bg-yellow-500/8 transition-all group"
+                      className="w-full flex items-center gap-4 px-4 py-3 rounded-[8px] bg-[#222] hover:border-yellow-500/40 hover:bg-yellow-500/8 transition-all group"
                     >
                       <div className="w-9 h-9 rounded-[8px] bg-neutral-800 flex items-center justify-center text-sm font-black text-yellow-400 shrink-0">
                         {player.name?.charAt(0)?.toUpperCase()}
                       </div>
                       <span className="flex-1 font-bold text-white text-sm">{player.name}</span>
-                      <ChevronRight size={14} className="text-neutral-600 group-hover:text-transparent bg-clip-text bg-gradient-to-r from-[#BFF367] to-[#BFF367] transition-colors" />
+                      <ChevronRight size={14} className="text-neutral-600 group-hover:text-yellow-400 transition-colors" />
                     </button>
                   ))
                 )}
@@ -240,9 +231,9 @@ const WicketModal = ({
             )}
           </div>
 
-          {/* Back button for steps > 1 */}
+          {/* Bottom Actions */}
           {step !== 'type' && (
-            <div className="px-6 pb-5 pt-3 border-t border-white/10">
+            <div className="px-6 pb-6 pt-4 border-t border-white/10 flex gap-4">
               <button
                 onClick={() => {
                   if (step === 'nextBatter') {
@@ -261,10 +252,19 @@ const WicketModal = ({
                     setStep('type');
                   }
                 }}
-                className="text-xs text-neutral-500 hover:text-white font-bold uppercase tracking-widest transition-colors"
+                className="flex-1 py-4 rounded-[8px] bg-[#1a1a1a] hover:bg-[#222] text-[11px] text-neutral-400 hover:text-white font-black uppercase tracking-[0.2em] transition-all active:scale-95"
               >
-                ← Back
+                BACK
               </button>
+
+              {step === 'fielder' && (
+                <button
+                  onClick={() => setStep('nextBatter')}
+                  className="flex-[2] py-4 rounded-[8px] bg-[#222] hover:bg-[#333] text-[11px] text-white font-black uppercase tracking-[0.2em] transition-all transform active:scale-95 shadow-xl"
+                >
+                  Skip Fielder
+                </button>
+              )}
             </div>
           )}
         </motion.div>

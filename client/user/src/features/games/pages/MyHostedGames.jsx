@@ -217,7 +217,7 @@ const MyHostedGames = () => {
                         </button>
                       )}
                     </div>
-                    <h2 className="text-2xl font-black mt-1 uppercase italic tracking-tighter">
+                    <h2 className="text-2xl font-black mt-1 uppercase tracking-tighter font-open-sans">
                       {game.teams?.teamA?.name} vs {game.teams?.teamB?.name}
                     </h2>
                   </div>

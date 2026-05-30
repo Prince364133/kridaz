@@ -622,7 +622,7 @@ export default function Profile() {
         </div>
 
         <div className="max-w-7xl mx-auto px-6 relative -mt-16 z-10">
-          <div className="flex flex-col md:flex-row items-end gap-6">
+          <div className="flex flex-col md:flex-row items-start md:items-end gap-6">
             <div className="relative group shrink-0">
               <div 
                 className="w-32 h-32 md:w-40 md:h-40 rounded-full border-[4px] border-black bg-gradient-to-br from-[#BFF367] to-[#BFF367] p-[2px] shadow-[0_0_35px_rgba(85,222,232,0.35)] overflow-hidden cursor-pointer"
@@ -738,10 +738,9 @@ export default function Profile() {
 
       <div className="max-w-7xl mx-auto px-6 mt-8">
         <>
-          {/* Short Bio Section */}
           {profileUser?.bio ? (
             <div className="mb-6 px-2">
-              <p className="text-sm text-gray-300 leading-relaxed font-bold italic">
+              <p className="text-sm text-gray-300 leading-relaxed font-bold" style={{ ...SUBHEADING_STYLE, fontWeight: 'bold' }}>
                 "{profileUser.bio}"
               </p>
             </div>
