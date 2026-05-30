@@ -170,14 +170,12 @@ const Community = ({ children, onSearchActive }) => {
         const index = reels.findIndex(r => r.id === urlId || r._id === urlId);
         if (index > 0) {
           setActiveReelIndex(index);
-          // Scroll the container to the correct item
+          // Scroll the container to the correct item instantly to avoid onScroll resetting it
           if (reelsContainerRef.current) {
-            // Need a slight delay to ensure DOM is updated and layout is calculated
-            setTimeout(() => {
-              if (reelsContainerRef.current) {
-                reelsContainerRef.current.scrollTop = index * reelsContainerRef.current.clientHeight;
-              }
-            }, 50);
+            const reelElement = reelsContainerRef.current.children[index];
+            if (reelElement) {
+              reelElement.scrollIntoView({ behavior: 'auto', block: 'start' });
+            }
           }
         }
       }

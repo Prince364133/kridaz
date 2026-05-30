@@ -19,28 +19,62 @@ export const sendWhatsAppMessage = async (phone, message, templateName = null, p
     let formattedPhone = phone.replace(/\D/g, "");
     if (formattedPhone.length === 10) formattedPhone = "91" + formattedPhone;
 
-    const payload = {
-      integrated_number: sender,
-      content_type: templateName ? "template" : "text",
-      payload: {
-        to: formattedPhone,
-        type: templateName ? "template" : "text",
-        ...(templateName ? {
+    let payload;
+    if (templateName) {
+      // Build the components object e.g., body_1, body_2
+      const componentsObj = {};
+      params.forEach((param, index) => {
+        componentsObj[`body_${index + 1}`] = {
+          type: "text",
+          value: String(param)
+        };
+        // For Authentication templates (like OTP) with a "Copy code" button,
+        // WhatsApp/MSG91 also requires the OTP value mapped to button_1.
+        if (index === 0) {
+          componentsObj[`button_1`] = {
+            subtype: "url",
+            type: "text",
+            value: String(param)
+          };
+        }
+      });
+
+      payload = {
+        integrated_number: sender,
+        content_type: "template",
+        payload: {
+          messaging_product: "whatsapp",
+          type: "template",
           template: {
             name: templateName,
             language: { code: "en", policy: "deterministic" },
-            components: [{
-              type: "body",
-              parameters: params.map(p => ({ type: "text", text: String(p) }))
-            }]
+            namespace: process.env.MSG91_WHATSAPP_NAMESPACE || "24b8b902_4d4e_4da1_86f9_5160683abccb",
+            to_and_components: [
+              {
+                to: [formattedPhone],
+                components: componentsObj
+              }
+            ]
           }
-        } : {
+        }
+      };
+    } else {
+      payload = {
+        integrated_number: sender,
+        content_type: "text",
+        payload: {
+          to: formattedPhone,
+          type: "text",
           text: { body: message }
-        })
-      }
-    };
+        }
+      };
+    }
 
-    const response = await axios.post("https://api.msg91.com/api/v5/whatsapp/whatsapp-outbound-message/", payload, {
+    const apiUrl = templateName 
+      ? "https://api.msg91.com/api/v5/whatsapp/whatsapp-outbound-message/bulk/"
+      : "https://api.msg91.com/api/v5/whatsapp/whatsapp-outbound-message/";
+
+    const response = await axios.post(apiUrl, payload, {
       headers: { 
         "authkey": authKey,
         "Content-Type": "application/json"

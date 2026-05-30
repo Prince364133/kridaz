@@ -68,7 +68,9 @@ const SignUp = () => {
 
     setAuthMode('phone');
     
-    const formattedPhone = countryCode + identifier;
+    // Remove the '+' sign before sending to the backend
+    const cleanCountryCode = countryCode.replace('+', '');
+    const formattedPhone = cleanCountryCode + identifier;
 
     setPhone(formattedPhone);
     
@@ -77,9 +79,6 @@ const SignUp = () => {
       const payload = { phone: formattedPhone };
       const res = await axiosInstance.post('/api/user/auth/send-otp', payload);
       toast.success(res.data.message);
-      if (res.data.testOtp) {
-         toast(`Test OTP: ${res.data.testOtp.phone}`, { icon: 'ðŸ§‘â€ðŸ’»', duration: 10000 });
-      }
       setStep(2);
     } catch (err) {
       toast.error(err.response?.data?.message || "Failed to send OTP");

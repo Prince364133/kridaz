@@ -178,11 +178,16 @@ const HostGame = () => {
   const [applyingCoupon, setApplyingCoupon] = useState(false);
 
   // Form State
-  const initialGameData = JSON.parse(sessionStorage.getItem('hostGameData')) || {
+  const storedData = JSON.parse(sessionStorage.getItem('hostGameData'));
+  const initialGameData = storedData ? {
+    ...storedData,
+    quickPlayerCount: storedData.quickPlayerCount || 2
+  } : {
     gameType: '',
     gameMode: '', // QUICK or FULL
     date: '',
     time: '',
+    quickPlayerCount: 2,
     quickSlotsData: [],
     city: user?.city || '',
     state: user?.state || '',
@@ -257,7 +262,7 @@ const HostGame = () => {
       team.members.forEach(member => {
         if (slotIdx < newSlots.length && member.user?._id !== user?._id) {
           if (member.user) {
-            newSlots[slotIdx] = { ...newSlots[slotIdx], userId: member.user._id, name: member.user.name, status: 'HELD' };
+            newSlots[slotIdx] = { ...newSlots[slotIdx], userId: member.user._id, name: member.user.name, profilePicture: member.user.profilePicture, status: 'HELD' };
           } else {
             newSlots[slotIdx] = { ...newSlots[slotIdx], customPlayer: { name: member.name, email: member.email }, status: 'HELD' };
           }
@@ -489,7 +494,7 @@ const HostGame = () => {
   const initQuickSlots = () => {
     const slots = [];
     // First slot is always the host
-    slots.push({ role: 'Player', userId: user?._id, name: user?.name, status: 'JOINED' });
+    slots.push({ role: 'Player', userId: user?._id, name: user?.name, profilePicture: user?.profilePicture, status: 'JOINED' });
     
     // Remaining slots are open
     for (let i = 1; i < gameData.quickPlayerCount; i++) {
@@ -516,6 +521,7 @@ const HostGame = () => {
         ...newSlots[idx], 
         userId: player._id, 
         name: player.name,
+        profilePicture: player.profilePicture,
         status: 'HELD' 
       };
     }
@@ -534,6 +540,37 @@ const HostGame = () => {
       };
       const res = await axiosInstance.post("/api/hosted-game/create", payload);
       if (res.data.success) {
+        // Send automated chat invites to invited users
+        const invitedUserIds = [];
+        if (gameData.gameMode === "QUICK") {
+          gameData.quickSlotsData.forEach(slot => {
+            if (slot.userId && slot.userId !== user?._id && slot.status === 'HELD') {
+              invitedUserIds.push(slot.userId);
+            }
+          });
+        } else {
+          ['teamA', 'teamB'].forEach(teamKey => {
+            gameData[teamKey].slots.forEach(slot => {
+              if (slot.userId && slot.userId !== user?._id && slot.status === 'HELD') {
+                invitedUserIds.push(slot.userId);
+              }
+            });
+          });
+        }
+        
+        if (invitedUserIds.length > 0) {
+          const inviteLink = `${window.location.origin}/game/${res.data.game.id}`;
+          const messageContent = `Hey! I've invited you to join a game. Click here to confirm your slot: ${inviteLink}`;
+          try {
+            await axiosInstance.post('/api/chat/message/broadcast', {
+              content: messageContent,
+              userIds: invitedUserIds
+            });
+          } catch(e) {
+            console.error("Failed to send auto-invites in chat", e);
+          }
+        }
+
         setShowCoinAnim(true);
       }
     } catch (err) {
@@ -1192,14 +1229,30 @@ const HostGame = () => {
                   onClick={() => idx !== 0 && setActiveSlotPicker({ idx })}
                   className={`relative p-6 rounded-[8px] border-2 transition-all cursor-pointer group flex flex-col items-center justify-center text-center h-48 ${ slot.userId || slot.customPlayer ? 'border-[#BFF367]/30 bg-[#BFF367]/5' : 'border-neutral-800 bg-neutral-900/50 hover:border-neutral-700' }`}
                 >
-                  <div className={`w-16 h-16 rounded-[8px] flex items-center justify-center mb-3 transition-transform duration-500 group-hover:scale-110 ${ slot.userId || slot.customPlayer ? 'bg-gradient-to-r from-[#BFF367] to-[#BFF367] text-black font-black' : 'bg-neutral-800 text-neutral-500' }`}>
-                    {slot.userId === user?._id ? <ShieldCheck size={28} /> : (slot.userId || slot.customPlayer ? <UserCheck size={28} /> : <Plus size={28} />)}
+                  <div className={`w-16 h-16 rounded-[8px] flex items-center justify-center mb-3 transition-transform duration-500 group-hover:scale-110 overflow-hidden ${ slot.userId || slot.customPlayer ? 'border-2 border-[#BFF367] bg-neutral-900' : 'bg-neutral-800 text-neutral-500' }`}>
+                    {slot.profilePicture ? (
+                      <img src={slot.profilePicture} alt={slot.name} className="w-full h-full object-cover" />
+                    ) : (slot.userId && user?._id && slot.userId === user._id) ? (
+                      user?.profilePicture ? (
+                        <img src={user.profilePicture} alt={user.name} className="w-full h-full object-cover" />
+                      ) : (
+                        <div className="text-xl font-black bg-[#BFF367] text-black w-full h-full flex items-center justify-center">
+                          {user?.name ? user.name.charAt(0).toUpperCase() : '?'}
+                        </div>
+                      )
+                    ) : (slot.userId || slot.customPlayer) ? (
+                      <div className="text-xl font-black bg-[#BFF367] text-black w-full h-full flex items-center justify-center">
+                        {(slot.name || slot.customPlayer?.name || '?').charAt(0).toUpperCase()}
+                      </div>
+                    ) : (
+                      <Plus size={28} />
+                    )}
                   </div>
                   
                   <div className="space-y-1">
                     <p className="text-[10px] font-black uppercase tracking-widest text-neutral-500">Slot {idx + 1}</p>
                     <h4 className="font-black truncate w-full px-2">
-                      {slot.userId === user?._id ? "You (Host)" : (slot.name || slot.customPlayer?.name || slot.customPlayer?.email || "Open Slot")}
+                      {(slot.userId && user?._id && slot.userId === user._id) ? (user?.name || "You (Host)") : (slot.name || slot.customPlayer?.name || slot.customPlayer?.email || "Open Slot")}
                     </h4>
                   </div>
 

@@ -114,9 +114,6 @@ const OnboardingModal = ({ isOpen, onClose, initialData, onComplete }) => {
       if (res.data.success) {
         setPhoneOtpSent(true);
         toast.success("Verification OTP sent successfully!");
-        if (res.data.testOtp) {
-          toast(`Test OTP: ${res.data.testOtp.phone}`, { icon: '🧑‍💻', duration: 10000 });
-        }
       }
     } catch (error) {
       toast.error(error.response?.data?.message || "Failed to send verification OTP");

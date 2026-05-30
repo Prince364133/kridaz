@@ -85,7 +85,7 @@ export default function Home() {
  const shouldHideRest = isReelsView || isCommunitySearchActive;
  const [showInterests, setShowInterests] = useState(false);
  const { data: reelsData } = useGetReelsFeedQuery();
- const reelsFeed = reelsData?.reels?.slice(0, 10) || [];
+ const reelsFeed = reelsData?.reels?.slice(0, 5) || [];
  const [activeTab, setActiveTab] = useState("venues");
  const [players, setPlayers] = useState([]);
  const [followingIds, setFollowingIds] = useState([]);

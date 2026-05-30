@@ -36,11 +36,25 @@ import { Toaster } from "react-hot-toast";
 import { RootErrorBoundary } from "@components/common";
 
 import { reelsApi } from "@redux/api/reelsApi";
+import { usePushNotifications } from "@hooks/usePushNotifications";
+import { CapacitorUpdater } from '@capgo/capacitor-updater';
+import { Capacitor } from '@capacitor/core';
 
 export default function App() {
   const dispatch = useDispatch();
   const theme = useSelector((state) => state.theme.current);
   const authState = useSelector((state) => state.auth);
+  
+  // Initialize Push Notifications
+  usePushNotifications(authState.isLoggedIn);
+
+  // Notify Capgo Updater that the app is ready and working
+  useEffect(() => {
+    if (Capacitor.isNativePlatform()) {
+      CapacitorUpdater.notifyAppReady().catch(err => console.error("OTA Ready Error:", err));
+    }
+  }, []);
+
   // If we have a persisted session, don't show the blocking loading screen
   const [loading, setLoading] = useState(false);
 

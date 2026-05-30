@@ -28,7 +28,7 @@ const SlotPickerPopup = ({ isOpen, onClose, onSelect, gameId, slotId }) => {
         setFollowers(res.data.people || []);
       }
     } catch (err) {
-      toast.error('Failed to fetch followers');
+      toast.error('Failed to fetch network');
     } finally {
       setLoading(false);
     }
@@ -36,7 +36,7 @@ const SlotPickerPopup = ({ isOpen, onClose, onSelect, gameId, slotId }) => {
 
   const fetchTeams = async () => {
     try {
-      const res = await axiosInstance.get('/api/v1/team');
+      const res = await axiosInstance.get('/api/team');
       if (res.data.success) {
         setTeams(res.data.teams || []);
       }
@@ -144,7 +144,7 @@ const SlotPickerPopup = ({ isOpen, onClose, onSelect, gameId, slotId }) => {
                 onClick={() => setActiveTab('followers')}
                 className={`flex-1 py-3 rounded-[8px] flex items-center justify-center gap-2 text-[10px] font-black transition-all ${ activeTab === 'followers' ? 'bg-yellow-500 text-black' : 'text-neutral-500 hover:text-white' }`}
               >
-                <Users size={14} /> Followers
+                <Users size={14} /> Network
               </button>
               <button
                 onClick={() => setActiveTab('teams')}
@@ -167,7 +167,7 @@ const SlotPickerPopup = ({ isOpen, onClose, onSelect, gameId, slotId }) => {
                     <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-neutral-500" size={18} />
                     <input
                       type="text"
-                      placeholder="Search followers..."
+                      placeholder="Search network..."
                       value={searchTerm}
                       onChange={(e) => setSearchTerm(e.target.value)}
                       className="w-full bg-black/40 border border-white/5 rounded-[8px] py-4 pl-12 pr-4 text-sm font-medium focus:border-yellow-500/50 outline-none transition-all"
@@ -187,8 +187,18 @@ const SlotPickerPopup = ({ isOpen, onClose, onSelect, gameId, slotId }) => {
                           className="group p-4 bg-black/20 border border-white/5 rounded-[8px] flex items-center justify-between hover:border-yellow-500/30 transition-all"
                         >
                           <div className="flex items-center gap-4">
-                            <div className="w-12 h-12 rounded-[8px] bg-neutral-800 border border-white/5 overflow-hidden">
-                              <img src={follower.profilePicture || `https://api.dicebear.com/7.x/avataaars/svg?seed=${follower.name}`} alt={follower.name} className="w-full h-full object-cover" />
+                            <div className="w-12 h-12 shrink-0 rounded-[8px] bg-neutral-800 overflow-hidden flex items-center justify-center border border-neutral-700/50">
+                              {follower.profilePicture ? (
+                                <img 
+                                  src={follower.profilePicture} 
+                                  alt={follower.name} 
+                                  className="w-full h-full object-cover"
+                                />
+                              ) : (
+                                <span className="text-lg font-black text-[#BFF367] uppercase">
+                                  {follower.name ? follower.name.charAt(0) : '?'}
+                                </span>
+                              )}
                             </div>
                             <div>
                               <h4 className="font-black text-sm">{follower.name}</h4>
@@ -207,7 +217,7 @@ const SlotPickerPopup = ({ isOpen, onClose, onSelect, gameId, slotId }) => {
                     ) : (
                       <div className="text-center py-12 space-y-3">
                         <Users className="mx-auto text-neutral-800" size={48} />
-                        <p className="text-sm text-neutral-500 font-medium italic">No followers found matching "{searchTerm}"</p>
+                        <p className="text-sm text-neutral-500 font-medium italic">No users found matching "{searchTerm}"</p>
                       </div>
                     )}
                   </div>
