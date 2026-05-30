@@ -622,8 +622,8 @@ export default function Profile() {
         </div>
 
         <div className="max-w-7xl mx-auto px-6 relative -mt-16 z-10">
-          <div className="flex flex-col md:flex-row items-end gap-6">
-            <div className="relative group shrink-0 flex flex-col items-center mb-4 md:mb-6">
+          <div className="flex flex-col md:flex-row-reverse items-center md:items-end justify-between gap-6 text-center md:text-right">
+            <div className="relative group shrink-0 flex flex-col items-center mb-4 md:mb-6 md:ml-auto">
               <div className="relative">
                 <div 
                   className="w-32 h-32 md:w-40 md:h-40 rounded-full border-[4px] border-black bg-gradient-to-br from-[#BFF367] to-[#BFF367] p-[2px] shadow-[0_0_35px_rgba(85,222,232,0.35)] overflow-hidden cursor-pointer"
@@ -656,9 +656,9 @@ export default function Profile() {
               </div>
             </div>
 
-            <div className="pb-2 flex-1 space-y-3">
+            <div className="pb-2 flex-1 space-y-3 flex flex-col items-center md:items-start text-center md:text-left">
               <div className="space-y-0.5">
-                <div className="flex items-center gap-2">
+                <div className="flex items-center justify-center md:justify-start gap-2">
                   <h1 className="text-3xl md:text-5xl font-black text-white tracking-tighter uppercase" style={HEADING_STYLE}>{profileUser?.name || "Player Name"}</h1>
                   <CheckCircle2 className="w-6 h-6 text-[#BFF367]" fill="currentColor" />
                 </div>
@@ -672,7 +672,7 @@ export default function Profile() {
                 </p>
               </div>
 
-              <div className="flex flex-wrap items-center gap-4 text-gray-400 font-bold uppercase tracking-widest text-[10px] md:text-xs">
+              <div className="flex flex-wrap items-center justify-center md:justify-start gap-4 text-gray-400 font-bold uppercase tracking-widest text-[10px] md:text-xs">
                 <button 
                   onClick={() => {
                     setConnectionsActiveTab("followers");
@@ -699,7 +699,7 @@ export default function Profile() {
                 </span>
               </div>
 
-              <div className="flex flex-wrap gap-2 pt-2">
+              <div className="flex flex-wrap justify-center md:justify-start gap-2 pt-2">
                 {isOwnProfile ? (
                   <>
                   </>

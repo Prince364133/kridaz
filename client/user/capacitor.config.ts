@@ -7,7 +7,8 @@ const config: CapacitorConfig = {
   plugins: {
     extConfig: {},
     CapacitorUpdater: {
-      appId: 'com.kridaz.app'
+      appId: 'com.kridaz.app',
+      autoUpdate: true
     },
     GoogleAuth: {
       scopes: ["profile", "email"],
