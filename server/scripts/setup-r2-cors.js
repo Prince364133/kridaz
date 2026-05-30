@@ -4,7 +4,7 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-dotenv.config({ path: path.join(__dirname, '../server/.env') });
+dotenv.config({ path: path.join(__dirname, '../.env') });
 
 const r2Client = new S3Client({
   region: 'auto',
@@ -21,8 +21,14 @@ const corsConfiguration = {
   CORSRules: [
     {
       AllowedHeaders: ['*'],
-      AllowedMethods: ['GET', 'PUT', 'POST', 'DELETE', 'HEAD', 'OPTIONS'],
-      AllowedOrigins: ['http://localhost:5174', 'https://kridaz.vercel.app'],
+      AllowedMethods: ['GET', 'PUT', 'POST', 'DELETE', 'HEAD'],
+      AllowedOrigins: [
+        'http://localhost:5174',
+        'https://kridaz.vercel.app',
+        'http://localhost',
+        'https://localhost',
+        'capacitor://localhost'
+      ],
       ExposedHeaders: ['ETag'],
       MaxAgeSeconds: 3000,
     },
