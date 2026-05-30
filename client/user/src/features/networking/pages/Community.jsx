@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { followUser, unfollowUser } from "@redux/slices/authSlice";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
@@ -69,12 +69,13 @@ const Community = ({ children, onSearchActive }) => {
   const [triggerGetFeed] = useLazyGetCommunityFeedQuery();
   const [triggerSearchPlayers] = useLazySearchPlayersQuery();
   const { data: storiesData } = useGetStoriesFeedQuery({
-    all: true,
     ...(location ? { lat: location.lat, lng: location.lng } : {})
   }, { skip: !isLoggedIn });
   const stories = storiesData?.stories || [];
-  const myStoryGroup = stories.find(group => group.user?._id === user?._id || group.user?.id === user?._id || group.user?._id === user?.id);
-  const otherStories = stories.filter(group => group.user?._id !== user?._id && group.user?.id !== user?._id && group.user?._id !== user?.id);
+  
+  const currentUserId = user?._id || user?.id;
+  const myStoryGroup = currentUserId ? stories.find(group => (group.user?._id || group.user?.id) === currentUserId) : null;
+  const otherStories = currentUserId ? stories.filter(group => (group.user?._id || group.user?.id) !== currentUserId) : stories;
   const { data: statsData } = useGetCommunityStatsQuery();
 
   const [createPost] = useCreatePostMutation();
@@ -146,15 +147,43 @@ const Community = ({ children, onSearchActive }) => {
   });
   const reels = reelsData?.reels || [];
 
+  const reelsContainerRef = useRef(null);
+  const initialReelScrolled = useRef(false);
+
   // Keep ?id= in sync with whichever reel is currently visible
   useEffect(() => {
-    if (activeFilter !== "Reels" || reels.length === 0) return;
+    if (activeFilter !== "Reels" || reels.length === 0 || !initialReelScrolled.current) return;
     const currentReel = reels[activeReelIndex];
-    if (currentReel?.id) {
-      setSearchParams({ tab: "shots", id: currentReel.id }, { replace: true });
+    if (currentReel?.id || currentReel?._id) {
+      const id = currentReel.id || currentReel._id;
+      if (searchParams.get("id") !== id) {
+        setSearchParams({ tab: "shots", id }, { replace: true });
+      }
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [activeReelIndex, activeFilter, reels.length]);
+  }, [activeReelIndex, activeFilter, reels.length, searchParams, setSearchParams]);
+
+  // Initial scroll to reel specified in URL
+  useEffect(() => {
+    if (activeFilter === "Reels" && reels.length > 0 && !initialReelScrolled.current) {
+      const urlId = searchParams.get("id");
+      if (urlId) {
+        const index = reels.findIndex(r => r.id === urlId || r._id === urlId);
+        if (index > 0) {
+          setActiveReelIndex(index);
+          // Scroll the container to the correct item
+          if (reelsContainerRef.current) {
+            // Need a slight delay to ensure DOM is updated and layout is calculated
+            setTimeout(() => {
+              if (reelsContainerRef.current) {
+                reelsContainerRef.current.scrollTop = index * reelsContainerRef.current.clientHeight;
+              }
+            }, 50);
+          }
+        }
+      }
+      initialReelScrolled.current = true;
+    }
+  }, [activeFilter, reels, searchParams]);
 
   const { socket, onlineCount } = useSocket();
 
@@ -1292,11 +1321,14 @@ const Community = ({ children, onSearchActive }) => {
                   </button>
                 </div>
                 <div
+                  ref={reelsContainerRef}
                   className="w-full aspect-[9/16] max-h-[100dvh] md:h-full md:w-auto overflow-y-scroll snap-y snap-mandatory no-scrollbar md:rounded-[8px] bg-black shadow-2xl mx-auto"
                   onScroll={(e) => {
                     const el = e.currentTarget;
                     const idx = Math.round(el.scrollTop / el.clientHeight);
-                    setActiveReelIndex(idx);
+                    if (idx !== activeReelIndex) {
+                      setActiveReelIndex(idx);
+                    }
                     if (reels.length > 0 && idx >= reels.length - 2 && !reelsFetching && reelsData?.nextCursor) {
                       setReelCursor(reelsData.nextCursor);
                     }
@@ -2102,8 +2134,16 @@ const Community = ({ children, onSearchActive }) => {
           currentUser={user}
           isAdmin={isAdmin}
           onNextUser={() => {
-            const displayStories = myStoryGroup ? [myStoryGroup, ...otherStories] : otherStories;
-            const currentIndex = displayStories.findIndex(g => g._id === selectedStoryGroup._id);
+            const getUserId = (g) => g?.user?._id || g?.user?.id;
+            const isMyStory = myStoryGroup && getUserId(selectedStoryGroup) === getUserId(myStoryGroup);
+            
+            if (isMyStory) {
+              setSelectedStoryGroup(null);
+              return;
+            }
+
+            const displayStories = otherStories;
+            const currentIndex = displayStories.findIndex(g => getUserId(g) === getUserId(selectedStoryGroup));
             if (currentIndex !== -1 && currentIndex < displayStories.length - 1) {
                setSelectedStoryGroup(displayStories[currentIndex + 1]);
             } else {
@@ -2111,8 +2151,13 @@ const Community = ({ children, onSearchActive }) => {
             }
           }}
           onPrevUser={() => {
-            const displayStories = myStoryGroup ? [myStoryGroup, ...otherStories] : otherStories;
-            const currentIndex = displayStories.findIndex(g => g._id === selectedStoryGroup._id);
+            const getUserId = (g) => g?.user?._id || g?.user?.id;
+            const isMyStory = myStoryGroup && getUserId(selectedStoryGroup) === getUserId(myStoryGroup);
+            
+            if (isMyStory) return;
+
+            const displayStories = otherStories;
+            const currentIndex = displayStories.findIndex(g => getUserId(g) === getUserId(selectedStoryGroup));
             if (currentIndex > 0) {
                setSelectedStoryGroup(displayStories[currentIndex - 1]);
             }
