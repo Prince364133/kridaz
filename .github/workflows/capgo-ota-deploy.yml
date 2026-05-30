@@ -40,4 +40,4 @@ jobs:
         working-directory: ./client/user
         env:
           CAPGO_TOKEN: ${{ secrets.CAPGO_TOKEN }}
-        run: npx @capgo/cli bundle upload --token ${{ secrets.CAPGO_TOKEN }}
+        run: npx @capgo/cli bundle upload --apikey ${{ secrets.CAPGO_TOKEN }}
