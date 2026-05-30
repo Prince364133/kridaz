@@ -408,7 +408,7 @@ export default function Profile() {
   const [userPosts, setUserPosts] = useState([]);
   const [loadingPosts, setLoadingPosts] = useState(false);
   
-  const { isUserOnline, getLastSeen } = useSocket();
+  const { isUserOnline } = useSocket();
   const isOwnProfile = !userId || (currentUser && (userId === currentUser.id || userId === currentUser._id));
   const targetUserId = isOwnProfile ? (currentUser?.id || currentUser?._id) : userId;
 
@@ -623,28 +623,37 @@ export default function Profile() {
 
         <div className="max-w-7xl mx-auto px-6 relative -mt-16 z-10">
           <div className="flex flex-col md:flex-row items-end gap-6">
-            <div className="relative group shrink-0">
-              <div 
-                className="w-32 h-32 md:w-40 md:h-40 rounded-full border-[4px] border-black bg-gradient-to-br from-[#BFF367] to-[#BFF367] p-[2px] shadow-[0_0_35px_rgba(85,222,232,0.35)] overflow-hidden cursor-pointer"
-                onClick={handleAvatarClick}
-              >
-                {profileUser?.profilePicture ? (
-                  <img src={profileUser.profilePicture} alt="" className="w-full h-full rounded-full object-cover" />
-                ) : (
-                  <div className="w-full h-full rounded-full flex items-center justify-center bg-zinc-900 text-[#BFF367] text-4xl font-black">
-                    {profileUser?.name?.[0]}
-                  </div>
+            <div className="relative group shrink-0 flex flex-col items-center mb-4 md:mb-6">
+              <div className="relative">
+                <div 
+                  className="w-32 h-32 md:w-40 md:h-40 rounded-full border-[4px] border-black bg-gradient-to-br from-[#BFF367] to-[#BFF367] p-[2px] shadow-[0_0_35px_rgba(85,222,232,0.35)] overflow-hidden cursor-pointer"
+                  onClick={handleAvatarClick}
+                >
+                  {profileUser?.profilePicture ? (
+                    <img src={profileUser.profilePicture} alt="" className="w-full h-full rounded-full object-cover" />
+                  ) : (
+                    <div className="w-full h-full rounded-full flex items-center justify-center bg-zinc-900 text-[#BFF367] text-4xl font-black">
+                      {profileUser?.name?.[0]}
+                    </div>
+                  )}
+                </div>
+                
+                {isOwnProfile && (
+                  <button 
+                    onClick={() => setIsEditModalOpen(true)}
+                    className="absolute -top-1 right-2 w-9 h-9 bg-gradient-to-br from-[#BFF367] to-[#BFF367] rounded-full border-[4px] border-black flex items-center justify-center text-black hover:scale-110 transition-all shadow-lg z-20"
+                  >
+                    <Edit2 size={16} strokeWidth={3} />
+                  </button>
+                )}
+
+                {isUserOnline(targetUserId) && (
+                  <span
+                    className="absolute bottom-2 right-0 h-7 w-7 translate-x-1 rounded-full border-[4px] border-black bg-gradient-to-br from-[#BFF367] to-[#BFF367] shadow-[0_0_16px_rgba(191,243,103,0.8)] md:h-8 md:w-8"
+                    aria-label="Online"
+                  />
                 )}
               </div>
-              
-              {isOwnProfile && (
-                <button 
-                  onClick={() => setIsEditModalOpen(true)}
-                  className="absolute bottom-1 right-1 w-9 h-9 bg-gradient-to-br from-[#BFF367] to-[#BFF367] rounded-full border-[4px] border-black flex items-center justify-center text-black hover:scale-110 transition-all shadow-lg z-20"
-                >
-                  <Edit2 size={16} strokeWidth={3} />
-                </button>
-              )}
             </div>
 
             <div className="pb-2 flex-1 space-y-3">
@@ -688,30 +697,6 @@ export default function Profile() {
                   <MapPin className="w-3.5 h-3.5" stroke="url(#cyan-lime-gradient)" />
                   {profileUser?.city || "Manchester"}
                 </span>
-                {(() => {
-                  const online = isUserOnline(targetUserId);
-                  const lastSeen = getLastSeen(targetUserId);
-                  const lastSeenText = lastSeen
-                    ? (() => {
-                        const diff = Date.now() - new Date(lastSeen).getTime();
-                        if (diff < 60000) return 'Just now';
-                        if (diff < 3600000) return `${Math.floor(diff / 60000)}m ago`;
-                        if (diff < 86400000) return `${Math.floor(diff / 3600000)}h ago`;
-                        return new Date(lastSeen).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
-                      })()
-                    : null;
-                  return online ? (
-                    <span className="px-3 py-0.5 bg-[#BFF367]/10 text-[#BFF367] rounded-[6px] border border-[#BFF367]/20 text-[9px] flex items-center gap-1">
-                      <span className="w-1.5 h-1.5 rounded-full bg-[#BFF367] animate-pulse" />
-                      Online
-                    </span>
-                  ) : lastSeenText ? (
-                    <span className="px-3 py-0.5 bg-white/5 text-gray-500 rounded-[6px] border border-white/5 text-[9px] flex items-center gap-1">
-                      <span className="w-1.5 h-1.5 rounded-full bg-gray-600" />
-                      {lastSeenText}
-                    </span>
-                  ) : null;
-                })()}
               </div>
 
               <div className="flex flex-wrap gap-2 pt-2">
@@ -859,18 +844,18 @@ export default function Profile() {
             )}
 
             {/* Sports Filter & Resume Header */}
-            <div className="flex items-center justify-between mb-8 bg-white/[0.02] border border-white/5 p-5 rounded-[8px] backdrop-blur-md">
+            <div className="flex w-fit md:w-full max-w-full items-center justify-between mb-5 md:mb-8 bg-white/[0.02] border border-white/5 px-4 py-3 md:p-5 rounded-[8px] backdrop-blur-md">
               <div className="flex items-center gap-3">
                 <Medal className="text-[#BFF367]" size={22} />
                 <div>
                   <h3 className="text-sm font-black uppercase tracking-wider text-white" style={HEADING_STYLE}>Sports Resumé</h3>
-                  <p className="text-[9px] font-bold text-gray-500 uppercase tracking-widest mt-0.5">Verified athlete resume & credentials</p>
+                  <p className="hidden md:block text-[9px] font-bold text-gray-500 uppercase tracking-widest mt-0.5">Verified athlete resume & credentials</p>
                 </div>
               </div>
               <select 
                 value={sportFilter} 
                 onChange={(e) => setSportFilter(e.target.value)} 
-                className="bg-black border border-white/10 text-white text-[10px] font-black uppercase tracking-widest px-4 py-2.5 rounded-[8px] focus:outline-none focus:border-[#BFF367] transition-all cursor-pointer"
+                className="hidden md:block bg-black border border-white/10 text-white text-[10px] font-black uppercase tracking-widest px-4 py-2.5 rounded-[8px] focus:outline-none focus:border-[#BFF367] transition-all cursor-pointer"
               >
                 <option value="CRICKET">Cricket Stats</option>
                 <option value="FOOTBALL">Football (Coming Soon)</option>
