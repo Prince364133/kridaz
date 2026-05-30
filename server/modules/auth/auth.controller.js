@@ -87,34 +87,32 @@ export const checkUsername = async (req, res) => {
 export const sendOtp = async (req, res) => {
   const { email, phone } = req.body;
   try {
+    const conditions = [];
+    if (email) conditions.push({ email });
+    if (phone) conditions.push({ phone });
+    
+    if (conditions.length === 0) {
+      return res.status(400).json({ success: false, message: "Email or Phone required" });
+    }
+
     // ── SECURITY BLOOM ─────────────────────────────────────────────────────
-    if (await isOtpBlacklisted(email) || await isOtpBlacklisted(phone)) {
+    if ((email && await isOtpBlacklisted(email)) || (phone && await isOtpBlacklisted(phone))) {
       return res.status(429).json({ success: false, message: "Too many attempts. Please try again later." });
     }
 
     const existingUser = await prisma.user.findFirst({
-      where: {
-        OR: [
-          { email },
-          { phone }
-        ]
-      }
+      where: { OR: conditions }
     });
     
     if (existingUser) {
       return res.status(400).json({ success: false, message: "Email or Phone already registered" });
     }
 
-    const emailOtp = generateOTP();
-    const phoneOtp = generateOTP();
+    const emailOtp = email ? generateOTP() : null;
+    const phoneOtp = phone ? generateOTP() : null;
 
     await prisma.oTP.deleteMany({
-      where: {
-        OR: [
-          { email },
-          { phone }
-        ]
-      }
+      where: { OR: conditions }
     });
 
     await prisma.oTP.create({
@@ -131,16 +129,20 @@ export const sendOtp = async (req, res) => {
     NotificationService.sendOTP({
       phone,
       email,
-      otp: phoneOtp, // or emailOtp, depending on which one you want to track
+      otp: phoneOtp || emailOtp, 
       phoneTemplate: process.env.MSG91_WHATSAPP_OTP_TEMPLATE,
       emailSubject: "Your Kridaz Verification Code",
-      emailHtml: `<p>Your verification code is <strong>${emailOtp}</strong>. It will expire in 10 minutes.</p>`
+      emailHtml: emailOtp ? `<p>Your verification code is <strong>${emailOtp}</strong>. It will expire in 10 minutes.</p>` : null
     });
+
+    let msg = "";
+    if (email && phone) msg = "OTPs sent to your email and WhatsApp successfully";
+    else if (email) msg = "OTP sent to your email successfully";
+    else msg = "OTP sent to your WhatsApp successfully";
 
     return res.status(200).json({ 
       success: true, 
-      message: "OTPs sent to your email and WhatsApp successfully",
-      ...(process.env.NODE_ENV === 'development' || process.env.NODE_ENV === 'test' ? { testOtp: { email: emailOtp, phone: phoneOtp } } : {})
+      message: msg
     });
   } catch (err) {
     logger.error(err.message);

@@ -66,4 +66,23 @@ export const clearNotifications = async (req, res) => {
   }
 };
 
+export const saveDeviceToken = async (req, res) => {
+  const { token } = req.body;
+  try {
+    const { id } = req.user;
+    if (!token) {
+      return res.status(400).json({ success: false, message: "Token is required" });
+    }
+
+    await prisma.user.update({
+      where: { id },
+      data: { fcmToken: token }
+    });
+
+    res.status(200).json({ success: true, message: "Device token saved successfully" });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
 

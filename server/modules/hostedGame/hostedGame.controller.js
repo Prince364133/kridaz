@@ -8,7 +8,7 @@ import WalletService from "../../services/wallet.service.js";
 import logger from "../../utils/logger.js";
 import { getIO } from "../../config/socket.js";
 import { liveStateService } from "../../services/liveState.service.js";
-
+import SocialService from "../../services/social.service.js";
 const fullGameInclude = {
   host: { select: { id: true, name: true, profilePicture: true } },
   turf: { select: { id: true, name: true, city: true, state: true, images: true } },

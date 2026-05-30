@@ -3,7 +3,8 @@ import {
   getMyNotifications, 
   markAsRead, 
   markAllAsRead, 
-  clearNotifications 
+  clearNotifications,
+  saveDeviceToken
 } from "../notification.controller.js";
 import verifyAuth from "../../../middleware/jwt/auth.middleware.js";
 
@@ -53,5 +54,14 @@ router.put("/:id/mark-read", markAsRead);
  *     tags: [Notification]
  */
 router.delete("/clear", clearNotifications);
+
+/**
+ * @swagger
+ * /notification/device-token:
+ *   post:
+ *     summary: Save device token for push notifications
+ *     tags: [Notification]
+ */
+router.post("/device-token", saveDeviceToken);
 
 export default router;
