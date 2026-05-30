@@ -16,10 +16,14 @@ const haversineKm = (lat1, lon1, lat2, lon2) => {
   return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
 };
 
-const TurfCardMobile = ({ turf, distance: distanceProp, compact = false }) => {
-  const [isWishlisted, setIsWishlisted] = useState(false);
+const TurfCardMobile = ({ turf, distance: distanceProp, compact = false, initialWishlisted = false, onUnfavorite }) => {
+  const [isWishlisted, setIsWishlisted] = useState(initialWishlisted);
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
+
+  useEffect(() => {
+    setIsWishlisted(initialWishlisted);
+  }, [initialWishlisted]);
 
   const returnTo = searchParams.get('returnTo');
   const baseTo = `/venue/${turf.id || turf._id}`;
@@ -62,8 +66,12 @@ const TurfCardMobile = ({ turf, distance: distanceProp, compact = false }) => {
     e.stopPropagation();
     const targetId = turf.id || turf._id;
     try {
-      setIsWishlisted(!isWishlisted);
+      const newValue = !isWishlisted;
+      setIsWishlisted(newValue);
       await axiosInstance.post("/api/user/turf/user/like", { turfId: targetId });
+      if (!newValue && onUnfavorite) {
+        onUnfavorite(targetId);
+      }
     } catch (err) {
       setIsWishlisted(isWishlisted);
       console.error("[TELEMETRY] Failed to toggle wishlist like:", err);

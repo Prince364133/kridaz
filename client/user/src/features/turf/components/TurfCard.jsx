@@ -1,13 +1,17 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { MapPin, Star, ChevronLeft, ChevronRight, Zap, Heart, Timer, MessageSquareShare } from "lucide-react";
 import axiosInstance from "@hooks/useAxiosInstance";
 
-const TurfCard = ({ turf, featured = false, distance = "1.2km Away" }) => {
+const TurfCard = ({ turf, featured = false, distance = "1.2km Away", initialWishlisted = false, onUnfavorite }) => {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
-  const [isWishlisted, setIsWishlisted] = useState(false);
+  const [isWishlisted, setIsWishlisted] = useState(initialWishlisted);
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
+
+  useEffect(() => {
+    setIsWishlisted(initialWishlisted);
+  }, [initialWishlisted]);
 
   // Ensure fallback values so we don't crash
   const returnTo = searchParams.get('returnTo');
@@ -40,8 +44,12 @@ const TurfCard = ({ turf, featured = false, distance = "1.2km Away" }) => {
     e.stopPropagation();
     const targetId = turf.id || turf._id;
     try {
-      setIsWishlisted(!isWishlisted);
+      const newValue = !isWishlisted;
+      setIsWishlisted(newValue);
       await axiosInstance.post("/api/user/turf/user/like", { turfId: targetId });
+      if (!newValue && onUnfavorite) {
+        onUnfavorite(targetId);
+      }
     } catch (err) {
       setIsWishlisted(isWishlisted); // Revert state on failure
       console.error("[TELEMETRY] Failed to toggle wishlist like:", err);

@@ -104,7 +104,7 @@ const MyJoinedGames = () => {
     }
   };
 
-  const filteredGames = joinedGames
+  const filteredGames = (joinedGames || [])
     .filter(game => {
       const matchesSearch = 
         game.host?.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -124,7 +124,7 @@ const MyJoinedGames = () => {
   return (
     <div className="min-h-screen bg-neutral-900 text-white p-4 pb-24">
       <div className="max-w-4xl mx-auto mb-8">
-        <h1 className="text-3xl font-black italic tracking-tighter uppercase">MY JOINED MATCHES</h1>
+        <h1 className="text-3xl font-black tracking-tighter font-open-sans text-transparent bg-clip-text bg-gradient-to-r from-[#BFF367] to-[#BFF367] mb-2 uppercase">MY JOINED MATCHES</h1>
         <p className="text-neutral-400" style={SUBHEADING_STYLE}>Games you&apos;ve requested to join or have already joined</p>
       </div>
 
@@ -158,13 +158,13 @@ const MyJoinedGames = () => {
         ) : filteredGames.length === 0 ? (
           <div className="py-20 text-center bg-neutral-800/20 rounded-[8px] border-2 border-dashed border-neutral-800">
             <Trophy size={48} className="mx-auto mb-4 text-neutral-700" />
-            <h3 className="text-xl font-bold">
-              {joinedGames.length === 0 ? "No matches joined yet" : "No matches found"}
+            <h3 className="text-2xl md:text-3xl font-black tracking-tighter font-open-sans text-transparent bg-clip-text bg-gradient-to-r from-[#BFF367] to-[#BFF367] mb-2 uppercase">
+              {joinedGames?.length === 0 ? "No matches joined yet" : "No matches found"}
             </h3>
             <p className="text-neutral-500 mb-6">
-              {joinedGames.length === 0 ? "Explore games hosted by the community and join one!" : "Try adjusting your search filters"}
+              {joinedGames?.length === 0 ? "Explore games hosted by the community and join one!" : "Try adjusting your search filters"}
             </p>
-            {joinedGames.length === 0 && (
+            {joinedGames?.length === 0 && (
               <button onClick={() => window.location.href='/join-games'} className="px-8 py-3 bg-yellow-500 text-black font-bold rounded-[8px]">
                 Find Games
               </button>
@@ -178,9 +178,9 @@ const MyJoinedGames = () => {
               (game.quickSlots?.length || 0);
 
             const joinedSlotsCount = 
-              (game.teams?.teamA?.slots?.filter(s => s.status === 'JOINED' && s.userId).length || 0) + 
-              (game.teams?.teamB?.slots?.filter(s => s.status === 'JOINED' && s.userId).length || 0) + 
-              (game.quickSlots?.filter(s => s.status === 'JOINED' && s.userId).length || 0);
+              (game.teams?.teamA?.slots?.filter(s => s.status === 'JOINED' && s.userId)?.length || 0) + 
+              (game.teams?.teamB?.slots?.filter(s => s.status === 'JOINED' && s.userId)?.length || 0) + 
+              (game.quickSlots?.filter(s => s.status === 'JOINED' && s.userId)?.length || 0);
 
             const perPlayerCharge = game.perPlayerCharge || 0;
             const totalPossibleCoins = totalSlotsCount * perPlayerCharge;
@@ -214,10 +214,10 @@ const MyJoinedGames = () => {
                         </button>
                       )}
                     </div>
-                    <h2 className="text-2xl font-black mt-1 uppercase italic tracking-tighter">
+                    <h2 className="text-2xl font-black mt-1 uppercase tracking-tighter font-open-sans">
                       {game.gameMode === 'QUICK' 
                         ? `${game.gameType} Quick Match` 
-                        : `${game.teams?.teamA?.name || 'TBD'} vs ${game.teams?.teamB?.name || 'TBD'}`}
+                        : <>{game.teams?.teamA?.name || 'TBD'} <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#BFF367] to-[#BFF367]">VS</span> {game.teams?.teamB?.name || 'TBD'}</>}
                     </h2>
                   </div>
                   <div className="text-right">

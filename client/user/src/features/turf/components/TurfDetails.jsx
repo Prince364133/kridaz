@@ -388,79 +388,99 @@ const TurfDetails = () => {
               </div>
             </div>
 
-            {/* Hero Image */}
-            <div
-              className="relative w-full h-[300px] md:h-[500px] overflow-hidden border border-zinc-800 shadow-2xl bg-zinc-900 group"
-              style={{
-                borderRadius: '15px'
-              }}
-            >
-              <AnimatePresence mode="wait">
-                <motion.div
-                  key={activeImageIndex}
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  exit={{ opacity: 0 }}
-                  transition={{ duration: 0.6 }}
-                  className="w-full h-full"
-                >
-                  {mediaItems[activeImageIndex].type === "youtube" ? (
-                    <iframe
-                      src={`https://www.youtube.com/embed/${mediaItems[activeImageIndex].id}?autoplay=1&mute=1&loop=1&playlist=${mediaItems[activeImageIndex].id}&controls=0&showinfo=0&rel=0`}
-                      title="Venue Video"
-                      className="w-full h-full object-cover border-0"
-                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                      allowFullScreen
-                    />
-                  ) : mediaItems[activeImageIndex].type === "video" ? (
-                    <video
-                      src={mediaItems[activeImageIndex].url}
-                      autoPlay
-                      muted
-                      loop
-                      playsInline
-                      className="w-full h-full object-cover"
-                    />
-                  ) : (
-                    <img
-                      src={mediaItems[activeImageIndex].url}
-                      alt={turf.name}
-                      className="w-full h-full object-cover"
-                    />
-                  )}
-                </motion.div>
-              </AnimatePresence>
-
-              {/* Navigation Arrows */}
-              {mediaItems.length > 1 && (
-                <>
-                  <button
-                    onClick={handlePrev}
-                    className="absolute left-4 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-black/40 backdrop-blur-md border border-white/10 flex items-center justify-center text-white opacity-0 group-hover:opacity-100 transition-all hover:bg-[#BFF367] hover:text-black z-30"
-                  >
-                    <ChevronLeft size={20} />
+            {/* Hero Image & Thumbnails */}
+            <div className="space-y-4">
+              <div
+                className="relative w-full h-[300px] md:h-[500px] overflow-hidden border border-zinc-800 shadow-2xl bg-zinc-900 group"
+                style={{
+                  borderRadius: '15px'
+                }}
+              >
+                <div className="absolute top-4 right-4 z-40 flex items-center gap-3">
+                  <button onClick={() => setIsFavorite(!isFavorite)} className={`p-2.5 rounded-full bg-black/40 backdrop-blur-md border ${isFavorite ? 'border-[#BFF367] text-[#BFF367]' : 'border-white/20 text-white'} hover:border-[#BFF367] transition-all`}>
+                    <Heart className={`w-5 h-5 ${isFavorite ? 'fill-current' : ''}`} />
                   </button>
-                  <button
-                    onClick={handleNext}
-                    className="absolute right-4 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-black/40 backdrop-blur-md border border-white/10 flex items-center justify-center text-white opacity-0 group-hover:opacity-100 transition-all hover:bg-[#BFF367] hover:text-black z-30"
-                  >
-                    <ChevronRight size={20} />
+                  <button onClick={handleShare} className="p-2.5 rounded-full bg-black/40 backdrop-blur-md border border-white/20 text-white hover:border-[#BFF367] transition-all">
+                    <Share2 className="w-5 h-5" />
                   </button>
-                </>
-              )}
+                </div>
+                <AnimatePresence mode="wait">
+                  <motion.div
+                    key={activeImageIndex}
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    transition={{ duration: 0.6 }}
+                    className="w-full h-full"
+                  >
+                    {mediaItems[activeImageIndex].type === "youtube" ? (
+                      <iframe
+                        src={`https://www.youtube.com/embed/${mediaItems[activeImageIndex].id}?autoplay=1&mute=1&loop=1&playlist=${mediaItems[activeImageIndex].id}&controls=0&showinfo=0&rel=0`}
+                        title="Venue Video"
+                        className="w-full h-full object-cover border-0"
+                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                        allowFullScreen
+                      />
+                    ) : mediaItems[activeImageIndex].type === "video" ? (
+                      <video
+                        src={mediaItems[activeImageIndex].url}
+                        autoPlay
+                        muted
+                        loop
+                        playsInline
+                        className="w-full h-full object-cover"
+                      />
+                    ) : (
+                      <img
+                        src={mediaItems[activeImageIndex].url}
+                        alt={turf.name}
+                        className="w-full h-full object-cover"
+                      />
+                    )}
+                  </motion.div>
+                </AnimatePresence>
 
-              {/* Image Indicators */}
-              <div className="absolute bottom-6 left-1/2 -translate-x-1/2 flex gap-2 z-20">
-                {mediaItems.map((_, idx) => (
-                  <button
-                    key={idx}
-                    onClick={() => setActiveImageIndex(idx)}
-                    className={`h-1.5 rounded-full transition-all duration-300 ${activeImageIndex === idx ? "w-8 bg-[#BFF367]" : "w-2 bg-white/30"}`}
-                  />
-                ))}
+                {/* Navigation Arrows */}
+                {mediaItems.length > 1 && (
+                  <>
+                    <button
+                      onClick={handlePrev}
+                      className="absolute left-4 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-black/40 backdrop-blur-md border border-white/10 flex items-center justify-center text-white opacity-0 group-hover:opacity-100 transition-all hover:bg-[#BFF367] hover:text-black z-30"
+                    >
+                      <ChevronLeft size={20} />
+                    </button>
+                    <button
+                      onClick={handleNext}
+                      className="absolute right-4 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-black/40 backdrop-blur-md border border-white/10 flex items-center justify-center text-white opacity-0 group-hover:opacity-100 transition-all hover:bg-[#BFF367] hover:text-black z-30"
+                    >
+                      <ChevronRight size={20} />
+                    </button>
+                  </>
+                )}
+
+                <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent pointer-events-none" />
               </div>
 
-              <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent pointer-events-none" />
+              {/* Thumbnails */}
+              {mediaItems.length > 1 && (
+                <div className="flex items-center gap-3 overflow-x-auto pb-2 custom-scrollbar">
+                  {mediaItems.map((media, idx) => (
+                    <button
+                      key={idx}
+                      onClick={() => setActiveImageIndex(idx)}
+                      className={`relative flex-shrink-0 w-24 h-16 md:w-32 md:h-20 rounded-[8px] overflow-hidden border-2 transition-all duration-300 ${activeImageIndex === idx ? 'border-[#BFF367]' : 'border-transparent opacity-60 hover:opacity-100'}`}
+                    >
+                      {media.type === "youtube" ? (
+                        <img src={`https://img.youtube.com/vi/${media.id}/mqdefault.jpg`} alt="thumbnail" className="w-full h-full object-cover" />
+                      ) : media.type === "video" ? (
+                        <video src={media.url} className="w-full h-full object-cover" />
+                      ) : (
+                        <img src={media.url} alt="thumbnail" className="w-full h-full object-cover" />
+                      )}
+                    </button>
+                  ))}
+                </div>
+              )}
             </div>
 
             {/* Venue Details Card */}
@@ -481,44 +501,43 @@ const TurfDetails = () => {
                     </div>
                   </div>
                 </div>
-                <div className="flex items-center gap-3 w-full sm:w-auto justify-start sm:justify-end">
-                  <button onClick={() => setIsFavorite(!isFavorite)} className={`p-3 rounded-[8px] bg-zinc-900/50 border ${isFavorite ? 'border-[#BFF367] text-[#BFF367]' : 'border-zinc-800 text-zinc-400'} hover:border-[#BFF367] transition-all`}>
-                    <Heart className={`w-5 h-5 ${isFavorite ? 'fill-current' : ''}`} />
-                  </button>
-                  <button onClick={handleShare} className="p-3 rounded-[8px] bg-zinc-900/50 border border-zinc-800 text-zinc-400 hover:border-[#BFF367] transition-all">
-                    <Share2 className="w-5 h-5" />
-                  </button>
-                </div>
               </div>
 
-              <div className="flex flex-wrap items-start gap-12">
+              <div className="grid grid-cols-2 gap-4 border border-zinc-800 rounded-[12px] p-4 sm:p-6 bg-[#0a0a0c]">
                 {/* Sports Available */}
-                <div className="space-y-4">
-                  <h2 className="text-sm font-inter font-bold uppercase tracking-[0.15em] text-white">
-                    Sports available
-                  </h2>
-                  <div className="flex flex-wrap gap-3">
+                <div className="space-y-4 border-r border-zinc-800 pr-4">
+                  <div className="flex items-center gap-3">
+                    <span className="text-[11px] sm:text-xs font-inter font-bold uppercase tracking-[0.15em] text-white">
+                      AVAILABLE
+                    </span>
+                  </div>
+                  <div className="flex flex-wrap gap-4">
                     {turf.sportTypes?.map((sport, i) => (
-                      <div key={i} className="px-4 py-1.5 rounded-[6px] bg-zinc-900/50 border border-zinc-800 flex items-center gap-2 text-white group hover:border-[#BFF367] transition-all duration-300">
-                        <div className="w-1.5 h-1.5 rounded-full bg-gradient-to-r from-[#BFF367] to-[#BFF367]" />
-                        <span className="text-[10px] font-bold uppercase tracking-wider font-inter">{sport}</span>
+                      <div key={i} className="flex items-center gap-2 text-white">
+                        <div className="w-1.5 h-1.5 rounded-full bg-[#BFF367]" />
+                        <span className="text-[10px] sm:text-[11px] font-bold uppercase tracking-wider font-inter">{sport}</span>
                       </div>
                     ))}
                     {!turf.sportTypes?.length && (
-                      <div className="px-4 py-1.5 rounded-[6px] bg-zinc-900/50 border border-zinc-800 flex items-center gap-2 text-zinc-400">
-                        <Activity className="w-3 h-3" />
-                        <span className="text-[10px] font-bold uppercase tracking-wider font-inter">Multisport</span>
+                      <div className="flex items-center gap-2 text-zinc-400">
+                        <div className="w-1.5 h-1.5 rounded-full bg-[#BFF367]" />
+                        <span className="text-[10px] sm:text-[11px] font-bold uppercase tracking-wider font-inter">Multisport</span>
                       </div>
                     )}
                   </div>
                 </div>
 
                 {/* Ground Composition */}
-                <div className="space-y-4">
-                  <h2 className="text-sm font-inter font-bold uppercase tracking-[0.15em] text-white">Ground Composition</h2>
-                  <div className="flex flex-wrap gap-3">
-                    <div className="px-4 py-1.5 rounded-[6px] bg-zinc-900 border border-zinc-800 flex items-center justify-center">
-                      <span className="text-[10px] font-black uppercase tracking-widest text-white font-inter">
+                <div className="space-y-4 pl-2 sm:pl-4">
+                  <div className="flex items-center gap-3">
+                    <span className="text-[11px] sm:text-xs font-inter font-bold uppercase tracking-[0.15em] text-white">
+                      COMPOSITION
+                    </span>
+                  </div>
+                  <div className="flex flex-wrap gap-4">
+                    <div className="flex items-center gap-2 text-white">
+                      <div className="w-1.5 h-1.5 rounded-full bg-[#BFF367]" />
+                      <span className="text-[10px] sm:text-[11px] font-bold uppercase tracking-widest font-inter">
                         {turf.turfType || "Natural Grass"}
                       </span>
                     </div>
@@ -632,7 +651,7 @@ const TurfDetails = () => {
             {/* Reviews Section */}
             <div className="pt-8 border-t border-zinc-900 mt-8">
               <div className="flex items-center justify-between mb-6">
-                <h2 className="text-xl md:text-2xl font-black uppercase tracking-tighter">Athlete Reviews</h2>
+                <h2 className="text-xl md:text-2xl font-black uppercase tracking-widest font-open-sans">Athlete Reviews</h2>
                 <div className="flex items-center gap-2 font-black">
                   <Star className="w-5 h-5" style={{ stroke: "url(#theme-gradient)", fill: "url(#theme-gradient)" }} />
                   <span className="bg-gradient-to-r from-[#BFF367] to-[#BFF367] inline-block text-transparent bg-clip-text text-xl md:text-2xl">{averageRating ? averageRating.toFixed(1) : "5.0"}</span>
@@ -695,10 +714,10 @@ const TurfDetails = () => {
 
         {/* Floating Book Now Button */}
         {!isBookingModalOpen && (
-          <div className="fixed bottom-24 md:bottom-6 left-1/2 -translate-x-1/2 z-[90] w-[90%] max-w-sm lg:hidden">
+          <div className="fixed bottom-16 md:bottom-4 right-4 z-[90] lg:hidden">
             <button
               onClick={() => setIsBookingModalOpen(true)}
-              className="w-full py-4 rounded-full bg-gradient-to-r from-[#BFF367] to-[#BFF367] text-black font-black uppercase tracking-widest shadow-[0_10px_30px_rgba(191,243,103,0.3)] hover:scale-105 transition-transform flex items-center justify-center gap-2"
+              className="px-6 py-3 rounded-[4px] bg-gradient-to-r from-[#BFF367] to-[#BFF367] text-black font-black uppercase tracking-widest shadow-[0_10px_30px_rgba(191,243,103,0.3)] hover:scale-105 transition-transform flex items-center justify-center gap-2"
             >
               Book Venue Now <ArrowRight size={20} />
             </button>

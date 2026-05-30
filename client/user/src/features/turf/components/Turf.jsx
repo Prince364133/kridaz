@@ -5,6 +5,7 @@ import useTurfData from "../hooks/useTurfData.jsx";
 import SearchTurf from "@components/search/SearchTurf.jsx";
 import { Trophy, MapPin, Loader2, Sparkles } from "lucide-react";
 import useRecommendations from "@hooks/useRecommendations";
+import axiosInstance from "@hooks/useAxiosInstance";
 
 /**
  * Turf — Venue discovery page.
@@ -29,6 +30,23 @@ const Turf = () => {
     lng: userLocation?.lng,
     limit: 4
   });
+
+  const [savedTurfIds, setSavedTurfIds] = useState(new Set());
+
+  useEffect(() => {
+    const fetchSaved = async () => {
+      try {
+        const res = await axiosInstance.get('/api/user/turf/saved');
+        if (res.data.success) {
+          const ids = new Set(res.data.data.map(v => v._id || v.id));
+          setSavedTurfIds(ids);
+        }
+      } catch (err) {
+        console.error("Failed to fetch saved turfs:", err);
+      }
+    };
+    fetchSaved();
+  }, []);
 
   // ── Auto-detect location ──────────────────────────────────────────
   const detectLocation = () => {
@@ -158,6 +176,7 @@ const Turf = () => {
                       ? `${(turf.distance / 1000).toFixed(1)} km`
                       : null
                   }
+                  initialWishlisted={savedTurfIds.has(turf._id || turf.id)}
                 />
               </div>
             ))}
@@ -207,6 +226,7 @@ const Turf = () => {
                         key={t.id || t._id} 
                         turf={t} 
                         distance={t.distance ? `${(t.distance / 1000).toFixed(1)} km Away` : "Nearby"}
+                        initialWishlisted={savedTurfIds.has(t._id || t.id)}
                       />
                     ))}
                   </div>

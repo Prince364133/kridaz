@@ -20,7 +20,8 @@ import useBookingPass from "../hooks/useBookingPass";
 import { motion } from "framer-motion";
 import useSimilarRecommendations from "@hooks/useSimilarRecommendations";
 import { TurfCard } from "@features/turf";
-import html2canvas from "html2canvas";
+import { toJpeg } from "html-to-image";
+import { jsPDF } from "jspdf";
 import toast from "react-hot-toast";
 
 const BookingPass = () => {
@@ -30,18 +31,30 @@ const BookingPass = () => {
 
   const handleDownload = async () => {
     if (!passRef.current) return;
+    const toastId = toast.loading("Generating pass...");
     try {
-      const toastId = toast.loading("Generating pass...");
-      const canvas = await html2canvas(passRef.current, { scale: 2, useCORS: true, backgroundColor: "#0A0A0A" });
-      const image = canvas.toDataURL("image/png");
-      const link = document.createElement("a");
-      link.href = image;
-      link.download = `Booking_Pass_${booking?.turf?.name?.replace(/\s+/g, '_') || 'Kridaz'}.png`;
-      link.click();
+      const imgData = await toJpeg(passRef.current, { quality: 0.95, pixelRatio: 2, backgroundColor: "#0A0A0A" });
+      
+      const img = new Image();
+      img.src = imgData;
+      await new Promise((resolve) => (img.onload = resolve));
+      
+      const width = img.width / 2;
+      const height = img.height / 2;
+      
+      const pdf = new jsPDF({
+        orientation: "portrait",
+        unit: "px",
+        format: [width, height]
+      });
+      
+      pdf.addImage(imgData, "JPEG", 0, 0, width, height);
+      pdf.save(`Booking_Pass_${booking?.turf?.name?.replace(/\s+/g, '_') || 'Kridaz'}.pdf`);
+      
       toast.success("Pass downloaded successfully!", { id: toastId });
     } catch (error) {
       console.error("Error generating pass:", error);
-      toast.error("Failed to download pass.");
+      toast.error(`Failed to download: ${error.message || "Unknown error"}`, { id: toastId });
     }
   };
 
@@ -134,6 +147,7 @@ const BookingPass = () => {
             <div className="relative h-48 sm:h-56">
               <img 
                 src={turf.images?.[0] || turf.image || "/banner-1.png"} 
+                crossOrigin="anonymous"
                 className="w-full h-full object-cover" 
                 alt={turf.name}
               />
@@ -334,7 +348,7 @@ const BookingPass = () => {
         <div className="mt-8 grid grid-cols-2 gap-4">
            <button onClick={handleDownload} className="w-full bg-zinc-900 border border-zinc-800 text-white h-14 rounded-[8px] font-bold uppercase text-[10px] tracking-widest hover:bg-zinc-800 transition-all flex items-center justify-center gap-2">
               <Download size={14} />
-              Save Pass Image
+              Save Pass PDF
            </button>
            <button 
              onClick={() => window.print()}

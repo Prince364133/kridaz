@@ -286,11 +286,6 @@ const TurfBookingHistory = () => {
                                 Dispute
                               </button>
                             )}
-                            {booking.status === "COMPLETED" && (
-                              <button onClick={() => openReviewModal(booking.turf._id)} className="px-4 py-2 rounded-[6px] bg-white/5 border border-white/10 hover:border-[#CCFF00]/50 hover:text-[#CCFF00] text-gray-400 text-[9px] font-black uppercase tracking-widest transition-colors flex items-center gap-1.5">
-                                Review
-                              </button>
-                            )}
                           </div>
                         </div>
 
@@ -304,7 +299,13 @@ const TurfBookingHistory = () => {
                             )}
                           </div>
                           
-                          <div className="mt-4 md:mt-0">
+                          <div className="mt-4 md:mt-0 w-full flex items-center justify-between md:justify-end gap-3">
+                            <button 
+                               onClick={() => openReviewModal(booking.turf._id || booking.turf.id)} 
+                               className="flex items-center gap-1.5 px-4 py-1.5 rounded-[6px] text-[9px] font-black uppercase tracking-widest border border-white/10 text-gray-400 bg-white/5 hover:border-[#CCFF00]/50 hover:text-[#CCFF00] transition-colors"
+                            >
+                               <Star size={12} /> Rate Venue
+                            </button>
                             <div className="px-4 py-1.5 rounded text-[9px] font-black uppercase tracking-widest" style={{ color: sm.color, backgroundColor: sm.bg, border: `1px solid ${sm.border}` }}>
                               {sm.label}
                             </div>

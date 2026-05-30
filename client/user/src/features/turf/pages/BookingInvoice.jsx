@@ -9,7 +9,7 @@ const BookingInvoice = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  const invoiceDownloadUrl = `${import.meta.env.VITE_API_URL}/api/user/booking/invoice/${id}`;
+  const invoiceDownloadUrl = `${import.meta.env.VITE_API_URL || ""}/api/user/booking/invoice/${id}`;
 
   useEffect(() => {
     const fetchBooking = async () => {

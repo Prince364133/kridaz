@@ -1059,6 +1059,72 @@ export const toggleTurfLike = async (req, res) => {
   }
 };
 
+// Fetch user's saved/liked turfs
+export const getSavedTurfs = async (req, res) => {
+  const userId = req.user.id;
+
+  try {
+    const savedTurfs = await prisma.turfLike.findMany({
+      where: { userId },
+      include: {
+        turf: {
+          include: {
+            owner: {
+              include: {
+                user: {
+                  select: {
+                    id: true,
+                    name: true,
+                    username: true,
+                    email: true,
+                    phone: true,
+                    profilePicture: true
+                  }
+                }
+              }
+            },
+            reviews: {
+              select: { rating: true }
+            }
+          }
+        }
+      },
+      orderBy: { createdAt: 'desc' }
+    });
+
+    const formattedTurfs = savedTurfs
+      .filter(like => like.turf && like.turf.isActive && like.turf.status === "approved")
+      .map(like => {
+        const t = like.turf;
+        const totalRating = t.reviews.reduce((acc, r) => acc + r.rating, 0);
+        const avgRating = t.reviews.length > 0 ? (totalRating / t.reviews.length) : 0;
+        
+        return {
+          ...t,
+          _id: t.id,
+          avgRating,
+          owner: t.owner ? {
+            id: t.owner.id,
+            name: t.owner.user?.name || '',
+            email: t.owner.user?.email || '',
+            phoneNumber: t.owner.user?.phone || '',
+            profileImage: t.owner.user?.profilePicture || null,
+            userId: t.owner.user ? {
+              id: t.owner.user.id,
+              name: t.owner.user.name,
+              username: t.owner.user.username,
+              profilePicture: t.owner.user.profilePicture
+            } : null
+          } : null
+        };
+      });
+
+    return res.status(200).json({ success: true, count: formattedTurfs.length, data: formattedTurfs });
+  } catch (err) {
+    return res.status(500).json({ success: false, message: err.message });
+  }
+};
+
 // Record turf share interaction
 export const recordTurfShare = async (req, res) => {
   const { turfId } = req.body;

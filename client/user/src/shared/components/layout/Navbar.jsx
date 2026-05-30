@@ -181,7 +181,7 @@ const Navbar = () => {
           </div>
 
           {/* ACTIONS */}
-          <div className="flex items-center gap-3 sm:gap-6 lg:fixed lg:top-4 lg:right-6 lg:z-[100]">
+          <div className={`flex items-center gap-3 sm:gap-6 lg:fixed lg:top-4 lg:right-6 lg:z-[100] transition-all duration-500 ${scrollDirection === "down" ? "lg:-translate-y-[200%] lg:opacity-0 lg:pointer-events-none" : "lg:translate-y-0 lg:opacity-100"}`}>
             {!isLoggedIn ? (
               <>
                 <Link

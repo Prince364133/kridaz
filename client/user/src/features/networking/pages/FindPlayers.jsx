@@ -503,7 +503,7 @@ const FindPlayers = () => {
   }, [isTrackingActive, isLocationSharing, socket, activeTab]);
 
   useEffect(() => {
-    if (activeTab === 'players' && snapState !== 'COLLAPSED') {
+    if (window.innerWidth < 1024 && activeTab === 'players' && snapState !== 'COLLAPSED') {
       document.body.style.overflow = 'hidden';
     } else {
       document.body.style.overflow = 'unset';
@@ -852,7 +852,7 @@ const FindPlayers = () => {
   };
 
   return (
-    <div className={`bg-black text-white flex flex-col ${activeTab === "players" ? "fixed inset-0 lg:left-64 overflow-hidden pt-16 lg:pt-0" : "min-h-screen overflow-y-auto no-scrollbar"}`}>
+    <div className={`bg-black text-white flex flex-col ${activeTab === "players" ? "fixed inset-0 lg:static lg:min-h-screen overflow-hidden lg:overflow-visible pt-16 lg:pt-0" : "min-h-screen overflow-y-auto no-scrollbar"}`}>
       
       {activeTab === "players" && (
         <>
@@ -987,7 +987,7 @@ const FindPlayers = () => {
       )}
 
       {/* BOTTOM PANEL: Feed */}
-      <div className={`flex-1 ${activeTab === "players" ? "overflow-y-auto no-scrollbar pb-24 pt-6" : "pb-12 pt-2"} px-4 md:px-8 bg-black`}>
+      <div className={`flex-1 ${activeTab === "players" ? "overflow-y-auto lg:overflow-visible no-scrollbar pb-24 pt-6" : "pb-12 pt-2"} px-4 md:px-8 bg-black`}>
         <div className={`max-w-6xl mx-auto space-y-6 ${activeTab === "players" ? "mt-6" : "mt-2"}`}>
           
           {/* Tab Switcher */}

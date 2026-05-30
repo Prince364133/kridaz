@@ -759,7 +759,7 @@ export default function FindProfessionals() {
                     Initiating Match...
                   </>
                 ) : (
-                  "⚡ FIND PRO'S"
+                  "FIND PROFESSIONALS"
                 )}
               </button>
 
