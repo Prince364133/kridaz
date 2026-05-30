@@ -65,14 +65,15 @@ const ReelPlayer = ({ reelId, hlsUrl, isVisible, poster }) => {
       if (Hls.isSupported()) {
         const hls = new Hls({
           capLevelToPlayerSize: true,
-          autoStartLoad: true
+          autoStartLoad: false // Don't download video segments until visible
         });
         hlsRef.current = hls;
         hls.loadSource(src);
         hls.attachMedia(video);
         hls.on(Hls.Events.MANIFEST_PARSED, () => {
-          setIsLoaded(true);
+          // Manifest loaded
           if (isVisible) {
+            hls.startLoad();
             video.play().catch(() => setIsPlaying(false));
           }
         });
@@ -101,20 +102,17 @@ const ReelPlayer = ({ reelId, hlsUrl, isVisible, poster }) => {
         hlsRef.current.startLoad(); // Start loading segments for HLS
       }
       
-      if (video.readyState >= 2) {
-        const playPromise = video.play();
-        if (playPromise !== undefined) {
-          playPromise
-            .then(() => setIsPlaying(true))
-            .catch(() => setIsPlaying(false));
-        }
+      const playPromise = video.play();
+      if (playPromise !== undefined) {
+        playPromise
+          .then(() => setIsPlaying(true))
+          .catch(() => setIsPlaying(false));
       }
     } else {
       video.pause();
       setIsPlaying(false);
-      if (hlsRef.current) {
-        hlsRef.current.stopLoad(); // Pause loading segments when hidden
-      }
+      // We don't call stopLoad() here because it would cancel the initial 
+      // manifest request for off-screen reels, causing them to break.
     }
   }, [isVisible]);
 

@@ -31,7 +31,8 @@ const StoryViewer = ({ storyGroup, onClose, onDelete, currentUser, isAdmin, init
  if (!storyGroup) return null;
 
  const currentStory = storyGroup.stories[currentStoryIndex];
- const isOwner = currentUser && (storyGroup.user._id === currentUser._id || storyGroup.user === currentUser._id);
+ const getUserId = (u) => u?._id || u?.id;
+ const isOwner = currentUser && getUserId(storyGroup.user) === getUserId(currentUser);
 
  const minSwipeDistance = 50;
 
