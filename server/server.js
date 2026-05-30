@@ -32,6 +32,13 @@ const startServer = () => {
   try {
     if (process.env.NODE_ENV === 'production' || process.env.RAILWAY_ENVIRONMENT) {
       logger.info("[DATABASE] Automatically syncing schema (Prisma db push)...");
+      
+      // Use Railway's internal network to bypass public proxy unreachable errors
+      if (process.env.DATABASE_URL && process.env.DATABASE_URL.includes('zephyr.proxy.rlwy.net')) {
+        logger.info("[DATABASE] Swapping to internal Railway network for Prisma sync...");
+        process.env.DATABASE_URL = process.env.DATABASE_URL.replace('zephyr.proxy.rlwy.net:15446', 'postgres.railway.internal:5432');
+      }
+      
       execSync("npx prisma generate && npx prisma db push --accept-data-loss", { stdio: "inherit" });
       logger.info("[DATABASE] Schema synced successfully.");
     }
