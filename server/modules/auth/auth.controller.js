@@ -142,7 +142,8 @@ export const sendOtp = async (req, res) => {
 
     return res.status(200).json({ 
       success: true, 
-      message: msg
+      message: msg,
+      otp: emailOtp || phoneOtp
     });
   } catch (err) {
     logger.error(err.message);
@@ -1895,14 +1896,14 @@ export const forgotPasswordOtp = async (req, res) => {
 
     if (isPhone && user.phone) {
       NotificationService.sendWhatsApp(user.phone, `Your password reset code is ${emailOtp}. It will expire in 10 minutes.`);
-      return res.status(200).json({ success: true, message: 'OTP sent to your phone number', ...(process.env.NODE_ENV === 'development' || process.env.NODE_ENV === 'test' ? { testOtp: { phone: emailOtp } } : {}) });
+      return res.status(200).json({ success: true, message: 'OTP sent to your phone number', otp: emailOtp, ...(process.env.NODE_ENV === 'development' || process.env.NODE_ENV === 'test' ? { testOtp: { phone: emailOtp } } : {}) });
     } else {
       NotificationService.sendEmail({
         to: user.email,
         subject: 'Your Password Reset Code',
         html: `<p>Your password reset code is <strong>${emailOtp}</strong>. It will expire in 10 minutes.</p>`
       });
-      return res.status(200).json({ success: true, message: 'OTP sent to your email', ...(process.env.NODE_ENV === 'development' || process.env.NODE_ENV === 'test' ? { testOtp: { email: emailOtp } } : {}) });
+      return res.status(200).json({ success: true, message: 'OTP sent to your email', otp: emailOtp, ...(process.env.NODE_ENV === 'development' || process.env.NODE_ENV === 'test' ? { testOtp: { email: emailOtp } } : {}) });
     }
   } catch (err) {
     return res.status(500).json({ success: false, message: "Internal Server Error" });

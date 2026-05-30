@@ -7,10 +7,12 @@ import toast from "react-hot-toast";
 import axiosInstance from "@hooks/useAxiosInstance";
 import { useDispatch } from "react-redux";
 import { login } from "@redux/slices/authSlice";
+import { Capacitor } from "@capacitor/core";
 
 const SUBHEADING_STYLE = { fontFamily: "'Inter 28pt Light', sans-serif", fontWeight: 300 };
 
 const SignUp = () => {
+  const [sentOtp, setSentOtp] = useState("");
   const [mounted, setMounted] = useState(false);
   const [authMode, setAuthMode] = useState('unified'); // 'unified', 'email', 'phone'
   const [step, setStep] = useState(1); // 1: Input, 2: OTP, 3: Password
@@ -79,6 +81,21 @@ const SignUp = () => {
       const payload = { phone: formattedPhone };
       const res = await axiosInstance.post('/api/user/auth/send-otp', payload);
       toast.success(res.data.message);
+      if (res.data.otp) {
+        setSentOtp(res.data.otp);
+        if (Capacitor.isNativePlatform()) {
+          toast((t) => (
+            <div className="flex flex-col gap-1 p-1">
+              <div className="font-bold text-sm text-black flex items-center gap-1">
+                🔔 Kridaz Notification
+              </div>
+              <div className="text-xs text-gray-600">
+                Your verification code is: <strong className="text-black text-sm">{res.data.otp}</strong>
+              </div>
+            </div>
+          ), { position: 'top-center', duration: 8000 });
+        }
+      }
       setStep(2);
     } catch (err) {
       toast.error(err.response?.data?.message || "Failed to send OTP");
@@ -285,6 +302,12 @@ const SignUp = () => {
                           className="w-full bg-white/[0.03] border border-white/5 focus:border-[#BFF367]/50 rounded-[8px] h-14 pl-12 pr-4 text-white text-sm placeholder:text-white/20 outline-none transition-all tracking-[0.5em] font-mono"
                         />
                       </div>
+                      {!Capacitor.isNativePlatform() && sentOtp && (
+                        <div className="bg-white/5 border border-white/10 rounded-[8px] p-3 mt-2 text-center">
+                          <p className="text-xs text-white/60">Developer Message</p>
+                          <p className="text-sm text-[#BFF367] font-mono mt-1">Your OTP code is: <strong>{sentOtp}</strong></p>
+                        </div>
+                      )}
                     </div>
                   )}
 

@@ -1,4 +1,4 @@
-﻿import React from "react";
+import React from "react";
 import { useGoogleLogin } from "@react-oauth/google";
 import { Loader2 } from "lucide-react";
 
@@ -12,6 +12,8 @@ const GoogleIcon = () => (
   </svg>
 );
 
+import { Capacitor } from "@capacitor/core";
+
 const GoogleAuthButton = ({ onSuccess, onError, mode = "signin", isLoading = false }) => {
   const login = useGoogleLogin({
     onSuccess: (tokenResponse) => {
@@ -21,6 +23,12 @@ const GoogleAuthButton = ({ onSuccess, onError, mode = "signin", isLoading = fal
       if (onError) onError();
     },
   });
+
+  // Google does not allow web-based OAuth inside WebViews (Capacitor mobile container).
+  // Hide it on Android/iOS native to prevent disallowed useragent error.
+  if (Capacitor.isNativePlatform()) {
+    return null;
+  }
 
   return (
     <button

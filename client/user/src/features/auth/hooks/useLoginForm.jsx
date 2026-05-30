@@ -7,6 +7,7 @@ import toast from "react-hot-toast";
 import { useDispatch } from "react-redux";
 import {login} from "@redux/slices/authSlice";
 import { useNavigate } from "react-router-dom";
+import { Capacitor } from "@capacitor/core";
 
 const loginSchema = yup.object().shape({
   email: yup
@@ -26,6 +27,7 @@ const loginSchema = yup.object().shape({
 const useLoginForm = () => {
   const [loading, setLoading] = useState(false);
   const [showOtpInput, setShowOtpInput] = useState(false);
+  const [sentOtp, setSentOtp] = useState("");
   const [accountNotFound, setAccountNotFound] = useState(false);
   const dispatch = useDispatch();
   const navigate = useNavigate();
@@ -79,6 +81,21 @@ const useLoginForm = () => {
       if (result.requiresOtp) {
         setShowOtpInput(true);
         setLoading(false);
+        if (result.otp) {
+          setSentOtp(result.otp);
+          if (Capacitor.isNativePlatform()) {
+            toast((t) => (
+              <div className="flex flex-col gap-1 p-1">
+                <div className="font-bold text-sm text-black flex items-center gap-1">
+                  🔔 Kridaz Notification
+                </div>
+                <div className="text-xs text-gray-600">
+                  Your verification code is: <strong className="text-black text-sm">{result.otp}</strong>
+                </div>
+              </div>
+            ), { position: 'top-center', duration: 8000 });
+          }
+        }
         toast.success("OTP sent to your email and WhatsApp");
         return;
       }
@@ -161,6 +178,7 @@ const useLoginForm = () => {
     onSubmit,
     loading,
     showOtpInput,
+    sentOtp,
     handleGoogleSuccess,
     handleGoogleError,
     accountNotFound,
