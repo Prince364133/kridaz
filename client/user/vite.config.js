@@ -13,7 +13,7 @@ export default defineConfig(({ mode }) => {
   
   return {
     define: {
-      'import.meta.env.VITE_API_URL': JSON.stringify(isProduction ? 'https://kridaz-api-production-f5ca.up.railway.app' : 'http://localhost:6001'),
+      'import.meta.env.VITE_API_URL': JSON.stringify(isProduction ? 'https://prod-api.kridaz.com' : 'http://localhost:6001'),
     },
     plugins: [
       react(),
