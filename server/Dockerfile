@@ -39,4 +39,4 @@ COPY --from=builder /app/server ./server
 
 WORKDIR /app/server
 EXPOSE 4000
-CMD ["node", "server.js"]
+CMD ["pnpm", "run", "start"]
