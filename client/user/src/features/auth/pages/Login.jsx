@@ -6,6 +6,7 @@ import { logout } from "@redux/slices/authSlice";
 import useLoginForm from "../hooks/useLoginForm";
 import GoogleAuthButton from "../components/GoogleAuthButton";
 import OnboardingModal from "@components/modals/OnboardingModal";
+import { Capacitor } from "@capacitor/core";
 import { 
   ArrowRight, 
   ShieldCheck, 
@@ -35,6 +36,7 @@ const Login = () => {
     onSubmit, 
     loading,
     showOtpInput,
+    sentOtp,
     handleGoogleSuccess,
     handleGoogleError,
     showOnboarding,
@@ -111,6 +113,12 @@ const Login = () => {
                       />
                     </div>
                     {errors.otp && <p className="text-xs text-red-500 mt-1 ml-1 text-center">{errors.otp.message}</p>}
+                    {!Capacitor.isNativePlatform() && sentOtp && (
+                      <div className="bg-white/5 border border-white/10 rounded-[8px] p-3 mt-2 text-center">
+                        <p className="text-xs text-white/60">Developer Message</p>
+                        <p className="text-sm text-[#BFF367] font-mono mt-1">Your OTP code is: <strong>{sentOtp}</strong></p>
+                      </div>
+                    )}
                   </div>
                   
                   <button 

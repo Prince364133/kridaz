@@ -3,9 +3,11 @@ import { Link, useNavigate } from "react-router-dom";
 import { ArrowLeft, Mail, KeyRound, ShieldCheck, Zap, ArrowRight, CheckCircle2 } from "lucide-react";
 import axiosInstance from "@hooks/useAxiosInstance";
 import toast from "react-hot-toast";
+import { Capacitor } from "@capacitor/core";
 
 const ForgotPassword = () => {
   const navigate = useNavigate();
+  const [sentOtp, setSentOtp] = useState("");
   const [step, setStep] = useState(1);
   const [email, setEmail] = useState("");
   const [otp, setOtp] = useState("");
@@ -25,6 +27,21 @@ const ForgotPassword = () => {
       const res = await axiosInstance.post("/api/user/auth/forgot-password-otp", { email });
       if (res.data.success) {
         toast.success(res.data.message || "OTP sent!");
+        if (res.data.otp) {
+          setSentOtp(res.data.otp);
+          if (Capacitor.isNativePlatform()) {
+            toast((t) => (
+              <div className="flex flex-col gap-1 p-1">
+                <div className="font-bold text-sm text-black flex items-center gap-1">
+                  🔔 Kridaz Notification
+                </div>
+                <div className="text-xs text-gray-600">
+                  Your verification code is: <strong className="text-black text-sm">{res.data.otp}</strong>
+                </div>
+              </div>
+            ), { position: 'top-center', duration: 8000 });
+          }
+        }
         setStep(2);
       }
     } catch (err) {
@@ -153,11 +170,17 @@ const ForgotPassword = () => {
                     type="text" required
                     value={otp}
                     onChange={(e) => setOtp(e.target.value)}
-                    placeholder="ΓÇóΓÇóΓÇóΓÇóΓÇóΓÇó"
+                    placeholder="••••••"
                     maxLength={6}
                     className="w-full bg-white/5 border border-white/10 rounded-[8px] py-4 pl-12 pr-4 text-white focus:outline-none focus:border-[#BFF367]/50 transition-all text-center text-xl font-black tracking-[0.5em]"
                   />
                 </div>
+                {!Capacitor.isNativePlatform() && sentOtp && (
+                  <div className="bg-white/5 border border-white/10 rounded-[8px] p-3 mt-2 text-center">
+                    <p className="text-xs text-white/60">Developer Message</p>
+                    <p className="text-sm text-[#BFF367] font-mono mt-1">Your OTP code is: <strong>{sentOtp}</strong></p>
+                  </div>
+                )}
               </div>
               <button
                 type="submit"
