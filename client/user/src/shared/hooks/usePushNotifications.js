@@ -27,10 +27,18 @@ export const usePushNotifications = (isLoggedIn) => {
         await PushNotifications.register();
 
         // On success, we should be able to receive notifications
-        PushNotifications.addListener('registration', (token) => {
+        PushNotifications.addListener('registration', async (token) => {
           if (!isMounted) return;
           console.log('Push registration success, token: ' + token.value);
-          // TODO: Send token to your backend API here
+          try {
+            const axiosInstance = (await import('@hooks/useAxiosInstance')).default;
+            await axiosInstance.post('/api/user/notification/device-token', {
+              token: token.value
+            });
+            console.log('Device token saved to backend successfully.');
+          } catch (err) {
+            console.error('Failed to save device token to backend:', err);
+          }
         });
 
         // Some issue with our setup and push will not work
