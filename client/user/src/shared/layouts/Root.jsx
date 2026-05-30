@@ -36,7 +36,7 @@ const Root = () => {
   const hideNav = isReelsPage || location.pathname.startsWith('/messages');
 
   return (
-    <div className="flex flex-col min-h-screen">
+    <div className="flex flex-col min-h-screen overflow-x-hidden">
       {/* Global Login-on-Demand Modal — rendered here so useNavigate() works inside router context */}
       <LoginModal
         isOpen={loginModal.isOpen}

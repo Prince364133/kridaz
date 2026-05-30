@@ -47,9 +47,35 @@ const worker = new Worker(
 
         case "IN_APP_NOTIF": {
           const { recipientId, recipientModel, title, message, type, link, metadata } = data;
-          await createNotification({ recipientId, recipientModel, title, message, type, link, metadata });
+          
+          // 1. Create the persistent database record (In-app notification)
+          const dbNotification = await createNotification({ recipientId, recipientModel, title, message, type, link, metadata });
+          
+          // 2. Fetch user to check for FCM device token
+          if (recipientModel === 'User') {
+            try {
+              const { prisma } = await import("../config/prisma.js");
+              const user = await prisma.user.findUnique({
+                where: { id: recipientId },
+                select: { fcmToken: true }
+              });
+
+              // 3. Dispatch the push notification via FCM if device token exists
+              if (user?.fcmToken) {
+                const { sendPushNotification } = await import("../utils/pushHelper.js");
+                await sendPushNotification(user.fcmToken, title, message, {
+                  notificationId: dbNotification?.id || "",
+                  link: link || "",
+                  type: type || ""
+                });
+              }
+            } catch (err) {
+              logger.error("[Notification Worker] Error fetching user or sending push notification:", err);
+            }
+          }
           break;
         }
+
 
         case "SEND_EMAIL": {
           const { to, subject, html, attachments } = data;

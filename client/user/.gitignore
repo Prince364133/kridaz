@@ -23,3 +23,6 @@ dist-ssr
 *.sln
 *.sw?
 .env
+# Ignore the specific credentials file:
+android/app/grounds-booking-*.json
+
