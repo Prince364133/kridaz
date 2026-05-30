@@ -20,7 +20,7 @@ const options = {
         description: "Development server",
       },
       {
-        url: "https://kridaz-api.up.railway.app/api",
+        url: "https://prod-api.kridaz.com/api",
         description: "Production server (Railway)",
       },
     ],
