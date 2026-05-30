@@ -1,7 +1,8 @@
 import { useState, useEffect, useRef } from "react";
 import axiosInstance from "@hooks/useAxiosInstance";
 import { toast } from "react-hot-toast";
-import { Plus, Trash2, Edit2, Layout, Video, Check, X, GripVertical, Upload, Image as ImageIcon } from "lucide-react";
+import { Plus, Trash2, Edit2, Layout, Video, Check, X, GripVertical, Upload, Image as ImageIcon, Activity as BellIcon } from "lucide-react";
+import PushComposer from "./PushComposer";
 
 export const MarketingManagement = () => {
   const [activeTab, setActiveTab] = useState("banners");
@@ -144,16 +145,18 @@ export const MarketingManagement = () => {
             MARKETING HUB
           </h1>
           <p className="text-sm text-gray-400">
-            Manage your homepage ad banners and video features.
+            Manage your homepage ad banners, video features, and push announcements.
           </p>
         </div>
-        <button
-          onClick={() => handleOpenModal()}
-          className="inline-flex items-center gap-2 bg-lime-500 text-black px-4 py-2 rounded-[6px] font-bold hover:bg-lime-400 transition-colors"
-        >
-          <Plus size={18} />
-          Add New {activeTab === "banners" ? "Banner" : "Video"}
-        </button>
+        {activeTab !== "notifications" && (
+          <button
+            onClick={() => handleOpenModal()}
+            className="inline-flex items-center gap-2 bg-lime-500 text-black px-4 py-2 rounded-[6px] font-bold hover:bg-lime-400 transition-colors"
+          >
+            <Plus size={18} />
+            Add New {activeTab === "banners" ? "Banner" : "Video"}
+          </button>
+        )}
       </div>
 
       {/* Tabs */}
@@ -176,74 +179,89 @@ export const MarketingManagement = () => {
             Dynamic Videos
           </div>
         </button>
+        <button
+          onClick={() => setActiveTab("notifications")}
+          className={`px-6 py-3 text-sm font-bold uppercase tracking-wider transition-colors border-b-2 ${ activeTab === "notifications" ? "border-lime-500 text-lime-500" : "border-transparent text-gray-400 hover:text-white" }`}
+        >
+          <div className="flex items-center gap-2">
+            <BellIcon size={16} />
+            Push Notifications
+          </div>
+        </button>
       </div>
+
 
       {/* Content */}
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-        {(activeTab === "banners" ? banners : videos).map((item) => (
-          <div
-            key={item._id}
-            className="group relative flex flex-col rounded-[8px] border border-white/10 bg-[#1A1A1A] overflow-hidden transition-all hover:border-lime-500/50"
-          >
-            {activeTab === "banners" ? (
-              <div className="aspect-video w-full bg-black overflow-hidden relative">
-                <img src={item.imageUrl} alt={item.title} className="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity" />
-                {!item.isActive && (
-                  <div className="absolute inset-0 bg-black/60 flex items-center justify-center">
-                    <span className="bg-red-500 text-white text-[10px] px-2 py-1 rounded font-bold uppercase">Inactive</span>
-                  </div>
-                )}
-              </div>
-            ) : (
-              <div className="aspect-video w-full bg-black flex items-center justify-center relative">
-                <Video size={40} className="text-lime-500/30" />
-                <div className="absolute bottom-2 right-2 bg-black/80 px-2 py-1 rounded text-[10px] text-gray-400 font-mono">
-                  YOUTUBE
+      {activeTab === "notifications" ? (
+        <PushComposer />
+      ) : (
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+          {(activeTab === "banners" ? banners : videos).map((item) => (
+            <div
+              key={item._id}
+              className="group relative flex flex-col rounded-[8px] border border-white/10 bg-[#1A1A1A] overflow-hidden transition-all hover:border-lime-500/50"
+            >
+              {activeTab === "banners" ? (
+                <div className="aspect-video w-full bg-black overflow-hidden relative">
+                  <img src={item.imageUrl} alt={item.title} className="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity" />
+                  {!item.isActive && (
+                    <div className="absolute inset-0 bg-black/60 flex items-center justify-center">
+                      <span className="bg-red-500 text-white text-[10px] px-2 py-1 rounded font-bold uppercase">Inactive</span>
+                    </div>
+                  )}
                 </div>
-                {!item.isActive && (
-                  <div className="absolute inset-0 bg-black/60 flex items-center justify-center">
-                    <span className="bg-red-500 text-white text-[10px] px-2 py-1 rounded font-bold uppercase">Inactive</span>
+              ) : (
+                <div className="aspect-video w-full bg-black flex items-center justify-center relative">
+                  <Video size={40} className="text-lime-500/30" />
+                  <div className="absolute bottom-2 right-2 bg-black/80 px-2 py-1 rounded text-[10px] text-gray-400 font-mono">
+                    YOUTUBE
                   </div>
-                )}
-              </div>
-            )}
+                  {!item.isActive && (
+                    <div className="absolute inset-0 bg-black/60 flex items-center justify-center">
+                      <span className="bg-red-500 text-white text-[10px] px-2 py-1 rounded font-bold uppercase">Inactive</span>
+                    </div>
+                  )}
+                </div>
+              )}
 
-            <div className="p-5 flex-1 flex flex-col">
-              <div className="flex items-start justify-between mb-2">
-                <h3 className="font-bold text-white truncate pr-4">{item.title}</h3>
-                <span className="text-xs font-mono text-lime-500">#{item.order}</span>
-              </div>
-              <p className="text-xs text-gray-500 truncate mb-4">
-                {activeTab === "banners" ? item.targetUrl || "No target URL" : item.youtubeUrl}
-              </p>
+              <div className="p-5 flex-1 flex flex-col">
+                <div className="flex items-start justify-between mb-2">
+                  <h3 className="font-bold text-white truncate pr-4">{item.title}</h3>
+                  <span className="text-xs font-mono text-lime-500">#{item.order}</span>
+                </div>
+                <p className="text-xs text-gray-500 truncate mb-4">
+                  {activeTab === "banners" ? item.targetUrl || "No target URL" : item.youtubeUrl}
+                </p>
 
-              <div className="mt-auto flex items-center gap-2 pt-4 border-t border-white/5">
-                <button
-                  onClick={() => handleOpenModal(item)}
-                  className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-lg bg-white/5 text-gray-400 hover:bg-white/10 hover:text-white transition-all text-xs font-bold"
-                >
-                  <Edit2 size={14} />
-                  Edit
-                </button>
-                <button
-                  onClick={() => handleDelete(item._id)}
-                  className="w-10 h-10 flex items-center justify-center rounded-lg bg-red-500/10 text-red-500 hover:bg-red-500 hover:text-white transition-all"
-                >
-                  <Trash2 size={16} />
-                </button>
+                <div className="mt-auto flex items-center gap-2 pt-4 border-t border-white/5">
+                  <button
+                    onClick={() => handleOpenModal(item)}
+                    className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-lg bg-white/5 text-gray-400 hover:bg-white/10 hover:text-white transition-all text-xs font-bold"
+                  >
+                    <Edit2 size={14} />
+                    Edit
+                  </button>
+                  <button
+                    onClick={() => handleDelete(item._id)}
+                    className="w-10 h-10 flex items-center justify-center rounded-lg bg-red-500/10 text-red-500 hover:bg-red-500 hover:text-white transition-all"
+                  >
+                    <Trash2 size={16} />
+                  </button>
+                </div>
               </div>
             </div>
-          </div>
-        ))}
+          ))}
 
-        {((activeTab === "banners" ? banners : videos).length === 0) && (
-          <div className="col-span-full py-20 flex flex-col items-center justify-center border border-dashed border-white/10 rounded-[8px]">
-            <Layout size={40} className="text-gray-600 mb-4" />
-            <h3 className="text-white font-bold">No {activeTab} found</h3>
-            <p className="text-gray-400 text-sm">Start by adding your first marketing asset.</p>
-          </div>
-        )}
-      </div>
+          {((activeTab === "banners" ? banners : videos).length === 0) && (
+            <div className="col-span-full py-20 flex flex-col items-center justify-center border border-dashed border-white/10 rounded-[8px]">
+              <Layout size={40} className="text-gray-600 mb-4" />
+              <h3 className="text-white font-bold">No {activeTab} found</h3>
+              <p className="text-gray-400 text-sm">Start by adding your first marketing asset.</p>
+            </div>
+          )}
+        </div>
+      )}
+
 
       {/* Modal */}
       {isModalOpen && (

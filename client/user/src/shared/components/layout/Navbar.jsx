@@ -107,7 +107,7 @@ const Navbar = () => {
   // Removed dedicated BOOKINGS link
 
   return (
-    <nav className={`sticky top-0 lg:fixed lg:top-0 lg:left-0 z-[90] flex flex-col transition-transform duration-500 
+    <nav className={`sticky top-0 w-full lg:fixed lg:top-0 lg:left-0 z-[90] flex flex-col transition-transform duration-500 
       ${ scrollDirection === "down" && window.innerWidth < 1024 ? "-translate-y-full" : "translate-y-0" }
       lg:transform-none lg:h-screen lg:w-64 lg:border-r lg:border-white/10 bg-black/40 lg:bg-[#050505] backdrop-blur-xl lg:backdrop-blur-none
     `}>
@@ -116,7 +116,7 @@ const Navbar = () => {
           {/* Logo & Mobile Location Section */}
           <div className="flex flex-col items-start justify-center lg:mb-8">
             <Link to="/" className="group flex items-center justify-center">
-              <img src="/logo.png" alt="Kridaz" className="h-8 lg:h-10 w-auto brightness-125 group-hover:scale-105 transition-transform duration-500" />
+              <img src="/logo.png" alt="Kridaz" className="h-7 sm:h-8 lg:h-10 w-auto brightness-125 group-hover:scale-105 transition-transform duration-500" />
             </Link>
 
             <div className="lg:hidden flex items-center gap-1 mt-0.5 ml-1 text-white/50">
@@ -181,7 +181,7 @@ const Navbar = () => {
           </div>
 
           {/* ACTIONS */}
-          <div className="flex items-center gap-3 sm:gap-6 lg:fixed lg:top-4 lg:right-6 lg:z-[100]">
+          <div className="flex items-center gap-2 sm:gap-4 lg:fixed lg:top-4 lg:right-6 lg:z-[100]">
             {!isLoggedIn ? (
               <>
                 <Link
@@ -202,18 +202,18 @@ const Navbar = () => {
                 {/* Search Icon */}
                 <Link
                   to="/search"
-                  className="relative w-10 sm:w-11 h-10 sm:h-11 border border-white/10 flex items-center justify-center bg-white/5 hover:border-[#84CC16]/50 transition-all cursor-pointer rounded-full group"
+                  className="relative w-9 sm:w-11 h-9 sm:h-11 border border-white/10 flex items-center justify-center bg-white/5 hover:border-[#84CC16]/50 transition-all cursor-pointer rounded-full group"
                 >
-                  <Search size={20} className="text-white/40 group-hover:text-[#84CC16] transition-colors" />
+                  <Search size={18} className="text-white/40 group-hover:text-[#84CC16] transition-colors" />
                 </Link>
 
                 {/* Plus Dropdown */}
                 <div className="dropdown dropdown-end">
                   <label
                     tabIndex={0}
-                    className="relative w-10 sm:w-11 h-10 sm:h-11 border border-white/10 flex items-center justify-center bg-white/5 hover:border-[#84CC16]/50 transition-all cursor-pointer rounded-full group"
+                    className="relative w-9 sm:w-11 h-9 sm:h-11 border border-white/10 flex items-center justify-center bg-white/5 hover:border-[#84CC16]/50 transition-all cursor-pointer rounded-full group"
                   >
-                    <Plus size={20} className="text-white/40 group-hover:text-[#84CC16] transition-colors" />
+                    <Plus size={18} className="text-white/40 group-hover:text-[#84CC16] transition-colors" />
                   </label>
                   <ul tabIndex={0} className="dropdown-content z-[100] mt-1 p-1 shadow-2xl bg-[#0A0A0A] border border-white/10 rounded-[8px] w-48 overflow-hidden backdrop-blur-xl">
                     <li>
@@ -236,9 +236,9 @@ const Navbar = () => {
                 {/* Notification Bell */}
                 <Link
                   to="/notifications"
-                  className="relative w-10 sm:w-11 h-10 sm:h-11 border border-white/10 flex items-center justify-center bg-white/5 hover:border-[#84CC16]/50 transition-all cursor-pointer rounded-full group"
+                  className="relative w-9 sm:w-11 h-9 sm:h-11 border border-white/10 flex items-center justify-center bg-white/5 hover:border-[#84CC16]/50 transition-all cursor-pointer rounded-full group"
                 >
-                  <Bell size={20} className="text-white/40 group-hover:text-[#84CC16] transition-colors" />
+                  <Bell size={18} className="text-white/40 group-hover:text-[#84CC16] transition-colors" />
                   <NotificationBadge />
                 </Link>
 
@@ -249,7 +249,7 @@ const Navbar = () => {
 
                   {/* PROFILE SIDEBAR TOGGLE */}
                   <div className="relative">
-                    <div onClick={() => setIsSidebarOpen(true)} role="button" className="relative w-10 sm:w-12 h-10 sm:h-12 border border-white/10 flex items-center justify-center bg-white/5 hover:border-[#84CC16]/50 transition-all cursor-pointer rounded-full group overflow-hidden">
+                    <div onClick={() => setIsSidebarOpen(true)} role="button" className="relative w-9 sm:w-12 h-9 sm:h-12 border border-white/10 flex items-center justify-center bg-white/5 hover:border-[#84CC16]/50 transition-all cursor-pointer rounded-full group overflow-hidden">
                       {(() => {
                         if (user?.profilePicture || user?.profileImage) {
                           return (
