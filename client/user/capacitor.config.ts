@@ -8,6 +8,11 @@ const config: CapacitorConfig = {
     extConfig: {},
     CapacitorUpdater: {
       appId: 'com.kridaz.app'
+    },
+    GoogleAuth: {
+      scopes: ["profile", "email"],
+      clientId: "615790581143-k4g37kb3krcfnh1p64aodd2qa3le5q96.apps.googleusercontent.com",
+      forceCodeForRefreshToken: true
     }
   }
 };
