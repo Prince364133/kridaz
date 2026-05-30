@@ -557,8 +557,9 @@ export default function Profile() {
     }
   };
 
-  const handleShare = () => {
-    const url = window.location.href;
+  const handleShare = async () => {
+    const { getShareLink } = await import("@utils/shareUtils");
+    const url = getShareLink(window.location.href);
     if (navigator.share) {
       navigator.share({
         title: `${profileUser?.name}'s Profile`,

@@ -858,7 +858,8 @@ const Community = ({ children, onSearchActive }) => {
   };
 
   const handleShareToPlatform = async (platform, postId) => {
-    const url = `${window.location.origin}${window.location.pathname}?post=${postId}`;
+    const { getShareLink } = await import("@utils/shareUtils");
+    const url = getShareLink(`${window.location.origin}${window.location.pathname}?post=${postId}`);
     const text = "Check out this post on Kridaz!";
     const encodedUrl = encodeURIComponent(url);
     const encodedText = encodeURIComponent(text);
