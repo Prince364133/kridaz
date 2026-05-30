@@ -31,9 +31,10 @@ app.use(express.static(path.join(process.cwd(), "public")));
 
 
 
+const defaultOrigins = ["http://localhost:5174", "https://kridaz.vercel.app", "http://localhost", "capacitor://localhost"];
 const allowedOrigins = process.env.CLIENT_URLS
-  ? process.env.CLIENT_URLS.split(",").map((url) => url.trim())
-  : ["http://localhost:5174", "https://kridaz.vercel.app"];
+  ? [...process.env.CLIENT_URLS.split(",").map((url) => url.trim()), "http://localhost", "capacitor://localhost"]
+  : defaultOrigins;
 
 app.use(
   cors({
