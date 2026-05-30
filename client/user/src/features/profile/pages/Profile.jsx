@@ -622,7 +622,7 @@ export default function Profile() {
           </button>
         </div>
 
-        <div className="max-w-7xl mx-auto px-6 relative -mt-16 z-10">
+        <div className="max-w-7xl mx-auto px-4 relative -mt-16 z-10">
           <div className="flex flex-col md:flex-row-reverse items-center md:items-end justify-between gap-6 text-center md:text-right">
             <div className="relative group shrink-0 flex flex-col items-center mb-4 md:mb-6 md:ml-auto">
               <div className="relative">
@@ -722,7 +722,7 @@ export default function Profile() {
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-6 mt-8">
+      <div className="max-w-7xl mx-auto px-4 mt-8">
         <>
           {/* Short Bio Section */}
           {profileUser?.bio ? (
