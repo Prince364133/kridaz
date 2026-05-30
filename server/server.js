@@ -25,8 +25,20 @@ server.headersTimeout = 76000;
 // Initialize Socket.io
 socketConfig(server);
 
+import { execSync } from "child_process";
+
 // Function to start the server
 const startServer = () => {
+  try {
+    if (process.env.NODE_ENV === 'production' || process.env.RAILWAY_ENVIRONMENT) {
+      logger.info("[DATABASE] Automatically syncing schema (Prisma db push)...");
+      execSync("npx prisma generate && npx prisma db push --accept-data-loss", { stdio: "inherit" });
+      logger.info("[DATABASE] Schema synced successfully.");
+    }
+  } catch (error) {
+    logger.error("[DATABASE] Failed to sync schema:", error);
+  }
+
   server.listen(port, () => {
     logger.info(`[SERVER] Running on http://localhost:${port}`);
     
