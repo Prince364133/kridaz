@@ -27,12 +27,15 @@ const TeamSidebar = ({ onSelectTeam, selectedTeamId, onCreateTeam }) => {
     }
   }, [location.state, navigate, location.pathname]);
 
-  const { data: myData, isLoading: isMyLoading } = useGetMyTeamsQuery();
+  const { data: myData, isLoading: isMyLoading } = useGetMyTeamsQuery(undefined, {
+    pollingInterval: 5000,
+  });
   const { data: oppData, isLoading: isOppLoading } = useGetOpponentTeamsQuery(undefined, {
-    skip: activeTab !== 'opponentTeams' && activeTab !== 'myTeams'
+    skip: activeTab !== 'opponentTeams' && activeTab !== 'myTeams',
+    pollingInterval: 5000,
   });
   const { data: scoringData, isLoading: isScoringLoading } = useGetMyScoringGamesQuery(undefined, {
-    skip: activeTab !== 'scoringMatches'
+    pollingInterval: 5000,
   });
 
   let data = null;
@@ -221,8 +224,14 @@ const TeamSidebar = ({ onSelectTeam, selectedTeamId, onCreateTeam }) => {
                 key={itemId}
                 whileHover={{ scale: 1.01 }}
                 whileTap={{ scale: 0.98 }}
-                onClick={() => onSelectTeam(item)}
-                style={{ fontFamily: "'Inter', sans-serif" }}
+                onClick={() => {
+                  if (activeTab === 'scoringMatches') {
+                    navigate(`/scoring/${item.shortId || item._id || item.id}`);
+                  } else {
+                    onSelectTeam(item);
+                  }
+                }}
+                style={{ fontFamily: "'Open Sans', sans-serif" }}
                 className={`w-full flex items-center gap-3 p-3 rounded-[8px] transition-all group ${ isSelected ? 'bg-gradient-to-r from-[#BFF367]/5 to-[#BFF367]/5 border border-[#BFF367]/20 shadow-[0_0_15px_rgba(85,222,232,0.06)]' : 'hover:bg-white/[0.03] border border-transparent' }`}
               >
                 <div className="relative shrink-0">

@@ -300,7 +300,8 @@ const LiveOverlay = () => {
 
     return (
       <div
-        style={{ width: '100vw', height: '100vh', background: 'transparent', position: 'relative', overflow: 'hidden', fontFamily: "'Inter', sans-serif" }}
+        className="force-open-sans"
+        style={{ width: '100vw', height: '100vh', background: 'transparent', position: 'relative', overflow: 'hidden', fontFamily: "'Open Sans', sans-serif" }}
         onClick={() => {
           // Unlock browser autoplay policy
           const unlockAudio = new Audio('data:audio/wav;base64,UklGRigAAABXQVZFZm10IBIAAAABAAEARKwAAIhYAQACABAAAABkYXRhAgAAAAEA');
@@ -336,6 +337,7 @@ const LiveOverlay = () => {
 
   return (
     <div
+      className="force-open-sans"
       style={{ width: '100vw', height: '100vh', background: 'transparent', position: 'relative', overflow: 'hidden' }}
       onClick={() => {
         // Unlock browser autoplay policy
@@ -394,7 +396,7 @@ const LiveOverlay = () => {
           borderRadius: '16px',
           padding: '20px',
           color: 'white',
-          fontFamily: "'Inter', sans-serif",
+          fontFamily: "'Open Sans', sans-serif",
           boxShadow: '0 10px 40px rgba(0,0,0,0.5)',
           animation: 'tickerIn 0.5s cubic-bezier(0.16,1,0.3,1) both',
           zIndex: 1000,

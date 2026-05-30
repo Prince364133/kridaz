@@ -19,6 +19,8 @@ import {
 import { useGetGroundsQuery, useGetUmpiresQuery, useGetMyHostedGamesQuery, useGetMyJoinedGamesQuery } from '@redux/api/gamesApi';
 import toast from 'react-hot-toast';
 import { fetchStates, fetchCities, searchLocations } from '../../../shared/utils/locationService';
+import { countryCodes } from '../../../utils/countryCodes';
+import CreateTeamModal from '../../teams/components/CreateTeamModal';
 
 // ─── Static Data ─────────────────────────────────────────────────────────────
 
@@ -246,8 +248,23 @@ const StartScoringModal = ({ isOpen, onClose, onSuccess, initialData }) => {
     }
   }, [isOpen, initialData]);
 
+  useEffect(() => {
+    if (isOpen) {
+      fetch('https://ipapi.co/json/')
+        .then(res => res.json())
+        .then(data => {
+          if (data && data.country_calling_code) {
+            const code = data.country_calling_code.replace('+', '');
+            setCustomPlayerCountryCode(code);
+          }
+        })
+        .catch(err => console.error('Failed to fetch country code', err));
+    }
+  }, [isOpen]);
+
   // Team selector popup state
   const [selectingTeam, setSelectingTeam] = useState(null); // 'A' | 'B'
+  const [showCreateTeam, setShowCreateTeam] = useState(false);
   const [teamTab, setTeamTab] = useState('myTeams');
   const [showMatchSettingsPopup, setShowMatchSettingsPopup] = useState(false);
   const [teamSearchQuery, setTeamSearchQuery] = useState('');
@@ -605,6 +622,10 @@ const StartScoringModal = ({ isOpen, onClose, onSuccess, initialData }) => {
     e?.preventDefault();
     if (!customPlayerName.trim()) return toast.error('Player Name is required');
 
+    if (customPlayerPhone && customPlayerPhone.replace(/\D/g, '').length !== 10) {
+      return toast.error('Phone number must be exactly 10 digits');
+    }
+
     const teamId = playerPopup?.teamKey === 'A' ? formData.teamAId : formData.teamBId;
     if (!teamId || initialData) {
       selectPlayer({ id: Math.random().toString(), name: customPlayerName, isCustom: true, phone: customPlayerPhone });
@@ -848,7 +869,7 @@ const StartScoringModal = ({ isOpen, onClose, onSuccess, initialData }) => {
       case 1: return formData.matchName.trim().length > 0;
       case 2: return !!formData.teamAId && !!formData.teamBId && formData.teamAId !== formData.teamBId;
       case 3: return formData.teamAPlayers.length > 0 && formData.teamBPlayers.length > 0;
-      case 5: return formData.scoringPassword.trim() === '' || formData.scoringPassword.length >= 4;
+      case 5: return formData.scoringPassword.trim() !== '' && formData.scoringPassword.length >= 6;
       default: return true;
     }
   };
@@ -1584,7 +1605,7 @@ const StartScoringModal = ({ isOpen, onClose, onSuccess, initialData }) => {
             
             {/* Create Team Button */}
             <button
-              onClick={() => window.open('/teams', '_blank')}
+              onClick={() => setShowCreateTeam(true)}
               className="w-full py-2.5 bg-white/5 border border-white/10 hover:bg-white/10 transition-all rounded-[8px] text-[#BFF367] text-xs font-black uppercase tracking-widest flex items-center justify-center gap-2"
             >
               <Plus size={16} /> Create Team
@@ -1841,18 +1862,18 @@ const StartScoringModal = ({ isOpen, onClose, onSuccess, initialData }) => {
                         <select
                           value={customPlayerCountryCode}
                           onChange={e => setCustomPlayerCountryCode(e.target.value)}
-                          className="w-[70px] bg-transparent text-white text-sm outline-none px-2 border-r border-white/10 cursor-pointer"
+                          className="w-[90px] bg-transparent text-white text-sm outline-none px-2 border-r border-white/10 cursor-pointer"
                         >
-                          <option value="91" className="bg-[#0a0a0a] text-white">+91</option>
-                          <option value="1" className="bg-[#0a0a0a] text-white">+1</option>
-                          <option value="44" className="bg-[#0a0a0a] text-white">+44</option>
-                          <option value="61" className="bg-[#0a0a0a] text-white">+61</option>
-                          <option value="971" className="bg-[#0a0a0a] text-white">+971</option>
+                          {countryCodes.map(c => (
+                            <option key={c.code} value={c.dial_code} className="bg-[#0a0a0a] text-white">
+                              {c.code} (+{c.dial_code})
+                            </option>
+                          ))}
                         </select>
                         <input
                           type="tel"
                           value={customPlayerPhone}
-                          onChange={e => setCustomPlayerPhone(e.target.value)}
+                          onChange={e => setCustomPlayerPhone(e.target.value.replace(/\D/g, '').slice(0, 10))}
                           placeholder="9876543210"
                           className="flex-1 bg-transparent text-white text-sm px-3 outline-none placeholder:text-white/30"
                         />
@@ -2359,7 +2380,9 @@ const StartScoringModal = ({ isOpen, onClose, onSuccess, initialData }) => {
                       const filteredVenues = groundsData?.grounds?.filter(g =>
                         (!venueStateFilter || g.state === venueStateFilter) &&
                         (!venueCityFilter || g.city === venueCityFilter) &&
-                        (!venueSearchQuery || g.name.toLowerCase().includes(venueSearchQuery.toLowerCase()))
+                        (!venueSearchQuery || 
+                          g.name.toLowerCase().includes(venueSearchQuery.toLowerCase()) || 
+                          (g.city && g.city.toLowerCase().includes(venueSearchQuery.toLowerCase())))
                       ) || [];
 
                       if (filteredVenues.length === 0 && !formData.customVenue) {
@@ -2475,7 +2498,12 @@ const StartScoringModal = ({ isOpen, onClose, onSuccess, initialData }) => {
                       <div className="flex justify-center p-4"><Loader2 className="animate-spin text-white/40" /></div>
                     ) : (() => {
                       const filteredPros = umpiresData?.umpires?.filter(u =>
-                        (!proRoleFilter || u.role === proRoleFilter)
+                        (!proRoleFilter || u.role === proRoleFilter) &&
+                        (!proStateFilter || u.state === proStateFilter) &&
+                        (!proCityFilter || u.city === proCityFilter) &&
+                        (!proSearchQuery || 
+                          u.name?.toLowerCase().includes(proSearchQuery.toLowerCase()) || 
+                          u.username?.toLowerCase().includes(proSearchQuery.toLowerCase()))
                       ) || [];
 
                       return filteredPros.length > 0 ? (
@@ -2585,10 +2613,10 @@ const StartScoringModal = ({ isOpen, onClose, onSuccess, initialData }) => {
             </div>
             {/* Security */}
             <div>
-              <label className={labelClass}><Shield size={12} className="inline mr-1" />Scoring App Password</label>
+              <label className={labelClass}><Shield size={12} className="inline mr-1" />Scoring App Password <span className="text-red-500">*</span></label>
               <input type="password" value={formData.scoringPassword}
                 onChange={e => setFormData(f => ({ ...f, scoringPassword: e.target.value }))}
-                className={inputClass} placeholder="Leave blank for open access, or set min 4 chars" />
+                className={inputClass} placeholder="Minimum 6 characters required" />
             </div>
             {/* YouTube Live URL */}
             <div>
@@ -2848,12 +2876,13 @@ const StartScoringModal = ({ isOpen, onClose, onSuccess, initialData }) => {
                           <select
                             value={customPlayerCountryCode}
                             onChange={e => setCustomPlayerCountryCode(e.target.value)}
-                            className="bg-transparent text-white px-3 border-r border-white/10 outline-none text-sm cursor-pointer hover:bg-white/5 appearance-none font-bold"
+                            className="w-[90px] bg-transparent text-white px-3 border-r border-white/10 outline-none text-sm cursor-pointer hover:bg-white/5 appearance-none font-bold"
                           >
-                            <option value="91" className="bg-[#0a0a0a] text-white">+91</option>
-                            <option value="1" className="bg-[#0a0a0a] text-white">+1</option>
-                            <option value="44" className="bg-[#0a0a0a] text-white">+44</option>
-                            <option value="61" className="bg-[#0a0a0a] text-white">+61</option>
+                            {countryCodes.map(c => (
+                              <option key={c.code} value={c.dial_code} className="bg-[#0a0a0a] text-white">
+                                {c.code} (+{c.dial_code})
+                              </option>
+                            ))}
                           </select>
                           <input
                             type="tel"
@@ -2927,6 +2956,15 @@ const StartScoringModal = ({ isOpen, onClose, onSuccess, initialData }) => {
           </>
         )}
       </AnimatePresence>
+
+      <CreateTeamModal 
+        isOpen={showCreateTeam} 
+        onClose={() => setShowCreateTeam(false)} 
+        onSuccess={(newTeam) => {
+          selectTeam(newTeam.id || newTeam._id);
+          setShowCreateTeam(false);
+        }} 
+      />
     </div>
   );
 };
@@ -3121,7 +3159,6 @@ const PlayingXIStep = ({ teamKey, teamName, players, maxMembers, teamDetails, on
           ))}
         </AnimatePresence>
       </div>
-
 
     </div>
   );

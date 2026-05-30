@@ -622,3 +622,7 @@ select option:active {
   overflow: visible !important;
 }
 
+
+.force-open-sans, .force-open-sans * {
+  font-family: 'Open Sans', sans-serif !important;
+}

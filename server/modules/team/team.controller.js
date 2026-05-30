@@ -857,19 +857,54 @@ export const inviteMembers = async (req, res) => {
         }
   
         if (existingUser) {
+          // Auto-add existing user instead of failing
+          const existingMember = await prisma.teamMember.findFirst({
+            where: { teamId: id, userId: existingUser.id }
+          });
+          
+          if (existingMember) {
+            results.push({ 
+              email: invitee.email, 
+              phone: invitee.phone, 
+              status: "already_exists", 
+              message: "User already in team" 
+            });
+            continue;
+          }
+
+          // Create team member entry
+          await prisma.teamMember.create({
+            data: {
+              teamId: id,
+              userId: existingUser.id,
+              role: "PLAYER",
+              status: "PENDING"
+            }
+          });
+
+          // Send notification to existing user
+          await prisma.notification.create({
+            data: {
+              userId: existingUser.id,
+              type: "TEAM_INVITE",
+              title: "Team Invitation",
+              message: `You have been invited to join the team "${team.name}"`,
+              metadata: { teamId: team.id }
+            }
+          });
+
           results.push({ 
-            email: invitee.email, 
-            phone: invitee.phone, 
-            status: "error", 
-            message: "User already registered. Invite by user ID instead.",
+            user: existingUser.id, 
+            status: "auto_added_existing_user",
             existingUserId: existingUser.id,
-            existingUserName: existingUser.name
+            existingUserName: existingUser.name,
+            profilePicture: existingUser.profilePicture
           });
           continue;
         }
 
         const inviteToken = crypto.randomUUID();
-        await prisma.teamCustomMember.create({
+        const customMember = await prisma.teamCustomMember.create({
           data: {
             teamId: id,
             name: invitee.name,
@@ -880,7 +915,7 @@ export const inviteMembers = async (req, res) => {
           }
         });
 
-        results.push({ name: invitee.name, token: inviteToken, status: "invited_custom" });
+        results.push({ name: invitee.name, token: inviteToken, status: "invited_custom", customMemberId: customMember.id });
       }
     }
 

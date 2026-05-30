@@ -4,6 +4,8 @@ import { X, Search, UserPlus, Phone, Loader2, Sparkles, MessageCircle } from 'lu
 import { useSearchPlayersQuery, useInviteMemberMutation, useAddCustomMemberMutation } from '@redux/api/teamApi';
 import { useSelector } from 'react-redux';
 import toast from 'react-hot-toast';
+import { countryCodes } from '../../../utils/countryCodes';
+import { useEffect } from 'react';
 
 const InviteMemberModal = ({ isOpen, onClose, teamId, teamName }) => {
   const [activeTab, setActiveTab] = useState('search'); // 'search' or 'custom'
@@ -14,6 +16,20 @@ const InviteMemberModal = ({ isOpen, onClose, teamId, teamName }) => {
   const [customPhone, setCustomPhone] = useState('');
   const [customCountryCode, setCustomCountryCode] = useState('91');
   const [customInviteData, setCustomInviteData] = useState(null);
+
+  useEffect(() => {
+    if (isOpen) {
+      fetch('https://ipapi.co/json/')
+        .then(res => res.json())
+        .then(data => {
+          if (data && data.country_calling_code) {
+            const code = data.country_calling_code.replace('+', '');
+            setCustomCountryCode(code);
+          }
+        })
+        .catch(err => console.error('Failed to fetch country code', err));
+    }
+  }, [isOpen]);
 
   const { user: currentUser } = useSelector((state) => state.auth);
 
@@ -39,6 +55,10 @@ const InviteMemberModal = ({ isOpen, onClose, teamId, teamName }) => {
     e.preventDefault();
     if (!customName.trim()) return toast.error('Player Name is required');
 
+    if (customPhone && customPhone.replace(/\D/g, '').length !== 10) {
+      return toast.error('Phone number must be exactly 10 digits');
+    }
+
     try {
       const result = await addCustomPlayer({
         teamId,
@@ -48,6 +68,13 @@ const InviteMemberModal = ({ isOpen, onClose, teamId, teamName }) => {
 
       if (result.success) {
         const inviteResult = result.results?.[0];
+        
+        if (inviteResult?.status === "auto_added_existing_user") {
+           toast.success(`User exists (${inviteResult.existingUserName}) and was automatically added to your team!`);
+           setCustomName('');
+           setCustomPhone('');
+           return;
+        }
         
         if (inviteResult?.status === "error" && inviteResult?.existingUserId) {
            toast.success(`User exists (${inviteResult.existingUserName}). Inviting them now...`);
@@ -215,11 +242,11 @@ const InviteMemberModal = ({ isOpen, onClose, teamId, teamName }) => {
                     onChange={(e) => setCustomCountryCode(e.target.value)}
                     className="bg-white/[0.03] border border-white/10 rounded-[8px] py-3.5 px-2 text-white text-sm font-bold focus:outline-none focus:border-[#CCFF00]/50 transition-all cursor-pointer w-24 appearance-none text-center"
                   >
-                    <option value="91" className="text-black">+91 🇮🇳</option>
-                    <option value="1" className="text-black">+1 🇺🇸</option>
-                    <option value="44" className="text-black">+44 🇬🇧</option>
-                    <option value="61" className="text-black">+61 🇦🇺</option>
-                    <option value="971" className="text-black">+971 🇦🇪</option>
+                    {countryCodes.map(c => (
+                      <option key={c.code} value={c.dial_code} className="text-black">
+                        {c.code} (+{c.dial_code})
+                      </option>
+                    ))}
                   </select>
                   <div className="relative flex-1">
                     <Phone className="absolute left-4 top-1/2 -translate-y-1/2 text-white/20" size={16} />
@@ -228,7 +255,7 @@ const InviteMemberModal = ({ isOpen, onClose, teamId, teamName }) => {
                       placeholder="10-digit number"
                       className="w-full bg-white/[0.03] border border-white/10 rounded-[8px] py-3.5 pl-12 pr-4 text-white text-sm font-bold focus:outline-none focus:border-[#CCFF00]/50 transition-all"
                       value={customPhone}
-                      onChange={(e) => setCustomPhone(e.target.value)}
+                      onChange={(e) => setCustomPhone(e.target.value.replace(/\D/g, '').slice(0, 10))}
                       maxLength={10}
                     />
                   </div>

@@ -1,6 +1,6 @@
 import React, { useState, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Lock, RotateCcw } from 'lucide-react';
+import { Lock, RotateCcw, Shield, Swords, Coins, Timer, Hash, MapPin, CircleDot, Activity } from 'lucide-react';
 
 /**
  * TossModal
@@ -89,7 +89,7 @@ const TossModal = ({ teamA, teamB, hasPassword, onConfirm, onCancel }) => {
                 style={{ transformStyle: 'preserve-3d' }}
                 onClick={() => {
                   if (step === 'FLIP_IDLE') {
-                    setCoinRotation(prev => prev + 180);
+                    handleFlip();
                   }
                 }}
               >
@@ -104,7 +104,11 @@ const TossModal = ({ teamA, teamB, hasPassword, onConfirm, onCancel }) => {
                   }}
                 >
                   <div className="flex flex-col items-center gap-2">
-                    <span className="material-symbols-outlined text-[#003914] text-7xl" style={{ fontVariationSettings: "'FILL' 1" }}>sports_cricket</span>
+                    {teamA?.logo || teamA?.image ? (
+                      <img src={teamA.logo || teamA.image} className="w-16 h-16 rounded-full object-cover mb-2 border-2 border-[#003914]" alt={teamA.name} />
+                    ) : (
+                      <Shield size={64} className="text-[#003914] mb-2" />
+                    )}
                     <span className="font-black text-[#003914] text-xl uppercase tracking-widest" style={{ fontFamily: 'Anton, sans-serif' }}>HEADS</span>
                   </div>
                 </div>
@@ -120,7 +124,11 @@ const TossModal = ({ teamA, teamB, hasPassword, onConfirm, onCancel }) => {
                   }}
                 >
                   <div className="flex flex-col items-center gap-2">
-                    <span className="material-symbols-outlined text-[#002020] text-7xl" style={{ fontVariationSettings: "'FILL' 1" }}>analytics</span>
+                    {teamB?.logo || teamB?.image ? (
+                      <img src={teamB.logo || teamB.image} className="w-16 h-16 rounded-full object-cover mb-2 border-2 border-[#002020]" alt={teamB.name} />
+                    ) : (
+                      <Swords size={64} className="text-[#002020] mb-2" />
+                    )}
                     <span className="font-black text-[#002020] text-xl uppercase tracking-widest" style={{ fontFamily: 'Anton, sans-serif' }}>TAILS</span>
                   </div>
                 </div>
@@ -130,16 +138,7 @@ const TossModal = ({ teamA, teamB, hasPassword, onConfirm, onCancel }) => {
 
             {/* Buttons pinned to bottom */}
             <div className="w-full space-y-3 pb-6">
-              {step === 'FLIP_IDLE' && (
-                <button
-                  onClick={handleFlip}
-                  className="w-full py-4 rounded-lg flex items-center justify-center gap-2 transition-all active:scale-95 font-bold text-[12px] uppercase tracking-[0.15em] text-[#006d2d]"
-                  style={{ background: 'linear-gradient(135deg, #7bf090 0%, #45dada 100%)' }}
-                >
-                  <span className="material-symbols-outlined text-[20px]" style={{ fontVariationSettings: "'FILL' 0" }}>cached</span>
-                  FLIP COIN
-                </button>
-              )}
+              {/* Flip Coin button removed, clicking the coin now flips it */}
 
               {step === 'FLIPPING' && (
                 <p className="text-[#bdcaba] font-bold animate-pulse uppercase tracking-widest text-center text-sm">Flipping...</p>
@@ -191,9 +190,13 @@ const TossModal = ({ teamA, teamB, hasPassword, onConfirm, onCancel }) => {
                       )}
 
                       <div className="flex items-center gap-4 relative z-10">
-                        <div className={`w-12 h-12 rounded-lg flex items-center justify-center font-normal text-[32px] tracking-[0.05em] ${isTeamA ? 'bg-[#7bf090] text-[#006d2d]' : 'bg-[#00bbbc] text-[#004545]'}`} style={{ fontFamily: 'Anton, sans-serif' }}>
-                          {isTeamA ? 'A' : 'B'}
-                        </div>
+                        {team.logo || team.image ? (
+                          <img src={team.logo || team.image} alt={team.name} className="w-12 h-12 rounded-lg object-cover bg-white/5 border border-[#3e4a3e]" />
+                        ) : (
+                          <div className={`w-12 h-12 rounded-lg flex items-center justify-center font-normal text-[32px] tracking-[0.05em] ${isTeamA ? 'bg-[#7bf090] text-[#006d2d]' : 'bg-[#00bbbc] text-[#004545]'}`} style={{ fontFamily: 'Anton, sans-serif' }}>
+                            {isTeamA ? 'A' : 'B'}
+                          </div>
+                        )}
                         <div>
                           <p className="text-[12px] font-bold tracking-[0.08em] text-[#bdcaba] uppercase mb-0.5" style={{ fontFamily: 'Inter, sans-serif' }}>TEAM {isTeamA ? 'ALPHA' : 'BRAVO'}</p>
                           <p className="text-[18px] font-normal text-white uppercase tracking-[0.02em]" style={{ fontFamily: 'Anton, sans-serif' }}>{team.name}</p>
@@ -250,7 +253,7 @@ const TossModal = ({ teamA, teamB, hasPassword, onConfirm, onCancel }) => {
                     <h3 className="text-[40px] uppercase leading-none" style={{ fontFamily: 'Anton, sans-serif' }}>BAT</h3>
                     <p className={`text-[12px] font-bold tracking-[0.08em] mt-2 ${decision === 'BAT' ? 'text-[#004f26]' : 'text-[#bdcaba]'}`} style={{ fontFamily: 'Inter, sans-serif' }}>SET THE TARGET</p>
                   </div>
-                  <span className={`material-symbols-outlined text-[64px] absolute right-4 -top-2 ${decision === 'BAT' ? 'text-[#004f26] opacity-20' : 'text-[#bdcaba] opacity-10'}`} style={{ fontVariationSettings: "'FILL' 1" }}>sports_cricket</span>
+                  <Activity className={`absolute right-4 -top-2 ${decision === 'BAT' ? 'text-[#004f26] opacity-20' : 'text-[#bdcaba] opacity-10'}`} size={64} />
                 </button>
 
                 {/* BOWL */}
@@ -262,7 +265,7 @@ const TossModal = ({ teamA, teamB, hasPassword, onConfirm, onCancel }) => {
                     <h3 className="text-[40px] uppercase leading-none" style={{ fontFamily: 'Anton, sans-serif' }}>BOWL</h3>
                     <p className={`text-[12px] font-bold tracking-[0.08em] mt-2 ${decision === 'BOWL' ? 'text-[#004f26]' : 'text-[#bdcaba]'}`} style={{ fontFamily: 'Inter, sans-serif' }}>CHASE LATER</p>
                   </div>
-                  <span className={`material-symbols-outlined text-[64px] absolute right-4 -top-2 ${decision === 'BOWL' ? 'text-[#004f26] opacity-20' : 'text-[#bdcaba] opacity-10'}`} style={{ fontVariationSettings: "'FILL' 1" }}>sports_baseball</span>
+                  <CircleDot className={`absolute right-4 -top-2 ${decision === 'BOWL' ? 'text-[#004f26] opacity-20' : 'text-[#bdcaba] opacity-10'}`} size={64} />
                 </button>
               </div>
 
@@ -302,14 +305,22 @@ const TossModal = ({ teamA, teamB, hasPassword, onConfirm, onCancel }) => {
               {/* Matchup Card */}
               <div className="bg-[#1c1b1b] border border-[#3e4a3e] rounded-xl p-5 flex items-center justify-between shadow-lg">
                 <div className="text-center flex-1 flex flex-col items-center">
-                  <div className="w-12 h-12 rounded-full bg-[#7bf090] flex items-center justify-center text-[#006d2d] font-black text-xl mb-3 shadow-[0_0_15px_rgba(123,240,144,0.2)]" style={{ fontFamily: 'Anton, sans-serif' }}>A</div>
+                  {teamA?.logo || teamA?.image ? (
+                    <img src={teamA.logo || teamA.image} alt={teamAName} className="w-12 h-12 rounded-full object-cover mb-3 shadow-[0_0_15px_rgba(123,240,144,0.2)] border-2 border-[#7bf090]" />
+                  ) : (
+                    <div className="w-12 h-12 rounded-full bg-[#7bf090] flex items-center justify-center text-[#006d2d] font-black text-xl mb-3 shadow-[0_0_15px_rgba(123,240,144,0.2)]" style={{ fontFamily: 'Anton, sans-serif' }}>A</div>
+                  )}
                   <span className="font-black text-[13px] text-white uppercase tracking-widest">{teamAName}</span>
                 </div>
                 <div className="px-4">
                   <span className="font-black text-[24px] text-[#3e4a3e] italic" style={{ fontFamily: 'Anton, sans-serif' }}>VS</span>
                 </div>
                 <div className="text-center flex-1 flex flex-col items-center">
-                  <div className="w-12 h-12 rounded-full bg-[#00bbbc] flex items-center justify-center text-[#004545] font-black text-xl mb-3 shadow-[0_0_15px_rgba(0,187,188,0.2)]" style={{ fontFamily: 'Anton, sans-serif' }}>B</div>
+                  {teamB?.logo || teamB?.image ? (
+                    <img src={teamB.logo || teamB.image} alt={teamBName} className="w-12 h-12 rounded-full object-cover mb-3 shadow-[0_0_15px_rgba(0,187,188,0.2)] border-2 border-[#00bbbc]" />
+                  ) : (
+                    <div className="w-12 h-12 rounded-full bg-[#00bbbc] flex items-center justify-center text-[#004545] font-black text-xl mb-3 shadow-[0_0_15px_rgba(0,187,188,0.2)]" style={{ fontFamily: 'Anton, sans-serif' }}>B</div>
+                  )}
                   <span className="font-black text-[13px] text-[#45dada] uppercase tracking-widest">{teamBName}</span>
                 </div>
               </div>
@@ -317,7 +328,7 @@ const TossModal = ({ teamA, teamB, hasPassword, onConfirm, onCancel }) => {
               {/* Toss Result Status Card */}
               <div className="bg-[#1c1b1b] rounded-xl border border-[#3e4a3e] p-4 flex items-center gap-4">
                 <div className="w-10 h-10 rounded-lg bg-[#2a2a2a] flex items-center justify-center border border-[#3e4a3e]">
-                  <span className="material-symbols-outlined text-[#7bf090]" style={{ fontVariationSettings: "'FILL' 1" }}>monetization_on</span>
+                  <Coins className="text-[#7bf090]" size={20} />
                 </div>
                 <div>
                   <h3 className="font-bold text-[10px] text-[#879485] uppercase tracking-widest mb-1">TOSS RESULT</h3>
@@ -330,11 +341,11 @@ const TossModal = ({ teamA, teamB, hasPassword, onConfirm, onCancel }) => {
               {/* Format & Overs */}
               <div className="grid grid-cols-2 gap-3">
                 <div className="bg-[#1c1b1b] border border-[#3e4a3e] p-4 rounded-xl">
-                  <span className="font-bold text-[10px] text-[#879485] uppercase tracking-widest block mb-1 flex items-center gap-1"><span className="material-symbols-outlined text-[14px]">timer</span> FORMAT</span>
+                  <span className="font-bold text-[10px] text-[#879485] uppercase tracking-widest block mb-1 flex items-center gap-1"><Timer size={14} /> FORMAT</span>
                   <p className="text-[18px] font-black text-white uppercase tracking-wide" style={{ fontFamily: 'Inter, sans-serif' }}>T20 MATCH</p>
                 </div>
                 <div className="bg-[#1c1b1b] border border-[#3e4a3e] p-4 rounded-xl">
-                  <span className="font-bold text-[10px] text-[#879485] uppercase tracking-widest block mb-1 flex items-center gap-1"><span className="material-symbols-outlined text-[14px]">tag</span> OVERS</span>
+                  <span className="font-bold text-[10px] text-[#879485] uppercase tracking-widest block mb-1 flex items-center gap-1"><Hash size={14} /> OVERS</span>
                   <p className="text-[18px] font-black text-white uppercase tracking-wide" style={{ fontFamily: 'Inter, sans-serif' }}>20.0 OVERS</p>
                 </div>
               </div>
@@ -344,7 +355,7 @@ const TossModal = ({ teamA, teamB, hasPassword, onConfirm, onCancel }) => {
                 <div className="absolute inset-0 opacity-20 bg-[url('https://images.unsplash.com/photo-1540747913346-19e32dc3e97e?q=80&w=1000&auto=format&fit=crop')] bg-cover bg-center grayscale" />
                 <div className="absolute inset-0 bg-gradient-to-t from-[#131313] to-transparent" />
                 <div className="relative z-10 w-full flex items-center gap-2">
-                  <span className="material-symbols-outlined text-[#bdcaba]">location_on</span>
+                  <MapPin className="text-[#bdcaba]" size={24} />
                   <div>
                     <span className="font-bold text-[9px] text-[#bdcaba] uppercase tracking-widest block mb-0.5">VENUE</span>
                     <p className="text-[16px] font-black text-white uppercase tracking-wide" style={{ fontFamily: 'Inter, sans-serif' }}>NATIONAL ARENA, DUBAI</p>
@@ -356,7 +367,7 @@ const TossModal = ({ teamA, teamB, hasPassword, onConfirm, onCancel }) => {
               {hasPassword && (
                 <div className="mt-2 space-y-2">
                   <label className="text-[10px] font-black text-[#879485] uppercase tracking-widest pl-1 flex items-center gap-1">
-                    <span className="material-symbols-outlined text-[14px]">lock</span> MATCH PASSWORD
+                    <Lock size={14} /> MATCH PASSWORD
                   </label>
                   <input
                     type="password"

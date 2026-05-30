@@ -1,7 +1,7 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ChevronLeft, Settings, History, Users, Circle, Zap, CheckCircle2, AlertCircle, Filter, Shield, User, PlayCircle, Undo2, Trophy, Play, Sparkles, X, Pause, FileText, TrendingUp, MapPin, Timer, Hash, Crosshair } from 'lucide-react';
+import { ChevronLeft, Settings, History, Users, Circle, Zap, CheckCircle2, AlertCircle, Filter, Shield, User, PlayCircle, Undo2, Trophy, Play, Sparkles, X, Pause, FileText, TrendingUp, MapPin, Timer, Hash, Crosshair, Share2 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { useSelector } from 'react-redux';
 import useCricketScoring from '../hooks/useCricketScoring';
@@ -79,9 +79,10 @@ function MembersTab({ matchData }) {
   return (
     <div className="space-y-4 pb-4 font-inter">
       <div className="flex gap-2 bg-white/5 rounded-[8px] p-1.5 border border-white/5">
-        {[['teamA', teamA?.name || 'TBD'], ['teamB', teamB?.name || 'TBD']].map(([key, label]) => (
+        {[['teamA', teamA?.name || 'TBD', teamA?.logo || teamA?.image], ['teamB', teamB?.name || 'TBD', teamB?.logo || teamB?.image]].map(([key, label, logo]) => (
           <button key={key} onClick={() => setTeamTab(key)}
-            className={`flex-1 py-2.5 rounded-[8px] text-[10px] font-black uppercase tracking-[0.2em] transition-all ${teamTab === key ? 'bg-[#00C187] text-black shadow-lg' : 'text-neutral-500 hover:text-white'}`}>
+            className={`flex-1 py-2.5 rounded-[8px] text-[10px] font-black uppercase tracking-[0.2em] transition-all flex items-center justify-center gap-2 ${teamTab === key ? 'bg-[#00C187] text-black shadow-lg' : 'text-neutral-500 hover:text-white'}`}>
+            {logo ? <img src={logo} className="w-4 h-4 rounded-full object-cover" alt={label} /> : null}
             {label}
           </button>
         ))}
@@ -344,11 +345,22 @@ const ScoringApp = () => {
     })).filter(p => p.userId);
   };
 
+  const getTeamInfo = (teamKey) => {
+    const game = matchData?.hostedGameId || matchData;
+    const team = game?.[teamKey] || (Array.isArray(game?.teams) ? game.teams.find(t => t.teamKey === teamKey) : game?.teams?.[teamKey]);
+    return {
+      name: team?.name || (teamKey === 'teamA' ? 'Team A' : 'Team B'),
+      logo: team?.image || team?.logo || null,
+    };
+  };
+
   const currentInnings = matchData?.innings?.[matchData?.currentInningsIndex ?? 0];
   const battingTeamKey = currentInnings?.battingTeam || 'teamA';
   const bowlingTeamKey = battingTeamKey === 'teamA' ? 'teamB' : 'teamA';
   const battingSlots = getTeamSlots(battingTeamKey);
   const bowlingSlots = getTeamSlots(bowlingTeamKey);
+  const battingTeamInfo = getTeamInfo(battingTeamKey);
+  const bowlingTeamInfo = getTeamInfo(bowlingTeamKey);
 
   const strikerStats = (() => {
     const s = matchData?.playerStats?.find(p => p.userId === matchData?.strikerId || p.userId?.toString() === matchData?.strikerId?.toString());
@@ -421,18 +433,7 @@ const ScoringApp = () => {
   const hasPassword = !!(matchData?.hostedGameId?.scoringPassword || matchData?.scoringPassword);
   const isLocked = hasPassword && !passwordVerified && !needsMatchStart;
 
-  if (isLocked) {
-    return (
-      <ScoringPasswordModal
-        matchId={matchId}
-        onSuccess={(token) => {
-          localStorage.setItem(`scorer_token_${matchId}`, token);
-          setPasswordVerified(true);
-        }}
-        actionLabel="Unlock Scoring Console"
-      />
-    );
-  }
+  // isLocked is now handled as an overlay in the return statement below
 
   const checkTimerActive = () => {
     if (matchData?.timerState === 'PAUSED') {
@@ -685,8 +686,21 @@ const ScoringApp = () => {
   };
 
   return (
-    <div className="min-h-[100dvh] bg-[#121212] flex justify-center text-white selection:bg-[#00C187] selection:text-black font-inter overflow-hidden">
-      <div className="w-full max-w-[450px] bg-black h-[100dvh] relative flex flex-col shadow-[0_0_50px_rgba(0,0,0,0.5)] border-x border-white/5 overflow-hidden">
+    <div className="min-h-[100dvh] bg-[#121212] flex justify-center text-white selection:bg-[#00C187] selection:text-black overflow-hidden" style={{ fontFamily: "'Open Sans', sans-serif" }}>
+      {isLocked && (
+        <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/60 backdrop-blur-sm">
+          <ScoringPasswordModal
+            matchId={matchId}
+            onSuccess={(token) => {
+              localStorage.setItem(`scorer_token_${matchId}`, token);
+              setPasswordVerified(true);
+            }}
+            actionLabel="Unlock Scoring Console"
+          />
+        </div>
+      )}
+
+      <div className={`w-full max-w-[450px] bg-black h-[100dvh] relative flex flex-col shadow-[0_0_50px_rgba(0,0,0,0.5)] border-x border-white/5 overflow-hidden ${isLocked ? 'blur-sm pointer-events-none' : ''}`}>
       
       {needsMatchStart ? (() => {
             const game = matchData?.hostedGameId || matchData;
@@ -694,7 +708,7 @@ const ScoringApp = () => {
             const tB = game?.teamB || (Array.isArray(game?.teams) ? game?.teams?.find(t => t.teamKey === 'teamB') : game?.teams?.teamB);
             const tAName = tA?.name || 'TEAM A';
             const tBName = tB?.name || 'TEAM B';
-            const locationName = game?.location || 'National Arena, Dubai';
+            const locationName = game?.venue?.name || game?.customVenue || game?.location || 'Location Not Provided';
 
             return (
               <div className="flex-1 flex flex-col p-4 bg-[#121212] relative overflow-y-auto no-scrollbar">
@@ -702,7 +716,7 @@ const ScoringApp = () => {
                  <div className="w-full bg-[#1e1e1e] border border-white/5 rounded-[12px] p-6 flex items-center justify-between shadow-lg mb-4 mt-2">
                     <div className="flex flex-col items-center gap-3 w-[30%]">
                       <div className="w-14 h-14 rounded-full bg-[#81FBB8] flex items-center justify-center shadow-[0_0_15px_rgba(129,251,184,0.3)] shrink-0 overflow-hidden">
-                         {tA?.logo ? <img src={tA.logo} alt={tAName} className="w-full h-full object-cover" /> : <Shield size={24} className="text-[#1a1a1a]" fill="currentColor" />}
+                         {(tA?.image || tA?.logo) ? <img src={tA.image || tA.logo} alt={tAName} className="w-full h-full object-cover" /> : <Shield size={24} className="text-[#1a1a1a]" fill="currentColor" />}
                       </div>
                       <span className="text-[14px] font-black uppercase tracking-wider text-white truncate w-full text-center" style={{ fontFamily: '"Bebas Neue", Anton, sans-serif' }}>
                          {tAName}
@@ -715,7 +729,7 @@ const ScoringApp = () => {
 
                     <div className="flex flex-col items-center gap-3 w-[30%]">
                       <div className="w-14 h-14 rounded-full bg-[#2FD1C6] flex items-center justify-center shadow-[0_0_15px_rgba(47,209,198,0.3)] shrink-0 overflow-hidden">
-                         {tB?.logo ? <img src={tB.logo} alt={tBName} className="w-full h-full object-cover" /> : <Zap size={24} className="text-[#1a1a1a]" fill="currentColor" />}
+                         {(tB?.image || tB?.logo) ? <img src={tB.image || tB.logo} alt={tBName} className="w-full h-full object-cover" /> : <Zap size={24} className="text-[#1a1a1a]" fill="currentColor" />}
                       </div>
                       <span className="text-[14px] font-black uppercase tracking-wider text-white truncate w-full text-center" style={{ fontFamily: '"Bebas Neue", Anton, sans-serif' }}>
                          {tBName}
@@ -729,7 +743,7 @@ const ScoringApp = () => {
                        <Timer size={18} className="text-[#2FD1C6] mb-auto" />
                        <div>
                          <p className="text-[9px] font-black uppercase tracking-widest text-neutral-500 mb-1">FORMAT</p>
-                         <p className="text-xl font-black text-white leading-none uppercase" style={{ fontFamily: '"Bebas Neue", Anton, sans-serif' }}>T20 MATCH</p>
+                         <p className="text-xl font-black text-white leading-none uppercase" style={{ fontFamily: '"Bebas Neue", Anton, sans-serif' }}>{game?.matchType || game?.format || 'T20'} MATCH</p>
                        </div>
                     </div>
                     <div className="bg-[#1e1e1e] border border-white/5 rounded-[12px] p-5 shadow-lg flex flex-col justify-between items-start h-[100px]">
@@ -741,20 +755,27 @@ const ScoringApp = () => {
                     </div>
                  </div>
 
-                 {/* Venue Card */}
-                 <div 
-                   className="w-full h-32 rounded-[12px] overflow-hidden relative shadow-lg mb-8 border border-white/5 bg-[#1e1e1e]"
-                 >
-                   <div className="absolute inset-0 bg-gradient-to-t from-black via-black/80 to-transparent z-10" />
-                   <img src="/score-bg.png" alt="Venue" className="absolute inset-0 w-full h-full object-cover opacity-30 grayscale" />
-                   <div className="absolute bottom-4 left-4 right-4 z-20 flex items-start gap-3">
-                     <MapPin size={20} className="text-[#D4F99A] mt-0.5" />
-                     <div>
-                       <p className="text-[9px] font-black uppercase tracking-widest text-neutral-400 mb-1">VENUE</p>
-                       <p className="text-lg font-black text-white tracking-wide leading-none uppercase truncate" style={{ fontFamily: '"Bebas Neue", Anton, sans-serif' }}>{locationName}</p>
+                 {/* Venue / Location */}
+                 {game?.venue?.name ? (
+                   <div className="w-full h-32 rounded-[12px] overflow-hidden relative shadow-lg mb-8 border border-white/5 bg-[#1e1e1e]">
+                     <div className="absolute inset-0 bg-gradient-to-t from-black via-black/80 to-transparent z-10" />
+                     <img src={game?.venue?.image || "/3d_stadium.png"} alt="Venue" className="absolute inset-0 w-full h-full object-cover opacity-30 grayscale" />
+                     <div className="absolute bottom-4 left-4 right-4 z-20 flex items-start gap-3">
+                       <MapPin size={20} className="text-[#D4F99A] mt-0.5" />
+                       <div>
+                         <p className="text-[9px] font-black uppercase tracking-widest text-neutral-400 mb-1">VENUE</p>
+                         <p className="text-lg font-black text-white tracking-wide leading-none uppercase truncate" style={{ fontFamily: '"Bebas Neue", Anton, sans-serif' }}>{game.venue.name}</p>
+                       </div>
                      </div>
                    </div>
-                 </div>
+                 ) : (
+                   <div className="w-full bg-[#1e1e1e] border border-white/5 rounded-[12px] p-4 flex items-center justify-center gap-2 shadow-lg mb-8">
+                     <MapPin size={16} className="text-neutral-500" />
+                     <span className="text-sm font-bold text-neutral-400 uppercase tracking-widest">
+                       {game?.customVenue || game?.location || 'No location provided'}
+                     </span>
+                   </div>
+                 )}
                  
                  <div className="flex gap-3 w-full mt-auto pb-4 pt-4">
                     <button
@@ -790,20 +811,20 @@ const ScoringApp = () => {
         <div 
           className="relative -mx-4 -mt-4 h-[439px] flex flex-col justify-end pb-8 bg-cover bg-center rounded-none overflow-hidden shadow-2xl" 
           style={{ 
-            backgroundImage: `linear-gradient(180deg, rgba(18,18,18,0.2) 0%, rgba(18,18,18,1) 100%), url('/score-bg.png')`
+            backgroundImage: `linear-gradient(180deg, rgba(18,18,18,0.2) 0%, rgba(18,18,18,1) 100%), url('/3d_stadium.png')`
           }}
         >
           <div className="absolute top-4 left-4 z-50">
-            <button onClick={() => setShowExitModal(true)} className="p-2 transition-all opacity-80 hover:opacity-100">
-              <img src="/back-icon.png" alt="Back" className="w-8 h-8 object-contain" />
+            <button onClick={() => setShowExitModal(true)} className="p-2 transition-all opacity-80 hover:opacity-100 bg-black/40 backdrop-blur-md rounded-full border border-white/10 flex items-center justify-center w-10 h-10">
+              <ChevronLeft size={24} className="text-white" />
             </button>
           </div>
-          <div className="absolute top-4 right-4 z-50 flex items-center gap-2">
-            <button className="p-2 transition-all opacity-80 hover:opacity-100">
-              <img src="/share-icon.png" alt="Share" className="w-7 h-7 object-contain" />
+          <div className="absolute top-4 right-4 z-50 flex items-center gap-3">
+            <button className="p-2 transition-all opacity-80 hover:opacity-100 bg-black/40 backdrop-blur-md rounded-full border border-white/10 flex items-center justify-center w-10 h-10">
+              <Share2 size={20} className="text-white" />
             </button>
-            <button onClick={() => setShowSettings(true)} className="p-2 transition-all opacity-80 hover:opacity-100">
-              <img src="/settings-icon.png" alt="Settings" className="w-8 h-8 object-contain" />
+            <button onClick={() => setShowSettings(true)} className="p-2 transition-all opacity-80 hover:opacity-100 bg-black/40 backdrop-blur-md rounded-full border border-white/10 flex items-center justify-center w-10 h-10">
+              <Settings size={20} className="text-white" />
             </button>
           </div>
           <div className="px-6 flex justify-between items-end">
@@ -1335,6 +1356,8 @@ const ScoringApp = () => {
         <InningsSetupModal
           battingTeamSlots={battingSlots}
           bowlingTeamSlots={bowlingSlots}
+          battingTeamInfo={battingTeamInfo}
+          bowlingTeamInfo={bowlingTeamInfo}
           inningsLabel={matchData?.currentInningsIndex === 0 ? '1st Innings' : '2nd Innings'}
           onConfirm={async (players) => {
             const result = await setPlayers(players);
@@ -1462,6 +1485,8 @@ const ScoringApp = () => {
         <InningsSetupModal
           battingTeamSlots={battingSlots}
           bowlingTeamSlots={bowlingSlots}
+          battingTeamInfo={battingTeamInfo}
+          bowlingTeamInfo={bowlingTeamInfo}
           inningsLabel={matchData?.currentInningsIndex === 0 ? '1st Innings' : '2nd Innings'}
           onConfirm={async (players) => {
             const result = await setPlayers(players);

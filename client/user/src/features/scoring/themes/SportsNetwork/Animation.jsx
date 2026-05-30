@@ -53,7 +53,7 @@ const SportsNetworkAnimation = ({ badge }) => {
           border: `4px solid ${borderColor}`,
           backdropFilter: 'none',
           padding: '40px 80px', borderRadius: '20px', textAlign: 'center', zIndex: 9999,
-          fontFamily: "'Roboto Condensed', sans-serif",
+          fontFamily: "'Open Sans', sans-serif",
           boxShadow: '0 0 50px rgba(0,0,0,0.5)',
           display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center'
         }}

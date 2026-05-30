@@ -1407,7 +1407,15 @@ export const fetchMatchStatus = async (matchId) => {
       where: { id: { in: userIds } },
       select: { id: true, name: true, profilePicture: true }
     });
-    const userMap = new Map(users.map(u => [u.id, u]));
+    
+    const customPlayers = await prisma.customPlayerInvite.findMany({
+      where: { id: { in: userIds } },
+      select: { id: true, name: true }
+    });
+
+    const userMap = new Map();
+    users.forEach(u => userMap.set(u.id, u));
+    customPlayers.forEach(c => userMap.set(c.id, { id: c.id, name: c.name, profilePicture: null }));
 
     const formattedPlayerStats = scoring.playerStats.map(s => ({
       ...s,
@@ -1499,11 +1507,20 @@ export const fetchMatchAnalytics = async (matchId) => {
     if (ball.fielderId) userIds.add(ball.fielderId);
   });
 
+  const userIdsArray = Array.from(userIds);
   const users = await prisma.user.findMany({
-    where: { id: { in: Array.from(userIds) } },
+    where: { id: { in: userIdsArray } },
     select: { id: true, name: true, profilePicture: true }
   });
-  const userMap = new Map(users.map(u => [u.id, u]));
+  
+  const customPlayers = await prisma.customPlayerInvite.findMany({
+    where: { id: { in: userIdsArray } },
+    select: { id: true, name: true }
+  });
+
+  const userMap = new Map();
+  users.forEach(u => userMap.set(u.id, u));
+  customPlayers.forEach(c => userMap.set(c.id, { id: c.id, name: c.name, profilePicture: null }));
 
   const formattedPlayerStats = scoring.playerStats.map(s => ({
     ...s,

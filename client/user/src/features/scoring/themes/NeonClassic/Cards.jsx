@@ -3,7 +3,7 @@ import React from 'react';
 // ─── Cards ─────────────────────────────────────────────────────────────────
 
 const NeonClassicEndOfOverCard = ({ score }) => (
-  <div style={{ padding: '20px', width: '350px', background: 'rgba(15, 23, 42, 0.9)', border: '2px solid #a3e635', borderRadius: '16px', color: '#fff', fontFamily: "'Orbitron', sans-serif" }}>
+  <div style={{ padding: '20px', width: '350px', background: 'rgba(15, 23, 42, 0.9)', border: '2px solid #a3e635', borderRadius: '16px', color: '#fff', fontFamily: "'Open Sans', sans-serif" }}>
     <h3 style={{ margin: '0 0 10px 0', fontSize: '14px', color: '#94a3b8', textTransform: 'uppercase' }}>End of Over {score?.overs}</h3>
     <div style={{ fontSize: '32px', fontWeight: 900, color: '#a3e635' }}>{score?.totalRuns}/{score?.totalWickets}</div>
     <div style={{ fontSize: '14px', color: '#94a3b8' }}>CRR: {score?.crr}</div>
@@ -11,7 +11,7 @@ const NeonClassicEndOfOverCard = ({ score }) => (
 );
 
 const NeonClassicMilestoneCard = ({ data }) => (
-  <div style={{ padding: '20px', width: '300px', textAlign: 'center', background: 'rgba(15, 23, 42, 0.9)', border: '2px solid #a3e635', borderRadius: '16px', color: '#fff', fontFamily: "'Orbitron', sans-serif" }}>
+  <div style={{ padding: '20px', width: '300px', textAlign: 'center', background: 'rgba(15, 23, 42, 0.9)', border: '2px solid #a3e635', borderRadius: '16px', color: '#fff', fontFamily: "'Open Sans', sans-serif" }}>
     <h3 style={{ margin: '0 0 10px 0', fontSize: '18px', color: '#a3e635', textTransform: 'uppercase', fontWeight: 900 }}>MILESTONE</h3>
     <div style={{ fontSize: '24px', fontWeight: 'bold' }}>{data?.name}</div>
     <div style={{ fontSize: '48px', fontWeight: 900, color: '#a3e635' }}>{data?.runs || data?.wickets}</div>
@@ -19,7 +19,7 @@ const NeonClassicMilestoneCard = ({ data }) => (
 );
 
 const NeonClassicFallOfWicketCard = ({ data }) => (
-  <div style={{ padding: '20px', width: '350px', background: 'rgba(15, 23, 42, 0.9)', border: '2px solid #ef4444', borderRadius: '16px', color: '#fff', fontFamily: "'Orbitron', sans-serif" }}>
+  <div style={{ padding: '20px', width: '350px', background: 'rgba(15, 23, 42, 0.9)', border: '2px solid #ef4444', borderRadius: '16px', color: '#fff', fontFamily: "'Open Sans', sans-serif" }}>
     <h3 style={{ margin: '0 0 10px 0', fontSize: '18px', color: '#ef4444', textTransform: 'uppercase', fontWeight: 900 }}>WICKET</h3>
     <div style={{ fontSize: '20px' }}>{data?.batterName}</div>
     <div style={{ fontSize: '14px', color: '#94a3b8' }}>b {data?.bowlerName}</div>
@@ -27,63 +27,63 @@ const NeonClassicFallOfWicketCard = ({ data }) => (
 );
 
 const NeonClassicPartnershipCard = ({ data }) => (
-  <div style={{ padding: '20px', width: '350px', background: 'rgba(15, 23, 42, 0.9)', border: '2px solid #3b82f6', borderRadius: '16px', color: '#fff', fontFamily: "'Orbitron', sans-serif" }}>
+  <div style={{ padding: '20px', width: '350px', background: 'rgba(15, 23, 42, 0.9)', border: '2px solid #3b82f6', borderRadius: '16px', color: '#fff', fontFamily: "'Open Sans', sans-serif" }}>
     <h3 style={{ margin: '0 0 10px 0', fontSize: '16px', color: '#3b82f6', textTransform: 'uppercase' }}>Partnership</h3>
     <div style={{ fontSize: '28px', fontWeight: 900 }}>{data?.runs} Runs</div>
   </div>
 );
 
 const NeonClassicNewBatterCard = ({ data }) => (
-  <div style={{ padding: '20px', width: '300px', background: 'rgba(15, 23, 42, 0.9)', border: '2px solid #a3e635', borderRadius: '16px', color: '#fff', fontFamily: "'Orbitron', sans-serif" }}>
+  <div style={{ padding: '20px', width: '300px', background: 'rgba(15, 23, 42, 0.9)', border: '2px solid #a3e635', borderRadius: '16px', color: '#fff', fontFamily: "'Open Sans', sans-serif" }}>
     <h3 style={{ margin: '0 0 10px 0', fontSize: '14px', color: '#a3e635', textTransform: 'uppercase' }}>New Batter</h3>
     <div style={{ fontSize: '22px', fontWeight: 'bold' }}>{data?.name}</div>
   </div>
 );
 
 const NeonClassicBowlerChangeCard = ({ data }) => (
-  <div style={{ padding: '20px', width: '300px', background: 'rgba(15, 23, 42, 0.9)', border: '2px solid #f59e0b', borderRadius: '16px', color: '#fff', fontFamily: "'Orbitron', sans-serif" }}>
+  <div style={{ padding: '20px', width: '300px', background: 'rgba(15, 23, 42, 0.9)', border: '2px solid #f59e0b', borderRadius: '16px', color: '#fff', fontFamily: "'Open Sans', sans-serif" }}>
     <h3 style={{ margin: '0 0 10px 0', fontSize: '14px', color: '#f59e0b', textTransform: 'uppercase' }}>Bowler Change</h3>
     <div style={{ fontSize: '22px', fontWeight: 'bold' }}>{data?.name}</div>
   </div>
 );
 
 const NeonClassicInningsBreakCard = ({ data }) => (
-  <div style={{ padding: '30px', width: '400px', textAlign: 'center', background: 'rgba(15, 23, 42, 0.95)', border: '3px solid #a3e635', borderRadius: '16px', color: '#fff', fontFamily: "'Orbitron', sans-serif" }}>
+  <div style={{ padding: '30px', width: '400px', textAlign: 'center', background: 'rgba(15, 23, 42, 0.95)', border: '3px solid #a3e635', borderRadius: '16px', color: '#fff', fontFamily: "'Open Sans', sans-serif" }}>
     <h2 style={{ color: '#a3e635', textTransform: 'uppercase', margin: '0 0 20px 0' }}>Innings Break</h2>
     <div style={{ fontSize: '36px', fontWeight: 900 }}>{data?.teamName}: {data?.runs}/{data?.wickets}</div>
   </div>
 );
 
 const NeonClassicMatchResultCard = ({ data }) => (
-  <div style={{ padding: '40px', width: '500px', textAlign: 'center', background: 'rgba(15, 23, 42, 0.95)', border: '4px solid #a3e635', borderRadius: '16px', color: '#fff', fontFamily: "'Orbitron', sans-serif" }}>
+  <div style={{ padding: '40px', width: '500px', textAlign: 'center', background: 'rgba(15, 23, 42, 0.95)', border: '4px solid #a3e635', borderRadius: '16px', color: '#fff', fontFamily: "'Open Sans', sans-serif" }}>
     <h1 style={{ color: '#a3e635', textTransform: 'uppercase', margin: '0 0 20px 0' }}>{data?.winner} WON</h1>
     <div style={{ fontSize: '24px' }}>by {data?.margin}</div>
   </div>
 );
 
 const NeonClassicWeatherCard = ({ data }) => (
-  <div style={{ padding: '20px', width: '300px', background: 'rgba(15, 23, 42, 0.9)', border: '2px solid #3b82f6', borderRadius: '16px', color: '#fff', fontFamily: "'Orbitron', sans-serif" }}>
+  <div style={{ padding: '20px', width: '300px', background: 'rgba(15, 23, 42, 0.9)', border: '2px solid #3b82f6', borderRadius: '16px', color: '#fff', fontFamily: "'Open Sans', sans-serif" }}>
     <h3 style={{ margin: '0 0 10px 0', fontSize: '14px', color: '#3b82f6', textTransform: 'uppercase' }}>Weather Update</h3>
     <div style={{ fontSize: '22px', fontWeight: 'bold' }}>{data?.status || 'Rain Delay'}</div>
   </div>
 );
 
 const NeonClassicTimeoutCard = ({ data }) => (
-  <div style={{ padding: '20px', width: '300px', textAlign: 'center', background: 'rgba(15, 23, 42, 0.9)', border: '2px solid #f59e0b', borderRadius: '16px', color: '#fff', fontFamily: "'Orbitron', sans-serif" }}>
+  <div style={{ padding: '20px', width: '300px', textAlign: 'center', background: 'rgba(15, 23, 42, 0.9)', border: '2px solid #f59e0b', borderRadius: '16px', color: '#fff', fontFamily: "'Open Sans', sans-serif" }}>
     <h3 style={{ margin: '0 0 10px 0', fontSize: '18px', color: '#f59e0b', textTransform: 'uppercase', fontWeight: 900 }}>Strategic Timeout</h3>
     <div style={{ fontSize: '32px', fontWeight: 'bold' }}>2:30</div>
   </div>
 );
 
 const NeonClassicWormCard = ({ data }) => (
-  <div style={{ padding: '20px', width: '400px', background: 'rgba(15, 23, 42, 0.9)', border: '2px solid #a3e635', borderRadius: '16px', color: '#fff', fontFamily: "'Orbitron', sans-serif" }}>
+  <div style={{ padding: '20px', width: '400px', background: 'rgba(15, 23, 42, 0.9)', border: '2px solid #a3e635', borderRadius: '16px', color: '#fff', fontFamily: "'Open Sans', sans-serif" }}>
     <h3 style={{ margin: '0 0 10px 0', fontSize: '14px', color: '#a3e635', textTransform: 'uppercase' }}>Worm Graph</h3>
     <div style={{ height: '150px', background: 'rgba(255,255,255,0.1)', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>[Worm Chart Placeholder]</div>
   </div>
 );
 
 const NeonClassicWinProbCard = ({ data }) => (
-  <div style={{ padding: '20px', width: '350px', background: 'rgba(15, 23, 42, 0.9)', border: '2px solid #a3e635', borderRadius: '16px', color: '#fff', fontFamily: "'Orbitron', sans-serif" }}>
+  <div style={{ padding: '20px', width: '350px', background: 'rgba(15, 23, 42, 0.9)', border: '2px solid #a3e635', borderRadius: '16px', color: '#fff', fontFamily: "'Open Sans', sans-serif" }}>
     <h3 style={{ margin: '0 0 10px 0', fontSize: '14px', color: '#a3e635', textTransform: 'uppercase' }}>Win Probability</h3>
     <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '24px', fontWeight: 'bold' }}>
       <span>{data?.team1}: {data?.prob1}%</span>

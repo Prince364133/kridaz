@@ -52,7 +52,7 @@ const NeonClassicAnimation = ({ badge }) => {
           border: `2px solid ${color}`,
           backdropFilter: 'none',
           padding: '40px 80px', borderRadius: '20px', textAlign: 'center', zIndex: 9999,
-          fontFamily: "'Orbitron', sans-serif",
+          fontFamily: "'Open Sans', sans-serif",
           boxShadow: '0 0 50px rgba(0,0,0,0.5)',
           display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center'
         }}

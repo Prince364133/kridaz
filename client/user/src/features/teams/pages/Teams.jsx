@@ -14,7 +14,9 @@ const MyTeams = () => {
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [isInviteModalOpen, setIsInviteModalOpen] = useState(false);
   
-  const { data: teamData } = useGetMyTeamsQuery();
+  const { data: teamData } = useGetMyTeamsQuery(undefined, {
+    pollingInterval: 5000,
+  });
 
   // Sync selected team with data if it changes
   useEffect(() => {
@@ -35,7 +37,7 @@ const MyTeams = () => {
   }, [teamIdParam, teamData]);
 
   return (
-    <div className="h-[calc(100vh-80px)] flex bg-[#0a0a0a] overflow-hidden">
+    <div className="h-[calc(100vh-80px)] flex bg-[#0a0a0a] overflow-hidden" style={{ fontFamily: "'Open Sans', sans-serif" }}>
       {/* Sidebar */}
       <div className={`${selectedTeam ? 'hidden md:block' : 'block'} w-full md:w-80 h-full shrink-0`}>
         <TeamSidebar 

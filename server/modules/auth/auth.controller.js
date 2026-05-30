@@ -423,6 +423,47 @@ export const registerUser = async (req, res) => {
         }
       });
 
+      // 5. Migrate Custom Player Data
+      if (phone) {
+        const customInvites = await tx.teamCustomMember.findMany({
+          where: { phone }
+        });
+        
+        for (const custom of customInvites) {
+          // Auto-add to the team
+          const existingMember = await tx.teamMember.findFirst({
+            where: { teamId: custom.teamId, userId: user.id }
+          });
+          if (!existingMember) {
+            await tx.teamMember.create({
+              data: {
+                teamId: custom.teamId,
+                userId: user.id,
+                role: "PLAYER",
+                status: "ACCEPTED"
+              }
+            });
+          }
+          
+          // Reassign stats
+          await tx.matchPlayerStat.updateMany({
+            where: { userId: custom.id },
+            data: { userId: user.id }
+          });
+          
+          // Reassign slots
+          await tx.gameSlot.updateMany({
+            where: { customPlayerId: custom.id },
+            data: { userId: user.id, customPlayerId: null }
+          });
+          
+          // Delete custom invite
+          await tx.teamCustomMember.delete({
+            where: { id: custom.id }
+          });
+        }
+      }
+
       return { user, ownerProfileId };
     });
 
@@ -518,6 +559,47 @@ export const registerOwner = async (req, res) => {
           businessName: businessName || name || "Independent Partner"
         }
       });
+
+      // 3. Migrate Custom Player Data
+      if (phone) {
+        const customInvites = await tx.teamCustomMember.findMany({
+          where: { phone }
+        });
+        
+        for (const custom of customInvites) {
+          // Auto-add to the team
+          const existingMember = await tx.teamMember.findFirst({
+            where: { teamId: custom.teamId, userId: user.id }
+          });
+          if (!existingMember) {
+            await tx.teamMember.create({
+              data: {
+                teamId: custom.teamId,
+                userId: user.id,
+                role: "PLAYER",
+                status: "ACCEPTED"
+              }
+            });
+          }
+          
+          // Reassign stats
+          await tx.matchPlayerStat.updateMany({
+            where: { userId: custom.id },
+            data: { userId: user.id }
+          });
+          
+          // Reassign slots
+          await tx.gameSlot.updateMany({
+            where: { customPlayerId: custom.id },
+            data: { userId: user.id, customPlayerId: null }
+          });
+          
+          // Delete custom invite
+          await tx.teamCustomMember.delete({
+            where: { id: custom.id }
+          });
+        }
+      }
 
       return { user, owner };
     });

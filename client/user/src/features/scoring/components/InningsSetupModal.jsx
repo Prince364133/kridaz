@@ -21,6 +21,8 @@ import { Users, Zap, X, ChevronRight } from 'lucide-react';
 const InningsSetupModal = ({
   battingTeamSlots = [],
   bowlingTeamSlots = [],
+  battingTeamInfo,
+  bowlingTeamInfo,
   inningsLabel = '1st Innings',
   onConfirm,
   onClose,
@@ -32,10 +34,10 @@ const InningsSetupModal = ({
   const [wicketKeeper, setWicketKeeper] = useState(null);
 
   const STEPS = [
-    { id: 1, label: 'Choose Opener (Striker)', icon: <Zap size={16} />, pool: battingTeamSlots, excludeId: null },
-    { id: 2, label: 'Choose Opener (Non-Striker)', icon: <Users size={16} />, pool: battingTeamSlots, excludeId: striker?.userId },
-    { id: 3, label: 'Choose Opening Bowler', icon: <Zap size={16} />, pool: bowlingTeamSlots, excludeId: null },
-    { id: 4, label: 'Choose Wicket Keeper', icon: <Users size={16} />, pool: bowlingTeamSlots.filter(p => p.role?.includes('WICKET_KEEPER')).length ? bowlingTeamSlots.filter(p => p.role?.includes('WICKET_KEEPER')) : bowlingTeamSlots, excludeId: bowler?.userId }
+    { id: 1, label: 'Choose Opener (Striker)', icon: <Zap size={16} />, pool: battingTeamSlots, teamInfo: battingTeamInfo, excludeId: null },
+    { id: 2, label: 'Choose Opener (Non-Striker)', icon: <Users size={16} />, pool: battingTeamSlots, teamInfo: battingTeamInfo, excludeId: striker?.userId },
+    { id: 3, label: 'Choose Opening Bowler', icon: <Zap size={16} />, pool: bowlingTeamSlots, teamInfo: bowlingTeamInfo, excludeId: null },
+    { id: 4, label: 'Choose Wicket Keeper', icon: <Users size={16} />, pool: bowlingTeamSlots.filter(p => p.role?.includes('WICKET_KEEPER')).length ? bowlingTeamSlots.filter(p => p.role?.includes('WICKET_KEEPER')) : bowlingTeamSlots, teamInfo: bowlingTeamInfo, excludeId: bowler?.userId }
   ];
 
   const currentStep = STEPS[step - 1];
@@ -105,6 +107,19 @@ const InningsSetupModal = ({
 
           {/* Player list */}
           <div className="px-4 py-4 max-h-72 overflow-y-auto space-y-2 custom-scrollbar">
+            {currentStep.teamInfo && (
+              <div className="flex items-center gap-3 px-2 mb-3">
+                {currentStep.teamInfo.logo ? (
+                  <img src={currentStep.teamInfo.logo} alt={currentStep.teamInfo.name} className="w-8 h-8 rounded-full object-cover shadow-md" />
+                ) : (
+                  <div className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center shrink-0">
+                    <Users size={14} className="text-white/60" />
+                  </div>
+                )}
+                <span className="text-sm font-bold text-white uppercase tracking-wider">{currentStep.teamInfo.name}</span>
+              </div>
+            )}
+
             {pool.length === 0 && (
               <p className="text-center text-neutral-500 text-sm py-8">No players available</p>
             )}

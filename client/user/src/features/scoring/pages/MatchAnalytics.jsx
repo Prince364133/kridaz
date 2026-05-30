@@ -430,7 +430,7 @@ const MatchAnalytics = () => {
 
   if (loading || (!analytics && !liveScore)) {
     return (
-      <div className="min-h-screen bg-black flex items-center justify-center">
+      <div className="min-h-screen bg-black flex items-center justify-center force-open-sans">
         <div className="animate-pulse flex flex-col items-center">
           <div className="w-12 h-12 rounded-full border-2 border-[#00C187] border-t-transparent animate-spin mb-4" />
           <p className="text-gray-500 uppercase tracking-widest text-[10px] font-bold">Analyzing Match Data...</p>
@@ -680,7 +680,7 @@ const MatchAnalytics = () => {
   }) : [];
 
   return (
-    <div className="min-h-screen bg-black text-white pb-20">
+    <div className="min-h-screen bg-black text-white pb-20 force-open-sans">
       {/* Break overlay */}
       {/* Overlay removed per user request */}
 
@@ -791,16 +791,23 @@ const MatchAnalytics = () => {
 
                 <div className="relative z-10 flex items-center justify-between gap-3">
                   <div className="flex items-center gap-3 sm:gap-4 min-w-0">
-                    <div className="relative shrink-0">
-                      <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-full border-2 border-[#00C187]/30 overflow-hidden bg-black/20">
-                        <img 
-                          src={mvp.profilePicture || `https://api.dicebear.com/7.x/avataaars/svg?seed=${mvp.name}`} 
-                          alt={mvp.name}
-                          className="w-full h-full object-cover"
-                        />
+                    <div className="relative z-10 w-12 h-12 sm:w-14 sm:h-14 mx-auto mb-3">
+                      <div className="absolute inset-0 bg-[#00C187] rounded-full blur-md opacity-40"></div>
+                      <div className="relative w-full h-full rounded-full border-2 border-[#00C187] bg-zinc-900 shadow-xl overflow-hidden flex items-center justify-center">
+                        {mvp.profilePicture ? (
+                          <img 
+                            src={mvp.profilePicture} 
+                            alt={mvp.name}
+                            className="w-full h-full object-cover scale-110 transition-transform duration-500 group-hover:scale-100"
+                          />
+                        ) : (
+                          <span className="text-lg font-black text-white opacity-50">
+                            {mvp.name?.substring(0, 2).toUpperCase()}
+                          </span>
+                        )}
                       </div>
-                      <div className="absolute -bottom-1 -right-1 bg-[#00C187] text-black p-1 rounded-full shadow-lg border-2 border-[#121212]">
-                        <Trophy size={10} strokeWidth={3} />
+                      <div className="absolute -bottom-1 -right-1 bg-gradient-to-br from-[#00C187] to-yellow-500 w-5 h-5 rounded-full flex items-center justify-center border-2 border-zinc-900 shadow-lg transform -rotate-12">
+                        <Trophy className="w-2.5 h-2.5 text-black fill-black" />
                       </div>
                     </div>
                     
@@ -924,12 +931,18 @@ const MatchAnalytics = () => {
                     className="flex items-center gap-4 p-4 bg-white/[0.01] border border-white/10 rounded-[8px] group hover:bg-white/[0.02] transition-all"
                   >
                     <div className="text-xl font-black text-white/20 w-8">{idx + 1}</div>
-                    <div className="w-12 h-12 rounded-full overflow-hidden border border-white/10 bg-black/40">
-                      <img 
-                        src={player.profilePicture || `https://api.dicebear.com/7.x/avataaars/svg?seed=${player.name}`} 
-                        alt={player.name}
-                        className="w-full h-full object-cover"
-                      />
+                    <div className="w-12 h-12 rounded-full overflow-hidden border border-white/10 bg-black/40 flex items-center justify-center">
+                      {player.profilePicture ? (
+                        <img 
+                          src={player.profilePicture} 
+                          alt={player.name}
+                          className="w-full h-full object-cover"
+                        />
+                      ) : (
+                        <span className="text-sm font-black text-white/50">
+                          {player.name?.substring(0, 2).toUpperCase()}
+                        </span>
+                      )}
                     </div>
                     <div className="flex-1">
                       <h4 className="font-black uppercase text-sm">{player.name}</h4>
