@@ -1,3 +1,4 @@
+import * as Sentry from "@sentry/react";
 import React, { useState, useRef, useEffect, useMemo } from 'react';
 import { useSelector } from 'react-redux';
 import { motion, AnimatePresence, useMotionValue, animate } from 'framer-motion';
@@ -258,7 +259,7 @@ const StartScoringModal = ({ isOpen, onClose, onSuccess, initialData }) => {
             setCustomPlayerCountryCode(code);
           }
         })
-        .catch(err => console.error('Failed to fetch country code', err));
+        .catch(err => Sentry.captureException(err));
     }
   }, [isOpen]);
 
@@ -415,7 +416,7 @@ const StartScoringModal = ({ isOpen, onClose, onSuccess, initialData }) => {
           const results = await searchLocations(locationInput);
           setLocationSuggestions(results || []);
         } catch (error) {
-          console.error("Location search failed:", error);
+          Sentry.captureException(error);
         }
       } else {
         setLocationSuggestions([]);
@@ -444,14 +445,18 @@ const StartScoringModal = ({ isOpen, onClose, onSuccess, initialData }) => {
                 setMapCoordinates({ lat: pos.coords.latitude, lon: pos.coords.longitude });
               }
             } catch (err) {
-              console.log('Reverse geocoding failed', err);
+              Sentry.addBreadcrumb({
+                message: JSON.stringify(['Reverse geocoding failed', err])
+              });
             }
           }, () => {
-            console.log('Geolocation permission denied or failed');
+            Sentry.addBreadcrumb({
+              message: String('Geolocation permission denied or failed')
+            });
           });
         }
       } catch (err) {
-        console.error('Failed to init location', err);
+        Sentry.captureException(err);
       }
     };
     initLocation();
@@ -913,14 +918,14 @@ const StartScoringModal = ({ isOpen, onClose, onSuccess, initialData }) => {
             toast.error('Failed to get address for live location.');
           }
         } catch (err) {
-          console.error(err);
+          Sentry.captureException(err);
           toast.error('Reverse geocoding failed.');
         } finally {
           setIsDetectingLocation(false);
         }
       },
       (error) => {
-        console.error(error);
+        Sentry.captureException(error);
         toast.error(error.message || 'Geolocation access denied.');
         setIsDetectingLocation(false);
       },

@@ -1,3 +1,4 @@
+import * as Sentry from "@sentry/react";
 import React, { useState, useEffect } from 'react';
 import { 
   ChevronLeft, 
@@ -29,7 +30,7 @@ const OwnerCalendar = () => {
         setData(response.data);
       }
     } catch (error) {
-      console.error("Error fetching calendar data:", error);
+      Sentry.captureException(error);
     } finally {
       setLoading(false);
     }

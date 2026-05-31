@@ -1,3 +1,4 @@
+import * as Sentry from "@sentry/react";
 import React, { useState } from 'react';
 import { X, Check, Eye, Sparkles, Tv, Layers, Palette, RefreshCw, Circle } from 'lucide-react';
 import toast from 'react-hot-toast';
@@ -55,7 +56,7 @@ const TickerThemeStoreModal = ({ activeTheme = 'neon_classic', matchId, onClose,
         toast.error(data.message || 'Unable to update ticker theme.');
       }
     } catch (err) {
-      console.error(err);
+      Sentry.captureException(err);
       toast.error('Network request failed. Please check connection.');
     } finally {
       setIsApplying(false);

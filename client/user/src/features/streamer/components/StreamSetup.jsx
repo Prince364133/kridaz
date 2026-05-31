@@ -1,3 +1,4 @@
+import * as Sentry from "@sentry/react";
 import React, { useState, useEffect, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useSelector } from "react-redux";
@@ -190,7 +191,9 @@ export default function StreamSetup() {
         setSelectedPlatforms(prev => ({ ...prev, [fbRes.data[0].accountId]: true }));
       }
     } catch (err) {
-      console.log("Facebook account fetch error", err);
+      Sentry.addBreadcrumb({
+        message: JSON.stringify(["Facebook account fetch error", err])
+      });
     } finally {
       if (!silent) setFbLoading(false);
     }
@@ -206,7 +209,9 @@ export default function StreamSetup() {
         setSelectedPlatforms(prev => ({ ...prev, [res.data[0].accountId]: true }));
       }
     } catch (err) {
-      console.log("YouTube account fetch error", err);
+      Sentry.addBreadcrumb({
+        message: JSON.stringify(["YouTube account fetch error", err])
+      });
     } finally {
       if (!silent) setChannelLoading(false);
     }
@@ -267,7 +272,7 @@ export default function StreamSetup() {
       const res = await axiosInstance.get(`/api/hosted-game/search-officials?query=${val}`);
       setSearchResults(res.data.officials || []);
     } catch (err) {
-      console.error(err);
+      Sentry.captureException(err);
     } finally {
       setSearching(false);
     }
@@ -306,7 +311,7 @@ export default function StreamSetup() {
       const res = await axiosInstance.get(`/api/hosted-game/grounds?query=${val}`);
       setGroundResults(res.data.grounds || []);
     } catch (err) {
-      console.error(err);
+      Sentry.captureException(err);
     } finally {
       setSearchingGround(false);
     }

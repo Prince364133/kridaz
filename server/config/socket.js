@@ -6,6 +6,7 @@ import logger from "../utils/logger.js";
 import { SOCKET } from "@kridaz/shared-constants/socketEvents";
 import fs from "fs";
 import path from "path";
+import jwt from "jsonwebtoken";
 let io;
 
 const socketConfig = (server) => {
@@ -19,6 +20,24 @@ const socketConfig = (server) => {
   });
 
   io.adapter(createAdapter(pubClient, subClient));
+
+  io.use((socket, next) => {
+    const token = socket.handshake.auth?.token;
+    if (!token) {
+      return next(new Error("AUTH"));
+    }
+    try {
+      const decoded = jwt.verify(token, process.env.JWT_SECRET);
+      if (!decoded) {
+        return next(new Error("AUTH"));
+      }
+      socket.user = decoded;
+      socket.userId = decoded.id || decoded.user?.id;
+      next();
+    } catch (err) {
+      return next(new Error("AUTH"));
+    }
+  });
 
   const schedulePresenceBroadcast = async () => {
     try {

@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { Outlet } from "react-router-dom";
 import { AdminSidebar, AuthenticatedNavbar } from "@components/layout";
 import MobileBottomNav from "@user/components/layout/MobileBottomNav";
+import RootErrorBoundary from "@components/common/RootErrorBoundary";
 
 const AdminLayout = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -31,7 +32,9 @@ const AdminLayout = () => {
           className={`flex-1 overflow-x-hidden transition-all duration-300 ease-in-out ${isMinimized ? "lg:ml-20" : "lg:ml-64"}`}
         >
           <div className="w-full p-4 pb-24 lg:pb-10">
-            <Outlet />
+            <RootErrorBoundary>
+              <Outlet />
+            </RootErrorBoundary>
           </div>
         </main>
       </div>

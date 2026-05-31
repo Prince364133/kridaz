@@ -1,3 +1,4 @@
+import * as Sentry from "@sentry/react";
 import React, { useState, useEffect } from "react";
 import {
   LifeBuoy, MessageSquare, ChevronRight, Clock, AlertCircle, Zap,
@@ -62,7 +63,7 @@ const PartnerSupport = () => {
       const res = await axiosInstance.get("/api/owner/support/tickets");
       setTickets(res.data.tickets || []);
     } catch (err) {
-      console.error(err);
+      Sentry.captureException(err);
     } finally {
       setFetching(false);
     }
@@ -76,19 +77,28 @@ const PartnerSupport = () => {
 
     setUploading(true);
     try {
-      console.log("PartnerSupport.jsx: Starting image upload for", files.length, "files");
+      Sentry.addBreadcrumb({
+        message: JSON.stringify(["PartnerSupport.jsx: Starting image upload for", files.length, "files"])
+      });
       const uploadPromises = files.map(async (file) => {
         const data = new FormData();
         data.append("file", file);
         data.append("folder", "kridaz/support");
         
-        console.log(`PartnerSupport.jsx: Uploading ${file.name} (${file.size} bytes)...`);
+        Sentry.addBreadcrumb({
+          message: String(`PartnerSupport.jsx: Uploading ${file.name} (${file.size} bytes)...`)
+        });
         const res = await axiosInstance.post("/api/upload", data, {
           headers: { "Content-Type": "multipart/form-data" }
         });
         
         if (res.data.success) {
-          console.log(`PartnerSupport.jsx: Successfully uploaded ${file.name}. URL:`, res.data.url);
+          Sentry.addBreadcrumb({
+            message: JSON.stringify([
+              `PartnerSupport.jsx: Successfully uploaded ${file.name}. URL:`,
+              res.data.url
+            ])
+          });
           return res.data.url;
         } else {
           throw new Error(res.data.message || "Upload failed");
@@ -99,7 +109,7 @@ const PartnerSupport = () => {
       setFormData(prev => ({ ...prev, images: [...prev.images, ...urls] }));
       toast.success(`Successfully uploaded ${urls.length} image(s)`);
     } catch (err) {
-      console.error("PartnerSupport.jsx: Upload error details:", err);
+      Sentry.captureException(err);
       toast.error(err.response?.data?.message || err.message || "Image upload failed");
     } finally {
       setUploading(false);

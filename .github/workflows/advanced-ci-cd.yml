@@ -47,7 +47,13 @@ jobs:
           JWT_SECRET: ${{ secrets.JWT_SECRET_TEST }}
           # Mock Redis URL for test environment if required by tests
           REDIS_URL: redis://localhost:6379 
-        run: pnpm run test:all
+        run: pnpm run test:all --coverage
+
+      - name: Check Coverage
+        run: |
+          echo "Checking if global statement coverage is >= 60%"
+          # Using nyc to check coverage thresholds across the monorepo
+          npx nyc check-coverage --statements 60
 
       - name: Run Build
         run: pnpm run build

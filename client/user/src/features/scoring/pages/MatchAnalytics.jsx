@@ -1,3 +1,4 @@
+import * as Sentry from "@sentry/react";
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { 
@@ -385,7 +386,7 @@ const MatchAnalytics = () => {
       toast.success("Scorecard downloaded!", { id: 'share' });
 
     } catch (err) {
-      console.error("Share failed:", err);
+      Sentry.captureException(err);
       toast.error("Could not generate scorecard. Please try again.", { id: 'share' });
     } finally {
       setIsCapturing(false);

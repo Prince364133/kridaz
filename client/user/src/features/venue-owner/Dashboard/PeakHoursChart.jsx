@@ -1,3 +1,4 @@
+import * as Sentry from "@sentry/react";
 import React, { useState, useEffect } from 'react';
 import { 
   BarChart, 
@@ -35,7 +36,7 @@ const PeakHoursChart = () => {
         setSelectedTurf(data[0]._id);
       }
     } catch (error) {
-      console.error("Error fetching turfs:", error);
+      Sentry.captureException(error);
     }
   };
 
@@ -54,7 +55,7 @@ const PeakHoursChart = () => {
         setSummary(res.data.summary);
       }
     } catch (error) {
-      console.error("Error fetching peak hours:", error);
+      Sentry.captureException(error);
     } finally {
       setLoading(false);
     }

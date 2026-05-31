@@ -1,3 +1,4 @@
+import * as Sentry from "@sentry/react";
 import React, { useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -10,7 +11,7 @@ const SportsNetworkAnimation = ({ badge }) => {
     if (badge && SFX_URLS[badge.type]) {
       audioRef.current = new Audio(SFX_URLS[badge.type]);
       audioRef.current.volume = 0.6;
-      audioRef.current.play().catch(e => console.error("Audio play failed:", e));
+      audioRef.current.play().catch(e => Sentry.captureException(e));
     }
     return () => {
       if (audioRef.current) {

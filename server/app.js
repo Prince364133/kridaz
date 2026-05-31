@@ -1,4 +1,5 @@
 import express from "express";
+import helmet from "helmet";
 import cors from "cors";
 import mongoose from "mongoose";
 import dotenv from "dotenv";
@@ -15,6 +16,7 @@ import {
 dotenv.config(); // Hot-reload trigger for route alias updates
 
 const app = express();
+app.use(helmet());
 
 app.use(express.json({
   limit: "50mb",

@@ -1,3 +1,4 @@
+import * as Sentry from "@sentry/react";
 import {
  Clock, MapPin, Calendar, QrCode, ShieldCheck, Zap, Activity, Wallet,
  CreditCard, FileText, Ticket, AlertOctagon, IndianRupee, Loader2, User,
@@ -80,7 +81,7 @@ const TurfBookingHistory = () => {
       toast.success("Review submitted successfully!");
       closeProReviewModal();
     } catch (err) {
-      console.error(err);
+      Sentry.captureException(err);
       toast.error(err.response?.data?.message || "Failed to submit review.");
     } finally {
       setProReviewSubmitting(false);
@@ -134,7 +135,7 @@ const TurfBookingHistory = () => {
       toast.success("Match request re-created successfully!");
       if (refetchOnDemand) refetchOnDemand();
     } catch (err) {
-      console.error(err);
+      Sentry.captureException(err);
       toast.error(err?.data?.message || "Failed to retry match request.");
     }
   };
@@ -152,7 +153,7 @@ const TurfBookingHistory = () => {
           setProfessionalBookings(res.data.bookings || []);
         }
       } catch (error) {
-        console.error("Failed to load professional bookings:", error);
+        Sentry.captureException(error);
       } finally {
         setLoadingProBookings(false);
       }
@@ -759,7 +760,7 @@ const TurfBookingHistory = () => {
                               slotsStr = booking.slots;
                             }
                           } catch (e) {
-                            console.error(e);
+                            Sentry.captureException(e);
                           }
 
                           return (
@@ -941,7 +942,7 @@ const TurfBookingHistory = () => {
         )}
       </div>
     </div>
- );
+  );
 };
 
 export default TurfBookingHistory;

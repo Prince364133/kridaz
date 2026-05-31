@@ -31,7 +31,7 @@ import { execSync } from "child_process";
 const startServer = () => {
   try {
     if (process.env.NODE_ENV === 'production' || process.env.RAILWAY_ENVIRONMENT) {
-      logger.info("[DATABASE] Automatically syncing schema (Prisma db push)...");
+      logger.info("[DATABASE] Deploying migrations...");
       
       // Use Railway's internal network to bypass public proxy unreachable errors
       if (process.env.DATABASE_URL && process.env.DATABASE_URL.includes('zephyr.proxy.rlwy.net')) {
@@ -39,8 +39,8 @@ const startServer = () => {
         process.env.DATABASE_URL = process.env.DATABASE_URL.replace('zephyr.proxy.rlwy.net:15446', 'postgres.railway.internal:5432');
       }
       
-      execSync("npx prisma generate && npx prisma db push --accept-data-loss", { stdio: "inherit" });
-      logger.info("[DATABASE] Schema synced successfully.");
+      execSync("npx prisma migrate deploy", { stdio: "inherit" });
+      logger.info("[DATABASE] Migrations deployed successfully.");
     }
   } catch (error) {
     logger.error("[DATABASE] Failed to sync schema:", error);

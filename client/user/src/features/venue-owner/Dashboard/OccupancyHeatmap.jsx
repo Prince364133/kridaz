@@ -1,3 +1,4 @@
+import * as Sentry from "@sentry/react";
 import React, { useState, useEffect } from 'react';
 import { Clock, User, Phone, Mail, MapPin, X } from 'lucide-react';
 import axiosInstance from '@hooks/useAxiosInstance';
@@ -23,7 +24,7 @@ const OccupancyHeatmap = () => {
         setSelectedTurf(data[0]._id);
       }
     } catch (error) {
-      console.error("Error fetching turfs:", error);
+      Sentry.captureException(error);
     }
   };
 
@@ -41,7 +42,7 @@ const OccupancyHeatmap = () => {
         setData(res.data.heatmap);
       }
     } catch (error) {
-      console.error("Error fetching occupancy:", error);
+      Sentry.captureException(error);
     } finally {
       setLoading(false);
     }

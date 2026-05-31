@@ -1,3 +1,4 @@
+import * as Sentry from "@sentry/react";
 import { useState, useEffect } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { Star, Heart, MapPin, Navigation } from "lucide-react";
@@ -75,7 +76,7 @@ const TurfCardMobile = ({ turf, distance: distanceProp, compact = false }) => {
     try {
       await toggleLikeApi(targetId).unwrap();
     } catch (err) {
-      console.error("[TELEMETRY] Failed to toggle wishlist like:", err);
+      Sentry.captureException(err);
       toast.error("Failed to save venue");
     }
   };

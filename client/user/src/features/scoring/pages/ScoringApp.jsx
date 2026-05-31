@@ -1,3 +1,4 @@
+import * as Sentry from "@sentry/react";
 import React, { useState, useMemo, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -286,7 +287,7 @@ const ScoringApp = () => {
             refresh();
           }
         } catch (err) {
-          console.error("Auto go-live error:", err);
+          Sentry.captureException(err);
         }
       };
       autoGoLive();
@@ -337,7 +338,9 @@ const ScoringApp = () => {
   const getTeamSlots = (teamKey) => {
     const game = matchData?.hostedGameId;
     const team = game?.[teamKey] || matchData?.[teamKey] || (Array.isArray(game?.teams) ? game.teams.find(t => t.teamKey === teamKey) : game?.teams?.[teamKey]);
-    console.log(`[getTeamSlots] teamKey=${teamKey}`, { game, team, slots: team?.slots });
+    Sentry.addBreadcrumb({
+      message: JSON.stringify([`[getTeamSlots] teamKey=${teamKey}`, { game, team, slots: team?.slots }])
+    });
     return (team?.slots || []).map(s => ({
       userId: s.user?._id || s.user?.id || s.userId || s.user || s.customPlayerId || s.id,
       name: s.user?.name || s.customPlayer?.name || 'Player',
@@ -702,7 +705,6 @@ const ScoringApp = () => {
           />
         </div>
       )}
-
       <div className={`w-full max-w-[450px] bg-black h-[100dvh] relative flex flex-col shadow-[0_0_50px_rgba(0,0,0,0.5)] border-x border-white/5 overflow-hidden ${isLocked ? 'blur-sm pointer-events-none' : ''}`}>
       
       {needsMatchStart ? (() => {
@@ -1049,7 +1051,6 @@ const ScoringApp = () => {
       </>
       )}
       </div>
-
       {/* Settings Modal */}
       {showSettings && (
         <div className="fixed inset-0 z-[100] bg-black/95 backdrop-blur-3xl flex justify-center animate-in fade-in duration-500">
@@ -1439,7 +1440,6 @@ const ScoringApp = () => {
           </div>
         </div>
       )}
-
       {/* ── Phase 1 Modals ── */}
       {(showInningsSetup || needsInningsSetup) && (
         <InningsSetupModal
@@ -1463,7 +1463,6 @@ const ScoringApp = () => {
           onClose={() => setShowInningsSetup(false)}
         />
       )}
-
       {showWicketModal && (
         <WicketModal
           fieldingTeamSlots={bowlingSlots}
@@ -1492,8 +1491,6 @@ const ScoringApp = () => {
           onClose={() => setShowWicketModal(false)}
         />
       )}
-
-
       {showThemeStore && (
         <TickerThemeStoreModal
           activeTheme={matchData?.hostedGameId?.tickerTheme || 'neon_classic'}
@@ -1519,7 +1516,6 @@ const ScoringApp = () => {
           }}
         />
       )}
-
       {showExitModal && (
         <MatchExitModal
           isOpen={showExitModal}
@@ -1531,14 +1527,13 @@ const ScoringApp = () => {
               try {
                 await updateMatchStatus(reason.toUpperCase());
               } catch (e) {
-                console.error("Failed to update status on exit:", e);
+                Sentry.captureException(e);
               }
             }
             window.history.back();
           }}
         />
       )}
-
       {/* Innings Complete Modal */}
       {showInningsCompleteModal && (
         <div className="fixed inset-0 z-[60] flex items-center justify-center p-4">
@@ -1576,7 +1571,6 @@ const ScoringApp = () => {
           </motion.div>
         </div>
       )}
-
       {/* ── Phase 1 Modals ── */}
       {(showInningsSetup || needsInningsSetup) && (
         <InningsSetupModal
@@ -1602,7 +1596,6 @@ const ScoringApp = () => {
           onClose={() => setShowInningsSetup(false)}
         />
       )}
-
       {showWicketModal && (
         <WicketModal
           fieldingTeamSlots={bowlingSlots}
@@ -1631,7 +1624,6 @@ const ScoringApp = () => {
           onClose={() => setShowWicketModal(false)}
         />
       )}
-
       {wagonWheelData && (
         <VisualWagonWheelModal
           runs={wagonWheelData.runs}
@@ -1651,7 +1643,6 @@ const ScoringApp = () => {
           onClose={() => setWagonWheelData(null)}
         />
       )}
-
       {extraModal && (
         <ExtraRunsModal
           extraType={extraModal}
@@ -1672,7 +1663,6 @@ const ScoringApp = () => {
           onClose={() => setExtraModal(null)}
         />
       )}
-
       {showBowlerModal && (
         <SelectBowlerModal
           pool={bowlingSlots}
@@ -1688,7 +1678,6 @@ const ScoringApp = () => {
           }}
         />
       )}
-
       {showTossModal && (
         <TossModal
           teamA={matchData?.teamA || matchData?.hostedGameId?.teamA || (Array.isArray(matchData?.hostedGameId?.teams) ? matchData.hostedGameId.teams.find(t => t.teamKey === 'teamA') : null)}
@@ -1746,7 +1735,6 @@ const ScoringApp = () => {
           }}
         />
       )}
-
       {showAuthModal && (
         <ScoringPasswordModal
           matchId={matchId}
@@ -1765,7 +1753,6 @@ const ScoringApp = () => {
           }}
         />
       )}
-
       {showThemeStore && (
         <TickerThemeStoreModal
           activeTheme={matchData?.hostedGameId?.tickerTheme || 'neon_classic'}
@@ -1791,7 +1778,6 @@ const ScoringApp = () => {
           }}
         />
       )}
-
       {showMatchReport && (
         <MatchReportModal
           matchId={matchId}
@@ -1799,7 +1785,6 @@ const ScoringApp = () => {
           onClose={() => setShowMatchReport(false)}
         />
       )}
-
       {showCustomRunsModal && (
         <CustomRunsModal
           onClose={() => setShowCustomRunsModal(false)}
@@ -1814,8 +1799,6 @@ const ScoringApp = () => {
           }}
         />
       )}
-
-
       {showEndMatchModal && (
         <EndMatchModal
           matchId={matchId}
@@ -1831,7 +1814,6 @@ const ScoringApp = () => {
           onClose={() => setShowEndMatchModal(false)}
         />
       )}
-
     </div>
   );
 };
