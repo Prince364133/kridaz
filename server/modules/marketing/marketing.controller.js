@@ -94,10 +94,13 @@ export const getVideos = async (req, res) => {
 
 export const createVideo = async (req, res) => {
   try {
-    const videoData = { ...req.body };
-    if (videoData.order) videoData.order = Number(videoData.order);
-    if (videoData.isActive === 'true') videoData.isActive = true;
-    if (videoData.isActive === 'false') videoData.isActive = false;
+    const { title, youtubeUrl, order, isActive } = req.body;
+    const videoData = {
+      title,
+      youtubeUrl,
+      order: order ? Number(order) : undefined,
+      isActive: isActive === 'true' || isActive === true
+    };
 
     const video = await prisma.video.create({
       data: videoData
@@ -110,10 +113,13 @@ export const createVideo = async (req, res) => {
 
 export const updateVideo = async (req, res) => {
   try {
-    const videoData = { ...req.body };
-    if (videoData.order) videoData.order = Number(videoData.order);
-    if (videoData.isActive === 'true') videoData.isActive = true;
-    if (videoData.isActive === 'false') videoData.isActive = false;
+    const { title, youtubeUrl, order, isActive } = req.body;
+    const videoData = {
+      title,
+      youtubeUrl,
+      order: order ? Number(order) : undefined,
+      isActive: isActive === 'true' || isActive === true
+    };
 
     const video = await prisma.video.update({
       where: { id: req.params.id },
