@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import { X, User, Phone, MapPin, AlignLeft, Loader2, Check, Info, Navigation, Camera, Star } from "lucide-react";
+import { X, User, Phone, MapPin, AlignLeft, Loader2, Check, Info, Navigation, Camera, Star, ChevronDown, ChevronUp } from "lucide-react";
 import toast from "react-hot-toast";
 import axiosInstance from "@hooks/useAxiosInstance";
 import { useDispatch } from "react-redux";
@@ -21,6 +21,7 @@ export default function EditProfileModal({ isOpen, onClose, user }) {
   const [locationSuggestions, setLocationSuggestions] = useState([]);
   const [isSearchingLocation, setIsSearchingLocation] = useState(false);
   const [showSuggestions, setShowSuggestions] = useState(false);
+  const [isSportsDropdownOpen, setIsSportsDropdownOpen] = useState(false);
   const locationRef = useRef(null);
   
   // Username check states
@@ -166,78 +167,56 @@ export default function EditProfileModal({ isOpen, onClose, user }) {
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-[1000] flex items-center justify-center p-4">
-      {/* ── Gradient SVG Definition for Modal Lucide Icons */}
-      <svg width="0" height="0" className="absolute">
-        <defs>
-          <linearGradient id="modal-cyan-lime-gradient" x1="0%" y1="0%" x2="100%" y2="0%">
-            <stop offset="0%" stopColor="#BFF367" />
-            <stop offset="100%" stopColor="#BFF367" />
-          </linearGradient>
-        </defs>
-      </svg>
-
-      {/* Backdrop */}
-      <div 
-        className="absolute inset-0 bg-black/90 backdrop-blur-md animate-in fade-in duration-300"
-        onClick={onClose}
-      />
-
-      {/* Modal Container - Upgraded to max-w-xl per Mockup */}
-      <div className="relative w-full max-w-xl bg-[#0a0a0a] border border-white/10 rounded-[8px] overflow-hidden shadow-2xl animate-in zoom-in-95 duration-300">
-        {/* Header - Compact */}
-        <div className="px-6 py-4 border-b border-white/10 flex items-center justify-between bg-gradient-to-r from-[#BFF367]/5 to-transparent">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-[8px] bg-[#BFF367]/10 flex items-center justify-center shrink-0">
-              <User size={18} className="text-[#BFF367]" />
-            </div>
-            <div>
-              <h2 className="text-lg font-black uppercase tracking-tight text-white leading-none" style={{ fontFamily: "'Open Sans', sans-serif" }}>Edit Profile</h2>
-              <p className="text-sm text-[#BFF367] font-black uppercase tracking-tight mt-1 leading-none" style={{ fontFamily: "'Inter 28pt Light', sans-serif" }}>Customize your identity</p>
-            </div>
+    <div className="fixed inset-0 z-[1000] bg-black/80 backdrop-blur-sm animate-in fade-in duration-300 flex justify-center">
+      <div className="w-full max-w-md mx-auto h-[100dvh] bg-[#161616] flex flex-col relative animate-in slide-in-from-bottom-full duration-500 ease-out shadow-2xl">
+        
+        {/* Header */}
+        <div className="px-6 md:px-8 pt-12 pb-4 shrink-0 flex items-start justify-between">
+          <div className="text-left">
+            <h2 className="text-[32px] md:text-[40px] font-black text-white leading-tight uppercase">
+              EDIT PROFILE
+            </h2>
           </div>
           <button 
             onClick={onClose}
-            className="p-2 rounded-[8px] hover:bg-white/5 text-white/40 hover:text-white transition-all border border-transparent hover:border-white/5"
+            className="p-2 -mr-2 rounded-full hover:bg-white/5 text-white/40 hover:text-white transition-all"
           >
-            <X size={18} />
+            <X size={24} />
           </button>
         </div>
 
-        {/* Content Form - Spaced out nicely and highly compact */}
-        <form onSubmit={handleSubmit} className="p-6 space-y-4 max-h-[85vh] overflow-y-auto custom-scrollbar">
-          
-          {/* Top Section: Avatar & Details side-by-side */}
-          <div className="flex flex-col md:flex-row gap-5">
-            {/* Left Box: Profile Picture */}
-            <div className="flex flex-col">
-              <label className="text-[9px] font-black uppercase tracking-[0.2em] text-white/30 mb-1.5 ml-1">Profile Picture</label>
-              <div className="relative group shrink-0 w-20 h-20">
-                <div className="w-20 h-20 rounded-[8px] bg-gradient-to-br from-[#BFF367]/10 to-[#BFF367]/10 border border-white/10 overflow-hidden flex items-center justify-center group-hover:border-[#BFF367]/30 transition-all p-[1px]">
+        {/* Content Form */}
+        <form onSubmit={handleSubmit} className="flex-1 flex flex-col min-h-0">
+          <div className="flex-1 overflow-y-auto px-6 md:px-8 space-y-6 custom-scrollbar pb-6">
+            
+            {/* Top Section: Avatar */}
+            <div className="flex flex-col items-center mb-4">
+              <div className="relative group shrink-0 w-24 h-24">
+                <div className="w-24 h-24 rounded-full bg-[#222222] border border-transparent overflow-hidden flex items-center justify-center transition-all">
                   {user?.profilePicture ? (
                     <img 
                       src={user.profilePicture} 
                       alt="" 
-                      className="w-full h-full object-cover rounded-[8px]"
+                      className="w-full h-full object-cover rounded-full"
                     />
                   ) : (
-                    <span className="text-[#BFF367] font-black text-2xl tracking-tighter">
+                    <span className="text-white/40 font-black text-3xl tracking-tighter">
                       {user?.name?.split(" ").map(w => w[0]).join("").toUpperCase().slice(0, 2) || "U"}
                     </span>
                   )}
 
                   {uploading && (
-                    <div className="absolute inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-10">
-                      <Loader2 size={20} className="animate-spin text-[#BFF367]" />
+                    <div className="absolute inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-10 rounded-full">
+                      <Loader2 size={24} className="animate-spin text-[#BFF367]" />
                     </div>
                   )}
                 </div>
                 
                 <label 
                   htmlFor="modal-profile-upload" 
-                  className="absolute bottom-0 right-0 w-7 h-7 bg-black rounded-full border border-[#BFF367] flex items-center justify-center cursor-pointer shadow-lg hover:scale-110 active:scale-95 transition-all z-20"
+                  className="absolute bottom-0 right-0 w-8 h-8 bg-black rounded-full border border-white/20 flex items-center justify-center cursor-pointer shadow-lg hover:scale-110 active:scale-95 transition-all z-20 group-hover:border-[#BFF367]"
                 >
-                  <Camera size={12} className="text-[#BFF367]" />
+                  <Camera size={14} className="text-white group-hover:text-[#BFF367] transition-colors" />
                   <input 
                     type="file" 
                     id="modal-profile-upload" 
@@ -250,29 +229,28 @@ export default function EditProfileModal({ isOpen, onClose, user }) {
               </div>
             </div>
 
-            {/* Right Box: Full Name & Username inputs */}
-            <div className="flex-1 grid grid-cols-1 md:grid-cols-2 gap-4">
+            {/* Form Fields */}
+            <div className="space-y-4">
               {/* Full Name */}
-              <div className="space-y-1.5">
-                <label className="text-[9px] font-black uppercase tracking-[0.2em] text-white/30 ml-1">Full Name</label>
-                <div className="relative group">
-                  <User className="absolute left-3.5 top-1/2 -translate-y-1/2 text-white/20 group-focus-within:text-[#BFF367] transition-colors" size={14} />
-                  <input
-                    type="text"
-                    name="name"
-                    value={formData.name}
-                    onChange={handleChange}
-                    className="w-full bg-[#0d0d0d] border border-white/10 rounded-[8px] py-2.5 pl-10 pr-3 text-xs text-white focus:outline-none focus:border-[#BFF367] focus:ring-4 focus:ring-[#BFF367]/10 transition-all placeholder-white/20"
-                    placeholder="Enter your name"
-                    required
-                  />
+              <label className="block">
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-[11px] font-semibold text-white/60 uppercase tracking-widest">Full Name</span>
                 </div>
-              </div>
+                <input
+                  type="text"
+                  name="name"
+                  value={formData.name}
+                  onChange={handleChange}
+                  className="w-full bg-[#222222] border border-transparent rounded-[10px] py-4 px-4 text-white focus:border-white/20 outline-none transition-all placeholder-white/20"
+                  placeholder="Enter your name"
+                  required
+                />
+              </label>
 
               {/* Username */}
-              <div className="space-y-1.5">
-                <div className="flex items-center justify-between ml-1">
-                  <label className="text-[9px] font-black uppercase tracking-[0.2em] text-white/30">Username</label>
+              <label className="block">
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-[11px] font-semibold text-white/60 uppercase tracking-widest">Username</span>
                   {usernameStatus && (
                     <span className={`text-[9px] font-bold uppercase tracking-wider ${ usernameStatus === 'available' ? 'text-[#BFF367]' : usernameStatus === 'taken' ? 'text-red-500' : usernameStatus === 'short' ? 'text-orange-500' : 'text-white/20' }`}>
                       {usernameStatus === 'checking' ? 'Checking...' :
@@ -282,25 +260,176 @@ export default function EditProfileModal({ isOpen, onClose, user }) {
                     </span>
                   )}
                 </div>
-                <div className="relative group">
-                  <span className={`absolute left-3.5 top-1/2 -translate-y-1/2 font-black text-xs transition-colors ${ usernameStatus === 'available' ? 'text-[#BFF367]' : usernameStatus === 'taken' ? 'text-red-500' : 'text-white/20' }`}>@</span>
+                <div className="relative">
+                  <span className={`absolute left-4 top-1/2 -translate-y-1/2 font-black text-sm transition-colors ${ usernameStatus === 'available' ? 'text-[#BFF367]' : usernameStatus === 'taken' ? 'text-red-500' : 'text-white/20' }`}>@</span>
                   <input
                     type="text"
                     name="username"
                     value={formData.username}
                     onChange={handleChange}
-                    className={`w-full bg-[#0d0d0d] border rounded-[8px] py-2.5 pl-9 pr-10 text-xs text-white focus:outline-none focus:ring-4 transition-all placeholder-white/20 ${ usernameStatus === 'available' ? 'border-[#BFF367]/50 focus:border-[#BFF367] focus:ring-[#BFF367]/10' : usernameStatus === 'taken' ? 'border-red-500/50 focus:border-red-500 focus:ring-red-500/10' : 'border-white/10 focus:border-[#BFF367] focus:ring-[#BFF367]/10' }`}
+                    className={`w-full bg-[#222222] border rounded-[10px] py-4 pl-10 pr-12 text-white outline-none transition-all placeholder-white/20 ${ usernameStatus === 'available' ? 'border-[#BFF367]/50 focus:border-[#BFF367]' : usernameStatus === 'taken' ? 'border-red-500/50 focus:border-red-500' : 'border-transparent focus:border-white/20' }`}
                     placeholder="username"
                     required
                   />
                   {isCheckingUsername && (
-                    <div className="absolute right-3.5 top-1/2 -translate-y-1/2">
-                      <Loader2 size={12} className="animate-spin text-[#BFF367]" />
+                    <div className="absolute right-4 top-1/2 -translate-y-1/2">
+                      <Loader2 size={16} className="animate-spin text-[#BFF367]" />
                     </div>
                   )}
                   {!isCheckingUsername && usernameStatus === 'available' && (
-                    <div className="absolute right-3.5 top-1/2 -translate-y-1/2">
-                      <Check size={12} className="text-[#BFF367]" />
+                    <div className="absolute right-4 top-1/2 -translate-y-1/2">
+                      <Check size={16} className="text-[#BFF367]" />
+                    </div>
+                  )}
+                </div>
+              </label>
+
+              {/* Row: Phone & Gender */}
+              <div className="grid grid-cols-2 gap-4">
+                {/* Phone */}
+                <label className="block">
+                  <span className="text-[11px] font-semibold text-white/60 uppercase tracking-widest mb-2 block">Contact</span>
+                  <input
+                    type="text"
+                    name="phone"
+                    value={formData.phone}
+                    onChange={handleChange}
+                    className="w-full bg-[#222222] border border-transparent rounded-[10px] py-4 px-4 text-white focus:border-white/20 outline-none transition-all placeholder-white/20"
+                    placeholder="Phone number"
+                  />
+                </label>
+
+                {/* Gender */}
+                <label className="block relative">
+                  <span className="text-[11px] font-semibold text-white/60 uppercase tracking-widest mb-2 block">Gender</span>
+                  <select
+                    name="gender"
+                    value={formData.gender}
+                    onChange={handleChange}
+                    className="w-full bg-[#222222] border border-transparent rounded-[10px] py-4 px-4 pr-10 text-white focus:border-white/20 outline-none transition-all appearance-none cursor-pointer"
+                  >
+                    <option value="" className="bg-[#161616]">Select Gender</option>
+                    <option value="Male" className="bg-[#161616]">Male</option>
+                    <option value="Female" className="bg-[#161616]">Female</option>
+                    <option value="Other" className="bg-[#161616]">Other</option>
+                    <option value="Prefer not to say" className="bg-[#161616]">Prefer not to say</option>
+                  </select>
+                  <div className="absolute right-4 bottom-4 pointer-events-none text-white/40">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="m6 9 6 6 6-6"/></svg>
+                  </div>
+                </label>
+              </div>
+
+              {/* Short Bio */}
+              <label className="block">
+                <span className="text-[11px] font-semibold text-white/60 uppercase tracking-widest mb-2 block">Short Bio</span>
+                <textarea
+                  name="bio"
+                  maxLength={150}
+                  value={formData.bio}
+                  onChange={handleChange}
+                  className="w-full bg-[#222222] border border-transparent rounded-[10px] py-4 px-4 text-white focus:border-white/20 outline-none transition-all min-h-[80px] resize-none placeholder-white/20"
+                  placeholder="Tell us about yourself..."
+                />
+                <div className="text-right text-[10px] font-semibold text-white/40 uppercase tracking-widest mt-1.5">
+                  {formData.bio?.length || 0}/150
+                </div>
+              </label>
+
+              {/* Location */}
+              <div className="relative block" ref={locationRef}>
+                <span className="text-[11px] font-semibold text-white/60 uppercase tracking-widest mb-2 block">Location</span>
+                <div className="relative">
+                  <input
+                    type="text"
+                    value={formData.location}
+                    onChange={(e) => {
+                      setFormData({...formData, location: e.target.value});
+                      setShowSuggestions(true);
+                    }}
+                    onFocus={() => setShowSuggestions(locationSuggestions.length > 0)}
+                    placeholder="e.g. Mumbai, Maharashtra"
+                    className="w-full bg-[#222222] border border-transparent rounded-[10px] py-4 px-4 text-white focus:border-white/20 outline-none transition-all placeholder-white/20"
+                  />
+                  {isSearchingLocation && (
+                    <div className="absolute right-4 top-1/2 -translate-y-1/2">
+                      <Loader2 className="w-4 h-4 text-[#BFF367] animate-spin" />
+                    </div>
+                  )}
+                  {showSuggestions && locationSuggestions.length > 0 && (
+                    <div className="absolute top-full left-0 right-0 mt-2 bg-[#222222] border border-white/10 rounded-[10px] overflow-hidden z-[110] shadow-2xl max-h-[160px] overflow-y-auto custom-scrollbar">
+                      {locationSuggestions.map((suggestion, idx) => (
+                        <button
+                          type="button"
+                          key={idx}
+                          onClick={() => handleSelectLocation(suggestion)}
+                          className="w-full px-4 py-3 text-left hover:bg-[#BFF367]/10 text-white/80 hover:text-white border-b border-white/5 last:border-0 transition-colors flex flex-col gap-0.5"
+                        >
+                          <span className="text-sm font-bold">{suggestion.city || suggestion.display_name.split(',')[0]}</span>
+                          <span className="text-[10px] text-white/40 truncate">{suggestion.display_name}</span>
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* Sports & Interests */}
+              <div className="block relative">
+                <span className="text-[11px] font-semibold text-white/60 uppercase tracking-widest mb-2 block">Sports & Interests</span>
+                
+                <div className="flex flex-wrap gap-2 mb-3">
+                  {(formData.interests || []).map((interest, idx) => (
+                    <span key={idx} className="px-3 py-1.5 bg-[#BFF367] rounded-[6px] text-[11px] font-bold text-black flex items-center gap-1.5 uppercase tracking-wider">
+                      {interest}
+                      <button 
+                        type="button"
+                        onClick={() => {
+                          setFormData(prev => ({
+                            ...prev,
+                            interests: prev.interests.filter(i => i !== interest)
+                          }));
+                        }}
+                        className="hover:opacity-60 transition-opacity"
+                      >
+                        <X size={12} />
+                      </button>
+                    </span>
+                  ))}
+                </div>
+
+                <div className="relative">
+                  <button
+                    type="button"
+                    onClick={() => setIsSportsDropdownOpen(!isSportsDropdownOpen)}
+                    className="w-full bg-[#222222] border border-transparent rounded-[10px] py-4 px-4 text-white text-left focus:border-white/20 outline-none transition-all flex items-center justify-between"
+                  >
+                    <span className="text-white/40">Select sports or interests...</span>
+                    {isSportsDropdownOpen ? <ChevronUp size={16} className="text-white/40" /> : <ChevronDown size={16} className="text-white/40" />}
+                  </button>
+
+                  {isSportsDropdownOpen && (
+                    <div className="absolute bottom-full mb-2 left-0 right-0 bg-[#222222] border border-white/10 rounded-[10px] overflow-hidden z-[110] shadow-2xl max-h-[220px] overflow-y-auto custom-scrollbar">
+                      {["Cricket", "Football", "Badminton", "Tennis", "Basketball", "Volleyball", "Table Tennis", "Swimming", "Gym", "Yoga"].map((sport, idx) => {
+                        const isSelected = formData.interests.includes(sport);
+                        return (
+                          <button
+                            type="button"
+                            key={idx}
+                            onClick={() => {
+                              if (isSelected) {
+                                setFormData(prev => ({ ...prev, interests: prev.interests.filter(i => i !== sport) }));
+                              } else {
+                                setFormData(prev => ({ ...prev, interests: [...prev.interests, sport] }));
+                              }
+                            }}
+                            className="w-full px-4 py-3 text-left hover:bg-white/5 border-b border-white/5 last:border-0 transition-colors flex items-center justify-between"
+                          >
+                            <span className={`text-sm ${isSelected ? 'text-[#BFF367] font-bold' : 'text-white'}`}>{sport}</span>
+                            {isSelected && <Check size={16} className="text-[#BFF367]" />}
+                          </button>
+                        );
+                      })}
                     </div>
                   )}
                 </div>
@@ -308,179 +437,27 @@ export default function EditProfileModal({ isOpen, onClose, user }) {
             </div>
           </div>
 
-          {/* Row 2: Phone & Gender */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {/* Phone */}
-            <div className="space-y-1.5">
-              <label className="text-[9px] font-black uppercase tracking-[0.2em] text-white/30 ml-1">Contact Number</label>
-              <div className="relative group">
-                <Phone className="absolute left-3.5 top-1/2 -translate-y-1/2 text-white/20 group-focus-within:text-[#BFF367] transition-colors" size={14} />
-                <input
-                  type="text"
-                  name="phone"
-                  value={formData.phone}
-                  onChange={handleChange}
-                  className="w-full bg-[#0d0d0d] border border-white/10 rounded-[8px] py-2.5 pl-10 pr-3 text-xs text-white focus:outline-none focus:border-[#BFF367] focus:ring-4 focus:ring-[#BFF367]/10 transition-all placeholder-white/20"
-                  placeholder="Phone number"
-                />
-              </div>
-            </div>
-
-            {/* Gender Dropdown */}
-            <div className="space-y-1.5">
-              <label className="text-[9px] font-black uppercase tracking-[0.2em] text-white/30 ml-1">Gender</label>
-              <div className="relative group">
-                <User className="absolute left-3.5 top-1/2 -translate-y-1/2 text-white/20 group-focus-within:text-[#BFF367] transition-colors pointer-events-none" size={14} />
-                <select
-                  name="gender"
-                  value={formData.gender}
-                  onChange={handleChange}
-                  className="w-full bg-[#0d0d0d] border border-white/10 rounded-[8px] py-2.5 pl-10 pr-10 text-xs text-white focus:outline-none focus:border-[#BFF367] focus:ring-4 focus:ring-[#BFF367]/10 transition-all appearance-none cursor-pointer"
-                >
-                  <option value="" className="bg-[#000000]">Select Gender</option>
-                  <option value="Male" className="bg-[#000000]">Male</option>
-                  <option value="Female" className="bg-[#000000]">Female</option>
-                  <option value="Other" className="bg-[#000000]">Other</option>
-                  <option value="Prefer not to say" className="bg-[#000000]">Prefer not to say</option>
-                </select>
-                <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-white/40">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="m6 9 6 6 6-6"/></svg>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Row 3: Short Bio with Character Limit */}
-          <div className="space-y-1.5">
-            <label className="text-[9px] font-black uppercase tracking-[0.2em] text-white/30 ml-1">Short Bio</label>
-            <div className="relative group">
-              <AlignLeft className="absolute left-3.5 top-3 text-white/20 group-focus-within:text-[#BFF367] transition-colors" size={14} />
-              <textarea
-                name="bio"
-                maxLength={150}
-                value={formData.bio}
-                onChange={handleChange}
-                className="w-full bg-[#0d0d0d] border border-white/10 rounded-[8px] py-2.5 pl-10 pr-3 text-xs text-white focus:outline-none focus:border-[#BFF367] focus:ring-4 focus:ring-[#BFF367]/10 transition-all min-h-[60px] resize-none placeholder-white/20"
-                placeholder="Tell us about yourself..."
-              />
-            </div>
-            <div className="text-right text-[9px] font-bold text-white/30 uppercase tracking-widest mt-0.5">
-              {formData.bio?.length || 0}/150
-            </div>
-          </div>
-
-          {/* Row 4: Location */}
-          <div className="space-y-1.5" ref={locationRef}>
-            <label className="text-[9px] font-black uppercase tracking-[0.2em] text-white/30 ml-1">Location</label>
-            <div className="relative group">
-              <MapPin className="absolute left-3.5 top-1/2 -translate-y-1/2 text-white/20 group-focus-within:text-[#BFF367] transition-colors" size={14} />
-              <input
-                type="text"
-                value={formData.location}
-                onChange={(e) => {
-                  setFormData({...formData, location: e.target.value});
-                  setShowSuggestions(true);
-                }}
-                onFocus={() => setShowSuggestions(locationSuggestions.length > 0)}
-                placeholder="e.g. Mumbai, Maharashtra"
-                className="w-full bg-[#0d0d0d] border border-white/10 rounded-[8px] py-2.5 pl-10 pr-10 text-xs text-white focus:outline-none focus:border-[#BFF367] focus:ring-4 focus:ring-[#BFF367]/10 transition-all placeholder-white/20"
-              />
-              {isSearchingLocation && (
-                <div className="absolute right-3.5 top-1/2 -translate-y-1/2">
-                  <Loader2 className="w-3.5 h-3.5 text-[#BFF367] animate-spin" />
-                </div>
-              )}
-
-              {/* Suggestions Dropdown */}
-              {showSuggestions && locationSuggestions.length > 0 && (
-                <div className="absolute top-full left-0 right-0 mt-2 bg-[#0A0A0A] border border-white/10 rounded-[8px] overflow-hidden z-[110] shadow-2xl max-h-[140px] overflow-y-auto custom-scrollbar">
-                  {locationSuggestions.map((suggestion, idx) => (
-                    <button
-                      type="button"
-                      key={idx}
-                      onClick={() => handleSelectLocation(suggestion)}
-                      className="w-full px-4 py-2.5 text-left hover:bg-[#BFF367]/10 text-white/80 hover:text-white border-b border-white/10 last:border-0 transition-colors flex flex-col gap-0.5"
-                    >
-                      <span className="text-xs font-bold uppercase tracking-wider">{suggestion.city || suggestion.display_name.split(',')[0]}</span>
-                      <span className="text-[9px] text-white/40 truncate">{suggestion.display_name}</span>
-                    </button>
-                  ))}
-                </div>
-              )}
-            </div>
-          </div>
-          
-          {/* Row 5: Sports & Interests select dropdown */}
-          <div className="space-y-2">
-            <label className="text-[9px] font-black uppercase tracking-[0.2em] text-white/30 ml-1">Sports & Interests</label>
-            <div className="flex flex-wrap gap-1.5 mb-1.5">
-              {(formData.interests || []).map((interest, idx) => (
-                <span key={idx} className="px-2.5 py-0.5 bg-[#BFF367]/15 border border-[#BFF367]/30 rounded-[8px] text-[9px] font-bold text-[#BFF367] flex items-center gap-1.5">
-                  {interest}
-                  <button 
-                    type="button"
-                    onClick={() => {
-                      setFormData(prev => ({
-                        ...prev,
-                        interests: prev.interests.filter(i => i !== interest)
-                      }));
-                    }}
-                    className="hover:text-white"
-                  >
-                    <X size={8} />
-                  </button>
-                </span>
-              ))}
-            </div>
-            <div className="relative group">
-              <Star className="absolute left-3.5 top-1/2 -translate-y-1/2 text-white/20 group-focus-within:text-[#BFF367] transition-colors pointer-events-none" size={14} />
-              <select
-                onChange={(e) => {
-                  if (e.target.value && !formData.interests.includes(e.target.value)) {
-                    setFormData(prev => ({
-                      ...prev,
-                      interests: [...prev.interests, e.target.value]
-                    }));
-                  }
-                  e.target.value = "";
-                }}
-                className="w-full bg-[#0d0d0d] border border-white/10 rounded-[8px] py-2.5 pl-10 pr-10 text-xs text-white focus:outline-none focus:border-[#BFF367] focus:ring-4 focus:ring-[#BFF367]/10 transition-all appearance-none cursor-pointer"
-              >
-                <option value="">Add your sports or interests</option>
-                {["Cricket", "Football", "Badminton", "Tennis", "Basketball", "Volleyball", "Table Tennis", "Swimming", "Gym", "Yoga"].filter(s => !formData.interests.includes(s)).map((sport, idx) => (
-                  <option key={idx} value={sport}>{sport}</option>
-                ))}
-              </select>
-              <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-white/40">
-                <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="m6 9 6 6 6-6"/></svg>
-              </div>
-            </div>
-          </div>
-
-          {/* Row 6: Action Buttons Cancel / Save */}
-          <div className="pt-4 flex items-center gap-4">
+          {/* Action Buttons (Fixed Bottom) */}
+          <div className="shrink-0 p-6 md:p-8 bg-[#161616] border-t border-white/5 flex items-center gap-4">
             <button
               type="button"
               onClick={onClose}
-              className="flex-1 px-6 py-2.5 rounded-[8px] border border-white/10 text-white/40 text-[9px] font-black uppercase tracking-widest hover:bg-white/5 hover:text-white transition-all"
+              className="flex-1 py-4 rounded-[10px] bg-[#222222] text-white text-[11px] font-bold uppercase tracking-widest hover:bg-[#333333] transition-colors"
             >
               Cancel
             </button>
             <button
               type="submit"
               disabled={loading || isCheckingUsername || usernameStatus === 'taken' || usernameStatus === 'short'}
-              className="flex-[2] px-6 py-2.5 rounded-[8px] bg-gradient-to-r from-[#BFF367] to-[#BFF367] text-black text-[9px] font-black uppercase tracking-widest hover:scale-[1.02] active:scale-[0.98] transition-all flex items-center justify-center gap-2 shadow-lg shadow-[#BFF367]/20 disabled:opacity-50 disabled:grayscale disabled:hover:scale-100"
+              className="flex-[2] py-4 rounded-[10px] bg-[#BFF367] text-black text-[11px] font-black uppercase tracking-widest hover:bg-[#a5db4e] transition-all flex items-center justify-center gap-2 disabled:opacity-50 disabled:grayscale"
             >
               {loading ? (
                 <>
-                  <Loader2 size={14} className="animate-spin" />
-                  Updating...
+                  <Loader2 size={16} className="animate-spin" />
+                  Saving...
                 </>
               ) : (
-                <>
-                  <Check size={14} strokeWidth={2.5} />
-                  Save Changes
-                </>
+                "Save Changes"
               )}
             </button>
           </div>

@@ -5,6 +5,7 @@ import { useSelector, useDispatch } from "react-redux";
 import { logout } from "@redux/slices/authSlice.js";
 import { useNavigate } from "react-router-dom";
 import { useScrollDirection } from "@hooks/useScrollDirection.js";
+import { useAuthModal } from "../../../context/AuthModalContext";
 
 const GuestNavbar = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -14,6 +15,7 @@ const GuestNavbar = () => {
   const { isLoggedIn, role } = useSelector((state) => state.auth);
   const dispatch = useDispatch();
   const navigate = useNavigate();
+  const { openAuthModal } = useAuthModal();
   const userUrl = import.meta.env.VITE_USER_URL || "http://localhost:5173";
 
   const handleLogout = () => {
@@ -83,17 +85,21 @@ const GuestNavbar = () => {
         <div className="flex items-center gap-6">
           {!isLoggedIn ? (
             <>
-              <Link 
-                to="/login" 
+              <button 
+                onClick={() => openAuthModal('login')}
                 className="hidden sm:flex items-center gap-2 text-sm font-medium text-white/60 hover:text-[#BFF367] transition-all"
               >
                 <ShieldCheck size={16} className="opacity-50" />
                 Login
-              </Link>
+              </button>
               
-              <Link to="/venue-owners" className="text-black h-10 px-6 rounded-md text-sm font-bold flex items-center gap-2 transition-all shadow-lg shadow-[#BFF367]/30 hover:scale-105" style={{ background: "linear-gradient(90deg, #BFF367 0%, #BFF367 100%)" }}>
+              <button 
+                onClick={() => openAuthModal('signup')} 
+                className="text-black h-10 px-6 rounded-md text-sm font-bold flex items-center gap-2 transition-all shadow-lg shadow-[#BFF367]/30 hover:scale-105" 
+                style={{ background: "linear-gradient(90deg, #BFF367 0%, #BFF367 100%)" }}
+              >
                 Join Now <ArrowRight size={16} />
-              </Link>
+              </button>
             </>
           ) : (
             <div className="flex items-center gap-4">
@@ -172,13 +178,15 @@ const GuestNavbar = () => {
           <div className="mt-auto pb-12 space-y-6">
             <div className="h-[1px] w-full bg-white/10" />
             <div className="flex items-center justify-end">
-               <Link 
-                to="/login" 
-                onClick={() => setIsOpen(false)}
+               <button 
+                onClick={() => {
+                  setIsOpen(false);
+                  openAuthModal('login');
+                }}
                 className="text-sm font-bold text-[#BFF367] border border-[#BFF367]/30 px-6 py-2 rounded-lg"
                >
                  Login
-               </Link>
+               </button>
             </div>
           </div>
         </div>

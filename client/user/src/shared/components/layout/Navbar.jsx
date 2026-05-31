@@ -1,16 +1,16 @@
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { getDynamicProfileRoute } from "@utils/routeUtils";
 import { useSelector, useDispatch } from "react-redux";
-import { User, Users, Menu, X, LogOut, Activity, ShieldCheck, Zap, ArrowRight, Clock, Trophy, Target, MessageCircle, MapPin, ChevronRight, Bell, UserSearch, Search, Plus, Bookmark, FileText } from "lucide-react";
+import { User, Users, Menu, X, LogOut, Activity, ShieldCheck, Zap, ArrowRight, Clock, Trophy, Target, MessageCircle, MapPin, ChevronRight, Bell, UserSearch, Search, Plus, Bookmark } from "lucide-react";
 import { useState, useEffect, useCallback } from "react";
 import { createPortal } from "react-dom";
 import { logout } from "@redux/slices/authSlice";
-import { setUserLocation, setLocationStatus } from "@redux/slices/uiSlice";
 import { reelsApi } from "@redux/api/reelsApi";
 import toast from "react-hot-toast";
 import axiosInstance from "@hooks/useAxiosInstance";
 import useNotifications from "@hooks/shared/useNotifications";
 import { useScrollDirection } from "@hooks/useScrollDirection.js";
+import { useAuthModal } from "../../../context/AuthModalContext";
 
 /**
  * NotificationBadge — Shows unread notification count as a red dot/badge.
@@ -28,8 +28,6 @@ const NotificationBadge = () => {
 
 const Navbar = () => {
   const { isLoggedIn, role, user } = useSelector((state) => state.auth);
-  const userLocation = useSelector((state) => state.ui.userLocation);
-  const locationStatus = useSelector((state) => state.ui.locationStatus);
   // Auth state log removed
   const dispatch = useDispatch();
   const navigate = useNavigate();
@@ -37,45 +35,49 @@ const Navbar = () => {
   const partnerUrl = import.meta.env.VITE_PARTNER_URL || "http://localhost:5174";
   const isPartnerPortal = location.pathname.startsWith("/partners");
   const { scrollDirection, scrolled: isScrolled } = useScrollDirection();
+  const { openAuthModal } = useAuthModal();
 
+  // ── Auto-detect city + state via browser Geolocation + Nominatim reverse-geocode ──
+  const [geoLabel, setGeoLabel] = useState(null); // null = not yet tried
+  const [geoLoading, setGeoLoading] = useState(false);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
-  const geoLoading = locationStatus === "detecting";
-  const geoLabel = userLocation 
-    ? (userLocation.city && userLocation.state 
-        ? `${userLocation.city}, ${userLocation.state}` 
-        : userLocation.city || userLocation.state || "Unknown")
-    : null;
-
   const detectLocation = useCallback(() => {
-    dispatch(setLocationStatus("detecting"));
-    if (!navigator.geolocation) {
-      dispatch(setLocationStatus("denied"));
-      return;
-    }
+    if (!navigator.geolocation) return;
+    setGeoLoading(true);
     navigator.geolocation.getCurrentPosition(
-      async (pos) => {
-        const lat = pos.coords.latitude;
-        const lng = pos.coords.longitude;
-        let city = "";
-        let state = "";
+      async ({ coords }) => {
         try {
-          const res = await fetch(`https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${lat}&longitude=${lng}&localityLanguage=en`);
+          const res = await fetch(
+            `https://nominatim.openstreetmap.org/reverse?lat=${coords.latitude}&lon=${coords.longitude}&format=json`,
+            { headers: { "Accept-Language": "en" } }
+          );
           const data = await res.json();
-          city = data.city || data.locality || "";
-          state = data.principalSubdivision || "";
-        } catch (error) {
-          console.warn("Reverse geocoding failed:", error);
+          const city =
+            data.address?.city ||
+            data.address?.town ||
+            data.address?.village ||
+            data.address?.county ||
+            "";
+          const state = data.address?.state || "";
+          setGeoLabel(city && state ? `${city}, ${state}` : city || state || "Unknown");
+        } catch {
+          setGeoLabel(null);
+        } finally {
+          setGeoLoading(false);
         }
-        dispatch(setUserLocation({ lat, lng, city, state }));
-        dispatch(setLocationStatus("granted"));
       },
       () => {
-        dispatch(setLocationStatus("denied"));
+        // Permission denied or unavailable — fall back to "Set Location"
+        setGeoLabel(null);
+        setGeoLoading(false);
       },
       { timeout: 8000 }
     );
-  }, [dispatch]);
+  }, []);
+
+  // Attempt auto-detect once on mount
+  useEffect(() => { detectLocation(); }, [detectLocation]);
 
   const handleLogout = async () => {
     try {
@@ -184,17 +186,20 @@ const Navbar = () => {
           <div className="flex items-center gap-2 sm:gap-4 lg:fixed lg:top-4 lg:right-6 lg:z-[100]">
             {!isLoggedIn ? (
               <>
-                <Link
-                  to="/login"
+                <button
+                  onClick={() => openAuthModal('login')}
                   className="hidden sm:flex items-center gap-2 text-sm font-semibold text-white/60 hover:text-white transition-all hover:translate-x-1"
                 >
                   <ShieldCheck size={16} className="opacity-50" />
                   Login
-                </Link>
+                </button>
 
-                <Link to="/signup" className="bg-[#84CC16] hover:bg-[#a3e635] text-black h-9 sm:h-11 px-4 sm:px-8 text-xs sm:text-sm font-bold flex items-center gap-2 sm:gap-3 rounded-[8px] transition-all shadow-[0_0_20px_rgba(132,204,22,0.2)]">
+                <button 
+                  onClick={() => openAuthModal('signup')} 
+                  className="bg-[#84CC16] hover:bg-[#a3e635] text-black h-9 sm:h-11 px-4 sm:px-8 text-xs sm:text-sm font-bold flex items-center gap-2 sm:gap-3 rounded-[8px] transition-all shadow-[0_0_20px_rgba(132,204,22,0.2)]"
+                >
                   Join Now <ArrowRight size={16} />
-                </Link>
+                </button>
               </>
             ) : (
               <div className="flex items-center gap-2 sm:gap-4">
@@ -449,15 +454,6 @@ const Navbar = () => {
                           <LogOut size={18} className="opacity-70" />
                           <span className="text-sm font-medium">Logout</span>
                         </button>
-
-                        <Link
-                          to="/blogs"
-                          onClick={() => setIsSidebarOpen(false)}
-                          className="w-full flex items-center gap-3 p-3 rounded-[8px] hover:bg-white/5 text-white/70 hover:text-white transition-all"
-                        >
-                          <FileText size={18} className="text-white/40" />
-                          <span className="text-sm font-medium">Blogs</span>
-                        </Link>
                       </div>
                     </div>,
                     document.body

@@ -1,7 +1,7 @@
 import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import axiosInstance from "@hooks/useAxiosInstance";
 import toast from "react-hot-toast";
 import { useDispatch } from "react-redux";
@@ -26,9 +26,11 @@ const loginSchema = yup.object().shape({
 
 const useLoginForm = () => {
   const [loading, setLoading] = useState(false);
+  const [googleLoading, setGoogleLoading] = useState(false);
   const [showOtpInput, setShowOtpInput] = useState(false);
   const [sentOtp, setSentOtp] = useState("");
   const [accountNotFound, setAccountNotFound] = useState(false);
+  const [timeLeft, setTimeLeft] = useState(60);
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
@@ -41,6 +43,16 @@ const useLoginForm = () => {
   } = useForm({
     resolver: yupResolver(loginSchema),
   });
+
+  useEffect(() => {
+    let timer;
+    if (showOtpInput && timeLeft > 0) {
+      timer = setInterval(() => {
+        setTimeLeft((prev) => prev - 1);
+      }, 1000);
+    }
+    return () => clearInterval(timer);
+  }, [showOtpInput, timeLeft]);
 
   const handleRoleRedirect = (role) => {
     const normalizedRole = role?.toLowerCase();
@@ -97,6 +109,7 @@ const useLoginForm = () => {
           }
         }
         toast.success("OTP sent to your email and WhatsApp");
+        setTimeLeft(60);
         return;
       }
     } catch (err) {
@@ -140,7 +153,7 @@ const useLoginForm = () => {
   };
 
   const handleGoogleSuccess = async (googleResponse) => {
-    setLoading(true);
+    setGoogleLoading(true);
     try {
       const payload = {
         role: "user",
@@ -163,7 +176,7 @@ const useLoginForm = () => {
     } catch (error) {
       toast.error(error.response?.data?.message || "Google login failed");
     } finally {
-      setLoading(false);
+      setGoogleLoading(false);
     }
   };
 
@@ -177,12 +190,15 @@ const useLoginForm = () => {
     errors,
     onSubmit,
     loading,
+    googleLoading,
     showOtpInput,
     sentOtp,
     handleGoogleSuccess,
     handleGoogleError,
     accountNotFound,
-    setAccountNotFound
+    setAccountNotFound,
+    timeLeft,
+    handleSendOtp: handleLoginStep1
   };
 };
 
