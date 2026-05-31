@@ -5,6 +5,12 @@ import {
   removeFailedJob,
   sendAdminPushNotification
 } from "../admin.notification.controller.js";
+import {
+  getMyNotifications,
+  markAsRead,
+  markAllAsRead,
+  clearNotifications
+} from "../notification.controller.js";
 
 const router = Router();
 
@@ -47,6 +53,14 @@ const router = Router();
  *         description: Notification queued successfully
  */
 router.post("/send", sendAdminPushNotification);
+
+router.get("/", getMyNotifications);
+
+router.put("/mark-all-read", markAllAsRead);
+
+router.put("/:id/mark-read", markAsRead);
+
+router.delete("/clear", clearNotifications);
 
 /**
  * @swagger

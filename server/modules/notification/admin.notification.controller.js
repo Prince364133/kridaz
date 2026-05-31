@@ -1,7 +1,41 @@
 import { notificationQueue } from "../../queues/notification.queue.js";
 import logger from "../../utils/logger.js";
 import { prisma } from "../../config/prisma.js";
-import NotificationService from "../../services/notification.service.js";
+import { processInAppNotification } from "../../services/notification.dispatcher.js";
+
+const summarizeDispatchResults = (results) => {
+  return results.reduce(
+    (summary, result) => {
+      const pushResult = result?.pushResult;
+      summary.notifications += result?.notification ? 1 : 0;
+      summary.tokens += result?.tokenCount || 0;
+      summary.success += pushResult?.successCount || 0;
+      summary.failure += pushResult?.failureCount || 0;
+      if (pushResult?.mock) summary.mock = true;
+      return summary;
+    },
+    { notifications: 0, tokens: 0, success: 0, failure: 0, mock: false }
+  );
+};
+
+const getUsersWithRegisteredDevices = async () => {
+  const [usersWithFallbackToken, userDevices] = await Promise.all([
+    prisma.user.findMany({
+      where: { fcmToken: { not: null } },
+      select: { id: true }
+    }),
+    prisma.userDevice.findMany({
+      select: { userId: true },
+      distinct: ["userId"]
+    })
+  ]);
+
+  const userIds = new Set();
+  usersWithFallbackToken.forEach((user) => userIds.add(user.id));
+  userDevices.forEach((device) => userIds.add(device.userId));
+
+  return Array.from(userIds).map((id) => ({ id }));
+};
 
 /**
  * GET /api/admin/notifications/failed
@@ -101,32 +135,14 @@ export const sendAdminPushNotification = async (req, res) => {
 
   try {
     if (recipientId === "ALL") {
-      // Find all general users who have registered an FCM device token or a web/mobile device
-      const activeUsers = await prisma.user.findMany({
-        where: {
-          OR: [
-            {
-              NOT: {
-                fcmToken: null
-              }
-            },
-            {
-              devices: {
-                some: {}
-              }
-            }
-          ]
-        },
-        select: { id: true }
-      });
+      const activeUsers = await getUsersWithRegisteredDevices();
 
       if (activeUsers.length === 0) {
         return res.status(200).json({ success: true, message: "No active users with registered mobile devices found." });
       }
 
-      // Enqueue notification tasks in BullMQ
-      const promises = activeUsers.map(user => 
-        NotificationService.sendInApp({
+      const results = await Promise.all(activeUsers.map(user =>
+        processInAppNotification({
           recipientId: user.id,
           recipientModel: "User",
           title,
@@ -135,12 +151,17 @@ export const sendAdminPushNotification = async (req, res) => {
           link: link || "",
           metadata: metadata || {}
         })
-      );
-      await Promise.all(promises);
+      ));
+
+      const summary = summarizeDispatchResults(results);
+      const delivery = summary.mock
+        ? "Firebase is in mock mode; notifications were saved but not delivered to devices."
+        : `Delivered to ${summary.success}/${summary.tokens} registered device token(s).`;
 
       return res.status(200).json({
         success: true,
-        message: `Successfully queued push notifications for all ${activeUsers.length} registered device(s).`
+        message: `Sent notification to ${activeUsers.length} user(s). ${delivery}`,
+        summary
       });
     } else {
       // Send to a single user
@@ -157,7 +178,7 @@ export const sendAdminPushNotification = async (req, res) => {
         return res.status(404).json({ success: false, message: "User not found" });
       }
 
-      await NotificationService.sendInApp({
+      const result = await processInAppNotification({
         recipientId: user.id,
         recipientModel: "User",
         title,
@@ -167,9 +188,15 @@ export const sendAdminPushNotification = async (req, res) => {
         metadata: metadata || {}
       });
 
+      const summary = summarizeDispatchResults([result]);
+      const delivery = summary.mock
+        ? "Firebase is in mock mode; notification was saved but not delivered to the device."
+        : `Delivered to ${summary.success}/${summary.tokens} registered device token(s).`;
+
       return res.status(200).json({
         success: true,
-        message: `Successfully queued push notification for user. Status will be delivered if device token exists (${user.fcmToken ? 'Device is registered' : 'No registered device token found'}).`
+        message: `Sent notification for user. ${delivery}`,
+        summary
       });
     }
   } catch (error) {

@@ -16,7 +16,12 @@ export const sendPushNotification = async (fcmToken, title, body, data = {}) => 
   // If Firebase Admin isn't initialized or running in mock mode, skip actual dispatch
   if (!admin || !admin.apps.length) {
     logger.info(`[Push Notification Mock] To: ${JSON.stringify(tokens)} | Title: ${title} | Body: ${body} | Data: ${JSON.stringify(data)}`);
-    return;
+    return {
+      successCount: 0,
+      failureCount: 0,
+      mock: true,
+      responses: []
+    };
   }
 
   // Ensure all keys and values in data are strings
@@ -68,5 +73,11 @@ export const sendPushNotification = async (fcmToken, title, body, data = {}) => 
     return response;
   } catch (error) {
     logger.error(`[Push Notification] Error sending multicast message:`, error);
+    return {
+      successCount: 0,
+      failureCount: tokens.length,
+      error: error.message,
+      responses: tokens.map(() => ({ success: false, error }))
+    };
   }
 };
