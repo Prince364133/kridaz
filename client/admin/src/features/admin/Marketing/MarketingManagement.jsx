@@ -1,13 +1,12 @@
 import { useState, useEffect, useRef } from "react";
 import axiosInstance from "@hooks/useAxiosInstance";
 import { toast } from "react-hot-toast";
-import { Plus, Trash2, Edit2, Layout, Video, Check, X, GripVertical, Upload, Image as ImageIcon, Activity as BellIcon } from "lucide-react";
+import { Plus, Trash2, Edit2, Layout, Check, X, Upload, Image as ImageIcon, Activity as BellIcon } from "lucide-react";
 import PushComposer from "./PushComposer";
 
 export const MarketingManagement = () => {
   const [activeTab, setActiveTab] = useState("banners");
   const [banners, setBanners] = useState([]);
-  const [videos, setVideos] = useState([]);
   const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingItem, setEditingItem] = useState(null);
@@ -17,9 +16,10 @@ export const MarketingManagement = () => {
   
   const [formData, setFormData] = useState({
     title: "",
+    description: "",
     imageUrl: "",
+    videoUrl: "",
     targetUrl: "",
-    youtubeUrl: "",
     order: 0,
     isActive: true,
   });
@@ -33,15 +33,11 @@ export const MarketingManagement = () => {
   const fetchData = async () => {
     try {
       setLoading(true);
-      const [bannersRes, videosRes] = await Promise.all([
-        axiosInstance.get(`${API_BASE}/banners`),
-        axiosInstance.get(`${API_BASE}/videos`),
-      ]);
-      setBanners(bannersRes.data.banners || []);
-      setVideos(videosRes.data.videos || []);
+      const res = await axiosInstance.get(`${API_BASE}/banners`);
+      setBanners(res.data.banners || []);
     } catch (error) {
       console.error("Marketing fetch error:", error);
-      toast.error("Failed to fetch marketing data");
+      toast.error("Failed to fetch banners");
     } finally {
       setLoading(false);
     }
@@ -52,16 +48,25 @@ export const MarketingManagement = () => {
     setPreviewUrl(null);
     if (item) {
       setEditingItem(item);
-      setFormData(item);
-      setPreviewUrl(item.imageUrl);
+      setFormData({
+        title: item.title || "",
+        description: item.description || "",
+        imageUrl: item.imageUrl || "",
+        videoUrl: item.videoUrl || "",
+        targetUrl: item.targetUrl || "",
+        order: item.order || 0,
+        isActive: item.isActive ?? true,
+      });
+      setPreviewUrl(item.imageUrl || item.videoUrl);
     } else {
       setEditingItem(null);
       setFormData({
         title: "",
+        description: "",
         imageUrl: "",
+        videoUrl: "",
         targetUrl: "",
-        youtubeUrl: "",
-        order: (activeTab === "banners" ? banners.length : videos.length) + 1,
+        order: banners.length + 1,
         isActive: true,
       });
     }
@@ -73,8 +78,7 @@ export const MarketingManagement = () => {
     if (file) {
       setSelectedFile(file);
       setPreviewUrl(URL.createObjectURL(file));
-      // Optionally clear URL input if file is picked
-      setFormData(prev => ({ ...prev, imageUrl: "" }));
+      setFormData(prev => ({ ...prev, imageUrl: "", videoUrl: "" }));
     }
   };
 
@@ -84,9 +88,10 @@ export const MarketingManagement = () => {
       let dataToSubmit;
       let headers = {};
 
-      if (activeTab === "banners" && (selectedFile || formData.imageUrl)) {
+      if (activeTab === "banners") {
         const fData = new FormData();
         fData.append("title", formData.title);
+        fData.append("description", formData.description || "");
         fData.append("targetUrl", formData.targetUrl || "");
         fData.append("order", formData.order);
         fData.append("isActive", formData.isActive);
@@ -94,19 +99,18 @@ export const MarketingManagement = () => {
         if (selectedFile) {
           fData.append("image", selectedFile);
         } else {
-          fData.append("imageUrl", formData.imageUrl);
+          if (formData.imageUrl) fData.append("imageUrl", formData.imageUrl);
+          if (formData.videoUrl) fData.append("videoUrl", formData.videoUrl);
         }
         dataToSubmit = fData;
         headers = { "Content-Type": "multipart/form-data" };
-      } else {
-        dataToSubmit = formData;
       }
 
       if (editingItem) {
-        await axiosInstance.put(`${API_BASE}/${activeTab}/${editingItem._id}`, dataToSubmit, { headers });
+        await axiosInstance.put(`${API_BASE}/banners/${editingItem._id}`, dataToSubmit, { headers });
         toast.success("Updated successfully");
       } else {
-        await axiosInstance.post(`${API_BASE}/${activeTab}`, dataToSubmit, { headers });
+        await axiosInstance.post(`${API_BASE}/banners`, dataToSubmit, { headers });
         toast.success("Created successfully");
       }
       setIsModalOpen(false);
@@ -120,13 +124,21 @@ export const MarketingManagement = () => {
   const handleDelete = async (id) => {
     if (!window.confirm("Are you sure?")) return;
     try {
-      await axiosInstance.delete(`${API_BASE}/${activeTab}/${id}`);
+      await axiosInstance.delete(`${API_BASE}/banners/${id}`);
       toast.success("Deleted successfully");
       fetchData();
     } catch (error) {
       console.error("Marketing delete error:", error);
       toast.error("Failed to delete");
     }
+  };
+
+  const isVideoFile = (file) => {
+    return file && file.type ? file.type.startsWith("video/") : false;
+  };
+
+  const isVideoUrl = (url) => {
+    return url ? (url.includes(".mp4") || url.includes(".webm") || url.includes(".mov") || url.includes("video/upload")) : false;
   };
 
   if (loading) {
@@ -145,7 +157,7 @@ export const MarketingManagement = () => {
             MARKETING HUB
           </h1>
           <p className="text-sm text-gray-400">
-            Manage your homepage ad banners, video features, and push announcements.
+            Manage your homepage ad banners and push announcements.
           </p>
         </div>
         {activeTab !== "notifications" && (
@@ -154,7 +166,7 @@ export const MarketingManagement = () => {
             className="inline-flex items-center gap-2 bg-lime-500 text-black px-4 py-2 rounded-[6px] font-bold hover:bg-lime-400 transition-colors"
           >
             <Plus size={18} />
-            Add New {activeTab === "banners" ? "Banner" : "Video"}
+            Add New Banner
           </button>
         )}
       </div>
@@ -168,15 +180,6 @@ export const MarketingManagement = () => {
           <div className="flex items-center gap-2">
             <Layout size={16} />
             Ad Banners
-          </div>
-        </button>
-        <button
-          onClick={() => setActiveTab("videos")}
-          className={`px-6 py-3 text-sm font-bold uppercase tracking-wider transition-colors border-b-2 ${ activeTab === "videos" ? "border-lime-500 text-lime-500" : "border-transparent text-gray-400 hover:text-white" }`}
-        >
-          <div className="flex items-center gap-2">
-            <Video size={16} />
-            Dynamic Videos
           </div>
         </button>
         <button
@@ -196,44 +199,39 @@ export const MarketingManagement = () => {
         <PushComposer />
       ) : (
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-          {(activeTab === "banners" ? banners : videos).map((item) => (
+          {banners.map((item) => (
             <div
               key={item._id}
               className="group relative flex flex-col rounded-[8px] border border-white/10 bg-[#1A1A1A] overflow-hidden transition-all hover:border-lime-500/50"
             >
-              {activeTab === "banners" ? (
-                <div className="aspect-video w-full bg-black overflow-hidden relative">
+              <div className="aspect-video w-full bg-black overflow-hidden relative">
+                {item.videoUrl ? (
+                  <video src={item.videoUrl} className="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity" muted playsInline />
+                ) : (
                   <img src={item.imageUrl} alt={item.title} className="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity" />
-                  {!item.isActive && (
-                    <div className="absolute inset-0 bg-black/60 flex items-center justify-center">
-                      <span className="bg-red-500 text-white text-[10px] px-2 py-1 rounded font-bold uppercase">Inactive</span>
-                    </div>
-                  )}
-                </div>
-              ) : (
-                <div className="aspect-video w-full bg-black flex items-center justify-center relative">
-                  <Video size={40} className="text-lime-500/30" />
-                  <div className="absolute bottom-2 right-2 bg-black/80 px-2 py-1 rounded text-[10px] text-gray-400 font-mono">
-                    YOUTUBE
+                )}
+                {!item.isActive && (
+                  <div className="absolute inset-0 bg-black/60 flex items-center justify-center">
+                    <span className="bg-red-500 text-white text-[10px] px-2 py-1 rounded font-bold uppercase">Inactive</span>
                   </div>
-                  {!item.isActive && (
-                    <div className="absolute inset-0 bg-black/60 flex items-center justify-center">
-                      <span className="bg-red-500 text-white text-[10px] px-2 py-1 rounded font-bold uppercase">Inactive</span>
-                    </div>
-                  )}
-                </div>
-              )}
+                )}
+              </div>
 
               <div className="p-5 flex-1 flex flex-col">
-                <div className="flex items-start justify-between mb-2">
+                <div className="flex items-start justify-between mb-1">
                   <h3 className="font-bold text-white truncate pr-4">{item.title}</h3>
                   <span className="text-xs font-mono text-lime-500">#{item.order}</span>
                 </div>
-                <p className="text-xs text-gray-500 truncate mb-4">
-                  {activeTab === "banners" ? item.targetUrl || "No target URL" : item.youtubeUrl}
+                {item.description && (
+                  <p className="text-[11px] text-gray-400 line-clamp-2 mb-2 leading-relaxed">
+                    {item.description}
+                  </p>
+                )}
+                <p className="text-xs text-gray-500 truncate mb-4 mt-auto">
+                  {item.targetUrl || "No target URL"}
                 </p>
 
-                <div className="mt-auto flex items-center gap-2 pt-4 border-t border-white/5">
+                <div className="flex items-center gap-2 pt-4 border-t border-white/5">
                   <button
                     onClick={() => handleOpenModal(item)}
                     className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-lg bg-white/5 text-gray-400 hover:bg-white/10 hover:text-white transition-all text-xs font-bold"
@@ -252,11 +250,11 @@ export const MarketingManagement = () => {
             </div>
           ))}
 
-          {((activeTab === "banners" ? banners : videos).length === 0) && (
+          {(banners.length === 0) && (
             <div className="col-span-full py-20 flex flex-col items-center justify-center border border-dashed border-white/10 rounded-[8px]">
               <Layout size={40} className="text-gray-600 mb-4" />
-              <h3 className="text-white font-bold">No {activeTab} found</h3>
-              <p className="text-gray-400 text-sm">Start by adding your first marketing asset.</p>
+              <h3 className="text-white font-bold">No banners found</h3>
+              <p className="text-gray-400 text-sm">Start by adding your first banner.</p>
             </div>
           )}
         </div>
@@ -269,7 +267,7 @@ export const MarketingManagement = () => {
           <div className="w-full max-w-lg bg-[#111] border border-white/10 rounded-[8px] overflow-hidden shadow-2xl">
             <div className="p-6 border-b border-white/10 flex items-center justify-between">
               <h2 className="text-xl font-bold font-bebas tracking-wider text-white">
-                {editingItem ? "EDIT" : "ADD NEW"} {activeTab.toUpperCase().slice(0, -1)}
+                {editingItem ? "EDIT" : "ADD NEW"} BANNER
               </h2>
               <button onClick={() => setIsModalOpen(false)} className="text-gray-400 hover:text-white">
                 <X size={20} />
@@ -290,86 +288,90 @@ export const MarketingManagement = () => {
                   />
                 </div>
 
-                {activeTab === "banners" ? (
-                  <>
-                    <div className="space-y-3">
-                      <label className="block text-xs font-bold uppercase tracking-widest text-gray-500">Banner Image</label>
-                      
-                      <div className="flex flex-col gap-3">
-                         {/* Compact Preview Area */}
-                         <div 
-                           onClick={() => fileInputRef.current?.click()}
-                           className="relative h-36 w-full rounded-[8px] border-2 border-dashed border-white/10 bg-white/5 overflow-hidden group cursor-pointer hover:border-lime-500/50 transition-all flex flex-col items-center justify-center gap-2"
-                         >
-                           {previewUrl ? (
-                             <>
-                               <img src={previewUrl} className="w-full h-full object-contain bg-black/20" alt="Preview" />
-                               <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity">
-                                  <div className="bg-lime-500 text-black p-2 rounded-full">
-                                    <Upload size={18} />
-                                  </div>
-                               </div>
-                             </>
+                <div>
+                  <label className="block text-xs font-bold uppercase tracking-widest text-gray-500 mb-2">Description (Subtitle / 2 lines of text)</label>
+                  <textarea
+                    value={formData.description}
+                    onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                    className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-lime-500 transition-colors text-sm h-20 resize-none"
+                    placeholder="Enter two lines of description text to display in the banner..."
+                  />
+                </div>
+
+                <div className="space-y-3">
+                  <label className="block text-xs font-bold uppercase tracking-widest text-gray-500">Banner Image or 1-Min Video</label>
+                  
+                  <div className="flex flex-col gap-3">
+                     {/* Compact Preview Area */}
+                     <div 
+                       onClick={() => fileInputRef.current?.click()}
+                       className="relative h-44 w-full rounded-[8px] border-2 border-dashed border-white/10 bg-white/5 overflow-hidden group cursor-pointer hover:border-lime-500/50 transition-all flex flex-col items-center justify-center gap-2"
+                     >
+                       {previewUrl ? (
+                         <>
+                           {(isVideoFile(selectedFile) || isVideoUrl(formData.videoUrl) || (editingItem && editingItem.videoUrl && !selectedFile)) ? (
+                             <video src={previewUrl} className="w-full h-full object-contain bg-black/20" controls muted playsInline />
                            ) : (
-                             <>
-                               <div className="p-3 rounded-full bg-white/5 text-gray-500 group-hover:text-lime-500 group-hover:bg-lime-500/10 transition-all">
-                                 <Upload size={24} />
-                               </div>
-                               <span className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Click to upload image</span>
-                             </>
+                             <img src={previewUrl} className="w-full h-full object-contain bg-black/20" alt="Preview" />
                            )}
-                           <input 
-                             type="file" 
-                             ref={fileInputRef}
-                             onChange={handleFileChange}
-                             className="hidden" 
-                             accept="image/*"
-                           />
-                         </div>
+                           <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity pointer-events-none">
+                              <div className="bg-lime-500 text-black p-2 rounded-full">
+                                <Upload size={18} />
+                              </div>
+                           </div>
+                         </>
+                       ) : (
+                         <>
+                           <div className="p-3 rounded-full bg-white/5 text-gray-500 group-hover:text-lime-500 group-hover:bg-lime-500/10 transition-all">
+                             <Upload size={24} />
+                           </div>
+                           <span className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Click to upload image or video</span>
+                         </>
+                       )}
+                       <input 
+                         type="file" 
+                         ref={fileInputRef}
+                         onChange={handleFileChange}
+                         className="hidden" 
+                         accept="image/*,video/*"
+                       />
+                     </div>
 
-                         <div className="relative">
-                            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                              <ImageIcon size={14} className="text-gray-500" />
-                            </div>
-                            <input
-                              type="text"
-                              value={formData.imageUrl}
-                              onChange={(e) => {
-                                setFormData({ ...formData, imageUrl: e.target.value });
-                                setPreviewUrl(e.target.value);
-                                setSelectedFile(null);
-                              }}
-                              className="w-full bg-white/5 border border-white/10 rounded-lg pl-10 pr-4 py-2.5 text-white text-xs focus:outline-none focus:border-lime-500 transition-colors"
-                              placeholder="...or paste image URL directly"
-                            />
-                         </div>
-                      </div>
-                    </div>
-
-                    <div>
-                      <label className="block text-xs font-bold uppercase tracking-widest text-gray-500 mb-2">Target URL (Optional)</label>
-                      <input
-                        type="text"
-                        value={formData.targetUrl}
-                        onChange={(e) => setFormData({ ...formData, targetUrl: e.target.value })}
-                        className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-2.5 text-white focus:outline-none focus:border-lime-500 transition-colors text-sm"
-                        placeholder="https://..."
-                      />
-                    </div>
-                  </>
-                ) : (
-                  <div>
-                    <label className="block text-xs font-bold uppercase tracking-widest text-gray-500 mb-2">YouTube URL</label>
-                    <input
-                      type="text"
-                      required
-                      value={formData.youtubeUrl}
-                      onChange={(e) => setFormData({ ...formData, youtubeUrl: e.target.value })}
-                      className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-2.5 text-white focus:outline-none focus:border-lime-500 transition-colors text-sm"
-                      placeholder="https://youtube.com/watch?v=..."
-                    />
+                     <div className="relative">
+                        <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                          <ImageIcon size={14} className="text-gray-500" />
+                        </div>
+                        <input
+                          type="text"
+                          value={formData.imageUrl || formData.videoUrl}
+                          onChange={(e) => {
+                            const val = e.target.value;
+                            const isVid = isVideoUrl(val);
+                            if (isVid) {
+                              setFormData({ ...formData, videoUrl: val, imageUrl: "" });
+                            } else {
+                              setFormData({ ...formData, imageUrl: val, videoUrl: "" });
+                            }
+                            setPreviewUrl(val);
+                            setSelectedFile(null);
+                          }}
+                          className="w-full bg-white/5 border border-white/10 rounded-lg pl-10 pr-4 py-2.5 text-white text-xs focus:outline-none focus:border-lime-500 transition-colors"
+                          placeholder="...or paste image/video URL directly"
+                        />
+                     </div>
                   </div>
-                )}
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold uppercase tracking-widest text-gray-500 mb-2">Target URL (Optional)</label>
+                  <input
+                    type="text"
+                    value={formData.targetUrl}
+                    onChange={(e) => setFormData({ ...formData, targetUrl: e.target.value })}
+                    className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-2.5 text-white focus:outline-none focus:border-lime-500 transition-colors text-sm"
+                    placeholder="https://..."
+                  />
+                </div>
 
                 <div className="grid grid-cols-2 gap-4">
                   <div>
@@ -406,7 +408,7 @@ export const MarketingManagement = () => {
                   type="submit"
                   className="flex-1 py-3 rounded-[8px] bg-lime-500 text-black font-bold hover:bg-lime-400 transition-all shadow-[0_0_20px_rgba(132,204,22,0.3)]"
                 >
-                  SAVE {activeTab.toUpperCase().slice(0, -1)}
+                  SAVE BANNER
                 </button>
               </div>
             </form>

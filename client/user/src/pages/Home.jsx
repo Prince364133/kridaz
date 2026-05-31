@@ -1167,9 +1167,6 @@ export default function Home() {
  {/* ── BLOGS & ARTICLES ── */}
  <BlogSection />
 
- {/* ── VIDEO GALLERY ── */}
- <VideoSection videos={marketing.videos} />
-
 
 
  {/* ── WHY CHOOSE BMSPORTZ ── */}
