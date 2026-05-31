@@ -178,7 +178,7 @@ const SignUp = ({ isModal = false }) => {
   };
 
   const handleGoogleSuccess = async (googleResponse) => {
-      // console.log("GOOGLE RESPONSE received");
+
       setGoogleLoading(true);
       try {
         const inviteToken = localStorage.getItem("pendingInvite");
@@ -189,7 +189,7 @@ const SignUp = ({ isModal = false }) => {
         } else if (googleResponse.access_token) {
           payload.accessToken = googleResponse.access_token;
         }
-        // console.log("SENDING PAYLOAD");
+
   
         const response = await axiosInstance.post(`/api/user/auth/google-auth`, payload);
         const result = response.data;

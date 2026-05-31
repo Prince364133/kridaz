@@ -1,28 +1,26 @@
 import { useForm, Controller } from "react-hook-form";
-import { yupResolver } from '@hookform/resolvers/yup';
-import * as Yup from 'yup';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { z } from 'zod';
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
 import { format, parse } from 'date-fns';
 import { Save, X, Clock, MapPin, Tag, Activity, ShieldCheck } from "lucide-react";
 
 const EditTurfForm = ({ turf, onSave, onCancel, turfId }) => {
-  const validationSchema = Yup.object().shape({
-    name: Yup.string().required("Name is required"),
-    description: Yup.string(),
-    policies: Yup.string()
-      .required("Policies are required")
-      .min(200, "Policies must be at least 200 characters long"),
-    pricePerHour: Yup.number()
-      .required("Price per Hour is required")
+  const validationSchema = z.object({
+    name: z.string().min(1, "Name is required"),
+    description: z.string().optional(),
+    policies: z.string().min(1, "Policies are required").min(200, "Policies must be at least 200 characters long"),
+    pricePerHour: z.number({ invalid_type_error: "Price per Hour is required" })
       .positive("Price per Hour must be a positive number")
       .min(500, "Price per Hour must be greater than 500")
       .max(10000, "Price per Hour must be less than 10000"),
-    location: Yup.string().required("Location is required"),
-    openTime: Yup.date().required("Open Time is required"),
-    closeTime: Yup.date()
-      .required("Close Time is required")
-      .min(Yup.ref("openTime"), "Close Time must be after Open Time"),
+    location: z.string().min(1, "Location is required"),
+    openTime: z.date({ required_error: "Open Time is required" }),
+    closeTime: z.date({ required_error: "Close Time is required" }),
+  }).refine((data) => data.closeTime > data.openTime, {
+    message: "Close Time must be after Open Time",
+    path: ["closeTime"],
   });
 
   const {
@@ -34,7 +32,7 @@ const EditTurfForm = ({ turf, onSave, onCancel, turfId }) => {
     watch,
     formState: { errors },
   } = useForm({
-    resolver: yupResolver(validationSchema),
+    resolver: zodResolver(validationSchema),
     defaultValues: {
       ...turf,
       openTime: turf.openTime ? parse(turf.openTime, 'hh:mm a', new Date()) : null,

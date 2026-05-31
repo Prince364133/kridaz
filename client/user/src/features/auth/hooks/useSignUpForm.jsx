@@ -1,6 +1,6 @@
 import { useForm } from "react-hook-form";
-import { yupResolver } from "@hookform/resolvers/yup";
-import * as yup from "yup";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
 import { useState, useEffect } from "react";
 import axiosInstance from "@hooks/useAxiosInstance";
 import toast from "react-hot-toast";
@@ -8,71 +8,42 @@ import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { login } from "@redux/slices/authSlice";
 
-const registerSchema = yup.object().shape({
-  name: yup.string().required("Name is required"),
-  username: yup
-    .string()
-    .required("Username is required")
-    .min(3, "Username must be at least 3 characters")
-    .matches(/^[a-z0-9_]+$/, "Username can only contain lowercase letters, numbers, and underscores"),
-  email: yup
-    .string()
-    .required("Enter your email")
-    .matches(
-      /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/,
-      "Enter a valid email"
-    ),
-  phone: yup
-    .string()
-    .required("Enter your phone number")
-    .matches(/^[0-9]{10}$/, "Enter a valid 10-digit phone number"),
-  gender: yup.string().required("Select your gender"),
-  dob: yup.string().required("Date of Birth is required"),
-  address: yup.string().required("Address is required"),
-  city: yup.string().required("City is required"),
-  state: yup.string().required("State is required"),
-  pinCode: yup.string().required("PIN Code is required").matches(/^[0-9]{6}$/, "Enter a valid 6-digit PIN code"),
-  sportTypes: yup.array().min(1, "Select at least one sport expertise").required("Sport expertise is required"),
-  experience: yup.string().required("Years of experience is required"),
-  coachingLevel: yup.string().required("Coaching level is required"),
-  sessionFee: yup.number().typeError("Session fee must be a number").required("Session fee is required"),
-  availabilityTimings: yup.string().required("Availability timings are required"),
-  availabilityMode: yup.string().required("Select availability mode"),
-  preferredLocations: yup.string().required("Preferred training locations are required"),
-  bio: yup.string().required("Bio/About is required").min(20, "Bio should be at least 20 characters"),
-  location: yup.string().optional(),
-  password: yup
-    .string()
-    .required("Enter your password")
-    .min(6, "Password must be at least 6 characters long"),
-  confirmPassword: yup
-    .string()
-    .required("Confirm your password")
-    .oneOf([yup.ref("password"), null], "Passwords must match"),
-  otp: yup.string().when("$showOtpInput", {
-    is: true,
-    then: () => yup.string().required("Email OTP is required").min(6, "OTP must be 6 characters"),
-    otherwise: () => yup.string().notRequired(),
-  }),
-  phoneOtp: yup.string().when("$showOtpInput", {
-    is: true,
-    then: () => yup.string().required("WhatsApp OTP is required").min(6, "OTP must be 6 characters"),
-    otherwise: () => yup.string().notRequired(),
-  }),
-  role: yup.string().required("Role is required"),
-  businessDetails: yup.object().shape({
-    businessName: yup.string().optional(),
-    registrationNumber: yup.string().optional(),
+const registerSchema = z.object({
+  name: z.string().min(1, "Name is required"),
+  username: z.string().min(1, "Username is required").min(3, "Username must be at least 3 characters").regex(/^[a-z0-9_]+$/, "Username can only contain lowercase letters, numbers, and underscores"),
+  email: z.string().min(1, "Enter your email").regex(/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/, "Enter a valid email"),
+  phone: z.string().min(1, "Enter your phone number").regex(/^[0-9]{10}$/, "Enter a valid 10-digit phone number"),
+  gender: z.string().min(1, "Select your gender"),
+  dob: z.string().min(1, "Date of Birth is required"),
+  address: z.string().min(1, "Address is required"),
+  city: z.string().min(1, "City is required"),
+  state: z.string().min(1, "State is required"),
+  pinCode: z.string().min(1, "PIN Code is required").regex(/^[0-9]{6}$/, "Enter a valid 6-digit PIN code"),
+  sportTypes: z.array(z.string()).min(1, "Select at least one sport expertise"),
+  experience: z.string().min(1, "Years of experience is required"),
+  coachingLevel: z.string().min(1, "Coaching level is required"),
+  sessionFee: z.number({ invalid_type_error: "Session fee must be a number" }),
+  availabilityTimings: z.string().min(1, "Availability timings are required"),
+  availabilityMode: z.string().min(1, "Select availability mode"),
+  preferredLocations: z.string().min(1, "Preferred training locations are required"),
+  bio: z.string().min(1, "Bio/About is required").min(20, "Bio should be at least 20 characters"),
+  location: z.string().optional(),
+  password: z.string().min(1, "Enter your password").min(6, "Password must be at least 6 characters long"),
+  confirmPassword: z.string().min(1, "Confirm your password"),
+  otp: z.string().optional(),
+  phoneOtp: z.string().optional(),
+  role: z.string().min(1, "Role is required"),
+  businessDetails: z.object({
+    businessName: z.string().optional(),
+    registrationNumber: z.string().optional(),
   }).optional(),
-  documents: yup.array()
-    .min(3, "At least 3 verification documents are required")
-    .of(
-      yup.object().shape({
-        name: yup.string().required(),
-        url: yup.string().required(),
-      })
-    )
-    .required("Verification documents are required"),
+  documents: z.array(z.object({
+    name: z.string().min(1, "Required"),
+    url: z.string().min(1, "Required"),
+  })).min(3, "At least 3 verification documents are required").optional(),
+}).refine((data) => data.password === data.confirmPassword, {
+  message: "Passwords must match",
+  path: ["confirmPassword"],
 });
 
 /**
@@ -102,7 +73,7 @@ const useSignUpForm = (predefinedRole = "user") => {
     watch,
     formState: { errors },
   } = useForm({
-    resolver: yupResolver(registerSchema),
+    resolver: zodResolver(registerSchema),
     context: { showOtpInput },
     defaultValues: {
       role: predefinedRole,

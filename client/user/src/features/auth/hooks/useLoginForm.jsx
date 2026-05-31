@@ -1,6 +1,6 @@
 import { useForm } from "react-hook-form";
-import { yupResolver } from "@hookform/resolvers/yup";
-import * as yup from "yup";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
 import { useState, useEffect } from "react";
 import axiosInstance from "@hooks/useAxiosInstance";
 import toast from "react-hot-toast";
@@ -9,19 +9,13 @@ import {login} from "@redux/slices/authSlice";
 import { useNavigate } from "react-router-dom";
 import { Capacitor } from "@capacitor/core";
 
-const loginSchema = yup.object().shape({
-  email: yup
-    .string()
-    .required("Enter your email or phone number")
-    .test('is-email-or-phone', 'Enter a valid email or 10-digit phone number', (value) => {
-      const isEmail = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/.test(value);
-      const isPhone = /^[0-9]{10}$/.test(value);
-      return isEmail || isPhone;
-    }),
-  password: yup
-    .string()
-    .required("Enter your password")
-    .min(6, "Password must be at least 6 characters long"),
+const loginSchema = z.object({
+  email: z.string().min(1, "Enter your email or phone number").refine((value) => {
+    const isEmail = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/.test(value);
+    const isPhone = /^[0-9]{10}$/.test(value);
+    return isEmail || isPhone;
+  }, { message: "Enter a valid email or 10-digit phone number" }),
+  password: z.string().min(1, "Enter your password").min(6, "Password must be at least 6 characters long"),
 });
 
 const useLoginForm = () => {
@@ -41,7 +35,7 @@ const useLoginForm = () => {
     trigger,
     formState: { errors },
   } = useForm({
-    resolver: yupResolver(loginSchema),
+    resolver: zodResolver(loginSchema),
   });
 
   useEffect(() => {
