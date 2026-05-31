@@ -43,6 +43,7 @@ const BookingPass            = lazy(() => import("@features/turf").then(m => ({ 
 const BookingInvoice         = lazy(() => import("@features/turf").then(m => ({ default: m.BookingInvoice })));
 const HostGame               = lazy(() => import("@features/games").then(m => ({ default: m.HostGame })));
 const JoinGames              = lazy(() => import("@features/games").then(m => ({ default: m.JoinGames })));
+const JoinGameDetails        = lazy(() => import("@features/games").then(m => ({ default: m.JoinGameDetails })));
 const MyHostedGames          = lazy(() => import("@features/games").then(m => ({ default: m.MyHostedGames })));
 const MyJoinedGames          = lazy(() => import("@features/games").then(m => ({ default: m.MyJoinedGames })));
 const FindProfessionals      = lazy(() => import("@features/networking").then(m => ({ default: m.FindProfessionals })));
@@ -221,6 +222,7 @@ const router = createBrowserRouter([
       { path: "players",      element: <S><FindPlayers /></S> },
       { path: "host-game",    element: <ProtectedRoute><S><HostGame /></S></ProtectedRoute> },
       { path: "join-games",   element: <S><JoinGames /></S> },
+      { path: "join-games/:gameId",   element: <S><JoinGameDetails /></S> },
       { path: "matches/:matchId/stream-setup", element: <ProtectedRoute><S><StreamSetup /></S></ProtectedRoute> },
       { path: "youtube-connected",  element: <Navigate to="/" replace /> },
       { path: "youtube-error",      element: <Navigate to="/" replace /> },

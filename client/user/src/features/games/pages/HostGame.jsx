@@ -535,6 +535,12 @@ const HostGame = () => {
     try {
       const payload = {
         ...gameData,
+        ...(gameData.gameMode === 'QUICK' ? {
+          teamA: {
+            ...gameData.teamA,
+            name: 'Casual Pool'
+          }
+        } : {}),
         couponCode: couponData ? couponCode : undefined,
         customUmpireData: customUmpireData.name ? customUmpireData : undefined
       };
@@ -1130,72 +1136,160 @@ const HostGame = () => {
 
         {/* Step 4: Setup (Quick vs Professional) */}
         {step === 4 && gameData.gameMode === 'QUICK' && (
-          <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} className="space-y-8 max-w-2xl mx-auto">
-            <div className="bg-neutral-900/40 border border-neutral-800/80 rounded-[8px] p-8 sm:p-12 text-center space-y-10 shadow-xl shadow-black/30">
-              <div className="max-w-md mx-auto space-y-4">
-                <div className="w-16 h-16 bg-[#BFF367]/8 rounded-full flex items-center justify-center mx-auto border border-[#BFF367]/20 shadow-[0_0_20px_rgba(85,222,232,0.08)]">
-                  <Users className="text-[#BFF367]" size={28} />
-                </div>
-                <h2 className="text-3xl font-bold tracking-tight text-white font-open-sans uppercase tracking-wider">Total Players</h2>
-                <p className="hidden sm:block text-neutral-400 font-inter text-[20px] max-w-md mx-auto leading-relaxed">
-                  How many players (including you) are playing in this quick game?
-                </p>
-              </div>
+          <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} className="space-y-6 max-w-2xl mx-auto">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 bg-neutral-900/40 border border-neutral-800/80 rounded-[8px] p-5 sm:p-6 shadow-xl shadow-black/30">
+              
+              {/* Left Column: Settings (Total Players & Entry Fee) */}
+              <div className="space-y-4 flex flex-col justify-between">
+                <div>
+                  <div className="flex items-center gap-2 mb-4">
+                    <div className="w-[3px] h-[16px] bg-gradient-to-b from-[#BFF367] to-[#BFF367] rounded-full" />
+                    <h3 className="text-xs font-black uppercase text-white tracking-wider">Quick Game Settings</h3>
+                  </div>
 
-              {/* Number Input / Slider */}
-              <div className="flex items-center justify-center gap-10 py-4">
-                <button 
-                  onClick={() => setGameData(prev => ({ ...prev, quickPlayerCount: Math.max(2, prev.quickPlayerCount - 1) }))}
-                  className="w-14 h-14 rounded-full bg-neutral-950 border border-[#BFF367]/30 text-[#BFF367] hover:bg-[#BFF367]/10 transition-all duration-300 flex items-center justify-center shadow-[0_4px_20px_rgba(85,222,232,0.15)] active:scale-95 cursor-pointer"
-                >
-                  <Minus size={22} className="text-[#BFF367]" />
-                </button>
-                <div className="w-24 text-center">
-                  <span className="text-7xl font-black text-white font-open-sans tracking-tight select-none tabular-nums">
-                    {gameData.quickPlayerCount || 0}
+                  <div className="space-y-3">
+                    {/* Compact Total Players Selection */}
+                    <div className="flex items-center gap-4 bg-neutral-950/60 p-3 rounded-[8px] border border-neutral-850 justify-between">
+                      <div className="flex flex-col text-left">
+                        <span className="text-[10px] font-black uppercase text-neutral-400 tracking-wider">Total Players</span>
+                        <span className="text-[8px] text-neutral-500 font-medium">Pool including you</span>
+                      </div>
+                      <div className="flex items-center gap-3">
+                        <button 
+                          type="button"
+                          onClick={() => setGameData(prev => ({ ...prev, quickPlayerCount: Math.max(2, prev.quickPlayerCount - 1) }))}
+                          className="w-8 h-8 rounded-full bg-neutral-900 border border-[#BFF367]/20 text-[#BFF367] flex items-center justify-center hover:bg-[#BFF367]/10 transition-colors"
+                        >
+                          <Minus size={14} />
+                        </button>
+                        <span className="text-lg font-black text-white w-6 text-center select-none tabular-nums">
+                          {gameData.quickPlayerCount || 2}
+                        </span>
+                        <button 
+                          type="button"
+                          onClick={() => setGameData(prev => ({ ...prev, quickPlayerCount: Math.min(22, prev.quickPlayerCount + 1) }))}
+                          className="w-8 h-8 rounded-full bg-neutral-900 border border-[#BFF367]/20 text-[#BFF367] flex items-center justify-center hover:bg-[#BFF367]/10 transition-colors"
+                        >
+                          <Plus size={14} />
+                        </button>
+                      </div>
+                    </div>
+
+                    {/* Compact Entry Fee Input */}
+                    <div className="flex items-center gap-4 bg-neutral-950/60 p-3 rounded-[8px] border border-neutral-850 justify-between">
+                      <div className="flex flex-col text-left">
+                        <span className="text-[10px] font-black uppercase text-neutral-400 tracking-wider">Entry Fee</span>
+                        <span className="text-[8px] text-neutral-500 font-medium">Per player (₹)</span>
+                      </div>
+                      <div className="flex items-center gap-2 bg-neutral-900 p-1.5 px-3 rounded-[6px] border border-neutral-800 focus-within:border-[#BFF367] transition-all">
+                        <Coins className="text-[#BFF367]" size={14} />
+                        <input 
+                          type="number"
+                          placeholder="0"
+                          value={gameData.perPlayerCharge || ''}
+                          onChange={(e) => setGameData({ ...gameData, perPlayerCharge: parseInt(e.target.value) || 0 })}
+                          className="w-16 bg-transparent border-none text-right font-black text-sm outline-none focus:ring-0 text-white p-0"
+                        />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Pool Status Badge */}
+                <div className="text-center py-2.5 px-3 bg-[#BFF367]/5 border border-[#BFF367]/10 rounded-[8px] mt-4 md:mt-0">
+                  <span className="text-[9px] font-black text-[#BFF367] uppercase tracking-widest">
+                    You + {gameData.quickPlayerCount - 1} Players Pool
                   </span>
                 </div>
-                <button 
-                  onClick={() => setGameData(prev => ({ ...prev, quickPlayerCount: Math.min(22, prev.quickPlayerCount + 1) }))}
-                  className="w-14 h-14 rounded-full bg-neutral-950 border border-[#BFF367]/30 text-[#BFF367] hover:bg-[#BFF367]/10 transition-all duration-300 flex items-center justify-center shadow-[0_4px_20px_rgba(191,243,103,0.15)] active:scale-95 cursor-pointer"
-                >
-                  <Plus size={22} className="text-[#BFF367]" />
-                </button>
               </div>
 
-              {/* Pricing Section (Internal to Quick Setup) */}
-              <div className="bg-neutral-950/40 p-8 rounded-[8px] border border-neutral-800/80 space-y-6">
-                <div className="flex flex-col sm:flex-row items-center justify-between gap-6">
-                  <div className="text-left space-y-1">
-                    <span className="font-inter text-[20px] font-bold text-neutral-300">Entry Fee per Player</span>
-                    <p className="hidden sm:block font-inter text-[20px] text-neutral-500">What each player pays to join (₹)</p>
-                  </div>
-                  <div className="flex items-center gap-3 bg-neutral-900/60 p-3 px-4 rounded-[8px] border border-neutral-800 focus-within:border-[#BFF367] focus-within:shadow-[0_0_15px_rgba(85,222,232,0.1)] transition-all duration-300">
-                    <Coins className="text-[#BFF367]" size={18} />
-                    <input 
-                      type="number"
-                      placeholder="0"
-                      value={gameData.perPlayerCharge || ''}
-                      onChange={(e) => setGameData({ ...gameData, perPlayerCharge: parseInt(e.target.value) || 0 })}
-                      className="w-20 bg-transparent border-none text-right font-bold text-xl outline-none focus:ring-0 text-white p-0"
-                    />
+              {/* Right Column: Custom Background Cover Photo */}
+              <div className="space-y-3.5 border-t md:border-t-0 md:border-l border-neutral-800/80 pt-4 md:pt-0 md:pl-5">
+                <div className="flex items-center gap-2 mb-1">
+                  <div className="w-[3px] h-[16px] bg-gradient-to-b from-[#BFF367] to-[#BFF367] rounded-full" />
+                  <h3 className="text-xs font-black uppercase text-white tracking-wider">Match Background</h3>
+                </div>
+
+                {/* Image Preview */}
+                <div className="relative w-full aspect-video rounded-[8px] overflow-hidden border border-white/5 bg-neutral-950">
+                  <img
+                    src={gameData.teamA?.image || MOCK_TEAM_IMAGES[0].url}
+                    alt="Quick Match Background Cover"
+                    className="w-full h-full object-cover"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent" />
+                  <div className="absolute bottom-2 left-2">
+                    <span className="text-[8px] font-black text-black bg-[#BFF367] px-2 py-0.5 rounded uppercase tracking-wider shadow">
+                      Card Cover
+                    </span>
                   </div>
                 </div>
-                
-                <div className="pt-5 border-t border-neutral-800/60 flex justify-center items-center">
-                  <span className="px-4 py-1.5 bg-neutral-900 border border-neutral-800 font-inter text-[20px] font-bold text-neutral-400 rounded-[8px]">
-                    You + {gameData.quickPlayerCount - 1} Players
+
+                {/* Upload Action */}
+                <label
+                  htmlFor="quick-cover-upload"
+                  className="flex flex-col items-center justify-center gap-1.5 p-3 border-2 border-dashed border-[#BFF367]/25 rounded-[8px] cursor-pointer hover:border-[#BFF367]/50 hover:bg-[#BFF367]/5 transition-all group"
+                >
+                  <div className="w-7 h-7 rounded-full bg-[#BFF367]/10 border border-[#BFF367]/20 flex items-center justify-center group-hover:bg-[#BFF367]/20 transition-all shrink-0">
+                    <ImageIcon size={14} className="text-[#BFF367]" />
+                  </div>
+                  <span className="text-[9px] font-black text-[#BFF367] uppercase tracking-wider text-center">
+                    {gameData.teamA?.imageName ? 'Change Cover Photo' : 'Upload Custom Image'}
                   </span>
+                  {gameData.teamA?.imageName && (
+                    <span className="text-[8px] text-white/30 truncate max-w-[150px]">{gameData.teamA.imageName}</span>
+                  )}
+                  <input
+                    id="quick-cover-upload"
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    onChange={(e) => handleTeamImageUpload('teamA', e)}
+                  />
+                </label>
+
+                {/* Preset Cover Selector */}
+                <div className="space-y-1">
+                  <span className="text-[8px] font-black text-neutral-500 uppercase tracking-widest block">Preset Backdrops</span>
+                  <div className="flex gap-1.5 overflow-x-auto pb-1 no-scrollbar max-w-full">
+                    {MOCK_TEAM_IMAGES.map((img) => {
+                      const isSelected = (gameData.teamA?.image || MOCK_TEAM_IMAGES[0].url) === img.url;
+                      return (
+                        <button
+                          key={img.url}
+                          type="button"
+                          onClick={() => setGameData(prev => ({ 
+                            ...prev, 
+                            teamA: { ...prev.teamA, image: img.url, imageName: null } 
+                          }))}
+                          className={`relative rounded-[4px] overflow-hidden border transition-all shrink-0 w-12 aspect-video ${ 
+                            isSelected 
+                              ? 'border-[#BFF367] shadow-[0_0_8px_rgba(191,243,103,0.3)]' 
+                              : 'border-transparent hover:border-white/20' 
+                          }`}
+                        >
+                          <img src={img.url} alt={img.label} className="w-full h-full object-cover" />
+                          {isSelected && (
+                            <div className="absolute inset-0 bg-[#BFF367]/10 flex items-center justify-center">
+                              <CheckCircle2 size={10} className="text-[#BFF367]" />
+                            </div>
+                          )}
+                        </button>
+                      );
+                    })}
+                  </div>
                 </div>
+
               </div>
+
             </div>
 
             <div className="flex gap-4 max-w-lg mx-auto w-full">
-              <button onClick={() => setStep(3)} className="flex-1 py-4 bg-neutral-900 hover:bg-neutral-850 text-neutral-400 font-bold rounded-[8px] border border-neutral-800 hover:border-neutral-700 transition-all text-base uppercase tracking-wider font-open-sans">Back</button>
+              <button onClick={() => setStep(3)} className="flex-1 py-3 bg-neutral-900 hover:bg-neutral-850 text-neutral-400 font-bold rounded-[8px] border border-neutral-800 hover:border-neutral-700 transition-all text-sm uppercase tracking-wider font-open-sans">Back</button>
               <button
                 disabled={gameData.quickPlayerCount < 2}
                 onClick={initQuickSlots}
-                className="flex-[2] py-4 bg-gradient-to-r from-[#BFF367] to-[#BFF367] text-black font-black rounded-[8px] hover:scale-[1.01] active:scale-[0.99] transition-all duration-300 text-base font-open-sans shadow-[0_10px_25px_rgba(85,222,232,0.25)] disabled:opacity-50 uppercase tracking-wider"
+                className="flex-[2] py-3 bg-gradient-to-r from-[#BFF367] to-[#BFF367] text-black font-black rounded-[8px] hover:scale-[1.01] active:scale-[0.99] transition-all duration-300 text-sm font-open-sans shadow-[0_10px_25px_rgba(85,222,232,0.25)] disabled:opacity-50 uppercase tracking-wider"
               >
                 SETUP SLOTS
               </button>

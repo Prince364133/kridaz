@@ -64,6 +64,11 @@ app.get("/metrics", async (req, res) => {
   }
 });
 
+// Capture and resolve frontend web-vitals observability reports
+app.post("/api/metrics/vitals", (req, res) => {
+  res.status(204).end();
+});
+
 // ── Rate Limiters ─────────────────────────────────────────────────────────────â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 // Global â€” all /api routes (health check excluded via skip in the middleware)
 app.use('/api', globalLimiter);

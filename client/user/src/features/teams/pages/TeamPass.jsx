@@ -1,14 +1,15 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import React, { useEffect, useState } from "react";
+import { useParams, useNavigate, Link } from "react-router-dom";
+import axiosInstance from "@hooks/useAxiosInstance";
 import {
-  Trophy, MapPin, Calendar, Shield, ChevronLeft,
-  Share2, Download, Printer, QrCode, Loader2, Sparkles,
-  Ticket, Flame, Target, Star, Crown, Users, Info
-} from 'lucide-react';
-import { motion } from 'framer-motion';
-import html2canvas from 'html2canvas';
-import toast from 'react-hot-toast';
-import axiosInstance from '@infrastructure/axios';
+  Users, Trophy, MapPin, User, Calendar, ChevronLeft, Download,
+  ShieldCheck, Share2, Zap, Copy, UserPlus, AlertOctagon,
+  QrCode as QrIcon, Mail, Info, Star, Swords, Target, Crown, X, Link as LinkIcon
+} from "lucide-react";
+import { format, parseISO } from "date-fns";
+import toast from "react-hot-toast";
+import { useSelector } from "react-redux";
+import { motion, AnimatePresence } from "framer-motion";
 
 const PRI = "#BFF367";
 const HEADING_STYLE = { fontFamily: "'Open Sans', sans-serif" };
@@ -17,211 +18,254 @@ const SUBHEADING_STYLE = { fontFamily: "'Inter 28pt Light', sans-serif", fontWei
 const TeamPass = () => {
   const { id } = useParams();
   const navigate = useNavigate();
-  const passRef = useRef(null);
-
+  const { isLoggedIn } = useSelector(state => state.auth);
   const [team, setTeam] = useState(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const [isDownloading, setIsDownloading] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [isJoining, setIsJoining] = useState(false);
 
   useEffect(() => {
     const fetchTeam = async () => {
       try {
-        const res = await axiosInstance.get(`/api/team/${id}`);
-        setTeam(res.data.team);
+        const { data } = await axiosInstance.get(`/api/team/${id}`);
+        setTeam(data.team);
       } catch (err) {
-        toast.error('Failed to load team data');
+        setError("Team invitation not found or has expired.");
       } finally {
-        setIsLoading(false);
+        setLoading(false);
       }
     };
     fetchTeam();
   }, [id]);
 
-  const handleDownload = async () => {
-    if (!passRef.current) return;
-    setIsDownloading(true);
-    toast.loading('Forging your Digital Pass...', { id: 'download' });
+  const handleJoinTeam = async () => {
+    if (!isLoggedIn) {
+      localStorage.setItem("pendingTeamInvite", id);
+      toast.info("Please login to join the squad");
+      navigate("/login");
+      return;
+    }
 
+    setIsJoining(true);
     try {
-      // Small timeout to ensure fonts and assets are fully painted
-      await new Promise(resolve => setTimeout(resolve, 800));
-
-      const canvas = await html2canvas(passRef.current, {
-        scale: 3, // Premium quality scaling
-        useCORS: true,
-        backgroundColor: '#000000',
-        logging: false
-      });
-
-      const image = canvas.toDataURL('image/png', 1.0);
-      const link = document.createElement('a');
-      link.download = `${team?.name || 'Kridaz'}-Team-Pass.png`;
-      link.href = image;
-      link.click();
-      toast.success('Pass Saved to Gallery!', { id: 'download' });
+      const response = await axiosInstance.post(`/api/team/join-request/${id}`);
+      if (response.data.success) {
+        toast.success("Join request sent successfully!");
+      }
     } catch (err) {
-      toast.error('Failed to generate pass', { id: 'download' });
+      toast.error(err.response?.data?.message || "Failed to send join request");
     } finally {
-      setIsDownloading(false);
+      setIsJoining(false);
     }
   };
 
-  const handlePrint = () => {
-    window.print();
-  };
-
-  if (isLoading) {
+  if (loading) {
     return (
       <div className="min-h-screen bg-black flex items-center justify-center">
         <div className="flex flex-col items-center gap-4">
-          <Loader2 className="w-10 h-10 text-[#BFF367] animate-spin" />
-          <p className="text-white/40 text-[10px] font-black uppercase tracking-[0.3em] animate-pulse">Generating Ticket...</p>
+          <div className="w-10 h-10 border-4 border-[#BFF367]/20 border-t-[#BFF367] rounded-full animate-spin" />
+          <p className="text-white/40 text-[10px] font-black uppercase tracking-[0.3em] animate-pulse">Scanning Pass...</p>
         </div>
       </div>
     );
   }
 
+  if (error || !team) {
+    return (
+      <div className="min-h-screen bg-black flex flex-col items-center justify-center gap-6 p-6">
+        <AlertOctagon className="w-16 h-16 text-red-500 mb-2" />
+        <h2 className="text-2xl font-black text-white uppercase tracking-tighter" style={HEADING_STYLE}>Invalid Invitation</h2>
+        <p className="text-white/40 text-[11px] font-medium text-center max-w-xs">{error || "This team invitation has expired or been revoked."}</p>
+        <Link to="/" className="px-8 py-3 bg-white/5 border border-white/10 rounded-[8px] text-white font-black uppercase text-[10px] tracking-widest hover:bg-white/10 transition-all">Go Back Home</Link>
+      </div>
+    );
+  }
+
   return (
-    <div className="min-h-screen bg-black text-white pt-4 pb-12 px-4 flex flex-col items-center justify-center relative overflow-hidden">
-      
-      {/* Background Ambience */}
-      <div className="absolute inset-0 z-0">
-        <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-[#BFF367]/5 blur-[120px] rounded-full" />
-      </div>
+    <div className="min-h-screen bg-black text-white py-12 px-4 flex flex-col items-center overflow-x-hidden">
+      <div className="w-full max-w-[480px] relative">
+        
+        {/* Background Glows */}
+        <div className="absolute -top-24 -left-24 w-64 h-64 bg-[#BFF367]/5 blur-[100px] rounded-full pointer-events-none" />
+        <div className="absolute -bottom-24 -right-24 w-64 h-64 bg-[#BFF367]/5 blur-[100px] rounded-full pointer-events-none" />
 
-      {/* Floating Action Header */}
-      <div className="w-full max-w-[420px] z-10 mb-4 flex items-center justify-between">
-        <button 
-          onClick={() => navigate(-1)}
-          className="w-10 h-10 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-white/60 hover:text-white hover:border-white/20 transition-all"
-        >
-          <ChevronLeft size={20} />
-        </button>
-        <span className="text-[9px] font-black text-gray-500 uppercase tracking-[0.2em]">Official Digital Ticket</span>
-        <div className="w-10" /> {/* Spacer */}
-      </div>
-
-      {/* Pass Wrapper (Fixed dimensions for exact pass proportions) */}
-      <div className="relative z-10 w-full max-w-[420px]" ref={passRef}>
-        <div className="relative bg-gradient-to-b from-[#121212] to-[#080808] border border-white/10 rounded-[8px] overflow-hidden shadow-2xl p-6 flex flex-col justify-between aspect-[3/5] min-h-[580px]">
+        {/* The Ticket Card */}
+        <div className="bg-[#050505] border border-white/5 rounded-[8px] overflow-hidden shadow-[0_0_100px_rgba(0,0,0,0.8)] relative p-1">
           
-          {/* Header Strip */}
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <div className="w-8 h-8 rounded-[8px] bg-black border border-white/10 p-1 flex items-center justify-center">
-                <Trophy size={14} className="text-[#BFF367]" />
-              </div>
-              <div>
-                <h4 className="text-[10px] font-black uppercase tracking-widest text-white leading-none">Kridaz</h4>
-                <p className="text-[6px] font-bold text-gray-500 uppercase tracking-widest mt-0.5">Champions League</p>
-              </div>
-            </div>
-            <div className="flex items-center gap-1.5 px-3 py-1 bg-white/5 border border-white/10 rounded-[6px]">
-              <span className="w-1.5 h-1.5 bg-[#BFF367] rounded-full animate-pulse" />
-              <span className="text-[7px] font-black text-[#BFF367] uppercase tracking-wider">Active</span>
-            </div>
-          </div>
-
-          {/* Stadium Silhouette Panel */}
-          <div className="relative h-44 rounded-[8px] overflow-hidden border border-white/5 my-4">
-            <img 
-              src="https://images.unsplash.com/photo-1540747913346-19e32dc3e97e?q=80&w=2105&auto=format&fit=crop" 
-              className="w-full h-full object-cover opacity-20 grayscale" 
-              alt="Stadium" 
-            />
-            <div className="absolute inset-0 bg-gradient-to-t from-[#0A0A0A] to-transparent" />
+          <div className="bg-[#0A0A0A] rounded-[8px] overflow-hidden border border-white/5">
             
-            {/* Logo Centerpiece */}
-            <div className="absolute inset-0 flex flex-col items-center justify-center gap-3">
-              <div className="w-18 h-18 rounded-[8px] bg-black border-2 border-[#BFF367] p-1 flex items-center justify-center shadow-[0_0_20px_rgba(85, 222, 232,0.15)]">
-                {team?.logo ? (
-                  <img src={team.logo} className="w-full h-full object-cover rounded-[8px]" alt="Logo" />
-                ) : (
-                  <Trophy size={28} className="text-[#BFF367]/20" />
-                )}
-              </div>
-              <div className="text-center">
-                <h2 className="text-2xl font-black uppercase tracking-tight text-white" style={HEADING_STYLE}>
-                  {team?.name || 'SQUAD NAME'}
-                </h2>
-                <p className="text-[8px] font-black text-gray-500 uppercase tracking-widest mt-0.5">
-                  {team?.sportType || 'Cricket'} Division
-                </p>
-              </div>
-            </div>
-          </div>
-
-          {/* Ticket Stats */}
-          <div className="grid grid-cols-3 gap-2 py-2">
-            {[
-              { label: 'Captain', value: team?.owner?.name || 'Leader', icon: Crown },
-              { label: 'City', value: team?.city || 'HQ', icon: MapPin },
-              { label: 'Members', value: `${team?.members?.length || 1} Players`, icon: Users }
-            ].map((stat, i) => (
-              <div key={i} className="bg-white/[0.02] border border-white/5 rounded-[8px] p-3 text-center">
-                <div className="flex items-center justify-center gap-1 text-gray-500 mb-1">
-                  <stat.icon size={8} />
-                  <span className="text-[6px] font-black uppercase tracking-widest">{stat.label}</span>
+            {/* Header Section */}
+            <div className="relative h-28 overflow-hidden border-b border-white/5">
+              <img 
+                src="https://images.unsplash.com/photo-1540747913346-19e32dc3e97e?q=80&w=2105&auto=format&fit=crop" 
+                className="w-full h-full object-cover opacity-20 grayscale" 
+                alt=""
+              />
+              <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-[#0A0A0A]/60 to-[#0A0A0A]" />
+              <div className="absolute inset-x-8 top-8 flex items-center justify-between z-10">
+                <div>
+                  <h3 className="text-xl font-black tracking-tighter text-[#BFF367]" style={HEADING_STYLE}>KRIDAZ</h3>
+                  <p className="text-[8px] font-black uppercase tracking-[0.4em] text-white/40 mt-1">Team Invitation Rs � {team.teamCode || id.slice(-8).toUpperCase()}</p>
                 </div>
-                <p className="text-[9px] font-black text-white uppercase truncate">{stat.value}</p>
-              </div>
-            ))}
-          </div>
-
-          {/* Dotted Tear Line */}
-          <div className="relative my-4">
-            <div className="absolute left-[-30px] top-1/2 -translate-y-1/2 w-4 h-8 bg-black rounded-r-full border-r border-y border-white/10" />
-            <div className="border-t-2 border-dashed border-white/10 w-full" />
-            <div className="absolute right-[-30px] top-1/2 -translate-y-1/2 w-4 h-8 bg-black rounded-l-full border-l border-y border-white/10" />
-          </div>
-
-          {/* Ticket QR and Verification Barcode */}
-          <div className="flex items-center justify-between gap-4">
-            <div className="flex-1 space-y-2">
-              <div>
-                <p className="text-[6px] font-black text-gray-500 uppercase tracking-widest">Entry ID</p>
-                <p className="text-[10px] font-black text-[#BFF367] uppercase mt-0.5">{team?.teamCode || 'KR-0000'}</p>
-              </div>
-              <div className="bg-[#BFF367]/10 px-3 py-1.5 rounded-[6px] border border-[#BFF367]/20 inline-flex items-center gap-1.5">
-                <Sparkles size={8} className="text-[#BFF367]" />
-                <span className="text-[7px] font-black text-white uppercase tracking-wider">Digital Verification</span>
+                <div className="flex items-center gap-2 px-4 py-2 bg-white/[0.03] border border-white/10 rounded-[8px] backdrop-blur-sm">
+                  <Mail size={12} className="text-[#BFF367]" />
+                  <span className="text-[9px] font-black uppercase tracking-widest text-white">Open Invite</span>
+                </div>
               </div>
             </div>
-            
-            <div className="w-20 h-20 bg-white rounded-[8px] p-1.5 flex items-center justify-center shadow-lg relative group overflow-hidden">
-              {team?.qrCode ? (
-                <img src={team.qrCode} alt="Team QR" className="w-full h-full object-cover" />
-              ) : (
-                <QrCode size={68} className="text-black" />
-              )}
-              <div className="absolute inset-0 bg-black/10 rounded-[8px] opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                <Info size={16} className="text-black" />
+
+            {/* Team Identity Area */}
+            <div className="px-8 py-8 flex items-center gap-6">
+              <div className="w-28 h-28 rounded-[8px] bg-black border border-white/10 p-1.5 overflow-hidden shrink-0 shadow-2xl">
+                <div className="w-full h-full rounded-[8px] bg-[#111] flex items-center justify-center overflow-hidden">
+                  {team.logo ? (
+                    <img src={team.logo} className="w-full h-full object-cover" alt={team.name} />
+                  ) : (
+                    <Users size={40} className="text-white/5" />
+                  )}
+                </div>
+              </div>
+              <div className="flex-1">
+                <h1 className="text-3xl font-black text-white uppercase tracking-tighter mb-1" style={HEADING_STYLE}>{team.name}</h1>
+                <div className="flex items-center gap-2 text-[#BFF367]">
+                  <Trophy size={16} />
+                  <span className="text-[11px] font-black uppercase tracking-[0.2em]">{team.sportType || 'Cricket'} Rs � {team.members?.length || 0} Members</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Metadata Grid (Styled as individual boxes) */}
+            <div className="px-8 pb-4">
+              <div className="grid grid-cols-2 gap-4">
+                {[
+                  { label: "Captain", icon: User, value: team.owner?.name || "N/A" },
+                  { label: "Location", icon: MapPin, value: team.city || "Various" },
+                  { label: "Created", icon: Calendar, value: format(parseISO(team.createdAt), "MMM yyyy") },
+                  { label: "Status", icon: ShieldCheck, value: team.visibility || "PUBLIC" },
+                ].map(({ label, icon: Icon, value }) => (
+                  <div key={label} className="bg-white/[0.02] border border-white/5 rounded-[8px] p-5 flex flex-col gap-3">
+                    <div className="flex items-center gap-2">
+                      <Icon size={16} className="text-[#BFF367]" />
+                      <span className="text-[9px] font-black uppercase tracking-[0.2em] text-white/30">{label}</span>
+                    </div>
+                    <p className="text-xs font-black text-white uppercase truncate">{value}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* About Team Section */}
+            <div className="px-8 py-4">
+               <div className="bg-white/[0.02] border border-white/5 rounded-[8px] p-6 relative overflow-hidden">
+                  <div className="relative z-10 space-y-3">
+                    <div className="flex items-center gap-2 text-white/30">
+                        <Info size={14} />
+                        <span className="text-[9px] font-black uppercase tracking-[0.2em]">About Team</span>
+                    </div>
+                    <p className="text-[13px] text-white/60 font-medium leading-relaxed">"{team.description || "Representing the best of their city. This squad is built on passion and strategy."}"</p>
+                  </div>
+                  {/* Decorative Ball Overlay */}
+                  <div className="absolute top-1/2 -right-8 -translate-y-1/2 opacity-[0.05] pointer-events-none">
+                    <Target size={140} strokeWidth={1} className="text-[#BFF367]" />
+                  </div>
+               </div>
+            </div>
+
+            {/* QR Scan Section (Enhanced Glow) */}
+            <div className="px-8 py-6">
+              <div className="bg-white/[0.02] border border-white/5 rounded-[8px] p-8 flex flex-col md:flex-row items-center gap-10">
+                 {/* QR Frame with Pulse Glow */}
+                 <div className="relative p-2">
+                    <div className="absolute inset-0 bg-[#BFF367]/20 blur-2xl rounded-full animate-pulse" />
+                    {/* Corners */}
+                    <div className="absolute top-0 left-0 w-6 h-6 border-t-4 border-l-4 border-[#BFF367] rounded-tl-2xl" />
+                    <div className="absolute top-0 right-0 w-6 h-6 border-t-4 border-r-4 border-[#BFF367] rounded-tr-2xl" />
+                    <div className="absolute bottom-0 left-0 w-6 h-6 border-b-4 border-l-4 border-[#BFF367] rounded-bl-2xl" />
+                    <div className="absolute bottom-0 right-0 w-6 h-6 border-b-4 border-r-4 border-[#BFF367] rounded-br-2xl" />
+                    
+                    <div className="bg-white p-4 rounded-[8px] relative z-10 shadow-[0_0_50px_rgba(85,222,232,0.2)]">
+                      {team.qrCode ? (
+                        <img src={team.qrCode} alt="Team QR" className="w-32 h-32" />
+                      ) : (
+                        <div className="w-32 h-32 flex items-center justify-center bg-black/5">
+                          <QrIcon size={48} className="text-black/10" />
+                        </div>
+                      )}
+                    </div>
+                 </div>
+
+                 <div className="flex-1 space-y-6">
+                    <div className="space-y-2 text-center md:text-left">
+                      <div className="flex items-center justify-center md:justify-start gap-2 text-[#BFF367]">
+                        <QrIcon size={18} strokeWidth={2.5} />
+                        <h4 className="text-[12px] font-black uppercase tracking-widest">Scan to Join Team</h4>
+                      </div>
+                      <p className="text-[10px] text-white/40 font-medium leading-relaxed">Scan this pass to view team details and join the squad</p>
+                    </div>
+
+                    <div className="grid grid-cols-3 gap-3">
+                      {[
+                        { icon: Users, l: "View Details" },
+                        { icon: ShieldCheck, l: "Join Squad" },
+                        { icon: Zap, l: "Play & Win" }
+                      ].map((feat, i) => (
+                        <div key={i} className="flex flex-col items-center md:items-start gap-3">
+                          <div className="w-10 h-10 rounded-[8px] bg-white/5 border border-white/10 flex items-center justify-center text-[#BFF367] shadow-lg">
+                            <feat.icon size={14} />
+                          </div>
+                          <p className="text-[7px] font-black text-white/30 uppercase tracking-[0.15em] leading-tight text-center md:text-left">{feat.l}</p>
+                        </div>
+                      ))}
+                    </div>
+                 </div>
+              </div>
+            </div>
+
+            {/* Main Action Area */}
+            <div className="px-8 pb-10 space-y-4">
+              <button
+                onClick={handleJoinTeam}
+                disabled={isJoining}
+                className="w-full flex items-center justify-center gap-4 py-6 rounded-[8px] bg-[#BFF367] text-black font-black uppercase text-[14px] tracking-[0.2em] transition-all hover:scale-[1.01] active:scale-[0.99] shadow-[0_15px_40px_rgba(85,222,232,0.4)] relative group overflow-hidden"
+              >
+                <div className="absolute inset-0 bg-white/20 -translate-x-full group-hover:translate-x-full transition-transform duration-700 skew-x-12" />
+                {isJoining ? <Loader2 size={24} className="animate-spin" /> : (
+                  <>
+                    <UserPlus size={22} strokeWidth={3} />
+                    Join This Team
+                  </>
+                )}
+              </button>
+
+              <div className="grid grid-cols-2 gap-4">
+                 <button
+                  onClick={() => window.print()}
+                  className="flex items-center justify-center gap-3 py-4 rounded-[8px] bg-white/[0.03] border border-white/5 text-white/40 font-black uppercase text-[10px] tracking-widest hover:bg-white/5 hover:text-white transition-all"
+                 >
+                   <Download size={16} /> Save Pass
+                 </button>
+                 <button
+                  onClick={() => {
+                    navigator.clipboard.writeText(window.location.href);
+                    toast.success("Invite link copied!");
+                  }}
+                  className="flex items-center justify-center gap-3 py-4 rounded-[8px] bg-white/[0.03] border border-white/5 text-white/40 font-black uppercase text-[10px] tracking-widest hover:bg-white/5 hover:text-white transition-all"
+                 >
+                   <Share2 size={16} /> Copy Link
+                 </button>
               </div>
             </div>
           </div>
+        </div>
 
+        {/* Footer Label */}
+        <div className="flex flex-col items-center gap-4 py-10 opacity-30">
+           <div className="flex items-center gap-3">
+              <ShieldCheck size={16} />
+              <span className="text-[11px] font-black uppercase tracking-[0.5em]">Official Kridaz Team Invitation</span>
+           </div>
         </div>
       </div>
-
-      {/* Control Buttons */}
-      <div className="w-full max-w-[420px] mt-6 grid grid-cols-2 gap-3 z-10">
-        <button 
-          onClick={handleDownload}
-          disabled={isDownloading}
-          className="py-3.5 bg-[#BFF367] text-black rounded-[8px] font-black uppercase text-[10px] tracking-widest flex items-center justify-center gap-2 hover:brightness-110 shadow-[0_5px_20px_rgba(85, 222, 232,0.25)] transition-all"
-        >
-          {isDownloading ? <Loader2 className="animate-spin w-4 h-4" /> : <Download size={14} />}
-          Save Pass
-        </button>
-        <button 
-          onClick={handlePrint}
-          className="py-3.5 bg-white/5 border border-white/10 text-white rounded-[8px] font-black uppercase text-[10px] tracking-widest flex items-center justify-center gap-2 hover:bg-white/10 transition-all"
-        >
-          <Printer size={14} />
-          Print Pass
-        </button>
-      </div>
-
     </div>
   );
 };

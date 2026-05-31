@@ -411,6 +411,19 @@ export const createHostedGame = async (req, res) => {
         // QUICK Mode: Flat slots
         const count = parseInt(playerCount) || quickSlotsData.length || 5;
 
+        // If a cover image is provided for the Quick game, save it as a generic team record for client rendering
+        if (teamA?.image) {
+          await tx.gameTeam.create({
+            data: {
+              gameId: hostedGame.id,
+              name: "Casual Pool",
+              teamKey: "teamA",
+              image: sanitizeImage(teamA.image),
+              linkedTeamId: null
+            }
+          });
+        }
+
         for (let i = 0; i < count; i++) {
           const provided = quickSlotsData[i];
           let customPlayerId = null;
