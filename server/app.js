@@ -65,7 +65,7 @@ app.get("/metrics", async (req, res) => {
 });
 
 // Capture and resolve frontend web-vitals observability reports
-app.post("/api/metrics/vitals", (req, res) => {
+app.all("/api/metrics/vitals", (req, res) => {
   res.status(204).end();
 });
 
