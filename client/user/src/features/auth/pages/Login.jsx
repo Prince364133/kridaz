@@ -253,16 +253,7 @@ const Login = ({ isModal = false }) => {
                     </div>
                   </div>
               </form>
-            </div>
           </div>
-          
-          {/* Back Link */}
-          {!isModal && (
-            <Link to="/" className="mt-8 flex items-center gap-2 text-white/40 hover:text-white transition-colors text-sm group">
-              <ChevronRight size={16} className="rotate-180 group-hover:-translate-x-1 transition-transform" />
-              Back to Home
-            </Link>
-          )}
         </div>
       </div>
   );

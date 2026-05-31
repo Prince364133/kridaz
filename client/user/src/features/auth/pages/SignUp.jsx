@@ -429,15 +429,6 @@ const SignUp = ({ isModal = false }) => {
             </div>
           </div>
         </div>
-        
-        {!isModal && (
-          <div className="mt-8 text-center">
-            <Link to="/" className="inline-flex items-center gap-2 text-white/40 hover:text-white transition-colors text-sm group">
-              <ChevronLeft size={16} className="group-hover:-translate-x-1 transition-transform" />
-              Back to Home
-            </Link>
-          </div>
-        )}
       </div>
   );
 
