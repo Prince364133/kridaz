@@ -37,6 +37,7 @@ import { RootErrorBoundary } from "@components/common";
 
 import { reelsApi } from "@redux/api/reelsApi";
 import { usePushNotifications } from "@hooks/usePushNotifications";
+import { useWebPushNotifications } from "@hooks/useWebPushNotifications";
 import { CapacitorUpdater } from '@capgo/capacitor-updater';
 import { Capacitor } from '@capacitor/core';
 
@@ -45,8 +46,9 @@ export default function App() {
   const theme = useSelector((state) => state.theme.current);
   const authState = useSelector((state) => state.auth);
   
-  // Initialize Push Notifications
+  // Initialize Native & Web Push Notifications
   usePushNotifications(authState.isLoggedIn);
+  useWebPushNotifications(authState.isLoggedIn);
 
   // Notify Capgo Updater that the app is ready and working
   useEffect(() => {

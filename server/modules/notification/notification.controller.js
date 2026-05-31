@@ -67,19 +67,27 @@ export const clearNotifications = async (req, res) => {
 };
 
 export const saveDeviceToken = async (req, res) => {
-  const { token } = req.body;
+  const { token, platform = "mobile" } = req.body;
   try {
     const { id } = req.user;
     if (!token) {
       return res.status(400).json({ success: false, message: "Token is required" });
     }
 
+    // 1. Register or update the token in the UserDevice model
+    await prisma.userDevice.upsert({
+      where: { token },
+      update: { userId: id, platform },
+      create: { userId: id, token, platform }
+    });
+
+    // 2. Safely keep user.fcmToken updated as a fallback for backwards compatibility
     await prisma.user.update({
       where: { id },
       data: { fcmToken: token }
-    });
+    }).catch(err => console.error("Fallback user fcmToken update error:", err));
 
-    res.status(200).json({ success: true, message: "Device token saved successfully" });
+    res.status(200).json({ success: true, message: "Device token registered successfully" });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
   }

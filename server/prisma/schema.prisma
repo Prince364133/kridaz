@@ -101,6 +101,7 @@ model User {
   careerStats             PlayerCareerStats[]
   earnedBadges            UserBadge[]
   postReports             PostReport[]
+  devices                 UserDevice[]
 
   @@index([role])
 }
@@ -1556,6 +1557,17 @@ model PlatformConfig {
   updatedBy   String?
   
   user        User?    @relation(fields: [updatedBy], references: [id])
+}
+
+model UserDevice {
+  id        String   @id @default(uuid())
+  userId    String
+  token     String   @unique
+  platform  String   // "web", "android", "ios"
+  createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
 }
 
 

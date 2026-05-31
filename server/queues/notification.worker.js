@@ -51,19 +51,34 @@ const worker = new Worker(
           // 1. Create the persistent database record (In-app notification)
           const dbNotification = await createNotification({ recipientId, recipientModel, title, message, type, link, metadata });
           
-          // 2. Fetch user to check for FCM device token
+          // 2. Fetch all registered and fallback device tokens for this user
           if (recipientModel === 'User') {
             try {
               const { prisma } = await import("../config/prisma.js");
-              const user = await prisma.user.findUnique({
-                where: { id: recipientId },
-                select: { fcmToken: true }
+              
+              const [user, userDevices] = await Promise.all([
+                prisma.user.findUnique({
+                  where: { id: recipientId },
+                  select: { fcmToken: true }
+                }),
+                prisma.userDevice.findMany({
+                  where: { userId: recipientId },
+                  select: { token: true }
+                })
+              ]);
+
+              const tokenSet = new Set();
+              if (user?.fcmToken) tokenSet.add(user.fcmToken);
+              userDevices.forEach(d => {
+                if (d.token) tokenSet.add(d.token);
               });
 
-              // 3. Dispatch the push notification via FCM if device token exists
-              if (user?.fcmToken) {
+              const tokens = Array.from(tokenSet);
+
+              // 3. Dispatch the push notification multicast if active devices exist
+              if (tokens.length > 0) {
                 const { sendPushNotification } = await import("../utils/pushHelper.js");
-                await sendPushNotification(user.fcmToken, title, message, {
+                await sendPushNotification(tokens, title, message, {
                   notificationId: dbNotification?.id || "",
                   link: link || "",
                   type: type || ""
