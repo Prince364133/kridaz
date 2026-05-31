@@ -287,7 +287,7 @@ const TurfBookingHistory = () => {
                               </button>
                             )}
                             {booking.status === "COMPLETED" && (
-                              <button onClick={() => openReviewModal(booking.turf._id)} className="px-4 py-2 rounded-[6px] bg-white/5 border border-white/10 hover:border-[#CCFF00]/50 hover:text-[#CCFF00] text-gray-400 text-[9px] font-black uppercase tracking-widest transition-colors flex items-center gap-1.5">
+                              <button onClick={() => openReviewModal(booking.turf?.id || booking.turf?._id)} className="px-4 py-2 rounded-[6px] bg-white/5 border border-white/10 hover:border-[#CCFF00]/50 hover:text-[#CCFF00] text-gray-400 text-[9px] font-black uppercase tracking-widest transition-colors flex items-center gap-1.5">
                                 Review
                               </button>
                             )}

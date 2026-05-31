@@ -181,7 +181,7 @@ const Navbar = () => {
           </div>
 
           {/* ACTIONS */}
-          <div className="flex items-center gap-2 sm:gap-4 lg:fixed lg:top-4 lg:right-6 lg:z-[100]">
+          <div className="flex items-center gap-2 sm:gap-4 fixed top-4 right-4 sm:right-6 z-[100]">
             {!isLoggedIn ? (
               <>
                 <Link

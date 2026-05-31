@@ -343,7 +343,7 @@ const ChatSidebar = ({ onSelectChat, selectedChatId, onCreateGroup, onCreateComm
     <div className="w-full md:w-[340px] h-full border-r border-white/10 bg-black/20 flex flex-col overflow-hidden">
       <div className="p-5 border-b border-white/10 flex justify-between items-center bg-black/40">
         <div>
-          <h2 className="text-xl font-black text-white tracking-tight uppercase">Messages</h2>
+          <h2 className="text-xl font-black text-white tracking-tight uppercase font-open-sans">Messages</h2>
           <p className="chat-subheading text-white/40 font-bold uppercase mt-0.5">Inbox & Groups</p>
         </div>
         <div className="relative" ref={addMenuRef}>

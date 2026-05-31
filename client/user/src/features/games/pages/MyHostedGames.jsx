@@ -217,7 +217,7 @@ const MyHostedGames = () => {
                         </button>
                       )}
                     </div>
-                    <h2 className="text-2xl font-black mt-1 uppercase italic tracking-tighter">
+                    <h2 className="text-2xl font-black mt-1 uppercase tracking-tighter font-open-sans">
                       {game.teams?.teamA?.name} vs {game.teams?.teamB?.name}
                     </h2>
                   </div>
@@ -238,7 +238,7 @@ const MyHostedGames = () => {
 
                 <div className="flex flex-col gap-4">
                   <div className="flex flex-wrap items-center justify-between gap-4">
-                    <div className="flex flex-wrap gap-4 text-xs font-medium text-neutral-400">
+                    <div className="flex flex-wrap gap-4 text-[13px] text-neutral-400" style={SUBHEADING_STYLE}>
                       <div className="flex items-center gap-1 bg-neutral-900 px-3 py-1.5 rounded-[6px]">
                         <Calendar size={14} className="text-[#BFF367]" /> {new Date(game.date).toLocaleDateString()}
                       </div>

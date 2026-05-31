@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Bookmark, MapPin, Gamepad2, FileText, ChevronLeft } from 'lucide-react';
+import { Bookmark, MapPin, Gamepad2, ChevronLeft } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import { useGetSavedTurfsQuery } from '@redux/api/turfApi';
@@ -20,7 +20,6 @@ const SavedPage = () => {
   const tabs = [
     { id: 'venues', label: 'Venues', icon: MapPin },
     { id: 'games', label: 'Games', icon: Gamepad2 },
-    { id: 'posts', label: 'Posts', icon: FileText }
   ];
 
   const renderEmptyState = (type) => {
@@ -35,10 +34,6 @@ const SavedPage = () => {
       case 'games':
         message = 'No saved games. Find games you are interested in and save them for later.';
         icon = <Gamepad2 className="w-16 h-16 text-zinc-700 mb-4 mx-auto" />;
-        break;
-      case 'posts':
-        message = 'You have no saved posts. Keep track of interesting community content by saving posts.';
-        icon = <FileText className="w-16 h-16 text-zinc-700 mb-4 mx-auto" />;
         break;
       default:
         break;

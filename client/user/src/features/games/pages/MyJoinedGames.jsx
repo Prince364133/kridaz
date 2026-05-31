@@ -124,8 +124,8 @@ const MyJoinedGames = () => {
   return (
     <div className="min-h-screen bg-neutral-900 text-white p-4 pb-24">
       <div className="max-w-4xl mx-auto mb-8">
-        <h1 className="text-3xl font-black italic tracking-tighter uppercase">MY JOINED MATCHES</h1>
-        <p className="text-neutral-400" style={SUBHEADING_STYLE}>Games you&apos;ve requested to join or have already joined</p>
+        <h1 className="text-3xl font-black tracking-tighter font-open-sans text-transparent bg-clip-text bg-gradient-to-r from-[#BFF367] to-[#BFF367] mb-2 uppercase">MY JOINED MATCHES</h1>
+        <p className="text-neutral-400 text-[20px]" style={SUBHEADING_STYLE}>Games you&apos;ve requested to join or have already joined</p>
       </div>
 
       <div className="max-w-4xl mx-auto mb-6 flex flex-col md:flex-row gap-4">
@@ -136,13 +136,13 @@ const MyJoinedGames = () => {
             placeholder="Search by Host, Team or Match Type..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full bg-neutral-800/50 border border-neutral-800 rounded-[8px] py-3 pl-12 pr-4 text-white focus:outline-none focus:border-yellow-500 transition-colors placeholder:text-neutral-600 font-inter"
+            className="w-full bg-neutral-800/50 border border-neutral-800 rounded-[8px] py-3 pl-12 pr-4 text-white focus:outline-none focus:border-[#BFF367] transition-colors placeholder:text-neutral-600 font-inter"
           />
         </div>
         <select
           value={filterStatus}
           onChange={(e) => setFilterStatus(e.target.value)}
-          className="bg-neutral-800/50 border border-neutral-800 rounded-[8px] py-3 px-4 text-white focus:outline-none focus:border-yellow-500 transition-colors appearance-none min-w-[150px] font-inter font-bold"
+          className="bg-neutral-800/50 border border-neutral-800 rounded-[8px] py-3 px-4 text-white focus:outline-none focus:border-[#BFF367] transition-colors appearance-none min-w-[150px] font-inter font-bold"
         >
           <option value="ALL">All Status</option>
           <option value="JOINED">Joined</option>
@@ -158,14 +158,14 @@ const MyJoinedGames = () => {
         ) : filteredGames.length === 0 ? (
           <div className="py-20 text-center bg-neutral-800/20 rounded-[8px] border-2 border-dashed border-neutral-800">
             <Trophy size={48} className="mx-auto mb-4 text-neutral-700" />
-            <h3 className="text-xl font-bold">
+            <h3 className="text-2xl md:text-3xl font-black tracking-tighter font-open-sans text-transparent bg-clip-text bg-gradient-to-r from-[#BFF367] to-[#BFF367] mb-2 uppercase">
               {joinedGames.length === 0 ? "No matches joined yet" : "No matches found"}
             </h3>
-            <p className="text-neutral-500 mb-6">
+            <p className="text-neutral-500 mb-6 text-[20px]" style={SUBHEADING_STYLE}>
               {joinedGames.length === 0 ? "Explore games hosted by the community and join one!" : "Try adjusting your search filters"}
             </p>
             {joinedGames.length === 0 && (
-              <button onClick={() => window.location.href='/join-games'} className="px-8 py-3 bg-yellow-500 text-black font-bold rounded-[8px]">
+              <button onClick={() => window.location.href='/join-games'} className="px-8 py-3 bg-[#BFF367] text-black font-bold rounded-[8px]">
                 Find Games
               </button>
             )}
@@ -200,13 +200,13 @@ const MyJoinedGames = () => {
                 <div className="flex justify-between items-start mb-4">
                   <div>
                     <div className="flex items-center gap-2 flex-wrap">
-                      <span className="bg-yellow-500/10 text-yellow-500 text-[10px] font-black px-2 py-0.5 rounded-full uppercase tracking-wider">
+                      <span className="bg-[#BFF367]/10 text-[#BFF367] text-[10px] font-black px-2 py-0.5 rounded-full uppercase tracking-wider">
                         {game.gameType}
                       </span>
                       {game.shortId && (
                         <button
                           onClick={() => { navigator.clipboard?.writeText(game.shortId); toast.success('Game ID copied!'); }}
-                          className="bg-neutral-900 border border-neutral-700 text-neutral-400 hover:text-yellow-500 hover:border-yellow-500/40 text-[10px] font-black px-2 py-0.5 rounded-[6px] uppercase tracking-wider transition-all flex items-center gap-1"
+                          className="bg-neutral-900 border border-neutral-700 text-neutral-400 hover:text-[#BFF367] hover:border-[#BFF367]/40 text-[10px] font-black px-2 py-0.5 rounded-[6px] uppercase tracking-wider transition-all flex items-center gap-1"
                           title="Click to copy Game ID"
                         >
                           <Info size={10} />
@@ -214,7 +214,7 @@ const MyJoinedGames = () => {
                         </button>
                       )}
                     </div>
-                    <h2 className="text-2xl font-black mt-1 uppercase italic tracking-tighter">
+                    <h2 className="text-2xl font-black mt-1 uppercase tracking-tighter font-open-sans">
                       {game.gameMode === 'QUICK' 
                         ? `${game.gameType} Quick Match` 
                         : `${game.teams?.teamA?.name || 'TBD'} vs ${game.teams?.teamB?.name || 'TBD'}`}
@@ -230,15 +230,15 @@ const MyJoinedGames = () => {
 
                 <div className="flex flex-col gap-4">
                   <div className="flex flex-wrap items-center justify-between gap-4">
-                    <div className="flex flex-wrap gap-4 text-xs font-medium text-neutral-400">
+                    <div className="flex flex-wrap gap-4 text-[13px] text-neutral-400" style={SUBHEADING_STYLE}>
                       <div className="flex items-center gap-1 bg-neutral-900 px-3 py-1.5 rounded-[6px]">
-                        <Calendar size={14} className="text-yellow-500" /> {new Date(game.date).toLocaleDateString()}
+                        <Calendar size={14} className="text-[#BFF367]" /> {new Date(game.date).toLocaleDateString()}
                       </div>
                       <div className="flex items-center gap-1 bg-neutral-900 px-3 py-1.5 rounded-[6px]">
-                        <Clock size={14} className="text-yellow-500" /> {game.time}
+                        <Clock size={14} className="text-[#BFF367]" /> {game.time}
                       </div>
                       <div className="flex items-center gap-1 bg-neutral-900 px-3 py-1.5 rounded-[6px]">
-                        <MapPin size={14} className="text-yellow-500 min-w-[14px]" /> 
+                        <MapPin size={14} className="text-[#BFF367] min-w-[14px]" /> 
                         {game.turf?.mapUrl ? (
                           <a href={game.turf.mapUrl} target="_blank" rel="noopener noreferrer" className="hover:text-[#BFF367] hover:underline transition-colors flex items-center gap-1 truncate max-w-[200px]" title={game.turf?.location || game.turf?.name}>
                             {game.turf?.name || game.customVenue || game.ground?.name || 'Self-Arranged'}
@@ -311,7 +311,7 @@ const MyJoinedGames = () => {
                     <div className="bg-neutral-900/50 p-2 rounded-[8px] flex flex-col items-center justify-center">
                       <p className="text-[9px] text-neutral-500 font-bold uppercase tracking-wider mb-1">Turf Expense</p>
                       <p className="text-xs font-black text-white">{game.groundCost || 0} Coins</p>
-                      {(game.turf?.name || game.ground?.name) && <p className="text-[8px] text-yellow-500 truncate max-w-full px-2 mt-0.5">{game.turf?.name || game.ground?.name}</p>}
+                      {(game.turf?.name || game.ground?.name) && <p className="text-[8px] text-[#BFF367] truncate max-w-full px-2 mt-0.5">{game.turf?.name || game.ground?.name}</p>}
                     </div>
                     <div className="bg-neutral-900/50 p-2 rounded-[8px] flex flex-col items-center justify-center">
                       <p className="text-[9px] text-neutral-500 font-bold uppercase tracking-wider mb-1">Professionals</p>
@@ -319,38 +319,38 @@ const MyJoinedGames = () => {
                       <div className="flex gap-2 mt-1">
                         {game.umpire && (
                           <Link to={game.umpire._id ? `/profile/${game.umpire._id}` : '#'} className="flex flex-col items-center gap-0.5 group">
-                            <div className="w-6 h-6 rounded-full overflow-hidden border border-neutral-700 group-hover:border-yellow-500 transition-colors">
+                            <div className="w-6 h-6 rounded-full overflow-hidden border border-neutral-700 group-hover:border-[#BFF367] transition-colors">
                               {game.umpire.profilePicture ? (
                                 <img src={game.umpire.profilePicture} alt={game.umpire.name || 'Umpire'} className="w-full h-full object-cover" />
                               ) : (
                                 <div className="w-full h-full bg-neutral-800 flex items-center justify-center"><User size={10} className="text-neutral-500" /></div>
                               )}
                             </div>
-                            <span className="text-[8px] text-neutral-400 group-hover:text-yellow-500 transition-colors truncate max-w-[40px] text-center" title="Umpire">{game.umpire.name?.split(' ')[0] || 'Umpire'}</span>
+                            <span className="text-[8px] text-neutral-400 group-hover:text-[#BFF367] transition-colors truncate max-w-[40px] text-center" title="Umpire">{game.umpire.name?.split(' ')[0] || 'Umpire'}</span>
                           </Link>
                         )}
                         {game.scorer && (
                           <Link to={game.scorer._id ? `/profile/${game.scorer._id}` : '#'} className="flex flex-col items-center gap-0.5 group">
-                            <div className="w-6 h-6 rounded-full overflow-hidden border border-neutral-700 group-hover:border-yellow-500 transition-colors">
+                            <div className="w-6 h-6 rounded-full overflow-hidden border border-neutral-700 group-hover:border-[#BFF367] transition-colors">
                               {game.scorer.profilePicture ? (
                                 <img src={game.scorer.profilePicture} alt={game.scorer.name || 'Scorer'} className="w-full h-full object-cover" />
                               ) : (
                                 <div className="w-full h-full bg-neutral-800 flex items-center justify-center"><User size={10} className="text-neutral-500" /></div>
                               )}
                             </div>
-                            <span className="text-[8px] text-neutral-400 group-hover:text-yellow-500 transition-colors truncate max-w-[40px] text-center" title="Scorer">{game.scorer.name?.split(' ')[0] || 'Scorer'}</span>
+                            <span className="text-[8px] text-neutral-400 group-hover:text-[#BFF367] transition-colors truncate max-w-[40px] text-center" title="Scorer">{game.scorer.name?.split(' ')[0] || 'Scorer'}</span>
                           </Link>
                         )}
                         {game.streamer && (
                           <Link to={game.streamer._id ? `/profile/${game.streamer._id}` : '#'} className="flex flex-col items-center gap-0.5 group">
-                            <div className="w-6 h-6 rounded-full overflow-hidden border border-neutral-700 group-hover:border-yellow-500 transition-colors">
+                            <div className="w-6 h-6 rounded-full overflow-hidden border border-neutral-700 group-hover:border-[#BFF367] transition-colors">
                               {game.streamer.profilePicture ? (
                                 <img src={game.streamer.profilePicture} alt={game.streamer.name || 'Streamer'} className="w-full h-full object-cover" />
                               ) : (
                                 <div className="w-full h-full bg-neutral-800 flex items-center justify-center"><User size={10} className="text-neutral-500" /></div>
                               )}
                             </div>
-                            <span className="text-[8px] text-neutral-400 group-hover:text-yellow-500 transition-colors truncate max-w-[40px] text-center" title="Streamer">{game.streamer.name?.split(' ')[0] || 'Streamer'}</span>
+                            <span className="text-[8px] text-neutral-400 group-hover:text-[#BFF367] transition-colors truncate max-w-[40px] text-center" title="Streamer">{game.streamer.name?.split(' ')[0] || 'Streamer'}</span>
                           </Link>
                         )}
                         {!game.umpire && !game.scorer && !game.streamer && (
@@ -374,7 +374,7 @@ const MyJoinedGames = () => {
                   {/* Quick Match Slots */}
                   {game.gameMode === 'QUICK' && game.quickSlots && game.quickSlots.length > 0 && (
                     <div className="space-y-3 mb-6">
-                      <h4 className="text-[10px] font-black text-yellow-500 uppercase tracking-[0.2em] mb-2 px-2">QUICK MATCH SLOTS</h4>
+                      <h4 className="text-[10px] font-black text-[#BFF367] uppercase tracking-[0.2em] mb-2 px-2">QUICK MATCH SLOTS</h4>
                       <div className="flex flex-wrap gap-4">
                         {game.quickSlots.map((slot, index) => (
                           <div key={`Q-${index}`} className="flex flex-col items-center gap-1 w-16 relative">
@@ -396,7 +396,7 @@ const MyJoinedGames = () => {
 
                             <div className="text-center w-full">
                               {slot.user || slot.userId ? (
-                                <Link to={`/profile/${slot.user?._id || slot.userId}`} className="text-[9px] font-bold text-white hover:text-yellow-500 transition-colors uppercase tracking-tighter truncate block w-full">
+                                <Link to={`/profile/${slot.user?._id || slot.userId}`} className="text-[9px] font-bold text-white hover:text-[#BFF367] transition-colors uppercase tracking-tighter truncate block w-full">
                                   {slot.user?.name?.split(' ')[0] || "OPEN"}
                                 </Link>
                               ) : (
@@ -414,7 +414,7 @@ const MyJoinedGames = () => {
                   {/* Team A Slots */}
                   {game.gameMode !== 'QUICK' && (
                   <div className="space-y-3">
-                    <h4 className="text-[10px] font-black text-yellow-500 uppercase tracking-[0.2em] mb-2 px-2">{game.teams?.teamA?.name ? `${game.teams.teamA.name} SLOTS` : "HOME TEAM SLOTS"}</h4>
+                    <h4 className="text-[10px] font-black text-[#BFF367] uppercase tracking-[0.2em] mb-2 px-2">{game.teams?.teamA?.name ? `${game.teams.teamA.name} SLOTS` : "HOME TEAM SLOTS"}</h4>
                     <div className="flex flex-wrap gap-4">
                       {game.teams?.teamA?.slots?.map((slot, index) => (
                         <div key={`A-${index}`} className="flex flex-col items-center gap-1 w-16 relative">
@@ -436,7 +436,7 @@ const MyJoinedGames = () => {
 
                           <div className="text-center w-full">
                             {slot.user ? (
-                              <Link to={`/profile/${slot.user._id || slot.user.id}`} className="text-[9px] font-bold text-white hover:text-yellow-500 transition-colors uppercase tracking-tighter truncate block w-full">
+                              <Link to={`/profile/${slot.user._id || slot.user.id}`} className="text-[9px] font-bold text-white hover:text-[#BFF367] transition-colors uppercase tracking-tighter truncate block w-full">
                                 {slot.user.name?.split(' ')[0] || "OPEN"}
                               </Link>
                             ) : (
@@ -454,7 +454,7 @@ const MyJoinedGames = () => {
                   {/* Team B Slots */}
                   {game.gameMode !== 'QUICK' && (
                   <div className="space-y-3">
-                    <h4 className="text-[10px] font-black text-yellow-500 uppercase tracking-[0.2em] mb-2 px-2">{game.teams?.teamB?.name ? `${game.teams.teamB.name} SLOTS` : "AWAY TEAM SLOTS"}</h4>
+                    <h4 className="text-[10px] font-black text-[#BFF367] uppercase tracking-[0.2em] mb-2 px-2">{game.teams?.teamB?.name ? `${game.teams.teamB.name} SLOTS` : "AWAY TEAM SLOTS"}</h4>
                     <div className="flex flex-wrap gap-4">
                       {game.teams?.teamB?.slots?.map((slot, index) => (
                         <div key={`B-${index}`} className="flex flex-col items-center gap-1 w-16 relative">
@@ -476,7 +476,7 @@ const MyJoinedGames = () => {
 
                           <div className="text-center w-full">
                             {slot.user ? (
-                              <Link to={`/profile/${slot.user._id || slot.user.id}`} className="text-[9px] font-bold text-white hover:text-yellow-500 transition-colors uppercase tracking-tighter truncate block w-full">
+                              <Link to={`/profile/${slot.user._id || slot.user.id}`} className="text-[9px] font-bold text-white hover:text-[#BFF367] transition-colors uppercase tracking-tighter truncate block w-full">
                                 {slot.user.name?.split(' ')[0] || "OPEN"}
                               </Link>
                             ) : (
