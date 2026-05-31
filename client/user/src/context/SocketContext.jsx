@@ -36,6 +36,7 @@ export const SocketProvider = ({ children }) => {
         reconnection: true,
         reconnectionAttempts: 5,
         reconnectionDelay: 1000,
+        transports: ["websocket"], // Enforce WebSockets to avoid HTTP polling loops
       });
 
       newSocket.on('connect', () => {
@@ -76,7 +77,7 @@ export const SocketProvider = ({ children }) => {
         newSocket.disconnect();
       };
     }
-  }, [user, token, ENDPOINT]);
+  }, [user?.id, token, ENDPOINT]);
 
   const isUserOnline = useCallback((userId) => {
     return onlineUsers.includes(userId);

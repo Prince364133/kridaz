@@ -18,7 +18,7 @@ const Blogs = () => {
     try {
       const res = await axios.post(`${import.meta.env.VITE_API_URL}/api/user/blogs/${id}/like`);
       if (res.data.success) {
-        setBlogs(prev => prev.map(b => b._id === id ? { ...b, likes: res.data.blog.likes } : b));
+        setBlogs(prev => prev.map(b => (b.id || b._id) === id ? { ...b, likes: res.data.blog.likes } : b));
       }
     } catch (err) {
       console.error("Error liking blog:", err);
@@ -107,14 +107,14 @@ const Blogs = () => {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {filteredBlogs.map((blog, idx) => (
               <Link 
-                key={blog._id} 
-                to={`/blogs/${blog._id}`}
+                key={blog.id || blog._id} 
+                to={`/blogs/${blog.id || blog._id}`}
                 className="group relative aspect-[4/5] rounded-[8px] overflow-hidden border border-white/5 bg-zinc-900 flex flex-col"
               >
                 {/* Image Background */}
                 <div className="absolute inset-0 z-0">
                   <img 
-                    src={blog.imageUrl} 
+                    src={blog.imageUrl || blog.featuredImage} 
                     alt={blog.title} 
                     className="w-full h-full object-cover opacity-50 group-hover:opacity-70 group-hover:scale-110 transition-all duration-1000"
                   />
@@ -147,7 +147,7 @@ const Blogs = () => {
                           {blog.views}
                         </div>
                         <button 
-                          onClick={(e) => handleLike(e, blog._id)}
+                          onClick={(e) => handleLike(e, blog.id || blog._id)}
                           className="flex items-center gap-2 text-xs font-mono text-white/40 hover:text-white transition-colors group/btn"
                         >
                           <ThumbsUp size={14} style={{ color: PRI }} className="group-hover/btn:scale-110 transition-transform" />

@@ -753,10 +753,59 @@ export const advanceToNextInnings = async (scoringId, battingTeamId) => {
  * Updates the match status (e.g. LIVE, RAIN_DELAY, BAD_LIGHT).
  */
 export const updateMatchStatus = async (scoringId, newStatus) => {
+  const match = await prisma.cricketMatch.findUnique({
+    where: { id: scoringId }
+  });
+  
+  if (!match) throw new Error("Match not found");
+
+  const now = new Date();
+  let timerUpdate = {};
+
+  const isPauseStatus = [
+    "DRINKS", "TIMED_OUT", "LUNCH", "STUMPS", "RAIN", "OTHER",
+    "SCORING_MISTAKE", "CHANGE_SCORER", "FACING_PROBLEM", "TESTING",
+    "PAUSED", "RAIN_DELAY", "BAD_LIGHT"
+  ].includes(newStatus.toUpperCase());
+  
+  if (isPauseStatus && match.timerState === "RUNNING") {
+    let newTotalDuration = match.totalDurationSeconds;
+    if (match.timerLastStartedAt) {
+      const diffSecs = Math.floor((now.getTime() - match.timerLastStartedAt.getTime()) / 1000);
+      newTotalDuration += diffSecs;
+    }
+    timerUpdate = {
+      timerState: "PAUSED",
+      totalDurationSeconds: newTotalDuration,
+      timerLastStartedAt: null
+    };
+  } else if (newStatus.toUpperCase() === "LIVE" && (match.timerState === "PAUSED" || match.timerState === "NOT_STARTED")) {
+    timerUpdate = {
+      timerState: "RUNNING",
+      timerLastStartedAt: now
+    };
+  }
+
   const scoring = await prisma.cricketMatch.update({
     where: { id: scoringId },
-    data: { status: newStatus }
+    data: { 
+      status: newStatus,
+      ...timerUpdate
+    }
   });
+
+  // Sync HostedGame.scoringStatus so match cards reflect pause/resume correctly
+  if (isPauseStatus) {
+    await prisma.hostedGame.update({
+      where: { id: scoring.gameId },
+      data: { scoringStatus: "PAUSED" }
+    });
+  } else if (newStatus.toUpperCase() === "LIVE") {
+    await prisma.hostedGame.update({
+      where: { id: scoring.gameId },
+      data: { scoringStatus: "LIVE" }
+    });
+  }
 
   const hostedGame = await prisma.hostedGame.findUnique({
     where: { id: scoring.gameId },
@@ -2005,6 +2054,15 @@ export const getScoringGameById = async (gameId) => {
       },
       turf: {
         select: { id: true, name: true, location: true, city: true, image: true }
+      },
+      umpire: {
+        select: { id: true, name: true, profilePicture: true, username: true }
+      },
+      scorer: {
+        select: { id: true, name: true, profilePicture: true, username: true }
+      },
+      streamer: {
+        select: { id: true, name: true, profilePicture: true, username: true }
       }
     }
   });

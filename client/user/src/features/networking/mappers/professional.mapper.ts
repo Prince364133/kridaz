@@ -1,59 +1,54 @@
-/**
- * @file professional.mapper.ts
- * @description Adapts raw backend professional profile responses and payloads to standard Professional contract models.
- * Ensures consistent usage of data fields across the application.
- */
+export interface ProfessionalRaw {
+  _id: string;
+  name?: string;
+  email?: string;
+  phone?: string;
+  profilePicture?: string;
+  role?: string;
+  price?: number;
+  rating?: number;
+  numReviews?: number;
+  businessDetails?: {
+    specialization?: string;
+    experience?: string;
+    [key: string]: any;
+  };
+  [key: string]: any;
+}
 
-import { Professional } from "../../../contracts/professional.contract";
+export interface ProfessionalMapped {
+  id: string;
+  name: string;
+  email: string | null;
+  phone: string | null;
+  profilePicture: string | null;
+  role: string;
+  price: number;
+  rating: number;
+  numReviews: number;
+  specialization: string;
+  experience: string;
+}
 
 export class ProfessionalMapper {
-  /**
-   * Adapts raw professional data from backend schema/API response to client-side Professional model.
-   * Handles string conversions, enum check logic, and default numeric values.
-   */
-  public static toClientModel(raw: any): Professional {
-    if (!raw) {
-      throw new Error("ProfessionalMapper: Raw professional payload is required");
-    }
-
+  static toDomain(raw: ProfessionalRaw): ProfessionalMapped {
     return {
-      id: raw.id || raw._id || "",
-      userId: raw.userId || raw.user?.id || raw.user || "",
-      role: ["COACH", "UMPIRE", "SCORER", "STREAMER"].includes(raw.role?.toUpperCase())
-        ? (raw.role.toUpperCase() as any)
-        : "COACH",
-      bio: raw.bio || undefined,
-      experienceYears: typeof raw.experienceYears === "number" ? raw.experienceYears : Number(raw.experienceYears || raw.experience || 0),
-      specializations: Array.isArray(raw.specializations) ? raw.specializations : (raw.specialization ? [raw.specialization] : []),
-      sessionFee: typeof raw.sessionFee === "number" ? raw.sessionFee : parseFloat(raw.sessionFee || raw.fee || raw.price || 0),
-      rating: typeof raw.rating === "number" ? raw.rating : (raw.rating !== undefined ? Number(raw.rating) : 5),
-      availabilityStatus: ["AVAILABLE", "BUSY", "UNAVAILABLE"].includes(raw.availabilityStatus?.toUpperCase())
-        ? (raw.availabilityStatus.toUpperCase() as any)
-        : "AVAILABLE",
-      location: raw.location || raw.address || undefined,
-      isVerified: raw.isVerified !== undefined ? Boolean(raw.isVerified) : Boolean(raw.verified || false),
-      name: raw.name || raw.user?.name || "Professional",
-      profilePicture: raw.profilePicture || raw.image || raw.user?.profilePicture || null,
-      city: raw.city || raw.user?.city || "",
-      state: raw.state || raw.user?.state || "",
-      numReviews: raw.numReviews !== undefined ? Number(raw.numReviews) : 0,
-      gameTypes: Array.isArray(raw.gameTypes) ? raw.gameTypes : [],
-      _id: raw.id || raw._id || "",
-      price: typeof raw.price === "number" ? raw.price : parseFloat(raw.price || raw.sessionFee || raw.fee || 0),
-      businessDetails: {
-        specialization: raw.specialization || (Array.isArray(raw.specializations) ? raw.specializations[0] : "") || raw.businessDetails?.specialization || "",
-        experience: raw.experience || (raw.experienceYears ? `${raw.experienceYears} Years` : "") || raw.businessDetails?.experience || "5+ Years",
-      },
+      id: raw._id || '',
+      name: raw.name || 'Unknown Professional',
+      email: raw.email || null,
+      phone: raw.phone || null,
+      profilePicture: raw.profilePicture || null,
+      role: (raw.role || 'professional').toLowerCase(),
+      price: raw.price || 0,
+      rating: raw.rating || 0,
+      numReviews: raw.numReviews || 0,
+      specialization: raw.businessDetails?.specialization || 'General',
+      experience: raw.businessDetails?.experience || 'Beginner',
     };
   }
 
-  /**
-   * Adapts an array of raw professional responses.
-   */
-  public static toClientList(rawArray: any[]): Professional[] {
-    if (!Array.isArray(rawArray)) {
-      return [];
-    }
-    return rawArray.map(raw => this.toClientModel(raw));
+  static toDomainList(rawList: ProfessionalRaw[]): ProfessionalMapped[] {
+    if (!Array.isArray(rawList)) return [];
+    return rawList.map(ProfessionalMapper.toDomain);
   }
 }

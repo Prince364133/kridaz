@@ -546,10 +546,22 @@ const StartScoringModal = ({ isOpen, onClose, onSuccess, initialData }) => {
     if (teamSearchQuery.trim()) await findTeamByCode(teamSearchQuery.trim());
   };
 
-  const selectTeam = (teamId) => {
+  useEffect(() => {
+    if (teamSearchQuery.trim().length === 10) {
+      findTeamByCode(teamSearchQuery.trim());
+    }
+  }, [teamSearchQuery, findTeamByCode]);
+
+  const selectTeam = (teamId, teamName) => {
     const key = selectingTeam === 'A' ? 'teamAId' : 'teamBId';
+    const nameKey = selectingTeam === 'A' ? 'teamAName' : 'teamBName';
     const playerKey = selectingTeam === 'A' ? 'teamAPlayers' : 'teamBPlayers';
-    setFormData(f => ({ ...f, [key]: teamId, [playerKey]: [] }));
+    setFormData(f => ({ 
+      ...f, 
+      [key]: teamId, 
+      [nameKey]: teamName || '',
+      [playerKey]: [] 
+    }));
     setSelectingTeam(null);
     setTeamSearchQuery('');
   };
@@ -607,7 +619,8 @@ const StartScoringModal = ({ isOpen, onClose, onSuccess, initialData }) => {
 
   const handleInviteAndAdd = async (player) => {
     const teamId = playerPopup?.teamKey === 'A' ? formData.teamAId : formData.teamBId;
-    if (teamId && !initialData) {
+    const isMyTeam = myTeams.some(t => (t._id || t.id) === teamId);
+    if (teamId && !initialData && isMyTeam) {
       try {
         await invitePlayer({ teamId, userId: player._id || player.id }).unwrap();
         toast.success('Invitation sent to player!');
@@ -627,7 +640,8 @@ const StartScoringModal = ({ isOpen, onClose, onSuccess, initialData }) => {
     }
 
     const teamId = playerPopup?.teamKey === 'A' ? formData.teamAId : formData.teamBId;
-    if (!teamId || initialData) {
+    const isMyTeam = myTeams.some(t => (t._id || t.id) === teamId);
+    if (!teamId || initialData || !isMyTeam) {
       selectPlayer({ id: Math.random().toString(), name: customPlayerName, isCustom: true, phone: customPlayerPhone });
       setCustomPlayerName('');
       setCustomPlayerPhone('');
@@ -782,7 +796,7 @@ const StartScoringModal = ({ isOpen, onClose, onSuccess, initialData }) => {
         name: player.name || player.username || customPlayerName,
         profilePicture: player.profilePicture || null,
         role: player.role || 'PLAYER',
-        isCustom: !(player.id || player._id),
+        isCustom: player.isCustom !== undefined ? player.isCustom : !(player.id || player._id),
       };
 
       if (action === 'REPLACE' && replaceId) {
@@ -1628,66 +1642,75 @@ const StartScoringModal = ({ isOpen, onClose, onSuccess, initialData }) => {
                 </button>
               </div>
             )}
-            {/* Team list */}
-            <div className="max-h-64 overflow-y-auto space-y-1.5 pr-1">
-              {teamTab === 'myTeams' && myTeams.map(t => {
-                const tid = t._id || t.id;
-                const isSelected = formData.teamAId === tid || formData.teamBId === tid;
-                return (
-                  <button key={tid} onClick={() => selectTeam(tid)}
-                    className="w-full flex items-center justify-between p-3 rounded-[8px] bg-white/5 hover:bg-white/10 border border-transparent hover:border-white/10 transition-all text-left">
-                    <div className="flex items-center gap-3">
-                      {t.logo ? <img src={t.logo} className="w-8 h-8 rounded-lg object-cover" alt={t.name} /> : <div className="w-8 h-8 rounded-lg bg-white/10 flex items-center justify-center text-white/40"><Users size={14} /></div>}
-                      <span className="font-bold text-white text-sm">{t.name}</span>
-                    </div>
-                    {isSelected && <Check size={16} className="text-[#BFF367]" />}
-                  </button>
-                );
-              })}
-              {teamTab === 'opponentTeams' && (
-                <>
-                  {!searchedTeamData && oppTeams.map(t => {
-                    const tid = t._id || t.id;
-                    const isSelected = formData.teamAId === tid || formData.teamBId === tid;
-                    return (
-                      <button key={tid} onClick={() => selectTeam(tid)}
-                        className="w-full flex items-center justify-between p-3 rounded-[8px] bg-white/5 hover:bg-white/10 border border-transparent hover:border-white/10 transition-all text-left">
-                        <div className="flex items-center gap-3">
-                          {t.logo ? <img src={t.logo} className="w-8 h-8 rounded-lg object-cover" alt={t.name} /> : <div className="w-8 h-8 rounded-lg bg-white/10 flex items-center justify-center text-white/40"><Swords size={14} /></div>}
-                          <div>
-                            <div className="font-bold text-white text-sm">{t.name}</div>
-                            <div className="text-[10px] text-white/40">{t.teamCode}</div>
-                          </div>
-                        </div>
-                        {isSelected && <Check size={16} className="text-[#BFF367]" />}
-                      </button>
-                    );
-                  })}
-                  {searchedTeamData?.team && (
-                    <button onClick={() => selectTeam(searchedTeamData.team._id || searchedTeamData.team.id)}
-                      className="w-full flex items-center justify-between p-3 rounded-[8px] bg-gradient-to-r from-[#55DEE8]/10 to-[#BFF367]/10 border border-[#55DEE8]/30 hover:border-[#55DEE8] transition-all text-left mt-2">
-                      <div>
-                        <div className="font-bold text-white text-sm">{searchedTeamData.team.name}</div>
-                        <div className="text-[10px] text-[#55DEE8]">Search Result · {searchedTeamData.team.teamCode}</div>
-                      </div>
-                      <Check size={14} className="text-[#55DEE8]" />
-                    </button>
-                  )}
-                </>
-              )}
-            </div>
-          </div>
-          <div className="p-5 border-t border-white/10 bg-black/40 flex-shrink-0">
-            <button
-              type="button"
-              onClick={() => setSelectingTeam(null)}
-              className="w-full py-3 rounded-[8px] border border-white/10 text-white font-bold hover:bg-white/5 hover:border-white/20 transition-all flex items-center justify-center gap-2 text-xs uppercase tracking-widest"
-            >
-              <ChevronLeft size={14} /> Back
-            </button>
-          </div>
-        </motion.div>
-      </div>
+             {/* Team list */}
+             <div className="max-h-64 overflow-y-auto space-y-1.5 pr-1">
+               {teamTab === 'myTeams' && myTeams.map(t => {
+                 const tid = t._id || t.id;
+                 const isSelected = formData.teamAId === tid || formData.teamBId === tid;
+                 return (
+                   <button key={tid} onClick={() => selectTeam(tid, t.name)}
+                     className="w-full flex items-center justify-between p-3 rounded-[8px] bg-white/5 hover:bg-white/10 border border-transparent hover:border-white/10 transition-all text-left">
+                     <div className="flex items-center gap-3">
+                       {t.logo ? <img src={t.logo} className="w-8 h-8 rounded-lg object-cover" alt={t.name} /> : <div className="w-8 h-8 rounded-lg bg-white/10 flex items-center justify-center text-white/40"><Users size={14} /></div>}
+                       <span className="font-bold text-white text-sm">{t.name}</span>
+                     </div>
+                     {isSelected && <Check size={16} className="text-[#BFF367]" />}
+                   </button>
+                 );
+               })}
+               {teamTab === 'opponentTeams' && (
+                 <>
+                   {!searchedTeamData && oppTeams.map(t => {
+                     const tid = t._id || t.id;
+                     const isSelected = formData.teamAId === tid || formData.teamBId === tid;
+                     return (
+                       <button key={tid} onClick={() => selectTeam(tid, t.name)}
+                         className="w-full flex items-center justify-between p-3 rounded-[8px] bg-white/5 hover:bg-white/10 border border-transparent hover:border-white/10 transition-all text-left">
+                         <div className="flex items-center gap-3">
+                           {t.logo ? <img src={t.logo} className="w-8 h-8 rounded-lg object-cover" alt={t.name} /> : <div className="w-8 h-8 rounded-lg bg-white/10 flex items-center justify-center text-white/40"><Swords size={14} /></div>}
+                           <div>
+                             <div className="font-bold text-white text-sm">{t.name}</div>
+                             <div className="text-[10px] text-white/40">{t.teamCode}</div>
+                           </div>
+                         </div>
+                         {isSelected && <Check size={16} className="text-[#BFF367]" />}
+                       </button>
+                     );
+                   })}
+                   {searchedTeamData?.team && (
+                     <button onClick={() => selectTeam(searchedTeamData.team._id || searchedTeamData.team.id, searchedTeamData.team.name)}
+                       className="w-full flex items-center justify-between p-3 rounded-[8px] bg-gradient-to-r from-[#55DEE8]/10 to-[#BFF367]/10 border border-[#55DEE8]/30 hover:border-[#55DEE8] transition-all text-left mt-2">
+                       <div>
+                         <div className="font-bold text-white text-sm">{searchedTeamData.team.name}</div>
+                         <div className="text-[10px] text-[#55DEE8]">Search Result · {searchedTeamData.team.teamCode}</div>
+                       </div>
+                       <Check size={14} className="text-[#55DEE8]" />
+                     </button>
+                   )}
+                 </>
+               )}
+             </div>
+           </div>
+           <div className="p-5 border-t border-white/10 bg-black/40 flex-shrink-0">
+             <button
+               type="button"
+               onClick={() => setSelectingTeam(null)}
+               className="w-full py-3 rounded-[8px] border border-white/10 text-white font-bold hover:bg-white/5 hover:border-white/20 transition-all flex items-center justify-center gap-2 text-xs uppercase tracking-widest"
+             >
+               <ChevronLeft size={14} /> Back
+             </button>
+           </div>
+         </motion.div>
+         
+         <CreateTeamModal 
+           isOpen={showCreateTeam} 
+           onClose={() => setShowCreateTeam(false)} 
+           onSuccess={(newTeam) => {
+             selectTeam(newTeam.id || newTeam._id, newTeam.name);
+             setShowCreateTeam(false);
+           }} 
+         />
+       </div>
     );
   }
 

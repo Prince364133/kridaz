@@ -54,7 +54,7 @@ export const useWebPushNotifications = (isLoggedIn) => {
 
         if (token && isMounted) {
           console.log('WebPush: Registration success, token:', token);
-          toast.success('Web Push Notifications registered!');
+          // toast.success('Web Push Notifications registered!');
 
           // 5. Send the web token to our unified backend register endpoint
           await axiosInstance.post('/api/user/notifications/device-token', {

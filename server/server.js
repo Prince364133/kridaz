@@ -118,3 +118,40 @@ const startServer = () => {
 
 // Start the server
 startServer(); // triggered restart
+
+// GRACEFUL SHUTDOWN — add at bottom of server.js
+const shutdown = async (signal) => {
+  logger.info(`[SERVER] ${signal} received. Graceful shutdown starting...`);
+  
+  // Stop accepting new HTTP connections
+  server.close(async () => {
+    logger.info('[SERVER] HTTP server closed. Draining queues...');
+    
+    try {
+      // Give BullMQ workers 15 seconds to finish current jobs
+      await Promise.race([
+        new Promise(resolve => setTimeout(resolve, 15000)),
+        // Import and close queues gracefully
+        import('./queues/media.queue.js').then(({ mediaQueue }) => mediaQueue.close()),
+      ]);
+      
+      // Disconnect Prisma
+      const { prisma } = await import('./config/prisma.js');
+      await prisma.$disconnect();
+      logger.info('[SERVER] Prisma disconnected. Shutdown complete.');
+      process.exit(0);
+    } catch (err) {
+      logger.error('[SERVER] Error during shutdown:', err);
+      process.exit(1);
+    }
+  });
+  
+  // Force exit after 30 seconds if graceful fails
+  setTimeout(() => {
+    logger.error('[SERVER] Forced shutdown after 30s timeout');
+    process.exit(1);
+  }, 30000);
+};
+
+process.on('SIGTERM', () => shutdown('SIGTERM'));
+process.on('SIGINT', () => shutdown('SIGINT'));

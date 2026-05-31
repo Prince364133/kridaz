@@ -22,7 +22,7 @@ const TurfCard = ({ turf, featured = false, distance = "1.2km Away" }) => {
   const displaySlots = activeSlots.length > 0 
     ? activeSlots.slice(0, 3) 
     : [{ startTime: "06:00 PM" }, { startTime: "07:00 PM" }, { startTime: "08:00 PM" }];
-  const slotsLeft = activeSlots.length > 0 ? activeSlots.length : Math.floor(Math.random() * 10) + 5;
+  const slotsLeft = turf.slotsLeft !== undefined ? turf.slotsLeft : (activeSlots.length > 0 ? activeSlots.length : Math.floor(Math.random() * 10) + 5);
   
   const nextImage = (e) => { 
     e.preventDefault(); 

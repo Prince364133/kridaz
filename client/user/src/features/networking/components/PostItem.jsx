@@ -1,0 +1,437 @@
+import React, { useState } from "react";
+import { Link } from "react-router-dom";
+import { ThumbsUp, MessageCircle, Send, MoreVertical, ShieldCheck, Video, Trash2, AlertTriangle, Eye, Calendar, User as UserIcon, Loader2 } from "lucide-react";
+import { AnimatePresence, motion } from "framer-motion";
+import { useLikePostMutation, useAddPostCommentMutation } from "@redux/api/communityApi";
+import toast from "react-hot-toast";
+
+const getPostId = (post) => post?._id || post?.id;
+
+const PostItem = React.memo(({ post, user, isAdmin, gateInteraction, onUpdatePost, onDeletePost, onSharePost, onReportPost }) => {
+  const postId = getPostId(post);
+  const currentUserId = user?._id || user?.id;
+
+  const [likePost] = useLikePostMutation();
+  const [addPostComment] = useAddPostCommentMutation();
+
+  const [expandedComments, setExpandedComments] = useState(false);
+  const [commentInput, setCommentInput] = useState("");
+  const [activeDropdown, setActiveDropdown] = useState(false);
+
+  // Relative / formatted time helper
+  const getFormattedTime = (dateString) => {
+    if (!dateString) return "2h ago";
+    try {
+      const date = new Date(dateString);
+      const now = new Date();
+      const diffMs = now - date;
+      const diffMins = Math.floor(diffMs / 60000);
+      const diffHours = Math.floor(diffMins / 60);
+      const diffDays = Math.floor(diffHours / 24);
+
+      if (diffMins < 1) return "Just now";
+      if (diffMins < 60) return `${diffMins}m ago`;
+      if (diffHours < 24) return `${diffHours}h ago`;
+      if (diffDays < 7) return `${diffDays}d ago`;
+      return date.toLocaleDateString(undefined, { day: "numeric", month: "short" });
+    } catch (e) {
+      return "2h ago";
+    }
+  };
+
+  const handleLike = async () => {
+    gateInteraction(async () => {
+      const userId = user?.id || user?._id;
+      const alreadyLiked = post.likes?.some((l) => (l.id || l._id || l) === userId);
+
+      // 1. Optimistic local update
+      onUpdatePost(postId, (oldPost) => {
+        const updatedLikes = alreadyLiked
+          ? (oldPost.likes || []).filter((l) => (l.id || l._id || l) !== userId)
+          : [
+              ...(oldPost.likes || []),
+              {
+                id: userId,
+                _id: userId,
+                name: user?.name,
+                username: user?.username,
+                profilePicture: user?.profilePicture,
+              },
+            ];
+        return {
+          ...oldPost,
+          likes: updatedLikes,
+          likesCount: updatedLikes.length,
+        };
+      });
+
+      try {
+        const res = await likePost(postId).unwrap();
+        if (res.likes) {
+          onUpdatePost(postId, (oldPost) => ({
+            ...oldPost,
+            likes: res.likes,
+            likesCount: res.likes.length,
+          }));
+        }
+      } catch (error) {
+        // Rollback optimistic update
+        onUpdatePost(postId, (oldPost) => {
+          const revertedLikes = alreadyLiked
+            ? [
+                ...(oldPost.likes || []),
+                {
+                  id: userId,
+                  _id: userId,
+                  name: user?.name,
+                  username: user?.username,
+                  profilePicture: user?.profilePicture,
+                },
+              ]
+            : (oldPost.likes || []).filter((l) => (l.id || l._id || l) !== userId);
+          return {
+            ...oldPost,
+            likes: revertedLikes,
+            likesCount: revertedLikes.length,
+          };
+        });
+        toast.error(error?.data?.message || error.message || "Failed to like post");
+      }
+    });
+  };
+
+  const handleAddComment = async () => {
+    gateInteraction(async () => {
+      const text = commentInput.trim();
+      if (!text) return;
+
+      const tempId = `temp-${Date.now()}`;
+      const optimisticComment = {
+        id: tempId,
+        _id: tempId,
+        text: text,
+        createdAt: new Date().toISOString(),
+        userId: {
+          id: user?.id || user?._id,
+          _id: user?.id || user?._id,
+          name: user?.name || "You",
+          username: user?.username || "",
+          profilePicture: user?.profilePicture || null,
+        },
+      };
+
+      // 1. Optimistic update
+      onUpdatePost(postId, (oldPost) => ({
+        ...oldPost,
+        comments: [...(oldPost.comments || []), optimisticComment],
+        totalComments: (oldPost.comments || []).length + 1,
+      }));
+      setCommentInput("");
+
+      try {
+        const res = await addPostComment({ postId, text }).unwrap();
+        if (res?.comment) {
+          onUpdatePost(postId, (oldPost) => ({
+            ...oldPost,
+            comments: (oldPost.comments || []).map((c) =>
+              c.id === tempId ? { ...res.comment, userId: res.comment.user || res.comment.userId } : c
+            ),
+          }));
+        }
+        toast.success("Comment added!");
+      } catch (error) {
+        // Rollback
+        onUpdatePost(postId, (oldPost) => ({
+          ...oldPost,
+          comments: (oldPost.comments || []).filter((c) => c.id !== tempId),
+          totalComments: Math.max(0, (oldPost.comments || []).length - 1),
+        }));
+        toast.error(error?.data?.message || "Failed to add comment");
+      }
+    }, {
+      title: "Join the Discussion",
+      message: "Sign in to leave a comment.",
+    });
+  };
+
+  const isPostAuthor =
+    (post.adminId?.id || post.adminId?._id) === currentUserId ||
+    (post.author?.id || post.author?._id) === currentUserId ||
+    post.authorId === currentUserId;
+
+  return (
+    <div className="bg-[#0A0A0A] border border-white/5 rounded-[8px] p-5 space-y-4">
+      {/* Post Header */}
+      <div className="flex items-center justify-between">
+        <Link
+          to={`/profile/${post.adminId?.id || post.adminId?._id || post.author?.id || post.author?._id || post.authorId}`}
+          className="flex items-center gap-3 group"
+        >
+          <img
+            src={post.adminId?.profilePicture || "/default-avatar.png"}
+            className="w-10 h-10 rounded-full object-cover border border-white/10 group-hover:border-[#BFF367]/50 transition-colors"
+            alt=""
+          />
+          <div>
+            <div className="flex items-center gap-1.5">
+              <span className="text-[13px] font-bold text-white transition-colors">
+                {post.adminId?.name || post.author?.name || "Player"}
+              </span>
+              <ShieldCheck size={14} className="text-[#BFF367]" />
+            </div>
+            <div className="text-[11px] font-bold text-white/40 mt-0.5">
+              {getFormattedTime(post.createdAt)}
+            </div>
+          </div>
+        </Link>
+        <div className="flex items-center gap-3">
+          <div className="relative">
+            <button
+              onClick={() => setActiveDropdown(!activeDropdown)}
+              className="text-white/40 hover:text-white transition-colors p-2"
+            >
+              <MoreVertical size={18} />
+            </button>
+            {activeDropdown && (
+              <div className="absolute right-0 mt-2 w-32 bg-neutral-900 border border-white/10 rounded-[8px] shadow-lg overflow-hidden z-50">
+                {isPostAuthor || isAdmin ? (
+                  <button
+                    onClick={() => {
+                      setActiveDropdown(false);
+                      onDeletePost(postId);
+                    }}
+                    className="w-full text-left px-4 py-2 text-[12px] font-bold text-red-500 hover:bg-white/5 transition-colors"
+                  >
+                    Delete
+                  </button>
+                ) : (
+                  <button
+                    onClick={() => {
+                      setActiveDropdown(false);
+                      onReportPost(postId);
+                    }}
+                    className="w-full text-left px-4 py-2 text-[12px] font-bold text-white hover:bg-white/5 transition-colors"
+                  >
+                    Report
+                  </button>
+                )}
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+
+      {/* Caption */}
+      {(post.title || post.content) && (
+        <div className="text-[12px] font-medium leading-relaxed">
+          {post.title && <span className="font-bold mr-2">{post.title}</span>}
+          <span className="text-white/90 whitespace-pre-wrap">{post.content}</span>
+        </div>
+      )}
+
+      {/* Media Display */}
+      {(post.image || post.imageUrl || post.mediaUrl) && (
+        <div className="relative aspect-square rounded-[8px] overflow-hidden group border border-white/5 bg-[#111]">
+          <img
+            src={post.image || post.imageUrl || post.thumbnailUrl || post.mediaUrl}
+            className={`w-full h-full object-cover transition-all duration-500 ${
+              post.status === "pending" || post.status === "processing" ? "blur-xl scale-110 opacity-50" : ""
+            }`}
+            alt=""
+          />
+
+          {/* Progress Overlay for Pending/Processing Posts */}
+          {(post.status === "pending" || post.status === "processing") && (
+            <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/20 backdrop-blur-sm z-10">
+              <div className="w-24 h-24 relative flex items-center justify-center">
+                <svg className="w-full h-full transform -rotate-90">
+                  <circle cx="48" cy="48" r="40" stroke="currentColor" strokeWidth="6" fill="transparent" className="text-white/10" />
+                  <circle
+                    cx="48"
+                    cy="48"
+                    r="40"
+                    stroke="#BFF367"
+                    strokeWidth="6"
+                    fill="transparent"
+                    strokeDasharray={2 * Math.PI * 40}
+                    strokeDashoffset={2 * Math.PI * 40 * (1 - (post.processingProgress || 0) / 100)}
+                    className="transition-all duration-300"
+                  />
+                </svg>
+                <div className="absolute inset-0 flex flex-col items-center justify-center">
+                  <span className="text-[14px] font-black text-white">{post.processingProgress || 0}%</span>
+                </div>
+              </div>
+              <div className="mt-4 flex flex-col items-center gap-1">
+                <span className="text-[10px] font-black uppercase tracking-[0.2em] text-[#BFF367] animate-pulse">
+                  {post.status === "processing" ? "Optimizing Media" : "Preparing Upload"}
+                </span>
+                <div className="flex gap-1">
+                  <span className="w-1 h-1 bg-gradient-to-r from-[#BFF367] to-[#BFF367] rounded-full animate-bounce [animation-delay:-0.3s]"></span>
+                  <span className="w-1 h-1 bg-gradient-to-r from-[#BFF367] to-[#BFF367] rounded-full animate-bounce [animation-delay:-0.15s]"></span>
+                  <span className="w-1 h-1 bg-gradient-to-r from-[#BFF367] to-[#BFF367] rounded-full animate-bounce"></span>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Video Icon for processed videos */}
+          {post.mediaType === "video" && post.status === "ready" && (
+            <div className="absolute top-4 right-4 p-1.5 bg-black/60 backdrop-blur-md rounded">
+              <Video size={14} className="text-white" />
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* Action Bar */}
+      <div className="flex items-center justify-between pt-1">
+        <div className="flex items-center gap-5">
+          <button onClick={handleLike} className="flex items-center gap-2 group">
+            <ThumbsUp
+              size={20}
+              className={`transition-colors ${
+                post.likes?.some((l) => (l.id || l._id || l) === currentUserId)
+                  ? "fill-[#BFF367] text-[#BFF367]"
+                  : "text-white/70 group-hover:text-[#BFF367]"
+              }`}
+            />
+            <span className="text-[12px] font-bold text-white">{post.likes?.length || 0}</span>
+          </button>
+          <button onClick={() => setExpandedComments(!expandedComments)} className="flex items-center gap-2 group">
+            <MessageCircle
+              size={20}
+              className={`transition-colors ${expandedComments ? "text-[#BFF367]" : "text-white/70 group-hover:text-[#BFF367]"}`}
+            />
+            <span className="text-[12px] font-bold text-white">{post.comments?.length || 0}</span>
+          </button>
+          <button
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation();
+              onSharePost(postId);
+            }}
+            className="flex items-center gap-2 group"
+          >
+            <Send size={18} className="text-white/70 group-hover:text-[#BFF367] transition-colors" />
+            <span className="text-[12px] font-bold text-white">Share</span>
+          </button>
+        </div>
+      </div>
+
+      {/* Likes Summary */}
+      {post.likes?.length > 0 && (
+        <div className="flex items-center gap-2 text-[11px] font-medium text-white/50 pt-1">
+          <div className="flex -space-x-1.5 shrink-0">
+            {post.likes.slice(0, 3).map((likeUser, i) => (
+              <div
+                key={likeUser.id || likeUser._id || i}
+                className="w-5 h-5 rounded-full bg-zinc-800 border border-[#0A0A0A] overflow-hidden flex items-center justify-center shrink-0"
+              >
+                {likeUser.profilePicture ? (
+                  <img src={likeUser.profilePicture} className="w-full h-full object-cover" alt="" />
+                ) : (
+                  <div className="w-full h-full flex items-center justify-center bg-zinc-700 text-white text-[8px] font-bold">
+                    {(likeUser.username || likeUser.name || "U")[0].toUpperCase()}
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+          <p className="text-[11px] text-white/50 font-medium">
+            {post.likes.length === 1 && (
+              <span>
+                Liked by <span className="font-bold text-white">{post.likes[0].username || post.likes[0].name || "User"}</span>
+              </span>
+            )}
+            {post.likes.length === 2 && (
+              <span>
+                Liked by <span className="font-bold text-white">{post.likes[0].username || post.likes[0].name || "User"}</span> and{" "}
+                <span className="font-bold text-white">{post.likes[1].username || post.likes[1].name || "User"}</span>
+              </span>
+            )}
+            {post.likes.length > 2 && (
+              <span>
+                Liked by <span className="font-bold text-white">{post.likes[0].username || post.likes[0].name || "User"}</span>,{" "}
+                <span className="font-bold text-white">{post.likes[1].username || post.likes[1].name || "User"}</span> and{" "}
+                <span className="font-bold text-white">
+                  {post.likes.length - 2} {post.likes.length - 2 === 1 ? "other" : "others"}
+                </span>
+              </span>
+            )}
+          </p>
+        </div>
+      )}
+
+      {/* Expandable Comments Section */}
+      <AnimatePresence>
+        {expandedComments && (
+          <motion.div
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: "auto", opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            transition={{ duration: 0.25 }}
+            className="overflow-hidden"
+          >
+            <div className="space-y-3 pt-2 border-t border-white/5">
+              {post.comments && post.comments.length > 0 && (
+                <div className="max-h-[200px] overflow-y-auto space-y-2.5 pr-1 scrollbar-thin scrollbar-thumb-white/10 scrollbar-track-transparent">
+                  {post.comments.slice(0, 4).map((comment) => {
+                    const commentUser = comment.userId || comment.user;
+                    return (
+                      <div key={comment.id || comment._id} className="flex items-start gap-2 text-[12px] leading-relaxed">
+                        <Link
+                          to={`/profile/${commentUser?.id || commentUser?._id}`}
+                          className="font-bold text-white hover:text-[#BFF367] transition-colors shrink-0"
+                        >
+                          {commentUser?.name || commentUser?.username || "Player"}
+                        </Link>
+                        <span className="text-white/80 break-words">{comment.text}</span>
+                      </div>
+                    );
+                  })}
+                  {post.comments.length > 4 && (
+                    <button className="text-[11px] text-[#BFF367] font-bold hover:underline">
+                      View all {post.comments.length} comments
+                    </button>
+                  )}
+                </div>
+              )}
+              {post.comments?.length === 0 && <p className="text-[12px] text-white/30 italic">No comments yet. Be the first!</p>}
+
+              {/* Comment Input */}
+              <div className="flex items-center gap-3 pt-2 border-t border-white/5">
+                <img src={user?.profilePicture || "/default-avatar.png"} className="w-7 h-7 rounded-full object-cover border border-white/10 shrink-0" alt="" />
+                <input
+                  type="text"
+                  placeholder="Add a comment..."
+                  className="flex-1 bg-transparent text-[12px] font-medium outline-none text-white placeholder:text-white/40"
+                  value={commentInput}
+                  onChange={(e) => setCommentInput(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") handleAddComment();
+                  }}
+                />
+                <button
+                  onClick={handleAddComment}
+                  disabled={!commentInput.trim()}
+                  className={`text-[12px] font-bold px-3 py-1.5 rounded-full transition-all ${
+                    commentInput.trim()
+                      ? "bg-[#BFF367] text-black hover:bg-[#BFF367]/80 cursor-pointer"
+                      : "bg-white/5 text-white/20 cursor-not-allowed"
+                  }`}
+                >
+                  Post
+                </button>
+              </div>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
+  );
+});
+
+PostItem.displayName = "PostItem";
+
+export default PostItem;

@@ -237,26 +237,31 @@ export const verifyBookingPayment = async (userId, paymentData) => {
   const platformFee = Math.round(baseAmount * (platformFeePercentage / 100));
   const ownerRevenue = baseAmount - platformFee;
 
-  // Overlap Guard
-  const overlappingSlot = await prisma.timeSlot.findFirst({
-    where: {
-      turfId: turfId,
-      OR: [
-        { startTime: { lt: adjustedEndTime, gte: adjustedStartTime } },
-        { endTime: { gt: adjustedStartTime, lte: adjustedEndTime } },
-        { startTime: { lte: adjustedStartTime }, endTime: { gte: adjustedEndTime } }
-      ]
-    }
-  });
-
-  if (overlappingSlot) {
-    const error = new Error("This time slot is already booked.");
-    error.statusCode = 400;
-    throw error;
-  }
+  // Overlap Guard is moved inside the transaction to prevent race conditions
 
   // Create booking transaction
   const booking = await prisma.$transaction(async (tx) => {
+    // 1. Acquire row-level lock on Turf to serialize concurrent booking attempts
+    await tx.$queryRaw`SELECT id FROM "Turf" WHERE id = ${turfId} FOR UPDATE`;
+
+    // 2. Overlap Guard (Inside transaction)
+    const overlappingSlot = await tx.timeSlot.findFirst({
+      where: {
+        turfId: turfId,
+        OR: [
+          { startTime: { lt: adjustedEndTime, gte: adjustedStartTime } },
+          { endTime: { gt: adjustedStartTime, lte: adjustedEndTime } },
+          { startTime: { lte: adjustedStartTime }, endTime: { gte: adjustedEndTime } }
+        ]
+      }
+    });
+
+    if (overlappingSlot) {
+      const error = new Error("SLOT_UNAVAILABLE");
+      error.statusCode = 400;
+      throw error;
+    }
+
     const timeSlot = await tx.timeSlot.create({
       data: {
         turfId: turfId,
@@ -429,25 +434,30 @@ export const processWalletBooking = async (userId, bookingData) => {
     throw error;
   }
 
-  // Overlap Guard
-  const overlappingSlot = await prisma.timeSlot.findFirst({
-    where: {
-      turfId: turfId,
-      OR: [
-        { startTime: { lt: adjustedEndTime, gte: adjustedStartTime } },
-        { endTime: { gt: adjustedStartTime, lte: adjustedEndTime } },
-        { startTime: { lte: adjustedStartTime }, endTime: { gte: adjustedEndTime } }
-      ]
-    }
-  });
-
-  if (overlappingSlot) {
-    const error = new Error("This time slot is already booked.");
-    error.statusCode = 400;
-    throw error;
-  }
+  // Overlap Guard is moved inside the transaction to prevent race conditions
 
   const booking = await prisma.$transaction(async (tx) => {
+    // 1. Acquire row-level lock on Turf to serialize concurrent booking attempts
+    await tx.$queryRaw`SELECT id FROM "Turf" WHERE id = ${turfId} FOR UPDATE`;
+
+    // 2. Overlap Guard (Inside transaction)
+    const overlappingSlot = await tx.timeSlot.findFirst({
+      where: {
+        turfId: turfId,
+        OR: [
+          { startTime: { lt: adjustedEndTime, gte: adjustedStartTime } },
+          { endTime: { gt: adjustedStartTime, lte: adjustedEndTime } },
+          { startTime: { lte: adjustedStartTime }, endTime: { gte: adjustedEndTime } }
+        ]
+      }
+    });
+
+    if (overlappingSlot) {
+      const error = new Error("SLOT_UNAVAILABLE");
+      error.statusCode = 400;
+      throw error;
+    }
+
     // Deduct from wallet
     await WalletService.debit(userId, "user", amountToDeduct, tx);
     

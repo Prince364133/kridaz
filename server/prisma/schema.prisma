@@ -996,15 +996,17 @@ model FeatureFlag {
 }
 
 model AdBanner {
-  id        String   @id @default(uuid())
-  title     String
-  imageUrl  String
-  targetUrl String?
-  type      String   @default("HOME")
-  isActive  Boolean  @default(true)
-  order     Int      @default(0)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id          String   @id @default(uuid())
+  title       String
+  description String?
+  imageUrl    String?
+  videoUrl    String?
+  targetUrl   String?
+  type        String   @default("HOME")
+  isActive    Boolean  @default(true)
+  order       Int      @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 }
 
 model Video {

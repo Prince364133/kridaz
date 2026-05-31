@@ -465,6 +465,15 @@ const ScoringApp = () => {
     return result;
   };
 
+  const handleScoringClick = (callback) => {
+    if (isMutating) {
+      toast.error("Action in progress. Please wait.");
+      return;
+    }
+    if (!checkTimerActive()) return;
+    callback();
+  };
+
   if (scoringLock === 'PENDING' && passwordVerified) return (
     <div className="min-h-screen bg-black flex items-center justify-center font-inter">
       <div className="text-center">
@@ -579,13 +588,12 @@ const ScoringApp = () => {
               {/* Col 1 */}
               <div className="flex flex-col gap-0 w-[25%]">
                 {[0, 3].map(run => (
-                  <button key={run} disabled={isMutating}
-                    onClick={() => {
-                      if (isMutating || !checkTimerActive()) return;
+                  <button key={run}
+                    onClick={() => handleScoringClick(() => {
                       run === 0 ? handleScore({ runs: run, extraType: 'NONE' }) : processRuns({ runs: run, isBoundary: false, isFour: false, isSix: false });
-                    }}
+                    })}
                     style={{ backdropFilter: 'blur(6px)' }}
-                    className={`flex-1 bg-white/[0.05] border border-white/10 rounded-none flex items-center justify-center text-white hover:bg-white/10 transition-all transform active:scale-95 ${isMutating ? 'opacity-40 cursor-not-allowed' : ''}`}>
+                    className="flex-1 bg-white/[0.05] border border-white/10 rounded-none flex items-center justify-center text-white hover:bg-white/10 transition-all transform active:scale-95">
                     <span style={{ fontFamily: '"Anton", sans-serif', fontSize: '32px', letterSpacing: '1.6px' }}>{run}</span>
                   </button>
                 ))}
@@ -593,66 +601,61 @@ const ScoringApp = () => {
               
               {/* Col 2 */}
               <div className="flex flex-col gap-0 w-[25%]">
-                <button disabled={isMutating}
-                  onClick={() => {
-                    if (isMutating || !checkTimerActive()) return;
+                <button
+                  onClick={() => handleScoringClick(() => {
                     processRuns({ runs: 1, isBoundary: false, isFour: false, isSix: false });
-                  }}
+                  })}
                   style={{ backdropFilter: 'blur(6px)' }}
-                  className={`flex-1 bg-white/[0.05] border border-white/10 rounded-none flex items-center justify-center text-white hover:bg-white/10 transition-all transform active:scale-95 ${isMutating ? 'opacity-40 cursor-not-allowed' : ''}`}>
+                  className="flex-1 bg-white/[0.05] border border-white/10 rounded-none flex items-center justify-center text-white hover:bg-white/10 transition-all transform active:scale-95">
                   <span style={{ fontFamily: '"Anton", sans-serif', fontSize: '32px', letterSpacing: '1.6px' }}>1</span>
                 </button>
-                <button disabled={isMutating}
-                  onClick={() => {
-                    if (isMutating || !checkTimerActive()) return;
+                <button
+                  onClick={() => handleScoringClick(() => {
                     processRuns({ runs: 4, isBoundary: true, isFour: true, isSix: false });
-                  }}
+                  })}
                   style={{ backdropFilter: 'blur(6px)' }}
-                  className={`flex-1 bg-white/[0.05] border border-white/10 rounded-none flex items-center justify-center text-white hover:bg-white/10 transition-all transform active:scale-95 ${isMutating ? 'opacity-40 cursor-not-allowed' : ''}`}>
+                  className="flex-1 bg-white/[0.05] border border-white/10 rounded-none flex items-center justify-center text-white hover:bg-white/10 transition-all transform active:scale-95">
                   <span style={{ fontFamily: '"Anton", sans-serif', fontSize: '32px', letterSpacing: '1.6px' }}>4</span>
                 </button>
               </div>
 
               {/* Col 3 */}
               <div className="flex flex-col gap-0 w-[25%]">
-                <button disabled={isMutating}
-                  onClick={() => {
-                    if (isMutating || !checkTimerActive()) return;
+                <button
+                  onClick={() => handleScoringClick(() => {
                     processRuns({ runs: 2, isBoundary: false, isFour: false, isSix: false });
-                  }}
+                  })}
                   style={{ backdropFilter: 'blur(6px)' }}
-                  className={`flex-1 bg-white/[0.05] border border-white/10 rounded-none flex items-center justify-center text-white hover:bg-white/10 transition-all transform active:scale-95 ${isMutating ? 'opacity-40 cursor-not-allowed' : ''}`}>
+                  className="flex-1 bg-white/[0.05] border border-white/10 rounded-none flex items-center justify-center text-white hover:bg-white/10 transition-all transform active:scale-95">
                   <span style={{ fontFamily: '"Anton", sans-serif', fontSize: '32px', letterSpacing: '1.6px' }}>2</span>
                 </button>
-                <button disabled={isMutating}
-                  onClick={() => {
-                    if (isMutating || !checkTimerActive()) return;
+                <button
+                  onClick={() => handleScoringClick(() => {
                     processRuns({ runs: 6, isBoundary: true, isFour: false, isSix: true });
-                  }}
+                  })}
                   style={{ backdropFilter: 'blur(6px)' }}
-                  className={`flex-1 bg-white/[0.05] border border-white/10 rounded-none flex items-center justify-center text-white hover:bg-white/10 transition-all transform active:scale-95 ${isMutating ? 'opacity-40 cursor-not-allowed' : ''}`}>
+                  className="flex-1 bg-white/[0.05] border border-white/10 rounded-none flex items-center justify-center text-white hover:bg-white/10 transition-all transform active:scale-95">
                   <span style={{ fontFamily: '"Anton", sans-serif', fontSize: '32px', letterSpacing: '1.6px' }}>6</span>
                 </button>
               </div>
 
               {/* Col 4 */}
               <div className="flex flex-col gap-0 w-[25%]">
-                <button disabled={isMutating}
-                  onClick={async () => {
-                    if (isMutating || !checkTimerActive()) return;
+                <button
+                  onClick={() => handleScoringClick(async () => {
                     const result = await undoBall();
                     if (result.success) toast.success('Reverted last ball');
                     else toast.error(result.error || 'Undo limit reached');
-                  }}
-                  className={`flex-[3] bg-white/[0.05] border border-white/10 rounded-none flex items-center justify-center hover:bg-white/10 transition-all transform active:scale-95 ${isMutating ? 'opacity-40 cursor-not-allowed' : ''}`}>
+                  })}
+                  className="flex-[3] bg-white/[0.05] border border-white/10 rounded-none flex items-center justify-center hover:bg-white/10 transition-all transform active:scale-95">
                   <span className="text-white font-inter font-semibold uppercase tracking-widest text-[16px]">UNDO</span>
                 </button>
-                <button disabled={isMutating} onClick={() => { if (!isMutating && checkTimerActive()) setShowWicketModal(true); }}
-                  className={`flex-[2] bg-white/[0.05] border border-white/10 rounded-none flex items-center justify-center hover:bg-white/10 transition-all transform active:scale-95 ${isMutating ? 'opacity-40 cursor-not-allowed' : ''}`}>
+                <button onClick={() => handleScoringClick(() => setShowWicketModal(true))}
+                  className="flex-[2] bg-white/[0.05] border border-white/10 rounded-none flex items-center justify-center hover:bg-white/10 transition-all transform active:scale-95">
                   <span className="text-[#F40000] font-inter font-semibold uppercase tracking-widest text-[18px]">OUT</span>
                 </button>
-                <button disabled={isMutating} onClick={() => { if (!isMutating && checkTimerActive()) setShowCustomRunsModal(true); }}
-                  className={`flex-[2] bg-white/[0.05] border border-white/10 rounded-none flex items-center justify-center hover:bg-white/10 transition-all transform active:scale-95 ${isMutating ? 'opacity-40 cursor-not-allowed' : ''}`}>
+                <button onClick={() => handleScoringClick(() => setShowCustomRunsModal(true))}
+                  className="flex-[2] bg-white/[0.05] border border-white/10 rounded-none flex items-center justify-center hover:bg-white/10 transition-all transform active:scale-95">
                   <span className="text-white font-inter font-semibold uppercase tracking-wider text-[13px]">CUSTOM</span>
                 </button>
               </div>
@@ -660,20 +663,20 @@ const ScoringApp = () => {
 
             {/* Bottom Row Extras */}
             <div className="flex h-[46px] gap-0 mt-0">
-              <button disabled={isMutating} onClick={() => { if (!isMutating && checkTimerActive()) setExtraModal('WIDE'); }}
-                className={`flex-1 bg-white/[0.05] border border-white/10 rounded-none flex items-center justify-center hover:bg-white/10 transition-all transform active:scale-95 ${isMutating ? 'opacity-40 cursor-not-allowed' : ''}`}>
+              <button onClick={() => handleScoringClick(() => setExtraModal('WIDE'))}
+                className="flex-1 bg-white/[0.05] border border-white/10 rounded-none flex items-center justify-center hover:bg-white/10 transition-all transform active:scale-95">
                 <span className="text-[#00C187] font-inter font-semibold uppercase tracking-widest text-[15px]">WIDE</span>
               </button>
-              <button disabled={isMutating} onClick={() => { if (!isMutating && checkTimerActive()) setExtraModal('NO_BALL'); }}
-                className={`flex-1 bg-white/[0.05] border border-white/10 rounded-none flex items-center justify-center hover:bg-white/10 transition-all transform active:scale-95 ${isMutating ? 'opacity-40 cursor-not-allowed' : ''}`}>
+              <button onClick={() => handleScoringClick(() => setExtraModal('NO_BALL'))}
+                className="flex-1 bg-white/[0.05] border border-white/10 rounded-none flex items-center justify-center hover:bg-white/10 transition-all transform active:scale-95">
                 <span className="text-[#00C187] font-inter font-semibold uppercase tracking-widest text-[16px]">NB</span>
               </button>
-              <button disabled={isMutating} onClick={() => { if (!isMutating && checkTimerActive()) setExtraModal('BYE'); }}
-                className={`flex-1 bg-white/[0.05] border border-white/10 rounded-none flex items-center justify-center hover:bg-white/10 transition-all transform active:scale-95 ${isMutating ? 'opacity-40 cursor-not-allowed' : ''}`}>
+              <button onClick={() => handleScoringClick(() => setExtraModal('BYE'))}
+                className="flex-1 bg-white/[0.05] border border-white/10 rounded-none flex items-center justify-center hover:bg-white/10 transition-all transform active:scale-95">
                 <span className="text-white font-inter font-semibold uppercase tracking-widest text-[16px]">BYE</span>
               </button>
-              <button disabled={isMutating} onClick={() => { if (!isMutating && checkTimerActive()) setExtraModal('LEG_BYE'); }}
-                className={`flex-1 bg-white/[0.05] border border-white/10 rounded-none flex items-center justify-center hover:bg-white/10 transition-all transform active:scale-95 ${isMutating ? 'opacity-40 cursor-not-allowed' : ''}`}>
+              <button onClick={() => handleScoringClick(() => setExtraModal('LEG_BYE'))}
+                className="flex-1 bg-white/[0.05] border border-white/10 rounded-none flex items-center justify-center hover:bg-white/10 transition-all transform active:scale-95">
                 <span className="text-white font-inter font-semibold uppercase tracking-wider text-[13px]">LEG BYE</span>
               </button>
             </div>
@@ -754,32 +757,86 @@ const ScoringApp = () => {
                        </div>
                     </div>
                  </div>
-
                  {/* Venue / Location */}
-                 {game?.venue?.name ? (
-                   <div className="w-full h-32 rounded-[12px] overflow-hidden relative shadow-lg mb-8 border border-white/5 bg-[#1e1e1e]">
+                 {(game?.turf?.name || game?.venue?.name) ? (
+                   <div className="w-full h-32 rounded-[12px] overflow-hidden relative shadow-lg mb-4 border border-white/5 bg-[#1e1e1e]">
                      <div className="absolute inset-0 bg-gradient-to-t from-black via-black/80 to-transparent z-10" />
-                     <img src={game?.venue?.image || "/3d_stadium.png"} alt="Venue" className="absolute inset-0 w-full h-full object-cover opacity-30 grayscale" />
+                     <img src={game?.turf?.image || game?.venue?.image || "/3d_stadium.png"} alt="Venue" className="absolute inset-0 w-full h-full object-cover opacity-30 grayscale" />
                      <div className="absolute bottom-4 left-4 right-4 z-20 flex items-start gap-3">
                        <MapPin size={20} className="text-[#D4F99A] mt-0.5" />
                        <div>
                          <p className="text-[9px] font-black uppercase tracking-widest text-neutral-400 mb-1">VENUE</p>
-                         <p className="text-lg font-black text-white tracking-wide leading-none uppercase truncate" style={{ fontFamily: '"Bebas Neue", Anton, sans-serif' }}>{game.venue.name}</p>
+                         <p className="text-lg font-black text-white tracking-wide leading-none uppercase truncate" style={{ fontFamily: '"Bebas Neue", Anton, sans-serif' }}>{game?.turf?.name || game?.venue?.name}</p>
                        </div>
                      </div>
                    </div>
                  ) : (
-                   <div className="w-full bg-[#1e1e1e] border border-white/5 rounded-[12px] p-4 flex items-center justify-center gap-2 shadow-lg mb-8">
+                   <div className="w-full bg-[#1e1e1e] border border-white/5 rounded-[12px] p-4 flex items-center justify-center gap-2 shadow-lg mb-4">
                      <MapPin size={16} className="text-neutral-500" />
                      <span className="text-sm font-bold text-neutral-400 uppercase tracking-widest">
-                       {game?.customVenue || game?.location || 'No location provided'}
+                       {game?.customVenue || game?.city || game?.location || 'No location provided'}
                      </span>
                    </div>
                  )}
+
+                 {/* Professionals / Officials */}
+                 {(() => {
+                   const officials = [];
+                   if (game?.umpire) {
+                     officials.push({ role: 'Umpire', name: game.umpire.name, image: game.umpire.profilePicture });
+                   } else if (game?.customUmpire && typeof game.customUmpire === 'object' && game.customUmpire.name) {
+                     officials.push({ role: 'Umpire', name: game.customUmpire.name });
+                   }
+                   
+                   if (game?.scorer) {
+                     officials.push({ role: 'Scorer', name: game.scorer.name, image: game.scorer.profilePicture });
+                   } else if (game?.customScorer && typeof game.customScorer === 'object' && game.customScorer.name) {
+                     officials.push({ role: 'Scorer', name: game.customScorer.name });
+                   }
+                   
+                   if (game?.streamer) {
+                     officials.push({ role: 'Streamer', name: game.streamer.name, image: game.streamer.profilePicture });
+                   } else if (game?.customStreamer && typeof game.customStreamer === 'object' && game.customStreamer.name) {
+                     officials.push({ role: 'Streamer', name: game.customStreamer.name });
+                   }
+                   
+                   if (Array.isArray(game?.customProfessionals)) {
+                     game.customProfessionals.forEach(p => {
+                       if (p && p.name) {
+                         officials.push({ role: p.role || 'Professional', name: p.name });
+                       }
+                     });
+                   }
+
+                   if (officials.length === 0) return null;
+
+                   return (
+                     <div className="w-full bg-[#1e1e1e] border border-white/5 rounded-[12px] p-4 shadow-lg mb-4">
+                       <p className="text-[10px] font-black uppercase tracking-widest text-neutral-400 mb-3">MATCH OFFICIALS</p>
+                       <div className="space-y-2">
+                         {officials.map((pro, index) => (
+                           <div key={index} className="flex items-center gap-3 bg-white/[0.02] border border-white/5 rounded-[8px] p-2">
+                             <div className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center overflow-hidden shrink-0">
+                               {pro.image ? (
+                                 <img src={pro.image} alt={pro.name} className="w-full h-full object-cover" />
+                               ) : (
+                                 <User size={16} className="text-neutral-400" />
+                               )}
+                             </div>
+                             <div>
+                               <p className="text-xs font-black text-white uppercase tracking-wider">{pro.name}</p>
+                               <p className="text-[9px] font-bold text-[#00C187] uppercase tracking-widest leading-none mt-0.5">{pro.role}</p>
+                             </div>
+                           </div>
+                         ))}
+                       </div>
+                     </div>
+                   );
+                 })()}
                  
                  <div className="flex gap-3 w-full mt-auto pb-4 pt-4">
                     <button
-                      onClick={() => setShowExitModal(true)}
+                      onClick={() => window.history.back()}
                       className="flex-1 h-14 bg-[#1e1e1e] border border-white/5 rounded-[8px] flex items-center justify-center gap-2 text-white text-[13px] font-black uppercase tracking-[0.1em] hover:bg-white/10 transition-all shadow-xl"
                     >
                       <ChevronLeft size={16} /> BACK
@@ -819,8 +876,40 @@ const ScoringApp = () => {
               <ChevronLeft size={24} className="text-white" />
             </button>
           </div>
-          <div className="absolute top-4 right-4 z-50 flex items-center gap-3">
-            <button className="p-2 transition-all opacity-80 hover:opacity-100 bg-black/40 backdrop-blur-md rounded-full border border-white/10 flex items-center justify-center w-10 h-10">
+          <div className="absolute top-4 right-4 z-50 flex items-center gap-2">
+            {/* Timer Display */}
+            <div className="flex items-center gap-1.5 bg-black/50 backdrop-blur-md rounded-full border border-white/10 px-2.5 py-1.5 h-10 shadow-lg text-xs font-mono font-bold text-white shrink-0">
+              <span>{formatTimer(localTimerSecs)}</span>
+              <button 
+                onClick={async () => {
+                  await toggleTimer();
+                }}
+                className="w-6 h-6 rounded-full flex items-center justify-center transition-all bg-white/10 hover:bg-white/20 active:scale-95"
+              >
+                {matchData?.timerState === 'RUNNING' ? (
+                  <Pause size={10} fill="currentColor" className="text-[#00C187]" />
+                ) : (
+                  <Play size={10} fill="currentColor" className="text-yellow-500 ml-0.5" />
+                )}
+              </button>
+            </div>
+
+            <button 
+              onClick={() => {
+                const shareUrl = `${window.location.origin}/analytics/${matchData?.hostedGameId?.shortId || matchId}`;
+                if (navigator.share) {
+                  navigator.share({
+                    title: 'Live Match Scoring',
+                    text: `Follow the live score of the match: ${matchData?.hostedGameId?.name || 'Match'}`,
+                    url: shareUrl
+                  }).catch(console.error);
+                } else {
+                  navigator.clipboard.writeText(shareUrl);
+                  toast.success("Live score link copied!");
+                }
+              }}
+              className="p-2 transition-all opacity-80 hover:opacity-100 bg-black/40 backdrop-blur-md rounded-full border border-white/10 flex items-center justify-center w-10 h-10"
+            >
               <Share2 size={20} className="text-white" />
             </button>
             <button onClick={() => setShowSettings(true)} className="p-2 transition-all opacity-80 hover:opacity-100 bg-black/40 backdrop-blur-md rounded-full border border-white/10 flex items-center justify-center w-10 h-10">
@@ -1435,8 +1524,16 @@ const ScoringApp = () => {
         <MatchExitModal
           isOpen={showExitModal}
           onClose={() => setShowExitModal(false)}
-          onConfirm={(data) => {
+          onConfirm={async (data) => {
             setShowExitModal(false);
+            const reason = data?.status || data?.help;
+            if (reason) {
+              try {
+                await updateMatchStatus(reason.toUpperCase());
+              } catch (e) {
+                console.error("Failed to update status on exit:", e);
+              }
+            }
             window.history.back();
           }}
         />

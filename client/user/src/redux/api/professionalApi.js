@@ -50,6 +50,13 @@ export const professionalApi = baseApi.injectEndpoints({
       query: () => "/api/professional/dashboard-stats",
       providesTags: ["Booking", "User"],
     }),
+    getProfessionalsList: builder.query({
+      query: (params) => ({
+        url: "/api/professional/list",
+        params,
+      }),
+      providesTags: ["User"],
+    }),
   }),
 });
 
@@ -62,5 +69,6 @@ export const {
   useGetMyOnDemandBookingsQuery,
   useGetUserOnDemandBookingsQuery,
   useGetDashboardStatsQuery,
+  useGetProfessionalsListQuery,
 } = professionalApi;
 

@@ -1,5 +1,0 @@
-Injected: client/user/src/user/components/layout/Navbar.jsx -> client/user/src/shared/components/layout/Navbar.jsx
-Injected: client/user/src/user/pages/FindProfessionals.jsx -> client/user/src/features/networking/pages/FindProfessionals.jsx
-Injected: client/user/src/user/pages/HostGame.jsx -> client/user/src/features/games/pages/HostGame.jsx
-Injected: client/user/src/user/pages/ProfessionalDetails.jsx -> client/user/src/features/networking/pages/ProfessionalDetails.jsx
-Injected: client/user/src/user/pages/Wallet.jsx -> client/user/src/features/wallet/pages/Wallet.jsx

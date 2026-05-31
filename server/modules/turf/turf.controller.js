@@ -12,7 +12,7 @@ import { getGroundRecommendations } from "../../services/recommendation.service.
 // --- USER OPERATIONS ---
 
 export const getAllTurfs = async (req, res) => {
-  const { searchTerm, city, state, lat, lng, radius } = req.query;
+  const { searchTerm, city, state, lat, lng, radius, limit, page } = req.query;
   try {
     const isVal = (v) => v && v !== "" && v !== "null" && v !== "undefined" && v !== "Select";
 
@@ -21,8 +21,6 @@ export const getAllTurfs = async (req, res) => {
       isActive: true
     };
 
-    // We want to show venues from their city, but also other cities in the same state.
-    // So we don't strictly filter out other cities, we just sort by city match or distance later.
     if (isVal(state)) where.state = { contains: state, mode: 'insensitive' };
     
     if (isVal(searchTerm) && searchTerm !== "All") {
@@ -32,49 +30,73 @@ export const getAllTurfs = async (req, res) => {
       ];
     }
 
-    const cacheKey = generateCacheKey("turfs:list", { searchTerm, city, state, lat, lng, radius });
+    const take = limit ? Math.min(parseInt(limit), 50) : 20;
+    const skip = page ? (parseInt(page) - 1) * take : 0;
+
+    const cacheKey = generateCacheKey("turfs:list", { searchTerm, city, state, lat, lng, radius, limit, page });
+
+    const turfSelect = {
+      id: true,
+      name: true,
+      description: true,
+      location: true,
+      image: true,
+      images: true,
+      city: true,
+      state: true,
+      latitude: true,
+      longitude: true,
+      pricePerHour: true,
+      sportTypes: true,
+      groundTypes: true,
+      facilities: true,
+      generatedSlots: true,
+      owner: {
+        select: {
+          id: true,
+          businessName: true,
+          user: {
+            select: { id: true, name: true, username: true, profilePicture: true }
+          }
+        }
+      },
+      reviews: { select: { rating: true } }
+    };
 
     const formattedTurfs = await getOrSetCache(cacheKey, async () => {
       let resultTurfs = [];
 
       if (lat && lng) {
-        // Use a huge default radius (500km) to ensure we cover the whole state if no specific radius is passed
         const r = radius ? parseFloat(radius) : 500000;
         resultTurfs = await findNearby('Turf', parseFloat(lat), parseFloat(lng), r, {
           where,
-          take: 100, // fetch enough to show rest of state
-          include: {
-            owner: {
-              include: {
-                user: {
-                  select: { id: true, name: true, username: true, profilePicture: true }
-                }
-              }
-            },
-            reviews: { select: { rating: true } }
-          }
+          take,
+          select: turfSelect
         });
+
+        // Fallback to fetch other approved turfs (including those without coordinates) if list is not full
+        if (resultTurfs.length < take) {
+          const foundIds = resultTurfs.map(t => t.id);
+          const fallbackTurfs = await prisma.turf.findMany({
+            where: {
+              ...where,
+              id: { notIn: foundIds }
+            },
+            select: turfSelect,
+            take: take - resultTurfs.length,
+            orderBy: { createdAt: 'desc' }
+          });
+          resultTurfs = [...resultTurfs, ...fallbackTurfs];
+        }
       } else {
         resultTurfs = await prisma.turf.findMany({
           where,
-          include: {
-            owner: {
-              include: {
-                user: {
-                  select: {
-                    id: true,
-                    name: true,
-                    username: true,
-                    profilePicture: true
-                  }
-                }
-              }
-            },
-            reviews: { select: { rating: true } }
-          }
+          select: turfSelect,
+          take,
+          skip,
+          orderBy: { createdAt: 'desc' }
         });
 
-        // If city is provided but no lat/lng, manually sort to put the requested city first
         if (isVal(city)) {
           const targetCity = city.toLowerCase().trim();
           resultTurfs.sort((a, b) => {
@@ -87,25 +109,53 @@ export const getAllTurfs = async (req, res) => {
         }
       }
 
+      // Fetch today's booked timeslots count for these turfs in batch
+      const turfIds = resultTurfs.map(t => t.id);
+      const timeZone = process.env.TIMEZONE || "Asia/Kolkata";
+      const startOfToday = fromZonedTime(startOfDay(new Date()), timeZone);
+      const endOfToday = addDays(startOfToday, 1);
+
+      const bookedSlots = turfIds.length > 0 ? await prisma.timeSlot.groupBy({
+        by: ['turfId'],
+        where: {
+          turfId: { in: turfIds },
+          startTime: { gte: startOfToday, lt: endOfToday }
+        },
+        _count: { id: true }
+      }) : [];
+
+      const bookedCountMap = {};
+      bookedSlots.forEach(bs => {
+        bookedCountMap[bs.turfId] = bs._count.id;
+      });
+
       return resultTurfs.map(t => {
         const totalRating = t.reviews.reduce((acc, r) => acc + r.rating, 0);
-          const avgRating = t.reviews.length > 0 ? (totalRating / t.reviews.length) : 0;
-          return {
-            ...t,
-            _id: t.id,
-            avgRating,
-            owner: t.owner ? {
-              id: t.owner.id,
-              businessName: t.owner.businessName,
-              user: t.owner.user ? {
-                id: t.owner.user.id,
-                name: t.owner.user.name,
-                username: t.owner.user.username,
-                profilePicture: t.owner.user.profilePicture
-              } : null
+        const avgRating = t.reviews.length > 0 ? (totalRating / t.reviews.length) : 0;
+
+        const activeSlots = Array.isArray(t.generatedSlots) 
+          ? t.generatedSlots.filter(s => s.isActive !== false) 
+          : [];
+        const bookedCount = bookedCountMap[t.id] || 0;
+        const slotsLeft = Math.max(0, activeSlots.length - bookedCount);
+
+        return {
+          ...t,
+          _id: t.id,
+          avgRating,
+          slotsLeft,
+          owner: t.owner ? {
+            id: t.owner.id,
+            businessName: t.owner.businessName,
+            user: t.owner.user ? {
+              id: t.owner.user.id,
+              name: t.owner.user.name,
+              username: t.owner.user.username,
+              profilePicture: t.owner.user.profilePicture
             } : null
-          };
-        });
+          } : null
+        };
+      });
     }, 900); // 15 minute TTL
 
     return res.status(200).json({ turfs: formattedTurfs });
@@ -1054,6 +1104,60 @@ export const toggleTurfLike = async (req, res) => {
 
     await prisma.turfLike.create({ data: { userId, turfId } });
     return res.status(200).json({ success: true, message: "Liked successfully", liked: true });
+  } catch (err) {
+    return res.status(500).json({ success: false, message: err.message });
+  }
+};
+
+// Get all liked turfs for the user
+export const getLikedTurfs = async (req, res) => {
+  const userId = req.user.id;
+
+  try {
+    const liked = await prisma.turfLike.findMany({
+      where: { userId },
+      include: {
+        turf: true
+      }
+    });
+
+    const rawTurfs = liked.map(item => item.turf).filter(Boolean);
+
+    // Fetch today's booked timeslots count in batch
+    const turfIds = rawTurfs.map(t => t.id);
+    const timeZone = process.env.TIMEZONE || "Asia/Kolkata";
+    const startOfToday = fromZonedTime(startOfDay(new Date()), timeZone);
+    const endOfToday = addDays(startOfToday, 1);
+
+    const bookedSlots = turfIds.length > 0 ? await prisma.timeSlot.groupBy({
+      by: ['turfId'],
+      where: {
+        turfId: { in: turfIds },
+        startTime: { gte: startOfToday, lt: endOfToday }
+      },
+      _count: { id: true }
+    }) : [];
+
+    const bookedCountMap = {};
+    bookedSlots.forEach(bs => {
+      bookedCountMap[bs.turfId] = bs._count.id;
+    });
+
+    const turfs = rawTurfs.map(t => {
+      const activeSlots = Array.isArray(t.generatedSlots) 
+        ? t.generatedSlots.filter(s => s.isActive !== false) 
+        : [];
+      const bookedCount = bookedCountMap[t.id] || 0;
+      const slotsLeft = Math.max(0, activeSlots.length - bookedCount);
+
+      return {
+        ...t,
+        _id: t.id,
+        slotsLeft
+      };
+    });
+
+    return res.status(200).json({ success: true, turfs });
   } catch (err) {
     return res.status(500).json({ success: false, message: err.message });
   }

@@ -102,12 +102,14 @@ const UploadReel = () => {
       </AnimatePresence>
 
       {/* Header */}
-      <div className="relative z-10 px-4 md:px-8 h-20 flex items-center gap-4 border-b border-white/5 bg-[#0A0A0A]/80 backdrop-blur-xl">
-        <button onClick={() => navigate(-1)} className="p-2 bg-white/5 hover:bg-white/10 rounded-full transition-colors">
-          <ChevronLeft size={24} />
-        </button>
-        <h1 className="text-xl font-black tracking-tight">Upload Short</h1>
-      </div>
+      {!preview && (
+        <div className="relative z-10 px-4 md:px-8 h-20 flex items-center gap-4 border-b border-white/5 bg-[#0A0A0A]/80 backdrop-blur-xl">
+          <button onClick={() => navigate(-1)} className="p-2 bg-white/5 hover:bg-white/10 rounded-full transition-colors">
+            <ChevronLeft size={24} />
+          </button>
+          <h1 className="text-xl font-black tracking-tight">Upload Short</h1>
+        </div>
+      )}
 
       <div className="relative z-10 flex-1 flex flex-col overflow-y-auto no-scrollbar">
         {!preview ? (

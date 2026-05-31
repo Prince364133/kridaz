@@ -138,11 +138,11 @@ const Leaderboard = () => {
               ) : players.length > 0 ? (
                 players.map((player, idx) => (
                   <motion.div 
-                    key={player._id}
+                    key={player.id || player._id}
                     initial={{ opacity: 0, y: 10 }}
                     whileInView={{ opacity: 1, y: 0 }}
                     transition={{ delay: idx * 0.05 }}
-                    onClick={() => navigate(`/profile/${player._id}`)}
+                    onClick={() => navigate(`/profile/${player.id || player._id}`)}
                     className="flex items-center bg-white/[0.03] border border-white/5 rounded-[12px] p-4 hover:bg-white/[0.05] transition-all cursor-pointer shadow-lg relative"
                   >
                     <div className="flex items-center gap-4 flex-1">

@@ -1,11 +1,21 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Bookmark, MapPin, Gamepad2, FileText, ChevronLeft, Calendar } from 'lucide-react';
+import { Bookmark, MapPin, Gamepad2, FileText, ChevronLeft } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { useSelector } from 'react-redux';
+import { useGetSavedTurfsQuery } from '@redux/api/turfApi';
+import TurfCardMobile from '../../turf/components/TurfCardMobile';
+import TurfCardSkeleton from '@components/ui/TurfCardSkeleton';
 
 const SavedPage = () => {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('venues'); // 'venues', 'games', 'posts'
+  const isLoggedIn = useSelector((state) => state.auth.isLoggedIn);
+
+  const { data, isLoading } = useGetSavedTurfsQuery(undefined, { 
+    skip: !isLoggedIn || activeTab !== 'venues' 
+  });
+  const savedTurfs = data?.turfs || [];
 
   const tabs = [
     { id: 'venues', label: 'Venues', icon: MapPin },
@@ -40,13 +50,65 @@ const SavedPage = () => {
         <h3 className="text-xl font-bold text-white mb-2 uppercase tracking-wide">No saved {type}</h3>
         <p className="text-zinc-500 max-w-sm mx-auto text-sm">{message}</p>
         <button 
-          onClick={() => navigate('/')}
+          onClick={() => navigate('/venues')}
           className="mt-6 px-6 py-2.5 rounded-full bg-zinc-800 text-white font-semibold hover:bg-zinc-700 transition-colors"
         >
           Explore Now
         </button>
       </div>
     );
+  };
+
+  const renderContent = () => {
+    if (!isLoggedIn) {
+      return (
+        <div className="flex flex-col items-center justify-center py-20 px-4 text-center border border-zinc-800 rounded-[12px] bg-[#121212]/50 border-dashed">
+          <Bookmark className="w-16 h-16 text-zinc-700 mb-4 mx-auto" />
+          <h3 className="text-xl font-bold text-white mb-2 uppercase tracking-wide">Please Log In</h3>
+          <p className="text-zinc-500 max-w-sm mx-auto text-sm">You must be logged in to view your personal saved items.</p>
+          <button 
+            onClick={() => navigate('/login')}
+            className="mt-6 px-8 py-3 rounded-full bg-[#BFF367] text-black font-bold hover:brightness-110 transition-all uppercase tracking-wider text-xs"
+          >
+            Log In Now
+          </button>
+        </div>
+      );
+    }
+
+    if (activeTab === 'venues') {
+      if (isLoading) {
+        return (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-8">
+            {Array.from({ length: 4 }).map((_, i) => (
+              <TurfCardSkeleton key={`skeleton-${i}`} />
+            ))}
+          </div>
+        );
+      }
+
+      if (savedTurfs.length > 0) {
+        return (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-8">
+            {savedTurfs.map((turf, idx) => (
+              <motion.div
+                key={turf.id || turf._id}
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.2, delay: idx * 0.05 }}
+              >
+                <TurfCardMobile turf={turf} />
+              </motion.div>
+            ))}
+          </div>
+        );
+      }
+
+      return renderEmptyState('venues');
+    }
+
+    // Default fallbacks for currently un-implemented tabs
+    return renderEmptyState(activeTab);
   };
 
   return (
@@ -107,7 +169,7 @@ const SavedPage = () => {
             exit={{ opacity: 0, y: -10 }}
             transition={{ duration: 0.2 }}
           >
-            {renderEmptyState(activeTab)}
+            {renderContent()}
           </motion.div>
         </AnimatePresence>
       </div>

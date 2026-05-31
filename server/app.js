@@ -25,6 +25,9 @@ app.use(express.json({
 app.use(express.urlencoded({ limit: "50mb", extended: true }));
 app.use(cookieParser());
 
+import requestLogger from "./middleware/requestLogger.middleware.js";
+app.use(requestLogger);
+
 // Serve static files from the public directory
 import path from "path";
 app.use(express.static(path.join(process.cwd(), "public")));
@@ -50,7 +53,18 @@ app.use(
   })
 );
 
-// â”€â”€ Rate Limiters â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+import { register } from "./utils/metrics.js";
+
+app.get("/metrics", async (req, res) => {
+  try {
+    res.set("Content-Type", register.contentType);
+    res.end(await register.metrics());
+  } catch (err) {
+    res.status(500).end(err.message);
+  }
+});
+
+// ── Rate Limiters ─────────────────────────────────────────────────────────────â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 // Global â€” all /api routes (health check excluded via skip in the middleware)
 app.use('/api', globalLimiter);
 

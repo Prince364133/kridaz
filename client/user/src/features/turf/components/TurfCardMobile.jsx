@@ -1,7 +1,9 @@
 import { useState, useEffect } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { Star, Heart, MapPin, Navigation } from "lucide-react";
-import axiosInstance from "@hooks/useAxiosInstance";
+import { useSelector } from "react-redux";
+import { useGetSavedTurfsQuery, useToggleTurfLikeMutation } from "@redux/api/turfApi";
+import toast from "react-hot-toast";
 
 /** Haversine distance in km */
 const haversineKm = (lat1, lon1, lat2, lon2) => {
@@ -17,9 +19,15 @@ const haversineKm = (lat1, lon1, lat2, lon2) => {
 };
 
 const TurfCardMobile = ({ turf, distance: distanceProp, compact = false }) => {
-  const [isWishlisted, setIsWishlisted] = useState(false);
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
+  const isLoggedIn = useSelector((state) => state.auth.isLoggedIn);
+  
+  const { data: savedData } = useGetSavedTurfsQuery(undefined, { skip: !isLoggedIn });
+  const [toggleLikeApi] = useToggleTurfLikeMutation();
+
+  const targetId = turf.id || turf._id;
+  const isWishlisted = isLoggedIn && savedData?.turfs?.some(t => (t.id || t._id) === targetId);
 
   const returnTo = searchParams.get('returnTo');
   const baseTo = `/venue/${turf.id || turf._id}`;
@@ -30,7 +38,7 @@ const TurfCardMobile = ({ turf, distance: distanceProp, compact = false }) => {
 
   // Extract slots
   const activeSlots = (turf.generatedSlots || []).filter(s => s.isActive !== false);
-  const slotsLeft = activeSlots.length > 0 ? activeSlots.length : Math.floor(Math.random() * 10) + 5;
+  const slotsLeft = turf.slotsLeft !== undefined ? turf.slotsLeft : (activeSlots.length > 0 ? activeSlots.length : Math.floor(Math.random() * 10) + 5);
   
   // Extract sports
   const sportTypes = turf.sportTypes || ["SPORTS"];
@@ -60,13 +68,15 @@ const TurfCardMobile = ({ turf, distance: distanceProp, compact = false }) => {
   const toggleWishlist = async (e) => {
     e.preventDefault();
     e.stopPropagation();
-    const targetId = turf.id || turf._id;
+    if (!isLoggedIn) {
+      toast.error("Please login to save venues");
+      return;
+    }
     try {
-      setIsWishlisted(!isWishlisted);
-      await axiosInstance.post("/api/user/turf/user/like", { turfId: targetId });
+      await toggleLikeApi(targetId).unwrap();
     } catch (err) {
-      setIsWishlisted(isWishlisted);
       console.error("[TELEMETRY] Failed to toggle wishlist like:", err);
+      toast.error("Failed to save venue");
     }
   };
 

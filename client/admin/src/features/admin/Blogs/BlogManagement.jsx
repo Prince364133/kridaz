@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import axios from "axios";
+import axiosInstance from "@hooks/useAxiosInstance";
 import { toast } from "react-hot-toast";
 import {
   Plus, Trash2, Edit2, FileText, X, Eye, ThumbsUp,
@@ -108,14 +108,12 @@ export const BlogManagement = () => {
     status: "published",
   });
 
-  const API_BASE = `${import.meta.env.VITE_API_URL}/api/admin/blogs`;
-
   useEffect(() => { fetchData(); }, []);
 
   const fetchData = async () => {
     try {
       setLoading(true);
-      const res = await axios.get(API_BASE, { withCredentials: true });
+      const res = await axiosInstance.get("/api/admin/blogs/admin");
       setBlogs(res.data.blogs || []);
     } catch {
       toast.error("Failed to fetch blogs");
@@ -131,7 +129,7 @@ export const BlogManagement = () => {
       const localUrl = URL.createObjectURL(file);
       setImagePreview(localUrl);
     } else {
-      setImagePreview(editingItem?.imageUrl || "");
+      setImagePreview(editingItem?.imageUrl || editingItem?.featuredImage || "");
     }
   };
 
@@ -139,7 +137,7 @@ export const BlogManagement = () => {
     setImageFile(null);
     if (item) {
       setEditingItem(item);
-      setImagePreview(item.imageUrl || "");
+      setImagePreview(item.imageUrl || item.featuredImage || "");
       setFormData({
         title: item.title,
         subtitle: item.subtitle || "",
@@ -193,10 +191,10 @@ export const BlogManagement = () => {
       const config = { withCredentials: true };
 
       if (editingItem) {
-        await axios.put(`${API_BASE}/${editingItem._id}`, data, config);
+        await axiosInstance.put(`/api/admin/blogs/admin/${editingItem.id || editingItem._id}`, data, config);
         toast.success("Blog updated successfully");
       } else {
-        await axios.post(API_BASE, data, config);
+        await axiosInstance.post("/api/admin/blogs/admin", data);
         toast.success("Blog created successfully");
       }
 
@@ -212,7 +210,7 @@ export const BlogManagement = () => {
   const handleDelete = async (id) => {
     if (!window.confirm("Are you sure you want to delete this blog?")) return;
     try {
-      await axios.delete(`${API_BASE}/${id}`, { withCredentials: true });
+      await axiosInstance.delete(`/api/admin/blogs/admin/${id}`, { withCredentials: true });
       toast.success("Blog deleted successfully");
       fetchData();
     } catch {
@@ -249,16 +247,15 @@ export const BlogManagement = () => {
         </button>
       </div>
 
-      {/* Blog Grid */}
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
         {blogs.map((blog, index) => (
           <div
-            key={blog._id}
+            key={blog.id || blog._id}
             className="group relative flex flex-col rounded-[8px] border border-white/10 bg-[#1A1A1A] overflow-hidden transition-all hover:border-lime-500/50"
           >
             <div className="aspect-[4/3] w-full bg-black overflow-hidden relative">
               <img
-                src={blog.imageUrl}
+                src={blog.imageUrl || blog.featuredImage}
                 alt={blog.title}
                 className="w-full h-full object-cover opacity-60 group-hover:opacity-100 group-hover:scale-105 transition-all duration-500"
               />
@@ -300,7 +297,7 @@ export const BlogManagement = () => {
                   Edit
                 </button>
                 <button
-                  onClick={() => handleDelete(blog._id)}
+                  onClick={() => handleDelete(blog.id || blog._id)}
                   className="w-11 h-11 flex items-center justify-center rounded-[8px] bg-red-500/10 text-red-500 hover:bg-red-500 hover:text-white transition-all"
                 >
                   <Trash2 size={18} />
@@ -487,3 +484,4 @@ export const BlogManagement = () => {
     </div>
   );
 };
+

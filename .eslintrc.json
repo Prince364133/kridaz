@@ -24,6 +24,24 @@
     "no-unused-vars": "warn",
     "no-console": "off"
   },
+  "overrides": [
+    {
+      "files": ["client/**/*.jsx", "client/**/*.tsx"],
+      "rules": {
+        "no-restricted-imports": [
+          "error",
+          {
+            "patterns": [
+              {
+                "group": ["@api/*", "**/api/*"],
+                "message": "UI components must not import directly from the API layer. Use Redux RTK Query hooks instead."
+              }
+            ]
+          }
+        ]
+      }
+    }
+  ],
   "settings": {
     "react": {
       "version": "detect"

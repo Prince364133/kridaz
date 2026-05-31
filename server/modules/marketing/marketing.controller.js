@@ -3,10 +3,14 @@ import { prisma } from "../../config/prisma.js";
 import cloudinary from "../../utils/cloudinary.js";
 
 // Helper for cloudinary upload
-const uploadToCloudinary = (fileBuffer, folder) => {
+const uploadToCloudinary = (fileBuffer, folder, isVideo = false) => {
   return new Promise((resolve, reject) => {
+    const options = { folder };
+    if (isVideo) {
+      options.resource_type = "video";
+    }
     const uploadStream = cloudinary.uploader.upload_stream(
-      { folder },
+      options,
       (error, result) => {
         if (error) reject(error);
         else resolve(result.secure_url);
@@ -30,15 +34,31 @@ export const getAdBanners = async (req, res) => {
 
 export const createAdBanner = async (req, res) => {
   try {
-    const bannerData = { ...req.body };
+    const { title, description, targetUrl, type, order, isActive } = req.body;
     
-    if (req.file) {
-      bannerData.imageUrl = await uploadToCloudinary(req.file.buffer, "kridaz/marketing");
-    }
+    const bannerData = {
+      title,
+      description,
+      targetUrl,
+      type: type || "HOME",
+      order: order ? Number(order) : 0,
+      isActive: isActive === 'true' || isActive === true
+    };
 
-    if (bannerData.order) bannerData.order = Number(bannerData.order);
-    if (bannerData.isActive === 'true') bannerData.isActive = true;
-    if (bannerData.isActive === 'false') bannerData.isActive = false;
+    if (req.file) {
+      const isVideo = req.file.mimetype.startsWith("video/");
+      const uploadedUrl = await uploadToCloudinary(req.file.buffer, "kridaz/marketing", isVideo);
+      if (isVideo) {
+        bannerData.videoUrl = uploadedUrl;
+        bannerData.imageUrl = null;
+      } else {
+        bannerData.imageUrl = uploadedUrl;
+        bannerData.videoUrl = null;
+      }
+    } else {
+      if (req.body.imageUrl) bannerData.imageUrl = req.body.imageUrl;
+      if (req.body.videoUrl) bannerData.videoUrl = req.body.videoUrl;
+    }
 
     const banner = await prisma.adBanner.create({
       data: bannerData
@@ -51,15 +71,31 @@ export const createAdBanner = async (req, res) => {
 
 export const updateAdBanner = async (req, res) => {
   try {
-    const bannerData = { ...req.body };
+    const { title, description, targetUrl, type, order, isActive } = req.body;
+    
+    const bannerData = {
+      title,
+      description,
+      targetUrl,
+      type: type || "HOME",
+      order: order ? Number(order) : 0,
+      isActive: isActive === 'true' || isActive === true
+    };
 
     if (req.file) {
-      bannerData.imageUrl = await uploadToCloudinary(req.file.buffer, "kridaz/marketing");
+      const isVideo = req.file.mimetype.startsWith("video/");
+      const uploadedUrl = await uploadToCloudinary(req.file.buffer, "kridaz/marketing", isVideo);
+      if (isVideo) {
+        bannerData.videoUrl = uploadedUrl;
+        bannerData.imageUrl = null;
+      } else {
+        bannerData.imageUrl = uploadedUrl;
+        bannerData.videoUrl = null;
+      }
+    } else {
+      if (req.body.imageUrl) bannerData.imageUrl = req.body.imageUrl;
+      if (req.body.videoUrl) bannerData.videoUrl = req.body.videoUrl;
     }
-
-    if (bannerData.order) bannerData.order = Number(bannerData.order);
-    if (bannerData.isActive === 'true') bannerData.isActive = true;
-    if (bannerData.isActive === 'false') bannerData.isActive = false;
 
     const banner = await prisma.adBanner.update({
       where: { id: req.params.id },
