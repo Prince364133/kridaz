@@ -68,7 +68,7 @@ const AuthModal = () => {
         </div>
 
         {/* Right Side: Form Area */}
-        <div className="w-full md:w-1/2 flex flex-col overflow-hidden relative">
+        <div className="w-full md:w-1/2 flex flex-col overflow-y-auto custom-scrollbar relative">
           
           <div className="flex-1 flex flex-col justify-center py-10 px-2 min-h-0">
             {initialView === 'login' ? (
