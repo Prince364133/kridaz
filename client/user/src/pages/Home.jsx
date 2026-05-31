@@ -497,6 +497,9 @@ export default function Home() {
       </Link>
         </div>
 
+      {/* ── AD BANNERS (SPECIAL PROMOTION) ── */}
+      <AdBannerSection banners={marketing.banners} />
+
   {/* ── FIND YOUR ARENA ── */}
   <section className="py-6 mb-6 w-full">
  <div className="relative flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6 border-b border-white/5 pb-4">
@@ -1018,10 +1021,7 @@ export default function Home() {
   </section>
 
   <div className={shouldHideRest ? 'hidden' : ''}>
- {/* ── AD BANNERS ── */}
- <AdBannerSection banners={marketing.banners} />
-
- {/* ── FIND PROFESSIONALS (Feature Flag) ── */}
+  {/* ── FIND PROFESSIONALS (Feature Flag) ── */}
  {featureFlags['find_professionals'] && (
  <section className="py-6 lg:py-12 px-4 lg:px-12 border-b" style={{ backgroundColor: "#000", borderColor: "#1A1A1A" }}>
  <div className="w-full">
