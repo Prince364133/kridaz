@@ -635,21 +635,38 @@ const OnboardingModal = ({ isOpen, onClose, initialData, onComplete }) => {
                 <div className="space-y-5">
                   <span className="text-[11px] font-semibold text-white/60 uppercase tracking-widest mb-2 block">Account Details</span>
                   
-                  <div className="block">
+                  <div className="block" ref={locationRef}>
                     <span className="text-[11px] font-semibold text-white/60 uppercase tracking-widest mb-2 block">Your City/Area</span>
-                    <div 
-                      className="relative cursor-pointer group"
-                      onClick={() => setIsLocationModalOpen(true)}
-                    >
-                      <MapPin className="absolute left-4 top-1/2 -translate-y-1/2 text-white/40 group-hover:text-white/70 transition-colors" size={18} />
-                      <div className="w-full bg-[#222222] border border-transparent rounded-[10px] py-4 pl-12 pr-4 text-white group-hover:border-white/20 transition-all flex items-center min-h-[56px]">
-                        {formData.location ? (
-                          <span className="text-white truncate pr-6">{formData.location}</span>
-                        ) : (
-                          <span className="text-white/20">Select your location</span>
-                        )}
-                      </div>
-                      <ChevronRight className="absolute right-4 top-1/2 -translate-y-1/2 text-white/40 group-hover:text-[#BFF367] transition-colors" size={18} />
+                    <div className="relative">
+                      <MapPin className="absolute left-4 top-1/2 -translate-y-1/2 text-white/40 z-10" size={18} />
+                      <input
+                        type="text"
+                        value={formData.location}
+                        onChange={(e) => setFormData({...formData, location: e.target.value})}
+                        onFocus={() => setShowSuggestions(locationSuggestions.length > 0)}
+                        placeholder="Select your location"
+                        className="w-full bg-[#222222] border border-transparent rounded-[10px] py-4 pl-12 pr-4 text-white focus:border-white/20 outline-none transition-all placeholder-white/20"
+                      />
+                      {isSearchingLocation && (
+                        <div className="absolute right-4 top-1/2 -translate-y-1/2">
+                          <Loader2 className="w-4 h-4 text-[#BFF367] animate-spin" />
+                        </div>
+                      )}
+                      {showSuggestions && locationSuggestions.length > 0 && (
+                        <div className="absolute top-full left-0 right-0 mt-2 bg-[#222222] border border-white/10 rounded-[10px] overflow-hidden z-[110] shadow-2xl max-h-[160px] overflow-y-auto custom-scrollbar">
+                          {locationSuggestions.map((suggestion, idx) => (
+                            <button
+                              type="button"
+                              key={idx}
+                              onClick={() => handleSelectLocation(suggestion)}
+                              className="w-full px-4 py-3 text-left hover:bg-[#BFF367]/10 text-white/80 hover:text-white border-b border-white/5 last:border-0 transition-colors flex flex-col gap-0.5"
+                            >
+                              <span className="text-sm font-bold">{suggestion.city || suggestion.display_name.split(',')[0]}</span>
+                              <span className="text-[10px] text-white/40 truncate">{suggestion.display_name}</span>
+                            </button>
+                          ))}
+                        </div>
+                      )}
                     </div>
                   </div>
 
