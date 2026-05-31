@@ -552,7 +552,41 @@ export const createHostedGame = async (req, res) => {
 
 export const getAllHostedGames = async (req, res) => {
   try {
-    const { city, state, gameType } = req.query;
+    const { city, state, gameType, limit, page } = req.query;
+
+    const take = limit ? Math.min(parseInt(limit), 50) : 20;
+    const skip = page ? (parseInt(page) - 1) * take : 0;
+
+    const compactGameInclude = {
+      host: { select: { id: true, name: true, profilePicture: true } },
+      turf: { select: { id: true, name: true, city: true, state: true, images: true } },
+      umpire: { select: { id: true, name: true, profilePicture: true } },
+      scorer: { select: { id: true, name: true, profilePicture: true } },
+      streamer: { select: { id: true, name: true, profilePicture: true } },
+      slots: {
+        select: {
+          id: true,
+          status: true,
+          role: true,
+          user: { select: { id: true, name: true, profilePicture: true } }
+        }
+      },
+      teams: {
+        select: {
+          id: true,
+          name: true,
+          teamKey: true,
+          slots: {
+            select: {
+              id: true,
+              status: true,
+              role: true,
+              user: { select: { id: true, name: true, profilePicture: true } }
+            }
+          }
+        }
+      }
+    };
 
     const games = await prisma.hostedGame.findMany({
       where: {
@@ -562,7 +596,9 @@ export const getAllHostedGames = async (req, res) => {
         ...(gameType ? { gameType } : {})
       },
       orderBy: { date: 'asc' },
-      include: fullGameInclude
+      take,
+      skip,
+      include: compactGameInclude
     });
 
     const formattedGames = games.map(formatGameForClient);

@@ -22,7 +22,7 @@ export const updateGeoPoint = async (table, id, lat, lng) => {
 export const findNearby = async (table, lat, lng, radiusInMeters = 5000, options = {}) => {
   try {
     const tableName = table.charAt(0).toUpperCase() + table.slice(1);
-    const { where = {}, take = 50, include = {} } = options;
+    const { where = {}, take = 50, include = {}, select } = options;
 
     // 1. Calculate bounding box (rough square) to use indexes
     // 1 degree of latitude is ~111km
@@ -81,16 +81,21 @@ export const findNearby = async (table, lat, lng, radiusInMeters = 5000, options
     });
     
     // Fetch full records with Prisma
-    const records = await prisma[table.toLowerCase()].findMany({
+    const queryOptions = {
       where: {
         AND: [
           { id: { in: ids } },
           where
         ]
       },
-      include,
       take
-    });
+    };
+    if (select) {
+      queryOptions.select = select;
+    } else if (include && Object.keys(include).length > 0) {
+      queryOptions.include = include;
+    }
+    const records = await prisma[table.toLowerCase()].findMany(queryOptions);
 
     // Restore order and attach distance
     records.sort((a, b) => idToDistance[a.id] - idToDistance[b.id]);
