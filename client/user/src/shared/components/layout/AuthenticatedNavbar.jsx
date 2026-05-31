@@ -153,7 +153,7 @@ const AuthenticatedNavbar = ({ toggleSidebar }) => {
   };
 
   const handleNotificationClick = (notif) => {
-    markRead(notif._id);
+    markRead(notif.id || notif._id);
     if (notif.link) {
       navigate(notif.link);
     }
@@ -249,7 +249,7 @@ const AuthenticatedNavbar = ({ toggleSidebar }) => {
                   {notifications.length > 0 ? (
                     notifications.map((notif) => (
                       <div 
-                        key={notif._id} 
+                        key={notif.id || notif._id} 
                         onClick={() => handleNotificationClick(notif)}
                         className={`p-5 border-b border-white/5 transition-colors cursor-pointer group ${notif.isRead ? 'opacity-60' : 'bg-white/[0.02]'}`}
                       >

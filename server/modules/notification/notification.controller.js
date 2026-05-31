@@ -1,12 +1,22 @@
 import { prisma } from "../../config/prisma.js";
 
 const getRecipientQuery = (req) => {
-  const { ownerId, id } = req.user;
-  // If ownerId exists in the token, this is a partner/admin notification stream
-  if (ownerId) {
-    return { ownerId: ownerId, recipientModel: 'Owner' };
+  const actor = req.user || req.owner || req.admin;
+  const id = actor?.id || actor?.userId || actor?._id;
+  const ownerId = actor?.ownerId;
+  const role = actor?.role?.toString().toLowerCase() || "";
+
+  if (!id && !ownerId) {
+    const error = new Error("Authenticated recipient could not be resolved");
+    error.statusCode = 401;
+    throw error;
   }
-  // Otherwise, it's a general user notification stream
+
+  // Admins are stored as users. Business actors use their owner profile stream.
+  if (ownerId && role !== "admin" && role !== "bmsp_admin") {
+    return { ownerId, recipientModel: 'Owner' };
+  }
+
   return { userId: id, recipientModel: 'User' };
 };
 
@@ -22,7 +32,7 @@ export const getMyNotifications = async (req, res) => {
 
     res.status(200).json({ success: true, notifications });
   } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
+    res.status(error.statusCode || 500).json({ success: false, message: error.message });
   }
 };
 
@@ -35,7 +45,7 @@ export const markAsRead = async (req, res) => {
     });
     res.status(200).json({ success: true, message: "Marked as read" });
   } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
+    res.status(error.statusCode || 500).json({ success: false, message: error.message });
   }
 };
 
@@ -49,7 +59,7 @@ export const markAllAsRead = async (req, res) => {
     });
     res.status(200).json({ success: true, message: "All marked as read" });
   } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
+    res.status(error.statusCode || 500).json({ success: false, message: error.message });
   }
 };
 
@@ -69,9 +79,12 @@ export const clearNotifications = async (req, res) => {
 export const saveDeviceToken = async (req, res) => {
   const { token, platform = "mobile" } = req.body;
   try {
-    const { id } = req.user;
+    const id = req.user?.id || req.user?.userId || req.user?._id;
     if (!token) {
       return res.status(400).json({ success: false, message: "Token is required" });
+    }
+    if (!id) {
+      return res.status(401).json({ success: false, message: "Authenticated user could not be resolved" });
     }
 
     // 1. Register or update the token in the UserDevice model

@@ -87,7 +87,16 @@ export const PushComposer = () => {
       };
 
       const res = await axiosInstance.post("/api/admin/notifications/send", payload);
-      toast.success(res.data.message || "Push notification sent successfully!");
+      const summary = res.data.summary;
+      const successMessage = res.data.message || "Push notification sent successfully!";
+
+      if (summary?.tokens > 0 && !summary.mock && summary.success === 0) {
+        toast.error(successMessage);
+      } else if (summary?.failure > 0) {
+        toast(successMessage);
+      } else {
+        toast.success(successMessage);
+      }
       
       // Reset form
       setFormData({

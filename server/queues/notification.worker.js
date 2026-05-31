@@ -8,7 +8,8 @@ import {
   sendCustomUmpireInvite 
 } from "../utils/notification.service.js";
 import generateEmail from "../utils/generateEmail.js";
-import { createNotification, notifyAdmins } from "../utils/notificationHelper.js";
+import { notifyAdmins } from "../utils/notificationHelper.js";
+import { processInAppNotification } from "../services/notification.dispatcher.js";
 
 /**
  * Worker to process notification jobs
@@ -46,48 +47,7 @@ const worker = new Worker(
         }
 
         case "IN_APP_NOTIF": {
-          const { recipientId, recipientModel, title, message, type, link, metadata } = data;
-          
-          // 1. Create the persistent database record (In-app notification)
-          const dbNotification = await createNotification({ recipientId, recipientModel, title, message, type, link, metadata });
-          
-          // 2. Fetch all registered and fallback device tokens for this user
-          if (recipientModel === 'User') {
-            try {
-              const { prisma } = await import("../config/prisma.js");
-              
-              const [user, userDevices] = await Promise.all([
-                prisma.user.findUnique({
-                  where: { id: recipientId },
-                  select: { fcmToken: true }
-                }),
-                prisma.userDevice.findMany({
-                  where: { userId: recipientId },
-                  select: { token: true }
-                })
-              ]);
-
-              const tokenSet = new Set();
-              if (user?.fcmToken) tokenSet.add(user.fcmToken);
-              userDevices.forEach(d => {
-                if (d.token) tokenSet.add(d.token);
-              });
-
-              const tokens = Array.from(tokenSet);
-
-              // 3. Dispatch the push notification multicast if active devices exist
-              if (tokens.length > 0) {
-                const { sendPushNotification } = await import("../utils/pushHelper.js");
-                await sendPushNotification(tokens, title, message, {
-                  notificationId: dbNotification?.id || "",
-                  link: link || "",
-                  type: type || ""
-                });
-              }
-            } catch (err) {
-              logger.error("[Notification Worker] Error fetching user or sending push notification:", err);
-            }
-          }
+          await processInAppNotification(data);
           break;
         }
 
