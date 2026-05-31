@@ -77,6 +77,48 @@ export const kridazActiveUsers = new client.Gauge({
 });
 register.registerMetric(kridazActiveUsers);
 
+// ── Granular Business Metrics (BMS-parity) ──────────────────────────────────
+export const bookingConfirmedTotal = new client.Counter({
+  name: "kridaz_booking_confirmed_total",
+  help: "Total bookings confirmed (payment captured)",
+  labelNames: ["payment_method"],
+});
+register.registerMetric(bookingConfirmedTotal);
+
+export const bookingCancelledTotal = new client.Counter({
+  name: "kridaz_booking_cancelled_total",
+  help: "Total bookings cancelled",
+  labelNames: ["reason", "refund_type"],
+});
+register.registerMetric(bookingCancelledTotal);
+
+export const paymentSuccessTotal = new client.Counter({
+  name: "kridaz_payment_success_total",
+  help: "Total successful payments",
+  labelNames: ["gateway", "type"],
+});
+register.registerMetric(paymentSuccessTotal);
+
+export const paymentFailedTotal = new client.Counter({
+  name: "kridaz_payment_failed_total",
+  help: "Total failed payments",
+  labelNames: ["gateway", "reason"],
+});
+register.registerMetric(paymentFailedTotal);
+
+export const walletTopupTotal = new client.Counter({
+  name: "kridaz_wallet_topup_total",
+  help: "Total wallet topups",
+});
+register.registerMetric(walletTopupTotal);
+
+export const userRegistrationTotal = new client.Counter({
+  name: "kridaz_user_registration_total",
+  help: "Total user registrations",
+  labelNames: ["role", "method"],
+});
+register.registerMetric(userRegistrationTotal);
+
 // ── Polling for Queue Depths ────────────────────────────────────────────────
 const queues = {};
 

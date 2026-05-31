@@ -2,6 +2,7 @@ import { prisma } from "../config/prisma.js";
 import { WalletBlockingService } from "./walletBlocking.service.js";
 import { TrustScoreLedgerService } from "./trustScore.service.js";
 import logger from "../utils/logger.js";
+import { bookingCancelledTotal } from "../utils/metrics.js";
 
 /**
  * CancellationService
@@ -45,6 +46,7 @@ export class CancellationService {
               data: { status: "CANCELLED_BY_USER" },
             });
             logger.info(`[CancellationService] Booking ${bookingId} cancelled by USER > 72h before start. 100% Refund.`);
+            bookingCancelledTotal.inc({ reason: "USER_INITIATED", refund_type: "FULL" });
           } else if (diffHours >= 48 && diffHours <= 72) {
             // User Cancellation 48h - 72h: 50% Refund, 0% Pro, 50% Platform fee
             const platformFee = blockedAmt * 0.5;
@@ -88,6 +90,7 @@ export class CancellationService {
               data: { status: "CANCELLED_BY_USER" },
             });
             logger.info(`[CancellationService] Booking ${bookingId} cancelled by USER 48-72h. 50% Refund, 50% Platform Fee.`);
+            bookingCancelledTotal.inc({ reason: "USER_INITIATED", refund_type: "PARTIAL" });
           } else {
             // User Cancellation < 48h: 0% Refund, 10% Pro, 90% Platform fee
             const platformFee = blockedAmt * 0.9;
@@ -127,6 +130,7 @@ export class CancellationService {
               data: { status: "CANCELLED_BY_USER" },
             });
             logger.info(`[CancellationService] Booking ${bookingId} cancelled by USER < 48h. 0% Refund, 10% Pro Payout, 90% Platform Fee.`);
+            bookingCancelledTotal.inc({ reason: "USER_INITIATED", refund_type: "NONE" });
           }
         });
       } else if (actorType === "PROFESSIONAL") {
@@ -154,6 +158,7 @@ export class CancellationService {
         });
 
         logger.info(`[CancellationService] Booking ${bookingId} cancelled by PROFESSIONAL > 72h before start. Trust penalty applied.`);
+        bookingCancelledTotal.inc({ reason: "PRO_INITIATED", refund_type: "FULL" });
       } else {
         throw new Error("Invalid actor type for cancellation");
       }

@@ -1,0 +1,62 @@
+groups:
+  - name: kridaz_slos
+    rules:
+      # Booking API must be available 99.9% of the time
+      - alert: BookingAPIHighErrorRate
+        expr: rate(http_request_duration_seconds_count{route=~"/api/user/booking.*", status_code=~"5.."}[5m]) / rate(http_request_duration_seconds_count{route=~"/api/user/booking.*"}[5m]) > 0.01
+        for: 5m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Booking API error rate above 1%"
+          description: "The booking API is returning >1% server errors over the last 5 minutes."
+
+      # Payment webhook must process within 10 seconds
+      - alert: WebhookSlowProcessing
+        expr: histogram_quantile(0.95, rate(http_request_duration_seconds_bucket{route="/api/payment/webhook"}[5m])) > 10
+        for: 2m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Payment webhook p95 latency above 10s"
+          description: "The 95th percentile of payment webhook processing time exceeds 10 seconds."
+
+      # Auth must be fast
+      - alert: AuthAPIHighLatency
+        expr: histogram_quantile(0.95, rate(http_request_duration_seconds_bucket{route=~"/api/.*/auth/login"}[5m])) > 2
+        for: 3m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Auth API p95 latency above 2s"
+          description: "Login endpoints are responding slower than 2 seconds at the 95th percentile."
+
+      # BullMQ queues must not overflow
+      - alert: NotificationQueueOverflow
+        expr: queue_depth_total{queue_name="notifications", status="waiting"} > 1000
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Notification queue has >1000 pending jobs"
+          description: "The notification BullMQ queue has accumulated over 1000 waiting jobs."
+
+      # Media processing queue should not stall
+      - alert: MediaQueueStalled
+        expr: queue_depth_total{queue_name="media", status="failed"} > 50
+        for: 10m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Media queue has >50 failed jobs"
+          description: "The media processing queue has accumulated over 50 failed jobs, indicating possible worker issues."
+
+      # High payment failure rate
+      - alert: HighPaymentFailureRate
+        expr: rate(kridaz_payment_failed_total[5m]) / (rate(kridaz_payment_success_total[5m]) + rate(kridaz_payment_failed_total[5m])) > 0.05
+        for: 5m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Payment failure rate above 5%"
+          description: "More than 5% of payment attempts are failing over the last 5 minutes."

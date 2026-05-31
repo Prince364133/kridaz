@@ -1,7 +1,7 @@
 import crypto from "crypto";
 import { prisma } from "../../config/prisma.js";
 import logger from "../../utils/logger.js";
-import { paymentTotal } from "../../utils/metrics.js";
+import { paymentTotal, paymentSuccessTotal, walletTopupTotal, bookingConfirmedTotal } from "../../utils/metrics.js";
 
 /**
  * Handle Razorpay Webhooks
@@ -104,6 +104,8 @@ async function handlePaymentCaptured(payment) {
       
       logger.info(`[WEBHOOK] Wallet topped up for ${user?.name || owner?.businessName}`);
       paymentTotal.inc({ status: "success" });
+      paymentSuccessTotal.inc({ gateway: "razorpay", type: "wallet_topup" });
+      walletTopupTotal.inc();
     }
     return;
   }
@@ -127,5 +129,7 @@ async function handlePaymentCaptured(payment) {
       }
     });
     paymentTotal.inc({ status: "success" });
+    paymentSuccessTotal.inc({ gateway: "razorpay", type: "booking" });
+    bookingConfirmedTotal.inc({ payment_method: "online" });
   }
 }

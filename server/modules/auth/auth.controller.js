@@ -12,6 +12,7 @@ import fs from 'fs';
 import { addUsernameToBloom, checkUsernameBloom, blacklistOtpIdentifier, isOtpBlacklisted } from "../../utils/bloomFilter.js";
 import { logAudit } from "../../utils/auditLogger.js";
 import logger from "../../utils/logger.js";
+import { userRegistrationTotal } from "../../utils/metrics.js";
 import { SOCKET } from "@kridaz/shared-constants/socketEvents";
 
 
@@ -475,6 +476,9 @@ export const registerUser = async (req, res) => {
     // Async: Update the username bloom filter
     addUsernameToBloom(user.username);
 
+    // Track registration metric
+    userRegistrationTotal.inc({ role: user.role || "USER", method: "email" });
+
     const token = generateUserToken(user.id, user.role, ownerProfileId);
 
     await issueTokens(res, user.id, token);
@@ -611,6 +615,9 @@ export const registerOwner = async (req, res) => {
 
     // Async: Update the username bloom filter
     addUsernameToBloom(user.username);
+
+    // Track registration metric
+    userRegistrationTotal.inc({ role: user.role || "OWNER", method: "email" });
 
     const token = generateOwnerToken(user.id, owner.role, owner.id);
 
