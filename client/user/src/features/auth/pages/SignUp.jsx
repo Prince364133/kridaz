@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import GoogleAuthButton from "../components/GoogleAuthButton";
 import OnboardingModal from "@components/modals/OnboardingModal";
-import { ArrowRight, ChevronLeft, User as UserIcon, Lock, CheckCircle2 } from "lucide-react";
+import { ArrowRight, ChevronLeft, User as UserIcon, Lock, CheckCircle2, X } from "lucide-react";
 import toast from "react-hot-toast";
 import axiosInstance from "@hooks/useAxiosInstance";
 import { useDispatch, useSelector } from "react-redux";
@@ -485,11 +485,37 @@ const SignUp = ({ isModal = false }) => {
   }
 
   return (
-    <div className="min-h-screen bg-[#000] relative flex flex-col items-center justify-start pt-4 lg:pt-10 pb-12 font-sans">
-      <div className="absolute inset-0 z-0 bg-black" />
-      {content}
-      <div className="absolute top-1/4 right-0 w-[600px] h-[600px] bg-white/[0.01] pointer-events-none rounded-full" />
-      <div className="absolute bottom-1/4 left-0 w-[600px] h-[600px] bg-white/[0.01] pointer-events-none rounded-full" />
+    <div className={`fixed inset-0 z-[9999] flex items-center justify-center sm:p-4 bg-black/60 backdrop-blur-md transition-opacity duration-500 ease-in-out ${!mounted ? 'opacity-0' : 'opacity-100'}`}>
+      <div className={`relative w-full max-w-[956px] h-[100dvh] sm:h-[821px] sm:max-h-[95vh] bg-[#0d0d0d] rounded-none sm:rounded-2xl overflow-hidden flex shadow-2xl sm:border border-white/10 transition-all duration-500 ease-in-out transform ${!mounted ? 'translate-y-full opacity-0 scale-95' : 'translate-y-0 opacity-100 scale-100'}`}>
+        {/* Close Button */}
+        <button
+          onClick={() => navigate('/')}
+          className="absolute top-4 right-4 z-50 p-2 bg-black/40 hover:bg-white/10 rounded-full text-white/60 hover:text-white transition-colors"
+        >
+          <X size={20} />
+        </button>
+
+        {/* Left Side: Image Holder */}
+        <div className="hidden md:block w-1/2 relative bg-black">
+          <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent z-10" />
+          <img 
+            src="/scoring_bg.png" 
+            alt="Auth Background" 
+            className="absolute inset-0 w-full h-full object-cover"
+          />
+          <div className="absolute bottom-10 left-10 z-20 space-y-2 text-left">
+            <h3 className="text-3xl font-bold text-white">Join Kridaz</h3>
+            <p className="text-white/70">Connect, play, and track your sports journey.</p>
+          </div>
+        </div>
+
+        {/* Right Side: Form Area */}
+        <div className="w-full md:w-1/2 flex flex-col overflow-y-auto custom-scrollbar relative">
+          <div className="flex-1 flex flex-col justify-center py-10 px-2 min-h-0">
+            {content}
+          </div>
+        </div>
+      </div>
       
       {showOnboarding && (
         <OnboardingModal 
