@@ -101,14 +101,21 @@ export const sendAdminPushNotification = async (req, res) => {
 
   try {
     if (recipientId === "ALL") {
-      // Find all general users who have registered an FCM device token
+      // Find all general users who have registered an FCM device token or a web/mobile device
       const activeUsers = await prisma.user.findMany({
         where: {
-          NOT: {
-            fcmToken: {
-              equals: null
+          OR: [
+            {
+              NOT: {
+                fcmToken: null
+              }
+            },
+            {
+              devices: {
+                some: {}
+              }
             }
-          }
+          ]
         },
         select: { id: true }
       });

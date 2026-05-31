@@ -12,7 +12,7 @@ import {
   globalLimiter,
 } from "./middleware/rateLimiter.middleware.js";
 
-dotenv.config();
+dotenv.config(); // Hot-reload trigger for route alias updates
 
 const app = express();
 

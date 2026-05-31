@@ -33,6 +33,7 @@ userRouter.use("/community", communityRouter);
 userRouter.use("/wallet", walletRouter);
 userRouter.use("/dispute", disputeRouter);
 userRouter.use("/notifications", notificationRouter);
+userRouter.use("/notification", notificationRouter);
 userRouter.use("/booking", userBookingRouter);
 
 export default userRouter;

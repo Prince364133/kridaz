@@ -9,11 +9,13 @@ import logger from "./logger.js";
  * @param {object} [data] - Optional key-value metadata payload for deep linking
  */
 export const sendPushNotification = async (fcmToken, title, body, data = {}) => {
-  if (!fcmToken) return;
+  if (!fcmToken || (Array.isArray(fcmToken) && fcmToken.length === 0)) return;
+
+  const tokens = Array.isArray(fcmToken) ? fcmToken : [fcmToken];
 
   // If Firebase Admin isn't initialized or running in mock mode, skip actual dispatch
   if (!admin || !admin.apps.length) {
-    logger.info(`[Push Notification Mock] To: ${fcmToken} | Title: ${title} | Body: ${body} | Data: ${JSON.stringify(data)}`);
+    logger.info(`[Push Notification Mock] To: ${JSON.stringify(tokens)} | Title: ${title} | Body: ${body} | Data: ${JSON.stringify(data)}`);
     return;
   }
 
@@ -26,7 +28,7 @@ export const sendPushNotification = async (fcmToken, title, body, data = {}) => 
   }
 
   const message = {
-    token: fcmToken,
+    tokens,
     notification: {
       title,
       body,
@@ -52,10 +54,19 @@ export const sendPushNotification = async (fcmToken, title, body, data = {}) => 
   };
 
   try {
-    const response = await admin.messaging().send(message);
-    logger.info(`[Push Notification] Successfully sent message ID: ${response}`);
+    const response = await admin.messaging().sendEachForMulticast(message);
+    logger.info(`[Push Notification] Multicast delivery finished. Success count: ${response.successCount}, Failure count: ${response.failureCount}`);
+    
+    // Log failures if any occurred
+    if (response.failureCount > 0) {
+      response.responses.forEach((resp, idx) => {
+        if (!resp.success) {
+          logger.warn(`[Push Notification] Failed to deliver to token ${tokens[idx]}: ${resp.error.message}`);
+        }
+      });
+    }
     return response;
   } catch (error) {
-    logger.error(`[Push Notification] Error sending to token ${fcmToken}:`, error);
+    logger.error(`[Push Notification] Error sending multicast message:`, error);
   }
 };
