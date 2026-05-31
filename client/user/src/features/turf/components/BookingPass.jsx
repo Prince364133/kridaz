@@ -18,9 +18,10 @@ import {
 } from "lucide-react";
 import useBookingPass from "../hooks/useBookingPass";
 import { motion } from "framer-motion";
+import { jsPDF } from "jspdf";
 import useSimilarRecommendations from "@hooks/useSimilarRecommendations";
 import { TurfCard } from "@features/turf";
-import html2canvas from "html2canvas";
+import { toPng } from "html-to-image";
 import toast from "react-hot-toast";
 
 const BookingPass = () => {
@@ -31,16 +32,25 @@ const BookingPass = () => {
   const handleDownload = async () => {
     if (!passRef.current) return;
     try {
-      const toastId = toast.loading("Generating pass...");
-      const canvas = await html2canvas(passRef.current, { scale: 2, useCORS: true, backgroundColor: "#0A0A0A" });
-      const image = canvas.toDataURL("image/png");
-      const link = document.createElement("a");
-      link.href = image;
-      link.download = `Booking_Pass_${booking?.turf?.name?.replace(/\s+/g, '_') || 'Kridaz'}.png`;
-      link.click();
+      const toastId = toast.loading("Generating PDF pass...");
+      const dataUrl = await toPng(passRef.current, { cacheBust: true, pixelRatio: 2, backgroundColor: "#0A0A0A" });
+      
+      const width = passRef.current.offsetWidth;
+      const height = passRef.current.offsetHeight;
+      
+      const pdf = new jsPDF({
+        orientation: "portrait",
+        unit: "px",
+        format: [width, height]
+      });
+
+      pdf.addImage(dataUrl, "PNG", 0, 0, width, height);
+      pdf.save(`Booking_Pass_${booking?.turf?.name?.replace(/\s+/g, '_') || 'Kridaz'}.pdf`);
+      
       toast.success("Pass downloaded successfully!", { id: toastId });
     } catch (error) {
       console.error("Error generating pass:", error);
+      toast.dismiss();
       toast.error("Failed to download pass.");
     }
   };
@@ -136,6 +146,7 @@ const BookingPass = () => {
                 src={turf.images?.[0] || turf.image || "/banner-1.png"} 
                 className="w-full h-full object-cover" 
                 alt={turf.name}
+                crossOrigin="anonymous"
               />
               <div className="absolute inset-0 bg-gradient-to-t from-[#0A0A0A] via-[#0A0A0A]/40 to-transparent" />
               <div className="absolute bottom-6 left-8 right-8">
@@ -294,7 +305,7 @@ const BookingPass = () => {
                     transition={{ repeat: Infinity, duration: 2, ease: "linear" }}
                     className="absolute top-0 left-0 w-20 h-full bg-gradient-to-r from-transparent via-zinc-200/50 to-transparent skew-x-12"
                   />
-                  <img src={qrCode} alt="Entry QR" className="w-40 h-40 relative z-10" />
+                  <img src={qrCode} alt="Entry QR" className="w-40 h-40 relative z-10" crossOrigin="anonymous" />
                 </div>
                 <div className="text-center space-y-1">
                   <p className="text-[10px] font-black text-white uppercase tracking-[0.2em]">Scan at Entrance</p>

@@ -44,9 +44,11 @@ const useWriteReview = () => {
  });
  const result = await response.data;
  toast.success("Review submitted successfully!");
+ closeReviewModal();
  navigate(`/venue/${turfId}`);
  } catch (err) {
  console.error(err);
+ toast.error(err.response?.data?.message || "Failed to submit review");
  } finally {
  setIsSubmitting(false);
  }
