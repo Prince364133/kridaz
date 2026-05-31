@@ -292,13 +292,7 @@ const OnboardingModal = ({ isOpen, onClose, initialData, onComplete }) => {
     if (formData.sportTypes.length === 0) return toast.error("Please select at least one sport");
     
     // Only require email/phone/password validation if they are rendered for the specific flow
-    if (!isGoogle && initialData?.authMethod === 'phone') {
-      if (!formData.email) return toast.error("Email required");
-      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-      if (!emailRegex.test(formData.email)) {
-        return toast.error("Please enter a valid email address (e.g., name@example.com)");
-      }
-    }
+    if (!isGoogle && initialData?.authMethod === 'phone' && !formData.email) return toast.error("Valid email required");
     if (!formData.password) return toast.error("Please create a password");
     if (formData.password.length < 6) return toast.error("Password must be at least 6 characters");
     if (needsPhoneVerification && !isPhoneVerified) return toast.error("Please verify your phone number via OTP");
