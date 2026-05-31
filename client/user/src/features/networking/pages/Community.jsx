@@ -241,7 +241,9 @@ const Community = ({ children, onSearchActive }) => {
       }
     } catch (err) {
       console.error("Error fetching posts:", err);
-      toast.error("Failed to load posts");
+      if (pageNumber === 1) toast.error("Failed to load posts");
+      setPostsPage(prev => Math.max(1, prev - 1));
+      setHasMorePosts(false);
     } finally {
       setPostsLoading(false);
     }
@@ -274,6 +276,9 @@ const Community = ({ children, onSearchActive }) => {
       }
     } catch (err) {
       console.error("Error searching players:", err);
+      if (pageNumber === 1) toast.error("Failed to search players");
+      setPlayersPage(prev => Math.max(1, prev - 1));
+      setHasMorePlayers(false);
     } finally {
       setPlayersLoading(false);
     }
