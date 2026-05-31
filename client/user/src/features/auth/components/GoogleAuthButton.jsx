@@ -13,20 +13,9 @@ const GoogleIcon = () => (
 );
 
 import { Capacitor } from "@capacitor/core";
-import { GoogleAuth } from "@codetrix-studio/capacitor-google-auth";
 
 const GoogleAuthButton = ({ onSuccess, onError, mode = "signin", isLoading = false }) => {
-  React.useEffect(() => {
-    if (Capacitor.isNativePlatform()) {
-      GoogleAuth.initialize({
-        clientId: "615790581143-k4g37kb3krcfnh1p64aodd2qa3le5q96.apps.googleusercontent.com",
-        scopes: ["profile", "email"],
-        grantOfflineAccess: true,
-      });
-    }
-  }, []);
-
-  const webLogin = useGoogleLogin({
+  const login = useGoogleLogin({
     onSuccess: (tokenResponse) => {
       onSuccess(tokenResponse);
     },
@@ -35,35 +24,16 @@ const GoogleAuthButton = ({ onSuccess, onError, mode = "signin", isLoading = fal
     },
   });
 
-  const handleNativeLogin = async () => {
-    try {
-      const user = await GoogleAuth.signIn();
-      if (user && user.authentication) {
-        onSuccess({
-          credential: user.authentication.idToken,
-          access_token: user.authentication.accessToken
-        });
-      } else {
-        if (onError) onError();
-      }
-    } catch (err) {
-      console.error("Native Google Auth error:", err);
-      if (onError) onError();
-    }
-  };
-
-  const handleLoginClick = () => {
-    if (Capacitor.isNativePlatform()) {
-      handleNativeLogin();
-    } else {
-      webLogin();
-    }
-  };
+  // Google does not allow web-based OAuth inside WebViews (Capacitor mobile container).
+  // Hide it on Android/iOS native to prevent disallowed useragent error.
+  if (Capacitor.isNativePlatform()) {
+    return null;
+  }
 
   return (
     <button
       type="button"
-      onClick={handleLoginClick}
+      onClick={() => login()}
       disabled={isLoading}
       className="group relative w-full flex items-center justify-center h-14 px-6 bg-white/[0.03] hover:bg-white/[0.06] border border-white/5 hover:border-[#BFF367]/40 rounded-[8px] transition-all duration-500 active:scale-[0.98] overflow-hidden shadow-xl hover:shadow-[#BFF367]/5"
     >

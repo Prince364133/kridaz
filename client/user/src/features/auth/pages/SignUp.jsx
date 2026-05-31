@@ -5,17 +5,21 @@ import OnboardingModal from "@components/modals/OnboardingModal";
 import { ArrowRight, ChevronLeft, User as UserIcon, Lock, CheckCircle2 } from "lucide-react";
 import toast from "react-hot-toast";
 import axiosInstance from "@hooks/useAxiosInstance";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { login } from "@redux/slices/authSlice";
 import { Capacitor } from "@capacitor/core";
 
+import { useAuthModal } from "../../../context/AuthModalContext";
+
 const SUBHEADING_STYLE = { fontFamily: "'Inter 28pt Light', sans-serif", fontWeight: 300 };
 
-const SignUp = () => {
+const SignUp = ({ isModal = false }) => {
+  const { closeAuthModal, toggleView } = useAuthModal();
   const [sentOtp, setSentOtp] = useState("");
   const [mounted, setMounted] = useState(false);
   const [authMode, setAuthMode] = useState('unified'); // 'unified', 'email', 'phone'
   const [step, setStep] = useState(1); // 1: Input, 2: OTP, 3: Password
+  const [timeLeft, setTimeLeft] = useState(60);
   
   const [countryCode, setCountryCode] = useState("+91");
   const [identifier, setIdentifier] = useState("");
@@ -24,12 +28,37 @@ const SignUp = () => {
   const [otp, setOtp] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);  
+  const [googleLoading, setGoogleLoading] = useState(false);
   const [showOnboarding, setShowOnboarding] = useState(false);
   const [onboardingData, setOnboardingData] = useState(null);
   
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const [searchParams] = useSearchParams();
+  const isLoggedIn = useSelector((state) => state.auth.isLoggedIn);
+  const role = useSelector((state) => state.auth.role);
+
+  useEffect(() => {
+    if (isLoggedIn && role === "user" && !showOnboarding) {
+      if (isModal) {
+        closeAuthModal();
+      } else {
+        const redirectUrl = localStorage.getItem("redirectAfterLogin") || "/";
+        localStorage.removeItem("redirectAfterLogin");
+        navigate(redirectUrl);
+      }
+    }
+  }, [isLoggedIn, role, navigate, showOnboarding, isModal, closeAuthModal]);
+
+  useEffect(() => {
+    let timer;
+    if (step === 2 && timeLeft > 0) {
+      timer = setInterval(() => {
+        setTimeLeft((prev) => prev - 1);
+      }, 1000);
+    }
+    return () => clearInterval(timer);
+  }, [step, timeLeft]);
 
   useEffect(() => {
     setMounted(true);
@@ -47,7 +76,7 @@ const SignUp = () => {
       if (emailParam) setIdentifier(decodeURIComponent(emailParam));
 
       if (inviter) {
-        toast.success(`You are invited by ${inviter} to join their team!`, { duration: 6000, icon: 'ðŸ‘‹' });
+        toast.success(`You are invited by ${inviter} to join their team!`, { duration: 6000, icon: '👋' });
       }
     }
     
@@ -75,6 +104,7 @@ const SignUp = () => {
     const formattedPhone = cleanCountryCode + identifier;
 
     setPhone(formattedPhone);
+    setStep(2); // Slide to next screen immediately
     
     setLoading(true);
     try {
@@ -96,9 +126,10 @@ const SignUp = () => {
           ), { position: 'top-center', duration: 8000 });
         }
       }
-      setStep(2);
+      setTimeLeft(60);
     } catch (err) {
       toast.error(err.response?.data?.message || "Failed to send OTP");
+      setStep(1); // Revert back if sending failed
     } finally {
       setLoading(false);
     }
@@ -148,7 +179,7 @@ const SignUp = () => {
 
   const handleGoogleSuccess = async (googleResponse) => {
       // console.log("GOOGLE RESPONSE received");
-      setLoading(true);
+      setGoogleLoading(true);
       try {
         const inviteToken = localStorage.getItem("pendingInvite");
         const umpireInvite = localStorage.getItem("umpireInvite");
@@ -176,6 +207,9 @@ const SignUp = () => {
           });
           setShowOnboarding(true);
         } else {
+          if (isModal) {
+            closeAuthModal();
+          }
           const teamInvite = localStorage.getItem("pendingTeamInvite");
           if (teamInvite) {
             try {
@@ -199,149 +233,261 @@ const SignUp = () => {
       } catch (error) {
         toast.error(error.response?.data?.message || "Google sign-in failed");
       } finally {
-        setLoading(false);
+        setGoogleLoading(false);
       }
   };
 
-  return (
-    <div className="min-h-screen bg-[#000] relative flex flex-col items-center justify-start pt-4 lg:pt-10 pb-12 font-sans">
-      <div className="absolute inset-0 z-0 bg-black" />
-
-      <div className={`relative z-10 w-full max-w-md mx-auto px-6 transition-all duration-1000 transform ${mounted ? "translate-y-0 opacity-100" : "translate-y-20 opacity-0"}`}>
-        <div className="flex flex-col items-center w-full mx-auto">
-          <div className="w-full relative">
+  const content = (
+      <div className={`relative z-10 w-full max-w-md mx-auto px-6 md:px-0 transition-all duration-1000 transform flex flex-col flex-1 h-full md:h-auto md:justify-center ${mounted ? "translate-y-0 opacity-100" : "translate-y-20 opacity-0"}`}>
+        <div className="flex flex-col w-full max-w-md mx-auto flex-1 md:flex-none h-full">
+          <div className="w-full relative flex flex-col flex-1 md:flex-none h-full">
             
-            <div className="flex flex-col items-center justify-center text-center mb-10">
-               <div className="space-y-2">
-                 <h2 className="text-3xl font-bold text-white">Create Account</h2>
-                 <p className="text-sm text-white/60" style={SUBHEADING_STYLE}>Sign up to get started</p>
-               </div>
-            </div>
+            {/* Header */}
+            {step === 1 && (
+              <div className="flex flex-col items-start justify-center text-left mb-8 md:mt-0 mt-4">
+                 <div className="space-y-1">
+                   <h2 className="text-[28px] font-bold text-white tracking-tight leading-tight font-['Inter'] uppercase">Create Account</h2>
+                 </div>
+              </div>
+            )}
 
-            <div className="w-full relative z-20">
-              <div className="space-y-6">
+            {step > 1 && (
+              <button
+                type="button"
+                onClick={() => { setAuthMode('unified'); setStep(1); }}
+                className="absolute top-2 left-0 md:-left-4 text-[#A2F86D] flex items-center text-sm font-medium hover:underline z-50"
+              >
+                <ChevronLeft size={16} className="mr-1" />
+                Back to options
+              </button>
+            )}
+
+            <div className="w-full flex-1 flex flex-col">
+              <form onSubmit={step === 1 ? handleSendOtp : handleVerifyOtp} className="flex-1 flex flex-col">
                 
                 {step === 1 && (
-                  <>
-                    <GoogleAuthButton 
-                      mode="signup"
-                      onSuccess={handleGoogleSuccess}
-                      onError={() => toast.error("Google sign-in failed")}
-                      isLoading={loading}
-                    />
-
-                    <div className="flex items-center gap-4 my-6">
-                      <div className="h-px bg-white/10 flex-1" />
-                      <span className="text-xs text-white/40 font-medium uppercase tracking-wider">or continue with</span>
-                      <div className="h-px bg-white/10 flex-1" />
+                  <div className="flex-1 flex flex-col animate-fade-in">
+                    <div className="space-y-5">
+                      <div>
+                        <label className="text-[11px] font-semibold tracking-widest text-white/60 uppercase mb-2 block">
+                          Phone Number
+                        </label>
+                        <div className="relative flex gap-2">
+                          <select
+                            value={countryCode}
+                            onChange={(e) => setCountryCode(e.target.value)}
+                            className="bg-white/10 backdrop-blur-[12.5px] shadow-[-13px_43px_18px_rgba(0,0,0,0.01),-7px_24px_15px_rgba(0,0,0,0.04),-3px_11px_11px_rgba(0,0,0,0.07),-1px_3px_6px_rgba(0,0,0,0.08)] border border-transparent focus:border-white/20 rounded-[10px] h-14 px-2 text-white text-sm outline-none transition-all cursor-pointer w-20 appearance-none text-center"
+                          >
+                            <option value="+91" className="text-black">+91</option>
+                            <option value="+1" className="text-black">+1</option>
+                            <option value="+44" className="text-black">+44</option>
+                            <option value="+61" className="text-black">+61</option>
+                            <option value="+971" className="text-black">+971</option>
+                          </select>
+                          <div className="relative flex-1">
+                            <input 
+                              type="tel"
+                              required
+                              value={identifier}
+                              onChange={(e) => {
+                                const val = e.target.value.replace(/\D/g, '');
+                                setIdentifier(val.slice(0, 10));
+                              }}
+                              className="w-full bg-white/10 backdrop-blur-[12.5px] shadow-[-13px_43px_18px_rgba(0,0,0,0.01),-7px_24px_15px_rgba(0,0,0,0.04),-3px_11px_11px_rgba(0,0,0,0.07),-1px_3px_6px_rgba(0,0,0,0.08)] border border-transparent focus:border-white/20 rounded-[10px] h-14 px-4 text-white text-sm outline-none transition-all focus:bg-white/20"
+                            />
+                          </div>
+                        </div>
+                      </div>
                     </div>
-                  </>
+
+                    <div className="flex items-center gap-4 w-full my-6 md:my-8">
+                      <div className="h-px bg-white/10 flex-1"></div>
+                      <span className="text-white/40 text-[11px] tracking-widest font-medium uppercase">OR</span>
+                      <div className="h-px bg-white/10 flex-1"></div>
+                    </div>
+
+                    <div className="w-full">
+                      <GoogleAuthButton 
+                        mode="signup"
+                        onSuccess={handleGoogleSuccess}
+                        onError={() => toast.error("Google sign-in failed")}
+                        isLoading={googleLoading}
+                      />
+                    </div>
+
+                    <div className="mt-auto pt-8 pb-4">
+                      <div className="text-center mb-6">
+                        <p className="text-[14px] text-white/80">
+                          Already have an account? 
+                          <button 
+                            type="button"
+                            onClick={() => {
+                              if (isModal) {
+                                toggleView();
+                              } else {
+                                navigate("/login");
+                              }
+                            }} 
+                            className="text-[#A2F86D] hover:underline ml-1"
+                          >
+                            Login
+                          </button>
+                        </p>
+                      </div>
+
+                      <button 
+                        type="submit" 
+                        disabled={loading}
+                        className="w-full bg-gradient-to-r from-[#60E5D0] to-[#A2F86D] text-black h-[52px] rounded-xl font-medium text-[15px] flex items-center justify-center transition-all active:scale-[0.98] disabled:opacity-50" 
+                      >
+                        {loading ? "Processing..." : "Continue"}
+                      </button>
+                    </div>
+                  </div>
                 )}
 
-                <form onSubmit={step === 1 ? handleSendOtp : handleVerifyOtp} className="space-y-6">
-                  {step > 1 && (
-                    <button
-                      type="button"
-                      onClick={() => { setAuthMode('unified'); setStep(1); }}
-                      className="text-[#BFF367] flex items-center text-sm font-medium hover:underline mb-4"
+                {step === 2 && (
+                  <div className="flex-1 flex flex-col animate-slide-left">
+                    <div className="flex-1">
+                      <div className="flex flex-col items-start justify-center text-left mb-8 mt-24 md:mt-40">
+                        <div className="space-y-1">
+                          <h3 className="text-[24px] font-bold text-white tracking-tight leading-tight font-['Inter'] uppercase">Verification Code</h3>
+                          <p className="text-sm text-white/60">Enter OTP sent to {authMode === 'email' ? email : phone}</p>
+                        </div>
+                      </div>
+                      
+                      <div className="space-y-4">
+                        <div className="flex justify-between gap-2">
+                          {[0, 1, 2, 3, 4, 5].map((index) => (
+                            <input
+                              key={index}
+                              id={`otp-${index}`}
+                              type="text"
+                              inputMode="numeric"
+                              maxLength={1}
+                              value={otp[index] || ''}
+                              onChange={(e) => {
+                                const val = e.target.value;
+                                if (val && !/^\d*$/.test(val)) return;
+                                const newOtp = otp.split('');
+                                newOtp[index] = val.slice(-1);
+                                const joined = newOtp.join('');
+                                setOtp(joined);
+                                if (val && index < 5) {
+                                  document.getElementById(`otp-${index + 1}`)?.focus();
+                                }
+                              }}
+                              onKeyDown={(e) => {
+                                if (e.key === 'Backspace' && !otp[index] && index > 0) {
+                                  document.getElementById(`otp-${index - 1}`)?.focus();
+                                }
+                              }}
+                              className="w-12 h-14 bg-white/10 backdrop-blur-[12.5px] shadow-[-13px_43px_18px_rgba(0,0,0,0.01),-7px_24px_15px_rgba(0,0,0,0.04),-3px_11px_11px_rgba(0,0,0,0.07),-1px_3px_6px_rgba(0,0,0,0.08)] border border-transparent focus:border-white/20 rounded-[10px] text-white text-center text-xl font-bold outline-none transition-all focus:bg-white/20"
+                            />
+                          ))}
+                        </div>
+                        {!Capacitor.isNativePlatform() && sentOtp && (
+                          <div className="bg-white/10 backdrop-blur-[12.5px] shadow-[-13px_43px_18px_rgba(0,0,0,0.01),-7px_24px_15px_rgba(0,0,0,0.04),-3px_11px_11px_rgba(0,0,0,0.07),-1px_3px_6px_rgba(0,0,0,0.08)] border border-transparent rounded-[10px] p-3 mt-4 text-center">
+                            <p className="text-xs text-white/60">Developer Message</p>
+                            <p className="text-sm text-[#A2F86D] font-mono mt-1">Your OTP code is: <strong>{sentOtp}</strong></p>
+                          </div>
+                        )}
+                        
+                        <div className="flex flex-col items-center mt-8 space-y-4">
+                          {timeLeft > 0 ? (
+                            <p className="text-white/80 text-sm">
+                              You can resend the code in <span className="text-[#A2F86D]">{timeLeft}</span> seconds
+                            </p>
+                          ) : (
+                            <p className="text-white/80 text-sm">
+                              Didn't receive the code?
+                            </p>
+                          )}
+                          <button
+                            type="button"
+                            disabled={timeLeft > 0 || loading}
+                            onClick={handleSendOtp}
+                            className={`text-2xl font-medium transition-colors ${timeLeft > 0 ? 'text-white/40 cursor-not-allowed' : 'text-[#A2F86D] hover:text-[#b4fc87]'}`}
+                          >
+                            Resend Code
+                          </button>
+                        </div>
+
+                      </div>
+                    </div>
+                    
+                    <button 
+                      type="submit" 
+                      disabled={loading}
+                      className="w-full bg-gradient-to-r from-[#60E5D0] to-[#A2F86D] text-black h-[52px] rounded-xl font-medium text-[15px] flex items-center justify-center transition-all active:scale-[0.98] disabled:opacity-50 mt-auto mb-4" 
                     >
-                      <ChevronLeft size={16} className="mr-1" />
-                      Back to options
+                      {loading && otp.length < 6 ? "Sending OTP..." : loading ? "Verifying..." : "Verify & Sign Up"}
                     </button>
-                  )}
-
-                  {step === 1 && (
-                    <div className="space-y-4">
-                      <label className="text-sm font-medium text-white/60 ml-1">
-                        Phone Number
-                      </label>
-                      <div className="relative group/field flex gap-2">
-                        <select
-                          value={countryCode}
-                          onChange={(e) => setCountryCode(e.target.value)}
-                          className="bg-white/[0.03] border border-white/5 focus:border-[#BFF367]/50 rounded-[8px] h-14 px-2 text-white text-sm outline-none transition-all cursor-pointer w-20 appearance-none text-center"
-                        >
-                          <option value="+91" className="text-black">+91 ðŸ‡®ðŸ‡³</option>
-                          <option value="+1" className="text-black">+1 ðŸ‡ºðŸ‡¸</option>
-                          <option value="+44" className="text-black">+44 ðŸ‡¬ðŸ‡§</option>
-                          <option value="+61" className="text-black">+61 ðŸ‡¦ðŸ‡º</option>
-                          <option value="+971" className="text-black">+971 ðŸ‡¦ðŸ‡ª</option>
-                        </select>
-                        <div className="relative flex-1">
-                          <UserIcon size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-white/20 group-focus-within/field:text-[#BFF367] transition-colors" />
-                          <input 
-                            type="tel"
-                            required
-                            value={identifier}
-                            onChange={(e) => {
-                              const val = e.target.value.replace(/\D/g, '');
-                              setIdentifier(val.slice(0, 10));
-                            }}
-                            placeholder="9876543210"
-                            className="w-full bg-white/[0.03] border border-white/5 focus:border-[#BFF367]/50 rounded-[8px] h-14 pl-12 pr-4 text-white text-sm placeholder:text-white/20 outline-none transition-all"
-                          />
-                        </div>
-                      </div>
-                    </div>
-                  )}
-
-                  {step === 2 && (
-                    <div className="space-y-4">
-                      <label className="text-sm font-medium text-white/60 ml-1">
-                        Enter OTP sent to {authMode === 'email' ? email : phone}
-                      </label>
-                      <div className="relative group/field">
-                        <CheckCircle2 size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-white/20 group-focus-within/field:text-[#BFF367] transition-colors" />
-                        <input 
-                          type="text"
-                          required
-                          maxLength={6}
-                          value={otp}
-                          onChange={(e) => setOtp(e.target.value)}
-                          placeholder="6-digit OTP"
-                          className="w-full bg-white/[0.03] border border-white/5 focus:border-[#BFF367]/50 rounded-[8px] h-14 pl-12 pr-4 text-white text-sm placeholder:text-white/20 outline-none transition-all tracking-[0.5em] font-mono"
-                        />
-                      </div>
-                      {!Capacitor.isNativePlatform() && sentOtp && (
-                        <div className="bg-white/5 border border-white/10 rounded-[8px] p-3 mt-2 text-center">
-                          <p className="text-xs text-white/60">Developer Message</p>
-                          <p className="text-sm text-[#BFF367] font-mono mt-1">Your OTP code is: <strong>{sentOtp}</strong></p>
-                        </div>
-                      )}
-                    </div>
-                  )}
-
-
-
-
-                  <button 
-                    type="submit" 
-                    disabled={loading}
-                    className="w-full bg-[#BFF367] hover:bg-[#a3e635] text-black h-14 rounded-[8px] font-bold text-lg flex items-center justify-center gap-2 active:scale-[0.98] transition-all disabled:opacity-50 mt-4 group/btn" 
-                  >
-                    {loading ? "Processing..." : step === 2 ? "Complete Profile" : "Continue"}
-                    {!loading && <ArrowRight className="w-5 h-5 group-hover/btn:translate-x-1 transition-transform" />}
-                  </button>
-                </form>
-              </div>
-            </div>
-
-            <div className="pt-8 mt-10 border-t border-white/5 flex flex-col items-center justify-center text-center">
-              <p className="text-sm text-white/60">
-                Already have an account? <Link to="/login" className="text-[#BFF367] hover:underline ml-2 font-semibold">Login</Link>
-              </p>
+                  </div>
+                )}
+              </form>
             </div>
           </div>
         </div>
         
-        <div className="mt-8 text-center">
-          <Link to="/" className="inline-flex items-center gap-2 text-white/40 hover:text-white transition-colors text-sm group">
-            <ChevronLeft size={16} className="group-hover:-translate-x-1 transition-transform" />
-            Back to Home
-          </Link>
-        </div>
+        {!isModal && (
+          <div className="mt-8 text-center">
+            <Link to="/" className="inline-flex items-center gap-2 text-white/40 hover:text-white transition-colors text-sm group">
+              <ChevronLeft size={16} className="group-hover:-translate-x-1 transition-transform" />
+              Back to Home
+            </Link>
+          </div>
+        )}
       </div>
-      
+  );
+
+  const handleOnboardingComplete = async () => {
+    if (isModal) {
+      closeAuthModal();
+    }
+    
+    const inviteToken = localStorage.getItem("pendingInvite");
+    const teamInvite = localStorage.getItem("pendingTeamInvite");
+    
+    if (teamInvite) {
+      try {
+         await axiosInstance.post(`/api/team/user/join/${teamInvite}`);
+         toast.success("Successfully joined the team!");
+         localStorage.removeItem("pendingTeamInvite");
+         const teamId = localStorage.getItem("pendingTeamId");
+         if (teamId) {
+            localStorage.removeItem("pendingTeamId");
+            return navigate(`/team/${teamId}`);
+         }
+      } catch (err) {
+         toast.error(err.response?.data?.message || "Failed to join team");
+      }
+    }
+
+    if (inviteToken) navigate(`/join-games?invite=${inviteToken}`);
+    else if (!isModal) navigate("/");
+  };
+
+  if (isModal) {
+    return (
+      <>
+        {content}
+        {showOnboarding && (
+          <OnboardingModal 
+            isOpen={showOnboarding} 
+            onClose={() => setShowOnboarding(false)}
+            initialData={onboardingData}
+            onComplete={handleOnboardingComplete}
+          />
+        )}
+      </>
+    );
+  }
+
+  return (
+    <div className="min-h-screen bg-[#000] relative flex flex-col items-center justify-start pt-4 lg:pt-10 pb-12 font-sans">
+      <div className="absolute inset-0 z-0 bg-black" />
+      {content}
       <div className="absolute top-1/4 right-0 w-[600px] h-[600px] bg-white/[0.01] pointer-events-none rounded-full" />
       <div className="absolute bottom-1/4 left-0 w-[600px] h-[600px] bg-white/[0.01] pointer-events-none rounded-full" />
       
@@ -350,28 +496,7 @@ const SignUp = () => {
           isOpen={showOnboarding} 
           onClose={() => setShowOnboarding(false)}
           initialData={onboardingData}
-          onComplete={async () => {
-            const inviteToken = localStorage.getItem("pendingInvite");
-            const teamInvite = localStorage.getItem("pendingTeamInvite");
-            
-            if (teamInvite) {
-              try {
-                 await axiosInstance.post(`/api/team/user/join/${teamInvite}`);
-                 toast.success("Successfully joined the team!");
-                 localStorage.removeItem("pendingTeamInvite");
-                 const teamId = localStorage.getItem("pendingTeamId");
-                 if (teamId) {
-                    localStorage.removeItem("pendingTeamId");
-                    return navigate(`/team/${teamId}`);
-                 }
-              } catch (err) {
-                 toast.error(err.response?.data?.message || "Failed to join team");
-              }
-            }
-
-            if (inviteToken) navigate(`/join-games?invite=${inviteToken}`);
-            else navigate("/");
-          }}
+          onComplete={handleOnboardingComplete}
         />
       )}
     </div>

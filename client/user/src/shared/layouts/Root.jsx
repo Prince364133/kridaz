@@ -10,6 +10,7 @@ import BackgroundUploadManager from "@components/BackgroundUploadManager";
 import OnboardingModal from "@components/modals/OnboardingModal";
 import LoginModal from "@components/modals/LoginModal";
 import { closeLoginModal } from "@redux/slices/uiSlice";
+import AuthModal from "../../features/auth/components/AuthModal";
 
 const Root = () => {
   const location = useLocation();
@@ -44,6 +45,7 @@ const Root = () => {
         title={loginModal.title}
         message={loginModal.message}
       />
+      <AuthModal />
       <OnboardingModal 
         isOpen={showOnboarding} 
         onClose={() => {

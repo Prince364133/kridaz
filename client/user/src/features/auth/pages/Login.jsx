@@ -25,10 +25,13 @@ import {
 } from "lucide-react";
 import { FormField } from "@components/common";
 
+import { useAuthModal } from "../../../context/AuthModalContext";
+
 const SUBHEADING_STYLE = { fontFamily: "'Inter 28pt Light', sans-serif", fontWeight: 300 };
 
-const Login = () => {
+const Login = ({ isModal = false }) => {
   const navigate = useNavigate();
+  const { closeAuthModal, toggleView } = useAuthModal();
   const { 
     register, 
     handleSubmit, 
@@ -42,16 +45,23 @@ const Login = () => {
     showOnboarding,
     setShowOnboarding,
     onboardingUser,
-    accountNotFound
+    accountNotFound,
+    googleLoading,
+    timeLeft,
+    handleSendOtp
   } = useLoginForm();
   const [mounted, setMounted] = useState(false);
-  const dispatch = useDispatch(); // for quick demo button
+  const dispatch = useDispatch();
 
   const { isLoggedIn, role } = useSelector((state) => state.auth);
   
   useEffect(() => {
     setMounted(true);
     if (isLoggedIn && !showOnboarding) {
+      if (isModal) {
+        closeAuthModal();
+      }
+
       const normalizedRole = role?.toLowerCase();
       const professionalRoles = ["coach", "umpire", "streamer", "scorer", "cheerleader", "commentator"];
       
@@ -66,187 +76,217 @@ const Login = () => {
         navigate("/");
       }
     }
-  }, [isLoggedIn, role, navigate, showOnboarding, dispatch]);
+  }, [isLoggedIn, role, navigate, showOnboarding, dispatch, isModal, closeAuthModal]);
 
-  return (
-    <div className="min-h-screen bg-[#000] relative flex flex-col items-center justify-start pt-4 lg:pt-10 pb-12 font-sans">
-      {/* Gï¿½ï¿½Gï¿½ï¿½ BACKGROUND LAYER Gï¿½ï¿½Gï¿½ï¿½ */}
-      <div className="absolute inset-0 z-0">
-        <div className="absolute inset-0 bg-black" />
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,_transparent_0%,_black_100%)]" />
-      </div>
-
-      {/* Gï¿½ï¿½Gï¿½ï¿½ MAIN CONTENT Gï¿½ï¿½Gï¿½ï¿½ */}
-      <div className={`relative z-10 w-full max-w-md mx-auto px-6 transition-all duration-1000 transform ${mounted ? "translate-y-0 opacity-100" : "translate-y-20 opacity-0"}`}>
+  const content = (
+    <div className={`relative z-10 w-full max-w-md mx-auto px-6 md:px-0 transition-all duration-1000 transform flex flex-col flex-1 h-full md:h-auto md:justify-center ${mounted ? "translate-y-0 opacity-100" : "translate-y-20 opacity-0"}`}>
         
-        <div className="flex flex-col items-center w-full max-w-md mx-auto">
-          <div className="w-full relative">
+        <div className="flex flex-col w-full max-w-md mx-auto flex-1 md:flex-none h-full">
+          <div className="w-full relative flex flex-col flex-1 md:flex-none h-full">
             
             {/* Header */}
-            <div className="flex flex-col items-center justify-center text-center mb-10">
-               <div className="space-y-2">
-                 <h2 className="text-3xl font-bold text-white">Login</h2>
-                 <p className="text-sm text-white/60" style={SUBHEADING_STYLE}>Welcome back, please enter your details</p>
+            <div className="flex flex-col items-start justify-center text-left mb-8 md:mt-0 mt-4">
+               <div className="space-y-1">
+                 <h2 className="text-[28px] font-bold text-white tracking-tight leading-tight font-['Inter']">Welcome back</h2>
                </div>
             </div>
 
             {/* Body */}
-            <div className="space-y-10 w-full">
-              <form onSubmit={handleSubmit(onSubmit)} className="space-y-8">
+            <div className="w-full flex-1 flex flex-col">
+              <form onSubmit={handleSubmit(onSubmit)} className="flex-1 flex flex-col">
                 
                 {/* OTP Step */}
-                <div className={showOtpInput ? "space-y-6 block animate-fade-in" : "hidden"}>
-                  <div className="text-center mb-8">
-                    <h3 className="text-xl font-semibold text-white">Verification Code</h3>
-                    <p className="text-sm text-white/60 mt-2">We sent a 6-digit code to your email address.</p>
+                <div className={showOtpInput ? "space-y-6 flex-1 flex flex-col animate-fade-in" : "hidden"}>
+                  <div className="flex flex-col items-start justify-center text-left mb-8 mt-24 md:mt-40">
+                    <div className="space-y-1">
+                      <h3 className="text-[24px] font-bold text-white tracking-tight leading-tight font-['Inter'] uppercase">Verification Code</h3>
+                      <p className="text-sm text-white/60">We sent a 6-digit code to your email address.</p>
+                    </div>
                   </div>
                   
                   <div className="space-y-2 group/field">
                     <div className="relative">
-                      <Lock size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-white/20 group-focus-within/field:text-[#BFF367] transition-colors" />
                       <input 
                         {...register("otp")}
                         type="text" 
                         placeholder="000000"
                         maxLength={6}
-                        className="w-full bg-white/[0.03] border border-white/5 focus:border-[#BFF367]/50 rounded-[8px] h-14 pl-12 pr-4 text-white text-center tracking-widest text-lg outline-none transition-all"
+                        className="w-full bg-white/10 backdrop-blur-[12.5px] shadow-[-13px_43px_18px_rgba(0,0,0,0.01),-7px_24px_15px_rgba(0,0,0,0.04),-3px_11px_11px_rgba(0,0,0,0.07),-1px_3px_6px_rgba(0,0,0,0.08)] border border-transparent focus:border-white/20 rounded-[10px] h-14 px-4 text-white text-center tracking-[0.5em] font-mono text-lg outline-none transition-all focus:bg-white/20"
                       />
                     </div>
                     {errors.otp && <p className="text-xs text-red-500 mt-1 ml-1 text-center">{errors.otp.message}</p>}
                     {!Capacitor.isNativePlatform() && sentOtp && (
-                      <div className="bg-white/5 border border-white/10 rounded-[8px] p-3 mt-2 text-center">
+                      <div className="bg-white/10 backdrop-blur-[12.5px] shadow-[-13px_43px_18px_rgba(0,0,0,0.01),-7px_24px_15px_rgba(0,0,0,0.04),-3px_11px_11px_rgba(0,0,0,0.07),-1px_3px_6px_rgba(0,0,0,0.08)] border border-transparent rounded-[10px] p-3 mt-4 text-center">
                         <p className="text-xs text-white/60">Developer Message</p>
-                        <p className="text-sm text-[#BFF367] font-mono mt-1">Your OTP code is: <strong>{sentOtp}</strong></p>
+                        <p className="text-sm text-[#A2F86D] font-mono mt-1">Your OTP code is: <strong>{sentOtp}</strong></p>
                       </div>
                     )}
+
+                    <div className="flex flex-col items-center mt-8 space-y-4">
+                      {timeLeft > 0 ? (
+                        <p className="text-white/80 text-sm">
+                          You can resend the code in <span className="text-[#A2F86D]">{timeLeft}</span> seconds
+                        </p>
+                      ) : (
+                        <p className="text-white/80 text-sm">
+                          Didn't receive the code?
+                        </p>
+                      )}
+                      <button
+                        type="button"
+                        disabled={timeLeft > 0 || loading}
+                        onClick={handleSendOtp}
+                        className={`text-2xl font-medium transition-colors ${timeLeft > 0 ? 'text-white/40 cursor-not-allowed' : 'text-[#A2F86D] hover:text-[#b4fc87]'}`}
+                      >
+                        Resend Code
+                      </button>
+                    </div>
+
                   </div>
                   
                   <button 
                     type="submit" 
                     disabled={loading}
-                    className="w-full bg-[#BFF367] hover:bg-[#a3e635] text-black h-14 rounded-[8px] font-bold text-lg flex items-center justify-center gap-2 active:scale-[0.98] transition-all disabled:opacity-50 mt-4 group/btn" 
+                    className="w-full bg-gradient-to-r from-[#60E5D0] to-[#A2F86D] text-black h-[60px] rounded-xl font-semibold text-[24px] sm:text-[28px] font-['Inter'] flex items-center justify-center transition-all active:scale-[0.98] disabled:opacity-50 mt-auto mb-4" 
                   >
                     {loading ? "Verifying..." : "Verify & Login"}
-                    {!loading && <ArrowRight className="w-5 h-5 group-hover/btn:translate-x-1 transition-transform" />}
                   </button>
                 </div>
 
                 {/* Email/Password Step */}
-                <div className={!showOtpInput ? "space-y-8 block animate-fade-in" : "hidden"}>
-                    {/* Google Login Button */}
-                    <div className="w-full mb-8">
-                      <GoogleAuthButton 
-                        onSuccess={handleGoogleSuccess}
-                        onError={handleGoogleError}
-                        isLoading={loading}
-                        mode="signin"
-                      />
-                    </div>
+                <div className={!showOtpInput ? "flex-1 flex flex-col animate-fade-in" : "hidden"}>
                     
-                    <div className="flex items-center gap-4 w-full mb-8">
-                      <div className="h-px bg-white/10 flex-1"></div>
-                      <span className="text-white/40 text-sm font-medium whitespace-nowrap">OR CONTINUE WITH EMAIL</span>
-                      <div className="h-px bg-white/10 flex-1"></div>
-                    </div>
-
-                    <div className="space-y-6">
+                    <div className="space-y-5">
                       {/* Email Input */}
-                      <div className="space-y-2">
-                        <div className="flex justify-between px-1">
-                          <label className="text-sm font-medium text-white/60 group-focus-within/input:text-[#BFF367] transition-colors">Email Address or Phone Number</label>
-                        </div>
-                        <div className="relative group/input">
-                          <div className="absolute left-4 top-1/2 -translate-y-1/2 text-white/20 group-focus-within/input:text-[#BFF367] transition-colors">
-                            <User size={16} />
-                          </div>
-                          <input
-                            {...register("email")}
-                            type="text"
-                            onChange={(e) => {
-                              const val = e.target.value;
-                              if (/^\d+$/.test(val)) {
-                                e.target.value = val.slice(0, 10);
-                              }
-                              register("email").onChange(e);
-                            }}
-                            placeholder="name@example.com or 9876543210"
-                            className="w-full bg-white/[0.03] border border-white/5 focus:border-[#BFF367]/50 rounded-[8px] h-14 pl-12 pr-4 text-white text-sm placeholder:text-white/20 outline-none transition-all group-hover/input:bg-white/[0.05]"
-                          />
-                          {errors.email && <p className="text-xs text-red-500 mt-1 ml-1">{errors.email.message}</p>}
-                        </div>
+                      <div>
+                        <label className="text-[11px] font-semibold tracking-widest text-white/60 uppercase mb-2 block">
+                          Email or Phone No
+                        </label>
+                        <input
+                          {...register("email")}
+                          type="text"
+                          onChange={(e) => {
+                            const val = e.target.value;
+                            if (/^\d+$/.test(val)) {
+                              e.target.value = val.slice(0, 10);
+                            }
+                            register("email").onChange(e);
+                          }}
+                          className="w-full bg-white/10 backdrop-blur-[12.5px] shadow-[-13px_43px_18px_rgba(0,0,0,0.01),-7px_24px_15px_rgba(0,0,0,0.04),-3px_11px_11px_rgba(0,0,0,0.07),-1px_3px_6px_rgba(0,0,0,0.08)] border border-transparent focus:border-white/20 rounded-[10px] h-14 px-4 text-white text-sm outline-none transition-all focus:bg-white/20"
+                        />
+                        {errors.email && <p className="text-xs text-red-500 mt-1 ml-1">{errors.email.message}</p>}
                       </div>
 
                       {/* Password Input */}
-                      <div className="space-y-2">
-                        <div className="flex justify-between px-1">
-                          <label className="text-sm font-medium text-white/60 group-focus-within/input:text-[#BFF367] transition-colors">Password</label>
-                          <Link to="/forgot-password" size="sm" className="text-xs text-white/40 hover:text-[#BFF367] transition-colors">Forgot Password?</Link>
-                        </div>
-                        <div className="relative group/input">
-                          <div className="absolute left-4 top-1/2 -translate-y-1/2 text-white/20 group-focus-within/input:text-[#BFF367] transition-colors">
-                            <Lock size={16} />
-                          </div>
-                          <input
-                            {...register("password")}
-                            type="password"
-                            placeholder="Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½"
-                            className="w-full bg-white/[0.03] border border-white/5 focus:border-[#BFF367]/50 rounded-[8px] h-14 pl-12 pr-4 text-white text-sm placeholder:text-white/20 outline-none transition-all group-hover/input:bg-white/[0.05]"
-                          />
-                          {errors.password && <p className="text-xs text-red-500 mt-1 ml-1">{errors.password.message}</p>}
-                        </div>
+                      <div>
+                        <label className="text-[11px] font-semibold tracking-widest text-white/60 uppercase mb-2 block">
+                          Password
+                        </label>
+                        <input
+                          {...register("password")}
+                          type="password"
+                          className="w-full bg-white/10 backdrop-blur-[12.5px] shadow-[-13px_43px_18px_rgba(0,0,0,0.01),-7px_24px_15px_rgba(0,0,0,0.04),-3px_11px_11px_rgba(0,0,0,0.07),-1px_3px_6px_rgba(0,0,0,0.08)] border border-transparent focus:border-white/20 rounded-[10px] h-14 px-4 text-white text-sm tracking-widest outline-none transition-all focus:bg-white/20"
+                        />
+                        {errors.password && <p className="text-xs text-red-500 mt-1 ml-1">{errors.password.message}</p>}
                       </div>
                     </div>
 
-                    {/* Submit Button */}
-                    <div className="space-y-4 mt-8">
+                    <div className="flex items-center gap-4 w-full my-6 md:my-8">
+                      <div className="h-px bg-white/10 flex-1"></div>
+                      <span className="text-white/40 text-[11px] tracking-widest font-medium uppercase">OR</span>
+                      <div className="h-px bg-white/10 flex-1"></div>
+                    </div>
+
+                    {/* Google Login Button */}
+                    <div className="w-full">
+                      <GoogleAuthButton 
+                        onSuccess={handleGoogleSuccess}
+                        onError={handleGoogleError}
+                        isLoading={googleLoading}
+                        mode="signin"
+                      />
+                    </div>
+
+                    {/* Submit Button & Sign Up Link */}
+                    <div className="mt-auto pt-8 pb-4">
                       {accountNotFound && (
-                        <div className="p-4 bg-red-500/10 border border-red-500/20 rounded-[8px] mb-4 animate-fade-in">
+                        <div className="p-4 bg-red-500/10 border border-red-500/20 rounded-xl mb-4 animate-fade-in">
                           <p className="text-sm text-red-500 text-center mb-3 font-medium">
                             Account not found. Create a new account to get started!
                           </p>
                           <Link 
                             to="/signup" 
-                            className="w-full bg-white/10 hover:bg-white/20 text-white h-12 rounded-lg font-bold text-sm flex items-center justify-center gap-2 transition-all"
+                            className="w-full bg-white/10 hover:bg-white/20 text-white h-12 rounded-xl font-bold text-sm flex items-center justify-center gap-2 transition-all"
                           >
                             Sign Up Now <ArrowRight size={16} />
                           </Link>
                         </div>
                       )}
                       
-                      
+                      <div className="text-center mb-6">
+                        <p className="text-[14px] text-white/80">
+                          Dont have an account? 
+                          <button 
+                            type="button" 
+                            onClick={() => {
+                              if (isModal) {
+                                toggleView();
+                              } else {
+                                navigate("/signup");
+                              }
+                            }} 
+                            className="text-[#A2F86D] hover:underline ml-1"
+                          >
+                            Sign up
+                          </button>
+                        </p>
+                      </div>
+
                       <button 
                         type="submit" 
                         disabled={loading}
-                        className="w-full bg-[#BFF367] hover:bg-[#a3e635] text-black h-14 rounded-[8px] font-bold text-lg flex items-center justify-center gap-2 active:scale-[0.98] transition-all disabled:opacity-50 group/btn" 
+                        className="w-full bg-gradient-to-r from-[#60E5D0] to-[#A2F86D] text-black h-[52px] rounded-xl font-medium text-[15px] flex items-center justify-center transition-all active:scale-[0.98] disabled:opacity-50" 
                       >
                         {loading ? "Sending OTP..." : "Continue"}
-                        {!loading && <ArrowRight className="w-5 h-5 group-hover/btn:translate-x-1 transition-transform" />}
                       </button>
-
                     </div>
                   </div>
               </form>
             </div>
-
-            {/* Footer Sign Up Link */}
-            <div className="pt-8 mt-10 border-t border-white/5 flex flex-col items-center justify-center text-center">
-              <p className="text-sm text-white/60">
-                Don't have an account? <Link to="/signup" className="text-[#BFF367] hover:underline ml-2 font-semibold">Sign up</Link>
-              </p>
-            </div>
           </div>
           
           {/* Back Link */}
-          <Link to="/" className="mt-8 flex items-center gap-2 text-white/40 hover:text-white transition-colors text-sm group">
-            <ChevronRight size={16} className="rotate-180 group-hover:-translate-x-1 transition-transform" />
-            Back to Home
-          </Link>
+          {!isModal && (
+            <Link to="/" className="mt-8 flex items-center gap-2 text-white/40 hover:text-white transition-colors text-sm group">
+              <ChevronRight size={16} className="rotate-180 group-hover:-translate-x-1 transition-transform" />
+              Back to Home
+            </Link>
+          )}
         </div>
       </div>
+  );
 
-      {/* AMBIENT LIGHTING */}
+  if (isModal) {
+    return (
+      <>
+        {content}
+        <OnboardingModal 
+          isOpen={showOnboarding} 
+          onClose={() => setShowOnboarding(false)} 
+          onComplete={() => navigate("/")}
+        />
+      </>
+    );
+  }
+
+  return (
+    <div className="min-h-screen bg-[#000] relative flex flex-col items-center justify-start pt-4 lg:pt-10 pb-12 font-sans">
+      <div className="absolute inset-0 z-0">
+        <div className="absolute inset-0 bg-black" />
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,_transparent_0%,_black_100%)]" />
+      </div>
+      {content}
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-white/[0.01] pointer-events-none rounded-full" />
-      {/* ONBOARDING MODAL */}
       <OnboardingModal 
         isOpen={showOnboarding} 
         onClose={() => setShowOnboarding(false)} 
