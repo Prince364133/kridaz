@@ -31,6 +31,14 @@ const AddOpponentModal = ({ isOpen, onClose, myTeams }) => {
     }
   };
 
+  React.useEffect(() => {
+    if (teamCode.length === 10) {
+      handleSearch();
+    } else {
+      setFoundTeam(null);
+    }
+  }, [teamCode]);
+
   const handleSendRequest = async () => {
     if (!selectedMyTeam) {
       toast.error('Please select one of your teams first');

@@ -56,6 +56,14 @@ export const handleRazorpayWebhook = async (req, res) => {
 async function handlePaymentCaptured(payment) {
   const { order_id, id: payment_id, status } = payment;
 
+  const alreadyProcessed = await prisma.walletTransaction.findFirst({
+    where: { razorpayPaymentId: payment_id }
+  });
+  if (alreadyProcessed) {
+    logger.info(`[WEBHOOK] Idempotency: payment ${payment_id} already processed. Skipping.`);
+    return;
+  }
+
   // Check if it's a Wallet Topup
   const transaction = await prisma.walletTransaction.findFirst({
     where: { 

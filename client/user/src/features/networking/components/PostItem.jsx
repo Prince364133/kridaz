@@ -231,10 +231,10 @@ const PostItem = React.memo(({ post, user, isAdmin, gateInteraction, onUpdatePos
 
       {/* Media Display */}
       {(post.image || post.imageUrl || post.mediaUrl) && (
-        <div className="relative rounded-[8px] overflow-hidden group border border-white/5 bg-[#111]">
+        <div className="relative aspect-square rounded-[8px] overflow-hidden group border border-white/5 bg-[#111]">
           <img
             src={post.image || post.imageUrl || post.thumbnailUrl || post.mediaUrl}
-            className={`w-full object-cover max-h-[500px] transition-all duration-500 ${
+            className={`w-full h-full object-cover transition-all duration-500 ${
               post.status === "pending" || post.status === "processing" ? "blur-xl scale-110 opacity-50" : ""
             }`}
             alt=""

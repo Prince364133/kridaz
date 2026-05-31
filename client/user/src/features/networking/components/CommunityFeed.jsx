@@ -18,6 +18,7 @@ const CommunityFeed = ({ user, isLoggedIn, isAdmin, gateInteraction, activeFilte
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
   const userLocation = useSelector((state) => state.ui.userLocation);
+  const locationStatus = useSelector((state) => state.ui.locationStatus);
   const { socket } = useSocket();
 
   const [triggerGetFeed] = useLazyGetCommunityFeedQuery();
@@ -150,10 +151,11 @@ const CommunityFeed = ({ user, isLoggedIn, isAdmin, gateInteraction, activeFilte
 
   // Effects to trigger data fetches
   useEffect(() => {
+    if (locationStatus === "detecting") return;
     if (postsPage === 1) {
       fetchPosts(1, !!debouncedSearchQuery.trim());
     }
-  }, [postsPage, debouncedSearchQuery, activeFilter, activeSportFilter, userLocation]);
+  }, [postsPage, debouncedSearchQuery, activeFilter, activeSportFilter, userLocation, locationStatus]);
 
   useEffect(() => {
     if (postsPage > 1) {
@@ -593,3 +595,4 @@ const CommunityFeed = ({ user, isLoggedIn, isAdmin, gateInteraction, activeFilte
 };
 
 export default CommunityFeed;
+

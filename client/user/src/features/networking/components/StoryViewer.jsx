@@ -157,7 +157,7 @@ const StoryViewer = ({ storyGroup, onClose, onDelete, currentUser, isAdmin, init
  {/* Footer */}
  <div className="absolute bottom-0 left-0 right-0 p-6 bg-gradient-to-t from-black to-transparent flex items-center gap-4 z-[210]">
  <Link 
- to={`/profile/${storyGroup.user._id}`} 
+ to={`/profile/${storyGroup.user.id || storyGroup.user._id}`} 
  className="w-10 h-10 rounded-full border-2 border-[#BFF367] overflow-hidden hover:opacity-80 transition-opacity shrink-0"
  onClick={(e) => e.stopPropagation()}
  >
@@ -165,7 +165,7 @@ const StoryViewer = ({ storyGroup, onClose, onDelete, currentUser, isAdmin, init
  </Link>
  <div className="flex-1 min-w-0">
  <Link 
- to={`/profile/${storyGroup.user._id}`} 
+ to={`/profile/${storyGroup.user.id || storyGroup.user._id}`} 
  className="hover:opacity-80 transition-opacity inline-block max-w-full"
  onClick={(e) => e.stopPropagation()}
  >
@@ -240,8 +240,8 @@ const StoryViewer = ({ storyGroup, onClose, onDelete, currentUser, isAdmin, init
  <div className="space-y-2">
  {currentStory.viewers.map((viewer) => (
  <Link
- key={viewer._id}
- to={`/profile/${viewer._id}`}
+ key={viewer.id || viewer._id}
+ to={`/profile/${viewer.id || viewer._id}`}
  onClick={() => onClose()}
  className="flex items-center gap-4 p-3 rounded-[8px] hover:bg-white/5 transition-all group border border-transparent hover:border-white/5"
  >

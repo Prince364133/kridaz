@@ -449,17 +449,40 @@ const useCricketScoring = (matchId) => {
 
   // ── Timers & Penalty ──────────────────────────────────────────────────────────
   const toggleTimer = async () => {
+    if (!matchData) return { success: false, error: "No match data loaded" };
+    
+    const previousData = matchData;
+    const isCurrentlyRunning = matchData.timerState === 'RUNNING';
+    const nextState = isCurrentlyRunning ? 'PAUSED' : 'RUNNING';
+    
+    let newDuration = matchData.totalDurationSeconds || 0;
+    if (isCurrentlyRunning && matchData.timerLastStartedAt) {
+      const start = new Date(matchData.timerLastStartedAt).getTime();
+      newDuration += Math.floor((Date.now() - start) / 1000);
+    }
+
+    setMatchData(prev => {
+      if (!prev) return prev;
+      return {
+        ...prev,
+        timerState: nextState,
+        timerLastStartedAt: nextState === 'RUNNING' ? new Date().toISOString() : null,
+        totalDurationSeconds: newDuration
+      };
+    });
+
     try {
       const response = await axiosInstance.put('/api/scoring/toggle-timer', {
         scoringId: matchData?.cricketMatch?.id || matchData?.id || matchData?._id,
       }, { headers: getHeaders() });
       if (response.data.success) {
-        // Will refresh the entire status to get new timer state
         fetchMatchStatus();
         return { success: true };
       }
+      setMatchData(previousData);
       return { success: false, message: response.data.message };
     } catch (err) {
+      setMatchData(previousData);
       return { success: false, error: err.message };
     }
   };

@@ -15,7 +15,7 @@ const MyTeams = () => {
   const [isInviteModalOpen, setIsInviteModalOpen] = useState(false);
   
   const { data: teamData } = useGetMyTeamsQuery(undefined, {
-    pollingInterval: 5000,
+    pollingInterval: 15000,
   });
 
   // Sync selected team with data if it changes

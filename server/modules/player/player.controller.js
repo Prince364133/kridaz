@@ -579,6 +579,7 @@ export const getLeaderboard = async (req, res) => {
 
     const rankedPlayers = users.map((u, index) => ({
       id: u.id,
+      _id: u.id,
       name: u.name,
       username: u.username,
       profilePicture: u.profilePicture,

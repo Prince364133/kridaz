@@ -28,14 +28,15 @@ const TeamSidebar = ({ onSelectTeam, selectedTeamId, onCreateTeam }) => {
   }, [location.state, navigate, location.pathname]);
 
   const { data: myData, isLoading: isMyLoading } = useGetMyTeamsQuery(undefined, {
-    pollingInterval: 5000,
+    pollingInterval: activeTab === 'myTeams' ? 15000 : undefined,
   });
   const { data: oppData, isLoading: isOppLoading } = useGetOpponentTeamsQuery(undefined, {
-    skip: activeTab !== 'opponentTeams' && activeTab !== 'myTeams',
-    pollingInterval: 5000,
+    skip: activeTab !== 'opponentTeams',
+    pollingInterval: activeTab === 'opponentTeams' ? 15000 : undefined,
   });
   const { data: scoringData, isLoading: isScoringLoading } = useGetMyScoringGamesQuery(undefined, {
-    pollingInterval: 5000,
+    skip: activeTab !== 'scoringMatches',
+    pollingInterval: activeTab === 'scoringMatches' ? 15000 : undefined,
   });
 
   let data = null;

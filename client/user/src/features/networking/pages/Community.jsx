@@ -106,7 +106,7 @@ const Community = ({ children, onSearchActive }) => {
   }, [searchQuery, showGlobalSearch]);
 
   return (
-    <div className={`min-h-screen bg-[#050505] text-white pt-4 pb-12 ${activeFilter === "Reels" ? "px-0 md:px-3" : "px-1 md:px-3"} font-sans relative`}>
+    <div className={`min-h-screen bg-[#050505] text-white pt-0 pb-12 ${activeFilter === "Reels" ? "px-0 md:px-3" : "px-1 md:px-3"} font-sans relative`}>
       {/* Global Search Modal */}
       <AnimatePresence>
         {showGlobalSearch && (
@@ -218,3 +218,6 @@ const Community = ({ children, onSearchActive }) => {
 };
 
 export default Community;
+
+
+

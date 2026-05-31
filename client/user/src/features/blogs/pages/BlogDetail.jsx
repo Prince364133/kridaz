@@ -68,7 +68,7 @@ export default function BlogDetail() {
       {/* ΓöÇΓöÇ HERO ΓöÇΓöÇ */}
       <div className="relative h-[60vh] min-h-[400px] overflow-hidden">
         <img
-          src={blog.imageUrl}
+          src={blog.imageUrl || blog.featuredImage}
           alt={blog.title}
           className="absolute inset-0 w-full h-full object-cover opacity-40"
         />

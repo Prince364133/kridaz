@@ -20,6 +20,13 @@ const StoriesSection = ({ user, isLoggedIn, isAdmin, gateInteraction }) => {
   const [showStoryModal, setShowStoryModal] = useState(false);
   const [selectedStoryGroup, setSelectedStoryGroup] = useState(null);
 
+  const hasSeenGroup = (group) => {
+    if (!currentUserId) return false;
+    return group.stories.every((story) =>
+      story.viewers?.some((viewer) => (viewer.id || viewer._id || viewer) === currentUserId)
+    );
+  };
+
   const stories = storiesData?.stories || [];
   const myStoryGroup = currentUserId ? stories.find((group) => (group.user?._id || group.user?.id) === currentUserId) : null;
   const otherStories = currentUserId ? stories.filter((group) => (group.user?._id || group.user?.id) !== currentUserId) : stories;
@@ -65,13 +72,13 @@ const StoriesSection = ({ user, isLoggedIn, isAdmin, gateInteraction }) => {
   };
 
   return (
-    <div className="py-2 px-1">
+    <div className="pt-3 pb-2 px-1">
       <div className="flex gap-4 overflow-x-auto no-scrollbar scroll-smooth items-center pb-2">
         {/* Add/View Your Story */}
         <div className="flex flex-col items-center gap-2.5 shrink-0 group relative">
           <div
             className={`w-[68px] h-[68px] rounded-full relative transition-transform ${
-              myStoryGroup ? "p-[2px] bg-gradient-to-r from-[#BFF367] to-[#BFF367]" : "border border-dashed border-white/30 group-hover:border-[#BFF367]/50 p-0.5"
+              myStoryGroup ? (hasSeenGroup(myStoryGroup) ? "bg-white/20 p-[2px]" : "p-[2px] bg-gradient-to-r from-[#BFF367] to-[#BFF367]") : "border border-dashed border-white/30 group-hover:border-[#BFF367]/50 p-0.5"
             }`}
           >
             <div
@@ -137,7 +144,7 @@ const StoriesSection = ({ user, isLoggedIn, isAdmin, gateInteraction }) => {
             onClick={() => setSelectedStoryGroup(group)}
             className="flex flex-col items-center gap-2.5 shrink-0 cursor-pointer group"
           >
-            <div className={`w-[68px] h-[68px] rounded-full p-[2px] relative hover:scale-105 transition-transform ${idx === 0 ? "bg-gradient-to-r from-[#BFF367] to-[#BFF367]" : "bg-white/20"}`}>
+            <div className={`w-[68px] h-[68px] rounded-full p-[2px] relative hover:scale-105 transition-transform ${hasSeenGroup(group) ? "bg-white/20" : "bg-gradient-to-r from-[#BFF367] to-[#BFF367]"}`}>
               <div className="w-full h-full rounded-full bg-[#0A0A0A] p-[2px]">
                 <div className="w-full h-full rounded-full overflow-hidden bg-[#111]">
                   {group.stories[0].mediaUrl ? (
@@ -155,11 +162,6 @@ const StoriesSection = ({ user, isLoggedIn, isAdmin, gateInteraction }) => {
                   )}
                 </div>
               </div>
-              {idx === 0 && (
-                <div className="absolute -top-1 left-1/2 -translate-x-1/2 px-1.5 py-[2px] bg-red-500 rounded flex items-center text-[7px] font-black uppercase text-white shadow-lg tracking-wider border border-[#0A0A0A]">
-                  LIVE
-                </div>
-              )}
             </div>
             <span className="text-[10px] font-bold text-white/80 group-hover:text-[#BFF367] transition-colors truncate max-w-[68px]">
               {group.user?.name?.split(" ")[0] || "Player"}
@@ -190,3 +192,4 @@ const StoriesSection = ({ user, isLoggedIn, isAdmin, gateInteraction }) => {
 };
 
 export default StoriesSection;
+

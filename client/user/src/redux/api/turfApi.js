@@ -9,9 +9,25 @@ export const turfApi = baseApi.injectEndpoints({
       }),
       providesTags: ["Turf"],
     }),
+    getSavedTurfs: builder.query({
+      query: () => ({
+        url: "/api/user/turf/user/likes",
+      }),
+      providesTags: ["Turf"],
+    }),
+    toggleTurfLike: builder.mutation({
+      query: (turfId) => ({
+        url: "/api/user/turf/user/like",
+        method: "POST",
+        body: { turfId },
+      }),
+      invalidatesTags: ["Turf"],
+    }),
   }),
 });
 
 export const {
   useGetTurfsQuery,
+  useGetSavedTurfsQuery,
+  useToggleTurfLikeMutation,
 } = turfApi;

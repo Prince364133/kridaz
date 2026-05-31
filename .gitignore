@@ -26,3 +26,21 @@ logs/
 .docusaurus/
 docs/.docusaurus/
 
+# Scratch / debug / injection scripts
+inject-*.js
+update_*.js
+check_*.js
+fix_*.js
+test-*.js
+test-*.mjs
+*_old.js
+*_sunny*.jsx
+sunny_*.jsx
+sunny_*.txt
+*-injection-summary.txt
+*.dump.txt
+*.bak.txt
+temp.json
+modal_*.txt
+recordball_*.txt
+*-summary.txt

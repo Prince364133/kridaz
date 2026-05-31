@@ -5,6 +5,7 @@ import {
   getTimeSlotByTurfId,
   getTurfLocations,
   toggleTurfLike,
+  getLikedTurfs,
   recordTurfShare,
   recordTurfInteraction,
   getTurfRecommendations,
@@ -15,6 +16,7 @@ import { protect, optionalProtect } from "../../../middleware/auth.middleware.js
 const router = express.Router();
 
 router.post("/like", protect, toggleTurfLike);
+router.get("/likes", protect, getLikedTurfs);
 router.post("/share", optionalProtect, recordTurfShare);
 router.post("/interaction", optionalProtect, recordTurfInteraction);
 router.get("/recommendations", optionalProtect, getTurfRecommendations);

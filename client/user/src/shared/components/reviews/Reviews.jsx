@@ -54,7 +54,7 @@ const Reviews = ({ turfId }) => {
  
  <div className="flex items-center gap-4 pt-4 border-t border-zinc-800/50">
  <Link 
- to={`/profile/${review.user?._id}`}
+ to={`/profile/${review.user?.id || review.user?._id}`}
  className="w-10 h-10 rounded-[8px] bg-zinc-800 border border-zinc-700 flex items-center justify-center text-[#BFF367] font-black text-sm uppercase group-hover:bg-[#BFF367] group-hover:text-black transition-all duration-300 overflow-hidden relative z-10"
  >
  {review.user?.profilePicture ? (
@@ -69,7 +69,7 @@ const Reviews = ({ turfId }) => {
  </Link>
  <div>
  <Link 
- to={`/profile/${review.user?._id}`}
+ to={`/profile/${review.user?.id || review.user?._id}`}
  className="font-black uppercase text-[10px] tracking-widest text-white mb-0.5 hover:text-[#BFF367] transition-colors relative z-10"
  >
  {review.user?.name || "Anonymous Player"}

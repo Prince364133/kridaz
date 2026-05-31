@@ -54,7 +54,7 @@ const ReelsView = ({ gateInteraction, onBack }) => {
   }, [reels, searchParams]);
 
   return (
-    <div className="relative flex flex-col items-center justify-center h-[100dvh] bg-black md:rounded-[8px]">
+    <div className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-black md:bg-black/80 md:backdrop-blur-md">
       {/* Back button & header */}
       <div className="absolute top-3 left-3 right-3 z-30 flex items-center justify-between">
         <div className="flex items-center gap-3">
@@ -77,7 +77,7 @@ const ReelsView = ({ gateInteraction, onBack }) => {
 
       <div
         ref={reelsContainerRef}
-        className="w-full aspect-[9/16] max-h-[100dvh] md:h-full md:w-auto overflow-y-scroll snap-y snap-mandatory no-scrollbar md:rounded-[8px] bg-black shadow-2xl mx-auto"
+        className="w-full h-full md:w-auto md:aspect-[9/16] overflow-y-scroll snap-y snap-mandatory no-scrollbar md:rounded-[8px] bg-black shadow-2xl mx-auto"
         onScroll={(e) => {
           const el = e.currentTarget;
           const idx = Math.round(el.scrollTop / el.clientHeight);

@@ -101,6 +101,26 @@ const PlayerAvatar = ({ src, name, active, size = 'sm', isBowler = false }) => {
   );
 };
 
+const getStatusLabel = (status) => {
+  if (!status) return 'BREAK';
+  const mapping = {
+    'DRINKS': 'DRINKS BREAK',
+    'TIMED_OUT': 'TIMED OUT',
+    'LUNCH': 'LUNCH BREAK',
+    'STUMPS': 'STUMPS',
+    'RAIN': 'RAIN DELAY',
+    'OTHER': 'DELAYED (OTHER)',
+    'SCORING_MISTAKE': 'SCORING CORRECTION',
+    'CHANGE_SCORER': 'CHANGING SCORER',
+    'FACING_PROBLEM': 'TECHNICAL ISSUE',
+    'TESTING': 'TESTING',
+    'PAUSED': 'PAUSED',
+    'RAIN_DELAY': 'RAIN DELAY',
+    'BAD_LIGHT': 'BAD LIGHT'
+  };
+  return mapping[status.toUpperCase()] || status.toUpperCase();
+};
+
 const MatchAnalytics = () => {
   const { matchId } = useParams();
   const navigate = useNavigate();
@@ -680,9 +700,21 @@ const MatchAnalytics = () => {
   }) : [];
 
   return (
-    <div className="min-h-screen bg-black text-white pb-20 force-open-sans">
-      {/* Break overlay */}
-      {/* Overlay removed per user request */}
+    <div className="min-h-screen bg-black text-white pb-20 force-open-sans relative">
+      {/* Pause Reason Watermark Overlay */}
+      {liveScore?.timerState === 'PAUSED' && liveScore?.pauseReason && (
+        <div className="fixed inset-0 z-[60] pointer-events-none flex items-center justify-center" style={{ perspective: '600px' }}>
+          <div className="text-center" style={{ transform: 'rotate(-18deg)' }}>
+            <div className="text-[clamp(2.5rem,10vw,6rem)] font-black uppercase tracking-[0.15em] text-red-500/15 leading-none whitespace-nowrap select-none" style={{ fontFamily: "'Open Sans', sans-serif", textShadow: '0 0 40px rgba(239,68,68,0.08)' }}>
+              {getStatusLabel(liveScore.pauseReason)}
+            </div>
+            <div className="mt-2 text-[clamp(0.6rem,2vw,1rem)] font-black uppercase tracking-[0.4em] text-red-500/10 select-none">
+              Match Paused
+            </div>
+          </div>
+        </div>
+      )}
+
 
       {/* Header */}
       <div className="sticky top-0 z-50 bg-black/80 backdrop-blur-xl border-b border-white/5 p-3 sm:p-4">
@@ -700,7 +732,7 @@ const MatchAnalytics = () => {
               {liveScore?.timerState === 'PAUSED' && (
                 <div className="flex items-center gap-1 px-1.5 py-0.5 bg-red-500/10 text-red-500 border border-red-500/20 rounded-[4px] text-[7px] font-black uppercase tracking-widest animate-pulse shrink-0">
                   <div className="w-1 h-1 rounded-full bg-red-500" />
-                  BREAK
+                  {getStatusLabel(liveScore?.pauseReason || liveScore?.status)}
                 </div>
               )}
             </div>

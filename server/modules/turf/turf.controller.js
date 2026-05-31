@@ -50,6 +50,7 @@ export const getAllTurfs = async (req, res) => {
       sportTypes: true,
       groundTypes: true,
       facilities: true,
+      generatedSlots: true,
       owner: {
         select: {
           id: true,
@@ -72,6 +73,21 @@ export const getAllTurfs = async (req, res) => {
           take,
           select: turfSelect
         });
+
+        // Fallback to fetch other approved turfs (including those without coordinates) if list is not full
+        if (resultTurfs.length < take) {
+          const foundIds = resultTurfs.map(t => t.id);
+          const fallbackTurfs = await prisma.turf.findMany({
+            where: {
+              ...where,
+              id: { notIn: foundIds }
+            },
+            select: turfSelect,
+            take: take - resultTurfs.length,
+            orderBy: { createdAt: 'desc' }
+          });
+          resultTurfs = [...resultTurfs, ...fallbackTurfs];
+        }
       } else {
         resultTurfs = await prisma.turf.findMany({
           where,
@@ -93,13 +109,41 @@ export const getAllTurfs = async (req, res) => {
         }
       }
 
+      // Fetch today's booked timeslots count for these turfs in batch
+      const turfIds = resultTurfs.map(t => t.id);
+      const timeZone = process.env.TIMEZONE || "Asia/Kolkata";
+      const startOfToday = fromZonedTime(startOfDay(new Date()), timeZone);
+      const endOfToday = addDays(startOfToday, 1);
+
+      const bookedSlots = turfIds.length > 0 ? await prisma.timeSlot.groupBy({
+        by: ['turfId'],
+        where: {
+          turfId: { in: turfIds },
+          startTime: { gte: startOfToday, lt: endOfToday }
+        },
+        _count: { id: true }
+      }) : [];
+
+      const bookedCountMap = {};
+      bookedSlots.forEach(bs => {
+        bookedCountMap[bs.turfId] = bs._count.id;
+      });
+
       return resultTurfs.map(t => {
         const totalRating = t.reviews.reduce((acc, r) => acc + r.rating, 0);
         const avgRating = t.reviews.length > 0 ? (totalRating / t.reviews.length) : 0;
+
+        const activeSlots = Array.isArray(t.generatedSlots) 
+          ? t.generatedSlots.filter(s => s.isActive !== false) 
+          : [];
+        const bookedCount = bookedCountMap[t.id] || 0;
+        const slotsLeft = Math.max(0, activeSlots.length - bookedCount);
+
         return {
           ...t,
           _id: t.id,
           avgRating,
+          slotsLeft,
           owner: t.owner ? {
             id: t.owner.id,
             businessName: t.owner.businessName,
@@ -1060,6 +1104,60 @@ export const toggleTurfLike = async (req, res) => {
 
     await prisma.turfLike.create({ data: { userId, turfId } });
     return res.status(200).json({ success: true, message: "Liked successfully", liked: true });
+  } catch (err) {
+    return res.status(500).json({ success: false, message: err.message });
+  }
+};
+
+// Get all liked turfs for the user
+export const getLikedTurfs = async (req, res) => {
+  const userId = req.user.id;
+
+  try {
+    const liked = await prisma.turfLike.findMany({
+      where: { userId },
+      include: {
+        turf: true
+      }
+    });
+
+    const rawTurfs = liked.map(item => item.turf).filter(Boolean);
+
+    // Fetch today's booked timeslots count in batch
+    const turfIds = rawTurfs.map(t => t.id);
+    const timeZone = process.env.TIMEZONE || "Asia/Kolkata";
+    const startOfToday = fromZonedTime(startOfDay(new Date()), timeZone);
+    const endOfToday = addDays(startOfToday, 1);
+
+    const bookedSlots = turfIds.length > 0 ? await prisma.timeSlot.groupBy({
+      by: ['turfId'],
+      where: {
+        turfId: { in: turfIds },
+        startTime: { gte: startOfToday, lt: endOfToday }
+      },
+      _count: { id: true }
+    }) : [];
+
+    const bookedCountMap = {};
+    bookedSlots.forEach(bs => {
+      bookedCountMap[bs.turfId] = bs._count.id;
+    });
+
+    const turfs = rawTurfs.map(t => {
+      const activeSlots = Array.isArray(t.generatedSlots) 
+        ? t.generatedSlots.filter(s => s.isActive !== false) 
+        : [];
+      const bookedCount = bookedCountMap[t.id] || 0;
+      const slotsLeft = Math.max(0, activeSlots.length - bookedCount);
+
+      return {
+        ...t,
+        _id: t.id,
+        slotsLeft
+      };
+    });
+
+    return res.status(200).json({ success: true, turfs });
   } catch (err) {
     return res.status(500).json({ success: false, message: err.message });
   }

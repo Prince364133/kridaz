@@ -341,9 +341,9 @@ const ConnectionsModal = ({ isOpen, onClose, followersList = [], followingList =
         <div className="max-h-[350px] overflow-y-auto pr-2 custom-scrollbar space-y-3">
           {list.length > 0 ? (
             list.map((player) => (
-              <div key={player.id} className="flex items-center justify-between p-3 bg-[#0d0d0d] border border-white/5 rounded-[8px] hover:border-white/10 transition-all">
+              <div key={player.id || player._id} className="flex items-center justify-between p-3 bg-[#0d0d0d] border border-white/5 rounded-[8px] hover:border-white/10 transition-all">
                 <Link 
-                  to={`/profile/${player.id}`} 
+                  to={`/profile/${player.id || player._id}`} 
                   onClick={onClose} 
                   className="flex items-center gap-3 min-w-0 hover:opacity-80"
                 >

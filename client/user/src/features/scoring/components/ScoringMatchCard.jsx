@@ -7,6 +7,7 @@ const ScoringMatchCard = ({ match }) => {
   const navigate = useNavigate();
 
   const isLive = match.status === 'LIVE';
+  const isPaused = match.status === 'PAUSED';
   const isUpcoming = match.status === 'SCHEDULED' || match.status === 'SETUP';
   const isCompleted = match.status === 'COMPLETED';
 
@@ -14,7 +15,7 @@ const ScoringMatchCard = ({ match }) => {
     <motion.div
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
-      className={`relative overflow-hidden rounded-[8px] p-[1px] ${ isLive ? 'bg-gradient-to-r from-red-500 via-[#55DEE8] to-[#BFF367]' : 'bg-white/10' }`}
+      className={`relative overflow-hidden rounded-[8px] p-[1px] ${ isLive ? 'bg-gradient-to-r from-red-500 via-[#55DEE8] to-[#BFF367]' : isPaused ? 'bg-gradient-to-r from-orange-500 via-yellow-500 to-orange-400' : 'bg-white/10' }`}
     >
       <div className="relative bg-[#0F0F0F] rounded-[8px] p-5 h-full flex flex-col">
         {/* Header */}
@@ -28,9 +29,11 @@ const ScoringMatchCard = ({ match }) => {
             </span>
           </div>
           
-          <div className={`px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-widest border ${ isLive ? 'bg-red-500/10 text-red-500 border-red-500/30 animate-pulse' : isCompleted ? 'bg-white/5 text-white/40 border-white/10' : 'bg-[#55DEE8]/10 text-[#55DEE8] border-[#55DEE8]/30' }`}>
+          <div className={`px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-widest border ${ isLive ? 'bg-red-500/10 text-red-500 border-red-500/30 animate-pulse' : isPaused ? 'bg-orange-500/10 text-orange-400 border-orange-500/30' : isCompleted ? 'bg-white/5 text-white/40 border-white/10' : 'bg-[#55DEE8]/10 text-[#55DEE8] border-[#55DEE8]/30' }`}>
             {isLive ? (
               <span className="flex items-center gap-1.5"><Activity size={10} /> Live</span>
+            ) : isPaused ? (
+              <span className="flex items-center gap-1.5"><Clock size={10} /> Paused</span>
             ) : match.status}
           </div>
         </div>
@@ -66,7 +69,7 @@ const ScoringMatchCard = ({ match }) => {
 
         {/* Action Buttons */}
         <div className="grid grid-cols-2 gap-2 mt-auto">
-          {isLive && match.youtubeStreamUrl ? (
+          {(isLive || isPaused) && match.youtubeStreamUrl ? (
             <button
               onClick={() => window.open(match.youtubeStreamUrl, '_blank')}
               className="py-2.5 bg-red-500/10 border border-red-500/30 hover:bg-red-500/20 text-red-500 rounded-[8px] font-black uppercase tracking-widest text-[9px] flex items-center justify-center gap-1.5 transition-all"
@@ -84,10 +87,10 @@ const ScoringMatchCard = ({ match }) => {
 
           <button
             onClick={() => window.open(`/scoring/${match.id || match._id}`, '_blank')}
-            className={`py-2.5 rounded-[8px] font-black uppercase tracking-widest text-[9px] flex items-center justify-center gap-1.5 transition-all ${ isLive || isUpcoming ? 'bg-gradient-to-r from-[#55DEE8] to-[#BFF367] text-black shadow-lg shadow-[#55DEE8]/20 hover:brightness-110' : 'bg-white/5 border border-white/10 text-white hover:bg-white/10' }`}
+            className={`py-2.5 rounded-[8px] font-black uppercase tracking-widest text-[9px] flex items-center justify-center gap-1.5 transition-all ${ isLive || isPaused || isUpcoming ? 'bg-gradient-to-r from-[#55DEE8] to-[#BFF367] text-black shadow-lg shadow-[#55DEE8]/20 hover:brightness-110' : 'bg-white/5 border border-white/10 text-white hover:bg-white/10' }`}
           >
-            {isLive || isUpcoming ? <Play size={12} className="fill-black" /> : <Trophy size={12} />}
-            {isLive || isUpcoming ? 'Launch App' : 'Scorecard'}
+            {isLive || isPaused || isUpcoming ? <Play size={12} className="fill-black" /> : <Trophy size={12} />}
+            {isLive || isPaused || isUpcoming ? 'Launch App' : 'Scorecard'}
           </button>
         </div>
       </div>

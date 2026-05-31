@@ -59,6 +59,24 @@ export const paymentTotal = new client.Counter({
 });
 register.registerMetric(paymentTotal);
 
+export const kridazBookingsTotal = new client.Counter({
+  name: "kridaz_bookings_total",
+  help: "Total number of kridaz bookings completed",
+});
+register.registerMetric(kridazBookingsTotal);
+
+export const kridazWalletTopupsTotal = new client.Counter({
+  name: "kridaz_wallet_topups_total",
+  help: "Total number of successful wallet topups",
+});
+register.registerMetric(kridazWalletTopupsTotal);
+
+export const kridazActiveUsers = new client.Gauge({
+  name: "kridaz_active_users",
+  help: "Total number of active users",
+});
+register.registerMetric(kridazActiveUsers);
+
 // ── Polling for Queue Depths ────────────────────────────────────────────────
 const queues = {};
 

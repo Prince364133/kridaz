@@ -1,7 +1,7 @@
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { getDynamicProfileRoute } from "@utils/routeUtils";
 import { useSelector, useDispatch } from "react-redux";
-import { User, Users, Menu, X, LogOut, Activity, ShieldCheck, Zap, ArrowRight, Clock, Trophy, Target, MessageCircle, MapPin, ChevronRight, Bell, UserSearch, Search, Plus, Bookmark } from "lucide-react";
+import { User, Users, Menu, X, LogOut, Activity, ShieldCheck, Zap, ArrowRight, Clock, Trophy, Target, MessageCircle, MapPin, ChevronRight, Bell, UserSearch, Search, Plus, Bookmark, FileText } from "lucide-react";
 import { useState, useEffect, useCallback } from "react";
 import { createPortal } from "react-dom";
 import { logout } from "@redux/slices/authSlice";
@@ -449,6 +449,15 @@ const Navbar = () => {
                           <LogOut size={18} className="opacity-70" />
                           <span className="text-sm font-medium">Logout</span>
                         </button>
+
+                        <Link
+                          to="/blogs"
+                          onClick={() => setIsSidebarOpen(false)}
+                          className="w-full flex items-center gap-3 p-3 rounded-[8px] hover:bg-white/5 text-white/70 hover:text-white transition-all"
+                        >
+                          <FileText size={18} className="text-white/40" />
+                          <span className="text-sm font-medium">Blogs</span>
+                        </Link>
                       </div>
                     </div>,
                     document.body

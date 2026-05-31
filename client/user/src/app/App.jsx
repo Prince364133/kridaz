@@ -42,6 +42,8 @@ import { useWebPushNotifications } from "@hooks/useWebPushNotifications";
 import { CapacitorUpdater } from '@capgo/capacitor-updater';
 import { Capacitor } from '@capacitor/core';
 
+import { ObservabilityProvider } from "./ObservabilityProvider";
+
 export default function App() {
   const dispatch = useDispatch();
   const theme = useSelector((state) => state.theme.current);
@@ -134,12 +136,13 @@ export default function App() {
       }
     }, 5000);
 
+    const controller = new AbortController();
     const initAuth = async () => {
       console.log("App.jsx: Starting auth check...");
       try {
         const [meResponse, networkResponse] = await Promise.all([
-          axiosInstance.get("/api/user/auth/getMe"),
-          axiosInstance.get("/api/user/players/network").catch(() => ({ data: { success: false } }))
+          axiosInstance.get("/api/user/auth/getMe", { signal: controller.signal }),
+          axiosInstance.get("/api/user/players/network", { signal: controller.signal }).catch(() => ({ data: { success: false } }))
         ]);
         
         if (isMounted && meResponse.data.success) {
@@ -172,6 +175,7 @@ export default function App() {
     return () => {
       isMounted = false;
       clearTimeout(authTimeout);
+      controller.abort();
     };
   }, [dispatch]);
 
@@ -204,25 +208,28 @@ export default function App() {
 
   return (
     <RootErrorBoundary>
-      <GoogleOAuthProvider clientId={import.meta.env.VITE_GOOGLE_CLIENT_ID}>
-        <SocketProvider>
-          <RouterProvider router={router} />
-          <Toaster 
-            position="top-center"
-            toastOptions={{
-              duration: 3000,
-              style: {
-                background: '#18181b',
-                color: '#fff',
-                border: '1px solid rgba(255,255,255,0.1)',
-              },
-            }}
-          />
-        </SocketProvider>
-      </GoogleOAuthProvider>
+      <ObservabilityProvider>
+        <GoogleOAuthProvider clientId={import.meta.env.VITE_GOOGLE_CLIENT_ID}>
+          <SocketProvider>
+            <RouterProvider router={router} />
+            <Toaster 
+              position="top-center"
+              toastOptions={{
+                duration: 3000,
+                style: {
+                  background: '#18181b',
+                  color: '#fff',
+                  border: '1px solid rgba(255,255,255,0.1)',
+                },
+              }}
+            />
+          </SocketProvider>
+        </GoogleOAuthProvider>
+      </ObservabilityProvider>
     </RootErrorBoundary>
   );
 }
 
 
  
+

@@ -1,3 +1,4 @@
+/* eslint-disable react/prop-types */
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useSelector, useDispatch } from 'react-redux';
@@ -506,13 +507,13 @@ const JoinGames = () => {
  ) : (
                          filteredGames.map(game => {
   const totalSlots = game.gameMode === 'QUICK' 
-    ? game.quickSlots.filter(s => s.status === 'OPEN').length 
+    ? (game.quickSlots || []).filter(s => s.status === 'OPEN').length 
     : (game.teams?.teamA?.slots?.filter(s => s.status === 'OPEN').length || 0) + (game.teams?.teamB?.slots?.filter(s => s.status === 'OPEN').length || 0);
   const openSlots = game.gameMode === 'QUICK' 
-    ? game.quickSlots.filter(s => s.status === 'OPEN').length 
+    ? (game.quickSlots || []).filter(s => s.status === 'OPEN').length 
     : (game.teams?.teamA?.slots?.filter(s => s.status === 'OPEN').length || 0) + (game.teams?.teamB?.slots?.filter(s => s.status === 'OPEN').length || 0);
-  const filledSlots = (game.gameMode === 'QUICK' ? game.quickSlots.length : (game.teams?.teamA?.slots?.length || 0) + (game.teams?.teamB?.slots?.length || 0)) - openSlots;
-  const totalCapacity = game.gameMode === 'QUICK' ? game.quickSlots.length : (game.teams?.teamA?.slots?.length || 0) + (game.teams?.teamB?.slots?.length || 0);
+  const filledSlots = (game.gameMode === 'QUICK' ? (game.quickSlots || []).length : (game.teams?.teamA?.slots?.length || 0) + (game.teams?.teamB?.slots?.length || 0)) - openSlots;
+  const totalCapacity = game.gameMode === 'QUICK' ? (game.quickSlots || []).length : (game.teams?.teamA?.slots?.length || 0) + (game.teams?.teamB?.slots?.length || 0);
 
   return (
    <motion.div
@@ -696,11 +697,11 @@ const JoinGames = () => {
   <div className="flex items-center justify-between pb-2 border-b border-white/[0.08]">
   <h3 className="font-open-sans text-base font-black text-white uppercase tracking-tight">Casual Match Pool</h3>
   <span className="font-inter text-[9px] md:text-[11px] font-bold bg-gradient-to-r from-[#BFF367] to-[#BFF367] bg-clip-text text-transparent border border-white/10 px-2.5 py-0.5 rounded-[8px]">
-  {selectedGame.quickSlots.filter(s => s.status !== 'OPEN').length}/{selectedGame.quickSlots.length}
+  {(selectedGame.quickSlots || []).filter(s => s.status !== 'OPEN').length}/{(selectedGame.quickSlots || []).length}
   </span>
   </div>
   <div className="grid grid-cols-5 gap-x-3 gap-y-5">
-  {selectedGame.quickSlots.map((slot, sIdx) => {
+  {(selectedGame.quickSlots || []).map((slot, sIdx) => {
   const isJoined = slot.status !== 'OPEN';
   const RoleIcon = getRoleIcon(slot.role || '');
   return (
@@ -710,7 +711,7 @@ const JoinGames = () => {
   onClick={() => {
   if (!isAuthenticated) { toast.error("Please login to join this game"); navigate('/login'); return; }
   const currentUserId = user?.id || user?._id;
-  const hasAlreadyJoined = selectedGame.quickSlots?.some(s => s.userId === currentUserId || s.user?._id === currentUserId || s.user?.id === currentUserId);
+  const hasAlreadyJoined = (selectedGame.quickSlots || []).some(s => s.userId === currentUserId || s.user?._id === currentUserId || s.user?.id === currentUserId);
   if (hasAlreadyJoined) {
     toast.error("You have already joined a slot in this game.");
     return;
@@ -741,13 +742,13 @@ const JoinGames = () => {
   {['teamA', 'teamB'].map((teamKey) => (
   <div key={teamKey} className="space-y-3">
   <div className="flex items-center justify-between pb-2 border-b border-white/[0.08]">
-  <h3 className="font-open-sans text-base font-black text-white uppercase tracking-tight">{selectedGame.teams[teamKey].name}</h3>
+  <h3 className="font-open-sans text-base font-black text-white uppercase tracking-tight">{(selectedGame.teams?.[teamKey] || {slots: []}).name}</h3>
   <span className="font-inter text-[9px] md:text-[11px] font-bold bg-gradient-to-r from-[#BFF367] to-[#BFF367] bg-clip-text text-transparent border border-white/10 px-2.5 py-0.5 rounded-[8px]">
-  {selectedGame.teams[teamKey].slots.filter(s => s.status !== 'OPEN').length}/{selectedGame.teams[teamKey].slots.length}
+  {(selectedGame.teams?.[teamKey] || {slots: []}).slots.filter(s => s.status !== 'OPEN').length}/{(selectedGame.teams?.[teamKey] || {slots: []}).slots.length}
   </span>
   </div>
   <div className="grid grid-cols-5 gap-x-2.5 gap-y-5">
-  {selectedGame.teams[teamKey].slots.map((slot, sIdx) => {
+  {(selectedGame.teams?.[teamKey] || {slots: []}).slots.map((slot, sIdx) => {
   const isJoined = slot.status !== 'OPEN';
   const RoleIcon = getRoleIcon(slot.role || '');
   return (
@@ -901,3 +902,8 @@ const JoinGames = () => {
 };
 
 export default JoinGames;
+
+
+
+
+
