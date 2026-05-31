@@ -1,8 +1,9 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { RouterProvider } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import router from "./router";
 import { login, logout, restoreAuth, setFollowingIds } from "@redux/slices/authSlice";
+import { setUserLocation, setLocationStatus } from "@redux/slices/uiSlice";
 import axiosInstance from "@hooks/useAxiosInstance";
 
 // Simple JWT decoder (no verification, just payload extraction)
@@ -45,10 +46,58 @@ export default function App() {
   const dispatch = useDispatch();
   const theme = useSelector((state) => state.theme.current);
   const authState = useSelector((state) => state.auth);
+  const lastAuthCheckTime = useRef(0);
   
   // Initialize Native & Web Push Notifications
   usePushNotifications(authState.isLoggedIn);
   useWebPushNotifications(authState.isLoggedIn);
+
+  // Geolocation detection
+  useEffect(() => {
+    dispatch(setLocationStatus("detecting"));
+    if (!navigator.geolocation) {
+      fallbackToIPLocation();
+      return;
+    }
+    navigator.geolocation.getCurrentPosition(
+      async (pos) => {
+        const lat = pos.coords.latitude;
+        const lng = pos.coords.longitude;
+        let city = "";
+        let state = "";
+        try {
+          const res = await fetch(`https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${lat}&longitude=${lng}&localityLanguage=en`);
+          const data = await res.json();
+          city = data.city || data.locality || "";
+          state = data.principalSubdivision || "";
+        } catch (error) {
+          console.warn("Reverse geocoding failed:", error);
+        }
+        dispatch(setUserLocation({ lat, lng, city, state }));
+        dispatch(setLocationStatus("granted"));
+      },
+      (err) => {
+        console.warn("Geolocation failed:", err.message);
+        fallbackToIPLocation();
+      },
+      { timeout: 8000, maximumAge: 60000 }
+    );
+
+    async function fallbackToIPLocation() {
+      try {
+        const res = await fetch("https://ipapi.co/json/");
+        const data = await res.json();
+        if (data.latitude && data.longitude) {
+          dispatch(setUserLocation({ lat: data.latitude, lng: data.longitude, city: data.city, state: data.region }));
+          dispatch(setLocationStatus("granted"));
+        } else {
+          dispatch(setLocationStatus("denied"));
+        }
+      } catch (error) {
+        dispatch(setLocationStatus("denied"));
+      }
+    }
+  }, [dispatch]);
 
   // Notify Capgo Updater that the app is ready and working
   useEffect(() => {
@@ -129,6 +178,11 @@ export default function App() {
   useEffect(() => {
     const handleFocus = () => {
       if (authState.isLoggedIn) {
+        const now = Date.now();
+        if (now - lastAuthCheckTime.current < 5 * 60 * 1000) {
+          return; // Skip background check if done in the last 5 minutes
+        }
+        lastAuthCheckTime.current = now;
         axiosInstance.get("/api/user/auth/getMe").then(res => {
           if (res.data.success) {
             dispatch(restoreAuth({

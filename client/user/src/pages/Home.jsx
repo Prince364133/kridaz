@@ -13,10 +13,14 @@ import TurfCardMobile from "../features/turf/components/TurfCardMobile";
 import SearchPlayers from "../shared/components/search/SearchPlayers";
 import SearchTurf from "../shared/components/search/SearchTurf";
 import InterestsModal from "../shared/components/modals/InterestsModal";
-import { updateUser } from "@redux/slices/authSlice";
+import { updateUser, followUser, unfollowUser } from "@redux/slices/authSlice";
 import useLoginOnDemand from "@hooks/useLoginOnDemand";
 import Community from "../features/networking/pages/Community";
 import { useGetReelsFeedQuery } from "@redux/api/reelsApi";
+import { useGetFeaturesFlagsQuery, useGetMarketingContentQuery } from "@redux/api/featuresApi";
+import { useGetStatesListQuery, useGetCitiesListQuery } from "@redux/api/locationApi";
+import { useListGamesQuery } from "@redux/api/gamesApi";
+import { useGetProfessionalsListQuery } from "@redux/api/professionalApi";
 
 const PRI = "#BFF367";
 const GRAD = "linear-gradient(90deg, #BFF367 0%, #BFF367 100%)";
@@ -77,22 +81,21 @@ const avatarColor = (name) => avatarColors[name?.charCodeAt(0) % avatarColors.le
 export default function Home() {
  const dispatch = useDispatch();
  const navigate = useNavigate();
- const { isLoggedIn, role, user } = useSelector((state) => state.auth);
- const { gateInteraction } = useLoginOnDemand();
- const [searchParams] = useSearchParams();
- const isReelsView = searchParams.get("tab") === "shots";
- const [isCommunitySearchActive, setIsCommunitySearchActive] = useState(false);
- const shouldHideRest = isReelsView || isCommunitySearchActive;
- const [showInterests, setShowInterests] = useState(false);
- const { data: reelsData } = useGetReelsFeedQuery();
- const reelsFeed = reelsData?.reels?.slice(0, 5) || [];
- const [activeTab, setActiveTab] = useState("venues");
- const [players, setPlayers] = useState([]);
- const [followingIds, setFollowingIds] = useState([]);
- const [turfFilters, setTurfFilters] = useState({});
- const [playerFilters, setPlayerFilters] = useState({});
- const [userLocation, setUserLocation] = useState(null);
- const [locationStatus, setLocationStatus] = useState("detecting");
+  const { isLoggedIn, role, user, followingIds } = useSelector((state) => state.auth);
+  const userLocation = useSelector((state) => state.ui.userLocation);
+  const locationStatus = useSelector((state) => state.ui.locationStatus);
+  const { gateInteraction } = useLoginOnDemand();
+  const [searchParams] = useSearchParams();
+  const isReelsView = searchParams.get("tab") === "shots";
+  const [isCommunitySearchActive, setIsCommunitySearchActive] = useState(false);
+  const shouldHideRest = isReelsView || isCommunitySearchActive;
+  const [showInterests, setShowInterests] = useState(false);
+  const { data: reelsData } = useGetReelsFeedQuery();
+  const reelsFeed = reelsData?.reels?.slice(0, 5) || [];
+  const [activeTab, setActiveTab] = useState("venues");
+  const [players, setPlayers] = useState([]);
+  const [turfFilters, setTurfFilters] = useState({});
+  const [playerFilters, setPlayerFilters] = useState({});
 
   const combinedTurfFilters = useMemo(() => {
     if (locationStatus === "detecting") return { _skip: true };
@@ -133,216 +136,68 @@ export default function Home() {
     // Level 3: All
     return sortedAll;
   }, [turfs, userLocation]);
- const [marketing, setMarketing] = useState({ banners: [], videos: [] });
- const [loading, setLoading] = useState(true);
- const [featureFlags, setFeatureFlags] = useState({});
- const [realSocialPosts, setRealSocialPosts] = useState([]);
- const [hostedGames, setHostedGames] = useState([]);
- const [hostedGamesLoading, setHostedGamesLoading] = useState(true);
- const [selectedGameSport, setSelectedGameSport] = useState("ALL SPORTS");
- const [professionals, setProfessionals] = useState([]);
- const [professionalsLoading, setProfessionalsLoading] = useState(true);
 
- // Home Page Location Filtering
- const [states, setStates] = useState([]);
- const [cities, setCities] = useState([]);
- const [selectedHomeState, setSelectedHomeState] = useState(user?.state || "");
- const [selectedHomeCity, setSelectedHomeCity] = useState(user?.city || "");
- const [loadingStates, setLoadingStates] = useState(false);
- const [loadingCities, setLoadingCities] = useState(false);
+  const { data: marketingData, isLoading: marketingLoading } = useGetMarketingContentQuery();
+  const marketing = marketingData || { banners: [], videos: [] };
 
- useEffect(() => {
- if (isLoggedIn && role === 'user' && user && (!user.sportTypes || user.sportTypes.length === 0)) {
- setShowInterests(true);
- }
- }, [isLoggedIn, role, user]);
+  const { data: featuresData, isLoading: featuresLoading } = useGetFeaturesFlagsQuery();
+  const featureFlags = featuresData?.flagsMap || {};
 
- const detectLocation = () => {
- setLocationStatus("detecting");
- if (!navigator.geolocation) {
- fallbackToIPLocation();
- return;
- }
- navigator.geolocation.getCurrentPosition(
- async (pos) => {
- const lat = pos.coords.latitude;
- const lng = pos.coords.longitude;
- let city = "";
- let state = "";
- try {
- const res = await fetch(`https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${lat}&longitude=${lng}&localityLanguage=en`);
- const data = await res.json();
- city = data.city || data.locality || "";
- state = data.principalSubdivision || "";
- } catch (error) {
- console.warn("Reverse geocoding failed:", error);
- }
- setUserLocation({ lat, lng, city, state });
- setLocationStatus("granted");
- },
- (err) => {
- console.warn("Geolocation failed:", err.message);
- fallbackToIPLocation();
- },
- { timeout: 8000, maximumAge: 60000 }
- );
- };
+  const loading = marketingLoading || featuresLoading;
 
- const fallbackToIPLocation = async () => {
- try {
- const res = await fetch("https://ipapi.co/json/");
- const data = await res.json();
- if (data.latitude && data.longitude) {
- setUserLocation({ lat: data.latitude, lng: data.longitude, city: data.city, state: data.region });
- setLocationStatus("granted");
- } else {
- setLocationStatus("denied");
- }
- } catch (error) {
- setLocationStatus("denied");
- }
- };
+  const [selectedGameSport, setSelectedGameSport] = useState("ALL SPORTS");
+
+  // Home Page Location Filtering
+  const [selectedHomeState, setSelectedHomeState] = useState(user?.state || "");
+  const [selectedHomeCity, setSelectedHomeCity] = useState(user?.city || "");
+
+  const { data: statesData, isLoading: loadingStates } = useGetStatesListQuery();
+  const states = statesData?.states || [];
+
+  const { data: citiesData, isLoading: loadingCities } = useGetCitiesListQuery(selectedHomeState, {
+    skip: !selectedHomeState,
+  });
+  const cities = citiesData?.cities || [];
+
+  const gameQueryParams = useMemo(() => {
+    const params = {};
+    const cityFilter = selectedHomeCity || user?.city;
+    const stateFilter = selectedHomeState || user?.state;
+    if (cityFilter) params.city = cityFilter;
+    if (stateFilter) params.state = stateFilter;
+    if (selectedGameSport && selectedGameSport !== "ALL SPORTS") {
+      params.gameType = selectedGameSport;
+    }
+    return params;
+  }, [selectedHomeCity, selectedHomeState, selectedGameSport, user?.city, user?.state]);
+
+  const { data: gamesData, isLoading: hostedGamesLoading } = useListGamesQuery(gameQueryParams);
+  const hostedGames = gamesData?.games || [];
+
+  const { data: professionalsData, isLoading: professionalsLoading } = useGetProfessionalsListQuery({ limit: 12 });
+  const professionals = professionalsData?.professionals || [];
 
   useEffect(() => {
-    detectLocation();
-  }, []);
+    if (isLoggedIn && role === 'user' && user && (!user.sportTypes || user.sportTypes.length === 0)) {
+      setShowInterests(true);
+    }
+  }, [isLoggedIn, role, user]);
 
- useEffect(() => {
- const fetchData = async () => {
- try {
- // Fetch features and marketing in parallel
- const results = await Promise.allSettled([
- axiosInstance.get("/api/features"),
- axiosInstance.get("/api/features/marketing"),
- axiosInstance.get("/api/user/community")
- ]);
-
- const [venuesRes, marketingRes, communityRes] = results;
-
- if (marketingRes.status === 'fulfilled') {
- setMarketing(marketingRes.value.data || { banners: [], videos: [] });
- }
- 
- if (venuesRes.status === 'fulfilled') {
- setFeatureFlags(venuesRes.value.data?.flagsMap || {});
- }
-
- if (communityRes.status === 'fulfilled' && communityRes.value.data?.posts) {
- const latestPosts = communityRes.value.data.posts.slice(0, 10);
- setRealSocialPosts(latestPosts);
- }
- } catch (error) {
- console.error("Home.jsx: Critical error in fetchData:", error);
- } finally {
- setLoading(false);
- }
- };
- fetchData();
- }, []);
-
- useEffect(() => {
- const fetchPlayers = async () => {
- try {
- const params = {
- ...playerFilters,
- sortBy: 'newest',
- };
- const res = await axiosInstance.get("/api/user/players", { params });
- setPlayers(res.data.players || []);
- } catch (error) {
- console.error("Error fetching players:", error);
- }
- };
-
- const fetchFollowingStatus = async () => {
- if (!isLoggedIn) return;
- try {
- const response = await axiosInstance.get("/api/user/players/network");
- const ids = (response.data.following || []).filter(p => p).map(p => p.id || p._id);
- setFollowingIds(ids);
- } catch (error) {
- console.error("Error fetching network:", error);
- }
- };
-
- fetchPlayers();
- fetchFollowingStatus();
- }, [playerFilters, userLocation, isLoggedIn]);
-
- useEffect(() => {
- const fetchStates = async () => {
- try {
- setLoadingStates(true);
- const res = await axiosInstance.get('/api/location/states');
- setStates(res.data.states || []);
- } catch (err) {
- console.error('Error fetching states:', err);
- } finally {
- setLoadingStates(false);
- }
- };
- fetchStates();
- }, []);
-
- useEffect(() => {
- const fetchCities = async () => {
- if (!selectedHomeState) {
- setCities([]);
- return;
- }
- try {
- setLoadingCities(true);
- const res = await axiosInstance.get(`/api/location/cities?state=${selectedHomeState}`);
- setCities(res.data.cities || []);
- } catch (err) {
- console.error('Error fetching cities:', err);
- } finally {
- setLoadingCities(false);
- }
- };
- fetchCities();
- }, [selectedHomeState]);
-
- useEffect(() => {
- const fetchHostedGames = async () => {
- try {
- setHostedGamesLoading(true);
- let url = "/api/hosted-game/list";
- const params = {};
- 
- // Priority: Filter selection > User profile
- const cityFilter = selectedHomeCity || user?.city;
- const stateFilter = selectedHomeState || user?.state;
- 
- if (cityFilter) params.city = cityFilter;
- if (stateFilter) params.state = stateFilter;
- if (selectedGameSport !== "ALL SPORTS") params.gameType = selectedGameSport;
- 
- const res = await axiosInstance.get(url, { params });
- setHostedGames(res.data.games || []);
- } catch (err) {
- console.error("Error fetching hosted games:", err);
- } finally {
- setHostedGamesLoading(false);
- }
- };
- fetchHostedGames();
- }, [selectedHomeCity, selectedHomeState, selectedGameSport, user?.city, user?.state]);
-
- useEffect(() => {
- const fetchProfessionals = async () => {
- try {
- setProfessionalsLoading(true);
- const res = await axiosInstance.get("/api/professional/list", { params: { limit: 12 } });
- setProfessionals(res.data.professionals || []);
- } catch (error) {
- console.error("Error fetching professionals:", error);
- } finally {
- setProfessionalsLoading(false);
- }
- };
- fetchProfessionals();
- }, []);
+  useEffect(() => {
+    const fetchPlayers = async () => {
+      try {
+        const params = {
+          ...playerFilters,
+          sortBy: 'newest',
+        };
+        const res = await axiosInstance.get("/api/user/players", { params });
+        setPlayers(res.data.players || []);
+      } catch (error) {
+        console.error("Error fetching players:", error);
+      }
+    };
+    fetchPlayers();
+  }, [playerFilters, userLocation]);
 
  const handleTurfSearch = (filters) => {
  setTurfFilters(filters);
@@ -368,39 +223,39 @@ export default function Home() {
  setPlayerFilters(filters);
  };
 
-  const handleFollowToggle = async (e, p) => {
-    e.preventDefault();
-    e.stopPropagation();
-    
-    gateInteraction(async () => {
-      const playerId = p.id || p._id;
-      const isFollowing = followingIds.includes(playerId);
-      
-      // Optimistic update
-      if (isFollowing) {
-        setFollowingIds(prev => prev.filter(id => id !== playerId));
-      } else {
-        setFollowingIds(prev => [...prev, playerId]);
-      }
-
-      try {
-        const endpoint = `/api/user/players/${playerId}/${isFollowing ? 'unfollow' : 'follow'}`;
-        await axiosInstance.post(endpoint);
-      } catch (err) {
-        // Revert on error
-        if (isFollowing) {
-          setFollowingIds(prev => [...prev, playerId]);
-        } else {
-          setFollowingIds(prev => prev.filter(id => id !== playerId));
-        }
-        console.error("Follow toggle failed:", err);
-        toast.error("Failed to update follow status");
-      }
-    }, { 
-      title: "Join the Network", 
-      message: "Connect with players, build your squad, and stay updated on the latest games. Sign in to follow athletes." 
-    });
-  };
+   const handleFollowToggle = async (e, p) => {
+     e.preventDefault();
+     e.stopPropagation();
+     
+     gateInteraction(async () => {
+       const playerId = p.id || p._id;
+       const isFollowing = followingIds.includes(playerId);
+       
+       // Optimistic update
+       if (isFollowing) {
+         dispatch(unfollowUser(playerId));
+       } else {
+         dispatch(followUser(playerId));
+       }
+ 
+       try {
+         const endpoint = `/api/user/players/${playerId}/${isFollowing ? 'unfollow' : 'follow'}`;
+         await axiosInstance.post(endpoint);
+       } catch (err) {
+         // Revert on error
+         if (isFollowing) {
+           dispatch(followUser(playerId));
+         } else {
+           dispatch(unfollowUser(playerId));
+         }
+         console.error("Follow toggle failed:", err);
+         toast.error("Failed to update follow status");
+       }
+     }, { 
+       title: "Join the Network", 
+       message: "Connect with players, build your squad, and stay updated on the latest games. Sign in to follow athletes." 
+     });
+   };
 
  return (
  <div className={`min-h-screen text-white ${isReelsView ? 'h-[100dvh] overflow-hidden' : ''}`} style={{ backgroundColor: "#000" }}>

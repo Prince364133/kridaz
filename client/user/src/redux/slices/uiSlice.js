@@ -5,7 +5,9 @@ const initialState = {
     isOpen: false,
     title: "Login Required",
     message: "Please log in to continue with this action."
-  }
+  },
+  userLocation: null, // { lat, lng, city, state }
+  locationStatus: "detecting", // "detecting" | "granted" | "denied"
 };
 
 const uiSlice = createSlice({
@@ -19,9 +21,15 @@ const uiSlice = createSlice({
     },
     closeLoginModal: (state) => {
       state.loginModal.isOpen = false;
+    },
+    setUserLocation: (state, action) => {
+      state.userLocation = action.payload;
+    },
+    setLocationStatus: (state, action) => {
+      state.locationStatus = action.payload;
     }
   }
 });
 
-export const { openLoginModal, closeLoginModal } = uiSlice.actions;
+export const { openLoginModal, closeLoginModal, setUserLocation, setLocationStatus } = uiSlice.actions;
 export default uiSlice.reducer;

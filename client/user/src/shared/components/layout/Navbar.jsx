@@ -5,6 +5,7 @@ import { User, Users, Menu, X, LogOut, Activity, ShieldCheck, Zap, ArrowRight, C
 import { useState, useEffect, useCallback } from "react";
 import { createPortal } from "react-dom";
 import { logout } from "@redux/slices/authSlice";
+import { setUserLocation, setLocationStatus } from "@redux/slices/uiSlice";
 import { reelsApi } from "@redux/api/reelsApi";
 import toast from "react-hot-toast";
 import axiosInstance from "@hooks/useAxiosInstance";
@@ -27,6 +28,8 @@ const NotificationBadge = () => {
 
 const Navbar = () => {
   const { isLoggedIn, role, user } = useSelector((state) => state.auth);
+  const userLocation = useSelector((state) => state.ui.userLocation);
+  const locationStatus = useSelector((state) => state.ui.locationStatus);
   // Auth state log removed
   const dispatch = useDispatch();
   const navigate = useNavigate();
@@ -35,47 +38,44 @@ const Navbar = () => {
   const isPartnerPortal = location.pathname.startsWith("/partners");
   const { scrollDirection, scrolled: isScrolled } = useScrollDirection();
 
-  // ── Auto-detect city + state via browser Geolocation + Nominatim reverse-geocode ──
-  const [geoLabel, setGeoLabel] = useState(null); // null = not yet tried
-  const [geoLoading, setGeoLoading] = useState(false);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
+  const geoLoading = locationStatus === "detecting";
+  const geoLabel = userLocation 
+    ? (userLocation.city && userLocation.state 
+        ? `${userLocation.city}, ${userLocation.state}` 
+        : userLocation.city || userLocation.state || "Unknown")
+    : null;
+
   const detectLocation = useCallback(() => {
-    if (!navigator.geolocation) return;
-    setGeoLoading(true);
+    dispatch(setLocationStatus("detecting"));
+    if (!navigator.geolocation) {
+      dispatch(setLocationStatus("denied"));
+      return;
+    }
     navigator.geolocation.getCurrentPosition(
-      async ({ coords }) => {
+      async (pos) => {
+        const lat = pos.coords.latitude;
+        const lng = pos.coords.longitude;
+        let city = "";
+        let state = "";
         try {
-          const res = await fetch(
-            `https://nominatim.openstreetmap.org/reverse?lat=${coords.latitude}&lon=${coords.longitude}&format=json`,
-            { headers: { "Accept-Language": "en" } }
-          );
+          const res = await fetch(`https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${lat}&longitude=${lng}&localityLanguage=en`);
           const data = await res.json();
-          const city =
-            data.address?.city ||
-            data.address?.town ||
-            data.address?.village ||
-            data.address?.county ||
-            "";
-          const state = data.address?.state || "";
-          setGeoLabel(city && state ? `${city}, ${state}` : city || state || "Unknown");
-        } catch {
-          setGeoLabel(null);
-        } finally {
-          setGeoLoading(false);
+          city = data.city || data.locality || "";
+          state = data.principalSubdivision || "";
+        } catch (error) {
+          console.warn("Reverse geocoding failed:", error);
         }
+        dispatch(setUserLocation({ lat, lng, city, state }));
+        dispatch(setLocationStatus("granted"));
       },
       () => {
-        // Permission denied or unavailable — fall back to "Set Location"
-        setGeoLabel(null);
-        setGeoLoading(false);
+        dispatch(setLocationStatus("denied"));
       },
       { timeout: 8000 }
     );
-  }, []);
-
-  // Attempt auto-detect once on mount
-  useEffect(() => { detectLocation(); }, [detectLocation]);
+  }, [dispatch]);
 
   const handleLogout = async () => {
     try {

@@ -30,7 +30,7 @@ const useNotifications = () => {
   }, [role, user?.role]);
 
   const fetchNotifications = useCallback(async () => {
-    if (!user) return;
+    if (!user?.id) return;
     setLoading(true);
     try {
       const response = await axiosInstance.get(getBaseUrl());
@@ -43,7 +43,7 @@ const useNotifications = () => {
     } finally {
       setLoading(false);
     }
-  }, [getBaseUrl, user]);
+  }, [getBaseUrl, user?.id]);
 
   const markRead = async (id) => {
     try {
