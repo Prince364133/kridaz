@@ -116,9 +116,14 @@ const Navbar = () => {
           {/* Logo & Mobile Location Section */}
           <div className="flex flex-col items-start justify-center lg:mb-8 w-full overflow-hidden">
             {isLoggedIn ? (
-              <div className="flex flex-col items-start justify-center py-1">
-                <Link to="/profile" className="text-[18px] sm:text-[20px] font-black text-white uppercase tracking-tighter hover:text-[#BFF367] transition-colors" style={{ fontFamily: "'Open Sans', sans-serif" }}>
+              <div className="flex flex-col items-start justify-center py-1 w-full">
+                {/* Mobile Greeting */}
+                <Link to="/profile" className="text-[18px] sm:text-[20px] font-black text-white uppercase tracking-tighter hover:text-[#BFF367] transition-colors lg:hidden" style={{ fontFamily: "'Open Sans', sans-serif" }}>
                   HELLO {user?.name?.split(' ')[0] || user?.username || ''}
+                </Link>
+                {/* Desktop Logo */}
+                <Link to="/" className="group hidden lg:flex items-center justify-start w-full lg:w-[32px] lg:group-hover/nav:w-full overflow-hidden transition-all duration-300">
+                  <img src="/logo.png" alt="Kridaz" className="h-10 sm:h-12 lg:h-10 w-auto max-w-none brightness-125 group-hover:scale-105 transition-transform duration-500" />
                 </Link>
                 <div className="lg:hidden flex items-center gap-1 mt-0.5 text-white/50">
                   <MapPin size={10} className={geoLoading ? "text-[#84CC16] animate-pulse" : "text-[#84CC16]"} />

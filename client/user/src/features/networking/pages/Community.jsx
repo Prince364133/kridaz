@@ -1,11 +1,10 @@
-import { useState, useEffect, useCallback } from "react";
-import { useSelector, useDispatch } from "react-redux";
+import { useState, useEffect } from "react";
+import { useSelector } from "react-redux";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import axiosInstance from "@hooks/useAxiosInstance";
-import { Search, Loader2, X, MapPin } from "lucide-react";
+import { Search, Loader2, X } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import useLoginOnDemand from "@hooks/useLoginOnDemand";
-import { setUserLocation, setLocationStatus } from "@redux/slices/uiSlice";
 
 import StoriesSection from "../components/StoriesSection";
 import CommunityFeed from "../components/CommunityFeed";
@@ -18,47 +17,6 @@ const Community = ({ children, onSearchActive }) => {
   const { gateInteraction } = useLoginOnDemand();
   const navigate = useNavigate();
   const isAdmin = role === "admin" || role === "BMSP_ADMIN";
-  const dispatch = useDispatch();
-
-  const userLocation = useSelector((state) => state.ui?.userLocation);
-  const locationStatus = useSelector((state) => state.ui?.locationStatus);
-
-  const geoLoading = locationStatus === "detecting";
-  const geoLabel = userLocation 
-    ? (userLocation.city && userLocation.state 
-        ? `${userLocation.city}, ${userLocation.state}` 
-        : userLocation.city || userLocation.state || "Mumbai, Maharashtra")
-    : "Mumbai, Maharashtra";
-
-  const detectLocation = useCallback(() => {
-    dispatch(setLocationStatus("detecting"));
-    if (!navigator.geolocation) {
-      dispatch(setLocationStatus("denied"));
-      return;
-    }
-    navigator.geolocation.getCurrentPosition(
-      async (pos) => {
-        const lat = pos.coords.latitude;
-        const lng = pos.coords.longitude;
-        let city = "";
-        let state = "";
-        try {
-          const res = await fetch(`https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${lat}&longitude=${lng}&localityLanguage=en`);
-          const data = await res.json();
-          city = data.city || data.locality || "";
-          state = data.principalSubdivision || "";
-        } catch (error) {
-          console.warn("Reverse geocoding failed:", error);
-        }
-        dispatch(setUserLocation({ lat, lng, city, state }));
-        dispatch(setLocationStatus("granted"));
-      },
-      () => {
-        dispatch(setLocationStatus("denied"));
-      },
-      { timeout: 8000 }
-    );
-  }, [dispatch]);
 
   // Filter / panel state
   const [searchParams, setSearchParams] = useSearchParams();
@@ -235,43 +193,14 @@ const Community = ({ children, onSearchActive }) => {
               <ReelsView gateInteraction={gateInteraction} onBack={() => handleSetActiveFilter("All")} />
             ) : (
               <>
-                {/* Premium Greeting Header */}
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between p-5 bg-gradient-to-r from-[#0C0C0C] to-[#141414] border border-white/5 rounded-2xl mb-4 gap-4 shadow-xl">
-                  <div>
-                    <h1 className="text-xl sm:text-2xl font-extrabold tracking-tight text-white flex items-center gap-2">
-                      <span className="bg-gradient-to-r from-white via-white to-[#BFF367] bg-clip-text text-transparent uppercase">
-                        HELLO, {user?.name?.split(' ')[0] || user?.username || 'SAMPAD'}
-                      </span>
-                      <motion.span
-                        animate={{ rotate: [0, 15, -15, 15, 0] }}
-                        transition={{ repeat: Infinity, duration: 2, repeatDelay: 3 }}
-                        className="inline-block origin-bottom text-lg sm:text-xl"
-                      >
-                        👋
-                      </motion.span>
-                    </h1>
-                    <p className="text-[10px] sm:text-[11px] text-white/40 font-bold mt-1 tracking-widest uppercase">
-                      Ready to dominate the arena today?
-                    </p>
+                {/* Desktop Greeting */}
+                {isLoggedIn && (
+                  <div className="hidden lg:flex items-center mt-4 mb-2">
+                    <span className="text-[24px] font-black text-white uppercase tracking-tighter" style={HEADING_STYLE}>
+                      HELLO {user?.name?.split(' ')[0] || user?.username || ''}
+                    </span>
                   </div>
-                  
-                  {/* Location Selector */}
-                  <div className="flex items-center gap-3 bg-white/5 border border-white/10 px-4 py-2 rounded-xl hover:border-[#BFF367]/50 transition-all duration-300 self-start sm:self-auto group cursor-pointer" onClick={detectLocation}>
-                    <div className="w-8 h-8 rounded-lg bg-[#BFF367]/10 flex items-center justify-center text-[#BFF367] shrink-0 transition-colors group-hover:bg-[#BFF367]/20">
-                      <MapPin size={16} className={geoLoading ? "animate-pulse" : "group-hover:scale-110 transition-transform duration-300"} />
-                    </div>
-                    <div className="flex flex-col">
-                      <span className="text-[8px] font-bold text-white/30 uppercase tracking-widest leading-none">Your Location</span>
-                      {geoLoading ? (
-                        <span className="text-[11px] font-extrabold text-[#BFF367] animate-pulse mt-0.5">Locating...</span>
-                      ) : (
-                        <span className="text-[11px] font-extrabold text-white mt-0.5 group-hover:text-[#BFF367] transition-colors">
-                          {geoLabel}
-                        </span>
-                      )}
-                    </div>
-                  </div>
-                </div>
+                )}
 
                 <StoriesSection user={user} isLoggedIn={isLoggedIn} isAdmin={isAdmin} gateInteraction={gateInteraction} />
 
