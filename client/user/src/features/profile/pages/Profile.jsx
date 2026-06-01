@@ -628,14 +628,23 @@ export default function Profile() {
       `}</style>
 
       <div className="relative">
-        <div className="h-72 relative overflow-hidden rounded-b-[32px]">
+        <div className="w-full aspect-[16/9] md:aspect-[24/7] max-h-[320px] md:max-h-[360px] relative overflow-hidden rounded-b-[32px] group/banner">
           <img
             src={profileUser?.bannerImage || "https://images.unsplash.com/photo-1742610569389-687ba54287f3?q=80&w=2070&auto=format&fit=crop"}
             alt="Stadium Background"
-            className="w-full h-full object-cover"
+            className="w-full h-full object-cover transition-transform duration-700 group-hover/banner:scale-105"
           />
-          <div className="absolute inset-0 bg-gradient-to-b from-black/20 via-black/50 to-black"></div>
+          <div className="absolute inset-0 bg-gradient-to-b from-black/20 via-black/40 to-black/80 transition-opacity duration-300 group-hover/banner:opacity-90"></div>
           
+          {isOwnProfile && (
+            <div className="absolute inset-0 flex items-center justify-center bg-black/40 opacity-0 group-hover/banner:opacity-100 transition-opacity duration-300 cursor-pointer" onClick={() => setIsEditModalOpen(true)}>
+              <div className="p-3 bg-black/60 backdrop-blur-md border border-white/20 rounded-full hover:scale-110 active:scale-95 transition-all text-white flex items-center gap-2">
+                <Camera size={16} />
+                <span className="text-[10px] font-black uppercase tracking-wider">Change Banner</span>
+              </div>
+            </div>
+          )}
+
           {/* Share button at top right corner */}
           <button 
             onClick={handleShare}
@@ -645,12 +654,12 @@ export default function Profile() {
           </button>
         </div>
 
-        <div className="max-w-7xl mx-auto px-4 relative -mt-16 z-10">
+        <div className="max-w-7xl mx-auto px-6 relative z-10 -mt-20 md:-mt-24">
           <div className="flex flex-col items-center md:items-start gap-4">
-            <div className="relative group shrink-0 flex flex-col items-center">
-              <div className="relative">
+            <div className="relative group/avatar shrink-0 flex flex-col items-center">
+              <div className="relative transition-all duration-300 hover:scale-105">
                 <div 
-                  className="w-32 h-32 md:w-40 md:h-40 rounded-full border-[4px] border-black bg-gradient-to-br from-[#BFF367] to-[#BFF367] p-[2px] shadow-[0_0_35px_rgba(85,222,232,0.35)] overflow-hidden cursor-pointer"
+                  className="w-32 h-32 md:w-40 md:h-40 rounded-full border-[5px] border-black bg-gradient-to-br from-[#BFF367] to-[#BFF367] p-[2px] shadow-[0_4px_25px_rgba(0,0,0,0.6),0_0_30px_rgba(191,243,103,0.2)] hover:shadow-[0_4px_30px_rgba(0,0,0,0.8),0_0_45px_rgba(191,243,103,0.5)] overflow-hidden cursor-pointer transition-all duration-500 relative"
                   onClick={handleAvatarClick}
                 >
                   {profileUser?.profilePicture ? (
@@ -658,6 +667,11 @@ export default function Profile() {
                   ) : (
                     <div className="w-full h-full rounded-full flex items-center justify-center bg-zinc-900 text-[#BFF367] text-4xl font-black">
                       {profileUser?.name?.[0]}
+                    </div>
+                  )}
+                  {isOwnProfile && (
+                    <div className="absolute inset-0 bg-black/40 opacity-0 hover:opacity-100 transition-opacity duration-300 flex items-center justify-center rounded-full">
+                      <Camera size={24} className="text-white" />
                     </div>
                   )}
                 </div>
@@ -673,7 +687,7 @@ export default function Profile() {
 
                 {isUserOnline(targetUserId) && (
                   <span
-                    className="absolute bottom-2 right-0 h-7 w-7 translate-x-1 rounded-full border-[4px] border-black bg-gradient-to-br from-[#BFF367] to-[#BFF367] shadow-[0_0_16px_rgba(191,243,103,0.8)] md:h-8 md:w-8"
+                    className="absolute bottom-2 right-2 h-7 w-7 rounded-full border-[4px] border-black bg-gradient-to-br from-[#BFF367] to-[#BFF367] shadow-[0_0_16px_rgba(191,243,103,0.8)] md:h-8 md:w-8"
                     aria-label="Online"
                   />
                 )}
