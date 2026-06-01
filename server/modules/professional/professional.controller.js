@@ -506,8 +506,8 @@ export const replyToReview = async (req, res) => {
 };
 
 export const updateProfessionalProfile = async (req, res) => {
-  const professionalId = req.user.ownerId;
-  if (!professionalId) return res.status(403).json({ message: "Unauthorized" });
+  const userId = req.user.id;
+  if (!userId) return res.status(403).json({ message: "Unauthorized" });
   const { 
     name, bio, hourlyPrice, gameTypes, city, state, 
     specialization, experience, certifications,
@@ -525,14 +525,23 @@ export const updateProfessionalProfile = async (req, res) => {
     let updatedProfessional = null;
 
     // 1. Get OwnerProfile outside of transaction to avoid holding locks
-    const owner = await prisma.ownerProfile.findUnique({
-      where: { id: professionalId },
-      select: { userId: true, businessDetails: true }
+    let owner = await prisma.ownerProfile.findUnique({
+      where: { userId: userId },
+      select: { id: true, userId: true, businessDetails: true }
     });
 
     if (!owner) {
-      return res.status(404).json({ message: "Owner profile not found" });
+      owner = await prisma.ownerProfile.create({
+        data: {
+          userId: userId,
+          businessName: name || "Independent Professional",
+          gender: gender || "Other",
+        },
+        select: { id: true, userId: true, businessDetails: true }
+      });
     }
+
+    const professionalId = owner.id;
 
     await prisma.$transaction(async (tx) => {
       // 2. Update User details if name, city, state, gameTypes or profilePicture are provided
@@ -786,10 +795,17 @@ export const getUserProfessionalBookings = async (req, res) => {
 // --- ON-DEMAND MATCHING & VERIFICATION OPERATIONS ---
 
 export const toggleOnlineStatus = async (req, res) => {
-  const professionalId = req.user.ownerId;
-  if (!professionalId) return res.status(403).json({ message: "Only professionals can toggle online status" });
+  const userId = req.user.id;
   const { isOnline, latitude, longitude } = req.body;
   try {
+    const owner = await prisma.ownerProfile.findUnique({
+      where: { userId: userId },
+      select: { id: true }
+    });
+    if (!owner) return res.status(403).json({ message: "Only professionals can toggle online status" });
+    
+    const professionalId = owner.id;
+
     const updated = await prisma.ownerProfile.update({
       where: { id: professionalId },
       data: {
@@ -1431,12 +1447,12 @@ export const getUserOnDemandBookings = async (req, res) => {
 };
 
 export const getMyProfessionalProfile = async (req, res) => {
-  const professionalId = req.user.ownerId;
-  if (!professionalId) return res.status(403).json({ message: "Unauthorized" });
+  const userId = req.user.id;
+  if (!userId) return res.status(401).json({ message: "Unauthorized" });
 
   try {
-    const professional = await prisma.ownerProfile.findUnique({
-      where: { id: professionalId },
+    let professional = await prisma.ownerProfile.findUnique({
+      where: { userId: userId },
       include: {
         user: {
           select: {
@@ -1454,7 +1470,30 @@ export const getMyProfessionalProfile = async (req, res) => {
       }
     });
 
-    if (!professional) return res.status(404).json({ message: "Professional profile not found" });
+    if (!professional) {
+      // Profile does not exist yet. Fetch user details and return a template.
+      const user = await prisma.user.findUnique({
+        where: { id: userId },
+        select: {
+          id: true,
+          name: true,
+          role: true,
+          city: true,
+          state: true,
+          profilePicture: true,
+          email: true,
+          phone: true,
+          sportTypes: true
+        }
+      });
+
+      if (!user) return res.status(404).json({ message: "User not found" });
+
+      professional = {
+        user: user,
+        certifications: []
+      };
+    }
 
     // Deserialize certifications if stored as stringified objects
     const parsedCertifications = (professional.certifications || []).map(cert => {
@@ -1481,10 +1520,40 @@ export const getMyProfessionalProfile = async (req, res) => {
 };
 
 export const getDashboardStats = async (req, res) => {
-  const professionalId = req.user.ownerId;
-  if (!professionalId) return res.status(403).json({ message: "Unauthorized" });
+  const userId = req.user.id;
 
   try {
+    const owner = await prisma.ownerProfile.findUnique({
+      where: { userId: userId },
+      select: { id: true, rating: true, numReviews: true }
+    });
+    
+    if (!owner) {
+      return res.status(200).json({
+        success: true,
+        stats: {
+          bookings: 0,
+          earnings: 0,
+          avgTime: "0h 0m",
+          rating: 0,
+          trustScore: 100,
+          acceptedRequests: 0,
+          rejectedRequests: 0,
+          skippedRequests: [],
+          graphData: {
+            "All Time": [{ name: 'No Data', bookings: 0, income: 0 }],
+            "Today": [{ name: 'No Data', bookings: 0, income: 0 }],
+            "This Week": [{ name: 'No Data', bookings: 0, income: 0 }],
+            "This Month": [{ name: 'No Data', bookings: 0, income: 0 }],
+            "Custom Time": [{ name: 'No Data', bookings: 0, income: 0 }]
+          }
+        },
+        activeBooking: null
+      });
+    }
+
+    const professionalId = owner.id;
+
     const [bookings, skippedNotifications, acceptedCount, rejectedCount, trustEvents, professional] = await Promise.all([
       prisma.onDemandProfessionalBooking.findMany({
         where: { professionalId },

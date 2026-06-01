@@ -214,7 +214,7 @@ describe("Wallet Module API Integration Tests", () => {
 
       // Verify db transaction was stored
       const txn = await prisma.walletTransaction.findFirst({
-        where: { razorpayOrderId: "order_test_123456" }
+        where: { razorpayOrderId: "order_test_123456", userId: userId }
       });
       expect(txn).toBeDefined();
       expect(Number(txn.amount)).toBe(1000);
@@ -240,7 +240,7 @@ describe("Wallet Module API Integration Tests", () => {
 
       // Verify db status updated to FAILED
       const txn = await prisma.walletTransaction.findFirst({
-        where: { razorpayOrderId: "order_test_123456" }
+        where: { razorpayOrderId: "order_test_123456", userId: userId }
       });
       expect(txn.status).toBe("FAILED");
     });

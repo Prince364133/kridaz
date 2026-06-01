@@ -29,14 +29,15 @@ const ALL_LANGUAGES = [
 const containsPhonePattern = (value) => {
   if (typeof value === "string") {
     if (value.startsWith("data:") || value.startsWith("http://") || value.startsWith("https://") || value.length > 500) return false;
-    return /\d{5,}/.test(value);
+    if (/^[0-9a-fA-F]{24}$/.test(value)) return false;
+    return /\d{9,}/.test(value);
   }
   if (Array.isArray(value)) {
     return value.some(item => containsPhonePattern(item));
   }
   if (value && typeof value === "object") {
     return Object.entries(value).some(([key, val]) => {
-      if (["profilePicture", "bannerUrl", "phone", "image", "mediaUrl", "proofImage", "logo"].includes(key)) return false;
+      if (["profilePicture", "bannerUrl", "phone", "image", "mediaUrl", "proofImage", "logo", "pinCode", "hourlyPrice", "price", "experience", "name", "username", "email", "dob", "id", "userId"].includes(key)) return false;
       return containsPhonePattern(val);
     });
   }
