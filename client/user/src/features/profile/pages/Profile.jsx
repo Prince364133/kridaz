@@ -646,8 +646,8 @@ export default function Profile() {
         </div>
 
         <div className="max-w-7xl mx-auto px-4 relative -mt-16 z-10">
-          <div className="flex flex-col md:flex-row-reverse items-center md:items-end justify-between gap-6 text-center md:text-right">
-            <div className="relative group shrink-0 flex flex-col items-center mb-4 md:mb-6 md:ml-auto">
+          <div className="flex flex-col items-center md:items-start gap-4">
+            <div className="relative group shrink-0 flex flex-col items-center">
               <div className="relative">
                 <div 
                   className="w-32 h-32 md:w-40 md:h-40 rounded-full border-[4px] border-black bg-gradient-to-br from-[#BFF367] to-[#BFF367] p-[2px] shadow-[0_0_35px_rgba(85,222,232,0.35)] overflow-hidden cursor-pointer"
@@ -680,20 +680,24 @@ export default function Profile() {
               </div>
             </div>
 
-            <div className="pb-2 flex-1 space-y-3 flex flex-col items-center md:items-start text-center md:text-left">
-              <div className="space-y-0.5">
-                <div className="flex items-center justify-center md:justify-start gap-2">
-                  <h1 className="text-3xl md:text-5xl font-black text-white tracking-tighter uppercase" style={HEADING_STYLE}>{profileUser?.name || "Player Name"}</h1>
+            <div className="w-full space-y-2 flex flex-col items-center md:items-start text-center md:text-left">
+              <div>
+                <div className="flex items-center justify-center md:justify-start gap-2 flex-wrap">
+                  <h1 className="text-3xl md:text-5xl font-black text-white tracking-tighter uppercase" style={HEADING_STYLE}>
+                    {profileUser?.name || "Player Name"}
+                  </h1>
                   <CheckCircle2 className="w-6 h-6 text-[#BFF367]" fill="currentColor" />
                 </div>
                 {profileUser?.username && (
-                  <p className="text-sm font-bold text-gray-500 tracking-tight" style={SUBHEADING_STYLE}>
+                  <p className="text-sm font-bold text-gray-500 tracking-tight mt-0.5" style={SUBHEADING_STYLE}>
                     @{profileUser.username}
                   </p>
                 )}
-                <p className="text-lg font-bold text-gray-400 uppercase tracking-tight" style={SUBHEADING_STYLE}>
-                  {profileUser?.role || "Athlete"} • {profileUser?.interests?.[0] || "Sports"}
-                </p>
+                {profileUser?.role && (
+                  <p className="text-lg font-bold text-gray-400 uppercase tracking-tight mt-1" style={SUBHEADING_STYLE}>
+                    {profileUser?.role} • {profileUser?.interests?.[0] || "Sports"}
+                  </p>
+                )}
               </div>
 
               <div className="flex flex-wrap items-center justify-center md:justify-start gap-4 text-gray-400 font-bold uppercase tracking-widest text-[10px] md:text-xs">
@@ -716,10 +720,19 @@ export default function Profile() {
                 >
                   <span className="text-[#BFF367]">{profileUser?.following?.length || 0}</span> Following
                 </button>
-                <span className="w-1 h-1 bg-zinc-700 rounded-full" />
-                <span className="flex items-center gap-1.5">
-                  <MapPin className="w-3.5 h-3.5" stroke="url(#cyan-lime-gradient)" />
-                  {profileUser?.city || "Manchester"}
+              </div>
+
+              <div className="flex items-center justify-center md:justify-start gap-1.5 text-gray-400 font-bold uppercase tracking-widest text-[10px] md:text-xs">
+                <MapPin className="w-3.5 h-3.5 text-[#BFF367]" />
+                <span>
+                  {(() => {
+                    const loc = profileUser?.city || "Manchester";
+                    const parts = loc.split(",").map(p => p.trim());
+                    if (parts.length > 2) {
+                      return `${parts[0]}, ${parts[parts.length - 1]}`;
+                    }
+                    return loc;
+                  })()}
                 </span>
               </div>
 
