@@ -48,7 +48,6 @@ jobs:
         env:
           CAPGO_TOKEN: ${{ secrets.CAPGO_TOKEN }}
         run: |
-          npx @capgo/cli bundle upload \
+          npx @capgo/cli bundle upload com.kridaz.app \
             --apikey ${{ secrets.CAPGO_TOKEN }} \
-            --channel production \
-            --appId com.kridaz.app
+            --channel production
