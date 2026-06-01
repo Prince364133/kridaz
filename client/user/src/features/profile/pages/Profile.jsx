@@ -402,11 +402,12 @@ export default function Profile() {
   const [sportFilter, setSportFilter] = useState("CRICKET");
   const [isConnectionsModalOpen, setIsConnectionsModalOpen] = useState(false);
   const [connectionsActiveTab, setConnectionsActiveTab] = useState("followers");
-  const [isCareerStatsExpanded, setIsCareerStatsExpanded] = useState(false);
-  const [isFormGuideExpanded, setIsFormGuideExpanded] = useState(false);
-  const [isMatchHistoryExpanded, setIsMatchHistoryExpanded] = useState(false);
+  const [isCareerStatsExpanded, setIsCareerStatsExpanded] = useState(true);
+  const [isFormGuideExpanded, setIsFormGuideExpanded] = useState(true);
+  const [isMatchHistoryExpanded, setIsMatchHistoryExpanded] = useState(true);
   const [userPosts, setUserPosts] = useState([]);
   const [loadingPosts, setLoadingPosts] = useState(false);
+  const [activeProfileTab, setActiveProfileTab] = useState("matches");
   
   const { isUserOnline } = useSocket();
   const isOwnProfile = !userId || (currentUser && (userId === currentUser.id || userId === currentUser._id));
@@ -450,6 +451,28 @@ export default function Profile() {
   }
 
   const dispatch = useDispatch();
+
+  const connectionsList = (() => {
+    switch (connectionsActiveTab) {
+      case "followers":
+        return profileUser?.followersList || [];
+      case "following":
+        return profileUser?.followingList || [];
+      case "common":
+        return commonConnections || [];
+      default:
+        return [];
+    }
+  })();
+
+  const profileTabs = [
+    { id: "matches", label: "Matches" },
+    { id: "stats", label: "Stats" },
+    { id: "badges", label: "Badges" },
+    { id: "teams", label: "Teams" },
+    { id: "posts", label: "Posts" },
+    { id: "connections", label: "Connections" }
+  ];
 
   const handlePlayerFollowToggle = async (player) => {
     const isFollowing = followingIds.includes(player.id);
@@ -605,14 +628,23 @@ export default function Profile() {
       `}</style>
 
       <div className="relative">
-        <div className="h-72 relative overflow-hidden rounded-b-[32px]">
+        <div className="w-full aspect-[16/9] md:aspect-[24/7] max-h-[320px] md:max-h-[360px] relative overflow-hidden rounded-b-[32px] group/banner">
           <img
             src={profileUser?.bannerImage || "https://images.unsplash.com/photo-1742610569389-687ba54287f3?q=80&w=2070&auto=format&fit=crop"}
             alt="Stadium Background"
-            className="w-full h-full object-cover"
+            className="w-full h-full object-cover transition-transform duration-700 group-hover/banner:scale-105"
           />
-          <div className="absolute inset-0 bg-gradient-to-b from-black/20 via-black/50 to-black"></div>
+          <div className="absolute inset-0 bg-gradient-to-b from-black/20 via-black/40 to-black/80 transition-opacity duration-300 group-hover/banner:opacity-90"></div>
           
+          {isOwnProfile && (
+            <div className="absolute inset-0 flex items-center justify-center bg-black/40 opacity-0 group-hover/banner:opacity-100 transition-opacity duration-300 cursor-pointer" onClick={() => setIsEditModalOpen(true)}>
+              <div className="p-3 bg-black/60 backdrop-blur-md border border-white/20 rounded-full hover:scale-110 active:scale-95 transition-all text-white flex items-center gap-2">
+                <Camera size={16} />
+                <span className="text-[10px] font-black uppercase tracking-wider">Change Banner</span>
+              </div>
+            </div>
+          )}
+
           {/* Share button at top right corner */}
           <button 
             onClick={handleShare}
@@ -622,12 +654,12 @@ export default function Profile() {
           </button>
         </div>
 
-        <div className="max-w-7xl mx-auto px-4 relative -mt-16 z-10">
-          <div className="flex flex-col md:flex-row-reverse items-center md:items-end justify-between gap-6 text-center md:text-right">
-            <div className="relative group shrink-0 flex flex-col items-center mb-4 md:mb-6 md:ml-auto">
-              <div className="relative">
+        <div className="max-w-7xl mx-auto px-6 relative z-10 -mt-20 md:-mt-24">
+          <div className="flex flex-col items-center md:items-start gap-4">
+            <div className="relative group/avatar shrink-0 flex flex-col items-center">
+              <div className="relative transition-all duration-300 hover:scale-105">
                 <div 
-                  className="w-32 h-32 md:w-40 md:h-40 rounded-full border-[4px] border-black bg-gradient-to-br from-[#BFF367] to-[#BFF367] p-[2px] shadow-[0_0_35px_rgba(85,222,232,0.35)] overflow-hidden cursor-pointer"
+                  className="w-32 h-32 md:w-40 md:h-40 rounded-full border-[5px] border-black bg-gradient-to-br from-[#BFF367] to-[#BFF367] p-[2px] shadow-[0_4px_25px_rgba(0,0,0,0.6),0_0_30px_rgba(191,243,103,0.2)] hover:shadow-[0_4px_30px_rgba(0,0,0,0.8),0_0_45px_rgba(191,243,103,0.5)] overflow-hidden cursor-pointer transition-all duration-500 relative"
                   onClick={handleAvatarClick}
                 >
                   {profileUser?.profilePicture ? (
@@ -635,6 +667,11 @@ export default function Profile() {
                   ) : (
                     <div className="w-full h-full rounded-full flex items-center justify-center bg-zinc-900 text-[#BFF367] text-4xl font-black">
                       {profileUser?.name?.[0]}
+                    </div>
+                  )}
+                  {isOwnProfile && (
+                    <div className="absolute inset-0 bg-black/40 opacity-0 hover:opacity-100 transition-opacity duration-300 flex items-center justify-center rounded-full">
+                      <Camera size={24} className="text-white" />
                     </div>
                   )}
                 </div>
@@ -650,34 +687,38 @@ export default function Profile() {
 
                 {isUserOnline(targetUserId) && (
                   <span
-                    className="absolute bottom-2 right-0 h-7 w-7 translate-x-1 rounded-full border-[4px] border-black bg-gradient-to-br from-[#BFF367] to-[#BFF367] shadow-[0_0_16px_rgba(191,243,103,0.8)] md:h-8 md:w-8"
+                    className="absolute bottom-2 right-2 h-7 w-7 rounded-full border-[4px] border-black bg-gradient-to-br from-[#BFF367] to-[#BFF367] shadow-[0_0_16px_rgba(191,243,103,0.8)] md:h-8 md:w-8"
                     aria-label="Online"
                   />
                 )}
               </div>
             </div>
 
-            <div className="pb-2 flex-1 space-y-3 flex flex-col items-center md:items-start text-center md:text-left">
-              <div className="space-y-0.5">
-                <div className="flex items-center justify-center md:justify-start gap-2">
-                  <h1 className="text-3xl md:text-5xl font-black text-white tracking-tighter uppercase" style={HEADING_STYLE}>{profileUser?.name || "Player Name"}</h1>
+            <div className="w-full space-y-2 flex flex-col items-center md:items-start text-center md:text-left">
+              <div>
+                <div className="flex items-center justify-center md:justify-start gap-2 flex-wrap">
+                  <h1 className="text-3xl md:text-5xl font-black text-white tracking-tighter uppercase" style={HEADING_STYLE}>
+                    {profileUser?.name || "Player Name"}
+                  </h1>
                   <CheckCircle2 className="w-6 h-6 text-[#BFF367]" fill="currentColor" />
                 </div>
                 {profileUser?.username && (
-                  <p className="text-sm font-bold text-gray-500 tracking-tight" style={SUBHEADING_STYLE}>
+                  <p className="text-sm font-bold text-gray-500 tracking-tight mt-0.5" style={SUBHEADING_STYLE}>
                     @{profileUser.username}
                   </p>
                 )}
-                <p className="text-lg font-bold text-gray-400 uppercase tracking-tight" style={SUBHEADING_STYLE}>
-                  {profileUser?.role || "Athlete"} • {profileUser?.interests?.[0] || "Sports"}
-                </p>
+                {profileUser?.role && (
+                  <p className="text-lg font-bold text-gray-400 uppercase tracking-tight mt-1" style={SUBHEADING_STYLE}>
+                    {profileUser?.role} • {profileUser?.interests?.[0] || "Sports"}
+                  </p>
+                )}
               </div>
 
               <div className="flex flex-wrap items-center justify-center md:justify-start gap-4 text-gray-400 font-bold uppercase tracking-widest text-[10px] md:text-xs">
                 <button 
                   onClick={() => {
+                    setActiveProfileTab("connections");
                     setConnectionsActiveTab("followers");
-                    setIsConnectionsModalOpen(true);
                   }}
                   className="flex items-center gap-1.5 hover:text-white transition-colors focus:outline-none"
                 >
@@ -686,17 +727,26 @@ export default function Profile() {
                 <span className="w-1 h-1 bg-zinc-700 rounded-full" />
                 <button 
                   onClick={() => {
+                    setActiveProfileTab("connections");
                     setConnectionsActiveTab("following");
-                    setIsConnectionsModalOpen(true);
                   }}
                   className="flex items-center gap-1.5 hover:text-white transition-colors focus:outline-none"
                 >
                   <span className="text-[#BFF367]">{profileUser?.following?.length || 0}</span> Following
                 </button>
-                <span className="w-1 h-1 bg-zinc-700 rounded-full" />
-                <span className="flex items-center gap-1.5">
-                  <MapPin className="w-3.5 h-3.5" stroke="url(#cyan-lime-gradient)" />
-                  {profileUser?.city || "Manchester"}
+              </div>
+
+              <div className="flex items-center justify-center md:justify-start gap-1.5 text-gray-400 font-bold uppercase tracking-widest text-[10px] md:text-xs">
+                <MapPin className="w-3.5 h-3.5 text-[#BFF367]" />
+                <span>
+                  {(() => {
+                    const loc = profileUser?.city || "Manchester";
+                    const parts = loc.split(",").map(p => p.trim());
+                    if (parts.length > 2) {
+                      return `${parts[0]}, ${parts[parts.length - 1]}`;
+                    }
+                    return loc;
+                  })()}
                 </span>
               </div>
 
@@ -738,454 +788,532 @@ export default function Profile() {
               </p>
             </div>
           ) : null}
-            {/* Squads Horizontal Row */}
-            {profileUser?.teams && profileUser.teams.length > 0 && (
-              <div className="mb-6 bg-white/[0.02] border border-white/5 p-5 rounded-[8px] backdrop-blur-md">
-                <h3 className="text-xs font-black uppercase tracking-wider text-gray-400 mb-4 flex items-center gap-2">
-                  <Users className="w-4 h-4 text-[#BFF367]" />
-                  My Teams
-                </h3>
-                <div className="flex items-center gap-6 overflow-x-auto pb-2 scrollbar-thin scrollbar-thumb-white/10 scrollbar-track-transparent">
-                  {profileUser.teams.map((team) => (
-                    <Link 
-                      key={team.id}
-                      to={`/team/${team.id}`}
-                      className="flex flex-col items-center gap-2 group shrink-0"
-                    >
-                      <div className="w-16 h-16 rounded-[12px] bg-black border border-white/10 flex items-center justify-center text-[#BFF367] font-bold overflow-hidden group-hover:border-[#BFF367]/50 transition-all">
-                        {team.logo || team.image ? (
-                          <img src={team.logo || team.image} alt={team.name} className="w-full h-full object-cover" />
-                        ) : (
-                          <span className="text-xl">{team.name.charAt(0).toUpperCase()}</span>
-                        )}
-                      </div>
-                      <span className="text-[10px] font-bold text-gray-400 group-hover:text-white uppercase tracking-wider transition-colors max-w-[80px] truncate text-center">
-                        {team.name}
-                      </span>
-                    </Link>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {/* ── Live Playing Matches Section */}
-            {profileUser?.liveMatches && profileUser.liveMatches.length > 0 && (
-              <div className="mb-6 relative overflow-hidden rounded-[8px] border border-[#BFF367]/30 bg-gradient-to-br from-[#BFF367]/10 via-black/80 to-[#BFF367]/5 backdrop-blur-md p-5">
-                {/* Animated background pulse */}
-                <div className="absolute inset-0 rounded-[8px] bg-gradient-to-r from-[#BFF367]/5 to-[#BFF367]/5 animate-pulse pointer-events-none" />
-
-                <h3 className="text-xs font-black uppercase tracking-wider text-[#BFF367] mb-4 flex items-center gap-2 relative z-10">
-                  <span className="relative flex items-center justify-center">
-                    <span className="absolute w-4 h-4 rounded-full bg-[#BFF367]/30 animate-ping" />
-                    <Wifi className="w-4 h-4 relative" />
-                  </span>
-                  Live Now — Playing a Match
-                </h3>
-
-                <div className="space-y-3 relative z-10">
-                  {profileUser.liveMatches.map((match) => {
-                    const teamA = match.teams?.[0]?.name || 'TBD';
-                    const teamB = match.teams?.[1]?.name || 'TBD';
-                    const matchFormat = match.format || match.gameType || "T20";
-                    const location = match.turf?.name || match.turf?.city || match.customVenue || match.city || "Local Ground";
-                    const minutesLive = match.liveStartedAt
-                      ? Math.floor((Date.now() - new Date(match.liveStartedAt).getTime()) / 60000)
-                      : null;
-
-                    return (
-                      <Link
-                        key={match.id}
-                        to={`/analytics/${match.id}`}
-                        className="group flex items-center justify-between gap-4 bg-black/50 border border-[#BFF367]/20 hover:border-[#BFF367]/60 rounded-[8px] px-5 py-4 transition-all duration-300 hover:bg-black/70 hover:shadow-[0_0_20px_rgba(85,222,232,0.15)]"
-                      >
-                        <div className="flex-1 min-w-0">
-                          {/* Teams vs */}
-                          <div className="flex items-center gap-2 mb-1.5">
-                            <span className="text-sm font-black text-white truncate tracking-tight" style={HEADING_STYLE}>
-                              {teamA}
-                            </span>
-                            <span className="text-[10px] font-black text-[#BFF367] px-1.5 py-0.5 bg-[#BFF367]/10 rounded-md border border-[#BFF367]/20 shrink-0">
-                              VS
-                            </span>
-                            <span className="text-sm font-black text-white truncate tracking-tight" style={HEADING_STYLE}>
-                              {teamB}
-                            </span>
-                          </div>
-
-                          {/* Format & Location row */}
-                          <div className="flex items-center gap-3 flex-wrap">
-                            <span className="px-2 py-0.5 rounded-[6px] bg-[#BFF367]/10 border border-[#BFF367]/20 text-[#BFF367] text-[9px] font-black uppercase tracking-widest">
-                              {matchFormat}
-                            </span>
-                            <span className="flex items-center gap-1 text-[9px] font-bold text-gray-500 uppercase tracking-widest">
-                              <MapPin size={9} className="text-[#BFF367]" />
-                              {location}
-                            </span>
-                            {minutesLive !== null && (
-                              <span className="flex items-center gap-1 text-[9px] font-bold text-gray-600 uppercase tracking-widest">
-                                <Clock size={9} />
-                                {minutesLive < 1 ? 'Just started' : `${minutesLive}m live`}
-                              </span>
-                            )}
-                          </div>
-                        </div>
-
-                        {/* CTA */}
-                        <div className="flex items-center gap-2 shrink-0">
-                          <div className="px-3 py-1.5 bg-gradient-to-r from-[#BFF367] to-[#BFF367] text-black text-[9px] font-black uppercase tracking-widest rounded-[8px] flex items-center gap-1.5 group-hover:scale-105 transition-transform">
-                            <Radio size={10} strokeWidth={2.5} />
-                            Watch Live
-                          </div>
-                        </div>
-                      </Link>
-                    );
-                  })}
-                </div>
-              </div>
-            )}
-
-            {/* Sports Filter & Resume Header */}
-            <div className="flex w-fit md:w-full max-w-full items-center justify-between mb-5 md:mb-8 bg-white/[0.02] border border-white/5 px-4 py-3 md:p-5 rounded-[8px] backdrop-blur-md">
-              <div className="flex items-center gap-3">
-                <Medal className="text-[#BFF367]" size={22} />
-                <div>
-                  <h3 className="text-sm font-black uppercase tracking-wider text-white" style={HEADING_STYLE}>Sports Resumé</h3>
-                  <p className="hidden md:block text-[9px] font-bold text-gray-500 uppercase tracking-widest mt-0.5">Verified athlete resume & credentials</p>
-                </div>
-              </div>
-              <select 
-                value={sportFilter} 
-                onChange={(e) => setSportFilter(e.target.value)} 
-                className="hidden md:block bg-black border border-white/10 text-white text-[10px] font-black uppercase tracking-widest px-4 py-2.5 rounded-[8px] focus:outline-none focus:border-[#BFF367] transition-all cursor-pointer"
-              >
-                <option value="CRICKET">Cricket Stats</option>
-                <option value="FOOTBALL">Football (Coming Soon)</option>
-              </select>
+            {/* Main Profile Tabs */}
+            <div className="flex border-b border-white/10 mb-8 overflow-x-auto no-scrollbar gap-2 sm:gap-6">
+              {profileTabs.map((t) => (
+                <button
+                  key={t.id}
+                  onClick={() => setActiveProfileTab(t.id)}
+                  className={`py-4 px-3 sm:px-4 text-xs sm:text-sm font-black uppercase tracking-widest border-b-2 transition-all duration-300 flex items-center gap-1.5 shrink-0 ${
+                    activeProfileTab === t.id
+                      ? "text-[#BFF367] border-[#BFF367]"
+                      : "text-white/40 border-transparent hover:text-white/80"
+                  }`}
+                >
+                  <span>{t.label}</span>
+                </button>
+              ))}
             </div>
 
-            {/* Earned Badges Scrollable Row */}
-            <div className="mb-8 bg-gradient-to-br from-white/5 to-white/[0.02] backdrop-blur-sm rounded-[8px] p-6 border border-white/10 animate-in fade-in duration-500">
-              <div className="mb-4">
-                <h2 className="text-xl font-black text-white flex items-center gap-2 uppercase tracking-tight" style={HEADING_STYLE}>
-                  <Award className="w-5 h-5" stroke="url(#cyan-lime-gradient)" />
-                  Earned Badges
-                </h2>
-                <p className="text-[9px] font-bold text-gray-500 uppercase tracking-widest mt-0.5">Prestigious dynamic sports career badges</p>
-              </div>
+            {/* Tab Contents */}
+            <div className="space-y-6">
+              {/* MATCHES TAB */}
+              {activeProfileTab === "matches" && (
+                <div className="space-y-6 animate-in fade-in duration-300">
+                  {/* Live Playing Matches Section */}
+                  {profileUser?.liveMatches && profileUser.liveMatches.length > 0 && (
+                    <div className="relative overflow-hidden rounded-[8px] border border-[#BFF367]/30 bg-gradient-to-br from-[#BFF367]/10 via-black/80 to-[#BFF367]/5 backdrop-blur-md p-5">
+                      <div className="absolute inset-0 rounded-[8px] bg-gradient-to-r from-[#BFF367]/5 to-[#BFF367]/5 animate-pulse pointer-events-none" />
+                      <h3 className="text-xs font-black uppercase tracking-wider text-[#BFF367] mb-4 flex items-center gap-2 relative z-10">
+                        <span className="relative flex items-center justify-center">
+                          <span className="absolute w-4 h-4 rounded-full bg-[#BFF367]/30 animate-ping" />
+                          <Wifi className="w-4 h-4 relative" />
+                        </span>
+                        Live Now — Playing a Match
+                      </h3>
 
-              {profileUser?.badges && profileUser.badges.length > 0 ? (
-                <div className="flex items-center gap-6 overflow-x-auto pb-2 scrollbar-thin scrollbar-thumb-white/10 scrollbar-track-transparent">
-                  {profileUser.badges.map((badge, idx) => (
-                    <div key={idx} className="group relative rounded-[8px] p-[1px] transition-all duration-300 cursor-pointer overflow-hidden shadow-lg hover:shadow-[#BFF367]/10 shrink-0 min-w-[200px] max-w-[240px]">
-                      <div className="absolute inset-0 bg-gradient-to-r from-[#BFF367] to-[#BFF367] opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-[8px]" />
-                      <div className="absolute inset-0 border border-white/10 group-hover:opacity-0 transition-opacity duration-300 rounded-[8px]" />
-                      <div className="relative bg-[#0d0d0d] rounded-[8px] p-4 h-full flex flex-col justify-between text-center min-h-[130px]">
-                        <div>
-                          <div className="w-10 h-10 mx-auto mb-2 rounded-full bg-zinc-950 border border-white/10 flex items-center justify-center">
-                            <Medal className="w-5 h-5 text-[#BFF367]" />
-                          </div>
-                          <h3 className="text-white text-center mb-1 font-black text-[11px] uppercase tracking-tight truncate">{badge.name}</h3>
-                          <p className="text-[9px] text-gray-500 leading-normal font-bold line-clamp-2">{badge.description}</p>
-                        </div>
-                        <p className="text-[8px] text-[#BFF367] font-black uppercase tracking-widest mt-2">{badge.category || 'MILESTONE'}</p>
+                      <div className="space-y-3 relative z-10">
+                        {profileUser.liveMatches.map((match) => {
+                          const teamA = match.teams?.[0]?.name || 'TBD';
+                          const teamB = match.teams?.[1]?.name || 'TBD';
+                          const matchFormat = match.format || match.gameType || "T20";
+                          const location = match.turf?.name || match.turf?.city || match.customVenue || match.city || "Local Ground";
+                          const minutesLive = match.liveStartedAt
+                            ? Math.floor((Date.now() - new Date(match.liveStartedAt).getTime()) / 60000)
+                            : null;
+
+                          return (
+                            <Link
+                              key={match.id}
+                              to={`/analytics/${match.id}`}
+                              className="group flex items-center justify-between gap-4 bg-black/50 border border-[#BFF367]/20 hover:border-[#BFF367]/60 rounded-[8px] px-5 py-4 transition-all duration-300 hover:bg-black/70 hover:shadow-[0_0_20px_rgba(85,222,232,0.15)]"
+                            >
+                              <div className="flex-1 min-w-0">
+                                <div className="flex items-center gap-2 mb-1.5">
+                                  <span className="text-sm font-black text-white truncate tracking-tight" style={HEADING_STYLE}>
+                                    {teamA}
+                                  </span>
+                                  <span className="text-[10px] font-black text-[#BFF367] px-1.5 py-0.5 bg-[#BFF367]/10 rounded-md border border-[#BFF367]/20 shrink-0">
+                                    VS
+                                  </span>
+                                  <span className="text-sm font-black text-white truncate tracking-tight" style={HEADING_STYLE}>
+                                    {teamB}
+                                  </span>
+                                </div>
+
+                                <div className="flex items-center gap-3 flex-wrap">
+                                  <span className="px-2 py-0.5 rounded-[6px] bg-[#BFF367]/10 border border-[#BFF367]/20 text-[#BFF367] text-[9px] font-black uppercase tracking-widest">
+                                    {matchFormat}
+                                  </span>
+                                  <span className="flex items-center gap-1 text-[9px] font-bold text-gray-500 uppercase tracking-widest">
+                                    <MapPin size={9} className="text-[#BFF367]" />
+                                    {location}
+                                  </span>
+                                  {minutesLive !== null && (
+                                    <span className="flex items-center gap-1 text-[9px] font-bold text-gray-600 uppercase tracking-widest">
+                                      <Clock size={9} />
+                                      {minutesLive < 1 ? 'Just started' : `${minutesLive}m live`}
+                                    </span>
+                                  )}
+                                </div>
+                              </div>
+
+                              <div className="flex items-center gap-2 shrink-0">
+                                <div className="px-3 py-1.5 bg-gradient-to-r from-[#BFF367] to-[#BFF367] text-black text-[9px] font-black uppercase tracking-widest rounded-[8px] flex items-center gap-1.5 group-hover:scale-105 transition-transform">
+                                  <Radio size={10} strokeWidth={2.5} />
+                                  Watch Live
+                                </div>
+                              </div>
+                            </Link>
+                          );
+                        })}
                       </div>
                     </div>
-                  ))}
-                </div>
-              ) : (
-                <div className="text-center py-6 bg-black/40 rounded-[8px] border border-white/5">
-                  <p className="text-xs font-bold text-gray-500 uppercase tracking-widest">No career badges unlocked yet</p>
-                  <p className="text-[9px] text-gray-600 uppercase tracking-widest mt-1">Score centuries, claim five-wicket hauls, or hit boundaries to earn yours!</p>
-                </div>
-              )}
-            </div>
-
-            {/* Career stats grid */}
-            {(() => {
-              const currentStats = profileUser?.careerStats?.find(s => s.sportType === sportFilter) || {
-                matchesPlayed: 0, matchesWon: 0, matchesLost: 0, winPercentage: 0,
-                totalRuns: 0, fours: 0, sixes: 0, centuries: 0, halfCenturies: 0, highestScore: 0, battingAverage: 0, battingStrikeRate: 0,
-                wickets: 0, economyRate: 0, bowlingAverage: 0, bestBowlingWickets: 0, bestBowlingRuns: 0, ballsBowled: 0, runsConceded: 0, fiveWicketHauls: 0
-              };
-
-              const formGuideData = (profileUser?.matchHistory || [])
-                .slice(0, 5)
-                .reverse()
-                .map((match, idx) => {
-                  const stat = match.cricketMatch?.playerStats?.find(s => s.userId === profileUser.id) || {};
-                  return {
-                    matchNum: `Match ${idx + 1}`,
-                    runs: stat.battingRuns || 0
-                  };
-                });
-
-              return (
-                <div className="space-y-8">
-                  {/* Grid layout for Stats Summary & Form Guide */}
-                  <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                    {/* Career Statistics */}
-                    <div className="lg:col-span-2 bg-gradient-to-br from-white/5 to-white/[0.02] backdrop-blur-sm rounded-[8px] p-6 border border-white/10 flex flex-col justify-between">
-                      <div 
-                        onClick={() => setIsCareerStatsExpanded(prev => !prev)}
-                        className="flex justify-between items-center cursor-pointer select-none group"
-                      >
-                        <div>
-                          <h2 className="text-xl font-black text-white flex items-center gap-2 uppercase tracking-tight" style={HEADING_STYLE}>
-                            <BarChart3 className="w-5 h-5" stroke="url(#cyan-lime-gradient)" />
-                            Career Stats Summary
-                          </h2>
-                          <p className="text-[9px] font-bold text-gray-500 uppercase tracking-widest mt-0.5">
-                            {isCareerStatsExpanded ? "Click here to collapse this section" : "Click here to expand this section"}
-                          </p>
-                        </div>
-                        <div className="p-2 bg-white/5 rounded-[8px] border border-white/10 text-white group-hover:scale-105 transition-all">
-                          {isCareerStatsExpanded ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
-                        </div>
-                      </div>
-                      
-                      {isCareerStatsExpanded && (
-                        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-6 animate-in fade-in duration-300">
-                          {[
-                            { label: 'Matches Played', value: currentStats.matchesPlayed, color: '#white' },
-                            { label: 'Win/Loss Spell', value: `${currentStats.matchesWon}W - ${currentStats.matchesLost}L`, color: '#BFF367' },
-                            { label: 'Win Ratio', value: `${currentStats.winPercentage}%`, color: '#BFF367' },
-                            { label: 'Runs Scored', value: currentStats.totalRuns, color: '#white' },
-                            { label: 'Batting Avg', value: currentStats.battingAverage || "0.0", color: '#white' },
-                            { label: 'Strike Rate', value: currentStats.battingStrikeRate || "0.0", color: '#BFF367' },
-                            { label: 'High Score', value: currentStats.highestScore || "0", color: '#white' },
-                            { label: 'Centuries (100s)', value: currentStats.centuries, color: '#white' },
-                            { label: 'Wickets Taken', value: currentStats.wickets, color: '#BFF367' },
-                            { label: 'Economy', value: currentStats.bowlingEconomy || currentStats.economyRate || "0.00", color: '#white' },
-                            { label: 'Bowling Avg', value: currentStats.bowlingAverage || "0.00", color: '#white' },
-                            { label: 'Best Bowling', value: currentStats.bestBowlingWickets ? `${currentStats.bestBowlingWickets}/${currentStats.bestBowlingRuns}` : "N/A", color: '#white' },
-                          ].map((stat, idx) => (
-                            <div key={idx} className="bg-black/40 rounded-[8px] p-4 border border-white/5 hover:border-[#BFF367]/30 transition-all group">
-                              <p className="text-xs font-bold text-gray-500 uppercase tracking-widest mb-1">{stat.label}</p>
-                              <p className="text-lg font-black tracking-tight" style={{ color: stat.color }}>{stat.value}</p>
-                            </div>
-                          ))}
-                        </div>
-                      )}
-                    </div>
-
-                    {/* Form Guide */}
-                    <div className="bg-gradient-to-br from-white/5 to-white/[0.02] backdrop-blur-sm rounded-[8px] p-6 border border-white/10 flex flex-col justify-between">
-                      <div 
-                        onClick={() => setIsFormGuideExpanded(prev => !prev)}
-                        className="flex justify-between items-center cursor-pointer select-none group"
-                      >
-                        <div>
-                          <h2 className="text-xl font-black text-white flex items-center gap-2 uppercase tracking-tight" style={HEADING_STYLE}>
-                            <TrendingUp className="w-5 h-5" stroke="url(#cyan-lime-gradient)" />
-                            Form Guide
-                          </h2>
-                          <p className="text-[9px] font-bold text-gray-500 uppercase tracking-widest mt-0.5">
-                            {isFormGuideExpanded ? "Click here to collapse this section" : "Click here to expand this section"}
-                          </p>
-                        </div>
-                        <div className="p-2 bg-white/5 rounded-[8px] border border-white/10 text-white group-hover:scale-105 transition-all">
-                          {isFormGuideExpanded ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
-                        </div>
-                      </div>
-                      
-                      {isFormGuideExpanded && (
-                        <div className="mt-6 animate-in fade-in duration-300">
-                          {formGuideData.length > 0 ? (
-                            <div className="w-full h-48">
-                              <ResponsiveContainer width="100%" height="100%">
-                                <LineChart data={formGuideData}>
-                                  <CartesianGrid strokeDasharray="3 3" stroke="#222" vertical={false} />
-                                  <XAxis dataKey="matchNum" tick={{ fill: '#666', fontSize: 9, fontWeight: 'bold' }} axisLine={false} />
-                                  <YAxis tick={false} axisLine={false} />
-                                  <Tooltip contentStyle={{ backgroundColor: '#000', border: '1px solid #333', borderRadius: '8px', fontSize: '10px' }} />
-                                  <Line type="monotone" dataKey="runs" stroke="url(#cyan-lime-gradient)" strokeWidth={3.5} dot={{ fill: '#BFF367', r: 4, strokeWidth: 2, stroke: '#000' }} activeDot={{ r: 6 }} />
-                                </LineChart>
-                              </ResponsiveContainer>
-                            </div>
-                          ) : (
-                            <div className="flex-1 flex items-center justify-center bg-black/40 border border-white/5 rounded-[8px] py-12 text-center">
-                              <p className="text-[9px] font-black text-gray-600 uppercase tracking-widest">No match form data available</p>
-                            </div>
-                          )}
-                        </div>
-                      )}
-                    </div>
-                  </div>
-
-
+                  )}
 
                   {/* Match History Feed */}
                   <div className="space-y-6">
-                    <div 
-                      onClick={() => setIsMatchHistoryExpanded(prev => !prev)}
-                      className="bg-gradient-to-br from-white/5 to-white/[0.02] backdrop-blur-sm rounded-[8px] p-6 border border-white/10 flex justify-between items-center cursor-pointer select-none group"
-                    >
+                    <div className="flex justify-between items-center select-none group">
                       <div>
                         <h2 className="text-xl font-black text-white flex items-center gap-2 uppercase tracking-tight" style={HEADING_STYLE}>
                           <Clock className="w-5 h-5" stroke="url(#cyan-lime-gradient)" />
                           Match History Feed
                         </h2>
-                        <p className="text-[9px] font-bold text-gray-500 uppercase tracking-widest mt-0.5">
-                          {isMatchHistoryExpanded ? "Click here to collapse this section" : "Click here to expand this section"}
-                        </p>
-                      </div>
-                      <div className="p-2 bg-white/5 rounded-[8px] border border-white/10 text-white group-hover:scale-105 transition-all">
-                        {isMatchHistoryExpanded ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
+                        <p className="text-[9px] font-bold text-gray-500 uppercase tracking-widest mt-0.5">Your past matches history</p>
                       </div>
                     </div>
 
-                    {isMatchHistoryExpanded && (
-                      <div className="animate-in fade-in duration-300">
-                        {profileUser?.matchHistory && profileUser.matchHistory.length > 0 ? (
-                          <div className="space-y-4 max-w-4xl">
-                            {profileUser.matchHistory.map((match, idx) => {
-                              const stat = match.cricketMatch?.playerStats?.find(s => s.userId === profileUser.id) || {};
-                              const userTeamSlot = match.teams?.find(t => t.slots?.some(s => s.userId === profileUser.id));
-                              const userTeamKey = userTeamSlot ? userTeamSlot.teamKey : "";
-                              const userTeamName = userTeamSlot ? userTeamSlot.name : "My Team";
-                              const opponentTeamName = match.teams?.find(t => t.teamKey !== userTeamKey)?.name || "Opponent";
+                    <div className="animate-in fade-in duration-300">
+                      {profileUser?.matchHistory && profileUser.matchHistory.length > 0 ? (
+                        <div className="space-y-4 max-w-4xl">
+                          {profileUser.matchHistory.map((match, idx) => {
+                            const stat = match.cricketMatch?.playerStats?.find(s => s.userId === profileUser.id) || {};
+                            const userTeamSlot = match.teams?.find(t => t.slots?.some(s => s.userId === profileUser.id));
+                            const userTeamKey = userTeamSlot ? userTeamSlot.teamKey : "";
+                            const userTeamName = userTeamSlot ? userTeamSlot.name : "My Team";
+                            const opponentTeamName = match.teams?.find(t => t.teamKey !== userTeamKey)?.name || "Opponent";
 
-                              const inningsUser = match.cricketMatch?.innings?.find(i => i.battingTeam === userTeamKey);
-                              const inningsOpponent = match.cricketMatch?.innings?.find(i => i.battingTeam !== userTeamKey);
-                              const won = (inningsUser?.totalRuns || 0) > (inningsOpponent?.totalRuns || 0);
+                            const inningsUser = match.cricketMatch?.innings?.find(i => i.battingTeam === userTeamKey);
+                            const inningsOpponent = match.cricketMatch?.innings?.find(i => i.battingTeam !== userTeamKey);
+                            const won = (inningsUser?.totalRuns || 0) > (inningsOpponent?.totalRuns || 0);
 
-                              return (
-                                <div 
-                                  key={idx} 
-                                  onClick={() => setSelectedMatch(match)}
-                                  className="group relative rounded-[8px] p-[1px] transition-all duration-300 cursor-pointer overflow-hidden hover:shadow-[#BFF367]/5"
-                                >
-                                  <div className="absolute inset-0 bg-gradient-to-r from-[#BFF367] to-[#BFF367] opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-[8px]" />
-                                  <div className="absolute inset-0 border border-white/10 group-hover:opacity-0 transition-opacity duration-300 rounded-[8px]" />
-                                  <div className="relative bg-[#0d0d0d] rounded-[8px] p-5 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-                                    <div>
-                                      <div className="flex items-center gap-2 mb-2">
-                                        <span className={`px-2 py-0.5 rounded-[8px] text-[8px] font-black uppercase tracking-widest border ${won ? 'text-[#BFF367] bg-[#BFF367]/10 border-[#BFF367]/20' : 'text-red-400 bg-red-500/10 border-red-500/20'}`}>
-                                          {won ? 'WON' : 'LOST'}
-                                        </span>
-                                        <span className="text-[8px] font-bold text-gray-500 uppercase tracking-widest">{new Date(match.date).toLocaleDateString('en-GB')}</span>
-                                      </div>
-                                      <h3 className="text-sm font-black text-white uppercase tracking-tight mb-1" style={HEADING_STYLE}>{userTeamName} vs {opponentTeamName}</h3>
-                                      <p className="text-[9px] font-bold text-gray-500 uppercase tracking-widest flex items-center gap-1">
-                                        <MapPin size={10} className="text-[#BFF367]" /> {match.turf?.name || match.customVenue || "Local Ground"}
+                            return (
+                              <div 
+                                key={idx} 
+                                onClick={() => setSelectedMatch(match)}
+                                className="group relative rounded-[8px] p-[1px] transition-all duration-300 cursor-pointer overflow-hidden hover:shadow-[#BFF367]/5"
+                              >
+                                <div className="absolute inset-0 bg-gradient-to-r from-[#BFF367] to-[#BFF367] opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-[8px]" />
+                                <div className="absolute inset-0 border border-white/10 group-hover:opacity-0 transition-opacity duration-300 rounded-[8px]" />
+                                <div className="relative bg-[#0d0d0d] rounded-[8px] p-5 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                                  <div>
+                                    <div className="flex items-center gap-2 mb-2">
+                                      <span className={`px-2 py-0.5 rounded-[8px] text-[8px] font-black uppercase tracking-widest border ${won ? 'text-[#BFF367] bg-[#BFF367]/10 border-[#BFF367]/20' : 'text-red-400 bg-red-500/10 border-red-500/20'}`}>
+                                        {won ? 'WON' : 'LOST'}
+                                      </span>
+                                      <span className="text-[8px] font-bold text-gray-500 uppercase tracking-widest">{new Date(match.date).toLocaleDateString('en-GB')}</span>
+                                    </div>
+                                    <h3 className="text-sm font-black text-white uppercase tracking-tight mb-1" style={HEADING_STYLE}>{userTeamName} vs {opponentTeamName}</h3>
+                                    <p className="text-[9px] font-bold text-gray-500 uppercase tracking-widest flex items-center gap-1">
+                                      <MapPin size={10} className="text-[#BFF367]" /> {match.turf?.name || match.customVenue || "Local Ground"}
+                                    </p>
+                                  </div>
+                                  <div className="flex items-center gap-3 shrink-0 self-end md:self-auto">
+                                    <div className="bg-white/5 border border-white/10 px-4 py-2 rounded-[8px] text-right">
+                                      <p className="text-[7px] font-black text-gray-500 uppercase tracking-widest">Match Performance</p>
+                                      <p className="text-xs font-black text-[#BFF367]">
+                                        {stat.battingRuns > 0 ? `${stat.battingRuns} Runs ` : ""}
+                                        {stat.bowlingWickets > 0 ? `& ${stat.bowlingWickets} Wkts` : ""}
+                                        {stat.battingRuns === 0 && stat.bowlingWickets === 0 ? "Fielded" : ""}
                                       </p>
                                     </div>
-                                    <div className="flex items-center gap-3 shrink-0 self-end md:self-auto">
-                                      <div className="bg-white/5 border border-white/10 px-4 py-2 rounded-[8px] text-right">
-                                        <p className="text-[7px] font-black text-gray-500 uppercase tracking-widest">Match Performance</p>
-                                        <p className="text-xs font-black text-[#BFF367]">
-                                          {stat.battingRuns > 0 ? `${stat.battingRuns} Runs ` : ""}
-                                          {stat.bowlingWickets > 0 ? `& ${stat.bowlingWickets} Wkts` : ""}
-                                          {stat.battingRuns === 0 && stat.bowlingWickets === 0 ? "Fielded" : ""}
-                                        </p>
-                                      </div>
-                                      <button className="p-2.5 bg-white/5 hover:bg-white/10 border border-white/10 rounded-[8px] text-white transition-all group-hover:scale-105">
-                                        <ArrowRight size={14} />
-                                      </button>
-                                    </div>
+                                    <button className="p-2.5 bg-white/5 hover:bg-white/10 border border-white/10 rounded-[8px] text-white transition-all group-hover:scale-105">
+                                      <ArrowRight size={14} />
+                                    </button>
                                   </div>
                                 </div>
-                              );
-                            })}
-                          </div>
-                        ) : (
-                          <div className="text-center py-12 bg-black/40 rounded-[8px] border border-white/10">
-                            <p className="text-xs font-bold text-gray-500 uppercase tracking-widest">No match history available</p>
-                            <p className="text-[9px] text-gray-600 uppercase tracking-widest mt-1">Once matches are completed on Kridaz, your detailed resumes will display here!</p>
-                          </div>
-                        )}
-                      </div>
-                    )}
+                              </div>
+                            );
+                          })}
+                        </div>
+                      ) : (
+                        <div className="text-center py-12 bg-black/40 rounded-[8px] border border-white/10">
+                          <p className="text-xs font-bold text-gray-500 uppercase tracking-widest">No match history available</p>
+                          <p className="text-[9px] text-gray-600 uppercase tracking-widest mt-1">Once matches are completed on Kridaz, your detailed resumes will display here!</p>
+                        </div>
+                      )}
+                    </div>
                   </div>
                 </div>
-              );
-            })()}
+              )}
 
-            {/* User Posts Section */}
-            <div className="mt-12 animate-in fade-in duration-500">
-              <div className="flex items-center justify-between mb-6">
-                <h2 className="text-xl font-black text-white flex items-center gap-2 uppercase tracking-tight" style={HEADING_STYLE}>
-                  <Plus className="w-5 h-5" stroke="url(#cyan-lime-gradient)" />
-                  User Posts
-                </h2>
-                {isOwnProfile && (
-                  <Link 
-                    to="/community?createPost=true"
-                    className="px-4 py-2 bg-gradient-to-r from-[#BFF367] to-[#BFF367] text-black rounded-[8px] text-[10px] font-black uppercase tracking-widest hover:scale-105 active:scale-95 transition-all shadow-[0_4px_12px_rgba(85,222,232,0.2)] flex items-center justify-center"
-                  >
-                    Create New Post
-                  </Link>
-                )}
-              </div>
-              
-              {loadingPosts ? (
-                <div className="flex justify-center items-center py-12">
-                  <Loader2 className="w-8 h-8 text-[#BFF367] animate-spin" />
-                </div>
-              ) : userPosts && userPosts.length > 0 ? (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                  {userPosts.map((post) => {
-                    const postImage = post.mediaUrls?.[0] || post.image || post.imageUrl || "https://images.unsplash.com/photo-1517466787929-bc90951d0974?q=80&w=2070";
-                    const postDate = post.createdAt ? new Date(post.createdAt).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' }) : 'Recent';
+              {/* STATS TAB */}
+              {activeProfileTab === "stats" && (
+                <div className="space-y-6 animate-in fade-in duration-300">
+                  {/* Sports Filter & Resume Header */}
+                  <div className="flex w-full items-center justify-between bg-white/[0.02] border border-white/5 px-4 py-3 md:p-5 rounded-[8px] backdrop-blur-md">
+                    <div className="flex items-center gap-3">
+                      <Medal className="text-[#BFF367]" size={22} />
+                      <div>
+                        <h3 className="text-sm font-black uppercase tracking-wider text-white" style={HEADING_STYLE}>Sports Stats</h3>
+                        <p className="hidden md:block text-[9px] font-bold text-gray-500 uppercase tracking-widest mt-0.5">Filter stats by sport type</p>
+                      </div>
+                    </div>
+                    <select 
+                      value={sportFilter} 
+                      onChange={(e) => setSportFilter(e.target.value)} 
+                      className="bg-black border border-white/10 text-white text-[10px] font-black uppercase tracking-widest px-4 py-2.5 rounded-[8px] focus:outline-none focus:border-[#BFF367] transition-all cursor-pointer"
+                    >
+                      <option value="CRICKET">Cricket Stats</option>
+                      <option value="FOOTBALL">Football (Coming Soon)</option>
+                    </select>
+                  </div>
+
+                  {(() => {
+                    const currentStats = profileUser?.careerStats?.find(s => s.sportType === sportFilter) || {
+                      matchesPlayed: 0, matchesWon: 0, matchesLost: 0, winPercentage: 0,
+                      totalRuns: 0, fours: 0, sixes: 0, centuries: 0, halfCenturies: 0, highestScore: 0, battingAverage: 0, battingStrikeRate: 0,
+                      wickets: 0, economyRate: 0, bowlingAverage: 0, bestBowlingWickets: 0, bestBowlingRuns: 0, ballsBowled: 0, runsConceded: 0, fiveWicketHauls: 0
+                    };
+
+                    const formGuideData = (profileUser?.matchHistory || [])
+                      .slice(0, 5)
+                      .reverse()
+                      .map((match, idx) => {
+                        const stat = match.cricketMatch?.playerStats?.find(s => s.userId === profileUser.id) || {};
+                        return {
+                          matchNum: `Match ${idx + 1}`,
+                          runs: stat.battingRuns || 0
+                        };
+                      });
+
                     return (
-                      <div key={post.id || post._id} className="bg-gradient-to-br from-white/5 to-white/[0.02] backdrop-blur-sm rounded-[8px] border border-white/10 overflow-hidden hover:border-[#BFF367]/40 transition-all group">
-                        <div className="h-40 relative overflow-hidden bg-zinc-900/50">
-                          {post.mediaType === 'video' ? (
-                            <div className="w-full h-full relative">
-                              <video src={post.videoUrl || post.mediaUrls?.[0]} className="w-full h-full object-cover" muted />
-                              <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
-                                <Zap className="w-8 h-8 text-[#BFF367]" />
+                      <div className="space-y-8">
+                        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                          {/* Career Statistics */}
+                          <div className="lg:col-span-2 bg-gradient-to-br from-white/5 to-white/[0.02] backdrop-blur-sm rounded-[8px] p-6 border border-white/10 flex flex-col justify-between">
+                            <div className="flex justify-between items-center select-none group">
+                              <div>
+                                <h2 className="text-xl font-black text-white flex items-center gap-2 uppercase tracking-tight" style={HEADING_STYLE}>
+                                  <BarChart3 className="w-5 h-5" stroke="url(#cyan-lime-gradient)" />
+                                  Career Stats Summary
+                                </h2>
                               </div>
                             </div>
-                          ) : (
-                            <img src={postImage} alt="" className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" />
-                          )}
-                          <div className="absolute top-3 right-3 px-1.5 py-0.5 bg-black/60 backdrop-blur-md rounded-[8px] text-[8px] font-black text-white uppercase tracking-widest border border-white/10">
-                            {post.mediaType || 'Post'}
-                          </div>
-                        </div>
-                        <div className="p-4">
-                          <div className="flex items-center gap-2 mb-2">
-                            {profileUser?.profilePicture ? (
-                              <img src={profileUser.profilePicture} className="w-5 h-5 rounded-full border border-[#BFF367]/40" />
-                            ) : (
-                              <div className="w-5 h-5 rounded-full bg-zinc-850 flex items-center justify-center text-[8px] font-black text-[#BFF367]">
-                                {profileUser?.name?.[0]}
-                              </div>
-                            )}
-                            <span className="text-[9px] font-bold text-gray-400 uppercase tracking-tight truncate flex-1">
-                              {profileUser?.name}
-                              {profileUser?.username && <span className="text-gray-600 ml-1">@{profileUser.username}</span>}
-                            </span>
-                            <span className="text-[8px] text-gray-600 font-bold">{postDate}</span>
-                          </div>
-                          <h3 className="text-[11px] font-black text-white mb-1 uppercase tracking-tight truncate" style={HEADING_STYLE}>{post.title || "Update"}</h3>
-                          <p className="text-[10px] text-gray-500 mb-3 line-clamp-2 leading-relaxed">{post.content}</p>
-                          <div className="flex items-center justify-between pt-3 border-t border-white/5">
-                            <div className="flex items-center gap-3">
-                              <button className="flex items-center gap-1 text-gray-500 hover:text-[#BFF367] transition-colors">
-                                <Heart size={12} />
-                                <span className="text-[9px] font-bold">{post.likes?.length || 0}</span>
-                              </button>
-                              <button className="flex items-center gap-1 text-gray-500 hover:text-[#BFF367] transition-colors">
-                                <MessageSquare size={12} />
-                                <span className="text-[9px] font-bold">{post.comments?.length || 0}</span>
-                              </button>
+                            
+                            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-6 animate-in fade-in duration-300">
+                              {[
+                                { label: 'Matches Played', value: currentStats.matchesPlayed, color: '#white' },
+                                { label: 'Win/Loss Spell', value: `${currentStats.matchesWon}W - ${currentStats.matchesLost}L`, color: '#BFF367' },
+                                { label: 'Win Ratio', value: `${currentStats.winPercentage}%`, color: '#BFF367' },
+                                { label: 'Runs Scored', value: currentStats.totalRuns, color: '#white' },
+                                { label: 'Batting Avg', value: currentStats.battingAverage || "0.0", color: '#white' },
+                                { label: 'Strike Rate', value: currentStats.battingStrikeRate || "0.0", color: '#BFF367' },
+                                { label: 'High Score', value: currentStats.highestScore || "0", color: '#white' },
+                                { label: 'Centuries (100s)', value: currentStats.centuries, color: '#white' },
+                                { label: 'Wickets Taken', value: currentStats.wickets, color: '#BFF367' },
+                                { label: 'Economy', value: currentStats.bowlingEconomy || currentStats.economyRate || "0.00", color: '#white' },
+                                { label: 'Bowling Avg', value: currentStats.bowlingAverage || "0.00", color: '#white' },
+                                { label: 'Best Bowling', value: currentStats.bestBowlingWickets ? `${currentStats.bestBowlingWickets}/${currentStats.bestBowlingRuns}` : "N/A", color: '#white' },
+                              ].map((stat, idx) => (
+                                <div key={idx} className="bg-black/40 rounded-[8px] p-4 border border-white/5 hover:border-[#BFF367]/30 transition-all group">
+                                  <p className="text-xs font-bold text-gray-500 uppercase tracking-widest mb-1">{stat.label}</p>
+                                  <p className="text-lg font-black tracking-tight" style={{ color: stat.color }}>{stat.value}</p>
+                                </div>
+                              ))}
                             </div>
-                            <button className="text-gray-500 hover:text-white transition-colors">
-                              <ArrowRight size={12} />
-                            </button>
+                          </div>
+
+                          {/* Form Guide */}
+                          <div className="bg-gradient-to-br from-white/5 to-white/[0.02] backdrop-blur-sm rounded-[8px] p-6 border border-white/10 flex flex-col justify-between">
+                            <div className="flex justify-between items-center select-none group">
+                              <div>
+                                <h2 className="text-xl font-black text-white flex items-center gap-2 uppercase tracking-tight" style={HEADING_STYLE}>
+                                  <TrendingUp className="w-5 h-5" stroke="url(#cyan-lime-gradient)" />
+                                  Form Guide
+                                </h2>
+                              </div>
+                            </div>
+                            
+                            <div className="mt-6 animate-in fade-in duration-300">
+                              {formGuideData.length > 0 ? (
+                                <div className="w-full h-48">
+                                  <ResponsiveContainer width="100%" height="100%">
+                                    <LineChart data={formGuideData}>
+                                      <CartesianGrid strokeDasharray="3 3" stroke="#222" vertical={false} />
+                                      <XAxis dataKey="matchNum" tick={{ fill: '#666', fontSize: 9, fontWeight: 'bold' }} axisLine={false} />
+                                      <YAxis tick={false} axisLine={false} />
+                                      <Tooltip contentStyle={{ backgroundColor: '#000', border: '1px solid #333', borderRadius: '8px', fontSize: '10px' }} />
+                                      <Line type="monotone" dataKey="runs" stroke="url(#cyan-lime-gradient)" strokeWidth={3.5} dot={{ fill: '#BFF367', r: 4, strokeWidth: 2, stroke: '#000' }} activeDot={{ r: 6 }} />
+                                    </LineChart>
+                                  </ResponsiveContainer>
+                                </div>
+                              ) : (
+                                <div className="flex-1 flex items-center justify-center bg-black/40 border border-white/5 rounded-[8px] py-12 text-center">
+                                  <p className="text-[9px] font-black text-gray-600 uppercase tracking-widest">No match form data available</p>
+                                </div>
+                              )}
+                            </div>
                           </div>
                         </div>
                       </div>
                     );
-                  })}
+                  })()}
                 </div>
-              ) : (
-                <div className="text-center py-12 bg-black/40 rounded-[8px] border border-white/10">
-                  <p className="text-xs font-bold text-gray-500 uppercase tracking-widest">No posts uploaded yet</p>
-                  {isOwnProfile && (
-                    <p className="text-[9px] text-gray-600 uppercase tracking-widest mt-1">Create your first community update to share your sports achievements!</p>
+              )}
+
+              {/* BADGES TAB */}
+              {activeProfileTab === "badges" && (
+                <div className="space-y-6 animate-in fade-in duration-300">
+                  <div className="bg-gradient-to-br from-white/5 to-white/[0.02] backdrop-blur-sm rounded-[8px] p-6 border border-white/10">
+                    <div className="mb-4">
+                      <h2 className="text-xl font-black text-white flex items-center gap-2 uppercase tracking-tight" style={HEADING_STYLE}>
+                        <Award className="w-5 h-5" stroke="url(#cyan-lime-gradient)" />
+                        Earned Badges
+                      </h2>
+                      <p className="text-[9px] font-bold text-gray-500 uppercase tracking-widest mt-0.5">Prestigious dynamic sports career badges</p>
+                    </div>
+
+                    {profileUser?.badges && profileUser.badges.length > 0 ? (
+                      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+                        {profileUser.badges.map((badge, idx) => (
+                          <div key={idx} className="group relative rounded-[8px] p-[1px] transition-all duration-300 cursor-pointer overflow-hidden shadow-lg hover:shadow-[#BFF367]/10 shrink-0">
+                            <div className="absolute inset-0 bg-gradient-to-r from-[#BFF367] to-[#BFF367] opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-[8px]" />
+                            <div className="absolute inset-0 border border-white/10 group-hover:opacity-0 transition-opacity duration-300 rounded-[8px]" />
+                            <div className="relative bg-[#0d0d0d] rounded-[8px] p-4 h-full flex flex-col justify-between text-center min-h-[130px]">
+                              <div>
+                                <div className="w-10 h-10 mx-auto mb-2 rounded-full bg-zinc-950 border border-white/10 flex items-center justify-center">
+                                  <Medal className="w-5 h-5 text-[#BFF367]" />
+                                </div>
+                                <h3 className="text-white text-center mb-1 font-black text-[11px] uppercase tracking-tight truncate">{badge.name}</h3>
+                                <p className="text-[9px] text-gray-500 leading-normal font-bold line-clamp-2">{badge.description}</p>
+                              </div>
+                              <p className="text-[8px] text-[#BFF367] font-black uppercase tracking-widest mt-2">{badge.category || 'MILESTONE'}</p>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <div className="text-center py-6 bg-black/40 rounded-[8px] border border-white/5">
+                        <p className="text-xs font-bold text-gray-500 uppercase tracking-widest">No career badges unlocked yet</p>
+                        <p className="text-[9px] text-gray-600 uppercase tracking-widest mt-1">Score centuries, claim five-wicket hauls, or hit boundaries to earn yours!</p>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
+
+              {/* TEAMS TAB */}
+              {activeProfileTab === "teams" && (
+                <div className="space-y-6 animate-in fade-in duration-300">
+                  <div className="bg-white/[0.02] border border-white/5 p-5 rounded-[8px] backdrop-blur-md">
+                    <h3 className="text-xs font-black uppercase tracking-wider text-gray-400 mb-4 flex items-center gap-2">
+                      <Users className="w-4 h-4 text-[#BFF367]" />
+                      My Teams
+                    </h3>
+                    {profileUser?.teams && profileUser.teams.length > 0 ? (
+                      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-6">
+                        {profileUser.teams.map((team) => (
+                          <Link 
+                            key={team.id}
+                            to={`/team/${team.id}`}
+                            className="flex flex-col items-center gap-2 group shrink-0"
+                          >
+                            <div className="w-20 h-20 rounded-[12px] bg-black border border-white/10 flex items-center justify-center text-[#BFF367] font-bold overflow-hidden group-hover:border-[#BFF367]/50 transition-all">
+                              {team.logo || team.image ? (
+                                <img src={team.logo || team.image} alt={team.name} className="w-full h-full object-cover" />
+                              ) : (
+                                <span className="text-2xl">{team.name.charAt(0).toUpperCase()}</span>
+                              )}
+                            </div>
+                            <span className="text-[11px] font-bold text-gray-400 group-hover:text-white uppercase tracking-wider transition-colors max-w-[100px] truncate text-center mt-1">
+                              {team.name}
+                            </span>
+                          </Link>
+                        ))}
+                      </div>
+                    ) : (
+                      <div className="text-center py-12 bg-black/40 rounded-[8px] border border-white/5">
+                        <p className="text-xs font-bold text-gray-500 uppercase tracking-widest">No teams joined yet</p>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
+
+              {/* POSTS TAB */}
+              {activeProfileTab === "posts" && (
+                <div className="space-y-6 animate-in fade-in duration-300">
+                  <div className="flex items-center justify-between mb-6">
+                    <h2 className="text-xl font-black text-white flex items-center gap-2 uppercase tracking-tight" style={HEADING_STYLE}>
+                      <Plus className="w-5 h-5" stroke="url(#cyan-lime-gradient)" />
+                      User Posts
+                    </h2>
+                    {isOwnProfile && (
+                      <Link 
+                        to="/community?createPost=true"
+                        className="px-4 py-2 bg-gradient-to-r from-[#BFF367] to-[#BFF367] text-black rounded-[8px] text-[10px] font-black uppercase tracking-widest hover:scale-105 active:scale-95 transition-all shadow-[0_4px_12px_rgba(85,222,232,0.2)] flex items-center justify-center"
+                      >
+                        Create New Post
+                      </Link>
+                    )}
+                  </div>
+                  
+                  {loadingPosts ? (
+                    <div className="flex justify-center items-center py-12">
+                      <Loader2 className="w-8 h-8 text-[#BFF367] animate-spin" />
+                    </div>
+                  ) : userPosts && userPosts.length > 0 ? (
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                      {userPosts.map((post) => {
+                        const postImage = post.mediaUrls?.[0] || post.image || post.imageUrl || "https://images.unsplash.com/photo-1517466787929-bc90951d0974?q=80&w=2070";
+                        const postDate = post.createdAt ? new Date(post.createdAt).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' }) : 'Recent';
+                        return (
+                          <div key={post.id || post._id} className="bg-gradient-to-br from-white/5 to-white/[0.02] backdrop-blur-sm rounded-[8px] border border-white/10 overflow-hidden hover:border-[#BFF367]/40 transition-all group">
+                            <div className="h-40 relative overflow-hidden bg-zinc-900/50">
+                              {post.mediaType === 'video' ? (
+                                <div className="w-full h-full relative">
+                                  <video src={post.videoUrl || post.mediaUrls?.[0]} className="w-full h-full object-cover" muted />
+                                  <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
+                                    <Zap className="w-8 h-8 text-[#BFF367]" />
+                                  </div>
+                                </div>
+                              ) : (
+                                <img src={postImage} alt="" className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" />
+                              )}
+                              <div className="absolute top-3 right-3 px-1.5 py-0.5 bg-black/60 backdrop-blur-md rounded-[8px] text-[8px] font-black text-white uppercase tracking-widest border border-white/10">
+                                {post.mediaType || 'Post'}
+                              </div>
+                            </div>
+                            <div className="p-4">
+                              <div className="flex items-center gap-2 mb-2">
+                                {profileUser?.profilePicture ? (
+                                  <img src={profileUser.profilePicture} className="w-5 h-5 rounded-full border border-[#BFF367]/40" />
+                                ) : (
+                                  <div className="w-5 h-5 rounded-full bg-zinc-850 flex items-center justify-center text-[8px] font-black text-[#BFF367]">
+                                    {profileUser?.name?.[0]}
+                                  </div>
+                                )}
+                                <span className="text-[9px] font-bold text-gray-400 uppercase tracking-tight truncate flex-1">
+                                  {profileUser?.name}
+                                  {profileUser?.username && <span className="text-gray-600 ml-1">@{profileUser.username}</span>}
+                                </span>
+                                <span className="text-[8px] text-gray-600 font-bold">{postDate}</span>
+                              </div>
+                              <h3 className="text-[11px] font-black text-white mb-1 uppercase tracking-tight truncate" style={HEADING_STYLE}>{post.title || "Update"}</h3>
+                              <p className="text-[10px] text-gray-500 mb-3 line-clamp-2 leading-relaxed">{post.content}</p>
+                              <div className="flex items-center justify-between pt-3 border-t border-white/5">
+                                <div className="flex items-center gap-3">
+                                  <button className="flex items-center gap-1 text-gray-500 hover:text-[#BFF367] transition-colors">
+                                    <Heart size={12} />
+                                    <span className="text-[9px] font-bold">{post.likes?.length || 0}</span>
+                                  </button>
+                                  <button className="flex items-center gap-1 text-gray-500 hover:text-[#BFF367] transition-colors">
+                                    <MessageSquare size={12} />
+                                    <span className="text-[9px] font-bold">{post.comments?.length || 0}</span>
+                                  </button>
+                                </div>
+                                <button className="text-gray-500 hover:text-white transition-colors">
+                                  <ArrowRight size={12} />
+                                </button>
+                              </div>
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  ) : (
+                    <div className="text-center py-12 bg-black/40 rounded-[8px] border border-white/10">
+                      <p className="text-xs font-bold text-gray-500 uppercase tracking-widest">No posts uploaded yet</p>
+                      {isOwnProfile && (
+                        <p className="text-[9px] text-gray-600 uppercase tracking-widest mt-1">Create your first community update to share your sports achievements!</p>
+                      )}
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* CONNECTIONS TAB */}
+              {activeProfileTab === "connections" && (
+                <div className="space-y-6 animate-in fade-in duration-300">
+                  <div className="flex border-b border-white/5 mb-6 overflow-x-auto no-scrollbar gap-2">
+                    <button 
+                      onClick={() => setConnectionsActiveTab("followers")}
+                      className={`py-3 px-4 text-center font-black uppercase tracking-widest text-[10px] sm:text-[11px] border-b-2 transition-all shrink-0 ${connectionsActiveTab === "followers" ? 'text-[#BFF367] border-[#BFF367]' : 'text-gray-400 border-transparent hover:text-white/80'}`}
+                    >
+                      Followers ({profileUser?.followersList?.length || 0})
+                    </button>
+                    <button 
+                      onClick={() => setConnectionsActiveTab("following")}
+                      className={`py-3 px-4 text-center font-black uppercase tracking-widest text-[10px] sm:text-[11px] border-b-2 transition-all shrink-0 ${connectionsActiveTab === "following" ? 'text-[#BFF367] border-[#BFF367]' : 'text-gray-400 border-transparent hover:text-white/80'}`}
+                    >
+                      Following ({profileUser?.followingList?.length || 0})
+                    </button>
+                    {!isOwnProfile && (
+                      <button 
+                        onClick={() => setConnectionsActiveTab("common")}
+                        className={`py-3 px-4 text-center font-black uppercase tracking-widest text-[10px] sm:text-[11px] border-b-2 transition-all shrink-0 ${connectionsActiveTab === "common" ? 'text-[#BFF367] border-[#BFF367]' : 'text-gray-400 border-transparent hover:text-white/80'}`}
+                      >
+                        Common ({commonConnections.length})
+                      </button>
+                    )}
+                  </div>
+
+                  {connectionsList.length > 0 ? (
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                      {connectionsList.map((player) => (
+                        <div key={player.id || player._id} className="flex items-center justify-between p-4 bg-[#0d0d0d] border border-white/5 rounded-[8px] hover:border-white/10 transition-all">
+                          <Link 
+                            to={`/profile/${player.id || player._id}`} 
+                            className="flex items-center gap-3 min-w-0 hover:opacity-80"
+                          >
+                            <img 
+                              src={player.profilePicture || "https://ui-avatars.com/api/?name=" + player.name} 
+                              className="w-12 h-12 rounded-full object-cover border border-white/10" 
+                              alt={player.name}
+                            />
+                            <div className="min-w-0">
+                              <p className="text-sm font-bold text-white tracking-tight truncate">{player.name}</p>
+                              <p className="text-[10px] font-bold text-gray-500 uppercase tracking-widest truncate">@{player.username || "player"}</p>
+                            </div>
+                          </Link>
+                          
+                          <div className="flex items-center gap-3 shrink-0">
+                            {player.sportTypes && player.sportTypes.length > 0 && (
+                              <span className="px-2.5 py-1 bg-[#BFF367]/10 text-[#BFF367] rounded-full border border-[#BFF367]/20 text-[9px] font-black uppercase">
+                                {player.sportTypes[0]}
+                              </span>
+                            )}
+                            {player.id !== (currentUser?.id || currentUser?._id) && (
+                              <button
+                                onClick={() => handlePlayerFollowToggle(player)}
+                                className={`px-3.5 py-2 rounded-[12px] font-black uppercase tracking-wider text-[10px] transition-all ${ followingIds.includes(player.id) ? 'bg-white/10 text-white/40 border border-white/5' : 'bg-gradient-to-r from-[#BFF367] to-[#BFF367] text-black hover:scale-105 active:scale-95' }`}
+                              >
+                                {followingIds.includes(player.id) ? "Following" : "Follow"}
+                              </button>
+                            )}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="text-center py-12 bg-black/40 rounded-[8px] border border-white/5">
+                      <p className="text-xs font-bold text-gray-500 uppercase tracking-widest">
+                        {connectionsActiveTab === "followers" && "No followers yet"}
+                        {connectionsActiveTab === "following" && "Not following anyone yet"}
+                        {connectionsActiveTab === "common" && "No common connections"}
+                      </p>
+                    </div>
                   )}
                 </div>
               )}

@@ -32,6 +32,8 @@ const Root = () => {
     }
   }, [isAuthenticated, user]);
 
+  const isSidebarCollapsed = useSelector((/** @type {any} */ state) => state.ui.isSidebarCollapsed);
+
   const searchParams = new URLSearchParams(location.search);
   const isReelsPage = location.pathname.startsWith('/reels') || location.pathname.startsWith('/shorts') || searchParams.get('tab') === 'shots';
   const hideNav = isReelsPage || location.pathname.startsWith('/messages');
@@ -58,7 +60,13 @@ const Root = () => {
       />
       <ScrollToTop />
       {!isReelsPage && <Navbar />}
-      <main className={`flex-grow ${isReelsPage ? 'pb-0' : location.pathname.startsWith('/messages') ? 'pb-0 lg:ml-64' : 'pb-20 lg:pb-0 lg:ml-64'}`}>
+      <main className={`flex-grow ${
+        isReelsPage 
+          ? 'pb-0' 
+          : location.pathname.startsWith('/messages') 
+            ? `pb-0 ${isSidebarCollapsed ? 'lg:ml-20' : 'lg:ml-64'}` 
+            : `pb-20 lg:pb-0 ${isSidebarCollapsed ? 'lg:ml-20' : 'lg:ml-64'}`
+      } transition-all duration-300`}>
         <Outlet />
       </main>
       {!hideNav && <MobileBottomNav />}

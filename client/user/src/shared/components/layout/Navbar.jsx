@@ -1,11 +1,11 @@
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { getDynamicProfileRoute } from "@utils/routeUtils";
 import { useSelector, useDispatch } from "react-redux";
-import { User, Users, Menu, X, LogOut, Activity, ShieldCheck, Zap, ArrowRight, Clock, Trophy, Target, MessageCircle, MapPin, ChevronRight, Bell, UserSearch, Search, Plus, Bookmark, FileText } from "lucide-react";
+import { User, Users, Menu, X, LogOut, Activity, ShieldCheck, Zap, ArrowRight, Clock, Trophy, Target, MessageCircle, MapPin, ChevronRight, ChevronLeft, Bell, UserSearch, Search, Plus, Bookmark, FileText, Home, Building, Briefcase } from "lucide-react";
 import { useState, useEffect, useCallback } from "react";
 import { createPortal } from "react-dom";
 import { logout } from "@redux/slices/authSlice";
-import { setUserLocation, setLocationStatus } from "@redux/slices/uiSlice";
+import { setUserLocation, setLocationStatus, toggleSidebar, setSidebarCollapsed } from "@redux/slices/uiSlice";
 import { reelsApi } from "@redux/api/reelsApi";
 import toast from "react-hot-toast";
 import axiosInstance from "@hooks/useAxiosInstance";
@@ -30,6 +30,7 @@ const Navbar = () => {
   const { isLoggedIn, role, user } = useSelector((state) => state.auth);
   const userLocation = useSelector((state) => state.ui.userLocation);
   const locationStatus = useSelector((state) => state.ui.locationStatus);
+  const isSidebarCollapsed = useSelector((state) => state.ui.isSidebarCollapsed);
   // Auth state log removed
   const dispatch = useDispatch();
   const navigate = useNavigate();
@@ -93,30 +94,46 @@ const Navbar = () => {
   };
 
   const navLinks = isPartnerPortal ? [
-    { name: "Venues", path: "/business/venue" },
-    { name: "Professionals", path: "/business/professional" },
+    { name: "Venues", path: "/business/venue", icon: Building },
+    { name: "Professionals", path: "/business/professional", icon: ShieldCheck },
   ] : [
-    { name: "Home", path: "/" },
-    { name: "Venues", path: "/venues" },
-    { name: "Pros", path: "/professionals" },
-    { name: "Join Games", path: "/join-games" },
-    { name: "Players", path: "/players" },
-    { name: "Business", path: "#" },
+    { name: "Home", path: "/", icon: Home },
+    { name: "Venues", path: "/venues", icon: MapPin },
+    { name: "Pros", path: "/professionals", icon: Trophy },
+    { name: "Join Games", path: "/join-games", icon: Target },
+    { name: "Players", path: "/players", icon: Users },
+    { name: "Business", path: "#", icon: Briefcase },
   ];
 
   // Removed dedicated BOOKINGS link
 
   return (
-    <nav className={`sticky top-0 w-full lg:fixed lg:top-0 lg:left-0 z-[90] flex flex-col transition-transform duration-500 
-      ${ scrollDirection === "down" && window.innerWidth < 1024 ? "-translate-y-full" : "translate-y-0" }
-      lg:transform-none lg:h-screen lg:w-64 lg:border-r lg:border-white/10 bg-black/40 lg:bg-[#050505] backdrop-blur-xl lg:backdrop-blur-none
-    `}>
+    <nav 
+      onMouseEnter={() => {
+        if (window.innerWidth >= 1024) {
+          dispatch(setSidebarCollapsed(false));
+        }
+      }}
+      onMouseLeave={() => {
+        if (window.innerWidth >= 1024) {
+          dispatch(setSidebarCollapsed(true));
+        }
+      }}
+      className={`sticky top-0 w-full lg:fixed lg:top-0 lg:left-0 z-[90] flex flex-col transition-all duration-300 
+        ${ scrollDirection === "down" && window.innerWidth < 1024 ? "-translate-y-full" : "translate-y-0" }
+        lg:transform-none lg:h-screen ${isSidebarCollapsed ? 'lg:w-20' : 'lg:w-64'} lg:border-r lg:border-white/10 bg-black/40 lg:bg-black backdrop-blur-xl lg:backdrop-blur-none
+      `}
+    >
       <div className={`flex justify-center transition-all duration-500 lg:h-full`}>
-        <div className={`relative w-full max-w-full h-16 sm:h-20 lg:h-auto border-b border-white/10 lg:border-none flex items-center lg:items-start lg:flex-col justify-between lg:justify-start px-2 sm:px-4 lg:px-6 lg:pt-8 transition-all duration-500`}>
+        <div className={`relative w-full max-w-full h-16 sm:h-20 lg:h-auto border-b border-white/10 lg:border-none flex items-center lg:items-start lg:flex-col justify-between lg:justify-start px-2 sm:px-4 ${isSidebarCollapsed ? 'lg:px-2' : 'lg:px-6'} lg:pt-8 transition-all duration-300`}>
           {/* Logo & Mobile Location Section */}
-          <div className="flex flex-col items-start justify-center lg:mb-8">
+          <div className={`flex flex-col ${isSidebarCollapsed ? 'lg:items-center lg:w-full lg:mb-6' : 'lg:items-start lg:mb-8'} justify-center`}>
             <Link to="/" className="group flex items-center justify-center">
-              <img src="/logo.png" alt="Kridaz" className="h-7 sm:h-8 lg:h-10 w-auto brightness-125 group-hover:scale-105 transition-transform duration-500" />
+              <img 
+                src="/logo.png" 
+                alt="Kridaz" 
+                className={`${isSidebarCollapsed ? 'h-8 w-8 object-cover object-left' : 'h-7 sm:h-8 lg:h-10 w-auto'} brightness-125 group-hover:scale-105 transition-all duration-300`} 
+              />
             </Link>
 
             <div className="lg:hidden flex items-center gap-1 mt-0.5 ml-1 text-white/50">
@@ -143,16 +160,21 @@ const Navbar = () => {
           {/* DESKTOP LINKS */}
           <div className="hidden lg:flex lg:flex-col lg:items-start gap-2 lg:w-full">
             {navLinks.map((link) => {
+              const Icon = link.icon;
+              const isActive = location.pathname === link.path || (link.name === "Business" && location.pathname.startsWith("/partners"));
+
               if (link.name === "Business") {
                 return (
-                  <div key={link.name} className="dropdown dropdown-hover group/link w-full">
+                  <div key={link.name} className={`dropdown ${isSidebarCollapsed ? 'dropdown-right' : 'dropdown-hover'} group/link w-full`}>
                     <label
                       tabIndex={0}
-                      className={`flex w-full px-4 py-3 rounded-xl text-base font-bold items-center gap-1 cursor-pointer transition-all ${location.pathname.startsWith("/partners") ? "bg-primary/10 text-primary border border-primary/20 shadow-[0_0_15px_rgba(85,222,232,0.1)]" : "text-white/60 hover:bg-white/5 hover:text-white border border-transparent"}`}
+                      className={`flex w-full px-4 py-3 text-base font-bold items-center ${isSidebarCollapsed ? 'justify-center' : 'gap-3'} cursor-pointer transition-all duration-300 ${isActive ? "text-primary" : "text-white/60 hover:text-primary"}`}
+                      title={isSidebarCollapsed ? "Business" : undefined}
                     >
-                      {link.name}
+                      {Icon && <Icon size={20} className={`transition-all duration-300 group-hover/link:scale-110 ${isActive ? "text-primary scale-110" : "text-white/50 group-hover/link:text-primary"}`} />}
+                      {!isSidebarCollapsed && <span>{link.name}</span>}
                     </label>
-                    <ul tabIndex={0} className="dropdown-content z-[100] mt-1 p-1 shadow-2xl bg-[#0A0A0A] border border-white/10 rounded-[8px] w-48 overflow-hidden backdrop-blur-xl">
+                    <ul tabIndex={0} className={`dropdown-content z-[100] p-1 shadow-2xl bg-[#0A0A0A] border border-white/10 rounded-[8px] w-48 overflow-hidden backdrop-blur-xl ${isSidebarCollapsed ? 'ml-2' : 'mt-1'}`}>
                       <li>
                         <Link to="/business/venue" className="flex items-center gap-3 p-4 text-sm font-medium text-white/60 hover:text-[#84CC16] hover:bg-white/5 transition-all">
                           Venue Owner
@@ -171,10 +193,11 @@ const Navbar = () => {
                 <Link
                   key={link.name}
                   to={link.path}
-                  onMouseEnter={() => {}}
-                  className={`block w-full px-4 py-3 rounded-xl text-base font-bold transition-all ${location.pathname === link.path ? "bg-primary/10 text-primary border border-primary/20 shadow-[0_0_15px_rgba(85,222,232,0.1)]" : "text-white/60 hover:bg-white/5 hover:text-white border border-transparent"}`}
+                  className={`flex w-full px-4 py-3 text-base font-bold items-center ${isSidebarCollapsed ? 'justify-center' : 'gap-3'} transition-all duration-300 group ${isActive ? "text-primary" : "text-white/60 hover:text-primary"}`}
+                  title={isSidebarCollapsed ? link.name : undefined}
                 >
-                  {link.name}
+                  {Icon && <Icon size={20} className={`transition-all duration-300 group-hover:scale-110 ${isActive ? "text-primary scale-110" : "text-white/50 group-hover:text-primary"}`} />}
+                  {!isSidebarCollapsed && <span>{link.name}</span>}
                 </Link>
               );
             })}
