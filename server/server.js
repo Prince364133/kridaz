@@ -68,6 +68,16 @@ const startServer = () => {
       const { notificationQueue } = await import("./queues/notification.queue.js");
       trackQueue("notifications", notificationQueue);
 
+      // Drain dead-letter queue for BullMQ fallback
+      try {
+        const { drainDeadLetter } = await import("./utils/deadLetter.js");
+        await drainDeadLetter({
+          notifications: notificationQueue,
+        });
+      } catch (err) {
+        logger.error("[DEAD_LETTER] Failed to drain dead-letter list on startup:", err);
+      }
+
       // Conditionally start CPU-heavy media workers
       // In production, you can set ENABLE_WORKERS=false on the API service 
       // and run a separate 'worker' service with ENABLE_WORKERS=true
