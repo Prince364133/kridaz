@@ -1,4 +1,5 @@
 import { prisma } from "../../config/prisma.js";
+import { BadRequestError, NotFoundError, ForbiddenError, UnauthorizedError, InternalError } from "@kridaz/common";
 import StatsService from "../../services/stats.service.js";
 import CareerStatsService from "../../services/careerStats.service.js";
 import { liveStateService } from "../../services/liveState.service.js";
@@ -249,16 +250,12 @@ export const goLiveSession = async (matchId) => {
   }
 
   if (!hostedGame) {
-    const error = new Error("Match not found");
-    error.statusCode = 404;
-    throw error;
+    throw new NotFoundError("Match not found");
   }
 
   if (!process.env.OVERLAY_TOKEN_SECRET) {
     logger.error('[FATAL] OVERLAY_TOKEN_SECRET env var is not set.');
-    const error = new Error("Server configuration error: overlay token secret not set.");
-    error.statusCode = 500;
-    throw error;
+    throw new InternalError("Server configuration error: overlay token secret not set.");
   }
 
   const finalMatchId = hostedGame.id;
@@ -360,9 +357,7 @@ export const endLiveSession = async (matchId) => {
   }
 
   if (!hostedGame) {
-    const error = new Error("Match not found");
-    error.statusCode = 404;
-    throw error;
+    throw new NotFoundError("Match not found");
   }
 
   const finalMatchId = hostedGame.id;
@@ -444,9 +439,7 @@ export const configureStream = async (matchId, { youtubeVideoId, youtubeLiveChat
   }
 
   if (!hostedGame) {
-    const error = new Error("Match not found");
-    error.statusCode = 404;
-    throw error;
+    throw new NotFoundError("Match not found");
   }
 
   const finalMatchId = hostedGame.id;
@@ -522,9 +515,7 @@ export const finalizeMatch = async (scoringId) => {
   });
 
   if (!scoring) {
-    const error = new Error("Scoring session not found");
-    error.statusCode = 404;
-    throw error;
+    throw new NotFoundError("Scoring session not found");
   }
 
   await prisma.$transaction([
@@ -567,9 +558,7 @@ export const lookupMatchByShortId = async (shortId) => {
   });
 
   if (!match) {
-    const error = new Error("Match not found");
-    error.statusCode = 404;
-    throw error;
+    throw new NotFoundError("Match not found");
   }
 
   if (match.turf) {
@@ -592,9 +581,7 @@ export const initializeScoringSession = async (finalMatchId, finalBattingTeam, u
   });
 
   if (!hostedGame) {
-    const error = new Error("Match not found");
-    error.statusCode = 404;
-    throw error;
+    throw new NotFoundError("Match not found");
   }
 
   const isAdmin = userRole?.toUpperCase() === 'ADMIN';
@@ -604,9 +591,7 @@ export const initializeScoringSession = async (finalMatchId, finalBattingTeam, u
     hostedGame.hostId === umpireId;
 
   if (!isAuthorized) {
-    const error = new Error("Authorization failed. Only the assigned umpire, host, or admin can score this match.");
-    error.statusCode = 403;
-    throw error;
+    throw new ForbiddenError("Authorization failed. Only the assigned umpire, host, or admin can score this match.");
   }
 
   // 2-hour window check
@@ -620,9 +605,7 @@ export const initializeScoringSession = async (finalMatchId, finalBattingTeam, u
   const twoHoursMs = 2 * 60 * 60 * 1000;
 
   if (timeDiffMs > twoHoursMs) {
-    const error = new Error("Scoring can only be started within 2 hours of the scheduled start time.");
-    error.statusCode = 400;
-    throw error;
+    throw new BadRequestError("Scoring can only be started within 2 hours of the scheduled start time.");
   }
 
   let scoring = await prisma.cricketMatch.findUnique({
@@ -702,9 +685,7 @@ export const advanceToNextInnings = async (scoringId, battingTeamId) => {
   });
 
   if (!scoring) {
-    const error = new Error("Scoring session not found");
-    error.statusCode = 404;
-    throw error;
+    throw new NotFoundError("Scoring session not found");
   }
 
   await prisma.$transaction([
@@ -993,24 +974,18 @@ export const updateTossResult = async (scoringId, winnerTeam, decision) => {
 export const updateActivePlayers = async (scoringId, { strikerId, nonStrikerId, bowlerId, wicketKeeperId }) => {
   const scoring = await prisma.cricketMatch.findUnique({ where: { id: scoringId } });
   if (!scoring) {
-    const error = new Error("Scoring session not found");
-    error.statusCode = 404;
-    throw error;
+    throw new NotFoundError("Scoring session not found");
   }
 
   if (bowlerId && scoring.bowlerId === bowlerId) {
-    const error = new Error("Same bowler cannot bowl consecutive overs");
-    error.statusCode = 400;
-    throw error;
+    throw new BadRequestError("Same bowler cannot bowl consecutive overs");
   }
 
   const finalStrikerId = strikerId !== undefined ? strikerId : scoring.strikerId;
   const finalNonStrikerId = nonStrikerId !== undefined ? nonStrikerId : scoring.nonStrikerId;
 
   if (finalStrikerId && finalNonStrikerId && finalStrikerId === finalNonStrikerId) {
-    const error = new Error("Striker and Non-Striker cannot be the same player");
-    error.statusCode = 400;
-    throw error;
+    throw new BadRequestError("Striker and Non-Striker cannot be the same player");
   }
 
   const updateData = {};
@@ -1041,23 +1016,17 @@ export const revertLastBall = async (scoringId) => {
   });
 
   if (!scoring) {
-    const error = new Error("Scoring session not found");
-    error.statusCode = 404;
-    throw error;
+    throw new NotFoundError("Scoring session not found");
   }
 
   if (!scoring.timeline.length) {
-    const error = new Error("No balls to undo");
-    error.statusCode = 400;
-    throw error;
+    throw new BadRequestError("No balls to undo");
   }
 
   const lastBall = scoring.timeline[0];
   const currentInnings = scoring.innings.find(i => i.inningsIndex === lastBall.inningsIndex);
   if (!currentInnings) {
-    const error = new Error("Innings not found for undo");
-    error.statusCode = 400;
-    throw error;
+    throw new BadRequestError("Innings not found for undo");
   }
 
   const isLegalBall = !lastBall.isExtra || lastBall.extraType === "BYE" || lastBall.extraType === "LEG_BYE" || lastBall.extraType === "PENALTY";
@@ -1147,22 +1116,16 @@ export const processScoreUpdate = async (scoringId, ballData) => {
     include: { innings: true }
   });
   if (!scoring) {
-    const error = new Error("Scoring session not found");
-    error.statusCode = 404;
-    throw error;
+    throw new NotFoundError("Scoring session not found");
   }
 
   const currentInnings = scoring.innings.find(i => i.inningsIndex === scoring.currentInningsIndex);
   if (!currentInnings) {
-    const error = new Error("No active innings");
-    error.statusCode = 400;
-    throw error;
+    throw new BadRequestError("No active innings");
   }
 
   if (scoring.timerState === "PAUSED") {
-    const error = new Error("Match is paused. Resume timer to score.");
-    error.statusCode = 400;
-    throw error;
+    throw new BadRequestError("Match is paused. Resume timer to score.");
   }
 
   const isWide = ballData.extraType === "WIDE";
@@ -1230,9 +1193,7 @@ export const processScoreUpdate = async (scoringId, ballData) => {
   }
 
   if (newStrikerId && newNonStrikerId && newStrikerId === newNonStrikerId) {
-    const error = new Error("Striker and Non-Striker cannot be the same player");
-    error.statusCode = 400;
-    throw error;
+    throw new BadRequestError("Striker and Non-Striker cannot be the same player");
   }
 
   await prisma.$transaction([
@@ -1497,9 +1458,7 @@ export const fetchMatchStatus = async (matchId) => {
   });
 
   if (!hostedGame) {
-    const error = new Error("Match not found");
-    error.statusCode = 404;
-    throw error;
+    throw new NotFoundError("Match not found");
   }
 
   const mappedHostedGame = mapHostedGame(hostedGame);
@@ -1543,9 +1502,7 @@ export const fetchMatchAnalytics = async (matchId) => {
   });
 
   if (!scoring) {
-    const error = new Error("Match data not found");
-    error.statusCode = 404;
-    throw error;
+    throw new NotFoundError("Match data not found");
   }
 
   const userIds = new Set();
@@ -1635,9 +1592,7 @@ export const fetchLiveScoreSnapshot = async (matchId) => {
   });
 
   if (!match) {
-    const error = new Error("Match not found");
-    error.statusCode = 404;
-    throw error;
+    throw new NotFoundError("Match not found");
   }
 
   const mappedMatch = mapHostedGame(match);
@@ -2080,9 +2035,7 @@ export const verifyScoringPassword = async (gameId, password) => {
   });
 
   if (!game) {
-    const err = new Error("GAME_NOT_FOUND");
-    err.statusCode = 404;
-    throw err;
+    throw new NotFoundError("GAME_NOT_FOUND");
   }
 
   if (!game.scoringPassword) {
@@ -2099,9 +2052,7 @@ export const verifyScoringPassword = async (gameId, password) => {
   const argon2 = await import('argon2');
   const isValid = await argon2.verify(game.scoringPassword, password);
   if (!isValid) {
-    const err = new Error("INVALID_PASSWORD");
-    err.statusCode = 401;
-    throw err;
+    throw new UnauthorizedError("INVALID_PASSWORD");
   }
 
   const token = jwt.sign(
@@ -2119,9 +2070,7 @@ export const deleteScoringMatch = async (matchId, userId) => {
   // Add appropriate validation
   const game = await prisma.hostedGame.findUnique({ where: { id: matchId } });
   if (!game) {
-    const err = new Error("MATCH_NOT_FOUND");
-    err.statusCode = 404;
-    throw err;
+    throw new NotFoundError("MATCH_NOT_FOUND");
   }
 
   // Delete the match

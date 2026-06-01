@@ -1,4 +1,5 @@
 import { prisma } from "../../config/prisma.js";
+import { UnauthorizedError } from "@kridaz/common";
 
 const getRecipientQuery = (req) => {
   const actor = req.user || req.owner || req.admin;
@@ -7,9 +8,7 @@ const getRecipientQuery = (req) => {
   const role = actor?.role?.toString().toLowerCase() || "";
 
   if (!id && !ownerId) {
-    const error = new Error("Authenticated recipient could not be resolved");
-    error.statusCode = 401;
-    throw error;
+    throw new UnauthorizedError("Authenticated recipient could not be resolved");
   }
 
   // Admins are stored as users. Business actors use their owner profile stream.
