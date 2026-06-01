@@ -1,27 +1,48 @@
-import logger from "../utils/logger.js";
+import logger from '../utils/logger.js';
+import { HttpError, NotFoundError } from '@kridaz/common';
+import * as Sentry from '@sentry/node';
 
 /**
- * Global Error Handler Middleware
- * Catch all errors and send standardized JSON response
+ * Global error handler. Must be the LAST middleware registered in app.js.
+ * Handles both typed HttpErrors and unexpected errors.
  */
 export const errorHandler = (err, req, res, next) => {
-  logger.error("[ERROR] Unhandled exception", err);
+  // Typed errors — use their statusCode and name directly
+  if (err instanceof HttpError) {
+    // Only log 5xx as errors; 4xx are expected and logged as warnings
+    const logFn = err.statusCode >= 500 ? logger.error : logger.warn;
+    logFn(`[${err.name}] ${err.message}`, {
+      statusCode: err.statusCode,
+      path: req.originalUrl,
+      method: req.method,
+      ...(Object.keys(err.meta || {}).length && { meta: err.meta }),
+    });
 
-  const statusCode = err.statusCode || 500;
-  const message = err.message || "Internal Server Error";
+    return res.status(err.statusCode).json({
+      success: false,
+      error:   err.name,
+      message: err.message,
+      ...(Object.keys(err.meta || {}).length && { details: err.meta }),
+    });
+  }
 
-  res.status(statusCode).json({
+  // Unexpected / untyped errors — always a 500
+  logger.error('[UNHANDLED_ERROR]', err);
+  Sentry.captureException(err, {
+    extra: { path: req.originalUrl, method: req.method },
+  });
+
+  return res.status(500).json({
     success: false,
-    message: message,
-    stack: process.env.NODE_ENV === "development" ? err.stack : undefined,
+    error:   'InternalError',
+    message: process.env.NODE_ENV === 'production' ? 'Something went wrong.' : err.message,
+    stack:   process.env.NODE_ENV === 'development' ? err.stack : undefined,
   });
 };
 
 /**
- * 404 Not Found Middleware
+ * 404 handler — must be registered BEFORE errorHandler in app.js.
  */
 export const notFound = (req, res, next) => {
-  const error = new Error(`Not Found - ${req.originalUrl}`);
-  error.statusCode = 404;
-  next(error);
+  next(new NotFoundError(`Route not found: ${req.originalUrl}`));
 };
