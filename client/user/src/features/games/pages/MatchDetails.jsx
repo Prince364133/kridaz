@@ -45,7 +45,7 @@ const MatchDetails = () => {
  const isUmpire = user && game.umpire && (user._id === game.umpire._id || user.id === game.umpire._id);
 
  return (
- <div className="min-h-screen bg-[#050505] text-white pb-32">
+ <div className="min-h-screen bg-black text-white pb-32">
  {/* Dynamic Header */}
  <div className="sticky top-0 z-50 bg-black/60 backdrop-blur-2xl border-b border-white/5 p-4">
  <div className="max-w-7xl mx-auto flex items-center justify-between">

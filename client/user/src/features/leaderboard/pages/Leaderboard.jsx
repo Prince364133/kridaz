@@ -68,7 +68,7 @@ const Leaderboard = () => {
   };
 
   return (
-    <div className="h-screen bg-[#050505] text-white font-sans overflow-hidden flex flex-col">
+    <div className="h-screen bg-black text-white font-sans overflow-hidden flex flex-col">
 
       {/* Main Content Area */}
       <div className="flex-1 flex flex-col relative overflow-y-auto">
@@ -79,7 +79,7 @@ const Leaderboard = () => {
             alt="" 
             className="w-full h-full object-cover opacity-20 filter grayscale contrast-125"
           />
-          <div className="absolute inset-0 bg-gradient-to-b from-transparent via-[#050505]/80 to-[#050505]"></div>
+          <div className="absolute inset-0 bg-gradient-to-b from-transparent via-black/80 to-black"></div>
         </div>
 
         {/* Content Container */}

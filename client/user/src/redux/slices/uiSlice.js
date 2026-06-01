@@ -8,6 +8,7 @@ const initialState = {
   },
   userLocation: null, // { lat, lng, city, state }
   locationStatus: "detecting", // "detecting" | "granted" | "denied"
+  isSidebarCollapsed: false,
 };
 
 const uiSlice = createSlice({
@@ -27,9 +28,12 @@ const uiSlice = createSlice({
     },
     setLocationStatus: (state, action) => {
       state.locationStatus = action.payload;
+    },
+    toggleSidebar: (state) => {
+      state.isSidebarCollapsed = !state.isSidebarCollapsed;
     }
   }
 });
 
-export const { openLoginModal, closeLoginModal, setUserLocation, setLocationStatus } = uiSlice.actions;
+export const { openLoginModal, closeLoginModal, setUserLocation, setLocationStatus, toggleSidebar } = uiSlice.actions;
 export default uiSlice.reducer;

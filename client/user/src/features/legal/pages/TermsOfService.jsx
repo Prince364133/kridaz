@@ -1,9 +1,9 @@
-﻿import React from "react";
+import React from "react";
 import { Link } from "react-router-dom";
 
 const TermsOfService = () => {
   return (
-    <div className="min-h-screen bg-[#050505] text-white pt-24 pb-12 font-sans selection:bg-[#BFF367]/30">
+    <div className="min-h-screen bg-black text-white pt-24 pb-12 font-sans selection:bg-[#BFF367]/30">
       <div className="container mx-auto px-6 max-w-4xl">
         <h1 className="text-4xl font-black mb-8 uppercase tracking-tight text-[#BFF367]">Terms of Service</h1>
         

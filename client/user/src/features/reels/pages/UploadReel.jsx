@@ -85,7 +85,7 @@ const UploadReel = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#050505] text-white flex flex-col relative">
+    <div className="min-h-screen bg-black text-white flex flex-col relative">
       {/* Dynamic Background Blur (When preview exists) */}
       <AnimatePresence>
         {preview && (

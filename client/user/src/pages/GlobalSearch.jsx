@@ -169,7 +169,7 @@ const GlobalSearch = () => {
   const VENUE_TYPES = ["TURF", "GROUND", "INDOOR"];
 
   return (
-    <div className="min-h-screen bg-[#050505] text-white pt-4 px-1 md:px-3 font-inter relative overflow-hidden">
+    <div className="min-h-screen bg-black text-white pt-4 px-1 md:px-3 font-inter relative overflow-hidden">
       <div className="max-w-3xl mx-auto space-y-6 pb-20">
         
         {/* Header */}
@@ -452,7 +452,7 @@ const GlobalSearch = () => {
       )}
       
       {/* Sidebar Panel */}
-      <div className={`fixed top-0 right-0 bottom-0 w-[85%] max-w-sm bg-[#050505] border-l border-white/10 shadow-2xl z-[110] transform transition-transform duration-300 ease-in-out ${isFilterOpen ? 'translate-x-0' : 'translate-x-full'}`}>
+      <div className={`fixed top-0 right-0 bottom-0 w-[85%] max-w-sm bg-black border-l border-white/10 shadow-2xl z-[110] transform transition-transform duration-300 ease-in-out ${isFilterOpen ? 'translate-x-0' : 'translate-x-full'}`}>
         <div className="flex flex-col h-full">
           {/* Header */}
           <div className="p-6 border-b border-white/5 flex items-center justify-between">
