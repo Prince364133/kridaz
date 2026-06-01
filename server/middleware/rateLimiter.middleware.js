@@ -1,49 +1,106 @@
-import rateLimit from 'express-rate-limit';
-import RedisStore from 'rate-limit-redis';
+import rateLimit    from 'express-rate-limit';
+import RedisStore   from 'rate-limit-redis';
+import CircuitBreaker from 'opossum';
 import { redisClient as redis } from '../config/redis.js';
+import logger from '../utils/logger.js';
 
-const isTestOrDev = process.env.NODE_ENV === 'test' || process.env.NODE_ENV === 'development';
+const isTestOrDev  = process.env.NODE_ENV === 'test' || process.env.NODE_ENV === 'development';
 const defaultWindow = parseInt(process.env.RATE_LIMIT_WINDOW_MS) || 15 * 60 * 1000;
+
+/**
+ * Creates a RedisStore wrapped in an Opossum circuit breaker.
+ * If Redis is unhealthy, the breaker opens and express-rate-limit
+ * falls back to its built-in memory store automatically.
+ *
+ * Circuit opens after 50% failure rate, resets after 30s.
+ *
+ * @param {string} prefix - unique keyPrefix for this limiter
+ * @returns {RedisStore|undefined} store for express-rate-limit, or undefined (memory fallback)
+ */
+const createRedisStoreWithBreaker = (prefix) => {
+  if (isTestOrDev) return undefined; // use memory store in test/dev
+
+  let usingRedis = true;
+
+  const breaker = new CircuitBreaker(
+    async () => {
+      // Lightweight health probe — just ping Redis
+      await redis.ping();
+    },
+    {
+      timeout: 3000,                   // 3s probe timeout = failure
+      errorThresholdPercentage: 50,    // 50% failures → circuit opens
+      resetTimeout: 30_000,            // retry Redis after 30s
+    }
+  );
+
+  breaker.on('open', () => {
+    usingRedis = false;
+    logger.warn(`[RATE_LIMITER] Circuit OPEN — Redis unavailable, falling back to memory (${prefix})`);
+  });
+  breaker.on('halfOpen', () => {
+    logger.info(`[RATE_LIMITER] Circuit HALF-OPEN — testing Redis (${prefix})`);
+  });
+  breaker.on('close', () => {
+    usingRedis = true;
+    logger.info(`[RATE_LIMITER] Circuit CLOSED — Redis restored (${prefix})`);
+  });
+
+  // Keep probing in the background
+  setInterval(async () => {
+    try { await breaker.fire(); } catch (_) { /* breaker handles logging */ }
+  }, 10_000);
+
+  // Return a dynamic store selector
+  // When circuit is open, returning undefined makes express-rate-limit use memory
+  return new RedisStore({
+    sendCommand: async (...args) => {
+      if (!usingRedis) throw new Error('Circuit open');
+      return redis.call(...args);
+    },
+    prefix,
+  });
+};
 
 /**
  * Auth limiter — login, register, Google auth, password reset.
  * 10 attempts per 15 minutes per IP.
- * skipSuccessfulRequests: true means the counter only increments on failed attempts.
  */
 export const authLimiter = rateLimit({
   windowMs: defaultWindow,
   max: parseInt(process.env.RATE_LIMIT_AUTH_MAX) || 10,
   standardHeaders: true,
   legacyHeaders: false,
-  store: isTestOrDev ? undefined : new RedisStore({ sendCommand: (...args) => redis.call(...args) }),
+  store: createRedisStoreWithBreaker('rl:auth'),
   message: { success: false, message: 'Too many attempts. Please try again in 15 minutes.' },
   skipSuccessfulRequests: true,
   skip: (req) => isTestOrDev,
 });
 
 /**
- * OTP limiter — send-otp and login-step1 (OTP verification entry point).
- * 5 requests per 15 mins (was 3 per min, adjusted to environment variable).
+ * OTP limiter — send-otp and login-step1.
+ * 5 requests per 15 minutes per IP.
  */
 export const otpLimiter = rateLimit({
   windowMs: defaultWindow,
   max: parseInt(process.env.RATE_LIMIT_OTP_MAX) || 5,
   standardHeaders: true,
   legacyHeaders: false,
-  store: isTestOrDev ? undefined : new RedisStore({ sendCommand: (...args) => redis.call(...args) }),
+  store: createRedisStoreWithBreaker('rl:otp'),
   message: { success: false, message: 'Too many OTP requests. Please wait a while.' },
   skip: (req) => isTestOrDev,
 });
 
 /**
- * Payment limiter — order creation, payment verification, etc.
+ * Payment limiter — order creation, payment verification.
+ * 10 requests per 15 minutes per IP.
  */
 export const paymentLimiter = rateLimit({
   windowMs: defaultWindow,
   max: parseInt(process.env.RATE_LIMIT_PAYMENT_MAX) || 10,
   standardHeaders: true,
   legacyHeaders: false,
-  store: isTestOrDev ? undefined : new RedisStore({ sendCommand: (...args) => redis.call(...args) }),
+  store: createRedisStoreWithBreaker('rl:payment'),
   message: { success: false, message: 'Too many payment requests. Please slow down.' },
   skip: (req) => isTestOrDev,
 });
@@ -57,7 +114,7 @@ export const globalLimiter = rateLimit({
   max: parseInt(process.env.RATE_LIMIT_GLOBAL_MAX) || 200,
   standardHeaders: true,
   legacyHeaders: false,
-  store: isTestOrDev ? undefined : new RedisStore({ sendCommand: (...args) => redis.call(...args) }),
+  store: createRedisStoreWithBreaker('rl:global'),
   message: { success: false, message: 'Too many requests. Please slow down.' },
   skip: (req) => isTestOrDev || req.path === '/health' || req.path === '/api/health',
 });
