@@ -1,7 +1,7 @@
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { getDynamicProfileRoute } from "@utils/routeUtils";
 import { useSelector, useDispatch } from "react-redux";
-import { User, Users, Menu, X, LogOut, Activity, ShieldCheck, Zap, ArrowRight, Clock, Trophy, Target, MessageCircle, MapPin, ChevronRight, Bell, UserSearch, Search, Plus, Bookmark, FileText, Home, Briefcase } from "lucide-react";
+import { User, Users, Menu, X, LogOut, Activity, ShieldCheck, Zap, ArrowRight, Clock, Trophy, Target, MessageCircle, MapPin, ChevronRight, Bell, UserSearch, Search, Plus, Bookmark, FileText, Home, Briefcase, ChevronDown } from "lucide-react";
 import { useState, useEffect, useCallback } from "react";
 import { createPortal } from "react-dom";
 import { logout } from "@redux/slices/authSlice";
@@ -117,33 +117,52 @@ const Navbar = () => {
           <div className="flex flex-col items-start justify-center lg:mb-8 w-full overflow-hidden">
             {isLoggedIn ? (
               <div className="flex flex-col items-start justify-center py-1 w-full">
-                {/* Mobile Greeting */}
-                <Link to="/profile" className="text-[18px] sm:text-[20px] font-black text-white uppercase tracking-tighter hover:text-[#BFF367] transition-colors lg:hidden" style={{ fontFamily: "'Open Sans', sans-serif" }}>
-                  HELLO {user?.name?.split(' ')[0] || user?.username || ''}
-                </Link>
+                {/* Mobile Location Header */}
+                <div className="flex lg:hidden flex-col items-start cursor-pointer group mt-1">
+                  <svg width="0" height="0" className="absolute">
+                    <linearGradient id="mapPinGradientMobile" x1="0%" y1="0%" x2="100%" y2="100%">
+                      <stop offset="0%" stopColor="#60E5D0" />
+                      <stop offset="100%" stopColor="#A2F86D" />
+                    </linearGradient>
+                  </svg>
+                  <span className="text-[9px] sm:text-[10px] font-bold text-white/50 uppercase tracking-[0.15em] mb-0.5">
+                    YOUR LOCATION
+                  </span>
+                  <div className="flex items-center gap-1.5 mt-[2px]">
+                    <div className="flex flex-col items-center justify-center">
+                      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="18" height="18">
+                        <g fill="none">
+                          <path d="m12.593 23.258l-.011.002l-.071.035l-.02.004l-.014-.004l-.071-.035q-.016-.005-.024.005l-.004.01l-.017.428l.005.02l.01.013l.104.074l.015.004l.012-.004l.104-.074l.012-.016l.004-.017l-.017-.427q-.004-.016-.017-.018m.265-.113l-.013.002l-.185.093l-.01.01l-.003.011l.018.43l.005.012l.008.007l.201.093q.019.005.029-.008l.004-.014l-.034-.614q-.005-.018-.02-.022m-.715.002a.02.02 0 0 0-.027.006l-.006.014l-.034.614q.001.018.017.024l.015-.002l.201-.093l.01-.008l.004-.011l.017-.43l-.003-.012l-.01-.01z" />
+                          <path fill="url(#mapPinGradientMobile)" d="M12 2a9 9 0 0 1 9 9c0 3.074-1.676 5.59-3.442 7.395a20.4 20.4 0 0 1-2.876 2.416l-.426.29l-.2.133l-.377.24l-.336.205l-.416.242a1.87 1.87 0 0 1-1.854 0l-.416-.242l-.52-.32l-.192-.125l-.41-.273a20.6 20.6 0 0 1-3.093-2.566C4.676 16.589 3 14.074 3 11a9 9 0 0 1 9-9m0 6a3 3 0 1 0 0 6a3 3 0 0 0 0-6" />
+                        </g>
+                      </svg>
+                    </div>
+                    
+                    {geoLoading ? (
+                      <span className="text-[18px] sm:text-[20px] font-medium text-white tracking-tight leading-none animate-pulse">
+                        Locating...
+                      </span>
+                    ) : geoLabel ? (
+                      <span className="text-[18px] sm:text-[20px] font-medium text-white tracking-tight leading-none truncate max-w-[150px] sm:max-w-[200px]">
+                        {userLocation?.city || geoLabel.split(',')[0]}
+                      </span>
+                    ) : (
+                      <button
+                        onClick={detectLocation}
+                        className="text-[18px] sm:text-[20px] font-medium text-white tracking-tight leading-none hover:text-white/80 transition-colors"
+                      >
+                        Set Location
+                      </button>
+                    )}
+                    
+                    <ChevronDown size={14} className="text-white mt-0.5 group-hover:translate-y-0.5 transition-transform" />
+                  </div>
+                </div>
+
                 {/* Desktop Logo */}
                 <Link to="/" className="group hidden lg:flex items-center justify-start w-full lg:w-[32px] lg:group-hover/nav:w-full overflow-hidden transition-all duration-300">
                   <img src="/logo.png" alt="Kridaz" className="h-10 sm:h-12 lg:h-10 w-auto max-w-none brightness-125 group-hover:scale-105 transition-transform duration-500" />
                 </Link>
-                <div className="lg:hidden flex items-center gap-1 mt-0.5 text-white/50">
-                  <MapPin size={10} className={geoLoading ? "text-[#84CC16] animate-pulse" : "text-[#84CC16]"} />
-                  {geoLoading ? (
-                    <span className="text-[8px] sm:text-[9px] font-bold uppercase tracking-widest text-white/30 animate-pulse">
-                      Locating...
-                    </span>
-                  ) : geoLabel ? (
-                    <span className="text-[8px] sm:text-[9px] font-bold uppercase tracking-widest truncate max-w-[120px] text-white/70">
-                      {geoLabel}
-                    </span>
-                  ) : (
-                    <button
-                      onClick={detectLocation}
-                      className="text-[8px] sm:text-[9px] font-bold uppercase tracking-widest text-white/40 hover:text-[#84CC16] transition-colors"
-                    >
-                      Set Location
-                    </button>
-                  )}
-                </div>
               </div>
             ) : (
               <Link to="/" className="group flex items-center justify-start w-full lg:w-[32px] lg:group-hover/nav:w-full overflow-hidden transition-all duration-300">
@@ -254,14 +273,7 @@ const Navbar = () => {
                   </ul>
                 </div>
 
-                {/* Notification Bell */}
-                <Link
-                  to="/notifications"
-                  className="relative w-9 sm:w-11 h-9 sm:h-11 border border-white/10 flex items-center justify-center bg-white/5 hover:border-[#84CC16]/50 transition-all cursor-pointer rounded-full group"
-                >
-                  <Bell size={18} className="text-white/40 group-hover:text-[#84CC16] transition-colors" />
-                  <NotificationBadge />
-                </Link>
+
 
 
 
@@ -386,6 +398,36 @@ const Navbar = () => {
                           )}
 
                         {/* ACCOUNT SECTION */}
+                        <details className="group [&_summary::-webkit-details-marker]:hidden lg:hidden">
+                          <summary className="flex items-center justify-between p-3 rounded-[8px] hover:bg-white/5 text-white/70 hover:text-white transition-all cursor-pointer list-none">
+                            <div className="flex items-center gap-3">
+                              <Briefcase size={18} className="text-white/40 group-hover:text-white/70 transition-colors" />
+                              <span className="text-sm font-medium">Business</span>
+                            </div>
+                            <ChevronRight size={16} className="text-white/40 transition-transform group-open:rotate-90" />
+                          </summary>
+                          <div className="flex flex-col gap-1 pl-10 pr-3 pb-2 pt-1">
+                            <Link to="/business/venue" onClick={() => setIsSidebarOpen(false)} className="text-sm font-medium text-white/50 hover:text-white py-1.5 transition-colors">
+                              Venue Owner
+                            </Link>
+                            <Link to="/business/professional" onClick={() => setIsSidebarOpen(false)} className="text-sm font-medium text-white/50 hover:text-white py-1.5 transition-colors">
+                              Professionals
+                            </Link>
+                          </div>
+                        </details>
+
+                        <Link
+                          to="/notifications"
+                          onClick={() => setIsSidebarOpen(false)}
+                          className="flex items-center gap-3 p-3 rounded-[8px] hover:bg-white/5 text-white/70 hover:text-white transition-all"
+                        >
+                          <div className="relative">
+                            <Bell size={18} className="text-white/40" />
+                            <NotificationBadge />
+                          </div>
+                          <span className="text-sm font-medium">Notifications</span>
+                        </Link>
+
                         <Link
                           to="/messages"
                           onClick={() => setIsSidebarOpen(false)}
