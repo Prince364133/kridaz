@@ -23,14 +23,16 @@ export const userRegisterSchema = z.object({
     confirmPassword: z.string().optional(),
     otp: z.string().optional(),
     phoneOtp: z.string().optional(),
+    registrationToken: z.string().optional(),
+    phoneRegistrationToken: z.string().optional(),
     dob: z.string().optional(),
     sportTypes: z.array(z.string()).optional(),
   }).refine((data) => !data.confirmPassword || data.password === data.confirmPassword, {
     message: "Passwords do not match",
     path: ["confirmPassword"],
-  }).refine((data) => data.otp || data.phoneOtp, {
-    message: "Either Email OTP or Phone OTP is required",
-    path: ["otp"],
+  }).refine((data) => data.otp || data.phoneOtp || data.registrationToken, {
+    message: "Either OTP or Registration Token is required",
+    path: ["registrationToken"],
   }),
 });
 
@@ -60,14 +62,16 @@ export const ownerRegisterSchema = z.object({
     confirmPassword: z.string().optional(),
     otp: z.string().optional(),
     phoneOtp: z.string().optional(),
+    registrationToken: z.string().optional(),
+    phoneRegistrationToken: z.string().optional(),
     role: z.enum(Object.values(OWNER_ROLE)).optional(),
     businessName: z.string().optional(),
   }).refine((data) => !data.confirmPassword || data.password === data.confirmPassword, {
     message: "Passwords do not match",
     path: ["confirmPassword"],
-  }).refine((data) => data.otp || data.phoneOtp, {
-    message: "Either Email OTP or Phone OTP is required",
-    path: ["otp"],
+  }).refine((data) => data.otp || data.phoneOtp || data.registrationToken, {
+    message: "Either OTP or Registration Token is required",
+    path: ["registrationToken"],
   }),
 });
 

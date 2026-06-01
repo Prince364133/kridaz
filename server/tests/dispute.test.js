@@ -320,7 +320,7 @@ describe("Support Dispute Resolution Domain Integration Tests", () => {
     it("should add an admin reply to Dispute 1 and transition status to INVESTIGATING", async () => {
       const dispute = disputes[0];
       const res = await request(app)
-        .post(`/api/admin/dispute/admin/${dispute.id}/reply`)
+        .post(`/api/admin/dispute/${dispute.id}/reply`)
         .set("Authorization", `Bearer ${adminToken}`)
         .send({
           message: "Admin is investigating. Please wait while we verify with the venue.",
@@ -347,7 +347,7 @@ describe("Support Dispute Resolution Domain Integration Tests", () => {
       const booking = bookings[0];
 
       const res = await request(app)
-        .post(`/api/admin/dispute/admin/${dispute.id}/resolve`)
+        .post(`/api/admin/dispute/${dispute.id}/resolve`)
         .set("Authorization", `Bearer ${adminToken}`)
         .send({
           resolutionAction: "RELEASE_TO_OWNER",
@@ -392,7 +392,7 @@ describe("Support Dispute Resolution Domain Integration Tests", () => {
       const booking = bookings[1];
 
       const res = await request(app)
-        .post(`/api/admin/dispute/admin/${dispute.id}/resolve`)
+        .post(`/api/admin/dispute/${dispute.id}/resolve`)
         .set("Authorization", `Bearer ${adminToken}`)
         .send({
           resolutionAction: "REFUND_TO_USER",
@@ -424,7 +424,7 @@ describe("Support Dispute Resolution Domain Integration Tests", () => {
       const booking = bookings[2]; // ownerRevenue = 2700.00
 
       const res = await request(app)
-        .post(`/api/admin/dispute/admin/${dispute.id}/resolve`)
+        .post(`/api/admin/dispute/${dispute.id}/resolve`)
         .set("Authorization", `Bearer ${adminToken}`)
         .send({
           resolutionAction: "PARTIAL_REFUND",
@@ -467,7 +467,7 @@ describe("Support Dispute Resolution Domain Integration Tests", () => {
       const booking = bookings[3]; // ownerRevenue = 3600.00
 
       const res = await request(app)
-        .post(`/api/admin/dispute/admin/${dispute.id}/resolve`)
+        .post(`/api/admin/dispute/${dispute.id}/resolve`)
         .set("Authorization", `Bearer ${adminToken}`)
         .send({
           resolutionAction: "CLOSE_NO_ACTION",
@@ -498,7 +498,7 @@ describe("Support Dispute Resolution Domain Integration Tests", () => {
       const dispute = disputes[0];
 
       const res = await request(app)
-        .post(`/api/admin/dispute/admin/${dispute.id}/resolve`)
+        .post(`/api/admin/dispute/${dispute.id}/resolve`)
         .set("Authorization", `Bearer ${adminToken}`)
         .send({
           resolutionAction: "RELEASE_TO_OWNER",

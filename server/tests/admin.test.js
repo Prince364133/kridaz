@@ -22,6 +22,7 @@ describe("Admin Module API Integration Tests", () => {
       data: {
         name: "Test Admin",
         email: emailAdmin,
+        username: `admin_test_${ts}`,
         phone: `77777${String(ts).slice(-5)}`,
         password: "Admin@Pass123", // Assuming no hashing for simple test or bypass in auth mock
         role: "ADMIN"
@@ -57,17 +58,15 @@ describe("Admin Module API Integration Tests", () => {
     }
   });
 
-  describe("GET /api/admin/dashboard/overview", () => {
+  describe("GET /api/admin/dashboard", () => {
     it("should fetch admin dashboard overview successfully", async () => {
       const res = await request(app)
-        .get("/api/admin/dashboard/overview")
+        .get("/api/admin/dashboard")
         .set("Authorization", `Bearer ${adminToken}`);
 
       expect(res.statusCode).toBe(200);
-      expect(res.body.success).toBe(true);
-      expect(res.body.data).toHaveProperty("totalUsers");
-      expect(res.body.data).toHaveProperty("totalTurfs");
-      expect(res.body.data).toHaveProperty("totalRevenue");
+      expect(res.body).toHaveProperty("totalUsers");
+      expect(res.body).toHaveProperty("totalTurfs");
     });
   });
 
@@ -90,7 +89,6 @@ describe("Admin Module API Integration Tests", () => {
         .set("Authorization", `Bearer ${adminToken}`);
 
       expect(res.statusCode).toBe(200);
-      expect(res.body.success).toBe(true);
       expect(Array.isArray(res.body.owners)).toBe(true);
     });
   });

@@ -78,6 +78,7 @@ describe("Team Module API Integration Tests", () => {
     await seedOtp(emailB, phoneB);
 
     // Register User A
+    const otpRes_regResA = await request(app).post('/api/user/auth/verify-otp').send({ email: emailA, phone: phoneA, otp: "123456" });
     const regResA = await request(app)
       .post("/api/user/auth/register")
       .send({
@@ -90,8 +91,7 @@ describe("Team Module API Integration Tests", () => {
         password: "Player@Pass123",
         confirmPassword: "Player@Pass123",
         otp: "123456",
-        phoneOtp: "123456",
-      });
+        phoneOtp: "123456", registrationToken: otpRes_regResA.body.registrationToken});
 
     if (regResA.statusCode === 201) {
       tokenA = regResA.body.token;
@@ -101,6 +101,7 @@ describe("Team Module API Integration Tests", () => {
     }
 
     // Register User B
+    const otpRes_regResB = await request(app).post('/api/user/auth/verify-otp').send({ email: emailB, phone: phoneB, otp: "123456" });
     const regResB = await request(app)
       .post("/api/user/auth/register")
       .send({
@@ -113,8 +114,7 @@ describe("Team Module API Integration Tests", () => {
         password: "Player@Pass123",
         confirmPassword: "Player@Pass123",
         otp: "123456",
-        phoneOtp: "123456",
-      });
+        phoneOtp: "123456", registrationToken: otpRes_regResB.body.registrationToken});
 
     if (regResB.statusCode === 201) {
       tokenB = regResB.body.token;

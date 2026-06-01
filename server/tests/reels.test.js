@@ -39,6 +39,7 @@ describe("Reels Module API", () => {
     await seedOtp(userEmail, userPhone);
 
     // Register user
+    const otpRes_regRes = await request(app).post('/api/user/auth/verify-otp').send({ email: userEmail, phone: userPhone, otp: "123456" });
     const regRes = await request(app)
       .post("/api/user/auth/register")
       .send({
@@ -51,8 +52,7 @@ describe("Reels Module API", () => {
         password: "Reels@Pass123",
         confirmPassword: "Reels@Pass123",
         otp: "123456",
-        phoneOtp: "123456",
-      });
+        phoneOtp: "123456", registrationToken: otpRes_regRes.body.registrationToken});
 
     if (regRes.statusCode === 201) {
       userToken = regRes.body.token;

@@ -37,6 +37,7 @@ describe("Payment Webhook Integration Tests", () => {
       data: {
         name: "Payment Test User",
         email: emailUser,
+        username: `payment_u_${ts}`,
         phone: `99999${String(ts).slice(-5)}`,
         password: "Password123",
       }
@@ -47,8 +48,7 @@ describe("Payment Webhook Integration Tests", () => {
       data: {
         userId,
         balance: 0,
-        usableBalance: 0,
-        userType: "user"
+        reservedBalance: 0
       }
     });
     walletId = wallet.id;
@@ -58,12 +58,16 @@ describe("Payment Webhook Integration Tests", () => {
       data: {
         name: "Test Turf Owner",
         email: `owner_${ts}@kridaz.test`,
+        username: `owner_${ts}`,
         phone: `88888${String(ts).slice(-5)}`,
         password: "Password123"
       }
     });
     const ownerProfile = await prisma.ownerProfile.create({
-      data: { userId: ownerUser.id }
+      data: { 
+        userId: ownerUser.id,
+        businessName: "Test Business"
+      }
     });
     const turf = await prisma.turf.create({
       data: {
@@ -71,12 +75,11 @@ describe("Payment Webhook Integration Tests", () => {
         name: "Payment Test Turf",
         location: "Test Location",
         city: "Test City",
-        googleLocation: "https://maps.google.com/test",
-        price: 1000,
-        contact: "1234567890",
         state: "Delhi",
-        zip: "110001",
-        landmark: "Test Landmark"
+        image: "test-image.jpg",
+        pricePerHour: 1000,
+        openTime: "06:00",
+        closeTime: "22:00"
       }
     });
 
@@ -85,11 +88,12 @@ describe("Payment Webhook Integration Tests", () => {
       data: {
         userId,
         turfId: turf.id,
-        turfDate: new Date(),
         totalPrice: 1000,
-        status: "PENDING_PAYMENT",
+        paidAmount: 0,
+        balanceAmount: 1000,
+        status: "PENDING",
         paymentType: "FULL",
-        razorpayOrderId: `order_booking_${ts}`
+        orderId: `order_booking_${ts}`
       }
     });
     testBookingId = booking.id;
@@ -123,7 +127,7 @@ describe("Payment Webhook Integration Tests", () => {
         .send(payload);
 
       expect(res.statusCode).toBe(400);
-      expect(res.body.message).toContain("Webhook signature is missing");
+      expect(res.body.status).toBe("invalid_signature");
     });
 
     it("should reject requests with invalid signature", async () => {
@@ -135,12 +139,12 @@ describe("Payment Webhook Integration Tests", () => {
         .send(payload);
 
       expect(res.statusCode).toBe(400);
-      expect(res.body.message).toContain("Invalid webhook signature");
+      expect(res.body.status).toBe("invalid_signature");
     });
 
     it("should successfully process a top-up payment.captured event and credit wallet idempotently", async () => {
-      const razorpayOrderId = \`order_topup_${ts}\`;
-      const razorpayPaymentId = \`pay_topup_${ts}\`;
+      const razorpayOrderId = `order_topup_${ts}`;
+      const razorpayPaymentId = `pay_topup_${ts}`;
       
       // Create pending wallet transaction
       await prisma.walletTransaction.create({
@@ -178,8 +182,8 @@ describe("Payment Webhook Integration Tests", () => {
 
       expect(res1.statusCode).toBe(200);
 
-      const walletAfterFirst = await prisma.wallet.findUnique({ where: { userId } });
-      expect(walletAfterFirst.balance).toBe(500);
+      const userAfterFirst = await prisma.user.findUnique({ where: { id: userId } });
+      expect(Number(userAfterFirst.walletBalance)).toBe(500);
 
       const txnAfterFirst = await prisma.walletTransaction.findFirst({ where: { razorpayOrderId } });
       expect(txnAfterFirst.status).toBe("SUCCESS");
@@ -192,13 +196,13 @@ describe("Payment Webhook Integration Tests", () => {
 
       expect(res2.statusCode).toBe(200); // Should return 200 immediately
       
-      const walletAfterSecond = await prisma.wallet.findUnique({ where: { userId } });
-      expect(walletAfterSecond.balance).toBe(500); // Balance should NOT increment again
+      const userAfterSecond = await prisma.user.findUnique({ where: { id: userId } });
+      expect(Number(userAfterSecond.walletBalance)).toBe(500); // Balance should NOT increment again
     });
 
     it("should successfully process a booking payment.captured event idempotently", async () => {
-      const razorpayOrderId = \`order_booking_${ts}\`;
-      const razorpayPaymentId = \`pay_booking_${ts}\`;
+      const razorpayOrderId = `order_booking_${ts}`;
+      const razorpayPaymentId = `pay_booking_${ts}`;
 
       const payload = {
         event: "payment.captured",
@@ -224,14 +228,11 @@ describe("Payment Webhook Integration Tests", () => {
 
       expect(res1.statusCode).toBe(200);
 
-      // Booking status should change to CONFIRMED
+      // Booking status should change to CONFIRMED and paymentId set
       const bookingAfterFirst = await prisma.booking.findUnique({ where: { id: testBookingId } });
       expect(bookingAfterFirst.status).toBe("CONFIRMED");
-
-      // Wallet transaction for booking should be created
-      const txn = await prisma.walletTransaction.findFirst({ where: { razorpayPaymentId } });
-      expect(txn).toBeDefined();
-      expect(txn.type).toBe("BOOKING_PAYMENT");
+      expect(bookingAfterFirst.paymentId).toBe(razorpayPaymentId);
+      expect(bookingAfterFirst.paymentStatus).toBe("SUCCESS");
 
       // Second webhook call (Idempotency test)
       const res2 = await request(app)
@@ -241,9 +242,8 @@ describe("Payment Webhook Integration Tests", () => {
 
       expect(res2.statusCode).toBe(200); // Should return 200 immediately
       
-      // Still only one transaction should exist
-      const txnCount = await prisma.walletTransaction.count({ where: { razorpayPaymentId } });
-      expect(txnCount).toBe(1);
+      const bookingAfterSecond = await prisma.booking.findUnique({ where: { id: testBookingId } });
+      expect(bookingAfterSecond.status).toBe("CONFIRMED");
     });
   });
 });

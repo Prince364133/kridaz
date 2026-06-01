@@ -54,6 +54,7 @@ describe("Player Module API", () => {
     await seedOtp(email2, phone2);
 
     // Register Player 1
+    const otpRes_regRes1 = await request(app).post('/api/user/auth/verify-otp').send({ email: email1, phone: phone1, otp: "123456" });
     const regRes1 = await request(app)
       .post("/api/user/auth/register")
       .send({
@@ -66,8 +67,7 @@ describe("Player Module API", () => {
         password: "Player@Pass123",
         confirmPassword: "Player@Pass123",
         otp: "123456",
-        phoneOtp: "123456",
-      });
+        phoneOtp: "123456", registrationToken: otpRes_regRes1.body.registrationToken});
 
     if (regRes1.statusCode === 201) {
       token1 = regRes1.body.token;
@@ -77,6 +77,7 @@ describe("Player Module API", () => {
     }
 
     // Register Player 2
+    const otpRes_regRes2 = await request(app).post('/api/user/auth/verify-otp').send({ email: email2, phone: phone2, otp: "123456" });
     const regRes2 = await request(app)
       .post("/api/user/auth/register")
       .send({
@@ -89,8 +90,7 @@ describe("Player Module API", () => {
         password: "Player@Pass123",
         confirmPassword: "Player@Pass123",
         otp: "123456",
-        phoneOtp: "123456",
-      });
+        phoneOtp: "123456", registrationToken: otpRes_regRes2.body.registrationToken});
 
     if (regRes2.statusCode === 201) {
       token2 = regRes2.body.token;

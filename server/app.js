@@ -29,6 +29,8 @@ app.use(cookieParser());
 
 import requestLogger from "./middleware/requestLogger.middleware.js";
 app.use(requestLogger);
+import { requestTimeout } from './middleware/requestTimeout.middleware.js';
+app.use(requestTimeout(30_000));
 
 // Serve static files from the public directory
 import path from "path";

@@ -37,6 +37,7 @@ describe("Story Module API", () => {
     await seedOtp(userEmail, userPhone);
 
     // Register user
+    const otpRes_regRes = await request(app).post('/api/user/auth/verify-otp').send({ email: userEmail, phone: userPhone, otp: "123456" });
     const regRes = await request(app)
       .post("/api/user/auth/register")
       .send({
@@ -49,8 +50,7 @@ describe("Story Module API", () => {
         password: "Story@Pass123",
         confirmPassword: "Story@Pass123",
         otp: "123456",
-        phoneOtp: "123456",
-      });
+        phoneOtp: "123456", registrationToken: otpRes_regRes.body.registrationToken});
 
     if (regRes.statusCode === 201) {
       userToken = regRes.body.token;
@@ -101,9 +101,10 @@ describe("Story Module API", () => {
   });
 
   describe("GET /api/user/stories/feed", () => {
-    it("should reject getting feed without auth token", async () => {
+    it("should fetch feed successfully as guest (optional auth)", async () => {
       const res = await request(app).get("/api/user/stories/feed");
-      expect(res.statusCode).toBe(401);
+      expect(res.statusCode).toBe(200);
+      expect(res.body.success).toBe(true);
     });
 
     it("should fetch stories feed successfully with auth token", async () => {

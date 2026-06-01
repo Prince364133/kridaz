@@ -105,6 +105,7 @@ describe("Wallet Module API Integration Tests", () => {
     await seedOtp(emailOwner, phoneOwner);
 
     // Register general USER
+    const otpRes_regUser = await request(app).post('/api/user/auth/verify-otp').send({ email: emailUser, phone: phoneUser, otp: "123456" });
     const regUser = await request(app)
       .post("/api/user/auth/register")
       .send({
@@ -117,8 +118,7 @@ describe("Wallet Module API Integration Tests", () => {
         password: "User@Pass123",
         confirmPassword: "User@Pass123",
         otp: "123456",
-        phoneOtp: "123456",
-      });
+        phoneOtp: "123456", registrationToken: otpRes_regUser.body.registrationToken});
 
     if (regUser.statusCode === 201) {
       userToken = regUser.body.token;

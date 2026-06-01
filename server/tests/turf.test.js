@@ -71,7 +71,7 @@ describe("Turf / Venue Module API", () => {
         password:        "Owner@Pass123",
         confirmPassword: "Owner@Pass123",
         otp:             "123456",
-        phoneOtp:        "123456",
+        phoneOtp: "123456",
       });
 
     if (registerRes.statusCode !== 201) {

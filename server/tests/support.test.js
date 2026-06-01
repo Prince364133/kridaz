@@ -17,6 +17,7 @@ describe("Support Module API Integration Tests", () => {
       data: {
         name: "Support Test User",
         email: emailUser,
+        username: `support_u_${ts}`,
         phone: `77777${String(ts).slice(-5)}`,
         password: "User@Pass123"
       }

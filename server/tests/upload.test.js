@@ -16,6 +16,7 @@ describe("Upload Module API Integration Tests", () => {
       data: {
         name: "Upload Test User",
         email: emailUser,
+        username: `upload_u_${ts}`,
         phone: `77777${String(ts).slice(-5)}`,
         password: "User@Pass123"
       }
@@ -43,7 +44,7 @@ describe("Upload Module API Integration Tests", () => {
         .set("Authorization", `Bearer ${userToken}`);
 
       expect(res.statusCode).toBe(400);
-      expect(res.body.message).toContain("No file uploaded");
+      expect(res.body.message).toContain("No file provided");
     });
 
     it("should process valid image upload successfully", async () => {
@@ -56,7 +57,7 @@ describe("Upload Module API Integration Tests", () => {
 
       expect(res.statusCode).toBe(200);
       expect(res.body.success).toBe(true);
-      expect(res.body).toHaveProperty("fileUrl");
+      expect(res.body).toHaveProperty("url");
     });
   });
 });

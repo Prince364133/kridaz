@@ -38,34 +38,22 @@ describe("Blog Module API Integration", () => {
     // Seed OTP
     await seedOtp(testEmail, testPhone);
 
-    // 2. Register mock user
-    const regRes = await request(app)
-      .post("/api/user/auth/register")
-      .send({
+    // 2. Create mock user directly
+    const user = await prisma.user.create({
+      data: {
         name: "Blog Tester User",
         email: testEmail,
         username: testUsername,
         phone: testPhone,
-        gender: "Male",
-        location: "Test City",
-        password: "Blog@Pass123",
-        confirmPassword: "Blog@Pass123",
-        otp: "123456",
-        phoneOtp: "123456",
-      });
+        password: "Blog@Pass123"
+      }
+    });
 
-    let registeredUserId = "";
-    if (regRes.statusCode === 201) {
-      userToken = regRes.body.token;
-      registeredUserId = regRes.body.user?.id;
-    } else {
-      logger.error("[blog setup register failed]:", regRes.body);
-    }
-
-    if (!registeredUserId) {
-      const user = await prisma.user.findFirst({ where: { email: testEmail } });
-      registeredUserId = user?.id;
-    }
+    const registeredUserId = user.id;
+    userToken = jwt.sign(
+      { id: registeredUserId, role: "USER" },
+      process.env.JWT_SECRET || "fallback_secret"
+    );
 
     // 3. Generate mock Admin token linked to the valid user to satisfy relation constraints
     adminToken = jwt.sign(

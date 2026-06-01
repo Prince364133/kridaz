@@ -904,7 +904,7 @@ const ScoringApp = () => {
                     title: 'Live Match Scoring',
                     text: `Follow the live score of the match: ${matchData?.hostedGameId?.name || 'Match'}`,
                     url: shareUrl
-                  }).catch(console.error);
+                  }).catch(err => Sentry.captureException(err));
                 } else {
                   navigator.clipboard.writeText(shareUrl);
                   toast.success("Live score link copied!");

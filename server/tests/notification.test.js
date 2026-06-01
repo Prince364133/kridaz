@@ -42,6 +42,7 @@ describe("Notification Module API Integration Tests", () => {
     await seedOtp(emailUser, phoneUser);
 
     // Register general USER
+    const otpRes_regUser = await request(app).post('/api/user/auth/verify-otp').send({ email: emailUser, phone: phoneUser, otp: "123456" });
     const regUser = await request(app)
       .post("/api/user/auth/register")
       .send({
@@ -54,19 +55,19 @@ describe("Notification Module API Integration Tests", () => {
         password: "User@Pass123",
         confirmPassword: "User@Pass123",
         otp: "123456",
-        phoneOtp: "123456",
-      });
+        phoneOtp: "123456", registrationToken: otpRes_regUser.body.registrationToken});
 
     if (regUser.statusCode === 201) {
       userToken = regUser.body.token;
       userId = regUser.body.user?.id || "";
     }
 
-    // Seed some notifications
+    // Seed some notifications with recipientModel: "User"
     if (userId) {
       const notif = await prisma.notification.create({
         data: {
           userId,
+          recipientModel: "User",
           title: "Test Notification",
           message: "This is a test notification",
           type: "INFO",
@@ -78,6 +79,7 @@ describe("Notification Module API Integration Tests", () => {
       await prisma.notification.create({
         data: {
           userId,
+          recipientModel: "User",
           title: "Test Notification 2",
           message: "This is a second test notification",
           type: "INFO",
@@ -94,6 +96,7 @@ describe("Notification Module API Integration Tests", () => {
       await prisma.userDevice.deleteMany({ where: { userId: user.id } }).catch(() => {});
       await prisma.user.delete({ where: { id: user.id } }).catch(() => {});
     }
+    await prisma.oTP.deleteMany({ where: { email: emailUser } }).catch(() => {});
   });
 
   describe("GET /api/user/notification - Fetch User Notifications", () => {
@@ -109,10 +112,10 @@ describe("Notification Module API Integration Tests", () => {
     });
   });
 
-  describe("PUT /api/user/notification/:id/read - Mark Notification as Read", () => {
+  describe("PUT /api/user/notification/:id/mark-read - Mark Notification as Read", () => {
     it("should mark a specific notification as read", async () => {
       const res = await request(app)
-        .put(`/api/user/notification/${notificationId}/read`)
+        .put(`/api/user/notification/${notificationId}/mark-read`)
         .set("Authorization", `Bearer ${userToken}`);
 
       expect(res.statusCode).toBe(200);
@@ -123,24 +126,24 @@ describe("Notification Module API Integration Tests", () => {
     });
   });
 
-  describe("PUT /api/user/notification/read/all - Mark All Notifications as Read", () => {
+  describe("PUT /api/user/notification/mark-all-read - Mark All Notifications as Read", () => {
     it("should mark all user notifications as read", async () => {
       const res = await request(app)
-        .put("/api/user/notification/read/all")
+        .put("/api/user/notification/mark-all-read")
         .set("Authorization", `Bearer ${userToken}`);
 
       expect(res.statusCode).toBe(200);
       expect(res.body.success).toBe(true);
 
-      const unreadCount = await prisma.notification.count({ where: { userId, isRead: false } });
+      const unreadCount = await prisma.notification.count({ where: { userId, recipientModel: "User", isRead: false } });
       expect(unreadCount).toBe(0);
     });
   });
 
-  describe("POST /api/user/notification/device - Save Device Token", () => {
+  describe("POST /api/user/notification/device-token - Save Device Token", () => {
     it("should reject if token is missing", async () => {
       const res = await request(app)
-        .post("/api/user/notification/device")
+        .post("/api/user/notification/device-token")
         .set("Authorization", `Bearer ${userToken}`)
         .send({});
 
@@ -151,7 +154,7 @@ describe("Notification Module API Integration Tests", () => {
     it("should successfully save or update device token", async () => {
       const token = `device_token_${ts}`;
       const res = await request(app)
-        .post("/api/user/notification/device")
+        .post("/api/user/notification/device-token")
         .set("Authorization", `Bearer ${userToken}`)
         .send({ token, platform: "android" });
 
@@ -174,7 +177,7 @@ describe("Notification Module API Integration Tests", () => {
       expect(res.statusCode).toBe(200);
       expect(res.body.success).toBe(true);
 
-      const count = await prisma.notification.count({ where: { userId } });
+      const count = await prisma.notification.count({ where: { userId, recipientModel: "User" } });
       expect(count).toBe(0);
     });
   });

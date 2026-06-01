@@ -28,7 +28,7 @@ describe("Auth Module API", () => {
         email:     testEmail,
         phone:     testPhone,
         emailOtp:  "123456",
-        phoneOtp:  "123456",
+        phoneOtp: "123456",
         expiresAt: new Date(Date.now() + 600000), // 10 minutes from now
       },
     });
@@ -81,7 +81,7 @@ describe("Auth Module API", () => {
           password:        "Password@123",
           confirmPassword: "Password@123",
           otp:             "123456",
-          phoneOtp:        "123456",
+          phoneOtp: "123456",
           registrationToken: registrationToken,
         });
 
@@ -123,7 +123,7 @@ describe("Auth Module API", () => {
           password:        "Password@123",
           confirmPassword: "Password@123",
           otp:             "123456",
-          phoneOtp:        "123456",
+          phoneOtp: "123456",
           registrationToken: registrationToken,
         });
 

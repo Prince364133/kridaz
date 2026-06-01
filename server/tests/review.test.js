@@ -81,6 +81,7 @@ describe("Review Module API Integration", () => {
     await seedOtp(testOwnerEmail, testOwnerPhone);
 
     // 3. Register user (player)
+    const otpRes_userRegRes = await request(app).post('/api/user/auth/verify-otp').send({ email: testUserEmail, phone: testUserPhone, otp: "123456" });
     const userRegRes = await request(app)
       .post("/api/user/auth/register")
       .send({
@@ -93,8 +94,7 @@ describe("Review Module API Integration", () => {
         password: "Review@Pass123",
         confirmPassword: "Review@Pass123",
         otp: "123456",
-        phoneOtp: "123456",
-      });
+        phoneOtp: "123456", registrationToken: otpRes_userRegRes.body.registrationToken});
 
     console.log("User Register Status:", userRegRes.statusCode);
     if (userRegRes.statusCode === 201) {
@@ -104,6 +104,7 @@ describe("Review Module API Integration", () => {
     }
 
     // 4. Register owner
+    const otpRes_owner = await request(app).post('/api/user/auth/verify-otp').send({ email: testOwnerEmail, phone: testOwnerPhone, otp: "123456" });
     const ownerRegRes = await request(app)
       .post("/api/owner/auth/owner/register")
       .send({
@@ -117,7 +118,8 @@ describe("Review Module API Integration", () => {
         confirmPassword: "Owner@Pass123",
         otp: "123456",
         phoneOtp: "123456",
-        role: "VENUE_OWNER"
+        role: "VENUE_OWNER",
+        registrationToken: otpRes_owner.body.registrationToken
       });
 
     console.log("Owner Register Status:", ownerRegRes.statusCode);
