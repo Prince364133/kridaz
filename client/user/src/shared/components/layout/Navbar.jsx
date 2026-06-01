@@ -5,7 +5,7 @@ import { User, Users, Menu, X, LogOut, Activity, ShieldCheck, Zap, ArrowRight, C
 import { useState, useEffect, useCallback } from "react";
 import { createPortal } from "react-dom";
 import { logout } from "@redux/slices/authSlice";
-import { setUserLocation, setLocationStatus, toggleSidebar } from "@redux/slices/uiSlice";
+import { setUserLocation, setLocationStatus, toggleSidebar, setSidebarCollapsed } from "@redux/slices/uiSlice";
 import { reelsApi } from "@redux/api/reelsApi";
 import toast from "react-hot-toast";
 import axiosInstance from "@hooks/useAxiosInstance";
@@ -108,10 +108,22 @@ const Navbar = () => {
   // Removed dedicated BOOKINGS link
 
   return (
-    <nav className={`sticky top-0 w-full lg:fixed lg:top-0 lg:left-0 z-[90] flex flex-col transition-all duration-300 
-      ${ scrollDirection === "down" && window.innerWidth < 1024 ? "-translate-y-full" : "translate-y-0" }
-      lg:transform-none lg:h-screen ${isSidebarCollapsed ? 'lg:w-20' : 'lg:w-64'} lg:border-r lg:border-white/10 bg-black/40 lg:bg-black backdrop-blur-xl lg:backdrop-blur-none
-    `}>
+    <nav 
+      onMouseEnter={() => {
+        if (window.innerWidth >= 1024) {
+          dispatch(setSidebarCollapsed(false));
+        }
+      }}
+      onMouseLeave={() => {
+        if (window.innerWidth >= 1024) {
+          dispatch(setSidebarCollapsed(true));
+        }
+      }}
+      className={`sticky top-0 w-full lg:fixed lg:top-0 lg:left-0 z-[90] flex flex-col transition-all duration-300 
+        ${ scrollDirection === "down" && window.innerWidth < 1024 ? "-translate-y-full" : "translate-y-0" }
+        lg:transform-none lg:h-screen ${isSidebarCollapsed ? 'lg:w-20' : 'lg:w-64'} lg:border-r lg:border-white/10 bg-black/40 lg:bg-black backdrop-blur-xl lg:backdrop-blur-none
+      `}
+    >
       <div className={`flex justify-center transition-all duration-500 lg:h-full`}>
         <div className={`relative w-full max-w-full h-16 sm:h-20 lg:h-auto border-b border-white/10 lg:border-none flex items-center lg:items-start lg:flex-col justify-between lg:justify-start px-2 sm:px-4 ${isSidebarCollapsed ? 'lg:px-2' : 'lg:px-6'} lg:pt-8 transition-all duration-300`}>
           {/* Logo & Mobile Location Section */}
