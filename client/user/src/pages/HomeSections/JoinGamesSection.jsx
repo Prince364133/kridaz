@@ -29,14 +29,14 @@ export default function JoinGamesSection({
   return (
     <section className="py-6 mb-6 w-full">
       <div className="w-full">
-        <div className="relative flex flex-col md:flex-row md:items-center justify-between gap-8 mb-6 border-b border-white/5 pb-4">
+        <div className="relative flex flex-row items-center justify-between gap-4 mb-6 border-b border-white/5 pb-4">
           <div className="relative">
             <div
-              className="absolute -left-6 top-1/2 -translate-y-1/2 w-1.5 h-16 rounded-full shadow-[0_0_25px_rgba(85,222,232,0.5)] hidden md:block"
+              className="absolute -left-6 top-1/2 -translate-y-1/2 w-1.5 h-12 rounded-full shadow-[0_0_25px_rgba(85,222,232,0.5)] hidden md:block"
               style={{ background: GRAD }}
             ></div>
             <h2
-              className="text-3xl md:text-5xl lg:text-6xl font-black text-white uppercase tracking-tighter leading-none"
+              className="text-[18px] md:text-[30px] font-black text-white uppercase tracking-tighter leading-none"
               style={{ fontFamily: "'Open Sans', sans-serif" }}
             >
               JOIN{" "}
@@ -50,24 +50,13 @@ export default function JoinGamesSection({
                 GAMES
               </span>
             </h2>
-            <p
-              className="text-xs md:text-sm font-bold text-white/40 uppercase tracking-[0.3em] mt-4"
-              style={{ fontFamily: "'Inter 28pt Light', sans-serif" }}
-            >
-              Community Matchmaking • No Team? No Problem.
-            </p>
           </div>
 
           <Link
             to="/join-games"
-            className="group flex items-center gap-3 px-6 py-3 bg-white/5 border border-white/10 rounded-[6px] hover:bg-[#BFF367] hover:text-black hover:border-[#BFF367] transition-all duration-500"
+            className="flex items-center gap-1 font-semibold text-[10px] md:text-[15px] transition-all hover:text-[#BFF367] text-[#888] whitespace-nowrap"
           >
-            <span className="text-[11px] font-black uppercase tracking-widest">
-              View More Games
-            </span>
-            <div className="w-6 h-6 rounded-full bg-white/5 group-hover:bg-black/10 flex items-center justify-center transition-colors">
-              <ChevronRight size={14} />
-            </div>
+            View More <span className="hidden md:inline">Games</span> <ChevronRight size={16} />
           </Link>
         </div>
 

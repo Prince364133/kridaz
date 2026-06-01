@@ -10,7 +10,8 @@ const sharePlatforms = [
   { id: "facebook", name: "Facebook", icon: Facebook },
 ];
 
-const HEADING_STYLE = { fontFamily: "'Open Sans', sans-serif" };
+const HEADING_STYLE = { fontFamily: "'Inter', sans-serif", letterSpacing: "-0.03em" };
+const SUBHEADING_STYLE = { fontFamily: "'Inter', sans-serif" };
 
 const ShareModal = ({ postId, onClose }) => {
   const copyShareLink = async (url, label = "Link copied!") => {
@@ -105,8 +106,8 @@ const ShareModal = ({ postId, onClose }) => {
       >
         <div className="relative flex items-start justify-between gap-4 border-b border-white/5 px-5 py-4 sm:px-6">
           <div>
-            <h3 className="text-lg font-black text-white" style={HEADING_STYLE}>Share post</h3>
-            <p className="mt-1 text-[11px] font-medium text-white/45">
+            <h3 className="text-[16px] font-black uppercase text-white tracking-wide" style={HEADING_STYLE}>Share post</h3>
+            <p className="mt-1 text-[11px] font-medium text-white/50" style={SUBHEADING_STYLE}>
               Choose a platform to send this community post.
             </p>
           </div>
@@ -126,16 +127,15 @@ const ShareModal = ({ postId, onClose }) => {
               const Icon = app.icon;
 
               return (
-                <div key={app.id} className="flex min-w-0 flex-col items-center gap-2">
+                <div key={app.id} className="flex min-w-0 flex-col items-center gap-1.5 group cursor-pointer" onClick={() => handleShareToPlatform(app.id)}>
                   <button
                     type="button"
-                    onClick={() => handleShareToPlatform(app.id)}
-                    className="flex h-14 w-14 items-center justify-center rounded-full border border-[#BFF367]/25 bg-gradient-to-br from-[#BFF367]/10 to-[#BFF367]/10 text-white/80 shadow-[0_0_18px_rgba(85,222,232,0.08)] transition-all hover:border-[#BFF367]/50 hover:from-[#BFF367]/20 hover:to-[#BFF367]/20 hover:text-[#BFF367] active:scale-95"
+                    className="flex h-12 w-12 items-center justify-center text-white/70 transition-all group-hover:text-white group-hover:scale-110 active:scale-95"
                     aria-label={`Share to ${app.name}`}
                   >
-                    <Icon size={23} strokeWidth={2.2} />
+                    <Icon size={28} strokeWidth={1.5} />
                   </button>
-                  <span className="w-full truncate text-center text-[10px] font-bold text-white/60">
+                  <span className="w-full truncate text-center text-[10px] font-bold text-white/50 group-hover:text-white/80 transition-colors" style={SUBHEADING_STYLE}>
                     {app.name}
                   </span>
                 </div>

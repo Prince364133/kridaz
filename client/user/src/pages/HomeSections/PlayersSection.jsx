@@ -16,14 +16,14 @@ export default function PlayersSection({
     <section className="py-6 mb-6 w-full">
       <div className="w-full">
         {/* Refined Section Header */}
-        <div className="relative flex flex-col md:flex-row md:items-center justify-between gap-8 mb-6 border-b border-white/5 pb-4">
+        <div className="relative flex flex-row items-center justify-between gap-4 mb-6 border-b border-white/5 pb-4">
           <div className="relative">
             <div
               className="absolute -left-6 top-1/2 -translate-y-1/2 w-1.5 h-12 rounded-full shadow-[0_0_20px_rgba(85,222,232,0.4)] hidden md:block"
               style={{ background: GRAD }}
             ></div>
             <h2
-              className="text-2xl md:text-4xl font-black text-white uppercase tracking-tighter leading-none"
+              className="text-[18px] md:text-[30px] font-black text-white uppercase tracking-tighter leading-none"
               style={{ fontFamily: "'Open Sans', sans-serif" }}
             >
               Find Players{" "}
@@ -37,13 +37,13 @@ export default function PlayersSection({
                 Near You
               </span>
             </h2>
-            <p
-              className="text-xs md:text-sm font-bold text-white/40 uppercase tracking-[0.3em] mt-3"
-              style={{ fontFamily: "'Inter 28pt Light', sans-serif" }}
-            >
-              Global Talent Network • Skill-Matched Athletes
-            </p>
           </div>
+          <Link
+            to="/players"
+            className="flex items-center gap-1 font-semibold text-[10px] md:text-[15px] transition-all hover:text-[#BFF367] text-[#888] whitespace-nowrap"
+          >
+            View More <span className="hidden md:inline">Players</span>
+          </Link>
         </div>
 
         {/* Player cards — 10 in one scrollable row */}
@@ -183,16 +183,7 @@ export default function PlayersSection({
           </div>
         )}
 
-        {/* View More Players btn */}
-        <div className="text-center mt-6 lg:mt-10">
-          <Link
-            to="/players"
-            className="inline-flex items-center gap-2 font-semibold text-sm py-3 px-10 rounded-[6px] border transition-all hover:border-[#BFF367] hover:text-[#BFF367]"
-            style={{ borderColor: BDR, color: "#888" }}
-          >
-            View More Players <ChevronRight size={16} />
-          </Link>
-        </div>
+
       </div>
     </section>
   );

@@ -17,11 +17,11 @@ export default function VenuesSection({
   const navigate = useNavigate();
 
   return (
-    <section className="py-6 mb-6 w-full">
-      <div className="relative flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6 border-b border-white/5 pb-4">
+    <section className="py-2 mb-4 w-full">
+      <div className="relative flex flex-row items-center justify-between gap-4 mb-4 border-b border-white/5 pb-4">
         <div className="relative">
           <h2
-            className="text-3xl md:text-5xl lg:text-6xl font-black text-white uppercase tracking-tighter leading-none"
+            className="text-[18px] md:text-[30px] font-black text-white uppercase tracking-tighter leading-none"
             style={{ fontFamily: "'Open Sans', sans-serif" }}
           >
             VENUES {userLocation?.city || userLocation?.state ? "IN " : "NEAR "}
@@ -29,31 +29,16 @@ export default function VenuesSection({
               {userLocation?.city || userLocation?.state || "YOU"}
             </span>
           </h2>
-          <p
-            className="text-xs md:text-sm font-bold text-white/40 uppercase tracking-[0.15em] mt-4"
-            style={{ fontFamily: "'Inter 28pt Light', sans-serif" }}
-          >
-            Premium Venue Discovery • Elite Sports Infrastructure
-          </p>
         </div>
+        <Link
+          to="/venues"
+          className="flex items-center gap-1 font-semibold text-[10px] md:text-[15px] transition-all hover:text-[#BFF367] text-[#888] whitespace-nowrap"
+        >
+          View All <span className="hidden md:inline">Venues</span>
+        </Link>
       </div>
 
-      {/* Search Row */}
-      <div className="flex flex-col gap-6 mb-10 w-full">
-        <div className="w-full animate-fade-in relative z-20">
-          <div className="flex items-center gap-2 bg-[#111] border border-white/10 rounded-full px-4 py-2 w-full md:w-1/2">
-            <Search size={18} className="text-[#BFF367]" />
-            <input
-              type="text"
-              placeholder="Search arenas..."
-              className="bg-transparent outline-none text-sm text-white w-full placeholder:text-gray-500 cursor-pointer"
-              value=""
-              readOnly
-              onClick={() => navigate("/search")}
-            />
-          </div>
-        </div>
-      </div>
+
 
       {/* Venue scroll — 1.8 cards on mobile */}
       {loading || turfLoading ? (
@@ -94,15 +79,7 @@ export default function VenuesSection({
         </div>
       )}
 
-      <div className="text-center mt-6 lg:mt-10">
-        <Link
-          to="/venues"
-          className="inline-flex items-center gap-2 font-semibold text-sm py-3 px-10 rounded-[6px] border transition-all hover:border-[#BFF367] hover:text-[#BFF367]"
-          style={{ borderColor: BDR, color: "#888" }}
-        >
-          View All Venues <ChevronRight size={16} />
-        </Link>
-      </div>
+
     </section>
   );
 }

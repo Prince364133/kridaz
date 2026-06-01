@@ -1,6 +1,9 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
-import { ThumbsUp, MessageCircle, Send, MoreVertical, ShieldCheck, Video, Trash2, AlertTriangle, Eye, Calendar, User as UserIcon, Loader2 } from "lucide-react";
+import { MoreVertical, ShieldCheck, Video, Trash2, AlertTriangle, Eye, Calendar, User as UserIcon, Loader2 } from "lucide-react";
+import LikeIcon from "../../../assets/icons/like_icon.png";
+import CommentIcon from "../../../assets/icons/comment_icon.png";
+import ShareIcon from "../../../assets/icons/share_icon.png";
 import { AnimatePresence, motion } from "framer-motion";
 import { useLikePostMutation, useAddPostCommentMutation } from "@redux/api/communityApi";
 import toast from "react-hot-toast";
@@ -160,9 +163,9 @@ const PostItem = React.memo(({ post, user, isAdmin, gateInteraction, onUpdatePos
     post.authorId === currentUserId;
 
   return (
-    <div className="bg-[#0A0A0A] border border-white/5 rounded-[8px] p-5 space-y-4">
+    <div className="bg-[#0A0A0A] border border-white/5 rounded-[12px] overflow-hidden flex flex-col">
       {/* Post Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between p-4 pb-2">
         <Link
           to={`/profile/${post.adminId?.id || post.adminId?._id || post.author?.id || post.author?._id || post.authorId}`}
           className="flex items-center gap-3 group"
@@ -223,7 +226,7 @@ const PostItem = React.memo(({ post, user, isAdmin, gateInteraction, onUpdatePos
 
       {/* Caption */}
       {(post.title || post.content) && (
-        <div className="text-[12px] font-medium leading-relaxed">
+        <div className="text-[13.5px] font-medium leading-relaxed px-4 pb-3">
           {post.title && <span className="font-bold mr-2">{post.title}</span>}
           <span className="text-white/90 whitespace-pre-wrap">{post.content}</span>
         </div>
@@ -231,7 +234,7 @@ const PostItem = React.memo(({ post, user, isAdmin, gateInteraction, onUpdatePos
 
       {/* Media Display */}
       {(post.image || post.imageUrl || post.mediaUrl) && (
-        <div className="relative aspect-square rounded-[8px] overflow-hidden group border border-white/5 bg-[#111]">
+        <div className="relative w-full aspect-[4/5] bg-[#050505] group overflow-hidden">
           <img
             src={post.image || post.imageUrl || post.thumbnailUrl || post.mediaUrl}
             className={`w-full h-full object-cover transition-all duration-500 ${
@@ -284,44 +287,9 @@ const PostItem = React.memo(({ post, user, isAdmin, gateInteraction, onUpdatePos
         </div>
       )}
 
-      {/* Action Bar */}
-      <div className="flex items-center justify-between pt-1">
-        <div className="flex items-center gap-5">
-          <button onClick={handleLike} className="flex items-center gap-2 group">
-            <ThumbsUp
-              size={20}
-              className={`transition-colors ${
-                post.likes?.some((l) => (l.id || l._id || l) === currentUserId)
-                  ? "fill-[#BFF367] text-[#BFF367]"
-                  : "text-white/70 group-hover:text-[#BFF367]"
-              }`}
-            />
-            <span className="text-[12px] font-bold text-white">{post.likes?.length || 0}</span>
-          </button>
-          <button onClick={() => setExpandedComments(!expandedComments)} className="flex items-center gap-2 group">
-            <MessageCircle
-              size={20}
-              className={`transition-colors ${expandedComments ? "text-[#BFF367]" : "text-white/70 group-hover:text-[#BFF367]"}`}
-            />
-            <span className="text-[12px] font-bold text-white">{post.comments?.length || 0}</span>
-          </button>
-          <button
-            type="button"
-            onClick={(e) => {
-              e.stopPropagation();
-              onSharePost(postId);
-            }}
-            className="flex items-center gap-2 group"
-          >
-            <Send size={18} className="text-white/70 group-hover:text-[#BFF367] transition-colors" />
-            <span className="text-[12px] font-bold text-white">Share</span>
-          </button>
-        </div>
-      </div>
-
       {/* Likes Summary */}
       {post.likes?.length > 0 && (
-        <div className="flex items-center gap-2 text-[11px] font-medium text-white/50 pt-1">
+        <div className="flex items-center gap-2 text-[11px] font-medium text-white/50 px-4 py-3">
           <div className="flex -space-x-1.5 shrink-0">
             {post.likes.slice(0, 3).map((likeUser, i) => (
               <div
@@ -363,6 +331,41 @@ const PostItem = React.memo(({ post, user, isAdmin, gateInteraction, onUpdatePos
         </div>
       )}
 
+      {/* Action Bar */}
+      <div className="flex items-center justify-between border-t border-white/10 bg-[#0A0A0A] px-2 py-1">
+        <button onClick={handleLike} className="flex-1 flex items-center justify-center gap-2 py-2 transition-colors group">
+          <img 
+            src={LikeIcon} 
+            alt="Like" 
+            className={`w-[18px] h-[18px] object-contain transition-all duration-200 brightness-0 invert group-hover:opacity-100 ${post.likes?.some((l) => (l.id || l._id || l) === currentUserId) ? "opacity-100 drop-shadow-[0_0_5px_rgba(255,255,255,0.5)]" : "opacity-70"}`}
+          />
+          {post.likes?.length > 0 && (
+            <span className="text-[13px] font-bold text-white/80 group-hover:text-white transition-colors">
+              {post.likes.length}
+            </span>
+          )}
+        </button>
+        <button onClick={() => setExpandedComments(!expandedComments)} className="flex-1 flex items-center justify-center gap-2 py-2 transition-colors group">
+          <img 
+            src={CommentIcon} 
+            alt="Comment" 
+            className="w-[18px] h-[18px] object-contain transition-all duration-200 opacity-70 group-hover:opacity-100 brightness-0 invert"
+          />
+          {(post.totalComments > 0 || post.comments?.length > 0) && (
+            <span className="text-[13px] font-bold text-white/80 group-hover:text-white transition-colors">
+              {post.totalComments || post.comments.length}
+            </span>
+          )}
+        </button>
+        <button onClick={(e) => { e.stopPropagation(); onSharePost(postId); }} className="flex-1 flex items-center justify-center py-2 transition-colors group">
+          <img 
+            src={ShareIcon} 
+            alt="Share" 
+            className="w-[18px] h-[18px] object-contain transition-all duration-200 opacity-70 group-hover:opacity-100 brightness-0 invert"
+          />
+        </button>
+      </div>
+
       {/* Expandable Comments Section */}
       <AnimatePresence>
         {expandedComments && (
@@ -371,9 +374,9 @@ const PostItem = React.memo(({ post, user, isAdmin, gateInteraction, onUpdatePos
             animate={{ height: "auto", opacity: 1 }}
             exit={{ height: 0, opacity: 0 }}
             transition={{ duration: 0.25 }}
-            className="overflow-hidden"
+            className="overflow-hidden bg-[#0A0A0A]"
           >
-            <div className="space-y-3 pt-2 border-t border-white/5">
+            <div className="space-y-3 pt-3 px-4 pb-4 border-t border-white/5">
               {post.comments && post.comments.length > 0 && (
                 <div className="max-h-[200px] overflow-y-auto space-y-2.5 pr-1 scrollbar-thin scrollbar-thumb-white/10 scrollbar-track-transparent">
                   {post.comments.slice(0, 4).map((comment) => {

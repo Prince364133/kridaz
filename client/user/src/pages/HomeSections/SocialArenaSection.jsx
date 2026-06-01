@@ -10,12 +10,12 @@ export default function SocialArenaSection({ reelsFeed }) {
   const navigate = useNavigate();
 
   return (
-    <section className="py-6 mb-6 w-full overflow-hidden">
+    <section className="pt-4 pb-1 mb-2 w-full overflow-hidden">
       <div className="w-full">
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-end mb-6 lg:mb-10 gap-4">
-          <div>
+        <div className="relative flex flex-row items-center justify-between gap-4 mb-6 lg:mb-10 border-b border-white/5 pb-4">
+          <div className="relative flex items-center gap-2">
             <h2
-              className="text-3xl md:text-5xl lg:text-6xl font-black text-white uppercase tracking-tighter leading-none flex items-center gap-2 md:gap-3"
+              className="text-[18px] md:text-[30px] font-black text-white uppercase tracking-tighter leading-none flex items-center gap-2 md:gap-3"
               style={{ fontFamily: "'Open Sans', sans-serif" }}
             >
               Your{" "}
@@ -28,20 +28,19 @@ export default function SocialArenaSection({ reelsFeed }) {
                 }}
               >
                 Social Arena
-              </span>{" "}
-              <Info className="w-4 h-4 md:w-5 md:h-5 text-gray-600 cursor-help shrink-0" />
+              </span>
             </h2>
-            <p
-              className="text-xs md:text-sm font-medium text-gray-400 mt-2"
-              style={{ fontFamily: "'Inter 28pt Light', sans-serif" }}
-            >
-              Swipe to see what's happening in the field
-            </p>
           </div>
+          <button
+            onClick={() => {}}
+            className="flex items-center gap-1 font-semibold text-[10px] md:text-[15px] transition-all hover:text-[#BFF367] text-[#888] whitespace-nowrap"
+          >
+            View More
+          </button>
         </div>
 
         {/* Reels Section (Horizontal Mock Data) */}
-        <div className="mb-8">
+        <div className="mb-2">
           <div className="flex gap-4 overflow-x-auto pb-4 scrollbar-hide snap-x">
             {reelsFeed.length === 0 ? (
               <div className="w-full py-12 flex items-center justify-center border border-white/5 bg-white/5 rounded-[12px]">

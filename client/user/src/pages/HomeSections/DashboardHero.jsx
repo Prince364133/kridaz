@@ -4,10 +4,10 @@ import { Link } from "react-router-dom";
 
 export default function DashboardHero() {
   return (
-    <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4 mb-6 w-full">
+    <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4 mb-2 w-full">
       {/* Leaderboard */}
       <Link
-        to="/leaderboard"
+        to="/venues"
         className="relative rounded-[6px] px-3.5 py-2 overflow-visible force-overflow-visible flex flex-col justify-center h-[72px] cursor-pointer group hover:scale-[1.02] transition-all duration-300 shadow-xl border border-[#EBEBEB]/15"
         style={{
           background:
@@ -17,7 +17,7 @@ export default function DashboardHero() {
       >
         <div className="absolute inset-0 bg-white/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500 rounded-[6px]" />
         <span className="relative z-20 text-white font-bold text-xs sm:text-sm tracking-tight leading-tight max-w-[55%] font-open-sans">
-          Leaderboard
+          Book grounds
         </span>
         <img
           src="/3d_map_location.svg"
@@ -39,7 +39,7 @@ export default function DashboardHero() {
       >
         <div className="absolute inset-0 bg-white/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500 rounded-[6px]" />
         <span className="relative z-20 text-white font-bold text-xs sm:text-sm tracking-tight leading-tight max-w-[55%] font-open-sans">
-          Scoring
+          Score your match
         </span>
         <img
           src="/3d_scoreboard_v2.png"
@@ -60,7 +60,7 @@ export default function DashboardHero() {
       >
         <div className="absolute inset-0 bg-white/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500 rounded-[6px]" />
         <span className="relative z-20 text-white font-bold text-xs sm:text-sm tracking-tight leading-tight max-w-[55%] font-open-sans">
-          Host & Join Games
+          Join Games
         </span>
         <img
           src="/3d_whistle.svg"
@@ -81,7 +81,7 @@ export default function DashboardHero() {
       >
         <div className="absolute inset-0 bg-white/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500 rounded-[6px]" />
         <span className="relative z-20 text-white font-bold text-xs sm:text-sm tracking-tight leading-tight max-w-[55%] font-open-sans">
-          Pros
+          Professionals
         </span>
         <img
           src="/3d_professional_v2.png"

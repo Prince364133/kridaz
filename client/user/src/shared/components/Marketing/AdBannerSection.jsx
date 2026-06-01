@@ -81,7 +81,7 @@ export const AdBannerSection = ({ banners = [] }) => {
   const isVideo = !!currentBanner.videoUrl;
 
   return (
-    <section className="relative w-full overflow-hidden bg-black py-4 md:py-6">
+    <section className="relative w-full overflow-hidden bg-black py-2 md:py-3">
       <div className="w-full px-1 md:px-2">
         <div className="relative group aspect-[16/9] md:aspect-[21/9] rounded-[8px] md:rounded-[8px] overflow-hidden border border-white/10 shadow-2xl">
           {/* Progress Bar */}

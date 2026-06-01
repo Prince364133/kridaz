@@ -1,7 +1,7 @@
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { getDynamicProfileRoute } from "@utils/routeUtils";
 import { useSelector, useDispatch } from "react-redux";
-import { User, Users, Menu, X, LogOut, Activity, ShieldCheck, Zap, ArrowRight, Clock, Trophy, Target, MessageCircle, MapPin, ChevronRight, Bell, UserSearch, Search, Plus, Bookmark, FileText } from "lucide-react";
+import { User, Users, Menu, X, LogOut, Activity, ShieldCheck, Zap, ArrowRight, Clock, Trophy, Target, MessageCircle, MapPin, ChevronRight, Bell, UserSearch, Search, Plus, Bookmark, FileText, Home, Briefcase } from "lucide-react";
 import { useState, useEffect, useCallback } from "react";
 import { createPortal } from "react-dom";
 import { logout } from "@redux/slices/authSlice";
@@ -93,66 +93,78 @@ const Navbar = () => {
   };
 
   const navLinks = isPartnerPortal ? [
-    { name: "Venues", path: "/business/venue" },
-    { name: "Professionals", path: "/business/professional" },
+    { name: "Venues", path: "/business/venue", icon: MapPin },
+    { name: "Professionals", path: "/business/professional", icon: Briefcase },
   ] : [
-    { name: "Home", path: "/" },
-    { name: "Venues", path: "/venues" },
-    { name: "Pros", path: "/professionals" },
-    { name: "Join Games", path: "/join-games" },
-    { name: "Players", path: "/players" },
-    { name: "Business", path: "#" },
+    { name: "Home", path: "/", icon: Home },
+    { name: "Venues", path: "/venues", icon: MapPin },
+    { name: "Pros", path: "/professionals", icon: UserSearch },
+    { name: "Join Games", path: "/join-games", icon: Target },
+    { name: "Players", path: "/players", icon: Users },
+    { name: "Business", path: "#", icon: Briefcase },
   ];
 
   // Removed dedicated BOOKINGS link
 
   return (
-    <nav className={`sticky top-0 w-full lg:fixed lg:top-0 lg:left-0 z-[90] flex flex-col transition-transform duration-500 
+    <nav className={`sticky top-0 w-full lg:fixed lg:top-0 lg:left-0 z-[90] flex flex-col transition-all duration-300 group/nav overflow-hidden
       ${ scrollDirection === "down" && window.innerWidth < 1024 ? "-translate-y-full" : "translate-y-0" }
-      lg:transform-none lg:h-screen lg:w-64 lg:border-r lg:border-white/10 bg-black/40 lg:bg-[#050505] backdrop-blur-xl lg:backdrop-blur-none
+      lg:transform-none lg:h-screen lg:w-[72px] lg:hover:w-64 lg:border-r lg:border-white/10 bg-black/40 lg:bg-[#050505] backdrop-blur-xl lg:backdrop-blur-none
     `}>
       <div className={`flex justify-center transition-all duration-500 lg:h-full`}>
-        <div className={`relative w-full max-w-full h-16 sm:h-20 lg:h-auto border-b border-white/10 lg:border-none flex items-center lg:items-start lg:flex-col justify-between lg:justify-start px-2 sm:px-4 lg:px-6 lg:pt-8 transition-all duration-500`}>
+        <div className={`relative w-full max-w-full h-16 sm:h-20 lg:h-auto border-b border-white/10 lg:border-none flex items-center lg:items-start lg:flex-col justify-between lg:justify-start px-2 sm:px-4 lg:px-4 lg:pt-8 transition-all duration-500`}>
           {/* Logo & Mobile Location Section */}
-          <div className="flex flex-col items-start justify-center lg:mb-8">
-            <Link to="/" className="group flex items-center justify-center">
-              <img src="/logo.png" alt="Kridaz" className="h-7 sm:h-8 lg:h-10 w-auto brightness-125 group-hover:scale-105 transition-transform duration-500" />
-            </Link>
-
-            <div className="lg:hidden flex items-center gap-1 mt-0.5 ml-1 text-white/50">
-              <MapPin size={10} className={geoLoading ? "text-[#84CC16] animate-pulse" : "text-[#84CC16]"} />
-              {geoLoading ? (
-                <span className="text-[8px] sm:text-[9px] font-bold uppercase tracking-widest text-white/30 animate-pulse">
-                  Locating...
-                </span>
-              ) : geoLabel ? (
-                <span className="text-[8px] sm:text-[9px] font-bold uppercase tracking-widest truncate max-w-[120px] text-white/70">
-                  {geoLabel}
-                </span>
-              ) : (
-                <button
-                  onClick={detectLocation}
-                  className="text-[8px] sm:text-[9px] font-bold uppercase tracking-widest text-white/40 hover:text-[#84CC16] transition-colors"
-                >
-                  Set Location
-                </button>
-              )}
-            </div>
+          <div className="flex flex-col items-start justify-center lg:mb-8 w-full overflow-hidden">
+            {isLoggedIn ? (
+              <div className="flex flex-col items-start justify-center py-1">
+                <Link to="/profile" className="text-[18px] sm:text-[20px] font-black text-white uppercase tracking-tighter hover:text-[#BFF367] transition-colors" style={{ fontFamily: "'Open Sans', sans-serif" }}>
+                  HELLO {user?.name?.split(' ')[0] || user?.username || ''}
+                </Link>
+                <div className="lg:hidden flex items-center gap-1 mt-0.5 text-white/50">
+                  <MapPin size={10} className={geoLoading ? "text-[#84CC16] animate-pulse" : "text-[#84CC16]"} />
+                  {geoLoading ? (
+                    <span className="text-[8px] sm:text-[9px] font-bold uppercase tracking-widest text-white/30 animate-pulse">
+                      Locating...
+                    </span>
+                  ) : geoLabel ? (
+                    <span className="text-[8px] sm:text-[9px] font-bold uppercase tracking-widest truncate max-w-[120px] text-white/70">
+                      {geoLabel}
+                    </span>
+                  ) : (
+                    <button
+                      onClick={detectLocation}
+                      className="text-[8px] sm:text-[9px] font-bold uppercase tracking-widest text-white/40 hover:text-[#84CC16] transition-colors"
+                    >
+                      Set Location
+                    </button>
+                  )}
+                </div>
+              </div>
+            ) : (
+              <Link to="/" className="group flex items-center justify-start w-full lg:w-[32px] lg:group-hover/nav:w-full overflow-hidden transition-all duration-300">
+                <img src="/logo.png" alt="Kridaz" className="h-10 sm:h-12 lg:h-10 w-auto max-w-none brightness-125 group-hover:scale-105 transition-transform duration-500" />
+              </Link>
+            )}
           </div>
 
           {/* DESKTOP LINKS */}
           <div className="hidden lg:flex lg:flex-col lg:items-start gap-2 lg:w-full">
             {navLinks.map((link) => {
+              const Icon = link.icon;
+              const isActive = location.pathname === link.path;
               if (link.name === "Business") {
                 return (
                   <div key={link.name} className="dropdown dropdown-hover group/link w-full">
                     <label
                       tabIndex={0}
-                      className={`flex w-full px-4 py-3 rounded-xl text-base font-bold items-center gap-1 cursor-pointer transition-all ${location.pathname.startsWith("/partners") ? "bg-primary/10 text-primary border border-primary/20 shadow-[0_0_15px_rgba(85,222,232,0.1)]" : "text-white/60 hover:bg-white/5 hover:text-white border border-transparent"}`}
+                      className={`flex w-full p-3 rounded-xl text-base font-bold items-center gap-4 cursor-pointer transition-all ${location.pathname.startsWith("/partners") ? "text-primary" : "text-white/60 hover:text-white"}`}
                     >
-                      {link.name}
+                      <Icon size={24} className="min-w-[24px]" />
+                      <span className="opacity-0 lg:group-hover/nav:opacity-100 transition-opacity duration-300 whitespace-nowrap overflow-hidden">
+                        {link.name}
+                      </span>
                     </label>
-                    <ul tabIndex={0} className="dropdown-content z-[100] mt-1 p-1 shadow-2xl bg-[#0A0A0A] border border-white/10 rounded-[8px] w-48 overflow-hidden backdrop-blur-xl">
+                    <ul tabIndex={0} className="dropdown-content z-[100] mt-1 p-1 shadow-2xl bg-[#0A0A0A] border border-white/10 rounded-[8px] w-48 overflow-hidden backdrop-blur-xl opacity-0 lg:group-hover/nav:opacity-100 transition-opacity duration-300">
                       <li>
                         <Link to="/business/venue" className="flex items-center gap-3 p-4 text-sm font-medium text-white/60 hover:text-[#84CC16] hover:bg-white/5 transition-all">
                           Venue Owner
@@ -171,10 +183,14 @@ const Navbar = () => {
                 <Link
                   key={link.name}
                   to={link.path}
-                  onMouseEnter={() => {}}
-                  className={`block w-full px-4 py-3 rounded-xl text-base font-bold transition-all ${location.pathname === link.path ? "bg-primary/10 text-primary border border-primary/20 shadow-[0_0_15px_rgba(85,222,232,0.1)]" : "text-white/60 hover:bg-white/5 hover:text-white border border-transparent"}`}
+                  className={`flex w-full p-3 rounded-xl text-base font-bold items-center gap-4 transition-all ${
+                    isActive ? "text-primary" : "text-white/60 hover:text-white"
+                  }`}
                 >
-                  {link.name}
+                  <Icon size={24} className="min-w-[24px]" />
+                  <span className="opacity-0 lg:group-hover/nav:opacity-100 transition-opacity duration-300 whitespace-nowrap overflow-hidden">
+                    {link.name}
+                  </span>
                 </Link>
               );
             })}

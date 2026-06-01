@@ -389,8 +389,8 @@ const OnboardingModal = ({ isOpen, onClose, initialData, onComplete }) => {
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-in fade-in duration-300">
-      <div className="w-full max-w-[900px] h-[580px] max-h-[90vh] bg-[#161616] flex relative animate-in slide-in-from-bottom-8 duration-500 ease-out rounded-2xl border border-white/10 shadow-2xl overflow-hidden">
+    <div className="fixed inset-0 z-[9999] flex items-center justify-center sm:p-4 bg-black/80 backdrop-blur-sm animate-in fade-in duration-300">
+      <div className="w-full max-w-[956px] h-[100dvh] sm:h-[821px] sm:max-h-[95vh] bg-[#161616] flex relative animate-in slide-in-from-bottom-8 duration-500 ease-out rounded-none sm:rounded-2xl border-none sm:border border-white/10 shadow-2xl overflow-hidden">
         
         {/* Left Side: Image Holder */}
         <div className="hidden md:block w-1/2 relative bg-black">
