@@ -8,7 +8,8 @@ const config: CapacitorConfig = {
     extConfig: {},
     CapacitorUpdater: {
       appId: 'com.kridaz.app',
-      autoUpdate: true
+      autoUpdate: false,
+      defaultChannel: 'production'
     },
     GoogleAuth: {
       scopes: ["profile", "email"],

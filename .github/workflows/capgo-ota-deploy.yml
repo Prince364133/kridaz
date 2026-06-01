@@ -34,10 +34,21 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       - name: Compile Production Web Assets
-        run: pnpm --filter user run build
+        env:
+          VITE_API_URL: ${{ secrets.VITE_API_URL }}
+          VITE_GOOGLE_CLIENT_ID: ${{ secrets.VITE_GOOGLE_CLIENT_ID }}
+          VITE_RAZORPAY_KEY_ID: ${{ secrets.VITE_RAZORPAY_KEY_ID }}
+          VITE_TURNSTILE_SITE_KEY: ${{ secrets.VITE_TURNSTILE_SITE_KEY }}
+          VITE_REELS_CDN_URL: ${{ secrets.VITE_REELS_CDN_URL }}
+          VITE_SENTRY_DSN: ${{ secrets.VITE_SENTRY_DSN }}
+        run: pnpm --filter user run build:prod
 
       - name: Upload OTA Bundle to Capgo Cloud
         working-directory: ./client/user
         env:
           CAPGO_TOKEN: ${{ secrets.CAPGO_TOKEN }}
-        run: npx @capgo/cli bundle upload --apikey ${{ secrets.CAPGO_TOKEN }}
+        run: |
+          npx @capgo/cli bundle upload \
+            --apikey ${{ secrets.CAPGO_TOKEN }} \
+            --channel production \
+            --appId com.kridaz.app

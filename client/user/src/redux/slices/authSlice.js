@@ -10,6 +10,7 @@ const authSlice = createSlice({
     role: null,
     user: null,
     followingIds: [],
+    isRestored: false,
   },
   reducers: {
     login: (state, action) => {
@@ -50,8 +51,11 @@ const authSlice = createSlice({
     unfollowUser: (state, action) => {
       state.followingIds = state.followingIds.filter(id => id !== action.payload);
     },
+    markRestored: (state) => {
+      state.isRestored = true;
+    },
   },
 });
 
-export const { login, logout, updateUser, restoreAuth, setFollowingIds, followUser, unfollowUser } = authSlice.actions;
+export const { login, logout, updateUser, restoreAuth, setFollowingIds, followUser, unfollowUser, markRestored } = authSlice.actions;
 export default authSlice.reducer;

@@ -39,8 +39,7 @@ import { RootErrorBoundary } from "@components/common";
 import { reelsApi } from "@redux/api/reelsApi";
 import { usePushNotifications } from "@hooks/usePushNotifications";
 import { useWebPushNotifications } from "@hooks/useWebPushNotifications";
-import { CapacitorUpdater } from '@capgo/capacitor-updater';
-import { Capacitor } from '@capacitor/core';
+import { useOTAUpdate } from "@hooks/useOTAUpdate";
 
 import { ObservabilityProvider } from "./ObservabilityProvider";
 
@@ -50,6 +49,9 @@ export default function App() {
   const authState = useSelector((state) => state.auth);
   const lastAuthCheckTime = useRef(0);
   
+  // Initialize OTA Updates
+  useOTAUpdate();
+
   // Initialize Native & Web Push Notifications
   usePushNotifications(authState.isLoggedIn);
   useWebPushNotifications(authState.isLoggedIn);
@@ -101,12 +103,7 @@ export default function App() {
     }
   }, [dispatch]);
 
-  // Notify Capgo Updater that the app is ready and working
-  useEffect(() => {
-    if (Capacitor.isNativePlatform()) {
-      CapacitorUpdater.notifyAppReady().catch(err => console.error("OTA Ready Error:", err));
-    }
-  }, []);
+
 
   // If we have a persisted session, don't show the blocking loading screen
   const [loading, setLoading] = useState(false);
