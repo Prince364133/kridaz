@@ -1,6 +1,9 @@
 import { useState, useEffect } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
-import { Star, Heart, MapPin, Navigation } from "lucide-react";
+import { 
+  Star, Heart, MapPin, Share2, MessageSquare, Bookmark, 
+  Wallet, Users, Calendar, Clock, Info, ArrowRight, Lock, Zap
+} from "lucide-react";
 import { useSelector } from "react-redux";
 import { useGetSavedTurfsQuery, useToggleTurfLikeMutation } from "@redux/api/turfApi";
 import toast from "react-hot-toast";
@@ -18,10 +21,27 @@ const haversineKm = (lat1, lon1, lat2, lon2) => {
   return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
 };
 
-const TurfCardMobile = ({ turf, distance: distanceProp, compact = false }) => {
+const generateDates = () => {
+  const dates = [];
+  const today = new Date();
+  for (let i = 0; i < 7; i++) {
+    const d = new Date(today);
+    d.setDate(today.getDate() + i);
+    dates.push({
+      dateObj: d,
+      dayName: i === 0 ? "Today" : d.toLocaleDateString("en-US", { weekday: "short" }),
+      dateNum: d.getDate(),
+      month: d.toLocaleDateString("en-US", { month: "short" })
+    });
+  }
+  return dates;
+};
+
+const TurfCardMobile = ({ turf, distance: distanceProp }) => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const isLoggedIn = useSelector((state) => state.auth.isLoggedIn);
+  const user = useSelector((state) => state.auth.user);
   
   const { data: savedData } = useGetSavedTurfsQuery(undefined, { skip: !isLoggedIn });
   const [toggleLikeApi] = useToggleTurfLikeMutation();
@@ -30,24 +50,32 @@ const TurfCardMobile = ({ turf, distance: distanceProp, compact = false }) => {
   const isWishlisted = isLoggedIn && savedData?.turfs?.some(t => (t.id || t._id) === targetId);
 
   const returnTo = searchParams.get('returnTo');
-  const baseTo = `/venue/${turf.id || turf._id}`;
+  const baseTo = `/venue/${targetId}`;
   const to = returnTo ? `${baseTo}?returnTo=${encodeURIComponent(returnTo)}` : baseTo;
   const images = turf.images?.length > 0 ? turf.images : [turf.image];
   const rating = turf.averageRating ?? turf.avgRating ?? turf.rating ?? 4.8;
-  const price = turf.pricePerHour ?? 800;
-
-  // Extract slots
-  const activeSlots = (turf.generatedSlots || []).filter(s => s.isActive !== false);
-  const slotsLeft = turf.slotsLeft !== undefined ? turf.slotsLeft : (activeSlots.length > 0 ? activeSlots.length : Math.floor(Math.random() * 10) + 5);
+  const reviewsCount = turf.reviewsCount ?? 128; // fallback mock
   
   // Extract sports
   const sportTypes = turf.sportTypes || ["SPORTS"];
-  const gameTypesDisplay = sportTypes.slice(0, 2).join(", "); // Show up to 2 sports
+  const sportDisplay = sportTypes[0] || "Football (5v5)";
+
+  // Dates & Slots
+  const [dates] = useState(generateDates());
+  const [selectedDate, setSelectedDate] = useState(dates[0]);
+  const [selectedSlot, setSelectedSlot] = useState("06:30 - 07:30");
+
+  const defaultSlots = [
+    "06:30 - 07:30",
+    "07:30 - 08:30",
+    "14:30 - 15:30",
+    "15:30 - 16:30"
+  ];
 
   // ── Distance calculation ──
   const [calcDistance, setCalcDistance] = useState(null);
   useEffect(() => {
-    if (distanceProp) return; // already have it from parent
+    if (distanceProp) return; 
     const venueLat = turf.location?.coordinates?.[1] ?? turf.latitude ?? turf.lat;
     const venueLng = turf.location?.coordinates?.[0] ?? turf.longitude ?? turf.lng;
     if (!venueLat || !venueLng) return;
@@ -75,96 +103,215 @@ const TurfCardMobile = ({ turf, distance: distanceProp, compact = false }) => {
     try {
       await toggleLikeApi(targetId).unwrap();
     } catch (err) {
-      console.error("[TELEMETRY] Failed to toggle wishlist like:", err);
+      console.error("Failed to toggle wishlist like:", err);
       toast.error("Failed to save venue");
     }
   };
 
+  const handleBookNow = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    navigate(to);
+  };
+
   return (
-    <div
-      onClick={() => navigate(to)}
-      className={`group relative w-full rounded-[12px] overflow-hidden cursor-pointer bg-black transition-all duration-500 hover:-translate-y-1 hover:shadow-2xl ${
-        compact ? "h-[220px] md:h-[260px]" : "h-[320px] md:h-[400px]"
-      }`}
-    >
-      {/* ── Background Images (Scrollable) ── */}
-      <div className="absolute inset-0 flex overflow-x-auto snap-x snap-mandatory no-scrollbar">
-        {images.map((img, idx) => (
-          <img
-            key={idx}
-            src={img || "https://images.unsplash.com/photo-1551958219-acbc608c6377?w=800&q=80"}
-            alt={`${turf.name} - ${idx + 1}`}
-            className="w-full h-full object-cover shrink-0 snap-center transition-transform duration-700 group-hover:scale-105"
-          />
-        ))}
-      </div>
-      {/* Darkening gradient overlay at the bottom for text contrast */}
-      <div className="absolute inset-0 bg-gradient-to-t from-black via-black/50 to-transparent opacity-90 pointer-events-none" />
+    <div className="w-full bg-[#111] rounded-[16px] overflow-hidden border border-[#222] font-inter shadow-2xl flex flex-col">
+      {/* ── Top Image Header ── */}
+      <div className="relative h-[130px] md:h-[160px] w-full shrink-0 group">
+        <div className="absolute inset-0 flex overflow-x-auto snap-x snap-mandatory no-scrollbar">
+          {images.map((img, idx) => (
+            <img
+              key={idx}
+              src={img || "https://images.unsplash.com/photo-1551958219-acbc608c6377?w=800&q=80"}
+              alt={`${turf.name} - ${idx + 1}`}
+              className="w-full h-full object-cover shrink-0 snap-center transition-transform duration-700"
+            />
+          ))}
+        </div>
+        <div className="absolute inset-0 bg-gradient-to-t from-[#111] via-transparent to-black/40 pointer-events-none" />
 
-      {/* ── Top Left Area: Slots and Game Type ── */}
-      <div className="absolute top-4 left-4 z-20 flex flex-row gap-2 items-center">
-        <span className={`bg-black/60 backdrop-blur-md text-[#BFF367] border border-[#BFF367]/20 font-black px-2.5 py-1 rounded-full uppercase tracking-widest ${compact ? 'text-[8px]' : 'text-[10px]'}`}>
-          {gameTypesDisplay}
-        </span>
-        <span className={`bg-[#BFF367] text-black font-black px-2.5 py-1 rounded-full uppercase tracking-widest ${compact ? 'text-[8px]' : 'text-[10px]'}`}>
-          {slotsLeft} Slots Left
-        </span>
-      </div>
+        {/* Featured Badge */}
+        <div className="absolute top-4 left-4 z-20 flex items-center gap-1.5 bg-black/60 backdrop-blur-md border border-[#BFF367]/30 px-3 py-1.5 rounded-full">
+          <Star size={12} className="text-[#BFF367] fill-[#BFF367]" />
+          <span className="text-[10px] font-black text-[#BFF367] uppercase tracking-wider">Featured</span>
+        </div>
 
-      {/* ── Top Right Area: Wishlist ── */}
-      <div className="absolute top-4 right-4 z-20">
+        {/* Wishlist Heart */}
         <button 
           onClick={toggleWishlist}
-          className={`rounded-full bg-black/40 backdrop-blur-md border border-white/10 hover:bg-black/60 transition-all duration-300 group/heart ${compact ? 'p-1.5' : 'p-2'}`}
+          className="absolute top-4 right-4 z-20 p-2.5 rounded-full bg-black/40 backdrop-blur-md border border-white/10 hover:bg-black/60 transition-all duration-300"
         >
           <Heart 
-            size={compact ? 14 : 18} 
-            className={`transition-all duration-300 ${ isWishlisted ? "fill-red-500 text-red-500 scale-110" : "text-white group-hover/heart:scale-110" }`} 
+            size={18} 
+            className={`transition-all duration-300 ${ isWishlisted ? "fill-red-500 text-red-500 scale-110" : "text-white" }`} 
           />
         </button>
+
+        {/* Location Pill */}
+        <div className="absolute bottom-4 left-4 z-20 flex items-center gap-1.5 bg-black/80 backdrop-blur-md border border-white/10 px-3 py-1.5 rounded-full">
+          <MapPin size={12} className="text-[#BFF367]" />
+          <span className="text-[11px] font-bold text-white tracking-wide">
+            {distance || "1.2 km away"}
+          </span>
+        </div>
+
+        {/* Pagination Dots */}
+        {images.length > 1 && (
+          <div className="absolute bottom-4 left-0 right-0 z-20 flex justify-center gap-1.5">
+            {images.map((_, idx) => (
+              <div key={idx} className={`w-1.5 h-1.5 rounded-full ${idx === 0 ? 'bg-[#BFF367]' : 'bg-white/40'}`} />
+            ))}
+          </div>
+        )}
       </div>
 
-      {/* ── Bottom Content Area ── */}
-      <div className={`absolute bottom-0 left-0 right-0 z-20 flex flex-col ${compact ? 'p-3 gap-0.5' : 'p-5 gap-1'}`}>
-        {/* Venue Name */}
-        <h3 className={`font-bold text-white tracking-tight leading-tight font-inter line-clamp-1 ${compact ? 'text-lg md:text-xl' : 'text-xl md:text-2xl'}`}>
-          {turf.name}
-        </h3>
+      {/* ── Content Area ── */}
+      <div className="p-2.5 md:p-3 flex flex-col gap-2 md:gap-3 bg-[#111]">
         
-        {/* Location */}
-        <div className={`flex items-center mb-1 ${compact ? 'gap-1' : 'gap-1.5 mb-2'}`}>
-          <MapPin size={compact ? 10 : 12} className="text-[#BFF367]" />
-          <p className={`text-white/70 font-medium font-inter ${compact ? 'text-[10px] md:text-xs' : 'text-xs md:text-sm'}`}>
-            {turf.location || turf.city || 'Hyderabad'}
-          </p>
-        </div>
-        
-        {/* Pricing & Rating Row */}
-        <div className="flex items-start justify-between mt-1">
-          <div className="flex items-baseline gap-1 mt-1">
-            <span className={`font-black text-[#BFF367] ${compact ? 'text-lg md:text-xl' : 'text-xl md:text-2xl'}`}>₹{price}</span>
-            <span className={`text-white/70 font-medium ${compact ? 'text-[10px] md:text-xs' : 'text-xs md:text-sm'}`}>/ hr</span>
-          </div>
-
-          <div className="flex flex-col items-end gap-0.5">
-            <div className="flex items-center gap-1.5 text-[#BFF367]">
-              <Star size={compact ? 14 : 16} className="fill-[#BFF367]" />
-              <span className={`font-bold font-inter ${compact ? 'text-sm md:text-base' : 'text-base md:text-lg'}`}>{rating.toFixed(1)}</span>
+        {/* Title and Rating Row */}
+        <div className="flex justify-between items-start gap-4">
+          <div>
+            <h2 className="text-xl md:text-2xl font-bold text-white tracking-tight leading-none mb-1">
+              {turf.name}
+            </h2>
+            <div className="flex items-center gap-1.5 text-white/50 mt-1">
+              <MapPin size={14} className="text-[#BFF367]" />
+              <p className="text-sm font-medium">
+                {turf.location || turf.city || 'Sector 42, Gurugram, Haryana'}
+              </p>
             </div>
-            {distance ? (
-              <div className="flex items-center gap-1 text-white/50">
-                <Navigation size={compact ? 8 : 9} className="text-[#BFF367]" />
-                <span className={`font-bold tracking-widest uppercase ${compact ? 'text-[8px]' : 'text-[9px]'}`}>
-                  {distance}
-                </span>
-              </div>
-            ) : (
-              <span className={`font-bold tracking-widest uppercase text-white/20 ${compact ? 'text-[8px]' : 'text-[9px]'}`}>
-                --
-              </span>
-            )}
+          </div>
+          <div className="flex flex-col items-end bg-[#1A1A1A] px-3 py-2 rounded-xl border border-white/5">
+            <div className="flex items-center gap-1 text-[#BFF367]">
+              <Star size={16} className="fill-[#BFF367]" />
+              <span className="text-xl font-bold leading-none">{rating.toFixed(1)}</span>
+            </div>
+            <span className="text-[10px] text-white/50 mt-1">{reviewsCount} Reviews</span>
           </div>
         </div>
+
+        {/* Info Pills */}
+        <div className="flex flex-nowrap overflow-x-auto no-scrollbar items-center gap-2 mt-1 pb-1">
+          <div className="flex items-center gap-1.5 bg-[#1A1A1A] px-2.5 py-1.5 rounded-lg border border-white/5 shrink-0">
+            <Zap size={14} className="text-white/60" />
+            <span className="text-[11px] font-semibold text-white/80">{sportDisplay}</span>
+          </div>
+          <div className="flex items-center gap-1.5 bg-[#1A1A1A] px-2.5 py-1.5 rounded-lg border border-white/5 shrink-0">
+            <Users size={14} className="text-white/60" />
+            <span className="text-[11px] font-semibold text-white/80">Up to 10 Players</span>
+          </div>
+          <div className="flex items-center justify-center gap-1.5 bg-[#1A1A1A] px-2.5 py-1.5 rounded-lg border border-white/5 shrink-0">
+            <Wallet size={14} className="text-[#BFF367]" />
+            <div className="flex flex-col">
+              <span className="text-[11px] font-bold text-white leading-none">250 Coins</span>
+              <span className="text-[8px] text-white/50">Wallet Balance</span>
+            </div>
+          </div>
+        </div>
+
+        {/* Date Selector */}
+        <div className="flex flex-col gap-1.5 mt-1">
+          <div className="flex items-center justify-between">
+            <h4 className="text-xs font-bold text-white">Select Date</h4>
+            <button className="p-1 bg-[#1A1A1A] rounded border border-white/5 text-white/60 hover:text-white">
+              <Calendar size={12} />
+            </button>
+          </div>
+          <div className="flex gap-2 overflow-x-auto no-scrollbar pb-1">
+            {dates.map((d, idx) => {
+              const isSelected = selectedDate.dateNum === d.dateNum;
+              return (
+                <button
+                  key={idx}
+                  onClick={() => setSelectedDate(d)}
+                  className={`flex flex-col items-center justify-center min-w-[56px] py-2 rounded-xl border transition-all ${
+                    isSelected 
+                      ? "border-[#BFF367] text-[#BFF367]" 
+                      : "border-[#222] bg-[#1A1A1A] text-white/60 hover:border-white/20"
+                  }`}
+                >
+                  <span className={`text-[10px] font-bold ${isSelected ? "text-[#BFF367]" : "text-white/40"}`}>{d.dayName}</span>
+                  <span className="text-lg font-bold mt-0.5">{d.dateNum}</span>
+                  <span className={`text-[10px] ${isSelected ? "text-[#BFF367]" : "text-white/40"}`}>{d.month}</span>
+                </button>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* Time Slot Selector */}
+        <div className="flex flex-col gap-2 mt-1">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-1.5 text-white">
+              <Clock size={14} />
+              <h4 className="text-xs font-bold">Select time slot</h4>
+            </div>
+            <div className="flex items-center gap-1 text-white/40">
+              <Info size={10} />
+              <span className="text-[8px]">All slots are 1 hour</span>
+            </div>
+          </div>
+          <div className="grid grid-cols-2 gap-2">
+            {defaultSlots.map((slot, idx) => {
+              const isSelected = selectedSlot === slot;
+              return (
+                <button
+                  key={idx}
+                  onClick={() => setSelectedSlot(slot)}
+                  className={`relative py-2 rounded-lg border transition-all text-xs font-bold flex items-center justify-center ${
+                    isSelected
+                      ? "border-[#BFF367] text-[#BFF367]"
+                      : "border-[#222] bg-[#1A1A1A] text-white/60 hover:border-white/20 hover:text-white"
+                  }`}
+                >
+                  {slot}
+                  {isSelected && (
+                    <div className="absolute right-3 w-4 h-4 bg-[#BFF367] rounded-full flex items-center justify-center">
+                       <svg width="10" height="8" viewBox="0 0 10 8" fill="none" xmlns="http://www.w3.org/2000/svg">
+                         <path d="M1 4L3.5 6.5L9 1" stroke="black" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                       </svg>
+                    </div>
+                  )}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* Action Row */}
+        <div className="flex items-center justify-between border-y border-[#222] py-1.5 mt-1">
+          <button className="flex items-center justify-center gap-1.5 flex-1 text-white/60 hover:text-white transition-colors border-r border-[#222]">
+            <Share2 size={12} />
+            <span className="text-[10px] font-semibold">Share</span>
+          </button>
+          <button className="flex items-center justify-center gap-1.5 flex-1 text-white/60 hover:text-white transition-colors border-r border-[#222]">
+            <MessageSquare size={12} />
+            <span className="text-[10px] font-semibold">Like / Comment</span>
+          </button>
+          <button className="flex items-center justify-center gap-1.5 flex-1 text-white/60 hover:text-white transition-colors">
+            <Bookmark size={12} />
+            <span className="text-[10px] font-semibold">Add to List</span>
+          </button>
+        </div>
+
+        {/* Book Now Button & Footer */}
+        <div className="flex flex-col gap-2 mt-1">
+          <button 
+            onClick={handleBookNow}
+            className="w-full bg-[#BFF367] hover:bg-[#aade55] text-black font-black text-sm md:text-base py-2.5 md:py-3 rounded-xl flex items-center justify-center transition-colors relative"
+          >
+            <span>Book Now</span>
+            <div className="absolute right-3 w-5 h-5 bg-black rounded-full flex items-center justify-center">
+              <ArrowRight size={12} className="text-[#BFF367]" />
+            </div>
+          </button>
+          
+          <div className="flex items-center justify-center gap-1 text-white/40 pb-1">
+            <Lock size={10} />
+            <span className="text-[9px]">Secure Booking & Safe Payments</span>
+          </div>
+        </div>
+
       </div>
     </div>
   );

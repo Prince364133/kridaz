@@ -2,7 +2,7 @@
 import React from "react";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Info, Play, Heart, MessageSquare, Edit3, Plus, Camera, Image, Film } from "lucide-react";
+import { Info, Play, Heart, MessageSquare, Edit3, Plus, Camera, Image, Film, Eye } from "lucide-react";
 import { useSelector } from "react-redux";
 import useLoginOnDemand from "@hooks/useLoginOnDemand";
 import { motion, AnimatePresence } from "framer-motion";
@@ -171,9 +171,17 @@ export default function SocialArenaSection({ reelsFeed }) {
                       <Play size={24} />
                     </div>
                   )}
-                  <div className="absolute inset-0 flex items-center justify-center bg-black/20 group-hover:bg-black/40 transition-colors">
-                    <div className="w-10 h-10 rounded-full bg-white/20 backdrop-blur-md flex items-center justify-center border border-white/40">
-                      <Play size={16} className="text-white fill-white ml-1" />
+                  <div className="absolute inset-0 bg-black/20 group-hover:bg-black/40 transition-colors pointer-events-none"></div>
+                  {/* Views Pill */}
+                  <div className="absolute bottom-3 left-3 z-10 pointer-events-none">
+                    <div className="flex items-center gap-1.5 w-fit px-3 py-1.5 bg-black/40 backdrop-blur-md rounded-full border border-white/10 shadow-sm">
+                      <Eye size={16} className="text-white" strokeWidth={2.5} />
+                      <span className="text-white text-xs font-bold tracking-wide drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)]">
+                        {Intl.NumberFormat('en-US', { notation: 'compact', maximumFractionDigits: 1 }).format(
+                          typeof reel.views === 'number' ? reel.views : 
+                          reel.stats?.views || reel.viewsCount || 0
+                        ).toLowerCase()}
+                      </span>
                     </div>
                   </div>
                 </div>

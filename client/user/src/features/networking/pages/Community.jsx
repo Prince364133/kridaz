@@ -5,7 +5,7 @@ import axiosInstance from "@hooks/useAxiosInstance";
 import { Search, Loader2, X, MapPin, ChevronDown } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import useLoginOnDemand from "@hooks/useLoginOnDemand";
-import { setUserLocation, setLocationStatus } from "@redux/slices/uiSlice";
+import { setUserLocation, setLocationStatus, openLocationSidebar } from "@redux/slices/uiSlice";
 
 import StoriesSection from "../components/StoriesSection";
 import CommunityFeed from "../components/CommunityFeed";
@@ -237,7 +237,10 @@ const Community = ({ children, onSearchActive }) => {
               <>
                 {/* Desktop Location Header */}
                 {isLoggedIn && (
-                  <div className="hidden lg:flex flex-col items-start mt-4 mb-4 cursor-pointer group">
+                  <div 
+                    className="hidden lg:flex flex-col items-start mt-4 mb-4 cursor-pointer group"
+                    onClick={() => dispatch(openLocationSidebar())}
+                  >
                     <svg width="0" height="0" className="absolute">
                       <linearGradient id="mapPinGradient" x1="0%" y1="0%" x2="100%" y2="100%">
                         <stop offset="0%" stopColor="#60E5D0" />
@@ -266,12 +269,11 @@ const Community = ({ children, onSearchActive }) => {
                           {userLocation?.city || geoLabel.split(',')[0]}
                         </span>
                       ) : (
-                        <button
-                          onClick={detectLocation}
+                        <span
                           className="text-[26px] font-medium text-white tracking-tight leading-none hover:text-white/80 transition-colors"
                         >
                           Set Location
-                        </button>
+                        </span>
                       )}
                       
                       <ChevronDown size={20} className="text-white mt-1 group-hover:translate-y-0.5 transition-transform" />

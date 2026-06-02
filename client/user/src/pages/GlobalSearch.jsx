@@ -7,11 +7,18 @@ import { useGetGroundsQuery } from "@redux/api/gamesApi";
 import axiosInstance from "@hooks/useAxiosInstance";
 import TurfCardMobile from "../features/turf/components/TurfCardMobile";
 import GameCard from "../features/games/components/GameCard";
+import { useSelector } from "react-redux";
+import useLoginOnDemand from "@hooks/useLoginOnDemand";
+import PostItem from "../features/networking/components/PostItem";
 
 const HEADING_STYLE = { fontFamily: "'Open Sans', sans-serif" };
 
 const GlobalSearch = () => {
   const navigate = useNavigate();
+  const { user } = useSelector((state) => state.auth);
+  const isAdmin = user?.role === "ADMIN";
+  const { gateInteraction } = useLoginOnDemand();
+
   const [searchQuery, setSearchQuery] = useState("");
   const [debouncedQuery, setDebouncedQuery] = useState("");
   const [isFilterOpen, setIsFilterOpen] = useState(false);
@@ -92,76 +99,6 @@ const GlobalSearch = () => {
     );
   };
 
-  const renderPost = (post) => {
-    const authorId = post.adminId?.id || post.adminId?._id || post.author?.id || post.author?._id || post.authorId;
-    const authorName = post.adminId?.name || post.author?.name || "Player";
-    const authorPic = post.adminId?.profilePicture || post.author?.profilePicture || `https://api.dicebear.com/7.x/avataaars/svg?seed=${authorName}`;
-    const postImage = post.image || post.imageUrl || post.mediaUrl || post.thumbnailUrl || (post.media?.length > 0 ? post.media[0].url : null);
-    const mediaType = post.mediaType || (post.media?.length > 0 ? post.media[0].type : null);
-
-    return (
-      <div key={post._id || post.id} className="bg-[#0A0A0A] border border-white/5 rounded-[8px] p-5 space-y-4">
-        {/* Post Header */}
-        <div className="flex items-center justify-between">
-          <Link to={`/profile/${authorId}`} className="flex items-center gap-3 group">
-            <img
-              src={authorPic}
-              className="w-10 h-10 rounded-full object-cover border border-white/10 group-hover:border-[#BFF367]/50 transition-colors"
-            />
-            <div>
-              <div className="flex items-center gap-1.5">
-                <span className="text-[13px] font-bold text-white transition-colors">{authorName}</span>
-                <ShieldCheck size={14} className="text-[#BFF367]" />
-              </div>
-              <div className="text-[11px] font-bold text-white/40 mt-0.5">
-                {new Date(post.createdAt).toLocaleDateString()}
-              </div>
-            </div>
-          </Link>
-          <button className="text-white/40 hover:text-white transition-colors p-2">
-            <MoreVertical size={18} />
-          </button>
-        </div>
-
-        {/* Caption */}
-        {(post.title || post.content) && (
-          <div className="text-[12px] font-medium leading-relaxed">
-            {post.title && <span className="font-bold mr-2">{post.title}</span>}
-            <span className="text-white/90 whitespace-pre-wrap">{post.content}</span>
-          </div>
-        )}
-
-        {/* Media */}
-        {postImage && (
-          <div className="relative rounded-[8px] overflow-hidden group border border-white/5 bg-[#111]">
-            {mediaType === 'video' ? (
-              <video src={postImage} className="w-full object-cover max-h-[500px]" controls />
-            ) : (
-              <img src={postImage} className="w-full object-cover max-h-[500px]" />
-            )}
-          </div>
-        )}
-
-        {/* Action Bar */}
-        <div className="flex items-center justify-between pt-1">
-          <div className="flex items-center gap-5">
-            <button className="flex items-center gap-2 group">
-              <ThumbsUp size={20} className="text-white/70 group-hover:text-[#BFF367] transition-colors" />
-              <span className="text-[12px] font-bold text-white">{post.likes?.length || 0}</span>
-            </button>
-            <button className="flex items-center gap-2 group">
-              <MessageCircle size={20} className="text-white/70 group-hover:text-[#BFF367] transition-colors" />
-              <span className="text-[12px] font-bold text-white">{post.comments?.length || post.totalComments || 0}</span>
-            </button>
-            <button className="flex items-center gap-2 group">
-              <Send size={18} className="text-white/70 group-hover:text-[#BFF367] transition-colors" />
-              <span className="text-[12px] font-bold text-white">Share</span>
-            </button>
-          </div>
-        </div>
-      </div>
-    );
-  };
 
   // Quick Filters
   const QUICK_FILTERS = ["All", "Roles", "Venue", "Join Games", "Live", "Posts"];
@@ -169,8 +106,8 @@ const GlobalSearch = () => {
   const VENUE_TYPES = ["TURF", "GROUND", "INDOOR"];
 
   return (
-    <div className="min-h-screen bg-[#050505] text-white pt-4 px-1 md:px-3 font-inter relative overflow-hidden">
-      <div className="max-w-3xl mx-auto space-y-6 pb-20">
+    <div className="bg-[#050505] min-h-screen text-white font-inter w-full max-w-[100vw] overflow-x-hidden pt-0 pb-16 lg:pb-0 relative">
+      <div className="px-4 max-w-[1400px] mx-auto mt-0 mb-4 space-y-6 pb-20">
         
         {/* Header */}
         <div className="flex items-center justify-between">
@@ -384,7 +321,19 @@ const GlobalSearch = () => {
                   </div>
                 ) : (
                   <div className="space-y-6">
-                    {loadedPosts.map(post => renderPost(post))}
+                    {loadedPosts.map(post => (
+                      <PostItem
+                        key={post._id || post.id}
+                        post={post}
+                        user={user}
+                        isAdmin={isAdmin}
+                        gateInteraction={gateInteraction}
+                        onUpdatePost={() => {}}
+                        onDeletePost={() => {}}
+                        onSharePost={() => {}}
+                        onReportPost={() => {}}
+                      />
+                    ))}
                   </div>
                 )}
               </div>
@@ -432,7 +381,19 @@ const GlobalSearch = () => {
                 </div>
               ) : latestPosts.length > 0 ? (
                 <div className="space-y-6">
-                  {latestPosts.map(post => renderPost(post))}
+                  {latestPosts.map(post => (
+                    <PostItem
+                      key={post._id || post.id}
+                      post={post}
+                      user={user}
+                      isAdmin={isAdmin}
+                      gateInteraction={gateInteraction}
+                      onUpdatePost={() => {}}
+                      onDeletePost={() => {}}
+                      onSharePost={() => {}}
+                      onReportPost={() => {}}
+                    />
+                  ))}
                 </div>
               ) : (
                 <div className="text-sm text-white/30 italic">No posts found.</div>

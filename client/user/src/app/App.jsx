@@ -43,6 +43,7 @@ import { CapacitorUpdater } from '@capgo/capacitor-updater';
 import { Capacitor } from '@capacitor/core';
 
 import { ObservabilityProvider } from "./ObservabilityProvider";
+import LocationSidebar from "../shared/components/modals/LocationSidebar";
 
 export default function App() {
   const dispatch = useDispatch();
@@ -223,6 +224,7 @@ export default function App() {
                 },
               }}
             />
+            <LocationSidebar />
           </SocketProvider>
         </GoogleOAuthProvider>
       </ObservabilityProvider>

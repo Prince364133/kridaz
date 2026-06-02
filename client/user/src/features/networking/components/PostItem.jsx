@@ -334,11 +334,22 @@ const PostItem = React.memo(({ post, user, isAdmin, gateInteraction, onUpdatePos
       {/* Action Bar */}
       <div className="flex items-center justify-between border-t border-white/10 bg-[#0A0A0A] px-2 py-1">
         <button onClick={handleLike} className="flex-1 flex items-center justify-center gap-2 py-2 transition-colors group">
-          <img 
-            src={LikeIcon} 
-            alt="Like" 
-            className={`w-[18px] h-[18px] object-contain transition-all duration-200 brightness-0 invert group-hover:opacity-100 ${post.likes?.some((l) => (l.id || l._id || l) === currentUserId) ? "opacity-100 drop-shadow-[0_0_5px_rgba(255,255,255,0.5)]" : "opacity-70"}`}
-          />
+          <svg 
+            xmlns="http://www.w3.org/2000/svg" 
+            viewBox="0 0 24 24"
+            className={`w-[18px] h-[18px] transition-all duration-200 ${post.likes?.some((l) => (l.id || l._id || l) === currentUserId) ? "" : "text-white/70 group-hover:text-white"}`}
+          >
+            <defs>
+              <linearGradient id={`like-gradient-${postId}`} x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stopColor="#BFF367" />
+                <stop offset="100%" stopColor="#55dee8" />
+              </linearGradient>
+            </defs>
+            <path 
+              fill={post.likes?.some((l) => (l.id || l._id || l) === currentUserId) ? `url(#like-gradient-${postId})` : "currentColor"} 
+              d="M4 21h1V8H4c-1.1 0-2 .9-2 2v9c0 1.1.9 2 2 2M20 8h-6.61l1.12-3.37c.2-.61.1-1.28-.27-1.8c-.38-.52-.98-.83-1.62-.83h-.61c-.3 0-.58.13-.77.36L7.01 7.44V21h10.31a2 2 0 0 0 1.87-1.3l2.76-7.35c.04-.11.06-.23.06-.35v-2c0-1.1-.9-2-2-2Z" 
+            />
+          </svg>
           {post.likes?.length > 0 && (
             <span className="text-[13px] font-bold text-white/80 group-hover:text-white transition-colors">
               {post.likes.length}

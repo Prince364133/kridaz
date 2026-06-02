@@ -11,7 +11,7 @@ export default function DashboardHero() {
         className="relative rounded-[6px] px-3.5 py-2 overflow-visible force-overflow-visible flex flex-col justify-center h-[72px] cursor-pointer group hover:scale-[1.02] transition-all duration-300 shadow-xl border border-[#EBEBEB]/15"
         style={{
           background:
-            "radial-gradient(circle at 80% 50%, rgba(255, 255, 255, 0.3) 0%, rgba(255, 255, 255, 0) 50%), radial-gradient(circle at 80% 50%, #2087FF 0%, #0E49B5 45%, #031533 100%)",
+            "radial-gradient(circle at 80% 50%, #2087FF 0%, #0E49B5 45%, #031533 100%)",
           overflow: "visible",
         }}
       >
@@ -33,7 +33,7 @@ export default function DashboardHero() {
         className="relative rounded-[6px] px-3.5 py-2 overflow-visible force-overflow-visible flex flex-col justify-center h-[72px] cursor-pointer group hover:scale-[1.02] transition-all duration-300 shadow-xl border border-[#EBEBEB]/15"
         style={{
           background:
-            "radial-gradient(circle at 80% 50%, rgba(255, 255, 255, 0.3) 0%, rgba(255, 255, 255, 0) 50%), radial-gradient(circle at 80% 50%, #FF9800 0%, #E65100 45%, #3E1700 100%)",
+            "radial-gradient(circle at 80% 50%, #FF9800 0%, #E65100 45%, #3E1700 100%)",
           overflow: "visible",
         }}
       >
@@ -54,7 +54,7 @@ export default function DashboardHero() {
         className="relative rounded-[6px] px-3.5 py-2 overflow-visible force-overflow-visible flex flex-col justify-center h-[72px] cursor-pointer group hover:scale-[1.02] transition-all duration-300 shadow-xl border border-[#EBEBEB]/15"
         style={{
           background:
-            "radial-gradient(circle at 80% 50%, rgba(255, 255, 255, 0.3) 0%, rgba(255, 255, 255, 0) 50%), radial-gradient(circle at 80% 50%, #22C55E 0%, #15803D 45%, #032512 100%)",
+            "radial-gradient(circle at 80% 50%, #22C55E 0%, #15803D 45%, #032512 100%)",
           overflow: "visible",
         }}
       >
@@ -75,7 +75,7 @@ export default function DashboardHero() {
         className="relative rounded-[6px] px-3.5 py-2 overflow-visible force-overflow-visible flex flex-col justify-center h-[72px] cursor-pointer group hover:scale-[1.02] transition-all duration-300 shadow-xl border border-[#EBEBEB]/15"
         style={{
           background:
-            "radial-gradient(circle at 80% 50%, rgba(255, 255, 255, 0.3) 0%, rgba(255, 255, 255, 0) 50%), radial-gradient(circle at 80% 50%, #FFA2FF 0%, #A726E2 50%, #220038 100%)",
+            "radial-gradient(circle at 80% 50%, #FFA2FF 0%, #A726E2 50%, #220038 100%)",
           overflow: "visible",
         }}
       >
