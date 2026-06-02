@@ -800,20 +800,45 @@ export const toggleOnlineStatus = async (req, res) => {
   try {
     const owner = await prisma.ownerProfile.findUnique({
       where: { userId: userId },
-      select: { id: true }
+      select: { id: true, isOnline: true }
     });
     if (!owner) return res.status(403).json({ message: "Only professionals can toggle online status" });
     
     const professionalId = owner.id;
+    const isCurrentlyOnline = owner.isOnline;
+    const newIsOnline = !!isOnline;
 
-    const updated = await prisma.ownerProfile.update({
-      where: { id: professionalId },
-      data: {
-        isOnline: !!isOnline,
-        latitude: latitude ? parseFloat(latitude) : null,
-        longitude: longitude ? parseFloat(longitude) : null,
-        lastLocationUpdate: latitude && longitude ? new Date() : null
+    const updated = await prisma.$transaction(async (tx) => {
+      if (newIsOnline && !isCurrentlyOnline) {
+        // Toggling ON
+        await tx.professionalOnlineSession.create({
+          data: { professionalId }
+        });
+      } else if (!newIsOnline && isCurrentlyOnline) {
+        // Toggling OFF
+        const activeSession = await tx.professionalOnlineSession.findFirst({
+          where: { professionalId, offlineAt: null },
+          orderBy: { createdAt: "desc" }
+        });
+        if (activeSession) {
+          const offlineAt = new Date();
+          const durationHours = (offlineAt.getTime() - activeSession.onlineAt.getTime()) / (1000 * 60 * 60);
+          await tx.professionalOnlineSession.update({
+            where: { id: activeSession.id },
+            data: { offlineAt, durationHours }
+          });
+        }
       }
+
+      return await tx.ownerProfile.update({
+        where: { id: professionalId },
+        data: {
+          isOnline: newIsOnline,
+          latitude: latitude ? parseFloat(latitude) : null,
+          longitude: longitude ? parseFloat(longitude) : null,
+          lastLocationUpdate: latitude && longitude ? new Date() : null
+        }
+      });
     });
     return res.status(200).json({ success: true, isOnline: updated.isOnline });
   } catch (error) {
@@ -886,15 +911,36 @@ export const createMatchRequest = async (req, res) => {
       return { ...prof, distance };
     });
 
+    // Sorting logic based on multiple tiers:
+    // 1. Trust Score (Primary)
+    // 2. Acceptance Rate (Tie-breaker 1)
+    // 3. DAAT (Tie-breaker 2)
+    // 4. Distance (Fallback tie-breaker)
+    const sortEngine = (a, b) => {
+      const tsA = a.trustScore || 100;
+      const tsB = b.trustScore || 100;
+      if (tsB !== tsA) return tsB - tsA;
+
+      const arA = a.acceptanceRate30d || 100;
+      const arB = b.acceptanceRate30d || 100;
+      if (arB !== arA) return arB - arA;
+
+      const daatA = a.avgDailyActivePct || 0;
+      const daatB = b.avgDailyActivePct || 0;
+      if (daatB !== daatA) return daatB - daatA;
+
+      return a.distance - b.distance;
+    };
+
     // Architecture spec: 50km initial radius, expand to 100km if < 3 candidates
     let matchedPros = candidatesWithDistance
       .filter(prof => prof.distance <= 50.0)
-      .sort((a, b) => a.distance - b.distance);
+      .sort(sortEngine);
 
     if (matchedPros.length < 3) {
       matchedPros = candidatesWithDistance
         .filter(prof => prof.distance <= 100.0)
-        .sort((a, b) => a.distance - b.distance);
+        .sort(sortEngine);
     }
 
     if (matchedPros.length === 0) {
@@ -1525,18 +1571,27 @@ export const getDashboardStats = async (req, res) => {
   try {
     const owner = await prisma.ownerProfile.findUnique({
       where: { userId: userId },
-      select: { id: true, rating: true, numReviews: true }
+      select: { 
+        id: true, 
+        rating: true, 
+        numReviews: true,
+        avgDailyActivePct: true,
+        acceptanceRate30d: true,
+        trustScore: true
+      }
     });
     
     if (!owner) {
       return res.status(200).json({
         success: true,
         stats: {
-          bookings: 0,
+          bookings: { assigned: 0, inProgress: 0, completed: 0, totalActive: 0 },
           earnings: 0,
           avgTime: "0h 0m",
           rating: 0,
           trustScore: 100,
+          acceptanceRate: 100,
+          daat: 0,
           acceptedRequests: 0,
           rejectedRequests: 0,
           skippedRequests: [],
@@ -1558,7 +1613,7 @@ export const getDashboardStats = async (req, res) => {
       prisma.onDemandProfessionalBooking.findMany({
         where: { professionalId },
         include: {
-          user: { select: { name: true, phone: true } },
+          user: { select: { name: true, phone: true, profilePicture: true } },
           ground: { select: { name: true } }
         },
         orderBy: { createdAt: "desc" }
@@ -1591,12 +1646,12 @@ export const getDashboardStats = async (req, res) => {
       })
     ]);
 
-    // Calculate trust score (base 100 + sum of deltas)
-    const baseScore = 100;
-    const trustScore = trustEvents.reduce((acc, ev) => acc + (parseFloat(ev.delta) || 0), baseScore);
+    // We now use the cached trustScore, acceptanceRate, and daat from OwnerProfile
+    const trustScore = owner.trustScore || 100;
+    const acceptanceRate = owner.acceptanceRate30d || 100;
+    const daat = owner.avgDailyActivePct || 0;
 
     // Format graph data based on completed bookings
-    // For simplicity, grouping all bookings by their createdAt date
     const graphData = {
       "Today": [],
       "This Week": [],
@@ -1606,10 +1661,18 @@ export const getDashboardStats = async (req, res) => {
     };
 
     const completedBookings = bookings.filter(b => b.status === "COMPLETED");
+    const assignedBookings = bookings.filter(b => b.status === "ASSIGNED");
+    const inProgressBookings = bookings.filter(b => b.status === "IN_PROGRESS");
+    
     const activeBooking = bookings.find(b => b.status === "ASSIGNED" || b.status === "IN_PROGRESS");
 
     // Aggregate values
-    const totalBookings = completedBookings.length;
+    const totalBookings = {
+      assigned: assignedBookings.length,
+      inProgress: inProgressBookings.length,
+      completed: completedBookings.length,
+      totalActive: assignedBookings.length + inProgressBookings.length
+    };
     const totalEarnings = completedBookings.reduce((sum, b) => sum + parseFloat(b.hourlyRate || 0), 0);
 
     // Grouping by day for "All Time"
@@ -1628,14 +1691,20 @@ export const getDashboardStats = async (req, res) => {
     if (graphData["All Time"].length === 0) {
       graphData["All Time"] = [{ name: 'No Data', bookings: 0, income: 0 }];
     }
+    graphData["Today"] = graphData["All Time"];
+    graphData["This Week"] = graphData["All Time"];
+    graphData["This Month"] = graphData["All Time"];
+    graphData["Custom Time"] = graphData["All Time"];
 
     // Prepare response
     const stats = {
       bookings: totalBookings,
       earnings: totalEarnings,
-      avgTime: "4h 30m", // Placeholder for actual calculation
-      rating: professional?.rating || 5.0,
-      trustScore: trustScore,
+      avgTime: "0h 0m",
+      rating: professional?.rating || 0,
+      trustScore,
+      acceptanceRate,
+      daat,
       acceptedRequests: acceptedCount,
       rejectedRequests: rejectedCount,
       skippedRequests: skippedNotifications.map(n => ({

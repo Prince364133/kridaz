@@ -16,6 +16,7 @@ const BookingsTab = ({ role }) => {
   const bookings = bookingsData?.bookings || [];
   const pendingBookings = bookingsData?.pendingBookings || [];
   const nonAcceptedBookings = bookingsData?.nonAcceptedBookings || [];
+  const skippedBookings = bookingsData?.skippedBookings || [];
 
   // Active tab: confirmed active bookings + pending offers
   const activeBookings = [
@@ -45,6 +46,8 @@ const BookingsTab = ({ role }) => {
         return "bg-yellow-500/10 text-yellow-400 border border-yellow-500/20 shadow-[0_0_12px_rgba(234,179,8,0.05)]";
       case "NOT_ACCEPTED":
         return "bg-red-500/10 text-red-400 border border-red-500/20";
+      case "SKIPPED":
+        return "bg-orange-500/10 text-orange-400 border border-orange-500/20 shadow-[0_0_12px_rgba(249,115,22,0.05)]";
       default:
         return "bg-gray-500/10 text-gray-400 border border-gray-500/20";
     }
@@ -59,6 +62,7 @@ const BookingsTab = ({ role }) => {
       case "CANCELLED": return "Cancelled";
       case "NO_SHOW": return "No Show";
       case "NOT_ACCEPTED": return "Not Accepted";
+      case "SKIPPED": return "Skipped";
       default: return status;
     }
   };
@@ -67,7 +71,9 @@ const BookingsTab = ({ role }) => {
     ? activeBookings 
     : activeSubTab === "history" 
       ? completedBookings 
-      : nonAcceptedBookings;
+      : activeSubTab === "nonAccepted"
+        ? nonAcceptedBookings
+        : skippedBookings;
 
   const formatDate = (dateStr) => {
     if (!dateStr) return "N/A";
@@ -84,27 +90,34 @@ const BookingsTab = ({ role }) => {
     <div className="space-y-6 text-white font-inter">
       {/* Tab Selectors */}
       <div className="border-b border-[#1A1A1A] pb-1">
-        <div className="grid grid-cols-3 w-full text-center">
+        <div className="grid grid-cols-4 w-full text-center">
           <button
             onClick={() => setActiveSubTab("active")}
             className={`pb-3 text-[10px] sm:text-xs font-bold uppercase tracking-wider border-b-2 transition-all ${activeSubTab === "active" ? "text-[#BFF367] border-[#BFF367]" : "text-gray-500 border-transparent hover:text-white"}`}
           >
             <span className="block sm:hidden">Active ({activeBookings.length})</span>
-            <span className="hidden sm:block">Active Assignments ({activeBookings.length})</span>
+            <span className="hidden sm:block">Active ({activeBookings.length})</span>
           </button>
           <button
             onClick={() => setActiveSubTab("history")}
             className={`pb-3 text-[10px] sm:text-xs font-bold uppercase tracking-wider border-b-2 transition-all ${activeSubTab === "history" ? "text-[#BFF367] border-[#BFF367]" : "text-gray-500 border-transparent hover:text-white"}`}
           >
             <span className="block sm:hidden">History ({completedBookings.length})</span>
-            <span className="hidden sm:block">Booking History ({completedBookings.length})</span>
+            <span className="hidden sm:block">History ({completedBookings.length})</span>
           </button>
           <button
             onClick={() => setActiveSubTab("nonAccepted")}
             className={`pb-3 text-[10px] sm:text-xs font-bold uppercase tracking-wider border-b-2 transition-all ${activeSubTab === "nonAccepted" ? "text-[#BFF367] border-[#BFF367]" : "text-gray-500 border-transparent hover:text-white"}`}
           >
-            <span className="block sm:hidden">Not Accepted ({nonAcceptedBookings.length})</span>
-            <span className="hidden sm:block">Not Accepted ({nonAcceptedBookings.length})</span>
+            <span className="block sm:hidden">Rejected ({nonAcceptedBookings.length})</span>
+            <span className="hidden sm:block">Rejected ({nonAcceptedBookings.length})</span>
+          </button>
+          <button
+            onClick={() => setActiveSubTab("skipped")}
+            className={`pb-3 text-[10px] sm:text-xs font-bold uppercase tracking-wider border-b-2 transition-all ${activeSubTab === "skipped" ? "text-[#BFF367] border-[#BFF367]" : "text-gray-500 border-transparent hover:text-white"}`}
+          >
+            <span className="block sm:hidden">Skipped ({skippedBookings.length})</span>
+            <span className="hidden sm:block">Skipped ({skippedBookings.length})</span>
           </button>
         </div>
       </div>
@@ -126,7 +139,9 @@ const BookingsTab = ({ role }) => {
                 ? "You do not have any active or pending match assignments right now." 
                 : activeSubTab === "history"
                   ? "No completed or historical matching records found on this account."
-                  : "No rejected, expired, or skipped matching requests found."}
+                  : activeSubTab === "nonAccepted"
+                    ? "No rejected matching requests found."
+                    : "No skipped matching requests found."}
             </p>
           </div>
         </div>

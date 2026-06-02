@@ -1357,15 +1357,15 @@ export const processScoreUpdate = async (scoringId, ballData) => {
   let finalScoring = updatedScoring;
   if (liveData.isInningsComplete && updatedScoring.timerState === "RUNNING") {
     const now = new Date();
-    const elapsedSinceLastStart = updatedScoring.lastTimerStart ? Math.floor((now - new Date(updatedScoring.lastTimerStart)) / 1000) : 0;
-    const newElapsedTime = (updatedScoring.elapsedTime || 0) + elapsedSinceLastStart;
+    const elapsedSinceLastStart = updatedScoring.timerLastStartedAt ? Math.floor((now - new Date(updatedScoring.timerLastStartedAt)) / 1000) : 0;
+    const newElapsedTime = (updatedScoring.totalDurationSeconds || 0) + elapsedSinceLastStart;
 
     finalScoring = await prisma.cricketMatch.update({
       where: { id: scoring.id },
       data: {
         timerState: "PAUSED",
-        elapsedTime: newElapsedTime,
-        lastTimerStart: null
+        totalDurationSeconds: newElapsedTime,
+        timerLastStartedAt: null
       },
       include: { innings: true, playerStats: true, timeline: { orderBy: { timestamp: 'desc' } } }
     });

@@ -20,6 +20,7 @@ const VenueApprovalDetail = lazy(() => import("../features/admin").then(m => ({ 
 const TransactionSection = lazy(() => import("../features/admin").then(m => ({ default: m.TransactionSection })));
 const SupportCenter = lazy(() => import("../features/admin").then(m => ({ default: m.SupportCenter })));
 const DisputeManager = lazy(() => import("../features/admin").then(m => ({ default: m.DisputeManager })));
+const ProfessionalDisputeManager = lazy(() => import("../features/admin").then(m => ({ default: m.ProfessionalDisputeManager })));
 const GameDisputeManager = lazy(() => import("../features/admin").then(m => ({ default: m.GameDisputeManager })));
 const AuditLogs = lazy(() => import("../features/admin").then(m => ({ default: m.AuditLogs })));
 const FinancialMissionControl = lazy(() => import("../features/admin").then(m => ({ default: m.FinancialMissionControl })));
@@ -74,6 +75,7 @@ const router = createBrowserRouter([
       { path: "transactions", element: <S><TransactionSection /></S> },
       { path: "support",      element: <S><SupportCenter /></S> },
       { path: "disputes",     element: <S><DisputeManager /></S> },
+      { path: "professional-disputes", element: <S><ProfessionalDisputeManager /></S> },
       { path: "game-disputes",element: <S><GameDisputeManager /></S> },
       { path: "audit",        element: <S><AuditLogs /></S> },
       { path: "finance",      element: <S><FinancialMissionControl /></S> },

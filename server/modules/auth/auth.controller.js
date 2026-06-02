@@ -935,14 +935,26 @@ export const googleAuth = async (req, res) => {
       });
       payload = ticket.getPayload();
     } else if (accessToken) {
-      const response = await fetch(`https://www.googleapis.com/oauth2/v3/userinfo?access_token=${accessToken}`);
-      if (!response.ok) throw new Error("Failed to fetch user info from Google");
+      const response = await fetch(`https://www.googleapis.com/oauth2/v3/userinfo`, {
+        headers: { Authorization: `Bearer ${accessToken}` }
+      });
+      if (!response.ok) {
+        const errorBody = await response.text();
+        logger.error("Google userinfo fetch failed:", response.status, errorBody);
+        throw new Error(`Failed to fetch user info from Google: ${response.status}`);
+      }
       payload = await response.json();
+
     } else {
       return res.status(400).json({ success: false, message: "No Google credentials provided" });
     }
     
     const { name, email, sub: googleId } = payload;
+
+    if (!email) {
+      logger.error("Google Auth: payload missing email", payload);
+      return res.status(400).json({ success: false, message: "Could not retrieve email from Google. Please ensure your Google account has a verified email." });
+    }
 
     let user = await prisma.user.findUnique({
       where: { email },
@@ -1109,8 +1121,9 @@ export const googleAuth = async (req, res) => {
       isNewUser
     });
   } catch (error) {
-    logger.error("Google Auth Error:", error);
-    return res.status(400).json({ success: false, message: "Google authentication failed" });
+    logger.error("Google Auth Error:", error.message || error);
+    return res.status(400).json({ success: false, message: error.message || "Google authentication failed" });
+
   }
 };
 

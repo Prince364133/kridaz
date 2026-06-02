@@ -65,7 +65,7 @@ export class TrustScoreLedgerService {
         return defaultOnboardingScore;
       }
 
-      const rawScore = events.reduce((sum, event) => sum + event.delta, 0);
+      const rawScore = defaultOnboardingScore + events.reduce((sum, event) => sum + event.delta, 0);
       
       // Cap the score at maxScore and ensure it doesn't go below 0
       const finalScore = Math.max(0, Math.min(rawScore, maxScore));

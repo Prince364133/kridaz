@@ -162,14 +162,11 @@ const useSignUpForm = (predefinedRole = "user") => {
       toast.success(`Welcome to Kridaz, ${data.name}!`);
       
       const role = result.role?.toLowerCase() || "";
-      if (role.includes("umpire")) {
-        navigate("/umpire");
-      } else if ((role === "owner" || role === "venu_owners")) {
+      const professionalRoles = ["coach", "umpire", "streamer", "scorer", "cheerleader", "commentator"];
+      if (role === "owner" || role === "venu_owners" || role === "venue_owner") {
         navigate("/venue-owner");
-      } else if (role === "coach") {
-        navigate("/professional/coach");
-      } else if (role === "streamer") {
-        navigate("/streamer");
+      } else if (professionalRoles.includes(role)) {
+        navigate(`/professional/${role}`);
       } else {
         navigate("/");
       }
@@ -232,14 +229,11 @@ const useSignUpForm = (predefinedRole = "user") => {
       }
 
       const role = result.role?.toLowerCase() || "";
-      if (role.includes("umpire")) {
-        navigate("/umpire");
-      } else if ((role === "owner" || role === "venu_owners")) {
+      const professionalRoles = ["coach", "umpire", "streamer", "scorer", "cheerleader", "commentator"];
+      if (role === "owner" || role === "venu_owners" || role === "venue_owner") {
         navigate("/venue-owner");
-      } else if (role === "coach") {
-        navigate("/professional/coach");
-      } else if (role === "streamer") {
-        navigate("/streamer");
+      } else if (professionalRoles.includes(role)) {
+        navigate(`/professional/${role}`);
       } else {
         navigate("/");
       }

@@ -233,6 +233,7 @@ model OwnerProfile {
   maxTravelRadius     Int                        @default(50)
   avgDailyActivePct   Float                      @default(0.0)
   acceptanceRate30d   Float                      @default(100.0)
+  trustScore          Float                      @default(100.0)
   createdAt           DateTime                   @default(now())
   updatedAt           DateTime                   @updatedAt
   createdChats        Chat[]                     @relation("ChatCreatorOwner")
@@ -246,6 +247,7 @@ model OwnerProfile {
   matchOffers         ProfessionalMatchOffer[]
   onDemandBookings    OnDemandProfessionalBooking[]
   sessions            ProfessionalSession[]
+  onlineSessions      ProfessionalOnlineSession[]
   reviews             Review[]                   @relation("ProfessionalReview")
   turfs               Turf[]
   withdrawalRequests  WithdrawalRequest[]
@@ -357,7 +359,8 @@ model Booking {
   bookingSource      String              @default("USER")
   paymentMethod      String?
   paymentType        String              @default("FULL")
-  qrCode             String?
+  qrCode               String?
+  isManuallyCompleted  Boolean            @default(false)
   orderId            String?
   paymentId          String?
   paymentSignature   String?
@@ -1148,7 +1151,7 @@ model TicketReply {
 
 model Dispute {
   id             String         @id @default(uuid())
-  bookingId      String
+  bookingId      String?
   raisedById     String
   ownerId        String?
   reason         String
@@ -1163,7 +1166,7 @@ model Dispute {
   onDemandBookingId String?
   createdAt      DateTime       @default(now())
   updatedAt      DateTime       @updatedAt
-  booking        Booking        @relation(fields: [bookingId], references: [id])
+  booking        Booking?       @relation(fields: [bookingId], references: [id])
   owner          OwnerProfile?  @relation(fields: [ownerId], references: [id])
   raisedBy       User           @relation("DisputeRaiser", fields: [raisedById], references: [id])
   onDemandBooking OnDemandProfessionalBooking? @relation(fields: [onDemandBookingId], references: [id])
@@ -1212,6 +1215,17 @@ model ProfessionalSession {
   updatedAt DateTime     @updatedAt
   coach     OwnerProfile @relation(fields: [coachId], references: [id])
   students  User[]       @relation("SessionStudents")
+}
+
+model ProfessionalOnlineSession {
+  id             String       @id @default(uuid())
+  professionalId String
+  onlineAt       DateTime     @default(now())
+  offlineAt      DateTime?
+  durationHours  Float?
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+  professional   OwnerProfile @relation(fields: [professionalId], references: [id], onDelete: Cascade)
 }
 
 model ProfessionalMatchRequest {
@@ -1270,6 +1284,7 @@ model OnDemandProfessionalBooking {
 
   otpHash        String
   status         OnDemandBookingStatus @default(ASSIGNED)
+  isManuallyCompleted Boolean   @default(false)
   verifiedAt     DateTime?
   createdAt      DateTime              @default(now())
   updatedAt      DateTime              @updatedAt

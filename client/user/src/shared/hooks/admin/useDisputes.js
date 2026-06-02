@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import axiosInstance from "@hooks/useAxiosInstance";
 import toast from "react-hot-toast";
 
-const useDisputes = () => {
+const useDisputes = (type = "all") => {
   const [disputes, setDisputes] = useState([]);
   const [loading, setLoading] = useState(true);
   const [processingId, setProcessingId] = useState("");
@@ -10,7 +10,8 @@ const useDisputes = () => {
   const fetchDisputes = async () => {
     setLoading(true);
     try {
-      const response = await axiosInstance.get("/api/admin/dispute");
+      const url = type === "all" ? "/api/admin/dispute" : `/api/admin/dispute?type=${type}`;
+      const response = await axiosInstance.get(url);
       setDisputes(response.data.data || []);
     } catch (err) {
       console.error(err);
