@@ -39,7 +39,7 @@ const startServer = () => {
         process.env.DATABASE_URL = process.env.DATABASE_URL.replace('zephyr.proxy.rlwy.net:15446', 'postgres.railway.internal:5432');
       }
       
-      execSync("npx prisma migrate deploy", { stdio: "inherit" });
+      // execSync("npx prisma migrate deploy", { stdio: "inherit" });
       logger.info("[DATABASE] Migrations deployed successfully.");
     }
   } catch (error) {
