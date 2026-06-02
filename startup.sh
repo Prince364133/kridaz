@@ -1,16 +1,11 @@
 #!/bin/bash
+echo "=== Kridaz Startup Script ==="
+cd /home/site/wwwroot
 
-# Navigate to the server directory
-cd /home/site/wwwroot/server
+npm install -g pnpm
+pnpm install
 
-# Generate Prisma client for Linux environment
-echo "Generating Prisma client..."
+cd server
 npx prisma generate
-
-# Sync the database schema
-echo "Syncing database schema..."
 npx prisma db push --accept-data-loss
-
-# Start the application server
-echo "Starting backend server..."
 node server.js
