@@ -165,12 +165,13 @@ export class WalletBlockingService {
         }
 
         // Only allow payout for CONFIRMED, IN_PROGRESS, PENDING_COMPLETION or DISPUTED (if being resolved)
+        // For COMPLETED, only skip if funds are already released
         if (
-          booking.status === "COMPLETED" ||
           booking.status === "REFUNDED" ||
-          booking.status === "FAILED"
+          booking.status === "FAILED" ||
+          (booking.status === "COMPLETED" && booking.fundsReleasedAt !== null)
         ) {
-          logger.warn(`[WalletBlocking] Payout skipped: Booking ${bookingId} already in terminal state: ${booking.status}`);
+          logger.warn(`[WalletBlocking] Payout skipped: Booking ${bookingId} already in terminal state or funds released: ${booking.status}`);
           return;
         }
 
@@ -183,20 +184,32 @@ export class WalletBlockingService {
         const commissionConfig = await t.platformConfig.findUnique({
           where: { key: "COMMISSION_PERCENTAGE" },
         });
-        const commissionPct = commissionConfig ? parseFloat(commissionConfig.value) : 10;
+        const commissionPct = commissionConfig ? parseFloat(commissionConfig.value) : 5;
 
         // 3. Calculate commission and payout
         const commissionAmount = blockedAmt * (commissionPct / 100);
         const payoutAmount = blockedAmt - commissionAmount;
 
-        // 4. Release (debit) user blocked funds
-        await this.releaseBlockedFunds(booking.userId, bookingId, blockedAmt, true, t);
+        // 4. Release (debit) user blocked funds ONLY IF NOT ALREADY DEBITED
+        // When a booking transitions to COMPLETED, the user is debited. We don't want to debit them again.
+        const existingDebit = await t.walletTransaction.findFirst({
+          where: {
+            userId: booking.userId,
+            type: "DEBIT",
+            description: { contains: bookingId }
+          }
+        });
 
-        // 5. Credit professional's wallet in OwnerProfile
+        if (!existingDebit) {
+          await this.releaseBlockedFunds(booking.userId, bookingId, blockedAmt, true, t);
+        }
+
+        // 5. Credit professional's wallet and decrement inProgressBalance in OwnerProfile
         await t.ownerProfile.update({
           where: { id: booking.professionalId },
           data: {
             walletBalance: { increment: payoutAmount },
+            inProgressBalance: { decrement: blockedAmt }
           },
         });
 

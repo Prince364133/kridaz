@@ -112,16 +112,34 @@ const AuthenticatedNavbar = ({ toggleSidebar }) => {
   };
 
   const handleToggleOnline = async () => {
-    const newStatus = !isOnline;
+    const nextState = !isOnline;
     // Optimistic update — flip UI instantly before API responds
-    dispatch(updateUser({ isOnline: newStatus }));
-    try {
-      await toggleOnline({ isOnline: newStatus }).unwrap();
-      toast.success(newStatus ? "You are now online and visible to users" : "You are now offline");
-    } catch (error) {
-      // Rollback on failure
-      dispatch(updateUser({ isOnline: !newStatus }));
-      toast.error(error?.data?.message || "Failed to update online status");
+    dispatch(updateUser({ isOnline: nextState }));
+
+    const performToggle = async (coords = {}) => {
+      try {
+        await toggleOnline({ isOnline: nextState, ...coords }).unwrap();
+        toast.success(nextState ? "You are now online and visible to users" : "You are now offline");
+      } catch (err) {
+        console.error("Failed to toggle online status", err);
+        // Rollback on failure
+        dispatch(updateUser({ isOnline: !nextState }));
+        toast.error(err?.data?.message || "Failed to update online status");
+      }
+    };
+
+    if (nextState && navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          const { latitude, longitude } = position.coords;
+          performToggle({ latitude, longitude });
+        },
+        () => {
+          performToggle();
+        }
+      );
+    } else {
+      performToggle();
     }
   };
 
@@ -355,8 +373,11 @@ const AuthenticatedNavbar = ({ toggleSidebar }) => {
               </div>
             </div>
 
-            {/* Center: Trust Score Ring (industry-standard circular progress) */}
-            <div className="flex items-center gap-2 sm:gap-3">
+            {/* Center: Trust Score Ring (clickable to go to Trust Score ledger) */}
+            <div 
+              onClick={() => navigate(`/professional/${role?.toLowerCase()}/trust-score`)}
+              className="flex items-center gap-2 sm:gap-3 cursor-pointer hover:opacity-80 transition-opacity active:scale-95 duration-200"
+            >
               <div className="relative flex items-center justify-center" style={{ width: 44, height: 44 }}>
                 {/* SVG Ring */}
                 <svg width="44" height="44" viewBox="0 0 44 44" className="-rotate-90">
@@ -383,23 +404,48 @@ const AuthenticatedNavbar = ({ toggleSidebar }) => {
               </div>
             </div>
 
-            {/* Right: Online Toggle (OverviewTab style) */}
-            <div className="flex items-center gap-2 bg-[#222222] px-3 py-2 sm:px-4 sm:py-2.5 rounded-xl border border-[#2D2D2D]">
-              <span className={`text-[10px] sm:text-xs font-semibold tracking-wide ${isOnline ? 'text-[#BFF367]' : 'text-gray-400'}`}>
-                <span className="sm:hidden">{isOnline ? 'ONLINE' : 'OFFLINE'}</span>
-                <span className="hidden sm:inline">{isOnline ? 'ONLINE & AVAILABLE' : 'OFFLINE / BUSY'}</span>
-              </span>
-              <button 
-                onClick={handleToggleOnline} 
+            {/* Right: Online / Offline Toggle */}
+            <div className="flex items-center gap-2 shrink-0">
+              <div className="flex flex-col items-end gap-0.5">
+                <span className="text-[8px] sm:text-[9px] font-bold uppercase tracking-widest" style={{ color: isOnline ? '#BFF367' : '#555' }}>
+                  {isOnline ? 'Online' : 'Offline'}
+                </span>
+                <span className="text-[9px] font-semibold text-gray-600 uppercase tracking-wider">
+                  {isOnline ? 'Visible' : 'Hidden'}
+                </span>
+              </div>
+              <button
+                onClick={handleToggleOnline}
                 disabled={isToggling}
-                className={`w-11 h-6 sm:w-12 sm:h-7 rounded-full p-1 transition-all duration-300 ${isOnline ? 'bg-[#BFF367]' : 'bg-gray-600'}`}
+                title={isOnline ? 'Go Offline' : 'Go Online'}
+                className={`relative w-12 h-6 rounded-full border transition-all duration-300 shrink-0 ${
+                  isOnline
+                    ? 'border-[#BFF367]/40 bg-[#BFF367]/15'
+                    : 'border-white/10 bg-white/5'
+                } ${isToggling ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer hover:opacity-90 active:scale-95'}`}
               >
-                <div className={`h-4 w-4 sm:h-5 sm:w-5 rounded-full bg-black shadow-md transform transition-all duration-300 ${isOnline ? 'translate-x-5 sm:translate-x-5' : 'translate-x-0'}`} />
+                {/* Track glow when online */}
+                {isOnline && (
+                  <span className="absolute inset-0 rounded-full" style={{ boxShadow: '0 0 8px rgba(191,243,103,0.3)' }} />
+                )}
+                {/* Thumb */}
+                <span
+                  className={`absolute top-0.5 w-5 h-5 rounded-full shadow-md transition-all duration-300 flex items-center justify-center ${
+                    isOnline
+                      ? 'left-[calc(100%-1.375rem)] bg-[#BFF367]'
+                      : 'left-0.5 bg-[#444]'
+                  }`}
+                >
+                  {/* Dot indicator */}
+                  <span className={`w-1.5 h-1.5 rounded-full ${isOnline ? 'bg-black' : 'bg-gray-600'}`} />
+                </span>
               </button>
             </div>
+
           </div>
         </div>
       )}
+
     </div>
   );
 };

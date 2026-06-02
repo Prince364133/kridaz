@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import {
   AreaChart,
   Area,
@@ -68,7 +69,9 @@ import {
   Bell,
   Clock,
   ChevronDown,
-  X
+  X,
+  Shield,
+  MessageCircle
 } from "lucide-react";
 import { 
   useToggleOnlineMutation, 
@@ -85,6 +88,7 @@ import { useSocket } from "@context/SocketContext";
 const OverviewTab = ({ role, profile }) => {
   const user = useSelector((state) => state.auth?.user);
   const dispatch = useDispatch();
+  const navigate = useNavigate();
   const { socket } = useSocket();
   const isOnline = user?.isOnline || false;
   const [otp, setOtp] = useState("");
@@ -292,32 +296,33 @@ const OverviewTab = ({ role, profile }) => {
   return (
     <div className="space-y-6 text-white font-inter">
       {/* Analytics Dashboard Grid */}
-      <div className="grid grid-cols-2 lg:grid-cols-5 gap-4">
+      <div className="grid grid-cols-2 lg:grid-cols-6 gap-4 mb-8">
         {/* Bookings */}
-        <div className="p-5 rounded-2xl bg-[#141414] border border-[#2D2D2D] flex flex-col justify-between h-36 relative">
+        <div className="col-span-2 lg:col-span-2 p-5 rounded-2xl bg-[#141414] border border-[#2D2D2D] flex flex-col justify-between h-36 relative">
           <div className="flex justify-between items-start">
             <span className="text-xs text-[#878C9F] font-semibold uppercase tracking-wider">Bookings</span>
             <div className="p-2 bg-white/5 rounded-lg absolute top-4 right-4">
               <Activity size={16} className="text-gray-400" />
             </div>
           </div>
-          <div className="mt-1">
-            <h3 className="text-3xl font-bold text-white">{getBookingsValue()}</h3>
+          <div className="mt-2 flex items-center gap-4">
+            <div>
+              <p className="text-[10px] text-gray-500 uppercase font-bold mb-0.5">Completed</p>
+              <h3 className="text-2xl font-bold text-white">{statsData?.stats?.bookings?.completed || 0}</h3>
+            </div>
+            <div className="w-px h-8 bg-[#2D2D2D]"></div>
+            <div>
+              <p className="text-[10px] text-[#BFF367] uppercase font-bold mb-0.5">Assigned</p>
+              <h3 className="text-xl font-bold text-white">{statsData?.stats?.bookings?.assigned || 0}</h3>
+            </div>
+            <div className="w-px h-8 bg-[#2D2D2D]"></div>
+            <div>
+              <p className="text-[10px] text-green-400 uppercase font-bold mb-0.5">In Progress</p>
+              <h3 className="text-xl font-bold text-white">{statsData?.stats?.bookings?.inProgress || 0}</h3>
+            </div>
           </div>
           <div className="mt-3 flex items-center border-t border-[#2D2D2D] pt-3">
-            <div className="relative inline-flex items-center w-full">
-              <select 
-                value={bookingsTimeline}
-                onChange={(e) => setBookingsTimeline(e.target.value)}
-                className="appearance-none bg-transparent text-[11px] text-[#878C9F] font-semibold uppercase tracking-wider pr-4 outline-none cursor-pointer hover:text-white transition-colors z-10 w-full"
-              >
-                <option className="bg-[#141414] text-white" value="Today">Today</option>
-                <option className="bg-[#141414] text-white" value="This Week">This Week</option>
-                <option className="bg-[#141414] text-white" value="This Month">This Month</option>
-                <option className="bg-[#141414] text-white" value="All Time">All Time</option>
-              </select>
-              <ChevronDown size={12} className="text-[#878C9F] absolute right-0 pointer-events-none" />
-            </div>
+            <span className="text-[11px] text-[#878C9F] font-semibold uppercase tracking-wider">All Time</span>
           </div>
         </div>
 
@@ -358,22 +363,10 @@ const OverviewTab = ({ role, profile }) => {
             </div>
           </div>
           <div className="mt-1">
-            <h3 className="text-2xl font-bold text-white">{getAvgTimeValue()}</h3>
+            <h3 className="text-2xl font-bold text-white">{statsData?.stats?.daat || 0}% <span className="text-sm font-normal text-gray-400">active</span></h3>
           </div>
           <div className="mt-3 flex items-center border-t border-[#2D2D2D] pt-3">
-            <div className="relative inline-flex items-center w-full">
-              <select 
-                value={timeTimeline}
-                onChange={(e) => setTimeTimeline(e.target.value)}
-                className="appearance-none bg-transparent text-[11px] text-[#878C9F] font-semibold uppercase tracking-wider pr-4 outline-none cursor-pointer hover:text-white transition-colors z-10 w-full"
-              >
-                <option className="bg-[#141414] text-white" value="Today">Today</option>
-                <option className="bg-[#141414] text-white" value="This Week">This Week</option>
-                <option className="bg-[#141414] text-white" value="This Month">This Month</option>
-                <option className="bg-[#141414] text-white" value="All Time">All Time</option>
-              </select>
-              <ChevronDown size={12} className="text-[#878C9F] absolute right-0 pointer-events-none" />
-            </div>
+            <span className="text-[11px] text-[#878C9F] font-semibold uppercase tracking-wider">30 Days</span>
           </div>
         </div>
 
@@ -406,24 +399,45 @@ const OverviewTab = ({ role, profile }) => {
           </div>
         </div>
 
-        {/* Requests */}
+        {/* Requests & Acceptance */}
         <div className="col-span-2 lg:col-span-1 p-5 rounded-2xl bg-[#141414] border border-[#2D2D2D] flex flex-col justify-between h-36 relative">
           <div className="flex justify-between items-start">
-            <span className="text-xs text-[#878C9F] font-semibold uppercase tracking-wider">Requests</span>
+            <span className="text-[11px] text-[#878C9F] font-semibold uppercase tracking-wider leading-tight">Match<br/>Requests</span>
           </div>
-          <div className="mt-2 flex items-center gap-4">
+          <div className="mt-1 flex items-center gap-3">
             <div>
-              <p className="text-[10px] text-gray-500 uppercase font-bold mb-0.5">Accepted</p>
-              <h3 className="text-2xl font-bold text-green-400">{statsData?.stats?.acceptedRequests ?? pastBookingsCount}</h3>
+              <p className="text-[10px] text-gray-500 uppercase font-bold mb-0.5">Acc</p>
+              <h3 className="text-xl font-bold text-green-400">{statsData?.stats?.acceptedRequests ?? pastBookingsCount}</h3>
             </div>
-            <div className="w-px h-8 bg-[#2D2D2D]"></div>
+            <div className="w-px h-6 bg-[#2D2D2D]"></div>
             <div>
-              <p className="text-[10px] text-gray-500 uppercase font-bold mb-0.5">Rejected</p>
-              <h3 className="text-2xl font-bold text-red-400">{statsData?.stats?.rejectedRequests ?? 0}</h3>
+              <p className="text-[10px] text-gray-500 uppercase font-bold mb-0.5">Rej</p>
+              <h3 className="text-xl font-bold text-red-400">{statsData?.stats?.rejectedRequests ?? 0}</h3>
+            </div>
+            <div className="w-px h-6 bg-[#2D2D2D]"></div>
+            <div>
+              <p className="text-[10px] text-[#BFF367] uppercase font-bold mb-0.5">Rate</p>
+              <h3 className="text-xl font-bold text-white">{statsData?.stats?.acceptanceRate ?? 100}%</h3>
             </div>
           </div>
           <div className="mt-3 flex items-center border-t border-[#2D2D2D] pt-3">
-             <span className="text-[11px] text-[#878C9F] font-semibold uppercase tracking-wider">All Time</span>
+             <span className="text-[11px] text-[#878C9F] font-semibold uppercase tracking-wider">30 Days</span>
+          </div>
+        </div>
+
+        {/* Conflict Balance */}
+        <div className="p-5 rounded-2xl bg-[#141414] border border-[#2D2D2D] flex flex-col justify-between h-36 relative">
+          <div className="flex justify-between items-start">
+            <span className="text-[11px] text-[#878C9F] font-semibold uppercase tracking-wider leading-tight">Conflict<br/>Balance</span>
+            <div className="p-2 bg-red-500/10 rounded-lg absolute top-4 right-4">
+              <Shield size={16} className="text-red-400" />
+            </div>
+          </div>
+          <div className="mt-1">
+            <h3 className="text-2xl font-bold text-white">₹{profile?.disputeBalance || 0}</h3>
+          </div>
+          <div className="mt-3 flex items-center border-t border-[#2D2D2D] pt-3">
+            <span className="text-[11px] text-[#878C9F] font-semibold uppercase tracking-wider">Funds on Hold</span>
           </div>
         </div>
       </div>
@@ -448,13 +462,24 @@ const OverviewTab = ({ role, profile }) => {
                 <div className="space-y-1">
                   <span className="text-xs text-[#878C9F] uppercase tracking-wider">Client details</span>
                   <div className="flex items-center gap-2 mt-1">
-                    <div className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center font-bold">
-                      {activeBooking.user?.name?.charAt(0) || "C"}
-                    </div>
-                    <div>
+                    {activeBooking.user?.profilePicture ? (
+                      <img src={activeBooking.user.profilePicture} alt="User Profile" className="w-8 h-8 rounded-full object-cover" />
+                    ) : (
+                      <div className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center font-bold">
+                        {activeBooking.user?.name?.charAt(0) || "C"}
+                      </div>
+                    )}
+                    <div className="flex-1">
                       <h4 className="text-sm font-semibold">{activeBooking.user?.name || "Client"}</h4>
-                      <p className="text-xs text-[#878C9F]">{activeBooking.user?.email || ""}</p>
+                      <p className="text-xs text-[#878C9F]">{activeBooking.user?.phone || activeBooking.user?.email || ""}</p>
                     </div>
+                    <button
+                      onClick={() => navigate(`/messages?userId=${activeBooking.user?.id}`)}
+                      className="flex items-center justify-center p-2 rounded-lg bg-[#BFF367]/10 text-[#BFF367] hover:bg-[#BFF367]/20 transition-colors"
+                      title="Chat with Customer"
+                    >
+                      <MessageCircle size={18} />
+                    </button>
                   </div>
                 </div>
 

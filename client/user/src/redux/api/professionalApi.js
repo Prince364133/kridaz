@@ -38,6 +38,13 @@ export const professionalApi = baseApi.injectEndpoints({
       }),
       invalidatesTags: ["Booking"],
     }),
+    completeProfessionalBooking: builder.mutation({
+      query: (bookingId) => ({
+        url: `/api/professional/bookings/${bookingId}/complete`,
+        method: "POST",
+      }),
+      invalidatesTags: ["Booking", "User"],
+    }),
     getMyOnDemandBookings: builder.query({
       query: () => "/api/professional/on-demand-bookings",
       providesTags: ["Booking"],
@@ -57,6 +64,10 @@ export const professionalApi = baseApi.injectEndpoints({
       }),
       providesTags: ["User"],
     }),
+    getTrustScoreHistory: builder.query({
+      query: () => "/api/professional/trust-score-history",
+      providesTags: ["Booking", "User"],
+    }),
   }),
 });
 
@@ -70,5 +81,7 @@ export const {
   useGetUserOnDemandBookingsQuery,
   useGetDashboardStatsQuery,
   useGetProfessionalsListQuery,
+  useGetTrustScoreHistoryQuery,
+  useCompleteProfessionalBookingMutation,
 } = professionalApi;
 

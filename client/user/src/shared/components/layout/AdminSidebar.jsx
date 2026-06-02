@@ -71,6 +71,7 @@ const AdminSidebar = ({ isOpen, toggleSidebar, isMinimized, className }) => {
       subItems: [
         { to: "/admin/support", label: "Tickets" },
         { to: "/admin/disputes", label: "Booking Disputes" },
+        { to: "/admin/professional-disputes", label: "Pro Disputes" },
         { to: "/admin/game-disputes", label: "Game Disputes" },
         { to: "/admin/reels-reports", label: "Reel Reports" },
       ],

@@ -7,8 +7,8 @@ import {
 } from "lucide-react";
 import useDisputes from "@hooks/admin/useDisputes";
 
-const DisputeManager = () => {
-  const { disputes, loading, processingId, handleResolve, handleReply } = useDisputes("turf");
+const ProfessionalDisputeManager = () => {
+  const { disputes, loading, processingId, handleResolve, handleReply } = useDisputes("professional");
   const [searchTerm, setSearchTerm] = useState("");
   const [filter, setFilter] = useState("ALL");
   const [selectedDispute, setSelectedDispute] = useState(null);
@@ -29,7 +29,7 @@ const DisputeManager = () => {
   const filteredDisputes = disputes.filter(dispute => {
     const matchesSearch = 
       dispute.booking?.userId?.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      dispute.bookingDetails?.turfName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      dispute.onDemandBooking?.professional?.businessName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       dispute.reason?.toLowerCase().includes(searchTerm.toLowerCase());
     
     const matchesFilter = filter === "ALL" || dispute.status === filter;
@@ -61,7 +61,7 @@ const DisputeManager = () => {
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
           <div>
             <h1 className="text-4xl md:text-5xl font-bold tracking-tight uppercase">
-              Dispute <span className="text-orange-500">Manager</span>
+              Pro Disputes <span className="text-orange-500">Manager</span>
             </h1>
             <p className="text-gray-400 text-sm mt-2 font-medium tracking-wide">Financial reconciliation and conflict resolution</p>
           </div>
@@ -123,7 +123,7 @@ const DisputeManager = () => {
                              </div>
                              <div className="w-1 h-1 bg-white/10 rounded-full" />
                              <div className="flex items-center gap-1.5 text-[10px] text-gray-400 font-bold">
-                                <Building size={12} className="text-gray-600"/> {dispute.bookingDetails?.turfName}
+                                <Building size={12} className="text-gray-600"/> {dispute.onDemandBooking?.professional?.businessName}
                              </div>
                           </div>
                        </button>
@@ -197,25 +197,25 @@ const DisputeManager = () => {
                         </div>
                      </div>
 
-                     {/* Venue Card */}
+                     {/* Professional Card */}
                      <div className="bg-[#111] border border-white/10 rounded-[8px] p-6 group hover:border-orange-500/20 transition-all">
                         <div className="flex items-center gap-4 mb-6">
                            <div className="w-12 h-12 rounded-[8px] bg-blue-500/10 flex items-center justify-center text-blue-500 border border-blue-500/20 group-hover:scale-110 transition-transform">
                               <Building size={24} />
                            </div>
                            <div>
-                              <p className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-500">Venue & Owner</p>
-                              <h3 className="text-lg font-bold truncate">{selectedDispute.bookingDetails?.turfName}</h3>
+                              <p className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-500">Professional Profile</p>
+                              <h3 className="text-lg font-bold truncate">{selecteddispute.onDemandBooking?.professional?.businessName}</h3>
                            </div>
                         </div>
                         <div className="space-y-4">
                            <div className="flex items-center justify-between p-3 bg-white/5 rounded-[8px] border border-white/5">
                               <span className="text-xs text-gray-500 font-bold uppercase flex items-center gap-2"><User size={12}/> Owner</span>
-                              <span className="text-xs font-bold text-white truncate">{selectedDispute.bookingDetails?.ownerName}</span>
+                              <span className="text-xs font-bold text-white truncate">{selecteddispute.owner?.businessName}</span>
                            </div>
                            <div className="flex items-center justify-between p-3 bg-white/5 rounded-[8px] border border-white/5">
                               <span className="text-xs text-gray-500 font-bold uppercase flex items-center gap-2"><Phone size={12}/> Contact</span>
-                              <span className="text-xs font-bold text-white">{selectedDispute.bookingDetails?.ownerPhone || "N/A"}</span>
+                              <span className="text-xs font-bold text-white">{selecteddispute.owner?.phone || "N/A"}</span>
                            </div>
                         </div>
                      </div>
@@ -228,21 +228,21 @@ const DisputeManager = () => {
                            <h4 className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-500 mb-6">Financial Snapshot</h4>
                            <div className="space-y-4">
                               <div className="flex justify-between items-center text-sm">
-                                 <span className="text-gray-400 font-bold uppercase text-[10px]">Total Booking</span>
-                                 <span className="font-bold">₹{selectedDispute.bookingDetails?.totalAmount}</span>
+                                 <span className="text-gray-400 font-bold uppercase text-[10px]">Total Blocked Amount</span>
+                                 <span className="font-bold">₹{selecteddispute.onDemandBooking?.blockedAmount}</span>
                               </div>
                               <div className="flex justify-between items-center text-sm">
-                                 <span className="text-gray-400 font-bold uppercase text-[10px]">Owner Revenue</span>
-                                 <span className="font-bold text-orange-400">₹{selectedDispute.bookingDetails?.ownerRevenue}</span>
+                                 <span className="text-gray-400 font-bold uppercase text-[10px]">Professional Revenue</span>
+                                 <span className="font-bold text-orange-400">₹{selecteddispute.onDemandBooking?.blockedAmount}</span>
                               </div>
                               <div className="h-px bg-white/5 my-2" />
                               <div className="flex justify-between items-center text-sm">
                                  <span className="text-gray-400 font-bold uppercase text-[10px]">Play Date</span>
-                                 <span className="font-bold text-[11px]">{selectedDispute.bookingDetails?.playDate ? new Date(selectedDispute.bookingDetails.playDate).toLocaleDateString() : "N/A"}</span>
+                                 <span className="font-bold text-[11px]">{selecteddispute.onDemandBooking?.bookingDate ? new Date(selectedDispute.bookingDetails.playDate).toLocaleDateString() : "N/A"}</span>
                               </div>
                               <div className="flex justify-between items-center text-sm">
                                  <span className="text-gray-400 font-bold uppercase text-[10px]">Slot Time</span>
-                                 <span className="font-bold text-[11px]">{selectedDispute.bookingDetails?.slotLabel}</span>
+                                 <span className="font-bold text-[11px]">{selecteddispute.onDemandBooking?.startTime}</span>
                               </div>
                            </div>
                         </div>
@@ -393,7 +393,7 @@ const DisputeManager = () => {
                        className="w-full bg-[#0a0a0a] border border-white/10 rounded-[8px] pl-8 pr-4 py-4 text-white focus:outline-none focus:border-orange-500 transition-all font-bold"
                      />
                   </div>
-                  <p className="text-[9px] text-gray-600 mt-2 font-bold uppercase italic">* Remaining ₹{selectedDispute.bookingDetails?.ownerRevenue - (parseFloat(partialAmount) || 0)} will be released to owner.</p>
+                  <p className="text-[9px] text-gray-600 mt-2 font-bold uppercase italic">* Remaining ₹{selecteddispute.onDemandBooking?.blockedAmount - (parseFloat(partialAmount) || 0)} will be released to owner.</p>
                 </div>
               )}
 
@@ -430,4 +430,4 @@ const DisputeManager = () => {
   );
 };
 
-export default DisputeManager;
+export default ProfessionalDisputeManager;

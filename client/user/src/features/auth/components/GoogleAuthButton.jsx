@@ -16,13 +16,16 @@ import { Capacitor } from "@capacitor/core";
 
 const GoogleAuthButton = ({ onSuccess, onError, mode = "signin", isLoading = false }) => {
   const login = useGoogleLogin({
+    flow: "implicit",
     onSuccess: (tokenResponse) => {
       onSuccess(tokenResponse);
     },
-    onError: () => {
+    onError: (error) => {
+      console.error("Google OAuth error:", error);
       if (onError) onError();
     },
   });
+
 
   // Google does not allow web-based OAuth inside WebViews (Capacitor mobile container).
   // Hide it on Android/iOS native to prevent disallowed useragent error.

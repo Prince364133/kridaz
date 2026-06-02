@@ -226,9 +226,16 @@ const SignUp = ({ isModal = false }) => {
             }
           }
 
-          const role = result.role?.toLowerCase() || "";
-          if (role.includes("umpire")) navigate("/umpire");
-          else navigate("/");
+          const normalizedRole = role?.toLowerCase() || "user";
+          const professionalRoles = ["coach", "umpire", "streamer", "scorer", "cheerleader", "commentator"];
+          if (normalizedRole === "venu_owners" || normalizedRole === "owner" || normalizedRole === "venue_owner") {
+            navigate("/venue-owner");
+          } else if (professionalRoles.includes(normalizedRole)) {
+            navigate(`/professional/${normalizedRole}`);
+          } else {
+            navigate("/");
+          }
+
         }
       } catch (error) {
         toast.error(error.response?.data?.message || "Google sign-in failed");

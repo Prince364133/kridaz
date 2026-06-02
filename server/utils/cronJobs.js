@@ -12,6 +12,62 @@ import logger from "./logger.js";
  */
 export const initCronJobs = () => {
 
+  // ── Hourly: Cache DAAT and Acceptance Rate on OwnerProfile ────────
+  nodeCron.schedule("0 * * * *", async () => {
+    logger.info("[CRON] Updating OwnerProfile DAAT and Acceptance Rate...");
+    try {
+      const cutoff30d = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
+      
+      const profiles = await prisma.ownerProfile.findMany({
+        select: { id: true, userId: true }
+      });
+      
+      for (const profile of profiles) {
+        // Calculate Acceptance Rate
+        const acceptedCount = await prisma.professionalMatchOffer.count({
+          where: { professionalId: profile.id, status: "ACCEPTED", createdAt: { gte: cutoff30d } }
+        });
+        const rejectedCount = await prisma.professionalMatchOffer.count({
+          where: { professionalId: profile.id, status: "REJECTED", createdAt: { gte: cutoff30d } }
+        });
+        const skippedCount = await prisma.bookingNotification.count({
+          where: { professionalId: profile.id, action: "SKIPPED", sentAt: { gte: cutoff30d } }
+        });
+        
+        const totalDecisions = acceptedCount + rejectedCount + skippedCount;
+        const acceptanceRate = totalDecisions > 0 ? (acceptedCount / totalDecisions) * 100 : 100;
+        
+        // Calculate DAAT
+        const sessions = await prisma.professionalOnlineSession.findMany({
+          where: { professionalId: profile.id, createdAt: { gte: cutoff30d } }
+        });
+        
+        let totalHours = 0;
+        for (const session of sessions) {
+          if (session.durationHours) {
+            totalHours += session.durationHours;
+          } else if (!session.offlineAt && session.onlineAt) {
+            // Still online, add hours up to now
+            totalHours += (Date.now() - session.onlineAt.getTime()) / (1000 * 60 * 60);
+          }
+        }
+        
+        const daatPct = Math.min((totalHours / (30 * 24)) * 100, 100); // percentage of a 24-hour day
+        
+        await prisma.ownerProfile.update({
+          where: { id: profile.id },
+          data: {
+            acceptanceRate30d: parseFloat(acceptanceRate.toFixed(2)),
+            avgDailyActivePct: parseFloat(daatPct.toFixed(2)) // Storing as percentage
+          }
+        });
+      }
+      logger.info(`[CRON] OwnerProfile caching complete for ${profiles.length} professionals.`);
+    } catch (error) {
+      logger.error("[CRON] DAAT/AcceptanceRate caching error:", error);
+    }
+  });
+
   // â”€â”€ Midnight: Expired & revoked refresh token cleanup â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   nodeCron.schedule("0 0 * * *", async () => {
     logger.info("[CRON] Purging expired/revoked refresh tokens...");

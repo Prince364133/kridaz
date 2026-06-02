@@ -23,6 +23,7 @@ const BookingsTab = lazy(() => import("@features/professional/pages/BookingsTab"
 const PayoutsTab  = lazy(() => import("@features/professional/pages/PayoutsTab"));
 const ReviewsTab  = lazy(() => import("@features/professional/pages/ReviewsTab"));
 const SupportTab  = lazy(() => import("@features/professional/pages/SupportTab"));
+const TrustScoreHistory = lazy(() => import("@features/professional/pages/TrustScoreHistory"));
 
 // Î“Ã¶Ã‡Î“Ã¶Ã‡ Lazy: User Portal Pages Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡
 const UserHome               = lazy(() => import("@user/pages/Home"));
@@ -168,6 +169,7 @@ const router = createBrowserRouter([
       { path: "reviews",                    element: <S><ReviewsTab /></S> },
       { path: "support",                    element: <S><SupportTab /></S> },
       { path: "profile",                    element: <S><ProfessionalProfile /></S> },
+      { path: "trust-score",                element: <S><TrustScoreHistory /></S> },
       { path: "*",                          element: <NotFound /> },
     ],
   },
@@ -284,6 +286,9 @@ const router = createBrowserRouter([
   { path: "/business/official", element: <Navigate to="/business/professional" replace /> },
   { path: "/business/scorer", element: <Navigate to="/business/professional" replace /> },
   { path: "/coach",           element: <Navigate to="/professional/coach" replace /> },
+  { path: "/umpire",          element: <Navigate to="/professional/umpire" replace /> },
+  { path: "/scorer",          element: <Navigate to="/professional/scorer" replace /> },
+  { path: "/streamer",        element: <Navigate to="/professional/streamer" replace /> },
   { path: "/business/streamer", element: <Navigate to="/business/professional" replace /> },
   // Catch-all (Global)
   { path: "*", element: <NotFound /> },
