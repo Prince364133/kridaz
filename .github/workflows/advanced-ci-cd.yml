@@ -94,36 +94,42 @@ jobs:
     name: Deploy Backend to Railway
     needs: ci
     runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/main' && github.event_name == 'push' && secrets.RAILWAY_TOKEN != ''
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
     env:
       RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
     steps:
       - name: Checkout Code
+        if: env.RAILWAY_TOKEN != ''
         uses: actions/checkout@v4
       - name: Setup Railway CLI
+        if: env.RAILWAY_TOKEN != ''
         run: npm i -g @railway/cli
       - name: Deploy to Railway
+        if: env.RAILWAY_TOKEN != ''
         run: railway up --service server --detach
 
   deploy-aws:
     name: Deploy to AWS
     needs: ci
     runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/main' && github.event_name == 'push' && secrets.AWS_ACCESS_KEY_ID != ''
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
     env:
       AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
       AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
       AWS_REGION: ${{ secrets.AWS_REGION }}
     steps:
       - name: Checkout Code
+        if: env.AWS_ACCESS_KEY_ID != ''
         uses: actions/checkout@v4
       - name: Configure AWS Credentials
+        if: env.AWS_ACCESS_KEY_ID != ''
         uses: aws-actions/configure-aws-credentials@v4
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ secrets.AWS_REGION }}
       - name: Deploy via AWS CLI/EB
+        if: env.AWS_ACCESS_KEY_ID != ''
         # Add your AWS deployment commands here, e.g., for Elastic Beanstalk or ECS
         run: |
           echo "AWS Credentials Configured."
@@ -133,17 +139,20 @@ jobs:
     name: Deploy to Azure
     needs: ci
     runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/main' && github.event_name == 'push' && secrets.AZURE_CREDENTIALS != ''
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
     env:
       AZURE_CREDENTIALS: ${{ secrets.AZURE_CREDENTIALS }}
     steps:
       - name: Checkout Code
+        if: env.AZURE_CREDENTIALS != ''
         uses: actions/checkout@v4
       - name: Login to Azure
+        if: env.AZURE_CREDENTIALS != ''
         uses: azure/login@v1
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
       - name: Deploy via Azure Web Apps
+        if: env.AZURE_CREDENTIALS != ''
         # Replace placeholders with actual Azure Web App Name
         # uses: azure/webapps-deploy@v2
         # with:
