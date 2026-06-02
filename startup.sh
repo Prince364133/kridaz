@@ -1,17 +1,9 @@
 #!/bin/bash
 echo "=== Kridaz Startup Script ==="
-cd /home/site/wwwroot
+cd /home/site/wwwroot/server
 
-# Clean any weird symlinks Azure makes for node_modules
-rm -rf node_modules
-
-npm install -g pnpm
-pnpm install
-# Rebuild sharp for Linux
-npm rebuild --prefix server sharp || true
-pnpm rebuild sharp || true
-
-cd server
-npx prisma generate
+echo "Pushing DB schema..."
 npx prisma db push --accept-data-loss
+
+echo "Starting server..."
 node server.js
