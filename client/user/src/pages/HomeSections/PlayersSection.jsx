@@ -18,10 +18,6 @@ export default function PlayersSection({
         {/* Refined Section Header */}
         <div className="relative flex flex-row items-center justify-between gap-4 mb-6">
           <div className="relative">
-            <div
-              className="absolute -left-6 top-1/2 -translate-y-1/2 w-1.5 h-12 rounded-full shadow-[0_0_20px_rgba(85,222,232,0.4)] hidden md:block"
-              style={{ background: GRAD }}
-            ></div>
             <h2
               className="text-[18px] md:text-[30px] font-black text-white uppercase tracking-tighter leading-none"
               style={{ fontFamily: "'Open Sans', sans-serif" }}

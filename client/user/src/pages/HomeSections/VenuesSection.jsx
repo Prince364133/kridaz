@@ -1,7 +1,7 @@
 /* eslint-disable react/prop-types */
-import React from "react";
+import React, { useRef } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { Search, ChevronRight } from "lucide-react";
+import { Search, ChevronRight, ChevronLeft } from "lucide-react";
 import TurfCardMobile from "../../features/turf/components/TurfCardMobile";
 
 const BDR = "#2A2A2A";
@@ -15,6 +15,14 @@ export default function VenuesSection({
   setTurfFilters,
 }) {
   const navigate = useNavigate();
+  const scrollRef = useRef(null);
+
+  const scroll = (direction) => {
+    if (scrollRef.current) {
+      const scrollAmount = scrollRef.current.clientWidth;
+      scrollRef.current.scrollBy({ left: direction === 'left' ? -scrollAmount : scrollAmount, behavior: 'smooth' });
+    }
+  };
 
   return (
     <section className="mb-8 w-full">
@@ -46,8 +54,8 @@ export default function VenuesSection({
           {[...Array(3)].map((_, i) => (
             <div
               key={i}
-              className="w-[85vw] md:w-[400px] shrink-0 snap-center rounded-[12px] border animate-pulse"
-              style={{ height: 320, backgroundColor: "#111", borderColor: BDR }}
+              className="w-[85vw] md:w-[calc(50%-8px)] shrink-0 snap-start rounded-[24px] border animate-pulse aspect-[1080/1350]"
+              style={{ backgroundColor: "#111", borderColor: BDR }}
             />
           ))}
         </div>
@@ -67,15 +75,36 @@ export default function VenuesSection({
           </p>
         </div>
       ) : (
-        <div className="flex gap-4 overflow-x-auto snap-x snap-mandatory no-scrollbar pb-4 pr-4">
-          {displayTurfs.slice(0, 10).map((t) => (
-            <div key={t._id} className="w-[85vw] md:w-[400px] shrink-0 snap-start">
-              <TurfCardMobile
-                turf={t}
-                distance={t.distance ? `${t.distance} km` : "1.2 km"}
-              />
-            </div>
-          ))}
+        <div className="relative group/scroll">
+          {/* Left Arrow (Desktop only) */}
+          <button 
+            onClick={() => scroll('left')}
+            className="hidden md:flex absolute -left-5 top-1/2 -translate-y-1/2 z-30 w-12 h-12 items-center justify-center bg-black/60 backdrop-blur-md text-white rounded-full border border-white/20 opacity-0 group-hover/scroll:opacity-100 transition-all duration-300 hover:bg-[#BFF367] hover:text-black shadow-xl"
+          >
+            <ChevronLeft size={28} />
+          </button>
+
+          <div 
+            ref={scrollRef}
+            className="flex gap-4 overflow-x-auto snap-x snap-mandatory no-scrollbar pb-4 pr-4 scroll-smooth"
+          >
+            {displayTurfs.slice(0, 10).map((t) => (
+              <div key={t._id} className="w-[85vw] md:w-[calc(50%-8px)] shrink-0 snap-start">
+                <TurfCardMobile
+                  turf={t}
+                  distance={t.distance ? `${t.distance} km` : "1.2 km"}
+                />
+              </div>
+            ))}
+          </div>
+
+          {/* Right Arrow (Desktop only) */}
+          <button 
+            onClick={() => scroll('right')}
+            className="hidden md:flex absolute -right-5 top-1/2 -translate-y-1/2 z-30 w-12 h-12 items-center justify-center bg-black/60 backdrop-blur-md text-white rounded-full border border-white/20 opacity-0 group-hover/scroll:opacity-100 transition-all duration-300 hover:bg-[#BFF367] hover:text-black shadow-xl"
+          >
+            <ChevronRight size={28} />
+          </button>
         </div>
       )}
 
