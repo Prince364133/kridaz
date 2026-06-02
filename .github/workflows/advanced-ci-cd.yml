@@ -1,10 +1,9 @@
-name: Advanced CI/CD Pipeline
+name: Kridaz Monorepo CI/CD
 
 on:
   push:
-    branches: [ main, develop ]
-  pull_request:
-    branches: [ main, develop ]
+    branches: [ main, version3 ]
+  workflow_dispatch:
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -12,152 +11,207 @@ concurrency:
 
 jobs:
   ci:
-    name: CI (Lint, Test, Build)
+    name: CI (Lint & Build All)
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
         with:
-          fetch-depth: 0
+          node-version: '22'
 
       - name: Setup pnpm
         uses: pnpm/action-setup@v3
         with:
           version: 10.28.0
 
+      - name: Install Dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build All Packages
+        run: pnpm run build
+
+  build-backend:
+    name: Build Backend Package
+    needs: ci
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
       - name: Setup Node.js
-        uses: actions/setup-node@v6
+        uses: actions/setup-node@v4
         with:
-          node-version: '20'
-          cache: 'pnpm'
+          node-version: '22'
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v3
+        with:
+          version: 10.28.0
+
+      - name: Install Monorepo Dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build Packages
+        run: pnpm --filter common run build && pnpm --filter shared-constants run build
+
+      - name: Generate Prisma Client
+        run: cd server && pnpm dlx prisma generate
+
+      - name: Create Backend Deployment Package
+        run: |
+          mkdir -p deploy/packages/common
+          mkdir -p deploy/packages/shared-constants
+          
+          # Copy server files
+          rsync -av --exclude='node_modules' --exclude='scratch' --exclude='logs' --exclude='.env' --exclude='tests' server/ deploy/
+          
+          # Copy common package
+          cp packages/common/package.json deploy/packages/common/
+          cp -r packages/common/dist deploy/packages/common/
+          cp -r packages/common/src deploy/packages/common/
+          
+          # Copy shared-constants
+          cp packages/shared-constants/package.json deploy/packages/shared-constants/
+          cp -r packages/shared-constants/src deploy/packages/shared-constants/
+          
+          # Copy startup script
+          cp startup.sh deploy/
+          
+          cd deploy
+          
+          # Fix workspace references and remove packageManager field
+          sed -i 's/"@kridaz\/common":\s*"workspace:\*"/"@kridaz\/common": "file:.\/packages\/common"/' package.json
+          sed -i 's/"@kridaz\/shared-constants":\s*"workspace:\*"/"@kridaz\/shared-constants": "file:.\/packages\/shared-constants"/' package.json
+          sed -i '/"packageManager":/d' package.json
+          
+          # Fix common's package.json
+          sed -i 's/"@kridaz\/shared-constants":\s*"workspace:\*"/"@kridaz\/shared-constants": "file:..\/shared-constants"/' packages/common/package.json
+          
+          # Install production dependencies for Linux target
+          npm install --omit=dev
+          npm install --os=linux --cpu=x64 sharp
+          
+          # Zip the deployment artifact
+          zip -q -r ../backend-artifact.zip .
+
+      - name: Upload Backend Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: backend-artifact
+          path: backend-artifact.zip
+
+  build-frontends:
+    name: Build Frontends
+    needs: ci
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v3
+        with:
+          version: 10.28.0
 
       - name: Install Dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Run Linters & Formatting Check
-        run: pnpm run lint && pnpm run format
+      - name: Build User Frontend
+        run: pnpm --filter user run build
 
-      - name: Run Type Checks
-        # Assuming type-check exists in the client user package
-        run: pnpm --filter user run type-check || echo "Type check skipped or not configured"
+      - name: Build Admin Frontend
+        run: pnpm --filter admin run build
 
-      - name: Run Tests
-        env:
-          DATABASE_URL: ${{ secrets.DATABASE_URL_TEST }}
-          JWT_SECRET: ${{ secrets.JWT_SECRET_TEST }}
-          # Mock Redis URL for test environment if required by tests
-          REDIS_URL: redis://localhost:6379 
-        run: pnpm run test:all --coverage
+      - name: Zip User Frontend Dist
+        run: cd client/user/dist && zip -q -r ../../../user-artifact.zip .
 
-      - name: Check Coverage
-        run: |
-          echo "Checking if global statement coverage is >= 60%"
-          # Using nyc to check coverage thresholds across the monorepo
-          npx nyc check-coverage --statements 60
+      - name: Zip Admin Frontend Dist
+        run: cd client/admin/dist && zip -q -r ../../../admin-artifact.zip .
 
-      - name: Run Build
-        run: pnpm run build
-
-      - name: Security Scan (pnpm audit)
-        run: pnpm audit --prod || echo "Audit found vulnerabilities, check details."
-
-  # Deployment Phase - Continuous Deployment (CD)
-  # These jobs only run on the main branch and if specific secrets are available.
-
-  deploy-vercel:
-    name: Deploy Frontend to Vercel
-    needs: ci
-    runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
-    steps:
-      - name: Checkout Code
-        uses: actions/checkout@v4
-      - name: Install Vercel CLI
-        run: npm install --global vercel@latest
-      - name: Pull Vercel Environment Information
-        run: vercel pull --yes --environment=production --token=${{ secrets.VERCEL_TOKEN }}
-        env:
-          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
-          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
-      - name: Build Project Artifacts
-        run: vercel build --prod --token=${{ secrets.VERCEL_TOKEN }}
-        env:
-          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
-          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
-      - name: Deploy Project Artifacts to Vercel
-        run: vercel deploy --prebuilt --prod --token=${{ secrets.VERCEL_TOKEN }}
-        env:
-          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
-          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
-
-  deploy-railway:
-    name: Deploy Backend to Railway
-    needs: ci
-    runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
-    env:
-      RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
-    steps:
-      - name: Checkout Code
-        if: env.RAILWAY_TOKEN != ''
-        uses: actions/checkout@v4
-      - name: Setup Railway CLI
-        if: env.RAILWAY_TOKEN != ''
-        run: npm i -g @railway/cli
-      - name: Deploy to Railway
-        if: env.RAILWAY_TOKEN != ''
-        run: railway up --service server --detach
-
-  deploy-aws:
-    name: Deploy to AWS
-    needs: ci
-    runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
-    env:
-      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-      AWS_REGION: ${{ secrets.AWS_REGION }}
-    steps:
-      - name: Checkout Code
-        if: env.AWS_ACCESS_KEY_ID != ''
-        uses: actions/checkout@v4
-      - name: Configure AWS Credentials
-        if: env.AWS_ACCESS_KEY_ID != ''
-        uses: aws-actions/configure-aws-credentials@v4
+      - name: Upload User Artifact
+        uses: actions/upload-artifact@v4
         with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: ${{ secrets.AWS_REGION }}
-      - name: Deploy via AWS CLI/EB
-        if: env.AWS_ACCESS_KEY_ID != ''
-        # Add your AWS deployment commands here, e.g., for Elastic Beanstalk or ECS
-        run: |
-          echo "AWS Credentials Configured."
-          echo "Replace this with actual AWS deployment script (e.g., aws s3 sync or eb deploy)."
+          name: user-artifact
+          path: user-artifact.zip
 
-  deploy-azure:
-    name: Deploy to Azure
-    needs: ci
+      - name: Upload Admin Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: admin-artifact
+          path: admin-artifact.zip
+
+  deploy-backend:
+    name: Deploy Backend to Azure
+    needs: build-backend
     runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
-    env:
-      AZURE_CREDENTIALS: ${{ secrets.AZURE_CREDENTIALS }}
+    if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/version3'
     steps:
-      - name: Checkout Code
-        if: env.AZURE_CREDENTIALS != ''
-        uses: actions/checkout@v4
+      - name: Download Artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: backend-artifact
+
       - name: Login to Azure
-        if: env.AZURE_CREDENTIALS != ''
-        uses: azure/login@v1
+        uses: azure/login@v2
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
-      - name: Deploy via Azure Web Apps
-        if: env.AZURE_CREDENTIALS != ''
-        # Replace placeholders with actual Azure Web App Name
-        # uses: azure/webapps-deploy@v2
-        # with:
-        #   app-name: 'YOUR_APP_NAME'
-        #   package: .
-        run: |
-          echo "Azure Credentials Configured."
-          echo "Replace this with actual Azure Web App deployment command."
+
+      - name: Deploy to Azure Web App
+        uses: azure/webapps-deploy@v3
+        with:
+          app-name: 'Kridaz'
+          package: backend-artifact.zip
+
+  deploy-user-frontend:
+    name: Deploy User Frontend to Azure
+    needs: build-frontends
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/version3'
+    steps:
+      - name: Download Artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: user-artifact
+
+      - name: Login to Azure
+        uses: azure/login@v2
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+      - name: Deploy to Azure Web App
+        uses: azure/webapps-deploy@v3
+        with:
+          app-name: 'kridaz-web'
+          package: user-artifact.zip
+          startup-command: 'pm2 serve /home/site/wwwroot --no-daemon --spa'
+
+  deploy-admin-frontend:
+    name: Deploy Admin Frontend to Azure
+    needs: build-frontends
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/version3'
+    steps:
+      - name: Download Artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: admin-artifact
+
+      - name: Login to Azure
+        uses: azure/login@v2
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+      - name: Deploy to Azure Web App
+        uses: azure/webapps-deploy@v3
+        with:
+          app-name: 'kridaz-admin'
+          package: admin-artifact.zip
+          startup-command: 'pm2 serve /home/site/wwwroot --no-daemon --spa'
