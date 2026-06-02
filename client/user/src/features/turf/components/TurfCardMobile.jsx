@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
-import { Star, Heart, MapPin, Navigation } from "lucide-react";
+import { Star, Heart, MapPin, Navigation, Users } from "lucide-react";
 import { useSelector } from "react-redux";
 import { useGetSavedTurfsQuery, useToggleTurfLikeMutation } from "@redux/api/turfApi";
 import toast from "react-hot-toast";
@@ -83,88 +83,83 @@ const TurfCardMobile = ({ turf, distance: distanceProp, compact = false }) => {
   return (
     <div
       onClick={() => navigate(to)}
-      className={`group relative w-full rounded-[12px] overflow-hidden cursor-pointer bg-black transition-all duration-500 hover:-translate-y-1 hover:shadow-2xl ${
-        compact ? "h-[220px] md:h-[260px]" : "h-[320px] md:h-[400px]"
-      }`}
+      className={`group relative w-full rounded-[24px] overflow-hidden cursor-pointer bg-black aspect-[1080/1350]`}
     >
-      {/* ── Background Images (Scrollable) ── */}
+      {/* ── Background Images ── */}
       <div className="absolute inset-0 flex overflow-x-auto snap-x snap-mandatory no-scrollbar">
         {images.map((img, idx) => (
           <img
             key={idx}
             src={img || "https://images.unsplash.com/photo-1551958219-acbc608c6377?w=800&q=80"}
             alt={`${turf.name} - ${idx + 1}`}
-            className="w-full h-full object-cover shrink-0 snap-center transition-transform duration-700 group-hover:scale-105"
+            className="w-full h-full object-cover shrink-0 snap-center"
           />
         ))}
       </div>
-      {/* Darkening gradient overlay at the bottom for text contrast */}
-      <div className="absolute inset-0 bg-gradient-to-t from-black via-black/50 to-transparent opacity-90 pointer-events-none" />
+      
+      {/* Soft gradient overlay for text readability */}
+      <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent opacity-100 pointer-events-none" />
 
-      {/* ── Top Left Area: Slots and Game Type ── */}
-      <div className="absolute top-4 left-4 z-20 flex flex-row gap-2 items-center">
-        <span className={`bg-black/60 backdrop-blur-md text-[#BFF367] border border-[#BFF367]/20 font-black px-2.5 py-1 rounded-full uppercase tracking-widest ${compact ? 'text-[8px]' : 'text-[10px]'}`}>
-          {gameTypesDisplay}
-        </span>
-        <span className={`bg-[#BFF367] text-black font-black px-2.5 py-1 rounded-full uppercase tracking-widest ${compact ? 'text-[8px]' : 'text-[10px]'}`}>
-          {slotsLeft} Slots Left
-        </span>
-      </div>
-
-      {/* ── Top Right Area: Wishlist ── */}
+      {/* ── Top Right Area: Wishlist Button ── */}
       <div className="absolute top-4 right-4 z-20">
         <button 
           onClick={toggleWishlist}
-          className={`rounded-full bg-black/40 backdrop-blur-md border border-white/10 hover:bg-black/60 transition-all duration-300 group/heart ${compact ? 'p-1.5' : 'p-2'}`}
+          className={`rounded-full bg-white shadow-lg flex items-center justify-center hover:scale-105 transition-transform duration-300 ${compact ? 'w-8 h-8' : 'w-10 h-10'}`}
         >
           <Heart 
-            size={compact ? 14 : 18} 
-            className={`transition-all duration-300 ${ isWishlisted ? "fill-red-500 text-red-500 scale-110" : "text-white group-hover/heart:scale-110" }`} 
+            size={compact ? 16 : 18} 
+            className={`transition-all duration-300 ${ isWishlisted ? "fill-red-500 text-red-500" : "text-black" }`} 
           />
         </button>
       </div>
 
       {/* ── Bottom Content Area ── */}
-      <div className={`absolute bottom-0 left-0 right-0 z-20 flex flex-col ${compact ? 'p-3 gap-0.5' : 'p-5 gap-1'}`}>
-        {/* Venue Name */}
-        <h3 className={`font-bold text-white tracking-tight leading-tight font-inter line-clamp-1 ${compact ? 'text-lg md:text-xl' : 'text-xl md:text-2xl'}`}>
-          {turf.name}
-        </h3>
+      <div className={`absolute bottom-0 left-0 right-0 z-20 flex flex-col ${compact ? 'p-4' : 'p-5'}`}>
         
-        {/* Location */}
-        <div className={`flex items-center mb-1 ${compact ? 'gap-1' : 'gap-1.5 mb-2'}`}>
-          <MapPin size={compact ? 10 : 12} className="text-[#BFF367]" />
-          <p className={`text-white/70 font-medium font-inter ${compact ? 'text-[10px] md:text-xs' : 'text-xs md:text-sm'}`}>
+        {/* Row 1: Location */}
+        <div className="flex items-center gap-1.5 mb-2">
+          <MapPin size={14} className="text-white/80" />
+          <p className="text-white/90 font-medium font-inter text-sm tracking-wide">
             {turf.location || turf.city || 'Hyderabad'}
           </p>
         </div>
         
-        {/* Pricing & Rating Row */}
-        <div className="flex items-start justify-between mt-1">
-          <div className="flex items-baseline gap-1 mt-1">
-            <span className={`font-black text-[#BFF367] ${compact ? 'text-lg md:text-xl' : 'text-xl md:text-2xl'}`}>₹{price}</span>
-            <span className={`text-white/70 font-medium ${compact ? 'text-[10px] md:text-xs' : 'text-xs md:text-sm'}`}>/ hr</span>
+        {/* Row 2: Title */}
+        <div className="w-full mb-3">
+          <h3 className={`font-bold text-white leading-tight font-inter line-clamp-2 ${compact ? 'text-[15px]' : 'text-[15px] md:text-[18px]'}`}>
+            {turf.name}
+          </h3>
+        </div>
+
+        {/* Row 3: Pill Badges and Price */}
+        <div className="flex items-center justify-between gap-2 w-full pb-1">
+          {/* Left: Tags */}
+          <div className="flex items-center gap-2 overflow-x-auto no-scrollbar flex-1">
+            {/* Rating */}
+            <div className="flex items-center gap-1.5 bg-white/20 backdrop-blur-md border border-white/10 px-3 py-1.5 rounded-full whitespace-nowrap">
+              <Star size={12} className="text-white" />
+              <span className="text-white font-medium text-xs">{rating.toFixed(1)}</span>
+            </div>
+            
+            {/* Slots */}
+            <div className="flex items-center gap-1.5 bg-white/20 backdrop-blur-md border border-white/10 px-3 py-1.5 rounded-full whitespace-nowrap">
+              <Users size={12} className="text-white" />
+              <span className="text-white font-medium text-xs">{slotsLeft} Slots</span>
+            </div>
+
+            {/* Game Type */}
+            <div className="flex items-center gap-1.5 bg-white/20 backdrop-blur-md border border-white/10 px-3 py-1.5 rounded-full whitespace-nowrap">
+              <span className="text-white font-medium text-xs">{gameTypesDisplay}</span>
+            </div>
           </div>
 
-          <div className="flex flex-col items-end gap-0.5">
-            <div className="flex items-center gap-1.5 text-[#BFF367]">
-              <Star size={compact ? 14 : 16} className="fill-[#BFF367]" />
-              <span className={`font-bold font-inter ${compact ? 'text-sm md:text-base' : 'text-base md:text-lg'}`}>{rating.toFixed(1)}</span>
-            </div>
-            {distance ? (
-              <div className="flex items-center gap-1 text-white/50">
-                <Navigation size={compact ? 8 : 9} className="text-[#BFF367]" />
-                <span className={`font-bold tracking-widest uppercase ${compact ? 'text-[8px]' : 'text-[9px]'}`}>
-                  {distance}
-                </span>
-              </div>
-            ) : (
-              <span className={`font-bold tracking-widest uppercase text-white/20 ${compact ? 'text-[8px]' : 'text-[9px]'}`}>
-                --
-              </span>
-            )}
+          {/* Right: Price */}
+          <div className="flex items-baseline gap-1 shrink-0 ml-1">
+            <span className={`font-bold text-[#BFF367] ${compact ? 'text-lg' : 'text-xl'}`}>₹{price}</span>
+            <span className="text-white/80 font-medium text-[10px] md:text-xs">/hr</span>
           </div>
         </div>
+        
       </div>
     </div>
   );
