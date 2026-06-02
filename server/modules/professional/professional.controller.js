@@ -1,5 +1,6 @@
 import { prisma } from "../../config/prisma.js";
 import WalletService from "../../services/wallet.service.js";
+import WalletBlockingService from "../../services/walletBlocking.service.js";
 import logger from "../../utils/logger.js";
 
 // --- USER OPERATIONS ---
@@ -1726,6 +1727,74 @@ export const getDashboardStats = async (req, res) => {
     return res.status(200).json({ success: true, stats, activeBooking });
   } catch (error) {
     logger.error("Error in getDashboardStats:", error);
+    return res.status(500).json({ message: error.message });
+  }
+};
+
+// Complete an on-demand professional booking manually
+export const completeProfessionalBooking = async (req, res) => {
+  const { bookingId } = req.params;
+  const userId = req.user.id;
+
+  try {
+    const booking = await prisma.onDemandProfessionalBooking.findUnique({
+      where: { id: bookingId }
+    });
+
+    if (!booking) {
+      return res.status(404).json({ message: "Booking not found" });
+    }
+
+    if (booking.userId !== userId) {
+      return res.status(403).json({ message: "Unauthorized to complete this booking" });
+    }
+
+    await WalletBlockingService.releaseFundsToProfessional(bookingId);
+
+    const updatedBooking = await prisma.onDemandProfessionalBooking.findUnique({
+      where: { id: bookingId }
+    });
+
+    return res.status(200).json({ success: true, booking: updatedBooking });
+  } catch (error) {
+    logger.error("Error in completeProfessionalBooking:", error);
+    return res.status(500).json({ message: error.message });
+  }
+};
+
+// Get trust score events history for professional
+export const getTrustScoreHistory = async (req, res) => {
+  const professionalId = req.user.ownerId;
+  if (!professionalId) {
+    return res.status(403).json({ message: "Unauthorized: Professional profile not found" });
+  }
+
+  try {
+    const [owner, events] = await Promise.all([
+      prisma.ownerProfile.findUnique({
+        where: { id: professionalId },
+        select: { trustScore: true }
+      }),
+      prisma.trustScoreEvent.findMany({
+        where: { professionalId },
+        include: {
+          booking: {
+            include: {
+              ground: { select: { name: true } },
+              user: { select: { name: true } }
+            }
+          }
+        },
+        orderBy: { createdAt: "desc" }
+      })
+    ]);
+
+    return res.status(200).json({
+      trustScore: owner?.trustScore ?? 100.0,
+      events
+    });
+  } catch (error) {
+    logger.error("Error in getTrustScoreHistory:", error);
     return res.status(500).json({ message: error.message });
   }
 };
