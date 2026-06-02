@@ -13,10 +13,10 @@ export default function PlayersSection({
   handleFollowToggle,
 }) {
   return (
-    <section className="py-6 mb-6 w-full">
+    <section className="mb-8 w-full">
       <div className="w-full">
         {/* Refined Section Header */}
-        <div className="relative flex flex-row items-center justify-between gap-4 mb-6 border-b border-white/5 pb-4">
+        <div className="relative flex flex-row items-center justify-between gap-4 mb-6">
           <div className="relative">
             <div
               className="absolute -left-6 top-1/2 -translate-y-1/2 w-1.5 h-12 rounded-full shadow-[0_0_20px_rgba(85,222,232,0.4)] hidden md:block"

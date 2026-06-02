@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useSelector } from "react-redux";
 import { Plus, User } from "lucide-react";
 import { useGetStoriesFeedQuery, useDeleteStoryMutation } from "@redux/api/communityApi";
@@ -19,6 +19,14 @@ const StoriesSection = ({ user, isLoggedIn, isAdmin, gateInteraction }) => {
 
   const [showStoryModal, setShowStoryModal] = useState(false);
   const [selectedStoryGroup, setSelectedStoryGroup] = useState(null);
+
+  useEffect(() => {
+    const handleOpenCreateStory = () => {
+      gateInteraction(() => setShowStoryModal(true));
+    };
+    window.addEventListener('openCreateStory', handleOpenCreateStory);
+    return () => window.removeEventListener('openCreateStory', handleOpenCreateStory);
+  }, [gateInteraction]);
 
   const hasSeenGroup = (group) => {
     if (!currentUserId) return false;
@@ -72,12 +80,12 @@ const StoriesSection = ({ user, isLoggedIn, isAdmin, gateInteraction }) => {
   };
 
   return (
-    <div className="pt-3 pb-2 px-1">
+    <div className="py-1 px-2">
       <div className="flex gap-4 overflow-x-auto no-scrollbar scroll-smooth items-center pb-2">
         {/* Add/View Your Story */}
         <div className="flex flex-col items-center gap-2.5 shrink-0 group relative">
           <div
-            className={`w-[96px] h-[113px] rounded-[7.2pt] p-[1px] relative transition-transform ${
+            className={`w-[96px] h-[143px] rounded-[7.2pt] p-[1px] relative ${
               myStoryGroup && hasSeenGroup(myStoryGroup) ? "bg-white/20" : "bg-gradient-to-r from-[#BFF367] to-[#BFF367]"
             }`}
           >
@@ -131,11 +139,14 @@ const StoriesSection = ({ user, isLoggedIn, isAdmin, gateInteraction }) => {
                 e.stopPropagation();
                 gateInteraction(() => setShowStoryModal(true));
               }}
-              className="absolute -bottom-1 -right-1 w-[22px] h-[22px] bg-gradient-to-r from-[#BFF367] to-[#BFF367] rounded-full flex items-center justify-center border-2 border-[#0A0A0A] cursor-pointer hover:scale-110 transition-transform z-10"
+              className="absolute -bottom-2 -right-2 w-[28px] h-[28px] bg-gradient-to-r from-[#BFF367] to-[#BFF367] rounded-full flex items-center justify-center border-2 border-[#0A0A0A] cursor-pointer hover:scale-110 transition-transform z-10 shadow-lg"
             >
-              <Plus size={12} strokeWidth={4} className="text-black" />
+              <Plus size={16} strokeWidth={3} className="text-black" />
             </div>
           </div>
+          <span className="text-[10px] font-bold text-white/80 group-hover:text-[#BFF367] transition-colors truncate max-w-[68px]">
+            Your Story
+          </span>
         </div>
 
         {/* Render Other Stories */}
@@ -145,7 +156,7 @@ const StoriesSection = ({ user, isLoggedIn, isAdmin, gateInteraction }) => {
             onClick={() => setSelectedStoryGroup(group)}
             className="flex flex-col items-center gap-2.5 shrink-0 cursor-pointer group"
           >
-            <div className={`w-[96px] h-[113px] rounded-[7.2pt] p-[1px] relative hover:scale-105 transition-transform ${hasSeenGroup(group) ? "bg-white/20" : "bg-gradient-to-r from-[#BFF367] to-[#BFF367]"}`}>
+            <div className={`w-[96px] h-[143px] rounded-[7.2pt] p-[1px] relative ${hasSeenGroup(group) ? "bg-white/20" : "bg-gradient-to-r from-[#BFF367] to-[#BFF367]"}`}>
               <div className="w-full h-full rounded-[6.5pt] bg-[#0A0A0A] p-[2px]">
                 <div className="w-full h-full rounded-[5.5pt] overflow-hidden bg-[#111]">
                   {group.stories[0].mediaUrl ? (

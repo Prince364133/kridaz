@@ -31,6 +31,7 @@ const CommunityFeed = ({ user, isLoggedIn, isAdmin, gateInteraction, activeFilte
   const [hasMorePosts, setHasMorePosts] = useState(true);
   const [postsLoading, setPostsLoading] = useState(false);
   const [showDesktopInlinePost, setShowDesktopInlinePost] = useState(false);
+  const [sortOrder, setSortOrder] = useState("latest");
 
   const [playersPage, setPlayersPage] = useState(1);
   const [loadedPlayers, setLoadedPlayers] = useState([]);
@@ -71,7 +72,7 @@ const CommunityFeed = ({ user, isLoggedIn, isAdmin, gateInteraction, activeFilte
     setLoadedPlayers([]);
     setPlayersPage(1);
     setHasMorePlayers(true);
-  }, [debouncedSearchQuery, activeFilter, activeSportFilter]);
+  }, [debouncedSearchQuery, activeFilter, activeSportFilter, sortOrder]);
 
   // Fetch function for posts feed
   const fetchPosts = async (pageNumber, isSearch) => {
@@ -82,6 +83,7 @@ const CommunityFeed = ({ user, isLoggedIn, isAdmin, gateInteraction, activeFilte
       const params = {
         page: pageNumber,
         limit: 10,
+        sort: sortOrder,
       };
 
       if (isSearch) {
@@ -156,7 +158,7 @@ const CommunityFeed = ({ user, isLoggedIn, isAdmin, gateInteraction, activeFilte
     if (postsPage === 1) {
       fetchPosts(1, !!debouncedSearchQuery.trim());
     }
-  }, [postsPage, debouncedSearchQuery, activeFilter, activeSportFilter, userLocation, locationStatus]);
+  }, [postsPage, debouncedSearchQuery, activeFilter, activeSportFilter, sortOrder, userLocation, locationStatus]);
 
   useEffect(() => {
     if (postsPage > 1) {
@@ -333,75 +335,32 @@ const CommunityFeed = ({ user, isLoggedIn, isAdmin, gateInteraction, activeFilte
   };
 
   return (
-    <div className="space-y-3 mb-2">
+    <div className="space-y-6 mb-4">
       {/* Search overlay/children placeholder */}
       {!debouncedSearchQuery.trim() && children}
 
       {/* Filters Row */}
       {!debouncedSearchQuery.trim() && (
-        <div className="mb-[5px]">
-          {/* Desktop View Filters Row */}
-          <div className="hidden md:flex gap-2 overflow-x-auto no-scrollbar items-center pb-2 justify-between w-full">
-            <div className="flex gap-2 items-center shrink-0">
-              {["All", "Following", "Reels", "Highlights", "Match Moments", "Announcements"].map((filter) => (
-                  <button
-                  key={filter}
-                  onClick={() => handleSetActiveFilter(filter)}
-                  className={`px-4 py-2 rounded-[8px] text-[11px] font-bold whitespace-nowrap transition-all border shrink-0 ${
-                    activeFilter === filter
-                      ? "bg-[#BFF367] text-black shadow-[0_0_10px_rgba(191,243,103,0.3)] border-transparent hover:brightness-110"
-                      : "bg-[#111] text-white/70 border-white/10 hover:bg-[#1A1A1A] hover:text-white"
-                  }`}
-                >
-                  {filter}
-                </button>
-              ))}
-            </div>
-            <div className="flex items-center gap-2 shrink-0 pl-2">
-              <div className="relative">
-                <select
-                  className="bg-[#111] border border-white/10 rounded-[8px] py-2 pl-4 pr-8 text-white text-[11px] font-bold focus:outline-none focus:border-[#BFF367]/50 transition-all appearance-none cursor-pointer hover:bg-[#1A1A1A]"
-                  style={{ fontFamily: "'Inter', sans-serif" }}
-                  value={activeSportFilter}
-                  onChange={(e) => setActiveSportFilter(e.target.value)}
-                >
-                  <option value="" className="bg-neutral-900 text-white">All Categories</option>
-                  {["Cricket", "Football", "Rugby", "Baseball", "Hockey", "Athletics"].map((s) => (
-                    <option key={s} value={s.toLowerCase()} className="bg-neutral-900 text-white">
-                      {s}
-                    </option>
-                  ))}
-                </select>
-                <div className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-white/40">
-                  <ChevronDown size={11} />
-                </div>
-              </div>
-              <button className="px-4 py-2 rounded-[8px] bg-[#111] border border-white/10 text-white/70 hover:bg-[#1A1A1A] hover:text-white text-[11px] font-bold flex items-center gap-1.5 transition-all">
-                Latest <ChevronDown size={12} />
-              </button>
-            </div>
-            <div className="w-1 shrink-0" />
-          </div>
-
-          {/* Mobile View Filters Dropdowns */}
-          <div className="flex md:hidden gap-2 items-center overflow-x-auto no-scrollbar pb-1">
+        <div className="mb-6">
+          {/* Unified View Filters Dropdowns */}
+          <div className="grid grid-cols-3 md:flex gap-2 items-center w-full pb-1">
             {/* Reels Toggle */}
             <button
               onClick={() => handleSetActiveFilter(activeFilter === "Reels" ? "All" : "Reels")}
-              className={`flex items-center gap-1.5 px-4 py-2 rounded-[8px] text-[11px] font-bold uppercase tracking-wider transition-all shrink-0 ${
+              className={`flex items-center justify-center gap-1 px-1 py-2 rounded-[8px] text-[10px] sm:text-[11px] font-bold uppercase tracking-wider transition-all shrink-0 min-w-0 ${
                 activeFilter === "Reels" 
-                  ? "bg-[#BFF367] text-black shadow-[0_0_10px_rgba(191,243,103,0.3)]" 
+                  ? "bg-[#BFF367] text-black shadow-[0_0_10px_rgba(191,243,103,0.3)] border-transparent" 
                   : "bg-[#111] text-white/70 hover:bg-[#1A1A1A] hover:text-white border border-white/10"
               }`}
             >
-              <PlaySquare size={13} className={activeFilter === "Reels" ? "text-black" : "text-white/70"} />
-              Reels
+              <PlaySquare size={13} className={`shrink-0 ${activeFilter === "Reels" ? "text-black" : "text-white/70"}`} />
+              <span className="truncate">Reels</span>
             </button>
 
             {/* Post Type Filter */}
-            <div className="relative shrink-0">
+            <div className="relative min-w-0">
               <select
-                className="bg-[#111] border border-white/10 rounded-[8px] py-2 pl-4 pr-8 text-white text-[11px] font-bold focus:outline-none focus:border-[#BFF367]/50 transition-all appearance-none cursor-pointer hover:bg-[#1A1A1A]"
+                className="w-full bg-[#111] border border-white/10 rounded-[8px] py-2 pl-2 pr-5 sm:pl-4 sm:pr-8 text-white text-[10px] sm:text-[11px] font-bold focus:outline-none focus:border-[#BFF367]/50 transition-all appearance-none cursor-pointer hover:bg-[#1A1A1A] truncate"
                 value={activeFilter}
                 onChange={(e) => handleSetActiveFilter(e.target.value)}
               >
@@ -411,15 +370,15 @@ const CommunityFeed = ({ user, isLoggedIn, isAdmin, gateInteraction, activeFilte
                   </option>
                 ))}
               </select>
-              <div className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-white/40">
+              <div className="pointer-events-none absolute right-2 sm:right-3 top-1/2 -translate-y-1/2 text-white/40">
                 <ChevronDown size={12} />
               </div>
             </div>
 
             {/* Sport Category Filter */}
-            <div className="relative shrink-0">
+            <div className="relative min-w-0">
               <select
-                className="bg-[#111] border border-white/10 rounded-[8px] py-2 pl-4 pr-8 text-white text-[11px] font-bold focus:outline-none focus:border-[#BFF367]/50 transition-all appearance-none cursor-pointer hover:bg-[#1A1A1A]"
+                className="w-full bg-[#111] border border-white/10 rounded-[8px] py-2 pl-2 pr-5 sm:pl-4 sm:pr-8 text-white text-[10px] sm:text-[11px] font-bold focus:outline-none focus:border-[#BFF367]/50 transition-all appearance-none cursor-pointer hover:bg-[#1A1A1A] truncate"
                 value={activeSportFilter}
                 onChange={(e) => setActiveSportFilter(e.target.value)}
               >
@@ -430,12 +389,26 @@ const CommunityFeed = ({ user, isLoggedIn, isAdmin, gateInteraction, activeFilte
                   </option>
                 ))}
               </select>
-              <div className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-white/40">
+              <div className="pointer-events-none absolute right-2 sm:right-3 top-1/2 -translate-y-1/2 text-white/40">
                 <ChevronDown size={12} />
               </div>
             </div>
             
-            <div className="w-2 shrink-0" />
+            <div className="ml-auto hidden md:flex shrink-0 pl-2">
+              <div className="relative">
+                <select
+                  className="bg-[#111] border border-white/10 rounded-[8px] py-2 pl-4 pr-8 text-white text-[11px] font-bold focus:outline-none focus:border-[#BFF367]/50 transition-all appearance-none cursor-pointer hover:bg-[#1A1A1A]"
+                  value={sortOrder}
+                  onChange={(e) => setSortOrder(e.target.value)}
+                >
+                  <option value="latest" className="bg-neutral-900 text-white">Latest</option>
+                  <option value="top" className="bg-neutral-900 text-white">Top Posts</option>
+                </select>
+                <div className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-white/40">
+                  <ChevronDown size={12} />
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       )}
@@ -509,59 +482,7 @@ const CommunityFeed = ({ user, isLoggedIn, isAdmin, gateInteraction, activeFilte
         </div>
       )}
 
-      {/* Create Post floating trigger / input mock */}
-      {isLoggedIn && !debouncedSearchQuery.trim() && (
-        <div className="mb-4">
-          {/* Mobile floating trigger */}
-          <div className="md:hidden bg-[#0A0A0A] border border-white/5 rounded-[12px] p-4 flex items-center gap-3">
-            <img src={user?.profilePicture || "/default-avatar.png"} className="w-8 h-8 rounded-full object-cover border border-white/10" alt="" />
-            <button
-              onClick={() => gateInteraction(() => setShowPostModal(true))}
-              className="flex-1 bg-[#111] hover:bg-[#1A1A1A] rounded-[8px] h-10 px-4 text-left text-[12px] font-bold text-white/40 border border-white/10 transition-all flex items-center justify-between"
-            >
-              <span>What's happening in your match?</span>
-              <Edit3 size={14} className="text-white/40" />
-            </button>
-          </div>
 
-          {/* Desktop inline accordion */}
-          <div className="hidden md:block">
-            <AnimatePresence mode="wait">
-              {!showDesktopInlinePost ? (
-                <motion.div
-                  key="trigger"
-                  initial={{ height: 0, opacity: 0 }}
-                  animate={{ height: "auto", opacity: 1 }}
-                  exit={{ height: 0, opacity: 0 }}
-                  className="bg-[#0A0A0A] border border-white/5 rounded-[12px] p-4 flex items-center gap-3"
-                >
-                  <img src={user?.profilePicture || "/default-avatar.png"} className="w-8 h-8 rounded-full object-cover border border-white/10" alt="" />
-                  <button
-                    onClick={() => gateInteraction(() => setShowDesktopInlinePost(true))}
-                    className="flex-1 bg-[#111] hover:bg-[#1A1A1A] rounded-[8px] h-10 px-4 text-left text-[12px] font-bold text-white/40 border border-white/10 transition-all flex items-center justify-between cursor-text"
-                  >
-                    <span>What's happening in your match?</span>
-                    <Edit3 size={14} className="text-white/40" />
-                  </button>
-                </motion.div>
-              ) : (
-                <motion.div key="form">
-                  <CreatePostModal
-                    isOpen={true}
-                    onClose={() => {
-                      setShowDesktopInlinePost(false);
-                      setEditingPost(null);
-                    }}
-                    editingPost={editingPost}
-                    user={user}
-                    isInline={true}
-                  />
-                </motion.div>
-              )}
-            </AnimatePresence>
-          </div>
-        </div>
-      )}
 
       {/* Feed list */}
       {postsLoading && loadedPosts.length === 0 ? (

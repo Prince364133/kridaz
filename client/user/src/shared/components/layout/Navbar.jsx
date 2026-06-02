@@ -331,7 +331,7 @@ const Navbar = () => {
                     {/* SIDEBAR PANEL */}
                     {createPortal(
                       <div className={`fixed top-0 right-0 h-[100dvh] w-72 sm:w-80 bg-[#0A0A0A] border-l border-white/10 shadow-[0_32px_64px_-16px_rgba(0,0,0,0.8)] overflow-y-auto z-[1000] transition-transform duration-300 ${isSidebarOpen ? 'translate-x-0' : 'translate-x-full'}`}>
-                      <div className="p-4 flex items-center justify-between border-b border-white/5 sticky top-0 bg-[#0A0A0A]/90 backdrop-blur-md z-10">
+                      <div className="p-4 flex items-center justify-between border-b border-white/5 sticky top-0 bg-[#0A0A0A] z-50">
                         <span className="font-bold text-white uppercase tracking-widest text-sm">Account</span>
                         <button onClick={() => setIsSidebarOpen(false)} className="p-2 hover:bg-white/10 rounded-full transition-colors text-white/70 hover:text-white">
                           <X size={20} />
@@ -339,188 +339,147 @@ const Navbar = () => {
                       </div>
 
                       {/* Navigation Groups */}
-                      <div className="p-4 space-y-2">
-                        {/* User info / Profile Link */}
+                      <div className="p-4 flex flex-col gap-6">
+                        {/* Profile Card */}
                         <Link
                           to={getDynamicProfileRoute(user, role)}
                           onClick={() => setIsSidebarOpen(false)}
-                          className="flex items-center gap-4 p-3 rounded-[8px] bg-white/5 hover:bg-white/10 text-white transition-all mb-4"
+                          className="flex items-center gap-4 p-4 rounded-[12px] bg-white/5 border border-white/10 hover:bg-white/10 text-white transition-all backdrop-blur-md mb-2"
                         >
-                          <div className="w-10 h-10 rounded-full border border-white/10 bg-white/10 flex items-center justify-center shrink-0">
+                          <div className="w-12 h-12 rounded-full bg-[#111] border border-white/20 flex items-center justify-center shrink-0 overflow-hidden">
                             {(() => {
                               if (user?.profilePicture || user?.profileImage) {
-                                return <img src={user.profilePicture || user.profileImage} alt="" className="w-full h-full object-cover rounded-full" />;
+                                return <img src={user.profilePicture || user.profileImage} alt="" className="w-full h-full object-cover" />;
                               }
                               const gender = user?.gender?.toLowerCase();
                               if (gender === 'male' || gender === 'm') {
-                                return <img src={`https://avatar.iran.liara.run/public/boy?username=${user?.name || 'user'}`} alt="" className="w-full h-full object-cover rounded-full" />;
+                                return <img src={`https://avatar.iran.liara.run/public/boy?username=${user?.name || 'user'}`} alt="" className="w-full h-full object-cover" />;
                               }
                               if (gender === 'female' || gender === 'f') {
-                                return <img src={`https://avatar.iran.liara.run/public/girl?username=${user?.name || 'user'}`} alt="" className="w-full h-full object-cover rounded-full" />;
+                                return <img src={`https://avatar.iran.liara.run/public/girl?username=${user?.name || 'user'}`} alt="" className="w-full h-full object-cover" />;
                               }
                               if (user?.name) {
                                 return (
-                                  <span className="text-[#84CC16] font-bold text-sm">
+                                  <span className="text-[#BFF367] font-bold text-sm">
                                     {user.name.split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2)}
                                   </span>
                                 );
                               }
-                              return <User size={20} className="text-[#84CC16]" />;
+                              return <User size={20} className="text-[#BFF367]" />;
                             })()}
                           </div>
                           <div className="flex-1 min-w-0">
-                            <p className="text-base font-bold text-white truncate">{user?.name || "Profile"}</p>
-                            <p className="text-xs text-white/40 truncate">{user?.email || "View Account"}</p>
+                            <p className="text-[15px] font-black tracking-tight text-white truncate">{user?.name || "Profile"}</p>
+                            <p className="text-[12px] font-medium text-white/40 truncate">{user?.email || "View Account"}</p>
                           </div>
                         </Link>
 
-                        <div className="h-[1px] bg-white/5 my-2" />
-
-                        {/* DASHBOARDS SECTION */}
-                        {(["bmsp_admin", "admin", "venu_owners", "venue_owners", "venue", "coach", "umpire", "streamer", "commentator", "scorer", "cheerleader"].some(r => role?.toLowerCase().includes(r)) ||
-                          ["bmsp_admin", "admin", "venu_owners", "venue_owners", "venue", "coach", "umpire", "streamer", "commentator", "scorer", "cheerleader"].some(r => user?.role?.toLowerCase().includes(r))) && (
-                            <>
-
-                              {(role?.toLowerCase().includes("venu_owners") || user?.role?.toLowerCase().includes("venu_owners") || role?.toLowerCase().includes("venue") || user?.role?.toLowerCase().includes("venue") || role?.toLowerCase().includes("owner") || user?.role?.toLowerCase().includes("owner")) && (
-                                <Link to="/venue-owner" onClick={() => setIsSidebarOpen(false)} className="flex items-center gap-3 p-3 rounded-[8px] hover:bg-white/5 text-white/70 hover:text-white transition-all">
-                                  <Activity size={18} className="text-white/40" />
-                                  <span className="text-sm font-medium">Venue Owner Dashboard</span>
+                        {/* PROFESSIONAL HUB */}
+                        <div className="flex flex-col">
+                          <span className="text-[10px] font-bold text-white/30 uppercase tracking-[0.2em] mb-2 px-1">Professional Hub</span>
+                          <div className="flex flex-col gap-1">
+                            {(["bmsp_admin", "admin", "venu_owners", "venue_owners", "venue", "owner"].some(r => role?.toLowerCase().includes(r) || user?.role?.toLowerCase().includes(r))) ? (
+                              <Link to="/venue-owner" onClick={() => setIsSidebarOpen(false)} className="flex items-center gap-3 p-3 rounded-[8px] hover:bg-white/5 text-white/70 hover:text-white transition-all">
+                                <Activity size={18} className="text-[#BFF367]" />
+                                <span className="text-sm font-semibold">Venue Dashboard</span>
+                              </Link>
+                            ) : (["coach", "umpire", "streamer", "commentator", "scorer", "cheerleader"].some(r => role?.toLowerCase().includes(r) || user?.role?.toLowerCase().includes(r))) ? (
+                              <Link to={`/professional/${role?.toLowerCase() || user?.role?.toLowerCase()}`} onClick={() => setIsSidebarOpen(false)} className="flex items-center gap-3 p-3 rounded-[8px] hover:bg-white/5 text-white/70 hover:text-white transition-all">
+                                <Zap size={18} className="text-[#BFF367]" />
+                                <span className="text-sm font-semibold">Professional Portal</span>
+                              </Link>
+                            ) : (
+                              <>
+                                <Link to="/business/venue" onClick={() => setIsSidebarOpen(false)} className="flex items-center gap-3 p-3 rounded-[8px] hover:bg-white/5 text-white/70 hover:text-white transition-all">
+                                  <Briefcase size={18} className="text-[#BFF367]" />
+                                  <span className="text-sm font-semibold">Host Venue</span>
                                 </Link>
-                              )}
-                              {(["coach", "umpire", "streamer", "commentator", "scorer", "cheerleader"].some(r => role?.toLowerCase().includes(r) || user?.role?.toLowerCase().includes(r))) && (
-                                <Link to={`/professional/${role?.toLowerCase() || user?.role?.toLowerCase()}`} onClick={() => setIsSidebarOpen(false)} className="flex items-center gap-3 p-3 rounded-[8px] hover:bg-white/5 text-white/70 hover:text-white transition-all">
-                                  <Zap size={18} className="text-white/40" />
-                                  <span className="text-sm font-medium">Professional Portal</span>
+                                <Link to="/business/professional" onClick={() => setIsSidebarOpen(false)} className="flex items-center gap-3 p-3 rounded-[8px] hover:bg-white/5 text-white/70 hover:text-white transition-all">
+                                  <Zap size={18} className="text-[#BFF367]" />
+                                  <span className="text-sm font-semibold">Register as Pro</span>
                                 </Link>
-                              )}
-                              <div className="h-[1px] bg-white/5 my-2" />
-                            </>
-                          )}
+                              </>
+                            )}
+                          </div>
+                        </div>
 
-                        {/* ACCOUNT SECTION */}
-                        <details className="group [&_summary::-webkit-details-marker]:hidden lg:hidden">
-                          <summary className="flex items-center justify-between p-3 rounded-[8px] hover:bg-white/5 text-white/70 hover:text-white transition-all cursor-pointer list-none">
-                            <div className="flex items-center gap-3">
-                              <Briefcase size={18} className="text-white/40 group-hover:text-white/70 transition-colors" />
-                              <span className="text-sm font-medium">Business</span>
-                            </div>
-                            <ChevronRight size={16} className="text-white/40 transition-transform group-open:rotate-90" />
-                          </summary>
-                          <div className="flex flex-col gap-1 pl-10 pr-3 pb-2 pt-1">
-                            <Link to="/business/venue" onClick={() => setIsSidebarOpen(false)} className="text-sm font-medium text-white/50 hover:text-white py-1.5 transition-colors">
-                              Venue Owner
+                        {/* PLAY */}
+                        <div className="flex flex-col">
+                          <span className="text-[10px] font-bold text-white/30 uppercase tracking-[0.2em] mb-2 px-1">Play</span>
+                          <div className="flex flex-col gap-1">
+                            <Link to="/booking-history" onClick={() => setIsSidebarOpen(false)} className="flex items-center gap-3 p-3 rounded-[8px] hover:bg-white/5 text-white/70 hover:text-white transition-all">
+                              <Clock size={18} className="text-white/40" />
+                              <span className="text-sm font-semibold">My Bookings</span>
                             </Link>
-                            <Link to="/business/professional" onClick={() => setIsSidebarOpen(false)} className="text-sm font-medium text-white/50 hover:text-white py-1.5 transition-colors">
-                              Professionals
+                            <Link to="/my-teams" onClick={() => setIsSidebarOpen(false)} className="flex items-center gap-3 p-3 rounded-[8px] hover:bg-white/5 text-white/70 hover:text-white transition-all">
+                              <Users size={18} className="text-white/40" />
+                              <span className="text-sm font-semibold">My Teams</span>
+                            </Link>
+                            <Link to="/my-joined-games" onClick={() => setIsSidebarOpen(false)} className="flex items-center gap-3 p-3 rounded-[8px] hover:bg-white/5 text-white/70 hover:text-white transition-all">
+                              <Trophy size={18} className="text-white/40" />
+                              <span className="text-sm font-semibold">My Joined Matches</span>
+                            </Link>
+                            <Link to="/my-hosted-games" onClick={() => setIsSidebarOpen(false)} className="flex items-center gap-3 p-3 rounded-[8px] hover:bg-white/5 text-white/70 hover:text-white transition-all">
+                              <Target size={18} className="text-white/40" />
+                              <span className="text-sm font-semibold">My Hosted Games</span>
+                            </Link>
+                            <Link to="/wallet" onClick={() => setIsSidebarOpen(false)} className="flex items-center gap-3 p-3 rounded-[8px] hover:bg-white/5 text-white/70 hover:text-white transition-all">
+                              <Zap size={18} className="text-white/40" />
+                              <span className="text-sm font-semibold">My Wallet</span>
                             </Link>
                           </div>
-                        </details>
+                        </div>
 
-                        <Link
-                          to="/notifications"
-                          onClick={() => setIsSidebarOpen(false)}
-                          className="flex items-center gap-3 p-3 rounded-[8px] hover:bg-white/5 text-white/70 hover:text-white transition-all"
-                        >
-                          <div className="relative">
-                            <Bell size={18} className="text-white/40" />
-                            <NotificationBadge />
+                        {/* COMMUNICATION */}
+                        <div className="flex flex-col">
+                          <span className="text-[10px] font-bold text-white/30 uppercase tracking-[0.2em] mb-2 px-1">Communication</span>
+                          <div className="flex flex-col gap-1">
+                            <Link to="/messages" onClick={() => setIsSidebarOpen(false)} className="flex items-center gap-3 p-3 rounded-[8px] hover:bg-white/5 text-white/70 hover:text-white transition-all">
+                              <MessageCircle size={18} className="text-white/40" />
+                              <span className="text-sm font-semibold">Messages</span>
+                            </Link>
+                            <Link to="/notifications" onClick={() => setIsSidebarOpen(false)} className="flex items-center gap-3 p-3 rounded-[8px] hover:bg-white/5 text-white/70 hover:text-white transition-all">
+                              <div className="relative">
+                                <Bell size={18} className="text-white/40" />
+                                <NotificationBadge />
+                              </div>
+                              <span className="text-sm font-semibold">Notifications</span>
+                            </Link>
                           </div>
-                          <span className="text-sm font-medium">Notifications</span>
-                        </Link>
+                        </div>
 
-                        <Link
-                          to="/messages"
-                          onClick={() => setIsSidebarOpen(false)}
-                          className="flex items-center gap-3 p-3 rounded-[8px] hover:bg-white/5 text-white/70 hover:text-white transition-all"
-                        >
-                          <MessageCircle size={18} className="text-white/40" />
-                          <span className="text-sm font-medium">Messages</span>
-                        </Link>
+                        {/* COMMUNITY */}
+                        <div className="flex flex-col">
+                          <span className="text-[10px] font-bold text-white/30 uppercase tracking-[0.2em] mb-2 px-1">Community</span>
+                          <div className="flex flex-col gap-1">
+                            <Link to="/leaderboard" onClick={() => setIsSidebarOpen(false)} className="flex items-center gap-3 p-3 rounded-[8px] hover:bg-white/5 text-white/70 hover:text-white transition-all">
+                              <Trophy size={18} className="text-white/40" />
+                              <span className="text-sm font-semibold">Global Leaderboard</span>
+                            </Link>
+                            <Link to="/saved" onClick={() => setIsSidebarOpen(false)} className="flex items-center gap-3 p-3 rounded-[8px] hover:bg-white/5 text-white/70 hover:text-white transition-all">
+                              <Bookmark size={18} className="text-white/40" />
+                              <span className="text-sm font-semibold">Saved Items</span>
+                            </Link>
+                            <Link to="/blogs" onClick={() => setIsSidebarOpen(false)} className="flex items-center gap-3 p-3 rounded-[8px] hover:bg-white/5 text-white/70 hover:text-white transition-all">
+                              <FileText size={18} className="text-white/40" />
+                              <span className="text-sm font-semibold">Blogs</span>
+                            </Link>
+                          </div>
+                        </div>
 
-                        <Link
-                          to="/my-teams"
-                          onClick={() => setIsSidebarOpen(false)}
-                          className="flex items-center gap-3 p-3 rounded-[8px] hover:bg-white/5 text-white/70 hover:text-white transition-all"
-                        >
-                          <Users size={18} className="text-white/40" />
-                          <span className="text-sm font-medium">My Teams</span>
-                        </Link>
-
-                        <Link
-                          to="/booking-history"
-                          onClick={() => setIsSidebarOpen(false)}
-                          className="flex items-center gap-3 p-3 rounded-[8px] hover:bg-white/5 text-white/70 hover:text-white transition-all"
-                        >
-                          <Clock size={18} className="text-white/40" />
-                          <span className="text-sm font-medium">My Bookings</span>
-                        </Link>
-
-                        <Link
-                          to="/my-hosted-games"
-                          onClick={() => setIsSidebarOpen(false)}
-                          className="flex items-center gap-3 p-3 rounded-[8px] hover:bg-white/5 text-white/70 hover:text-white transition-all"
-                        >
-                          <Target size={18} className="text-white/40" />
-                          <span className="text-sm font-medium">My Hosted Games</span>
-                        </Link>
-
-                        <Link
-                          to="/my-joined-games"
-                          onClick={() => setIsSidebarOpen(false)}
-                          className="flex items-center gap-3 p-3 rounded-[8px] hover:bg-white/5 text-white/70 hover:text-white transition-all"
-                        >
-                          <Trophy size={18} className="text-white/40" />
-                          <span className="text-sm font-medium">My Joined Matches</span>
-                        </Link>
-
-                        <Link
-                          to="/saved"
-                          onClick={() => setIsSidebarOpen(false)}
-                          className="flex items-center gap-3 p-3 rounded-[8px] hover:bg-white/5 text-white/70 hover:text-white transition-all"
-                        >
-                          <Bookmark size={18} className="text-white/40" />
-                          <span className="text-sm font-medium">Saved Items</span>
-                        </Link>
-
-                        <Link
-                          to="/leaderboard"
-                          onClick={() => setIsSidebarOpen(false)}
-                          className="flex items-center gap-3 p-3 rounded-[8px] hover:bg-primary/10 text-primary border border-primary/10 transition-all"
-                        >
-                          <Trophy size={18} className="text-primary/70" />
-                          <span className="text-sm font-bold">Global Leaderboard</span>
-                        </Link>
-
-                        <Link
-                          to="/wallet"
-                          onClick={() => setIsSidebarOpen(false)}
-                          className="flex items-center gap-3 p-3 rounded-[8px] hover:bg-white/5 text-white/70 hover:text-white transition-all"
-                        >
-                          <Zap size={18} className="text-white/40" />
-                          <span className="text-sm font-medium">My Wallet</span>
-                        </Link>
-
-                        <div className="h-[1px] bg-white/5 my-2" />
-
-                        <button
-                          onClick={() => {
-                            setIsSidebarOpen(false);
-                            handleLogout();
-                          }}
-                          className="w-full flex items-center gap-3 p-3 rounded-[8px] hover:bg-red-500/10 text-red-400 hover:text-red-300 transition-all"
-                        >
-                          <LogOut size={18} className="opacity-70" />
-                          <span className="text-sm font-medium">Logout</span>
-                        </button>
-
-                        <Link
-                          to="/blogs"
-                          onClick={() => setIsSidebarOpen(false)}
-                          className="w-full flex items-center gap-3 p-3 rounded-[8px] hover:bg-white/5 text-white/70 hover:text-white transition-all"
-                        >
-                          <FileText size={18} className="text-white/40" />
-                          <span className="text-sm font-medium">Blogs</span>
-                        </Link>
+                        {/* BOTTOM FIXED (LOGOUT) */}
+                        <div className="pt-4 border-t border-white/5 mt-auto">
+                          <button
+                            onClick={() => {
+                              setIsSidebarOpen(false);
+                              handleLogout();
+                            }}
+                            className="w-full flex items-center justify-center gap-2 p-3 rounded-[8px] bg-red-500/5 hover:bg-red-500/10 border border-red-500/10 text-red-400 hover:text-red-300 transition-all"
+                          >
+                            <LogOut size={16} className="opacity-70" />
+                            <span className="text-sm font-bold tracking-wide">Logout</span>
+                          </button>
+                        </div>
                       </div>
                     </div>,
                     document.body

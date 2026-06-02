@@ -17,8 +17,8 @@ export default function VenuesSection({
   const navigate = useNavigate();
 
   return (
-    <section className="py-2 mb-4 w-full">
-      <div className="relative flex flex-row items-center justify-between gap-4 mb-4 border-b border-white/5 pb-4">
+    <section className="mb-8 w-full">
+      <div className="relative flex flex-row items-center justify-between gap-4 mb-6">
         <div className="relative">
           <h2
             className="text-[18px] md:text-[30px] font-black text-white uppercase tracking-tighter leading-none"

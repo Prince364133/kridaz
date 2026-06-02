@@ -148,7 +148,7 @@ const Community = ({ children, onSearchActive }) => {
   }, [searchQuery, showGlobalSearch]);
 
   return (
-    <div className={`min-h-screen bg-[#050505] text-white pt-0 pb-12 ${activeFilter === "Reels" ? "px-0 md:px-3" : "px-1 md:px-3"} font-sans relative`}>
+    <div className={`min-h-screen bg-[#050505] text-white pt-4 pb-12 ${activeFilter === "Reels" ? "px-0 md:px-4" : "px-2 md:px-4"} font-sans relative`}>
       {/* Global Search Modal */}
       <AnimatePresence>
         {showGlobalSearch && (
@@ -230,14 +230,14 @@ const Community = ({ children, onSearchActive }) => {
 
       <div className="max-w-[1500px] mx-auto w-full">
         <div className="grid grid-cols-1 gap-6">
-          <div className={`max-w-3xl mx-auto w-full transition-all duration-300 ${activeFilter === "Reels" ? "h-[100dvh] sticky top-0 max-w-none" : "space-y-2"}`}>
+          <div className={`max-w-3xl mx-auto w-full transition-all duration-300 flex flex-col ${activeFilter === "Reels" ? "h-[100dvh] sticky top-0 max-w-none" : "gap-1"}`}>
             {activeFilter === "Reels" ? (
               <ReelsView gateInteraction={gateInteraction} onBack={() => handleSetActiveFilter("All")} />
             ) : (
               <>
                 {/* Desktop Location Header */}
                 {isLoggedIn && (
-                  <div className="hidden lg:flex flex-col items-start mt-[18px] mb-4 cursor-pointer group">
+                  <div className="hidden lg:flex flex-col items-start mt-4 mb-4 cursor-pointer group">
                     <svg width="0" height="0" className="absolute">
                       <linearGradient id="mapPinGradient" x1="0%" y1="0%" x2="100%" y2="100%">
                         <stop offset="0%" stopColor="#60E5D0" />
@@ -279,7 +279,9 @@ const Community = ({ children, onSearchActive }) => {
                   </div>
                 )}
 
-                <StoriesSection user={user} isLoggedIn={isLoggedIn} isAdmin={isAdmin} gateInteraction={gateInteraction} />
+                <div className="mb-4">
+                  <StoriesSection user={user} isLoggedIn={isLoggedIn} isAdmin={isAdmin} gateInteraction={gateInteraction} />
+                </div>
 
                 <CommunityFeed
                   user={user}

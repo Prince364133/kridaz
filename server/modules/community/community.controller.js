@@ -224,9 +224,17 @@ export const getPosts = async (req, res) => {
     const rawId = req.user?.id || req.admin?.id;
     const userId = await resolveUserId(rawId);
 
-    const { search, page = 1, limit = 10, following, lat, lng } = req.query;
+    const { search, page = 1, limit = 10, following, lat, lng, sort } = req.query;
     const skip = (parseInt(page) - 1) * parseInt(limit);
     const take = parseInt(limit);
+
+    let orderByOption = { createdAt: 'desc' };
+    if (sort === 'top') {
+      orderByOption = [
+        { likes: { _count: 'desc' } },
+        { createdAt: 'desc' }
+      ];
+    }
 
     let authorFilter = null;
     
@@ -303,7 +311,7 @@ export const getPosts = async (req, res) => {
           take: 3
         }
       },
-      orderBy: { createdAt: 'desc' },
+      orderBy: orderByOption,
       skip,
       take
     });
@@ -328,7 +336,7 @@ export const getPosts = async (req, res) => {
             take: 3
           }
         },
-        orderBy: { createdAt: 'desc' },
+        orderBy: orderByOption,
         skip,
         take
       });
