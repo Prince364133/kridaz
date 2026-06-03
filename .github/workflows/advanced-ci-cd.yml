@@ -2,7 +2,7 @@ name: Kridaz Monorepo CI/CD
 
 on:
   push:
-    branches: [ main, version3, Production ]
+    branches: [ main, version3, Production, dev_test_production ]
   workflow_dispatch:
 
 concurrency:
@@ -158,7 +158,7 @@ jobs:
     name: Deploy Backend to Azure
     needs: build-backend
     runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/version3' || github.ref == 'refs/heads/Production'
+    if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/version3' || github.ref == 'refs/heads/Production' || github.ref == 'refs/heads/dev_test_production'
     steps:
       - name: Download Artifact
         uses: actions/download-artifact@v4
@@ -180,7 +180,7 @@ jobs:
     name: Deploy User Frontend to Azure
     needs: build-frontends
     runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/version3' || github.ref == 'refs/heads/Production'
+    if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/version3' || github.ref == 'refs/heads/Production' || github.ref == 'refs/heads/dev_test_production'
     steps:
       - name: Download Artifact
         uses: actions/download-artifact@v4
@@ -203,7 +203,7 @@ jobs:
     name: Deploy Admin Frontend to Azure
     needs: build-frontends
     runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/version3' || github.ref == 'refs/heads/Production'
+    if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/version3' || github.ref == 'refs/heads/Production' || github.ref == 'refs/heads/dev_test_production'
     steps:
       - name: Download Artifact
         uses: actions/download-artifact@v4
