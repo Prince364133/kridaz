@@ -148,7 +148,7 @@ const Community = ({ children, onSearchActive }) => {
   }, [searchQuery, showGlobalSearch]);
 
   return (
-    <div className={`min-h-screen bg-[#050505] text-white pt-4 pb-12 ${activeFilter === "Reels" ? "px-0 md:px-4" : "px-2 md:px-4"} font-sans relative`}>
+    <div className={`min-h-screen bg-[#050505] text-white pt-4 pb-12 ${activeFilter === "Reels" ? "px-0 md:px-4" : "px-2 md:px-0"} font-sans relative`}>
       {/* Global Search Modal */}
       <AnimatePresence>
         {showGlobalSearch && (
@@ -230,57 +230,11 @@ const Community = ({ children, onSearchActive }) => {
 
       <div className="max-w-[1500px] mx-auto w-full">
         <div className="grid grid-cols-1 gap-6">
-          <div className={`max-w-3xl mx-auto w-full transition-all duration-300 flex flex-col ${activeFilter === "Reels" ? "h-[100dvh] sticky top-0 max-w-none" : "gap-1"}`}>
+          <div className={`max-w-3xl md:max-w-none mx-auto md:mx-0 w-full transition-all duration-300 flex flex-col ${activeFilter === "Reels" ? "h-[100dvh] sticky top-0 max-w-none" : "gap-1"}`}>
             {activeFilter === "Reels" ? (
               <ReelsView gateInteraction={gateInteraction} onBack={() => handleSetActiveFilter("All")} />
             ) : (
               <>
-                {/* Desktop Location Header */}
-                {isLoggedIn && (
-                  <div 
-                    className="hidden lg:flex flex-col items-start mt-4 mb-4 cursor-pointer group"
-                    onClick={() => dispatch(openLocationSidebar())}
-                  >
-                    <svg width="0" height="0" className="absolute">
-                      <linearGradient id="mapPinGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-                        <stop offset="0%" stopColor="#60E5D0" />
-                        <stop offset="100%" stopColor="#A2F86D" />
-                      </linearGradient>
-                    </svg>
-                    <span className="text-[12px] font-bold text-white/50 uppercase tracking-[0.15em] mb-1">
-                      YOUR LOCATION
-                    </span>
-                    <div className="flex items-center gap-2 mt-[2px]">
-                      <div className="flex flex-col items-center justify-center">
-                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24">
-                          <g fill="none">
-                            <path d="m12.593 23.258l-.011.002l-.071.035l-.02.004l-.014-.004l-.071-.035q-.016-.005-.024.005l-.004.01l-.017.428l.005.02l.01.013l.104.074l.015.004l.012-.004l.104-.074l.012-.016l.004-.017l-.017-.427q-.004-.016-.017-.018m.265-.113l-.013.002l-.185.093l-.01.01l-.003.011l.018.43l.005.012l.008.007l.201.093q.019.005.029-.008l.004-.014l-.034-.614q-.005-.018-.02-.022m-.715.002a.02.02 0 0 0-.027.006l-.006.014l-.034.614q.001.018.017.024l.015-.002l.201-.093l.01-.008l.004-.011l.017-.43l-.003-.012l-.01-.01z" />
-                            <path fill="url(#mapPinGradient)" d="M12 2a9 9 0 0 1 9 9c0 3.074-1.676 5.59-3.442 7.395a20.4 20.4 0 0 1-2.876 2.416l-.426.29l-.2.133l-.377.24l-.336.205l-.416.242a1.87 1.87 0 0 1-1.854 0l-.416-.242l-.52-.32l-.192-.125l-.41-.273a20.6 20.6 0 0 1-3.093-2.566C4.676 16.589 3 14.074 3 11a9 9 0 0 1 9-9m0 6a3 3 0 1 0 0 6a3 3 0 0 0 0-6" />
-                          </g>
-                        </svg>
-                      </div>
-                      
-                      {geoLoading ? (
-                        <span className="text-[26px] font-medium text-white tracking-tight leading-none animate-pulse">
-                          Locating...
-                        </span>
-                      ) : geoLabel ? (
-                        <span className="text-[26px] font-medium text-white tracking-tight leading-none truncate max-w-[300px]">
-                          {userLocation?.city || geoLabel.split(',')[0]}
-                        </span>
-                      ) : (
-                        <span
-                          className="text-[26px] font-medium text-white tracking-tight leading-none hover:text-white/80 transition-colors"
-                        >
-                          Set Location
-                        </span>
-                      )}
-                      
-                      <ChevronDown size={20} className="text-white mt-1 group-hover:translate-y-0.5 transition-transform" />
-                    </div>
-                  </div>
-                )}
-
                 <div className="mb-4">
                   <StoriesSection user={user} isLoggedIn={isLoggedIn} isAdmin={isAdmin} gateInteraction={gateInteraction} />
                 </div>

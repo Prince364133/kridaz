@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { Search, Loader2, ArrowLeft, X, SlidersHorizontal, Star, MapPin, Check, ShieldCheck, MoreVertical, ThumbsUp, MessageCircle, Send } from "lucide-react";
 import { useLazySearchPlayersQuery } from "@redux/api/teamApi";
 import { useLazyGetCommunityFeedQuery, useGetCommunityFeedQuery } from "@redux/api/communityApi";
@@ -15,13 +15,20 @@ const HEADING_STYLE = { fontFamily: "'Open Sans', sans-serif" };
 
 const GlobalSearch = () => {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const queryParam = searchParams.get("q") || "";
   const { user } = useSelector((state) => state.auth);
   const isAdmin = user?.role === "ADMIN";
   const { gateInteraction } = useLoginOnDemand();
 
-  const [searchQuery, setSearchQuery] = useState("");
-  const [debouncedQuery, setDebouncedQuery] = useState("");
+  const [searchQuery, setSearchQuery] = useState(queryParam);
+  const [debouncedQuery, setDebouncedQuery] = useState(queryParam);
   const [isFilterOpen, setIsFilterOpen] = useState(false);
+
+  useEffect(() => {
+    setSearchQuery(queryParam);
+    setDebouncedQuery(queryParam);
+  }, [queryParam]);
 
   // States for dynamic search
   const [venues, setVenues] = useState([]);

@@ -188,7 +188,7 @@ export default function Home() {
   return (
 
     <div className="bg-[#050505] min-h-screen text-white font-sans w-full max-w-[100vw] overflow-x-hidden pt-0 pb-16 lg:pb-0">
-      <div className="px-2 md:px-4 lg:px-2 lg:pl-4 max-w-[1400px] mt-0 mb-4">
+      <div className="px-2 md:px-0 w-full mt-0 mb-4">
         <Community onSearchActive={setIsCommunitySearchActive}>
           {/* -- HERO DASHBOARD -- */}
           <DashboardHero user={user} />
