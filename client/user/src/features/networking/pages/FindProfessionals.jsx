@@ -541,7 +541,7 @@ export default function FindProfessionals() {
           className="fixed bottom-24 md:bottom-8 left-1/2 -translate-x-1/2 z-[60] flex items-center gap-2.5 px-6 py-3.5 rounded-full bg-gradient-to-r from-[#BFF367] to-[#BFF367] text-black font-black text-xs uppercase tracking-widest shadow-[0_8px_32px_rgba(85,222,232,0.3)] hover:shadow-[0_8px_40px_rgba(85,222,232,0.5)] hover:scale-105 active:scale-95 transition-all duration-300 group"
         >
           <Zap size={16} className="group-hover:animate-pulse" />
-          Request Match
+          Find Pro's
         </button>
       )}
 
