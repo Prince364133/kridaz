@@ -20,7 +20,7 @@
     "eslint-config-prettier": "^9.1.0",
     "eslint-plugin-react": "^7.34.1",
     "prettier": "^3.2.5",
-    "turbo": "^2.0.0"
+    "turbo": "^2.9.14"
   },
   "pnpm": {
     "onlyBuiltDependencies": [
