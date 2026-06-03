@@ -15,7 +15,6 @@ import {
   useGetUserOnDemandBookingsQuery
 } from "../../../redux/api/professionalApi";
 
-const SUBHEADING_STYLE = { fontFamily: "'Inter 28pt Light', sans-serif", fontWeight: 300 };
 const sports = ["ALL SPORTS", "CRICKET", "BADMINTON", "FOOTBALL", "TENNIS", "PICKLEBALL"];
 const roles = ["All", "Coach", "Umpire", "Streamer", "Commentator", "Scorer", "Cheerleader"];
 
@@ -54,8 +53,10 @@ export default function FindProfessionals() {
   const [locationResults, setLocationResults] = useState([]);
   const [locationSearching, setLocationSearching] = useState(false);
   const [showLocationDropdown, setShowLocationDropdown] = useState(false);
+  const [showMoreFilters, setShowMoreFilters] = useState(false);
   const [showLocationSearchModal, setShowLocationSearchModal] = useState(false);
   const locationSearchRef = useRef(null);
+  const filterMenuRef = useRef(null);
   const searchTimeoutRef = useRef(null);
   const [selectedRoles, setSelectedRoles] = useState(() => {
     const validRoles = ["COACH", "UMPIRE", "STREAMER", "COMMENTATOR", "SCORER", "CHEERLEADER"];
@@ -208,7 +209,9 @@ export default function FindProfessionals() {
           );
           const data = await res.json();
           if (data.display_name) address = data.display_name;
-        } catch { }
+        } catch {
+          // Keep the GPS coordinates if reverse geocoding is unavailable.
+        }
         setCustomLocation({ latitude: lat, longitude: lon, address });
         setLocationQuery(address);
         setSelectedGroundId("custom");
@@ -263,6 +266,9 @@ export default function FindProfessionals() {
     const handleClickOutside = (e) => {
       if (locationSearchRef.current && !locationSearchRef.current.contains(e.target)) {
         setShowLocationDropdown(false);
+      }
+      if (filterMenuRef.current && !filterMenuRef.current.contains(e.target)) {
+        setShowMoreFilters(false);
       }
     };
     document.addEventListener("mousedown", handleClickOutside);
@@ -342,84 +348,86 @@ export default function FindProfessionals() {
   return (
     <div className="min-h-screen bg-black text-white pb-20 px-1 md:px-3 font-sans">
 
-      {/* Header Section */}
-      <div className="max-w-7xl mx-auto pt-6 pb-6 text-center relative px-2">
-        <h1 className="font-['Open_Sans'] font-extrabold text-5xl lg:text-[64px] uppercase tracking-tighter text-transparent bg-clip-text bg-gradient-to-r from-[#BFF367] to-[#BFF367] mb-2 leading-[1]">
-          FIND PROFESSIONALS
-        </h1>
-        <p className="hidden md:block text-[16px] text-white/60 uppercase tracking-[0.15em] leading-relaxed" style={SUBHEADING_STYLE}>
-          Coaching • Officiating • Scorers • Live Streaming
-        </p>
-      </div>
-
       {/* Search & Filters */}
-      {/* Search & Filters */}
-      <div className="max-w-7xl mx-auto px-2 mb-8">
-        <div className="max-w-5xl mx-auto">
-          {/* Search Input */}
-          <div 
-            onClick={() => navigate('/search')}
-            className="w-full bg-[#1A1A1A] rounded-[10px] p-1.5 flex items-center mb-6 shadow-lg border border-white/5 cursor-pointer hover:bg-white/5 transition-colors"
-          >
-            <Search className="text-gray-400 ml-4 mr-2" size={20} />
-            <div className="w-full text-white/50 text-[15px] py-3 tracking-wide select-none">
-              Search community posts or players...
-            </div>
-          </div>
-
-          {/* Filters Pills */}
-          <div className="flex gap-3 overflow-x-auto no-scrollbar mb-8 pb-2">
-            {roles.map((role) => (
-              <button
-                key={role}
-                onClick={() => setSelectedRole(role)}
-                className={`px-6 py-2 rounded-[8px] text-[13px] font-medium whitespace-nowrap transition-colors border ${selectedRole === role
-                    ? "bg-[#BFF367] text-black border-[#BFF367]"
-                    : "bg-[#222222] text-white/80 border-white/5 hover:bg-[#333333]"
-                  }`}
-              >
-                {role === "All" ? "All Roles" : role + "s"}
-              </button>
-            ))}
-          </div>
-
-          {/* Categories Horizontal Scroll */}
-          <div className="flex gap-4 overflow-x-auto no-scrollbar mb-12 pb-4">
-            {[
-              { name: "FOOTBALL", emoji: "⚽", img: "/Football_transparent.png" },
-              { name: "CRICKET", emoji: "🏏", img: "/Cricket_transparent.png" },
-              { name: "BASKETBALL", emoji: "🏀", img: "/Basketball_transparent.png" },
-              { name: "VOLLEYBALL", emoji: "🏐", img: "/Volleyball_transparent.png" },
-              { name: "BADMINTON", emoji: "🏸", img: "/Badminton_transparent.png" },
-              { name: "TENNIS", emoji: "🎾", img: "/tennis_icon_transparent.png" },
-              { name: "TABLE TENNIS", emoji: "🏓", img: "/Table-tennis_transparent.png" },
-              { name: "PICKLEBALL", emoji: "🥒", img: "/Pickleball_transparent.png" }
-            ].map((sport) => (
-              <div
-                key={sport.name}
-                onClick={() => setSelectedSport(sport.name === selectedSport ? "ALL SPORTS" : sport.name)}
-                className={`relative min-w-[90px] h-[90px] rounded-2xl flex flex-col items-center justify-center p-1 cursor-pointer transition-all duration-300 shrink-0 ${selectedSport === sport.name
-                    ? "scale-110 opacity-100"
-                    : "hover:scale-110 opacity-70 hover:opacity-100"
-                  }`}
-              >
-                {sport.img ? (
-                  <img 
-                    src={sport.img} 
-                    alt={sport.name} 
-                    className="w-[70px] h-[70px] object-contain drop-shadow-[0_10px_15px_rgba(0,0,0,0.5)] brightness-125 contrast-110 saturate-110" 
-                  />
-                ) : (
-                  <span className="text-5xl">{sport.emoji}</span>
-                )}
-                
-                {/* Gradient line for selected state */}
-                {selectedSport === sport.name && (
-                  <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 w-12 h-1 bg-gradient-to-r from-[#BFF367] to-[#BFF367] rounded-full shadow-[0_0_10px_rgba(191,243,103,0.6)]" />
-                )}
+      <div className="max-w-7xl mx-auto px-2 pt-4 mb-8">
+        <div className="max-w-7xl mx-auto">
+          <form onSubmit={handleSearch} className="relative mb-6" ref={filterMenuRef}>
+            <div className="flex items-center rounded-full border border-white/10 bg-[#262626] shadow-lg transition-colors focus-within:border-[#BFF367]/70 hover:bg-[#303030]">
+              <div className="relative min-w-0 flex-1">
+                <Search className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-white/50" size={17} />
+                <input
+                  type="search"
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  placeholder="Search by name, specialty, or keyword..."
+                  aria-label="Search professionals"
+                  className="h-[38px] w-full rounded-l-full bg-transparent pl-11 pr-4 text-[13px] font-semibold text-white outline-none placeholder:text-white/40"
+                />
               </div>
-            ))}
-          </div>
+
+              <div className="hidden h-7 w-px bg-white/10 sm:block" />
+
+              <button
+                type="button"
+                onClick={() => setShowMoreFilters((isOpen) => !isOpen)}
+                className="flex h-[38px] shrink-0 items-center justify-center gap-2 rounded-r-full px-3 text-[10px] font-black text-white transition-colors hover:bg-white/5 focus:outline-none sm:px-4"
+                aria-expanded={showMoreFilters}
+                aria-controls="professionals-more-filters"
+              >
+                <Filter size={13} className="text-white/70" />
+                <span className="hidden sm:inline">More Filters</span>
+              </button>
+            </div>
+
+            {showMoreFilters && (
+              <div
+                id="professionals-more-filters"
+                className="absolute right-0 top-full z-30 mt-3 w-full max-w-sm rounded-2xl border border-white/10 bg-[#141414] p-4 shadow-[0_18px_60px_rgba(0,0,0,0.55)]"
+              >
+                <div className="space-y-4">
+                  <label className="block">
+                    <span className="mb-2 block text-[10px] font-black uppercase tracking-[0.16em] text-white/45">Role Filter</span>
+                    <div className="relative">
+                      <Filter className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-white/55" size={15} />
+                      <select
+                        value={selectedRole}
+                        onChange={(e) => setSelectedRole(e.target.value)}
+                        aria-label="Role filter"
+                        className="h-[46px] w-full appearance-none rounded-full border border-white/10 bg-[#262626] pl-11 pr-10 text-[13px] font-bold text-white outline-none transition-colors hover:bg-[#303030] focus:border-[#BFF367]/70"
+                      >
+                        {roles.map((role) => (
+                          <option key={role} value={role}>
+                            {role === "All" ? "All Roles" : role}
+                          </option>
+                        ))}
+                      </select>
+                      <ChevronDown className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-white/55" size={16} />
+                    </div>
+                  </label>
+
+                  <label className="block">
+                    <span className="mb-2 block text-[10px] font-black uppercase tracking-[0.16em] text-white/45">Sport Filter</span>
+                    <div className="relative">
+                      <Trophy className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-white/55" size={15} />
+                      <select
+                        value={selectedSport}
+                        onChange={(e) => setSelectedSport(e.target.value)}
+                        aria-label="Sports filter"
+                        className="h-[46px] w-full appearance-none rounded-full border border-white/10 bg-[#262626] pl-11 pr-10 text-[13px] font-bold text-white outline-none transition-colors hover:bg-[#303030] focus:border-[#BFF367]/70"
+                      >
+                        {sports.map((sport) => (
+                          <option key={sport} value={sport}>
+                            {sport === "ALL SPORTS" ? "All Sports" : sport}
+                          </option>
+                        ))}
+                      </select>
+                      <ChevronDown className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-white/55" size={16} />
+                    </div>
+                  </label>
+                </div>
+              </div>
+            )}
+          </form>
 
           {/* Ads Space */}
           <div className="w-full h-[180px] sm:h-[240px] rounded-xl overflow-hidden mb-8 relative cursor-pointer group bg-[#111]">
@@ -443,72 +451,71 @@ export default function FindProfessionals() {
             <p className="text-white/40 text-xs">Try adjusting your filters or location parameters</p>
           </div>
         ) : (
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 xl:grid-cols-6 gap-3 md:gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
             {professionals.map((pro) => (
               <div
                 key={pro.id || pro._id}
                 className="group cursor-pointer"
                 onClick={() => navigate(`/professionals/${pro.id || pro._id}`)}
               >
-                <div className="relative bg-[#0d0d0e] rounded-[8px] p-2.5 border border-white/5 transition-all duration-300 hover:border-[#BFF367]/30">
+                <div className="relative transition-all duration-300 hover:-translate-y-1">
                   {/* Image Box */}
-                  <div className="relative aspect-[1/1.2] rounded-md overflow-hidden block mb-3 bg-[#161618]">
+                  <div className="relative aspect-[1.04/1] overflow-hidden bg-[#111]">
                     {pro.profilePicture ? (
                       <img
                         src={pro.profilePicture}
                         alt={pro.name}
-                        className="w-full h-full object-cover"
+                        className="w-full h-full object-cover grayscale transition-all duration-500 group-hover:grayscale-0 group-hover:scale-105"
                       />
                     ) : (
-                      <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-[#1a1a1a] to-[#0a0a0a]">
-                        <span className="text-white/20 font-black text-2xl tracking-tighter">
+                      <div className="w-full h-full flex items-center justify-center bg-[radial-gradient(circle_at_50%_20%,rgba(191,243,103,0.12),transparent_34%),linear-gradient(135deg,#242424,#070707)]">
+                        <span className="text-white/18 font-black text-5xl tracking-tighter">
                           {getInitials(pro.name)}
                         </span>
                       </div>
                     )}
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/10 to-black/20" />
 
                     {/* Rating Badges */}
-                    <div className="absolute top-2 right-2">
-                      <div className="flex px-1.5 py-0.5 rounded-[4px] bg-black/85 border border-white/10 items-center justify-center text-[#BFF367] text-[9px] font-bold gap-0.5 shadow-lg">
-                        <Star size={8} className="fill-[#BFF367]" />
+                    <div className="absolute top-3 right-3">
+                      <div className="flex px-2.5 py-1 rounded-[3px] bg-black/85 border border-white/10 items-center justify-center text-[#BFF367] text-[10px] font-black gap-1 shadow-lg">
+                        <Star size={10} className="fill-[#BFF367]" />
                         {pro.rating?.toFixed(1) || "5.0"}
                       </div>
                     </div>
 
                     {/* Role Badges */}
-                    <div className="absolute top-2 left-2">
-                      <div className="px-1.5 py-0.5 rounded-[4px] bg-black/85 border border-white/10 flex items-center justify-center text-[#BFF367] text-[9px] font-black tracking-wider gap-1">
-                        {pro.role === 'umpire' ? <Shield size={8} /> :
-                          pro.role === 'streamer' ? <Video size={8} /> :
-                            pro.role === 'scorer' ? <Activity size={8} /> :
-                              <Trophy size={8} />}
+                    <div className="absolute bottom-3 left-3">
+                      <div className="px-2.5 py-1 rounded-[3px] bg-[#BFF367]/95 flex items-center justify-center text-black text-[9px] font-black tracking-[0.12em] gap-1.5">
+                        {pro.role === 'umpire' ? <Shield size={10} /> :
+                          pro.role === 'streamer' ? <Video size={10} /> :
+                            pro.role === 'scorer' ? <Activity size={10} /> :
+                              <Trophy size={10} />}
                         <span className="uppercase">{pro.role}</span>
                       </div>
                     </div>
                   </div>
 
                   {/* Content */}
-                  <div className="px-1">
-                    <div className="flex items-center gap-1.5 mb-1 justify-between">
-                      <h3 className="text-white font-bold text-xs truncate capitalize flex-1">
+                  <div className="pt-3">
+                    <div className="flex items-start justify-between gap-2">
+                      <h3 className="min-w-0 flex-1 truncate text-white font-black text-base uppercase tracking-wide">
                         {pro.name?.toLowerCase()}
                       </h3>
-                      <div className="flex items-center justify-center w-3 h-3 rounded-full bg-blue-500">
-                        <Check size={6} strokeWidth={4} className="text-white" />
+                      <div className="shrink-0 text-right text-[#BFF367] font-black text-xs">
+                        ₹{pro.price || "500"}
+                        <span className="text-[9px] text-white/40 font-bold">/{pro.role === "coach" ? "hr" : "match"}</span>
                       </div>
                     </div>
 
-                    <p className="text-white/40 text-[9px] font-medium truncate mb-2">
+                    <p className="mt-2 line-clamp-2 min-h-[2.3em] text-white/40 text-[11px] font-medium leading-relaxed">
                       {pro.businessDetails?.specialization || "Generalist"} • {pro.businessDetails?.experience || "3+ yrs"}
                     </p>
 
-                    <div className="flex items-center justify-between mt-2 pt-1 border-t border-white/5">
-                      <div className="text-[#BFF367] font-black text-sm">
-                        ₹{pro.price || "500"}
-                        <span className="text-[8px] text-white/30 font-medium">/{pro.role === "coach" ? "hr" : "match"}</span>
-                      </div>
-                      <button className="px-2.5 py-1 rounded bg-[#BFF367] text-black font-black text-[9px] uppercase tracking-wider hover:opacity-90 active:scale-95 transition-all">
-                        View
+                    <div className="mt-3 border-t border-white/10 pt-3">
+                      <button className="flex w-full items-center justify-between border border-white/10 bg-black/30 px-3 py-2.5 text-[9px] font-black uppercase tracking-[0.18em] text-white transition-colors group-hover:border-[#BFF367]/40 group-hover:text-[#BFF367]">
+                        View Profile
+                        <span className="text-[#BFF367] transition-transform group-hover:translate-x-1">→</span>
                       </button>
                     </div>
                   </div>
@@ -577,7 +584,7 @@ export default function FindProfessionals() {
                   </div>
                 </div>
                 <div className="text-center space-y-3">
-                  <h3 className="text-xl sm:text-2xl font-black text-white uppercase tracking-widest animate-pulse">Finding Pro's...</h3>
+                  <h3 className="text-xl sm:text-2xl font-black text-white uppercase tracking-widest animate-pulse">Finding Pros...</h3>
                   <p className="text-xs sm:text-sm text-white/50 max-w-[280px] mx-auto leading-relaxed">Analyzing your request and matching with the best professionals nearby</p>
                 </div>
               </div>
