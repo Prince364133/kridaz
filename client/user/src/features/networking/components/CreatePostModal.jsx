@@ -9,7 +9,7 @@ import toast from "react-hot-toast";
 const HEADING_STYLE = { fontFamily: "'Open Sans', sans-serif" };
 const SUBHEADING_STYLE = { fontFamily: "'Inter 28pt Light', sans-serif", fontWeight: 300 };
 
-const CreatePostModal = ({ isOpen, onClose, editingPost, user }) => {
+const CreatePostModal = ({ isOpen, onClose, editingPost, user, isInline = false }) => {
   const dispatch = useDispatch();
   const [createPost] = useCreatePostMutation();
   const [updatePost] = useUpdatePostMutation();
@@ -96,24 +96,21 @@ const CreatePostModal = ({ isOpen, onClose, editingPost, user }) => {
     }
   };
 
-  return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4" style={{ perspective: "1200px" }}>
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        exit={{ opacity: 0 }}
-        onClick={onClose}
-        className="absolute inset-0 bg-[#030303]/75 backdrop-blur-md"
-      />
-      <motion.div
-        initial={{ opacity: 0, y: 50, scale: 0.95, rotateX: -8 }}
-        animate={{ opacity: 1, y: 0, scale: 1, rotateX: 0 }}
-        exit={{ opacity: 0, y: 30, scale: 0.95, rotateX: 5 }}
-        transition={{ type: "spring", damping: 25, stiffness: 240 }}
-        className="relative w-full max-w-lg bg-neutral-950/80 border border-white/5 rounded-[8px] overflow-hidden shadow-[0_25px_60px_rgba(0,0,0,0.8)] backdrop-blur-2xl"
-      >
-        <div className="absolute -top-24 -left-24 w-52 h-52 bg-[#BFF367]/10 blur-[80px] rounded-full pointer-events-none" />
-        <div className="absolute -bottom-24 -right-24 w-52 h-52 bg-[#BFF367]/5 blur-[80px] rounded-full pointer-events-none" />
+  if (!isOpen) return null;
+  const modalContent = (
+    <motion.div
+      initial={isInline ? { height: 0, opacity: 0 } : { opacity: 0, y: 50, scale: 0.95, rotateX: -8 }}
+      animate={isInline ? { height: "auto", opacity: 1 } : { opacity: 1, y: 0, scale: 1, rotateX: 0 }}
+      exit={isInline ? { height: 0, opacity: 0 } : { opacity: 0, y: 30, scale: 0.95, rotateX: 5 }}
+      transition={{ type: "spring", damping: 25, stiffness: 240 }}
+      className={`w-full overflow-hidden ${isInline ? 'relative bg-[#0A0A0A] border border-white/5 rounded-[12px]' : 'flex-1 md:flex-none md:h-auto w-full md:max-w-2xl bg-[#050505] md:bg-neutral-950/80 border-0 md:border md:border-white/5 rounded-none md:rounded-[8px] md:shadow-[0_25px_60px_rgba(0,0,0,0.8)] md:backdrop-blur-2xl flex flex-col'}`}
+    >
+      {!isInline && (
+        <>
+          <div className="absolute -top-24 -left-24 w-52 h-52 bg-[#BFF367]/10 blur-[80px] rounded-full pointer-events-none" />
+          <div className="absolute -bottom-24 -right-24 w-52 h-52 bg-[#BFF367]/5 blur-[80px] rounded-full pointer-events-none" />
+        </>
+      )}
 
         <div className="relative px-5 py-4 border-b border-white/5 flex items-center justify-between gap-4">
           <div>
@@ -150,15 +147,6 @@ const CreatePostModal = ({ isOpen, onClose, editingPost, user }) => {
                 </div>
               </div>
             )}
-
-            <motion.button
-              whileHover={{ rotate: 90, scale: 1.08, backgroundColor: "rgba(239, 68, 68, 0.12)", color: "#ef4444" }}
-              whileTap={{ scale: 0.92 }}
-              onClick={onClose}
-              className="p-1.5 rounded-full text-white/40 transition-colors cursor-pointer"
-            >
-              <X size={18} />
-            </motion.button>
           </div>
         </div>
 
@@ -179,46 +167,14 @@ const CreatePostModal = ({ isOpen, onClose, editingPost, user }) => {
           </div>
         </div>
 
-        <form onSubmit={handleCreatePost} className="relative px-5 pb-5 pt-3 space-y-3.5 z-10">
-          <div className="relative group/title">
-            <input
-              type="text"
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
-              placeholder="Title (Optional)"
-              maxLength={80}
-              style={SUBHEADING_STYLE}
-              className="w-full bg-white/[0.01] hover:bg-white/[0.02] border border-white/5 focus:border-[#BFF367]/30 focus:bg-white/[0.03] rounded-[8px] h-10 px-3.5 text-white text-xs outline-none transition-all duration-300 placeholder:text-white/20"
-            />
-            {title.length > 0 && (
-              <span className="absolute right-3.5 top-3 text-[9px] font-bold text-neutral-500" style={SUBHEADING_STYLE}>
-                {title.length}/80
-              </span>
-            )}
-          </div>
-
-          <div className="relative group/content">
-            <textarea
-              value={content}
-              onChange={(e) => setContent(e.target.value)}
-              placeholder="What’s happening in your match? Share updates, highlights, or announcements…"
-              maxLength={1000}
-              style={SUBHEADING_STYLE}
-              className="w-full bg-white/[0.01] hover:bg-white/[0.02] border border-white/5 focus:border-[#BFF367]/30 focus:bg-white/[0.03] rounded-[8px] min-h-[100px] max-h-[200px] p-3.5 text-white text-xs outline-none transition-all duration-300 resize-none placeholder:text-white/20"
-            />
-            {content.length > 0 && (
-              <span className="absolute right-3.5 bottom-3.5 text-[9px] font-bold text-neutral-500" style={SUBHEADING_STYLE}>
-                {content.length}/1000
-              </span>
-            )}
-          </div>
-
-          {imagePreview && (
+        <form onSubmit={handleCreatePost} className="relative px-5 pb-5 pt-3 flex flex-col flex-1 z-10 space-y-3.5 overflow-y-auto no-scrollbar">
+          <div className={`flex flex-col ${imagePreview ? 'md:flex-row' : ''} gap-3.5 flex-1 min-h-0`}>
+            {imagePreview && (
             <motion.div
               initial={{ opacity: 0, scale: 0.97, y: 5 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.97, y: -5 }}
-              className="relative h-36 w-full rounded-[8px] overflow-hidden border border-white/5 group shadow-lg"
+              className="relative h-48 md:h-auto md:w-[45%] rounded-[8px] overflow-hidden border border-white/5 group shadow-lg shrink-0"
             >
               <img src={imagePreview} alt="" className="w-full h-full object-cover group-hover:scale-105 transition-all duration-500" />
               <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center pointer-events-none">
@@ -241,7 +197,28 @@ const CreatePostModal = ({ isOpen, onClose, editingPost, user }) => {
             </motion.div>
           )}
 
-          <div className="flex items-center justify-between pt-2 border-t border-white/5">
+          <div className={`relative group/content flex-1 flex flex-col min-h-0 ${imagePreview ? 'md:w-[55%]' : 'w-full'}`}>
+            <textarea
+              value={content}
+              onChange={(e) => {
+                setContent(e.target.value);
+                e.target.style.height = 'auto';
+                e.target.style.height = e.target.scrollHeight + 'px';
+              }}
+              placeholder="What’s happening in your match? Share updates, highlights, or announcements…"
+              maxLength={1000}
+              style={{ ...SUBHEADING_STYLE, minHeight: "120px" }}
+              className="w-full bg-transparent border-none focus:ring-0 p-1 text-white text-sm outline-none transition-all duration-300 resize-none placeholder:text-white/30 overflow-hidden"
+            />
+            {content.length > 0 && (
+              <span className="absolute right-1 bottom-1 text-[9px] font-bold text-neutral-500" style={SUBHEADING_STYLE}>
+                {content.length}/1000
+              </span>
+            )}
+          </div>
+        </div>
+
+          <div className="flex items-center justify-between pt-2 border-t border-white/5 pb-4 md:pb-0">
             <div className="flex items-center gap-2">
               {!editingPost && (
                 <div className="relative">
@@ -302,6 +279,22 @@ const CreatePostModal = ({ isOpen, onClose, editingPost, user }) => {
           </div>
         </form>
       </motion.div>
+  );
+
+  if (isInline) {
+    return modalContent;
+  }
+
+  return (
+    <div className="fixed inset-0 z-[9999] flex flex-col md:flex-row items-stretch md:items-center justify-center md:p-4" style={{ perspective: "1200px" }}>
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+        onClick={onClose}
+        className="absolute inset-0 bg-[#030303]/75 backdrop-blur-md"
+      />
+      {modalContent}
     </div>
   );
 };

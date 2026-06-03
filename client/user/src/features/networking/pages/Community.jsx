@@ -1,10 +1,11 @@
 import { useState, useEffect } from "react";
-import { useSelector } from "react-redux";
+import { useSelector, useDispatch } from "react-redux";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import axiosInstance from "@hooks/useAxiosInstance";
-import { Search, Loader2, X } from "lucide-react";
+import { Search, Loader2, X, MapPin, ChevronDown } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import useLoginOnDemand from "@hooks/useLoginOnDemand";
+import { setUserLocation, setLocationStatus, openLocationSidebar } from "@redux/slices/uiSlice";
 
 import StoriesSection from "../components/StoriesSection";
 import CommunityFeed from "../components/CommunityFeed";
@@ -16,7 +17,48 @@ const Community = ({ children, onSearchActive }) => {
   const { user, role, isLoggedIn } = useSelector((state) => state.auth);
   const { gateInteraction } = useLoginOnDemand();
   const navigate = useNavigate();
+  const dispatch = useDispatch();
   const isAdmin = role === "admin" || role === "BMSP_ADMIN";
+
+  const userLocation = useSelector((state) => state.ui?.userLocation);
+  const locationStatus = useSelector((state) => state.ui?.locationStatus);
+
+  const geoLoading = locationStatus === "detecting";
+  const geoLabel = userLocation 
+    ? (userLocation.city && userLocation.state 
+        ? `${userLocation.city}, ${userLocation.state}` 
+        : userLocation.city || userLocation.state || "Unknown")
+    : null;
+
+  const detectLocation = () => {
+    dispatch(setLocationStatus("detecting"));
+    if (!navigator.geolocation) {
+      dispatch(setLocationStatus("denied"));
+      return;
+    }
+    navigator.geolocation.getCurrentPosition(
+      async (pos) => {
+        const lat = pos.coords.latitude;
+        const lng = pos.coords.longitude;
+        let city = "";
+        let state = "";
+        try {
+          const res = await fetch(`https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${lat}&longitude=${lng}&localityLanguage=en`);
+          const data = await res.json();
+          city = data.city || data.locality || "";
+          state = data.principalSubdivision || "";
+        } catch (error) {
+          console.warn("Reverse geocoding failed:", error);
+        }
+        dispatch(setUserLocation({ lat, lng, city, state }));
+        dispatch(setLocationStatus("granted"));
+      },
+      () => {
+        dispatch(setLocationStatus("denied"));
+      },
+      { timeout: 8000 }
+    );
+  };
 
   // Filter / panel state
   const [searchParams, setSearchParams] = useSearchParams();
@@ -50,11 +92,14 @@ const Community = ({ children, onSearchActive }) => {
   useEffect(() => {
     if (activeFilter === "Reels") {
       document.body.style.overflow = "hidden";
+      document.documentElement.style.overflow = "hidden";
     } else {
-      document.body.style.overflow = "auto";
+      document.body.style.overflow = "";
+      document.documentElement.style.overflow = "";
     }
     return () => {
-      document.body.style.overflow = "auto";
+      document.body.style.overflow = "";
+      document.documentElement.style.overflow = "";
     };
   }, [activeFilter]);
 
@@ -106,7 +151,7 @@ const Community = ({ children, onSearchActive }) => {
   }, [searchQuery, showGlobalSearch]);
 
   return (
-    <div className={`min-h-screen bg-[#050505] text-white pt-0 pb-12 ${activeFilter === "Reels" ? "px-0 md:px-3" : "px-1 md:px-3"} font-sans relative`}>
+    <div className={`min-h-screen bg-[#050505] text-white pt-4 pb-12 ${activeFilter === "Reels" ? "px-0 md:px-4" : "px-2 md:px-0"} font-sans relative`}>
       {/* Global Search Modal */}
       <AnimatePresence>
         {showGlobalSearch && (
@@ -188,12 +233,14 @@ const Community = ({ children, onSearchActive }) => {
 
       <div className="max-w-[1500px] mx-auto w-full">
         <div className="grid grid-cols-1 gap-6">
-          <div className={`max-w-3xl mx-auto w-full transition-all duration-300 ${activeFilter === "Reels" ? "h-[100dvh] sticky top-0 max-w-none" : "space-y-2"}`}>
+          <div className={`max-w-3xl md:max-w-none mx-auto md:mx-0 w-full transition-all duration-300 flex flex-col ${activeFilter === "Reels" ? "h-[100dvh] sticky top-0 max-w-none" : "gap-1"}`}>
             {activeFilter === "Reels" ? (
               <ReelsView gateInteraction={gateInteraction} onBack={() => handleSetActiveFilter("All")} />
             ) : (
               <>
-                <StoriesSection user={user} isLoggedIn={isLoggedIn} isAdmin={isAdmin} gateInteraction={gateInteraction} />
+                <div className="mb-4">
+                  <StoriesSection user={user} isLoggedIn={isLoggedIn} isAdmin={isAdmin} gateInteraction={gateInteraction} />
+                </div>
 
                 <CommunityFeed
                   user={user}

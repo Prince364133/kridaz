@@ -32,7 +32,7 @@ const StreamerLayout = () => {
           />
         </div>
         <main
-          className={`flex-1 overflow-x-hidden transition-all duration-300 ease-in-out ${isMinimized ? "lg:ml-20" : "lg:ml-64"}`}
+          className={`flex-1 overflow-x-clip transition-all duration-300 ease-in-out ${isMinimized ? "lg:ml-20" : "lg:ml-64"}`}
         >
           <div className="w-full p-4 pb-24 lg:pb-10">
             <RootErrorBoundary>
