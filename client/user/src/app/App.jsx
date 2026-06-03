@@ -42,6 +42,7 @@ import { useWebPushNotifications } from "@hooks/useWebPushNotifications";
 import { useOTAUpdate } from "@hooks/useOTAUpdate";
 
 import { ObservabilityProvider } from "./ObservabilityProvider";
+import LocationSidebar from "../shared/components/modals/LocationSidebar";
 
 export default function App() {
   const dispatch = useDispatch();
@@ -220,6 +221,7 @@ export default function App() {
                 },
               }}
             />
+            <LocationSidebar />
           </SocketProvider>
         </GoogleOAuthProvider>
       </ObservabilityProvider>

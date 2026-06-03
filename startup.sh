@@ -1,10 +1,10 @@
 #!/bin/bash
 set -x
 echo "=== Kridaz Startup Script ==="
-cd /home/site/wwwroot/server
+cd /home/site/wwwroot
 
 echo "Pushing DB schema..."
-npx --yes prisma db push --accept-data-loss
+./node_modules/.bin/prisma db push --accept-data-loss
 
 echo "Starting server..."
 node server.js
