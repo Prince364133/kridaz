@@ -1,5 +1,7 @@
+import React, { useState, useRef } from "react";
+import { motion, useAnimation, useMotionValue } from "framer-motion";
 import { Link, useLocation } from "react-router-dom";
-import { Home, Search, Users, UserSearch, Trophy } from "lucide-react";
+import { Home, Search, Users, UserSearch, Trophy, Plus, Video, PenSquare, Gamepad2 } from "lucide-react";
 import { useSelector } from "react-redux";
 import { useScrollDirection } from "@hooks/useScrollDirection.js";
 import { getDynamicProfileRoute } from "@utils/routeUtils";
@@ -8,6 +10,26 @@ const MobileBottomNav = () => {
   const location = useLocation();
   const { isLoggedIn, role, user } = useSelector((state) => state.auth);
   const { scrollDirection, scrolled } = useScrollDirection();
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isScattered, setIsScattered] = useState(false);
+  
+  const controls = useAnimation();
+  const x = useMotionValue(0);
+  const y = useMotionValue(0);
+  const [savedPos, setSavedPos] = useState({ x: 0, y: 0 });
+
+  const handleToggle = () => {
+    if (isMenuOpen) {
+      setIsScattered(false);
+      controls.start({ x: savedPos.x, y: savedPos.y, transition: { type: "spring", stiffness: 300, damping: 25 } });
+      setTimeout(() => setIsMenuOpen(false), 250);
+    } else {
+      setSavedPos({ x: x.get(), y: y.get() });
+      controls.start({ x: 0, y: 0, transition: { type: "spring", stiffness: 300, damping: 25 } });
+      setIsMenuOpen(true);
+      setTimeout(() => setIsScattered(true), 250);
+    }
+  };
 
   const getDashboardPath = () => {
     const roleStr = role?.toLowerCase() || "";
@@ -18,13 +40,12 @@ const MobileBottomNav = () => {
     return getDynamicProfileRoute(user, role);
   };
 
-
   const navItems = [
     { name: "Home", path: "/", icon: Home },
     { name: "Venues", path: "/venues", icon: Search },
-    { name: "Pros", path: "/professionals", icon: Trophy },
+    { name: "Create", isAction: true },
     { name: "Players", path: "/players", icon: UserSearch },
-    { name: "My Teams", path: "/my-teams", icon: Users, protected: true },
+    { name: "My Teams", path: "/my-teams", icon: Users },
   ];
 
   // Filter items based on login status and role
@@ -33,30 +54,98 @@ const MobileBottomNav = () => {
     return true;
   });
 
+  const dragConstraintsRef = React.useRef(null);
+
   return (
-    <div className="lg:hidden fixed bottom-0 left-0 right-0 z-[100] bg-black/40 backdrop-blur-3xl border-t border-white/10 rounded-t-[24px] px-4 pb-safe-area-inset-bottom transition-transform duration-500 translate-y-0 shadow-2xl">
-      <div className="flex justify-between items-center h-16 max-w-md mx-auto">
-        {visibleItems.slice(0, 5).map((item) => {
-          const isActive = location.pathname === item.path;
-          return (
-            <Link
-              key={item.name}
-              to={item.path}
-              onMouseEnter={item.onMouseEnter}
-              onTouchStart={item.onTouchStart}
-              className={`flex flex-col items-center justify-center gap-1 flex-1 transition-all duration-300 ${ isActive ? "text-[#BFF367]" : "text-white/40 hover:text-white/60" }`}
-            >
-              <div className={`relative p-1.5 rounded-[8px] transition-all duration-300 ${ isActive ? "scale-110" : "" }`}>
-                <item.icon size={20} strokeWidth={isActive ? 2.5 : 2} />
-              </div>
-              <span className={`text-[10px] font-bold uppercase tracking-widest ${ isActive ? "opacity-100" : "opacity-60" }`}>
-                {item.name}
-              </span>
-            </Link>
-          );
-        })}
+    <>
+      {/* Invisible Drag Constraints Area */}
+      <div className="lg:hidden fixed inset-4 z-[-1] pointer-events-none" ref={dragConstraintsRef} />
+
+      {/* Full Screen Blur Overlay */}
+      {isMenuOpen && (
+        <div 
+          className="lg:hidden fixed inset-0 z-[90] bg-black/40 backdrop-blur-md pointer-events-auto"
+          onClick={handleToggle}
+        />
+      )}
+
+      {/* Free Floating Draggable Container */}
+      <div className="lg:hidden fixed bottom-10 left-0 right-0 z-[100] pointer-events-none flex justify-center items-end">
+        <motion.div
+          drag
+          dragConstraints={dragConstraintsRef}
+          dragElastic={0.2}
+          dragMomentum={false}
+          style={{ x, y }}
+          animate={controls}
+          className="relative flex flex-col items-center justify-center pointer-events-auto"
+        >
+          
+          {/* Floating Actions Container (Arc Navbar) */}
+          <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-6 flex justify-center items-center">
+            
+            {/* Create Post (Left) */}
+            <div className={`absolute z-50 transition-all duration-500 ease-[cubic-bezier(0.34,1.56,0.64,1)] ${isMenuOpen ? "delay-[100ms] translate-x-[-70px] translate-y-[-70px] scale-100 opacity-100 pointer-events-auto" : "delay-[100ms] translate-x-[0px] translate-y-[20px] scale-0 opacity-0 pointer-events-none"}`}>
+              <Link to="/create-post" onClick={handleToggle} className="w-12 h-12 rounded-full bg-[#1A1A1A] border border-[#BFF367]/30 text-[#BFF367] flex items-center justify-center hover:bg-[#222] transition-colors shadow-xl">
+                <PenSquare size={22} />
+              </Link>
+            </div>
+
+            {/* Create Reel (Center) */}
+            <div className={`absolute z-50 transition-all duration-500 ease-[cubic-bezier(0.34,1.56,0.64,1)] ${isMenuOpen ? "delay-[200ms] translate-x-[0px] translate-y-[-100px] scale-100 opacity-100 pointer-events-auto" : "delay-[50ms] translate-x-[0px] translate-y-[20px] scale-0 opacity-0 pointer-events-none"}`}>
+              <Link to="/create-reel" onClick={handleToggle} className="w-12 h-12 rounded-full bg-[#1A1A1A] border border-[#BFF367]/30 text-[#BFF367] flex items-center justify-center hover:bg-[#222] transition-colors shadow-xl">
+                <Video size={22} />
+              </Link>
+            </div>
+
+            {/* Scoring (Right) */}
+            <div className={`absolute z-50 transition-all duration-500 ease-[cubic-bezier(0.34,1.56,0.64,1)] ${isMenuOpen ? "delay-[300ms] translate-x-[70px] translate-y-[-70px] scale-100 opacity-100 pointer-events-auto" : "delay-0 translate-x-[0px] translate-y-[20px] scale-0 opacity-0 pointer-events-none"}`}>
+              <Link to="/scoring" onClick={handleToggle} className="w-12 h-12 rounded-full bg-[#1A1A1A] border border-[#BFF367]/30 text-[#BFF367] flex items-center justify-center hover:bg-[#222] transition-colors shadow-xl">
+                <Gamepad2 size={22} />
+              </Link>
+            </div>
+          </div>
+
+          {/* Horizontal Side Nav Icons (Home, Venues, Players, My Teams) */}
+          {visibleItems.filter(item => !item.isAction).slice(0, 4).map((item, idx) => {
+            const isActive = location.pathname === item.path;
+            
+            // Fixed horizontal translation relative to the dragged FAB
+            let targetTranslate = "";
+            if (idx === 0) targetTranslate = "translate-x-[-140px]"; // Far left
+            if (idx === 1) targetTranslate = "translate-x-[-70px]"; // Inner left
+            if (idx === 2) targetTranslate = "translate-x-[70px]"; // Inner right
+            if (idx === 3) targetTranslate = "translate-x-[140px]"; // Far right
+
+            return (
+              <Link
+                key={item.name}
+                to={item.path}
+                onClick={handleToggle}
+                className={`absolute top-1/2 left-1/2 -mt-7 -ml-7 min-w-[56px] w-auto px-1 h-14 flex flex-col items-center justify-center gap-1 transition-all duration-500 ease-out
+                  ${!isMenuOpen ? "translate-x-0 translate-y-0 scale-0 opacity-0 pointer-events-none" : isScattered ? `${targetTranslate} translate-y-0 scale-100 opacity-100 pointer-events-auto` : "translate-x-0 translate-y-0 scale-100 opacity-100 pointer-events-none"}
+                  ${isActive ? "text-[#BFF367]" : "text-white/40 hover:text-white/60"} -z-10`}
+              >
+                <div className={`relative p-1 rounded-[8px] transition-all duration-300 ${ isActive ? "scale-110" : "" }`}>
+                  <item.icon size={22} strokeWidth={isActive ? 2.5 : 2} />
+                </div>
+                <span className={`text-[9px] font-bold uppercase tracking-widest whitespace-nowrap ${ isActive ? "opacity-100" : "opacity-60" }`}>
+                  {item.name}
+                </span>
+              </Link>
+            );
+          })}
+
+          {/* Main Action Button */}
+          <button
+            onClick={handleToggle}
+            className={`relative flex items-center justify-center w-14 h-14 rounded-full text-black transition-all duration-700 shadow-[0_0_20px_rgba(191,243,103,0.2)] border-[4px] border-black ${isMenuOpen ? "bg-[#aade55] rotate-[1035deg]" : "bg-[#BFF367] rotate-0 hover:scale-105"}`}
+          >
+            <Plus size={26} strokeWidth={3.5} />
+          </button>
+        </motion.div>
       </div>
-    </div>
+    </>
   );
 };
 
