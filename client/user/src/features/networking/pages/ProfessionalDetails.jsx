@@ -161,9 +161,9 @@ export default function ProfessionalDetails() {
 
     try {
       if (previousState) {
-        await axiosInstance.post(`/api/player/${pro.userId}/unfollow`);
+        await axiosInstance.post(`/api/user/players/${pro.userId}/unfollow`);
       } else {
-        await axiosInstance.post(`/api/player/${pro.userId}/follow`);
+        await axiosInstance.post(`/api/user/players/${pro.userId}/follow`);
       }
     } catch (err) {
       // Revert on error
