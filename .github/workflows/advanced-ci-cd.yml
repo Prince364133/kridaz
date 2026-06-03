@@ -16,7 +16,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           fetch-depth: 0
 
@@ -71,7 +71,7 @@ jobs:
     if: github.ref == 'refs/heads/main' && github.event_name == 'push'
     steps:
       - name: Checkout Code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
       - name: Install Vercel CLI
         run: npm install --global vercel@latest
       - name: Pull Vercel Environment Information
@@ -100,7 +100,7 @@ jobs:
     steps:
       - name: Checkout Code
         if: env.RAILWAY_TOKEN != ''
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
       - name: Setup Railway CLI
         if: env.RAILWAY_TOKEN != ''
         run: npm i -g @railway/cli
@@ -120,7 +120,7 @@ jobs:
     steps:
       - name: Checkout Code
         if: env.AWS_ACCESS_KEY_ID != ''
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
       - name: Configure AWS Credentials
         if: env.AWS_ACCESS_KEY_ID != ''
         uses: aws-actions/configure-aws-credentials@v4
@@ -145,7 +145,7 @@ jobs:
     steps:
       - name: Checkout Code
         if: env.AZURE_CREDENTIALS != ''
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
       - name: Login to Azure
         if: env.AZURE_CREDENTIALS != ''
         uses: azure/login@v1
