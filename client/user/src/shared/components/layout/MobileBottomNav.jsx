@@ -70,7 +70,7 @@ const MobileBottomNav = () => {
       )}
 
       {/* Free Floating Draggable Container */}
-      <div className="lg:hidden fixed bottom-10 left-0 right-0 z-[100] pointer-events-none flex justify-center items-end">
+      <div className="lg:hidden fixed bottom-4 left-0 right-0 z-[100] pointer-events-none flex justify-center items-end">
         <motion.div
           drag
           dragConstraints={dragConstraintsRef}
