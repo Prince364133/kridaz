@@ -1,6 +1,6 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useSelector } from "react-redux";
-import { Plus } from "lucide-react";
+import { Plus, User } from "lucide-react";
 import { useGetStoriesFeedQuery, useDeleteStoryMutation } from "@redux/api/communityApi";
 import StoryViewer from "./StoryViewer";
 import CreateStoryModal from "./CreateStoryModal";
@@ -19,6 +19,14 @@ const StoriesSection = ({ user, isLoggedIn, isAdmin, gateInteraction }) => {
 
   const [showStoryModal, setShowStoryModal] = useState(false);
   const [selectedStoryGroup, setSelectedStoryGroup] = useState(null);
+
+  useEffect(() => {
+    const handleOpenCreateStory = () => {
+      gateInteraction(() => setShowStoryModal(true));
+    };
+    window.addEventListener('openCreateStory', handleOpenCreateStory);
+    return () => window.removeEventListener('openCreateStory', handleOpenCreateStory);
+  }, [gateInteraction]);
 
   const hasSeenGroup = (group) => {
     if (!currentUserId) return false;
@@ -72,13 +80,13 @@ const StoriesSection = ({ user, isLoggedIn, isAdmin, gateInteraction }) => {
   };
 
   return (
-    <div className="pt-3 pb-2 px-1">
+    <div className="py-1 px-2">
       <div className="flex gap-4 overflow-x-auto no-scrollbar scroll-smooth items-center pb-2">
         {/* Add/View Your Story */}
         <div className="flex flex-col items-center gap-2.5 shrink-0 group relative">
           <div
-            className={`w-[68px] h-[68px] rounded-full relative transition-transform ${
-              myStoryGroup ? (hasSeenGroup(myStoryGroup) ? "bg-white/20 p-[2px]" : "p-[2px] bg-gradient-to-r from-[#BFF367] to-[#BFF367]") : "border border-dashed border-white/30 group-hover:border-[#BFF367]/50 p-0.5"
+            className={`w-[96px] h-[143px] rounded-[7.2pt] p-[1px] relative ${
+              myStoryGroup && hasSeenGroup(myStoryGroup) ? "bg-white/20" : "bg-gradient-to-r from-[#BFF367] to-[#BFF367]"
             }`}
           >
             <div
@@ -89,10 +97,9 @@ const StoriesSection = ({ user, isLoggedIn, isAdmin, gateInteraction }) => {
                   gateInteraction(() => setShowStoryModal(true));
                 }
               }}
-              className={`w-full h-full rounded-full flex items-center justify-center overflow-hidden bg-[#111] cursor-pointer ${
-                myStoryGroup ? "border-2 border-[#0A0A0A]" : "border border-white/10"
-              }`}
+              className="w-full h-full rounded-[6.5pt] bg-[#0A0A0A] p-[2px] cursor-pointer"
             >
+              <div className="w-full h-full rounded-[5.5pt] flex items-center justify-center overflow-hidden bg-[#111]">
               {myStoryGroup && myStoryGroup.stories[0].mediaUrl ? (
                 <img
                   src={myStoryGroup.stories[0].thumbnailUrl || myStoryGroup.stories[0].mediaUrl}
@@ -105,35 +112,40 @@ const StoriesSection = ({ user, isLoggedIn, isAdmin, gateInteraction }) => {
                 <div className="w-full h-full flex items-center justify-center text-[7px] p-2 text-center text-[#BFF367] font-bold bg-[#111]">
                   {myStoryGroup.stories[0].content?.slice(0, 15)}
                 </div>
+              ) : user?.profilePicture || user?.profileImage ? (
+                <>
+                  <img
+                    src={user.profilePicture || user.profileImage}
+                    className="w-full h-full object-cover opacity-60"
+                    alt="Profile"
+                    onError={(e) => {
+                      e.currentTarget.style.display = 'none';
+                      e.currentTarget.nextElementSibling.style.display = 'flex';
+                    }}
+                  />
+                  <div className="hidden w-full h-full items-center justify-center bg-[#111]">
+                    <User size={32} className="text-gray-600" />
+                  </div>
+                </>
               ) : (
-                <img
-                  src={user?.profilePicture || user?.profileImage || "/default-avatar.png"}
-                  className="w-full h-full object-cover opacity-60"
-                  alt="Profile"
-                />
+                <div className="w-full h-full flex items-center justify-center bg-[#111]">
+                  <User size={32} className="text-gray-600" />
+                </div>
               )}
+              </div>
             </div>
             <div
               onClick={(e) => {
                 e.stopPropagation();
                 gateInteraction(() => setShowStoryModal(true));
               }}
-              className="absolute bottom-0 right-0 w-[22px] h-[22px] bg-gradient-to-r from-[#BFF367] to-[#BFF367] rounded-full flex items-center justify-center border-2 border-[#0A0A0A] cursor-pointer hover:scale-110 transition-transform z-10"
+              className="absolute -bottom-2 -right-2 w-[28px] h-[28px] bg-gradient-to-r from-[#BFF367] to-[#BFF367] rounded-full flex items-center justify-center border-2 border-[#0A0A0A] cursor-pointer hover:scale-110 transition-transform z-10 shadow-lg"
             >
-              <Plus size={12} strokeWidth={4} className="text-black" />
+              <Plus size={16} strokeWidth={3} className="text-black" />
             </div>
           </div>
-          <span
-            onClick={() => {
-              if (myStoryGroup) {
-                setSelectedStoryGroup(myStoryGroup);
-              } else {
-                gateInteraction(() => setShowStoryModal(true));
-              }
-            }}
-            className="text-[10px] font-bold text-white/60 group-hover:text-white transition-colors cursor-pointer"
-          >
-            Your story
+          <span className="text-[10px] font-bold text-white/80 group-hover:text-[#BFF367] transition-colors truncate max-w-[68px]">
+            Your Story
           </span>
         </div>
 
@@ -144,9 +156,9 @@ const StoriesSection = ({ user, isLoggedIn, isAdmin, gateInteraction }) => {
             onClick={() => setSelectedStoryGroup(group)}
             className="flex flex-col items-center gap-2.5 shrink-0 cursor-pointer group"
           >
-            <div className={`w-[68px] h-[68px] rounded-full p-[2px] relative hover:scale-105 transition-transform ${hasSeenGroup(group) ? "bg-white/20" : "bg-gradient-to-r from-[#BFF367] to-[#BFF367]"}`}>
-              <div className="w-full h-full rounded-full bg-[#0A0A0A] p-[2px]">
-                <div className="w-full h-full rounded-full overflow-hidden bg-[#111]">
+            <div className={`w-[96px] h-[143px] rounded-[7.2pt] p-[1px] relative ${hasSeenGroup(group) ? "bg-white/20" : "bg-gradient-to-r from-[#BFF367] to-[#BFF367]"}`}>
+              <div className="w-full h-full rounded-[6.5pt] bg-[#0A0A0A] p-[2px]">
+                <div className="w-full h-full rounded-[5.5pt] overflow-hidden bg-[#111]">
                   {group.stories[0].mediaUrl ? (
                     <img
                       src={group.stories[0].thumbnailUrl || group.stories[0].mediaUrl}

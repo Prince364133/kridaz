@@ -20,17 +20,17 @@ export default function ProfessionalsSection({
       style={{ backgroundColor: "#000", borderColor: "#1A1A1A" }}
     >
       <div className="w-full">
-        <div className="relative flex flex-col md:flex-row md:items-center justify-between gap-8 mb-12 border-b border-white/5 pb-10">
+        <div className="relative flex flex-row items-center justify-between gap-4 mb-6 border-b border-white/5 pb-4">
           <div className="relative">
             <div
-              className="absolute -left-6 top-1/2 -translate-y-1/2 w-1.5 h-16 rounded-full shadow-[0_0_25px_rgba(85,222,232,0.5)] hidden md:block"
+              className="absolute -left-6 top-1/2 -translate-y-1/2 w-1.5 h-12 rounded-full shadow-[0_0_25px_rgba(85,222,232,0.5)] hidden md:block"
               style={{ background: GRAD }}
             ></div>
             <h2
-              className="text-3xl md:text-5xl lg:text-6xl font-black text-white uppercase tracking-tighter leading-none"
+              className="text-[18px] md:text-[25px] font-black text-white tracking-tighter leading-none"
               style={{ fontFamily: "'Open Sans', sans-serif" }}
             >
-              PRO{" "}
+              Pro{" "}
               <span
                 style={{
                   background: GRAD,
@@ -38,42 +38,43 @@ export default function ProfessionalsSection({
                   WebkitTextFillColor: "transparent",
                 }}
               >
-                EXPERTS
+                Experts
               </span>
             </h2>
-            <p
-              className="text-xs md:text-sm font-bold text-white/40 uppercase tracking-[0.3em] mt-4"
-              style={{ fontFamily: "'Inter 28pt Light', sans-serif" }}
-            >
-              Certified Coaching • Professional Officiating
-            </p>
           </div>
 
-          {/* Refined Tabs */}
-          <div className="flex gap-2 overflow-x-auto no-scrollbar pb-2 md:pb-0">
-            {["ALL SPORTS", "CRICKET", "BADMINTON", "FOOTBALL", "TENNIS"].map(
-              (tab, i) => (
-                <button
-                  key={tab}
-                  className={`px-6 py-2.5 rounded-full font-black text-[10px] shrink-0 transition-all duration-300 uppercase tracking-widest border ${
-                    i === 0
-                      ? "text-black shadow-[0_0_15px_rgba(85,222,232,0.3)]"
-                      : "bg-white/5 text-white/40 border-white/5 hover:border-white/10 hover:text-white"
-                  }`}
-                  style={
-                    i === 0
-                      ? {
-                          background:
-                            "linear-gradient(90deg, #BFF367 0%, #BFF367 100%)",
-                          borderColor: "#BFF367",
-                        }
-                      : {}
-                  }
-                >
-                  {tab}
-                </button>
-              )
-            )}
+          <div className="flex items-center gap-4">
+            <div className="hidden lg:flex gap-2 overflow-x-auto no-scrollbar pb-2 md:pb-0 mr-4">
+              {["ALL SPORTS", "CRICKET", "BADMINTON", "FOOTBALL", "TENNIS"].map(
+                (tab, i) => (
+                  <button
+                    key={tab}
+                    className={`px-6 py-2.5 rounded-full font-black text-[10px] shrink-0 transition-all duration-300 uppercase tracking-widest border ${
+                      i === 0
+                        ? "text-black shadow-[0_0_15px_rgba(85,222,232,0.3)]"
+                        : "bg-white/5 text-white/40 border-white/5 hover:border-white/10 hover:text-white"
+                    }`}
+                    style={
+                      i === 0
+                        ? {
+                            background:
+                              "linear-gradient(90deg, #BFF367 0%, #BFF367 100%)",
+                            borderColor: "#BFF367",
+                          }
+                        : {}
+                    }
+                  >
+                    {tab}
+                  </button>
+                )
+              )}
+            </div>
+            <Link
+              to="/professionals"
+              className="flex items-center gap-1 font-semibold text-[10px] md:text-[15px] transition-all hover:text-[#BFF367] text-[#888] whitespace-nowrap"
+            >
+              View All <span className="hidden md:inline">Pros</span> <ChevronRight size={16} />
+            </Link>
           </div>
         </div>
 

@@ -60,19 +60,11 @@ const ReelsView = ({ gateInteraction, onBack }) => {
         <div className="flex items-center gap-3">
           <button
             onClick={onBack}
-            className="flex items-center gap-2 bg-black/60 backdrop-blur-md border border-white/10 text-white px-3 py-2 rounded-[8px] text-xs font-bold uppercase tracking-wider hover:bg-white/10 transition-all"
+            className="flex items-center justify-center bg-black/60 backdrop-blur-md border border-white/10 text-white w-9 h-9 rounded-[8px] hover:bg-white/10 transition-all"
           >
-            <ArrowLeft size={14} strokeWidth={2.5} />
-            <span>Community</span>
+            <ArrowLeft size={16} strokeWidth={2.5} />
           </button>
         </div>
-        <button
-          onClick={() => gateInteraction(() => navigate("/reels/upload"))}
-          className="flex items-center gap-1.5 bg-[#BFF367] text-black px-3 py-2 rounded-[8px] text-xs font-black uppercase tracking-widest hover:bg-[#BFF367] transition-colors shadow-lg shadow-[#BFF367]/20"
-        >
-          <Plus size={14} strokeWidth={3} />
-          <span>Upload</span>
-        </button>
       </div>
 
       <div
