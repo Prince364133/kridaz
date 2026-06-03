@@ -84,23 +84,30 @@ const MobileBottomNav = () => {
           {/* Floating Actions Container (Arc Navbar) */}
           <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-6 flex justify-center items-center">
             
-            {/* Create Post (Left) */}
-            <div className={`absolute z-50 transition-all duration-500 ease-[cubic-bezier(0.34,1.56,0.64,1)] ${isMenuOpen ? "delay-[100ms] translate-x-[-70px] translate-y-[-70px] scale-100 opacity-100 pointer-events-auto" : "delay-[100ms] translate-x-[0px] translate-y-[20px] scale-0 opacity-0 pointer-events-none"}`}>
-              <Link to="/create-post" onClick={handleToggle} className="w-12 h-12 rounded-full bg-[#1A1A1A] border border-[#BFF367]/30 text-[#BFF367] flex items-center justify-center hover:bg-[#222] transition-colors shadow-xl">
+            {/* Create Post (Far Left) */}
+            <div className={`absolute z-50 transition-all duration-500 ease-[cubic-bezier(0.34,1.56,0.64,1)] ${isMenuOpen ? "delay-[100ms] translate-x-[-90px] translate-y-[-40px] scale-100 opacity-100 pointer-events-auto" : "delay-[100ms] translate-x-[0px] translate-y-[20px] scale-0 opacity-0 pointer-events-none"}`}>
+              <Link to="/create-post" onClick={handleToggle} title="Create Post" className="w-12 h-12 rounded-full bg-[#1A1A1A] border border-[#BFF367]/30 text-[#BFF367] flex items-center justify-center hover:bg-[#222] transition-colors shadow-xl">
                 <PenSquare size={22} />
               </Link>
             </div>
 
-            {/* Create Reel (Center) */}
-            <div className={`absolute z-50 transition-all duration-500 ease-[cubic-bezier(0.34,1.56,0.64,1)] ${isMenuOpen ? "delay-[200ms] translate-x-[0px] translate-y-[-100px] scale-100 opacity-100 pointer-events-auto" : "delay-[50ms] translate-x-[0px] translate-y-[20px] scale-0 opacity-0 pointer-events-none"}`}>
-              <Link to="/create-reel" onClick={handleToggle} className="w-12 h-12 rounded-full bg-[#1A1A1A] border border-[#BFF367]/30 text-[#BFF367] flex items-center justify-center hover:bg-[#222] transition-colors shadow-xl">
-                <Video size={22} />
+            {/* Join Game (Inner Left) */}
+            <div className={`absolute z-50 transition-all duration-500 ease-[cubic-bezier(0.34,1.56,0.64,1)] ${isMenuOpen ? "delay-[150ms] translate-x-[-40px] translate-y-[-90px] scale-100 opacity-100 pointer-events-auto" : "delay-[75ms] translate-x-[0px] translate-y-[20px] scale-0 opacity-0 pointer-events-none"}`}>
+              <Link to="/join-games" onClick={handleToggle} title="Join Game" className="w-12 h-12 rounded-full bg-[#1A1A1A] border border-[#BFF367]/30 text-[#BFF367] flex items-center justify-center hover:bg-[#222] transition-colors shadow-xl">
+                <Trophy size={22} />
               </Link>
             </div>
 
-            {/* Scoring (Right) */}
-            <div className={`absolute z-50 transition-all duration-500 ease-[cubic-bezier(0.34,1.56,0.64,1)] ${isMenuOpen ? "delay-[300ms] translate-x-[70px] translate-y-[-70px] scale-100 opacity-100 pointer-events-auto" : "delay-0 translate-x-[0px] translate-y-[20px] scale-0 opacity-0 pointer-events-none"}`}>
-              <Link to="/scoring" onClick={handleToggle} className="w-12 h-12 rounded-full bg-[#1A1A1A] border border-[#BFF367]/30 text-[#BFF367] flex items-center justify-center hover:bg-[#222] transition-colors shadow-xl">
+            {/* Professionals (Inner Right) */}
+            <div className={`absolute z-50 transition-all duration-500 ease-[cubic-bezier(0.34,1.56,0.64,1)] ${isMenuOpen ? "delay-[200ms] translate-x-[40px] translate-y-[-90px] scale-100 opacity-100 pointer-events-auto" : "delay-[50ms] translate-x-[0px] translate-y-[20px] scale-0 opacity-0 pointer-events-none"}`}>
+              <Link to="/professionals" onClick={handleToggle} title="Professionals" className="w-12 h-12 rounded-full bg-[#1A1A1A] border border-[#BFF367]/30 text-[#BFF367] flex items-center justify-center hover:bg-[#222] transition-colors shadow-xl">
+                <UserSearch size={22} />
+              </Link>
+            </div>
+
+            {/* Scoring (Far Right) */}
+            <div className={`absolute z-50 transition-all duration-500 ease-[cubic-bezier(0.34,1.56,0.64,1)] ${isMenuOpen ? "delay-[250ms] translate-x-[90px] translate-y-[-40px] scale-100 opacity-100 pointer-events-auto" : "delay-0 translate-x-[0px] translate-y-[20px] scale-0 opacity-0 pointer-events-none"}`}>
+              <Link to="/scoring" onClick={handleToggle} title="Scoring" className="w-12 h-12 rounded-full bg-[#1A1A1A] border border-[#BFF367]/30 text-[#BFF367] flex items-center justify-center hover:bg-[#222] transition-colors shadow-xl">
                 <Gamepad2 size={22} />
               </Link>
             </div>
