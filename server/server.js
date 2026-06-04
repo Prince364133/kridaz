@@ -129,38 +129,60 @@ const startServer = () => {
 // Start the server
 startServer(); // triggered restart
 
-// GRACEFUL SHUTDOWN — add at bottom of server.js
+// GRACEFUL SHUTDOWN
+//
+// Order matters:
+//   1. Stop accepting new HTTP connections — server.close drains keep-alive.
+//   2. Let BullMQ workers finish current jobs (15s budget).
+//   3. Disconnect data stores (Prisma + Redis clients + pubsub).
+//   4. Forced 30s ceiling so a stuck connection can't pin the container.
+let shuttingDown = false;
 const shutdown = async (signal) => {
+  if (shuttingDown) return;
+  shuttingDown = true;
   logger.info(`[SERVER] ${signal} received. Graceful shutdown starting...`);
-  
-  // Stop accepting new HTTP connections
+
   server.close(async () => {
     logger.info('[SERVER] HTTP server closed. Draining queues...');
-    
+
     try {
-      // Give BullMQ workers 15 seconds to finish current jobs
+      // Close every BullMQ queue we know about. Each close() flushes the worker
+      // and lets in-flight jobs complete. Capped at 15s so a stuck job can't
+      // delay restart past the deploy budget.
       await Promise.race([
-        new Promise(resolve => setTimeout(resolve, 15000)),
-        // Import and close queues gracefully
-        import('./queues/media.queue.js').then(({ mediaQueue }) => mediaQueue.close()),
+        new Promise(resolve => setTimeout(resolve, 15_000)),
+        Promise.allSettled([
+          import('./queues/media.queue.js').then(({ mediaQueue }) => mediaQueue.close()),
+          import('./queues/notification.queue.js').then(({ notificationQueue }) => notificationQueue.close()).catch(() => {}),
+          import('./queues/settlement.queue.js').then(({ settlementQueue }) => settlementQueue?.close?.()).catch(() => {}),
+        ]),
       ]);
-      
-      // Disconnect Prisma
-      const { prisma } = await import('./config/prisma.js');
-      await prisma.$disconnect();
-      logger.info('[SERVER] Prisma disconnected. Shutdown complete.');
+
+      // Disconnect data stores.
+      const [{ prisma }, redis] = await Promise.all([
+        import('./config/prisma.js'),
+        import('./config/redis.js'),
+      ]);
+      await Promise.allSettled([
+        prisma.$disconnect(),
+        redis.redisClient.quit?.().catch(() => {}),
+        redis.pubClient?.quit?.().catch(() => {}),
+        redis.subClient?.quit?.().catch(() => {}),
+        redis.bullmqConnection?.quit?.().catch(() => {}),
+      ]);
+      logger.info('[SERVER] Prisma + Redis disconnected. Shutdown complete.');
       process.exit(0);
     } catch (err) {
       logger.error('[SERVER] Error during shutdown:', err);
       process.exit(1);
     }
   });
-  
+
   // Force exit after 30 seconds if graceful fails
   setTimeout(() => {
     logger.error('[SERVER] Forced shutdown after 30s timeout');
     process.exit(1);
-  }, 30000);
+  }, 30_000).unref();
 };
 
 process.on('SIGTERM', () => shutdown('SIGTERM'));

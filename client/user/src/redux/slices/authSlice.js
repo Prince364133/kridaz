@@ -1,6 +1,16 @@
 // src/redux/slices/authSlice.js
 import { createSlice } from "@reduxjs/toolkit";
 
+// Mirror server-side privacy truth into localStorage so the geolocation watcher
+// in SocketContext respects the user's setting across devices/sessions.
+const syncLocationSharingFlag = (user) => {
+  if (typeof window === "undefined" || !user) return;
+  if (typeof user.locationSharingEnabled !== "boolean") return;
+  try {
+    localStorage.setItem("kridaz_location_sharing", String(user.locationSharingEnabled));
+  } catch { /* private mode / quota — non-fatal */ }
+};
+
 const authSlice = createSlice({
   name: "auth",
   initialState: {
@@ -20,6 +30,7 @@ const authSlice = createSlice({
       state.followingIds = action.payload.followingIds || [];
       state.isAuthenticated = true;
       state.isLoggedIn = true;
+      syncLocationSharingFlag(state.user);
     },
     logout: (state) => {
       state.token = null;
@@ -36,9 +47,11 @@ const authSlice = createSlice({
       state.followingIds = action.payload.followingIds || state.followingIds;
       state.isAuthenticated = true;
       state.isLoggedIn = true;
+      syncLocationSharingFlag(state.user);
     },
     updateUser: (state, action) => {
       state.user = { ...state.user, ...action.payload };
+      syncLocationSharingFlag(state.user);
     },
     setFollowingIds: (state, action) => {
       state.followingIds = action.payload;

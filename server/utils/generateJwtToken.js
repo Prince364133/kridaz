@@ -1,16 +1,23 @@
 import jwt from "jsonwebtoken";
 import crypto from "crypto";
 import { prisma } from "../config/prisma.js";
+import { getAccessSecret } from "./jwtSecrets.js";
 
 /**
  * Generates a short-lived (15m) JWT access token for Users.
+ *
+ * `tokenVersion` is embedded so a future PR can mass-invalidate sessions on
+ * password change by bumping User.tokenVersion and rejecting tokens whose
+ * embedded version doesn't match. Today the field is plumbed but verifiers
+ * don't enforce it — adding enforcement is a single-file change.
  */
-export function generateUserToken(userId, role = "user", ownerId = null) {
-    return jwt.sign({ 
-        id: userId, 
+export function generateUserToken(userId, role = "user", ownerId = null, tokenVersion = 0) {
+    return jwt.sign({
+        id: userId,
         role: role,
-        ownerId: ownerId 
-    }, process.env.JWT_SECRET, {
+        ownerId: ownerId,
+        tokenVersion,
+    }, getAccessSecret(), {
          expiresIn: "15m"
     });
 }
@@ -18,12 +25,13 @@ export function generateUserToken(userId, role = "user", ownerId = null) {
 /**
  * Generates a short-lived (15m) JWT access token for Owners.
  */
-export const generateOwnerToken = (userId, role, ownerId) => {
-    return jwt.sign({ 
-        id: userId, 
-        ownerId: ownerId, 
-        role: role || "owner" 
-    }, process.env.JWT_SECRET, {
+export const generateOwnerToken = (userId, role, ownerId, tokenVersion = 0) => {
+    return jwt.sign({
+        id: userId,
+        ownerId: ownerId,
+        role: role || "owner",
+        tokenVersion,
+    }, getAccessSecret(), {
         expiresIn: "15m"
     });
 }

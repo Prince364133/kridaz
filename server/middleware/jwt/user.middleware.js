@@ -1,40 +1,41 @@
 import jwt from "jsonwebtoken";
+import { UnauthorizedError } from "@kridaz/common";
+import { getAccessSecret } from "../../utils/jwtSecrets.js";
 
 const verifyUserToken = async (req, res, next) => {
+  const header = req.headers.authorization;
+  let token = null;
+
+  if (header && header.startsWith("Bearer ")) {
+    token = header.split(" ")[1];
+  } else if (req.cookies && req.cookies.auth_token) {
+    token = req.cookies.auth_token;
+  }
+
+  if (!token) {
+    return next(new UnauthorizedError("No token provided", { code: "NO_TOKEN" }));
+  }
+
+  let decoded;
   try {
-    const header = req.headers.authorization;
-    let token = null;
-
-    if (header && header.startsWith("Bearer ")) {
-      token = header.split(" ")[1];
-    } else if (req.cookies && req.cookies.auth_token) {
-      token = req.cookies.auth_token;
-    }
-
-    if (!token) {
-      // No token provided
-      return res
-        .status(401)
-        .json({ message: "Unauthorized: No token provided" });
-    }
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    if (!decoded) {
-      // Invalid token
-      return res.status(401).json({ message: "Unauthorized: Invalid token" });
-    }
-    // Attach the decoded user information to the request with normalization
-    req.user = {
-      ...decoded,
-      id: decoded.id || (decoded.user && decoded.user.id)
-    };
-    next();
+    decoded = jwt.verify(token, getAccessSecret());
   } catch (err) {
     if (err.name === "TokenExpiredError") {
-      return res.status(401).json({ success: false, message: "TOKEN_EXPIRED" });
+      return next(new UnauthorizedError("Session expired", { code: "TOKEN_EXPIRED" }));
     }
-    // Return 403 on verification error (malformed or tampered token)
-    return res.status(403).json({ success: false, message: "Unauthorized: Session invalid" });
+    return next(new UnauthorizedError("Invalid token", { code: "INVALID_TOKEN" }));
   }
+
+  if (!decoded) {
+    return next(new UnauthorizedError("Invalid token", { code: "INVALID_TOKEN" }));
+  }
+
+  // Attach the decoded user information to the request with normalization
+  req.user = {
+    ...decoded,
+    id: decoded.id || (decoded.user && decoded.user.id)
+  };
+  next();
 };
 
 export const optionalUserAuth = async (req, res, next) => {
@@ -52,7 +53,7 @@ export const optionalUserAuth = async (req, res, next) => {
       return next(); // Proceed without req.user
     }
 
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    const decoded = jwt.verify(token, getAccessSecret());
     if (decoded) {
       req.user = {
         ...decoded,

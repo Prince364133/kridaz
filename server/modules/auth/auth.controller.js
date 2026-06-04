@@ -14,23 +14,42 @@ import { logAudit } from "../../utils/auditLogger.js";
 import logger from "../../utils/logger.js";
 import { userRegistrationTotal } from "../../utils/metrics.js";
 import { SOCKET } from "@kridaz/shared-constants/socketEvents";
+import { sanitizeUser } from "../../utils/sanitizeUser.js";
+import { getRegistrationSecret } from "../../utils/jwtSecrets.js";
 
 
 
 const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
+// Lifetimes — kept in one place so the cookie maxAge and the body expiry
+// timestamps can never drift. Refresh-token rotation in refreshToken() also
+// imports these via the module-scope constants below the helper.
+const ACCESS_TOKEN_LIFETIME_MS_HELPER  = 15 * 60 * 1000;
+const REFRESH_TOKEN_LIFETIME_MS_HELPER = 30 * 24 * 60 * 60 * 1000;
+
+/**
+ * Issue cookie tokens AND return the values + expiry timestamps so mobile
+ * clients (no cookie jar) can read them from the response body.
+ *
+ * Returns { refreshToken, accessTokenExpiresAt, refreshTokenExpiresAt }.
+ * Web ignores the return value and reads cookies as before.
+ */
 const issueTokens = async (res, userId, token) => {
     // Generate new refresh token (random string, hashed & saved in DB)
     const clientIp = res.req.ip || res.req.headers['x-forwarded-for'] || res.req.socket?.remoteAddress || null;
     const refreshToken = await generateRefreshToken(userId, clientIp);
-    
+
     const isProd = process.env.NODE_ENV === "production" || !!process.env.RAILWAY_ENVIRONMENT || !!process.env.RAILWAY_ENVIRONMENT_NAME || !!process.env.RAILWAY_PROJECT_ID;
-    
+
+    const now = Date.now();
+    const accessTokenExpiresAt  = new Date(now + ACCESS_TOKEN_LIFETIME_MS_HELPER).toISOString();
+    const refreshTokenExpiresAt = new Date(now + REFRESH_TOKEN_LIFETIME_MS_HELPER).toISOString();
+
     res.cookie("auth_token", token, {
       httpOnly: true,
       secure: isProd,
       sameSite: isProd ? "none" : "lax",
-      maxAge: 15 * 60 * 1000, // 15 mins
+      maxAge: ACCESS_TOKEN_LIFETIME_MS_HELPER,
       path: "/"
     });
 
@@ -38,14 +57,101 @@ const issueTokens = async (res, userId, token) => {
       httpOnly: true,
       secure: isProd,
       sameSite: isProd ? "none" : "lax",
-      maxAge: 30 * 24 * 60 * 60 * 1000, // 30 days
-      path: "/" 
+      maxAge: REFRESH_TOKEN_LIFETIME_MS_HELPER,
+      path: "/"
     });
+
+    return { refreshToken, accessTokenExpiresAt, refreshTokenExpiresAt };
 };
 
 
 const generateOTP = () => {
   return Math.floor(100000 + Math.random() * 900000).toString();
+};
+
+/**
+ * Verify a registration token AND atomically mark it consumed.
+ *
+ * Throws a plain object {status, code, message} the caller maps onto its
+ * existing res.status().json() pattern — keeps the register paths uniform
+ * without forcing a wider refactor in this wave.
+ *
+ * Single-use is enforced via Redis SET NX. The TTL (35 min) is the JWT
+ * lifetime (30 min) plus headroom so a replay right at expiry still hits
+ * the blacklist.
+ */
+const REG_TOKEN_TTL_S = 35 * 60;
+const claimRegistrationToken = async (token) => {
+  if (!token) {
+    throw { status: 400, code: "REGISTRATION_TOKEN_MISSING", message: "Registration token is missing. Please verify your OTP again." };
+  }
+
+  let decoded;
+  try {
+    decoded = jwt.verify(token, getRegistrationSecret());
+  } catch (err) {
+    throw { status: 400, code: "REGISTRATION_TOKEN_INVALID", message: "Registration token is invalid or expired. Please start over." };
+  }
+
+  // Older tokens minted before the jti rollout don't have one; let them through
+  // so users mid-registration during the deploy don't get stranded. New tokens
+  // always carry a jti.
+  if (decoded.jti) {
+    const claimed = await redisClient.set(`reg:used:${decoded.jti}`, "1", "EX", REG_TOKEN_TTL_S, "NX");
+    if (claimed !== "OK") {
+      throw { status: 400, code: "REGISTRATION_TOKEN_USED", message: "Registration token has already been used. Please verify your OTP again." };
+    }
+  }
+
+  return decoded;
+};
+
+/**
+ * Reassign the custom-player data for a phone number to the newly created
+ * real user. Previous implementation looped over invites with 4 sequential
+ * writes each (findFirst → maybe create → updateMany × 2 → delete) — N*4
+ * round trips in the registration hot path.
+ *
+ * This version:
+ *  1. Loads all invites and existing memberships in one round trip each.
+ *  2. Runs all per-invite work in parallel inside the transaction.
+ *
+ * @param {import("@prisma/client").Prisma.TransactionClient} tx
+ * @param {string} userId
+ * @param {string} phone
+ */
+const migrateCustomInvitesForUser = async (tx, userId, phone) => {
+  const customInvites = await tx.teamCustomMember.findMany({
+    where: { phone },
+    select: { id: true, teamId: true },
+  });
+  if (!customInvites.length) return;
+
+  // Pre-fetch existing memberships across all relevant teams so we know which
+  // teamMember.create calls to skip. One IN query replaces N findFirst calls.
+  const teamIds = [...new Set(customInvites.map(c => c.teamId))];
+  const existingMembers = await tx.teamMember.findMany({
+    where: { userId, teamId: { in: teamIds } },
+    select: { teamId: true },
+  });
+  const alreadyJoined = new Set(existingMembers.map(m => m.teamId));
+
+  await Promise.all(customInvites.map(custom => Promise.all([
+    !alreadyJoined.has(custom.teamId)
+      ? tx.teamMember.create({
+          data: { teamId: custom.teamId, userId, role: "PLAYER", status: "ACCEPTED" },
+        })
+      : Promise.resolve(),
+    tx.matchPlayerStat.updateMany({
+      where: { userId: custom.id },
+      data: { userId },
+    }),
+    tx.gameSlot.updateMany({
+      where: { customPlayerId: custom.id },
+      data: { userId, customPlayerId: null },
+    }),
+    tx.teamCustomMember.delete({ where: { id: custom.id } }),
+  ])));
 };
 
 const generateUniqueUsername = async (baseName) => {
@@ -172,14 +278,17 @@ export const verifyOtp = async (req, res) => {
       return res.status(400).json({ success: false, message: "OTP has expired" });
     }
 
-    // Generate Registration Token valid for 30 minutes
+    // Generate Registration Token valid for 30 minutes.
+    // jti makes the token single-use: register() atomically claims it via
+    // Redis SET NX. Replays return REGISTRATION_TOKEN_USED.
     const registrationToken = jwt.sign(
-      { 
-        verifiedEmail: email || otpRecord?.email, 
+      {
+        verifiedEmail: email || otpRecord?.email,
         verifiedPhone: phone || otpRecord?.phone,
-        otpVerified: true 
+        otpVerified: true,
+        jti: crypto.randomUUID(),
       },
-      process.env.JWT_SECRET,
+      getRegistrationSecret(),
       { expiresIn: '30m' }
     );
 
@@ -315,22 +424,23 @@ export const registerUser = async (req, res) => {
       return res.status(400).json({ success: false, message: "Email, Phone or Username already registered" });
     }
 
-    if (!registrationToken) {
-      return res.status(400).json({ success: false, message: "Registration token is missing. Please verify your OTP again." });
-    }
-
     try {
-      jwt.verify(registrationToken, process.env.JWT_SECRET);
+      await claimRegistrationToken(registrationToken);
     } catch (err) {
-      return res.status(400).json({ success: false, message: "Registration token is invalid or expired. Please start over." });
+      return res.status(err.status || 400).json({ success: false, code: err.code, message: err.message });
     }
 
     // If phoneRegistrationToken is provided (for email signups), verify it too
     if (phoneRegistrationToken) {
       try {
-        jwt.verify(phoneRegistrationToken, process.env.JWT_SECRET);
+        await claimRegistrationToken(phoneRegistrationToken);
       } catch (err) {
-        return res.status(400).json({ success: false, message: "Phone verification token is invalid or expired. Please verify your phone again." });
+        // Map to a phone-verification-specific code so the client can show the
+        // right "verify your phone again" copy rather than the generic one.
+        const code = err.code === "REGISTRATION_TOKEN_USED"
+          ? "PHONE_REGISTRATION_TOKEN_USED"
+          : "PHONE_REGISTRATION_TOKEN_INVALID";
+        return res.status(err.status || 400).json({ success: false, code, message: "Phone verification token is invalid, expired, or already used. Please verify your phone again." });
       }
     }
 
@@ -427,45 +537,11 @@ export const registerUser = async (req, res) => {
         }
       });
 
-      // 5. Migrate Custom Player Data
+      // 5. Migrate Custom Player Data — invites are independent, so the per-row
+      // 4 writes can run in parallel within the transaction. The membership
+      // check is pre-fetched in one go to avoid N findFirst round-trips.
       if (phone) {
-        const customInvites = await tx.teamCustomMember.findMany({
-          where: { phone }
-        });
-        
-        for (const custom of customInvites) {
-          // Auto-add to the team
-          const existingMember = await tx.teamMember.findFirst({
-            where: { teamId: custom.teamId, userId: user.id }
-          });
-          if (!existingMember) {
-            await tx.teamMember.create({
-              data: {
-                teamId: custom.teamId,
-                userId: user.id,
-                role: "PLAYER",
-                status: "ACCEPTED"
-              }
-            });
-          }
-          
-          // Reassign stats
-          await tx.matchPlayerStat.updateMany({
-            where: { userId: custom.id },
-            data: { userId: user.id }
-          });
-          
-          // Reassign slots
-          await tx.gameSlot.updateMany({
-            where: { customPlayerId: custom.id },
-            data: { userId: user.id, customPlayerId: null }
-          });
-          
-          // Delete custom invite
-          await tx.teamCustomMember.delete({
-            where: { id: custom.id }
-          });
-        }
+        await migrateCustomInvitesForUser(tx, user.id, phone);
       }
 
       return { user, ownerProfileId };
@@ -481,16 +557,17 @@ export const registerUser = async (req, res) => {
 
     const token = generateUserToken(user.id, user.role, ownerProfileId);
 
-    await issueTokens(res, user.id, token);
+    const tokens = await issueTokens(res, user.id, token);
 
     return res
       .status(201)
-      .json({ 
-        success: true, 
-        message: "User created successfully", 
-        token, 
-        user, 
-        role: user.role 
+      .json({
+        success: true,
+        message: "User created successfully",
+        token,
+        ...tokens,
+        user: sanitizeUser(user),
+        role: user.role
       });
   } catch (err) {
     console.error("RegisterUser Error (debug):", err);
@@ -514,21 +591,20 @@ export const registerOwner = async (req, res) => {
       return res.status(400).json({ success: false, message: "Email or Phone already registered" });
     }
 
-    if (!registrationToken) {
-      return res.status(400).json({ success: false, message: "Registration token is missing. Please verify your OTP again." });
-    }
-
     try {
-      jwt.verify(registrationToken, process.env.JWT_SECRET);
+      await claimRegistrationToken(registrationToken);
     } catch (err) {
-      return res.status(400).json({ success: false, message: "Registration token is invalid or expired. Please start over." });
+      return res.status(err.status || 400).json({ success: false, code: err.code, message: err.message });
     }
 
     if (phoneRegistrationToken) {
       try {
-        jwt.verify(phoneRegistrationToken, process.env.JWT_SECRET);
+        await claimRegistrationToken(phoneRegistrationToken);
       } catch (err) {
-        return res.status(400).json({ success: false, message: "Phone verification token is invalid or expired. Please verify your phone again." });
+        const code = err.code === "REGISTRATION_TOKEN_USED"
+          ? "PHONE_REGISTRATION_TOKEN_USED"
+          : "PHONE_REGISTRATION_TOKEN_INVALID";
+        return res.status(err.status || 400).json({ success: false, code, message: "Phone verification token is invalid, expired, or already used. Please verify your phone again." });
       }
     }
 
@@ -568,45 +644,9 @@ export const registerOwner = async (req, res) => {
         }
       });
 
-      // 3. Migrate Custom Player Data
+      // 3. Migrate Custom Player Data — see migrateCustomInvitesForUser.
       if (phone) {
-        const customInvites = await tx.teamCustomMember.findMany({
-          where: { phone }
-        });
-        
-        for (const custom of customInvites) {
-          // Auto-add to the team
-          const existingMember = await tx.teamMember.findFirst({
-            where: { teamId: custom.teamId, userId: user.id }
-          });
-          if (!existingMember) {
-            await tx.teamMember.create({
-              data: {
-                teamId: custom.teamId,
-                userId: user.id,
-                role: "PLAYER",
-                status: "ACCEPTED"
-              }
-            });
-          }
-          
-          // Reassign stats
-          await tx.matchPlayerStat.updateMany({
-            where: { userId: custom.id },
-            data: { userId: user.id }
-          });
-          
-          // Reassign slots
-          await tx.gameSlot.updateMany({
-            where: { customPlayerId: custom.id },
-            data: { userId: user.id, customPlayerId: null }
-          });
-          
-          // Delete custom invite
-          await tx.teamCustomMember.delete({
-            where: { id: custom.id }
-          });
-        }
+        await migrateCustomInvitesForUser(tx, user.id, phone);
       }
 
       return { user, owner };
@@ -622,14 +662,15 @@ export const registerOwner = async (req, res) => {
 
     const token = generateOwnerToken(user.id, owner.role, owner.id);
 
-    await issueTokens(res, user.id, token);
+    const tokens = await issueTokens(res, user.id, token);
 
     return res.status(201).json({
       success: true,
       message: waitlistPosition ? "You've been added to the waitlist!" : "Account created successfully",
       token,
+      ...tokens,
       role: owner.role,
-      user,
+      user: sanitizeUser(user),
       waitlistNumber: waitlistPosition,
     });
   } catch (err) {
@@ -675,11 +716,11 @@ export const loginStep1 = async (req, res) => {
     const ownerProfileId = user.ownerProfile ? user.ownerProfile.id : null;
     const token = isSuperAdmin
       ? generateUserToken(user.id, role, ownerProfileId)
-      : (user.ownerProfile 
+      : (user.ownerProfile
         ? generateOwnerToken(user.id, role, ownerProfileId)
         : generateUserToken(user.id, role));
 
-    await issueTokens(res, user.id, token);
+    const tokens = await issueTokens(res, user.id, token);
 
     if (role?.toUpperCase() === "ADMIN") {
       await logAudit({
@@ -690,12 +731,13 @@ export const loginStep1 = async (req, res) => {
       });
     }
 
-    return res.status(200).json({ 
-      success: true, 
-      message: "Login successful", 
-      token, 
+    return res.status(200).json({
+      success: true,
+      message: "Login successful",
+      token,
+      ...tokens,
       role,
-      user
+      user: sanitizeUser(user)
     });
   } catch (err) {
     logger.error("LoginStep1 Error:", err);
@@ -777,7 +819,7 @@ export const login = async (req, res) => {
       });
     }
 
-    await issueTokens(res, user.id, token);
+    const tokens = await issueTokens(res, user.id, token);
 
     if (role?.toUpperCase() === "ADMIN") {
       await logAudit({
@@ -788,12 +830,13 @@ export const login = async (req, res) => {
       });
     }
 
-    return res.status(200).json({ 
-      success: true, 
-      message: "Login successful", 
-      token, 
+    return res.status(200).json({
+      success: true,
+      message: "Login successful",
+      token,
+      ...tokens,
       role,
-      user
+      user: sanitizeUser(user)
     });
   } catch (err) {
     logger.error("Login error:", err);
@@ -899,7 +942,7 @@ export const loginWithRecoveryToken = async (req, res) => {
     const role = user.role;
     const token = generateUserToken(user.id, user.role);
 
-    await issueTokens(res, user.id, token);
+    const tokens = await issueTokens(res, user.id, token);
 
     await logAudit({
       userId: user.id,
@@ -908,12 +951,13 @@ export const loginWithRecoveryToken = async (req, res) => {
       req
     });
 
-    return res.status(200).json({ 
-      success: true, 
-      message: "Login successful via recovery token", 
-      token, 
+    return res.status(200).json({
+      success: true,
+      message: "Login successful via recovery token",
+      token,
+      ...tokens,
       role,
-      user
+      user: sanitizeUser(user)
     });
   } catch (err) {
     logger.error("Recovery Login Error:", err);
@@ -922,9 +966,13 @@ export const loginWithRecoveryToken = async (req, res) => {
 };
 
 // Google Auth
+//
+// Accepts a Google credential (idToken) or access token; we never accept a
+// password here. A Google-authenticated account uses a random server-side
+// secret as its password hash so the local-login path can't be used against
+// it (Google must keep being the auth source).
 export const googleAuth = async (req, res) => {
-  // console.log("GOOGLE AUTH REQ BODY:", { ...req.body, credential: "[REDACTED]", password: "[REDACTED]" });
-  const { credential, accessToken, role: requestedRole, umpireInvite, inviteToken, password } = req.body;
+  const { credential, accessToken, role: requestedRole, umpireInvite, inviteToken } = req.body;
   try {
     let payload;
 
@@ -972,14 +1020,13 @@ export const googleAuth = async (req, res) => {
         ? generateOwnerToken(user.id, roleToReturn, ownerProfileId)
         : generateUserToken(user.id, user.role);
     } else {
-      // New account creation via Google
-      let hashedPassword;
-      if (password) {
-        hashedPassword = await argon2.hash(password);
-      } else {
-        const randomPassword = crypto.randomBytes(32).toString("hex");
-        hashedPassword = await argon2.hash(randomPassword);
-      }
+      // New account creation via Google.
+      // Always seed a random hash — the user authenticates via Google, not
+      // via local password. Letting the client supply a password here would
+      // open a path where a stolen Google credential + chosen password sets
+      // a working local login on a fresh account.
+      const randomPassword = crypto.randomBytes(32).toString("hex");
+      const hashedPassword = await argon2.hash(randomPassword);
 
       const generatedUsername = await generateUniqueUsername(name);
 
@@ -1108,16 +1155,17 @@ export const googleAuth = async (req, res) => {
       return res.status(403).json({ success: false, message: "Your account has been blocked by an administrator." });
     }
 
-    await issueTokens(res, user.id, token);
+    const tokens = await issueTokens(res, user.id, token);
 
     const isNewUser = isNewAccountCreated || !user.phone || !user.gender || !user.location;
 
-    return res.status(200).json({ 
-      success: true, 
-      message: "Google authentication successful", 
-      token, 
+    return res.status(200).json({
+      success: true,
+      message: "Google authentication successful",
+      token,
+      ...tokens,
       role: roleToReturn,
-      user,
+      user: sanitizeUser(user),
       isNewUser
     });
   } catch (error) {
@@ -1160,16 +1208,31 @@ export const logout = async (req, res) => {
 };
 
 // Refresh Token Rotation
+//
+// Accepts the refresh token from either the request body or the cookie. Mobile
+// clients (Flutter/Dio) don't share a browser cookie jar — they POST
+// { refreshToken } in the body. Web continues to use the httpOnly cookie.
+//
+// Response (additive — old top-level `token` is kept for back-compat):
+//   { success, token, role, user, accessTokenExpiresAt, refreshTokenExpiresAt }
+//
+// Grace window for already-revoked tokens is 60s. The original 15s wasn't
+// enough for poor 3G — concurrent requests during a refresh would race past
+// the window and get the user logged out.
+const ACCESS_TOKEN_LIFETIME_MS = 15 * 60 * 1000;
+const REFRESH_TOKEN_LIFETIME_MS = 30 * 24 * 60 * 60 * 1000;
+const REFRESH_REVOKE_GRACE_MS = 60_000;
+
 export const refreshToken = async (req, res) => {
   try {
-      const refreshToken = req.cookies?.refresh_token;
-      
+      const refreshToken = req.body?.refreshToken || req.cookies?.refresh_token;
+
       if (!refreshToken) {
-          return res.status(401).json({ success: false, message: "No refresh token provided" });
+          return res.status(401).json({ success: false, code: "NO_REFRESH_TOKEN", message: "No refresh token provided" });
       }
 
       const tokenHash = crypto.createHash('sha256').update(refreshToken).digest('hex');
-      
+
       // Find the token in the DB
       const tokenDoc = await prisma.refreshToken.findUnique({
         where: { tokenHash: tokenHash }
@@ -1177,12 +1240,12 @@ export const refreshToken = async (req, res) => {
 
       // 1. If token doesn't exist, it's invalid
       if (!tokenDoc) {
-          return res.status(401).json({ success: false, message: "Invalid refresh token" });
+          return res.status(401).json({ success: false, code: "INVALID_REFRESH_TOKEN", message: "Invalid refresh token" });
       }
 
       // 2. REUSE DETECTION: If token is already revoked, someone might be attempting an attack
       if (tokenDoc.revokedAt) {
-          const gracePeriodMs = 15000; // 15 seconds grace period
+          const gracePeriodMs = REFRESH_REVOKE_GRACE_MS;
           const timeSinceRevocation = new Date().getTime() - new Date(tokenDoc.revokedAt).getTime();
           
           if (timeSinceRevocation > gracePeriodMs) {
@@ -1191,7 +1254,7 @@ export const refreshToken = async (req, res) => {
                   where: { userId: tokenDoc.userId },
                   data: { revokedAt: new Date() }
               });
-              return res.status(401).json({ success: false, message: "Token compromise detected. Please login again." });
+              return res.status(401).json({ success: false, code: "REFRESH_TOKEN_REUSE", message: "Token compromise detected. Please login again." });
           }
 
           // Within the grace period, let's find the user and issue a new access token (no new refresh token needed)
@@ -1201,7 +1264,7 @@ export const refreshToken = async (req, res) => {
           });
 
           if (!user || user.status === "blocked") {
-              return res.status(401).json({ success: false, message: "User status invalid" });
+              return res.status(401).json({ success: false, code: "ACCOUNT_BLOCKED", message: "User status invalid" });
           }
 
           let role = user.role;
@@ -1232,17 +1295,20 @@ export const refreshToken = async (req, res) => {
             path: "/"
           });
 
-          return res.status(200).json({ 
-              success: true, 
+          return res.status(200).json({
+              success: true,
               token: newToken,
               role,
-              user: account
+              user: sanitizeUser(account),
+              accessTokenExpiresAt: new Date(Date.now() + ACCESS_TOKEN_LIFETIME_MS).toISOString(),
+              // Same refresh token kept during grace period — its original expiry stands.
+              refreshTokenExpiresAt: new Date(tokenDoc.expiresAt).toISOString(),
           });
       }
 
       // 3. Check expiration
       if (new Date() > tokenDoc.expiresAt) {
-          return res.status(401).json({ success: false, message: "Refresh token expired" });
+          return res.status(401).json({ success: false, code: "REFRESH_TOKEN_EXPIRED", message: "Refresh token expired" });
       }
 
       // 4. Token is valid, let's rotate
@@ -1252,11 +1318,11 @@ export const refreshToken = async (req, res) => {
       });
 
       if (!user) {
-          return res.status(401).json({ success: false, message: "User not found" });
+          return res.status(401).json({ success: false, code: "USER_NOT_FOUND", message: "User not found" });
       }
-      
+
       if (user.status === "blocked") {
-          return res.status(403).json({ success: false, message: "Account blocked" });
+          return res.status(403).json({ success: false, code: "ACCOUNT_BLOCKED", message: "Account blocked" });
       }
 
       let role = user.role;
@@ -1283,18 +1349,20 @@ export const refreshToken = async (req, res) => {
         data: { revokedAt: new Date() }
       });
 
-      // Issue new access and refresh token (Rotation)
-      await issueTokens(res, user.id, newToken);
+      // Issue new access and refresh token (Rotation) — issueTokens returns
+      // the new refreshToken + both expiries so the body carries them too.
+      const tokens = await issueTokens(res, user.id, newToken);
 
-      return res.status(200).json({ 
-          success: true, 
+      return res.status(200).json({
+          success: true,
           token: newToken,
+          ...tokens,
           role,
-          user: account
+          user: sanitizeUser(account),
       });
   } catch (error) {
       logger.error("Refresh token error:", error);
-      return res.status(500).json({ success: false, message: "Failed to refresh token" });
+      return res.status(500).json({ success: false, code: "REFRESH_FAILED", message: "Failed to refresh token" });
   }
 };
 
@@ -1335,7 +1403,7 @@ export const ownerRequest = async (req, res) => {
       .status(201)
       .json({ success: true, message: "Owner request created successfully" });
   } catch (err) {
-    logger.info(err.message);
+    logger.error("ownerRequest Error:", err);
     return res.status(500).json({ success: false, message: "Internal Server Error" });
   }
 };
@@ -1464,24 +1532,23 @@ export const getMe = async (req, res) => {
     }
 
     const { id } = decoded;
-    
-    // First try to find by User ID (standard for new system)
-    let user = await prisma.user.findUnique({
-      where: { id: id },
-      include: { ownerProfile: true }
+
+    // Single round-trip for the common case + the legacy "decoded.id is an
+    // ownerProfile.id" fallback. getMe is called on every cold app start so
+    // this matters — the previous version did two sequential findUniques even
+    // on success.
+    const user = await prisma.user.findFirst({
+      where: {
+        OR: [
+          { id },
+          { ownerProfile: { id } },
+        ],
+      },
+      include: { ownerProfile: true },
     });
 
-    // If not found, it might be an old Owner ID being passed
     if (!user) {
-      const profile = await prisma.ownerProfile.findUnique({
-        where: { id: id },
-        include: { user: true }
-      });
-      if (profile) user = { ...profile.user, ownerProfile: profile };
-    }
-
-    if (!user) {
-      return res.status(404).json({ success: false, message: "Account not found" });
+      return res.status(404).json({ success: false, code: "ACCOUNT_NOT_FOUND", message: "Account not found" });
     }
 
     if (user.status === "blocked") {
@@ -1505,8 +1572,8 @@ export const getMe = async (req, res) => {
 
     const token = req.cookies.auth_token || req.headers.authorization?.split(" ")[1];
 
-    // Strip password hash — NEVER send it to the client
-    const { password: _pw, ...safeUser } = user;
+    // Strip secrets — password hash, fcmToken, googleId, refreshTokens.
+    const safeUser = sanitizeUser(user);
 
     // Safely merge only the ownerProfile fields we want to expose, without
     // overwriting critical user fields (id, role, createdAt, etc.)
@@ -1531,9 +1598,9 @@ export const getMe = async (req, res) => {
     const isSuperAdmin = user.role?.toUpperCase() === "ADMIN";
     const activeRole = isSuperAdmin ? user.role : (user.ownerProfile?.role || user.role);
 
-    return res.status(200).json({ 
-      success: true, 
-      user: account, 
+    return res.status(200).json({
+      success: true,
+      user: account,
       role: activeRole,
       token
     });
@@ -1605,7 +1672,7 @@ export const updateProfilePicture = async (req, res) => {
       success: true,
       message: "Profile picture updated successfully",
       profilePicture: profilePictureUrl,
-      user: { ...user, profilePicture: profilePictureUrl }
+      user: sanitizeUser({ ...user, profilePicture: profilePictureUrl })
     });
   } catch (err) {
     logger.error("updateProfilePicture Error:", err);
@@ -1750,7 +1817,7 @@ export const updateProfile = async (req, res) => {
     return res.status(200).json({
       success: true,
       message: "Profile updated successfully",
-      user: updatedUser
+      user: sanitizeUser(updatedUser)
     });
   } catch (err) {
     logger.error("updateProfile Error:", err);

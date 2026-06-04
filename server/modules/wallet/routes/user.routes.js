@@ -12,6 +12,7 @@ import {
   verifyTopupSchema,
 } from "../wallet.validator.js";
 import { paymentLimiter } from "../../../middleware/rateLimiter.middleware.js";
+import { idempotency } from "../../../middleware/idempotency.middleware.js";
 
 const router = Router();
 
@@ -47,6 +48,7 @@ router.get("/data", getWalletData);
 router.post(
   "/topup/create-order",
   paymentLimiter,
+  idempotency,
   validate(createTopupSchema),
   createTopupOrder
 );
@@ -63,6 +65,7 @@ router.post(
 router.post(
   "/topup/verify",
   paymentLimiter,
+  idempotency,
   validate(verifyTopupSchema),
   verifyTopup
 );

@@ -13,6 +13,7 @@ import { createOrderSchema, verifyPaymentSchema, bookWithWalletSchema } from "..
 import { validate } from "../../../middleware/validate.middleware.js";
 import verifyToken from "../../../middleware/jwt/user.middleware.js";
 import { paymentLimiter } from "../../../middleware/rateLimiter.middleware.js";
+import { idempotency } from "../../../middleware/idempotency.middleware.js";
 
 /**
  * @module UserBookingRoutes
@@ -56,7 +57,7 @@ const router = Router();
  *       429:
  *         description: Too many payment requests
  */
-router.post("/create-order", paymentLimiter, verifyToken, validate(createOrderSchema), createOrder);
+router.post("/create-order", paymentLimiter, verifyToken, idempotency, validate(createOrderSchema), createOrder);
 
 /**
  * @swagger
@@ -93,7 +94,7 @@ router.post("/create-order", paymentLimiter, verifyToken, validate(createOrderSc
  *       429:
  *         description: Too many payment requests
  */
-router.post("/verify-payment", paymentLimiter, verifyToken, validate(verifyPaymentSchema), verifyPayment);
+router.post("/verify-payment", paymentLimiter, verifyToken, idempotency, validate(verifyPaymentSchema), verifyPayment);
 
 /**
  * @swagger
@@ -123,7 +124,7 @@ router.post("/verify-payment", paymentLimiter, verifyToken, validate(verifyPayme
  *       429:
  *         description: Too many payment requests
  */
-router.post("/book-with-wallet", paymentLimiter, verifyToken, validate(bookWithWalletSchema), bookWithWallet);
+router.post("/book-with-wallet", paymentLimiter, verifyToken, idempotency, validate(bookWithWalletSchema), bookWithWallet);
 
 /**
  * @swagger

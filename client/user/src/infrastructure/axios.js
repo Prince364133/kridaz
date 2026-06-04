@@ -41,10 +41,18 @@ axiosInstance.interceptors.response.use(
     const originalRequest = error.config;
     const isAuthCheck = originalRequest?.url?.includes('/api/user/auth/getMe');
 
+    // Match on the canonical `code` field (Wave 1 server envelope).
+    // The server still emits message === "TOKEN_EXPIRED" as a back-compat
+    // shim during the rollout, so we OR the two checks — once that shim is
+    // removed, the message branch becomes dead code.
+    const errCode = error.response?.data?.code;
+    const errMessage = error.response?.data?.message;
+    const isExpired = errCode === "TOKEN_EXPIRED" || errMessage === "TOKEN_EXPIRED";
+
     if (
-      error.response?.status === 401 && 
-      error.response?.data?.message === "TOKEN_EXPIRED" &&
-      !originalRequest._retry && 
+      error.response?.status === 401 &&
+      isExpired &&
+      !originalRequest._retry &&
       !isAuthCheck
     ) {
       if (isRefreshing) {
@@ -85,9 +93,18 @@ axiosInstance.interceptors.response.use(
       }
     } else if (error.response?.status === 401 || error.response?.status === 403) {
       if (!isAuthCheck) {
-        console.warn("API returned 401/403. URL:", originalRequest?.url, "Message:", error.response?.data?.message);
-        const msg = error.response?.data?.message || "";
-        if (msg.includes("Invalid token") || msg.includes("Session invalid")) {
+        console.warn("API returned 401/403. URL:", originalRequest?.url, "Code:", errCode, "Message:", errMessage);
+        // Prefer the stable `code` (Wave 1 envelope); fall back to substring
+        // matching on the human message for any older response paths that
+        // haven't been migrated yet.
+        const HARD_LOGOUT_CODES = new Set(["INVALID_TOKEN", "NO_TOKEN"]);
+        const msg = errMessage || "";
+        const shouldLogout =
+          (errCode && HARD_LOGOUT_CODES.has(errCode)) ||
+          msg.includes("Invalid token") ||
+          msg.includes("Session invalid") ||
+          msg.includes("Session expired");
+        if (shouldLogout) {
           store.dispatch(logout());
         }
       }

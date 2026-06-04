@@ -8,6 +8,7 @@ import { findNearby, updateGeoPoint } from "../../utils/geo.util.js";
 import { getOrSetCache, generateCacheKey, invalidateCache } from "../../utils/cache.js";
 import logger from "../../utils/logger.js";
 import { getGroundRecommendations } from "../../services/recommendation.service.js";
+import { computeLowestHourlyRate } from "../../utils/turfPricing.js";
 
 // --- USER OPERATIONS ---
 
@@ -160,7 +161,7 @@ export const getAllTurfs = async (req, res) => {
 
     return res.status(200).json({ turfs: formattedTurfs });
   } catch (err) {
-    logger.info("Error in getAllTurfs", err);
+    logger.error("Error in getAllTurfs", err);
     return res.status(500).json({ message: err.message });
   }
 };
@@ -203,7 +204,7 @@ export const getTurfLocations = async (req, res) => {
       citiesByState: locationMap,
     });
   } catch (err) {
-    logger.info("Error in getTurfLocations", err);
+    logger.error("Error in getTurfLocations", err);
     return res.status(500).json({ message: err.message });
   }
 };
@@ -273,7 +274,7 @@ export const getTurfById = async (req, res) => {
 
     return res.status(200).json({ turf: formattedTurf });
   } catch (error) {
-    logger.info("Error in getTurfById", error);
+    logger.error("Error in getTurfById", error);
     return res.status(500).json({ message: error.message });
   }
 };
@@ -338,7 +339,7 @@ export const getTimeSlotByTurfId = async (req, res) => {
 
     return res.status(200).json({ timeSlots: turfDetails, bookedTime });
   } catch (error) {
-    logger.info("Error in getTimeSlotByTurfId", error);
+    logger.error("Error in getTimeSlotByTurfId", error);
     return res.status(500).json({ message: error.message });
   }
 };
@@ -411,6 +412,9 @@ export const turfRegister = async (req, res) => {
       configExpiry.setDate(configExpiry.getDate() + (Number(slotsConfigWeeks) * 7));
     }
 
+    const parsedSlots = generatedSlots ? JSON.parse(generatedSlots) : [];
+    const slotLowestHourly = computeLowestHourlyRate(parsedSlots);
+
     const newTurf = await prisma.turf.create({
       data: {
         name,
@@ -419,8 +423,8 @@ export const turfRegister = async (req, res) => {
         youtubeUrl,
         openTime,
         closeTime,
-        image: imageUrls[0], 
-        images: imageUrls,    
+        image: imageUrls[0],
+        images: imageUrls,
         ownerId: ownerProfile.id,
         status: "pending",
         city,
@@ -429,13 +433,13 @@ export const turfRegister = async (req, res) => {
         longitude: longitude ? parseFloat(longitude) : null,
         slotDuration: Number(slotDuration) || 60,
         breakTime: Number(breakTime) || 0,
-        pricePerHour: parseFloat(price) || 0,
+        pricePerHour: slotLowestHourly ?? (parseFloat(price) || 0),
         availableDays: Array.isArray(availableDays) ? availableDays : (availableDays ? [availableDays] : []),
         offDays: Array.isArray(offDays) ? offDays : (offDays ? [offDays] : []),
         sportTypes: Array.isArray(sportTypes) ? sportTypes : (sportTypes ? [sportTypes] : []),
         groundTypes: Array.isArray(groundTypes) ? groundTypes : (groundTypes ? [groundTypes] : []),
         facilities: Array.isArray(facilities) ? facilities : (facilities ? [facilities] : []),
-        generatedSlots: generatedSlots ? JSON.parse(generatedSlots) : [],
+        generatedSlots: parsedSlots,
         managerContacts: managerContacts ? JSON.parse(managerContacts) : [],
         slotsConfigDuration: slotsConfigDuration || "Until Changed",
         slotsConfigWeeks: Number(slotsConfigWeeks) || 1,
@@ -577,6 +581,13 @@ export const editTurfById = async (req, res) => {
     if (req.body.slotDuration) updatedTurfData.slotDuration = Number(req.body.slotDuration);
     if (req.body.breakTime !== undefined) updatedTurfData.breakTime = Number(req.body.breakTime);
     if (price) updatedTurfData.pricePerHour = parseFloat(price);
+
+    // Slots are the source of truth for headline pricing — override any explicit `price`
+    // when active slots are present so cards display the lowest hourly rate.
+    if (updatedTurfData.generatedSlots) {
+      const slotLowestHourly = computeLowestHourlyRate(updatedTurfData.generatedSlots);
+      if (slotLowestHourly != null) updatedTurfData.pricePerHour = slotLowestHourly;
+    }
 
     if (req.body.city) updatedTurfData.city = req.body.city;
     if (req.body.state) updatedTurfData.state = req.body.state;
@@ -890,7 +901,7 @@ export const adminApproveTurf = async (req, res) => {
       turf: { ...updatedTurf, _id: updatedTurf.id } 
     });
   } catch (err) {
-    logger.info("Error in adminApproveTurf", err);
+    logger.error("Error in adminApproveTurf", err);
     return res.status(500).json({ success: false, message: err.message });
   }
 };

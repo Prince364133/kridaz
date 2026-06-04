@@ -1,5 +1,6 @@
 import jwt from "jsonwebtoken";
 import verifyAuth from "./jwt/auth.middleware.js";
+import { getAccessSecret } from "../utils/jwtSecrets.js";
 
 /**
  * Authentication middleware (Alias for verifyAuth)
@@ -24,7 +25,7 @@ export const optionalProtect = async (req, res, next) => {
     }
 
     if (token) {
-      const decoded = jwt.verify(token, process.env.JWT_SECRET);
+      const decoded = jwt.verify(token, getAccessSecret());
       if (decoded) {
         req.user = {
           id: decoded.id,

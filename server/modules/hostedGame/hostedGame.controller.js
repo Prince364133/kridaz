@@ -44,6 +44,51 @@ const formatGameForClient = (game) => {
   return formatted;
 };
 
+/**
+ * Decorate a game with the viewer's participation flags. Pure function over
+ * the already-fetched include tree — no extra queries. Returns:
+ *   isHost          — viewer hosted the game
+ *   youJoined       — viewer holds a slot (any status) in Quick.slots or any team.slots
+ *   yourSlotId      — the matching gameSlot id (null if not joined)
+ *   yourSlotStatus  — OPEN/PENDING/JOINED/HELD/etc. (null if not joined)
+ *
+ * Unauthenticated viewers get { isHost: false, youJoined: false, yourSlotId: null, yourSlotStatus: null }.
+ */
+const decorateViewerFlags = (game, viewerId) => {
+  if (!viewerId) {
+    return { isHost: false, youJoined: false, yourSlotId: null, yourSlotStatus: null };
+  }
+
+  // Slot ownership can come through two shapes depending on the include
+  // tree the controller used: raw scalar `userId` (fullGameInclude) or only
+  // the nested `user: { id }` (compactGameInclude). Check both.
+  const matches = (s) =>
+    s && (s.userId === viewerId || s.user?.id === viewerId);
+
+  const quickSlots = Array.isArray(game.slots) ? game.slots : [];
+  const teamRows = Array.isArray(game.teams)
+    ? game.teams
+    : game.teams && typeof game.teams === 'object'
+      ? Object.values(game.teams).filter(Boolean)
+      : [];
+
+  let found = quickSlots.find(matches);
+  if (!found) {
+    for (const team of teamRows) {
+      const teamSlots = Array.isArray(team?.slots) ? team.slots : [];
+      const hit = teamSlots.find(matches);
+      if (hit) { found = hit; break; }
+    }
+  }
+
+  return {
+    isHost: game.hostId === viewerId,
+    youJoined: !!found,
+    yourSlotId: found?.id || null,
+    yourSlotStatus: found?.status || null,
+  };
+};
+
 const populateRequestUsers = async (games) => {
   if (!games || !games.length) return games;
 
@@ -614,7 +659,15 @@ export const getAllHostedGames = async (req, res) => {
       include: compactGameInclude
     });
 
-    const formattedGames = games.map(formatGameForClient);
+    // Decorate using the still-pre-formatted games (slots live at game.slots
+    // and game.teams[].slots before formatGameForClient reshapes the trees).
+    const viewerId = req.user?.id || null;
+    const flagsByGame = new Map(games.map(g => [g.id, decorateViewerFlags(g, viewerId)]));
+
+    const formattedGames = games.map(g => ({
+      ...formatGameForClient(g),
+      ...flagsByGame.get(g.id),
+    }));
 
     return res.status(200).json({ games: formattedGames });
   } catch (error) {
@@ -624,7 +677,7 @@ export const getAllHostedGames = async (req, res) => {
 
 export const joinHostedGame = async (req, res) => {
   try {
-    await runInTransaction(async ({ tx }) => {
+    const txResult = await runInTransaction(async ({ tx }) => {
       const userId = req.user.id;
       const { gameId, team, slotIndex, role, slotId } = req.body;
 
@@ -698,30 +751,55 @@ export const joinHostedGame = async (req, res) => {
         }
       });
 
+      // PUBLIC games auto-join (no host approval needed) — matches the
+      // "Public/Private" toggle in the Flutter create-game UI. PRIVATE games
+      // (or any older row missing the field) still go through the approval
+      // flow.
+      const isPublic = String(game.visibility || "PUBLIC").toUpperCase() === "PUBLIC";
+
       await tx.gameSlot.update({
         where: { id: targetSlot.id },
         data: {
           userId,
           role: role || "Player",
-          status: "PENDING",
-          paymentStatus: "RESERVED"
-        }
+          status: isPublic ? "JOINED" : "PENDING",
+          paymentStatus: "RESERVED",
+        },
       });
 
-      NotificationService.sendInApp({
-        recipientId: game.hostId,
-        senderId: userId,
-        type: "GAME_JOIN_REQUEST",
-        title: "New Join Request",
-        message: `A player has requested to join your ${game.gameType} match.`,
-        relatedId: game.id,
-        onModel: "HostedGame"
-      });
+      NotificationService.sendInApp(
+        isPublic
+          ? {
+              recipientId: game.hostId,
+              senderId: userId,
+              type: "GAME_JOIN_CONFIRMED",
+              title: "New Player Joined",
+              message: `A player just joined your ${game.gameType} match.`,
+              relatedId: game.id,
+              onModel: "HostedGame",
+            }
+          : {
+              recipientId: game.hostId,
+              senderId: userId,
+              type: "GAME_JOIN_REQUEST",
+              title: "New Join Request",
+              message: `A player has requested to join your ${game.gameType} match.`,
+              relatedId: game.id,
+              onModel: "HostedGame",
+            }
+      );
 
-      return true;
+      return { autoJoined: isPublic };
     });
 
-    return res.status(200).json({ success: true, message: "Join request sent. Coins reserved." });
+    const autoJoined = !!txResult?.autoJoined;
+    return res.status(200).json({
+      success: true,
+      message: autoJoined
+        ? "Joined the game. Coins reserved."
+        : "Join request sent. Coins reserved.",
+      data: { autoJoined },
+    });
 
   } catch (error) {
     logger.error("Error in joinHostedGame:", error);
@@ -1704,9 +1782,12 @@ export const getHostedGameById = async (req, res) => {
         (!!game.scorerId || game.scorerRequest?.status === 'APPROVED')
     };
 
+    // Compute against the pre-format game (raw slots/teams arrays).
+    const viewerFlags = decorateViewerFlags(game, req.user?.id || null);
+
     return res.status(200).json({
       success: true,
-      game: formatGameForClient(game),
+      game: { ...formatGameForClient(game), ...viewerFlags },
       officialSetupStatus
     });
   } catch (error) {

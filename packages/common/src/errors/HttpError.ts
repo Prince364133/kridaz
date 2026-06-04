@@ -1,6 +1,10 @@
 /**
  * Base HTTP error class. All typed errors extend this.
  * Preserves subclass name in logs via new.target.name.
+ *
+ * `meta` carries structured context: a stable machine-readable `code` for
+ * clients, optional field-level details for validation, etc. Stored as-is
+ * and surfaced by the error middleware.
  */
 export class HttpError extends Error {
   statusCode: number;
@@ -19,40 +23,40 @@ export class HttpError extends Error {
 
 /** 400 — malformed request body or invalid parameters */
 export class BadRequestError extends HttpError {
-  constructor(msg = 'Bad Request', meta = {}) { super(400, msg, meta); }
+  constructor(msg = 'Bad Request', meta: any = {}) { super(400, msg, meta); }
 }
 
 /** 401 — missing or invalid auth token */
 export class UnauthorizedError extends HttpError {
-  constructor(msg = 'Unauthorized') { super(401, msg); }
+  constructor(msg = 'Unauthorized', meta: any = {}) { super(401, msg, meta); }
 }
 
 /** 403 — authenticated but not allowed */
 export class ForbiddenError extends HttpError {
-  constructor(msg = 'Forbidden') { super(403, msg); }
+  constructor(msg = 'Forbidden', meta: any = {}) { super(403, msg, meta); }
 }
 
 /** 404 — resource does not exist */
 export class NotFoundError extends HttpError {
-  constructor(msg = 'Not Found') { super(404, msg); }
+  constructor(msg = 'Not Found', meta: any = {}) { super(404, msg, meta); }
 }
 
 /** 409 — resource already exists or state conflict */
 export class ConflictError extends HttpError {
-  constructor(msg = 'Conflict') { super(409, msg); }
+  constructor(msg = 'Conflict', meta: any = {}) { super(409, msg, meta); }
 }
 
 /** 422 — validation failed (use meta for field-level errors) */
 export class UnprocessableError extends HttpError {
-  constructor(msg = 'Validation Failed', meta = {}) { super(422, msg, meta); }
+  constructor(msg = 'Validation Failed', meta: any = {}) { super(422, msg, meta); }
 }
 
 /** 429 — rate limit exceeded */
 export class TooManyRequestsError extends HttpError {
-  constructor(msg = 'Too Many Requests') { super(429, msg); }
+  constructor(msg = 'Too Many Requests', meta: any = {}) { super(429, msg, meta); }
 }
 
 /** 500 — unexpected server error */
 export class InternalError extends HttpError {
-  constructor(msg = 'Internal Server Error') { super(500, msg); }
+  constructor(msg = 'Internal Server Error', meta: any = {}) { super(500, msg, meta); }
 }

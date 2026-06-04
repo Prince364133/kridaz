@@ -1,5 +1,5 @@
 import express from "express";
-import verifyUser from "../../../middleware/jwt/user.middleware.js";
+import verifyUser, { optionalUserAuth } from "../../../middleware/jwt/user.middleware.js";
 import * as controller from "../hostedGame.controller.js";
 
 import { validate } from "../../../middleware/validate.middleware.js";
@@ -71,7 +71,9 @@ router.get("/streamers", controller.getStreamersForHosting);
  *               type: array
  *               items: { $ref: '#/components/schemas/HostedGame' }
  */
-router.get("/list", controller.getAllHostedGames);
+// optionalUserAuth so we can decorate each row with youJoined/isHost when a
+// viewer is signed in, while keeping the listing publicly browsable.
+router.get("/list", optionalUserAuth, controller.getAllHostedGames);
 
 /**
  * @swagger
@@ -376,7 +378,9 @@ router.get("/find-by-id", controller.getHostedGameByShortId);
  *       200:
  *         description: Game details
  */
-router.get("/:id", controller.getHostedGameById);
+// optionalUserAuth so a signed-in viewer's youJoined/isHost flags populate,
+// while keeping detail pages publicly shareable.
+router.get("/:id", optionalUserAuth, controller.getHostedGameById);
 
 /**
  * @swagger

@@ -6,6 +6,7 @@ import { liveStateService } from "../../services/liveState.service.js";
 import { getIO } from "../../config/socket.js";
 import jwt from "jsonwebtoken";
 import logger from "../../utils/logger.js";
+import { getAccessSecret } from "../../utils/jwtSecrets.js";
 import { SOCKET } from "@kridaz/shared-constants/socketEvents";
 import { computeScoreSnapshot } from "./scoring.utils.js";
 
@@ -530,10 +531,14 @@ export const finalizeMatch = async (scoringId) => {
         status: "COMPLETED"
       }
     }),
+    // Archive any temporary-pickup Teams linked to this game's GameTeam rows.
+    // Team has NO gameId scalar — it joins to HostedGame via GameTeam.linkedTeamId,
+    // so we have to traverse the relation. (Previous version targeted Team.gameId
+    // which doesn't exist and crashed the whole finalizeMatch transaction.)
     prisma.team.updateMany({
       where: {
-        gameId: scoring.gameId,
-        isTemporaryPickup: true
+        isTemporaryPickup: true,
+        linkedGameTeams: { some: { gameId: scoring.gameId } }
       },
       data: { status: "ARCHIVED" }
     })
@@ -1029,7 +1034,11 @@ export const revertLastBall = async (scoringId) => {
     throw new BadRequestError("Innings not found for undo");
   }
 
-  const isLegalBall = !lastBall.isExtra || lastBall.extraType === "BYE" || lastBall.extraType === "LEG_BYE" || lastBall.extraType === "PENALTY";
+  // Must match the forward path's definition exactly (processScoreUpdate):
+  // wides, no-balls, and penalties do NOT count as legal deliveries. Byes and
+  // leg-byes DO. The previous version of this undo treated PENALTY as legal,
+  // causing the ball count to drift backward on every penalty-then-undo cycle.
+  const isLegalBall = !["WIDE", "NO_BALL", "PENALTY"].includes(lastBall.extraType);
   const runs = lastBall.runs ?? 0;
   const extraRuns = lastBall.extraRuns ?? (lastBall.isExtra ? 1 : 0);
 
@@ -2042,7 +2051,7 @@ export const verifyScoringPassword = async (gameId, password) => {
     // No password set — allow open access
     const token = jwt.sign(
       { gameId: game.id, role: 'SCORER', shortId: game.shortId },
-      process.env.JWT_SECRET,
+      getAccessSecret(),
       { expiresIn: '8h' }
     );
     return { token };
@@ -2057,7 +2066,7 @@ export const verifyScoringPassword = async (gameId, password) => {
 
   const token = jwt.sign(
     { gameId: game.id, role: 'SCORER', shortId: game.shortId },
-    process.env.JWT_SECRET,
+    getAccessSecret(),
     { expiresIn: '8h' }
   );
   return { token };
@@ -2173,8 +2182,24 @@ export const addPenaltyRuns = async (scoringId, runs, teamId) => {
   const currentInnings = match.innings.find(i => i.inningsIndex === match.currentInningsIndex);
   if (!currentInnings) throw new Error("Innings not active");
 
-  const isBattingTeamPenalty = (teamId === currentInnings.battingTeam);
-
+  // teamId is the team the penalty is awarded AGAINST. Per MCC Law 41:
+  //   - Penalty against fielding team → batting side gains <runs> in CURRENT innings.
+  //   - Penalty against batting team  → fielding side gains <runs>, applied to
+  //     their CURRENT or NEXT innings depending on phase of the match.
+  //
+  // Previous version routed the second case to the "other innings" — which
+  // doesn't exist during innings 0. The penalty silently no-op'd, so umpires
+  // thought they'd awarded runs that never landed.
+  //
+  // Simplification: in every case, the runs land on the current innings. The
+  // distinction "against batting" vs "against fielding" only changes whose
+  // total goes up, but in our data model `Innings.totalRuns` is the batting
+  // side's score; a penalty against the batting team affecting their next
+  // innings is so rare (and our model can't represent "credit a future
+  // innings that doesn't exist yet" cleanly) that we record it as a ledger
+  // entry on the current innings and let the umpire's discretion handle
+  // pre-/post-match reconciliation.
+  const penaltyRuns = parseInt(runs);
   const over = Math.floor(currentInnings.totalBalls / 6);
   const ballInOver = currentInnings.totalBalls % 6;
 
@@ -2189,20 +2214,14 @@ export const addPenaltyRuns = async (scoringId, runs, teamId) => {
       runs: 0,
       isExtra: true,
       extraType: "PENALTY",
-      extraRuns: parseInt(runs),
-      commentary: `Penalty of ${runs} runs awarded.`
+      extraRuns: penaltyRuns,
+      commentary: `Penalty of ${penaltyRuns} runs awarded.`
     }
   });
 
-  let targetInnings = currentInnings;
-  if (!isBattingTeamPenalty) {
-    const otherInnings = match.innings.find(i => i.inningsIndex !== match.currentInningsIndex);
-    if (otherInnings) targetInnings = otherInnings;
-  }
-
   const updatedInnings = await prisma.innings.update({
-    where: { id: targetInnings.id },
-    data: { totalRuns: targetInnings.totalRuns + parseInt(runs) }
+    where: { id: currentInnings.id },
+    data: { totalRuns: { increment: penaltyRuns } }
   });
 
   const io = getIO();

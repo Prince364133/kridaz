@@ -7,6 +7,7 @@ import { SOCKET } from "@kridaz/shared-constants/socketEvents";
 import fs from "fs";
 import path from "path";
 import jwt from "jsonwebtoken";
+import { getAccessSecret } from "../utils/jwtSecrets.js";
 let io;
 
 const socketConfig = (server) => {
@@ -27,7 +28,7 @@ const socketConfig = (server) => {
       return next(new Error("AUTH"));
     }
     try {
-      const decoded = jwt.verify(token, process.env.JWT_SECRET);
+      const decoded = jwt.verify(token, getAccessSecret());
       if (!decoded) {
         return next(new Error("AUTH"));
       }
@@ -138,12 +139,30 @@ const socketConfig = (server) => {
     // files are automatically cleaned up after 30s in commentary.service.js
 
     socket.on("location:update", async (data) => {
-      const { lat, lng } = data;
+      const { lat, lng, radiusKm, accuracy } = data || {};
       if (!socket.userId || isNaN(lat) || isNaN(lng)) return;
 
       const now = Date.now();
       if (socket.lastLocationUpdate && now - socket.lastLocationUpdate < 2000) return;
       socket.lastLocationUpdate = now;
+
+      // Server-side privacy gate: respect User.locationSharingEnabled.
+      // Cached on the socket so we read DB at most once per connection.
+      if (socket.shareLocation === undefined) {
+        try {
+          const u = await prisma.user.findUnique({
+            where: { id: socket.userId },
+            select: { locationSharingEnabled: true }
+          });
+          socket.shareLocation = u?.locationSharingEnabled !== false;
+        } catch {
+          socket.shareLocation = true;
+        }
+      }
+      if (socket.shareLocation === false) return;
+
+      // Reject low-accuracy fixes (typical indoor GPS can be 1-3km off).
+      if (typeof accuracy === "number" && accuracy > 200) return;
 
       try {
         await redis.set(
@@ -152,18 +171,17 @@ const socketConfig = (server) => {
           "EX", 300
         );
 
-        if (!socket.lastDbLocationWrite || now - socket.lastDbLocationWrite > 30000) {
-          // Update location in Postgres
+        // Throttle DB writes to once every 2 minutes; Redis is the source of truth for live.
+        if (!socket.lastDbLocationWrite || now - socket.lastDbLocationWrite > 120000) {
           await prisma.$executeRaw`
-              UPDATE "User" 
+              UPDATE "User"
               SET latitude = ${lat},
                   longitude = ${lng}
               WHERE id = ${socket.userId}
             `;
-          // Sync with UserProfile
           await prisma.$executeRaw`
-              UPDATE "UserProfile" 
-              SET latitude = ${lat}, 
+              UPDATE "UserProfile"
+              SET latitude = ${lat},
                   longitude = ${lng}
               WHERE "userId" = ${socket.userId}
             `;
@@ -171,7 +189,16 @@ const socketConfig = (server) => {
         }
 
         await redis.geoadd("kridaz:geo:online", lng, lat, socket.userId.toString());
-        const nearbyUserIds = await redis.georadius("kridaz:geo:online", lng, lat, 10, "km");
+
+        // Honor radius from payload (clamped to [1, 100] km). Default 25 km for a sane city-scale fanout.
+        const requestedRadius = Number(radiusKm);
+        const broadcastRadiusKm = Math.min(
+          Math.max(Number.isFinite(requestedRadius) ? requestedRadius : 25, 1),
+          100
+        );
+        const nearbyUserIds = await redis.georadius(
+          "kridaz:geo:online", lng, lat, broadcastRadiusKm, "km"
+        );
 
         if (nearbyUserIds) {
           nearbyUserIds.forEach((uid) => {

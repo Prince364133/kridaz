@@ -20,6 +20,7 @@ model User {
   state                   String?
   latitude                Decimal?              @db.Decimal(10, 8)
   longitude               Decimal?              @db.Decimal(11, 8)
+  locationSharingEnabled  Boolean               @default(true)
   isVerified              Boolean               @default(false)
   isOnboarded             Boolean               @default(false)
   gender                  String?
@@ -47,6 +48,10 @@ model User {
   reservedBalance         Decimal               @default(0) @db.Decimal(12, 2)
   bookingCount            Int                   @default(0)
   fcmToken                String?
+  // Bumped on password change / "logout all sessions". Future PR will reject
+  // access tokens whose embedded tokenVersion != current. Today it's plumbed
+  // through the JWT payload but verification is permissive.
+  tokenVersion            Int                   @default(0)
   createdAt               DateTime              @default(now())
   updatedAt               DateTime              @default(now()) @updatedAt
   auditLogs               AuditLog[]
@@ -104,6 +109,7 @@ model User {
   devices                 UserDevice[]
 
   @@index([role])
+  @@index([latitude, longitude])
 }
 
 model UserProfile {
@@ -309,6 +315,12 @@ model Turf {
   policies            String?      @default("")
   managerContacts     Json?
   generatedSlots      Json?
+  // Stages owner edits to an approved turf for admin re-approval. Read by
+  // turf.controller.js adminApproveTurf (which merges into the turf and clears
+  // this) and by web EditTurf.jsx to show "pending" badges next to fields the
+  // owner has edited but admin hasn't approved yet. Was missing from the
+  // schema — every owner edit to an approved turf was silently failing.
+  pendingUpdates      Json?
   verificationData    Json?
   createdAt           DateTime     @default(now())
   updatedAt           DateTime     @default(now()) @updatedAt
@@ -1577,12 +1589,16 @@ model PlatformConfig {
 }
 
 model UserDevice {
-  id        String   @id @default(uuid())
-  userId    String
-  token     String   @unique
-  platform  String   // "web", "android", "ios"
-  createdAt DateTime @default(now())
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  id          String    @id @default(uuid())
+  userId      String
+  token       String    @unique
+  platform    String    // "web", "android", "ios"
+  deviceId    String?   // OS-level device identifier (Flutter device_info_plus)
+  appVersion  String?   // semver, used for min-client gating
+  locale      String?   // BCP-47 e.g. "en-IN" — drives notification language
+  lastSeenAt  DateTime?
+  createdAt   DateTime  @default(now())
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId])
 }
