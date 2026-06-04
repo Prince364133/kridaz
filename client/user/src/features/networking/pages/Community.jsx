@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useSelector, useDispatch } from "react-redux";
-import { useNavigate, useSearchParams } from "react-router-dom";
+import { useNavigate, useSearchParams, useLocation } from "react-router-dom";
 import axiosInstance from "@hooks/useAxiosInstance";
 import { Search, Loader2, X } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
@@ -19,6 +19,16 @@ const Community = ({ children, onSearchActive }) => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const isAdmin = role === "admin" || role === "BMSP_ADMIN";
+  const location = useLocation();
+
+  // Auto-scroll to top when returning from content creation
+  useEffect(() => {
+    if (location.state?.scrollToTop) {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      // Clear the state so it doesn't re-trigger on re-renders
+      navigate(location.pathname + location.search, { replace: true, state: {} });
+    }
+  }, [location.state]);
 
   const userLocation = useSelector((state) => state.ui?.userLocation);
   const locationStatus = useSelector((state) => state.ui?.locationStatus);

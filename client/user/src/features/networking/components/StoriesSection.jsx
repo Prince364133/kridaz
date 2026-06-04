@@ -1,12 +1,21 @@
 import { useState, useEffect } from "react";
 import { useSelector } from "react-redux";
-import { Plus, User } from "lucide-react";
+import { Plus, User, Video } from "lucide-react";
 import { useGetStoriesFeedQuery, useDeleteStoryMutation } from "@redux/api/communityApi";
+import { useNavigate } from "react-router-dom";
 import StoryViewer from "./StoryViewer";
-import CreateStoryModal from "./CreateStoryModal";
 import toast from "react-hot-toast";
 
+/** Returns a renderable image URL for a story thumbnail, or null if only HLS video. */
+const getStoryThumb = (story) => {
+  if (!story) return null;
+  if (story.thumbnailUrl) return story.thumbnailUrl;
+  if (story.mediaUrl && !story.mediaUrl.includes('.m3u8')) return story.mediaUrl;
+  return null; // HLS-only video — no image to render
+};
+
 const StoriesSection = ({ user, isLoggedIn, isAdmin, gateInteraction }) => {
+  const navigate = useNavigate();
   const userLocation = useSelector((state) => state.ui.userLocation);
   const currentUserId = user?._id || user?.id;
 
@@ -17,12 +26,11 @@ const StoriesSection = ({ user, isLoggedIn, isAdmin, gateInteraction }) => {
 
   const [deleteStory] = useDeleteStoryMutation();
 
-  const [showStoryModal, setShowStoryModal] = useState(false);
   const [selectedStoryGroup, setSelectedStoryGroup] = useState(null);
 
   useEffect(() => {
     const handleOpenCreateStory = () => {
-      gateInteraction(() => setShowStoryModal(true));
+      gateInteraction(() => navigate('/create-story'));
     };
     window.addEventListener('openCreateStory', handleOpenCreateStory);
     return () => window.removeEventListener('openCreateStory', handleOpenCreateStory);
@@ -94,20 +102,25 @@ const StoriesSection = ({ user, isLoggedIn, isAdmin, gateInteraction }) => {
                 if (myStoryGroup) {
                   setSelectedStoryGroup(myStoryGroup);
                 } else {
-                  gateInteraction(() => setShowStoryModal(true));
+                  gateInteraction(() => navigate('/create-story'));
                 }
               }}
               className="w-full h-full rounded-[6.5pt] bg-[#0A0A0A] p-[2px] cursor-pointer"
             >
               <div className="w-full h-full rounded-[5.5pt] flex items-center justify-center overflow-hidden bg-[#111]">
-              {myStoryGroup && myStoryGroup.stories[0].mediaUrl ? (
+              {myStoryGroup && getStoryThumb(myStoryGroup.stories[0]) ? (
                 <img
-                  src={myStoryGroup.stories[0].thumbnailUrl || myStoryGroup.stories[0].mediaUrl}
+                  src={getStoryThumb(myStoryGroup.stories[0])}
                   className={`w-full h-full object-cover ${
                     myStoryGroup.stories.some((s) => s.status === "pending" || s.status === "processing") ? "blur-sm opacity-50" : ""
                   }`}
                   alt="Your story"
                 />
+              ) : myStoryGroup && myStoryGroup.stories[0].mediaType === 'video' ? (
+                <div className="w-full h-full flex flex-col items-center justify-center bg-gradient-to-br from-[#111] to-[#1a1a1a]">
+                  <Video size={24} className="text-[#BFF367] mb-1" />
+                  <span className="text-[7px] font-bold text-white/40 uppercase tracking-wider">Video</span>
+                </div>
               ) : myStoryGroup && myStoryGroup.stories[0].content ? (
                 <div className="w-full h-full flex items-center justify-center text-[7px] p-2 text-center text-[#BFF367] font-bold bg-[#111]">
                   {myStoryGroup.stories[0].content?.slice(0, 15)}
@@ -137,7 +150,7 @@ const StoriesSection = ({ user, isLoggedIn, isAdmin, gateInteraction }) => {
             <div
               onClick={(e) => {
                 e.stopPropagation();
-                gateInteraction(() => setShowStoryModal(true));
+                gateInteraction(() => navigate('/create-story'));
               }}
               className="absolute -bottom-2 -right-2 w-[28px] h-[28px] bg-gradient-to-r from-[#BFF367] to-[#BFF367] rounded-full flex items-center justify-center border-2 border-[#0A0A0A] cursor-pointer hover:scale-110 transition-transform z-10 shadow-lg"
             >
@@ -159,14 +172,19 @@ const StoriesSection = ({ user, isLoggedIn, isAdmin, gateInteraction }) => {
             <div className={`w-[96px] h-[143px] rounded-[7.2pt] p-[1px] relative ${hasSeenGroup(group) ? "bg-white/20" : "bg-gradient-to-r from-[#BFF367] to-[#BFF367]"}`}>
               <div className="w-full h-full rounded-[6.5pt] bg-[#0A0A0A] p-[2px]">
                 <div className="w-full h-full rounded-[5.5pt] overflow-hidden bg-[#111]">
-                  {group.stories[0].mediaUrl ? (
+                  {getStoryThumb(group.stories[0]) ? (
                     <img
-                      src={group.stories[0].thumbnailUrl || group.stories[0].mediaUrl}
+                      src={getStoryThumb(group.stories[0])}
                       alt=""
                       className={`w-full h-full object-cover ${
                         group.stories.some((s) => s.status === "pending" || s.status === "processing") ? "blur-sm opacity-50" : ""
                       }`}
                     />
+                  ) : group.stories[0].mediaType === 'video' ? (
+                    <div className="w-full h-full flex flex-col items-center justify-center bg-gradient-to-br from-[#111] to-[#1a1a1a]">
+                      <Video size={24} className="text-[#BFF367] mb-1" />
+                      <span className="text-[7px] font-bold text-white/40 uppercase tracking-wider">Video</span>
+                    </div>
                   ) : (
                     <div className="w-full h-full flex items-center justify-center text-[7px] p-2 text-center text-[#BFF367] font-bold bg-[#111]">
                       {group.stories[0].content?.slice(0, 15)}
@@ -182,11 +200,6 @@ const StoriesSection = ({ user, isLoggedIn, isAdmin, gateInteraction }) => {
         ))}
       </div>
 
-      <CreateStoryModal
-        isOpen={showStoryModal}
-        onClose={() => setShowStoryModal(false)}
-        user={user}
-      />
 
       {selectedStoryGroup && (
         <StoryViewer

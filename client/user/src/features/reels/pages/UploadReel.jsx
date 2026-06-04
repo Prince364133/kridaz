@@ -1,14 +1,16 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { ChevronLeft, Upload, X, Hash, Globe, MapPin } from 'lucide-react';
 import { useDispatch } from 'react-redux';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import { motion } from 'framer-motion';
 import { startUpload } from '@redux/slices/mediaUploadSlice';
 
 const UploadReel = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const dispatch = useDispatch();
+  const fileInputRef = useRef(null);
   const [file, setFile] = useState(null);
   const [preview, setPreview] = useState(null);
   const [caption, setCaption] = useState('');
@@ -18,15 +20,55 @@ const UploadReel = () => {
   const [locationName, setLocationName] = useState('');
   const [isLocating, setIsLocating] = useState(false);
 
+  useEffect(() => {
+    // If a file was passed via navigation state (e.g. from NewPostLanding), use it immediately
+    if (location.state?.preSelectedFile && !file) {
+      const passedFile = location.state.preSelectedFile;
+      if (passedFile.size > 100 * 1024 * 1024) {
+        toast.error('File size too large. Max 100MB.');
+      } else {
+        setFile(passedFile);
+        setPreview(URL.createObjectURL(passedFile));
+      }
+      
+      // Clear the state so it doesn't re-trigger on refresh
+      window.history.replaceState({}, document.title);
+    }
+  }, [location.state, file]);
+
   const handleFileChange = (e) => {
     const selectedFile = e.target.files[0];
     if (selectedFile) {
-      if (selectedFile.size > 100 * 1024 * 1024) {
-        toast.error('File size too large. Max 100MB.');
+      if (!selectedFile.type.startsWith('video/')) {
+        toast.error('Only videos are allowed for Reels.', { id: 'reel-type-error' });
+        e.target.value = '';
         return;
       }
-      setFile(selectedFile);
-      setPreview(URL.createObjectURL(selectedFile));
+
+      if (selectedFile.size > 100 * 1024 * 1024) {
+        toast.error('Video size must be less than 100MB', { id: 'reel-size-error' });
+        e.target.value = '';
+        return;
+      }
+      
+      const videoElement = document.createElement('video');
+      videoElement.preload = 'metadata';
+      videoElement.onloadedmetadata = () => {
+        window.URL.revokeObjectURL(videoElement.src);
+        if (videoElement.duration > 60) {
+          toast.error("Video cannot be longer than 60 seconds", { id: "video-duration-error" });
+          e.target.value = '';
+          return;
+        }
+        if (videoElement.duration < 5) {
+          toast.error('Video must be at least 5 seconds long', { id: "video-duration-error" });
+          e.target.value = '';
+          return;
+        }
+        setFile(selectedFile);
+        setPreview(URL.createObjectURL(selectedFile));
+      };
+      videoElement.src = URL.createObjectURL(selectedFile);
     }
   };
 
@@ -45,7 +87,7 @@ const UploadReel = () => {
     }));
 
     toast.success('Upload started in background');
-    navigate('/reels');
+    navigate('/community?tab=shots', { state: { scrollToTop: true } });
   };
 
   const clearForm = () => {
@@ -112,7 +154,7 @@ const UploadReel = () => {
             </motion.div>
             <h3 className="text-2xl font-black text-white tracking-wide">Select Video</h3>
             <p className="text-white/50 text-sm mt-2">MP4 or WebM • Up to 100MB</p>
-            <input type="file" accept="video/*" className="hidden" onChange={handleFileChange} />
+            <input ref={fileInputRef} type="file" accept="video/*" className="hidden" onChange={handleFileChange} />
           </label>
         </motion.div>
       ) : (
@@ -127,7 +169,7 @@ const UploadReel = () => {
           
           {/* Header overlay */}
           <div className="absolute top-0 left-0 right-0 p-4 flex items-center justify-between z-20 bg-gradient-to-b from-black/60 to-transparent">
-            <button onClick={clearForm} className="p-2 bg-black/40 backdrop-blur-md hover:bg-black/60 rounded-full transition-colors border border-white/10">
+            <button onClick={() => navigate(-1)} className="p-2 bg-black/40 backdrop-blur-md hover:bg-black/60 rounded-full transition-colors border border-white/10">
               <ChevronLeft size={24} />
             </button>
           </div>

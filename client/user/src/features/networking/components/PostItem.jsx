@@ -19,6 +19,15 @@ const PostItem = React.memo(({ post, user, isAdmin, gateInteraction, onUpdatePos
   const [expandedComments, setExpandedComments] = useState(false);
   const [commentInput, setCommentInput] = useState("");
   const [activeDropdown, setActiveDropdown] = useState(false);
+  const [activeMediaIndex, setActiveMediaIndex] = useState(0);
+
+  const handleMediaScroll = (e) => {
+    if (!e.target) return;
+    const index = Math.round(e.target.scrollLeft / e.target.clientWidth);
+    if (index !== activeMediaIndex) {
+      setActiveMediaIndex(index);
+    }
+  };
 
   // Relative / formatted time helper
   const getFormattedTime = (dateString) => {
@@ -232,11 +241,88 @@ const PostItem = React.memo(({ post, user, isAdmin, gateInteraction, onUpdatePos
       )}
 
       {/* Media Display */}
-      {(post.image || post.imageUrl || post.mediaUrl) && (
+      {post.mediaUrls && post.mediaUrls.length > 0 ? (
+        <div className="relative w-full aspect-[4/5] bg-[#050505] group overflow-hidden">
+          <div 
+            className="flex overflow-x-auto snap-x snap-mandatory h-full w-full [&::-webkit-scrollbar]:hidden" 
+            style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+            onScroll={handleMediaScroll}
+          >
+            {post.mediaUrls.map((url, idx) => (
+              <div key={idx} className="min-w-full h-full snap-center shrink-0 relative">
+                <img
+                  src={url}
+                  className={`w-full h-full object-contain transition-all duration-500 ${
+                    post.status === "pending" || post.status === "processing" ? "blur-xl scale-110 opacity-50" : ""
+                  }`}
+                  alt=""
+                />
+                {/* Video Icon for processed videos */}
+                {post.mediaType === "video" && post.status === "ready" && (
+                  <div className="absolute top-4 right-4 p-1.5 bg-black/60 backdrop-blur-md rounded z-10">
+                    <Video size={14} className="text-white" />
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+
+          {/* Progress Overlay for Pending/Processing Posts */}
+          {(post.status === "pending" || post.status === "processing") && (
+            <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/20 backdrop-blur-sm z-20">
+              <div className="w-24 h-24 relative flex items-center justify-center">
+                <svg className="w-full h-full transform -rotate-90">
+                  <circle cx="48" cy="48" r="40" stroke="currentColor" strokeWidth="6" fill="transparent" className="text-white/10" />
+                  <circle
+                    cx="48"
+                    cy="48"
+                    r="40"
+                    stroke="#BFF367"
+                    strokeWidth="6"
+                    fill="transparent"
+                    strokeDasharray={2 * Math.PI * 40}
+                    strokeDashoffset={2 * Math.PI * 40 * (1 - (post.processingProgress || 0) / 100)}
+                    className="transition-all duration-300"
+                  />
+                </svg>
+                <div className="absolute inset-0 flex flex-col items-center justify-center">
+                  <span className="text-[14px] font-black text-white">{post.processingProgress || 0}%</span>
+                </div>
+              </div>
+              <div className="mt-4 flex flex-col items-center gap-1">
+                <span className="text-[10px] font-black uppercase tracking-[0.2em] text-[#BFF367] animate-pulse">
+                  {post.status === "processing" ? "Optimizing Media" : "Preparing Upload"}
+                </span>
+                <div className="flex gap-1">
+                  <span className="w-1 h-1 bg-gradient-to-r from-[#BFF367] to-[#BFF367] rounded-full animate-bounce [animation-delay:-0.3s]"></span>
+                  <span className="w-1 h-1 bg-gradient-to-r from-[#BFF367] to-[#BFF367] rounded-full animate-bounce [animation-delay:-0.15s]"></span>
+                  <span className="w-1 h-1 bg-gradient-to-r from-[#BFF367] to-[#BFF367] rounded-full animate-bounce"></span>
+                </div>
+              </div>
+            </div>
+          )}
+          
+          {/* Multiple Image Indicator Dots */}
+          {post.mediaUrls.length > 1 && (
+            <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex items-center justify-center gap-1.5 z-10 bg-black/40 backdrop-blur-md px-3 py-1.5 rounded-full pointer-events-none shadow-lg">
+              {post.mediaUrls.map((_, i) => (
+                <div 
+                  key={i} 
+                  className={`rounded-full transition-all duration-300 ${
+                    i === activeMediaIndex 
+                      ? "w-2 h-2 bg-[#BFF367]" 
+                      : "w-1.5 h-1.5 bg-white/50"
+                  }`} 
+                />
+              ))}
+            </div>
+          )}
+        </div>
+      ) : (post.image || post.imageUrl || post.mediaUrl) ? (
         <div className="relative w-full aspect-[4/5] bg-[#050505] group overflow-hidden">
           <img
             src={post.image || post.imageUrl || post.thumbnailUrl || post.mediaUrl}
-            className={`w-full h-full object-cover transition-all duration-500 ${
+            className={`w-full h-full object-contain transition-all duration-500 ${
               post.status === "pending" || post.status === "processing" ? "blur-xl scale-110 opacity-50" : ""
             }`}
             alt=""
@@ -284,7 +370,7 @@ const PostItem = React.memo(({ post, user, isAdmin, gateInteraction, onUpdatePos
             </div>
           )}
         </div>
-      )}
+      ) : null}
 
       {/* Likes Summary */}
       {post.likes?.length > 0 && (

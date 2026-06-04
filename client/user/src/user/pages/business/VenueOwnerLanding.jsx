@@ -98,7 +98,7 @@ export default function VenueOwnerLanding() {
               
               {/* decorative bg */}
               <div className="absolute right-0 bottom-0 w-1/2 h-full opacity-20 pointer-events-none grayscale group-hover:grayscale-0 transition-all duration-700">
-                 <img src="https://images.unsplash.com/photo-1518605368461-1e122b1029c7?w=800&q=80" alt="Stadium" className="w-full h-full object-cover" />
+                 <img src="https://images.unsplash.com/photo-1540747913346-19e32dc3e97e?auto=format&fit=crop&w=800&q=80" onError={(e) => { e.target.onerror = null; e.target.src = 'https://images.unsplash.com/photo-1540747913346-19e32dc3e97e?auto=format&fit=crop&w=800&q=80'; }} alt="Stadium" className="w-full h-full object-cover" />
               </div>
             </div>
 

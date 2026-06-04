@@ -37,7 +37,8 @@ const Root = () => {
 
   const searchParams = new URLSearchParams(location.search);
   const isReelsPage = location.pathname.startsWith('/reels') || location.pathname.startsWith('/shorts') || searchParams.get('tab') === 'shots';
-  const hideNav = isReelsPage || location.pathname.startsWith('/messages');
+  const isNewPostPage = location.pathname.startsWith('/new-post') || location.pathname.startsWith('/create-post') || location.pathname.startsWith('/create-story');
+  const hideNav = isReelsPage || location.pathname.startsWith('/messages') || isNewPostPage;
   const isHome = location.pathname === "/" || location.pathname === "/community";
   const isVenue = location.pathname.startsWith("/venue") || location.pathname === "/venues";
   const isUploadReel = location.pathname.startsWith("/reels/upload") || location.pathname.startsWith("/shorts/upload");
@@ -69,19 +70,19 @@ const Root = () => {
       <BackgroundUploadManager />
 
       {/* Collapsible Left Navigation (Previous Layout Navbar) */}
-      {!isReelsPage && <Navbar />}
+      {!isReelsPage && !isNewPostPage && <Navbar />}
 
       <div className="flex flex-1 relative w-full">
         {/* Main Content Area - Shifted by Left Sidebar and right padded by Right Sidebar on Desktop */}
         <main className={`flex-grow ${
-          isReelsPage 
+          isReelsPage || isNewPostPage
             ? 'pb-0' 
             : location.pathname.startsWith('/messages') 
               ? `pb-0 ${isSidebarCollapsed ? 'lg:ml-20' : 'lg:ml-64'}` 
               : `pb-20 lg:pb-0 ${isSidebarCollapsed ? 'lg:ml-20' : 'lg:ml-64'}`
-        } ${showRightSidebar ? 'xl:pr-[440px]' : ''} transition-all duration-300 min-w-0 flex justify-center py-6`}>
+        } ${showRightSidebar ? 'xl:pr-[440px]' : ''} transition-all duration-300 min-w-0 flex justify-center ${isNewPostPage ? 'py-0' : 'py-6'}`}>
           
-          <div className={`w-full ${useRestrictedWidth ? 'max-w-[495px]' : 'px-4 md:px-8 max-w-none'} flex flex-col justify-between`}>
+          <div className={`w-full ${isNewPostPage ? 'max-w-none px-0' : useRestrictedWidth ? 'max-w-[495px]' : 'px-4 md:px-8 max-w-none'} flex flex-col justify-between`}>
             <div className="min-h-full">
               <Outlet />
             </div>

@@ -6,7 +6,6 @@ import { Play, Camera, Image, Film, Eye } from "lucide-react";
 import { useSelector } from "react-redux";
 import useLoginOnDemand from "@hooks/useLoginOnDemand";
 import { motion, AnimatePresence } from "framer-motion";
-import CreatePostModal from "../../features/networking/components/CreatePostModal";
 
 const GRAD = "linear-gradient(90deg, #BFF367 0%, #BFF367 100%)";
 const BDR = "#2A2A2A";
@@ -16,8 +15,6 @@ export default function SocialArenaSection({ reelsFeed }) {
   const { user, isLoggedIn } = useSelector((state) => state.auth);
   const { gateInteraction } = useLoginOnDemand();
 
-  const [showPostModal, setShowPostModal] = useState(false);
-  const [showDesktopInlinePost, setShowDesktopInlinePost] = useState(false);
   const [editingPost, setEditingPost] = useState(null);
 
   return (
@@ -47,84 +44,49 @@ export default function SocialArenaSection({ reelsFeed }) {
         {/* Create Post unified trigger / input mock */}
         {isLoggedIn && (
           <div className="mb-6">
-            <AnimatePresence mode="wait">
-              {!showDesktopInlinePost ? (
-                <motion.div
-                  key="trigger"
-                  initial={{ height: 0, opacity: 0 }}
-                  animate={{ height: "auto", opacity: 1 }}
-                  exit={{ height: 0, opacity: 0 }}
-                  className="bg-[#0A0A0A] border border-white/5 rounded-[12px] p-3 md:p-4 flex flex-col gap-3 md:gap-4"
+            <motion.div
+              key="trigger"
+              initial={{ height: 0, opacity: 0 }}
+              animate={{ height: "auto", opacity: 1 }}
+              exit={{ height: 0, opacity: 0 }}
+              className="bg-[#0A0A0A] border border-white/5 rounded-[12px] p-3 md:p-4 flex flex-col gap-3 md:gap-4"
+            >
+              <div className="flex items-center gap-3">
+                <img src={user?.profilePicture || "/default-avatar.png"} className="w-10 h-10 rounded-full object-cover border border-white/10 shrink-0" alt="" />
+                <button
+                  onClick={() => gateInteraction(() => navigate("/create-post"))}
+                  className="flex-1 bg-[#111] hover:bg-[#1A1A1A] rounded-full h-11 px-5 text-left text-[13px] font-bold text-white/40 border border-white/10 transition-all cursor-text"
                 >
-                  <div className="flex items-center gap-3">
-                    <img src={user?.profilePicture || "/default-avatar.png"} className="w-10 h-10 rounded-full object-cover border border-white/10 shrink-0" alt="" />
-                    <button
-                      onClick={() => gateInteraction(() => {
-                        if (window.innerWidth >= 768) setShowDesktopInlinePost(true);
-                        else setShowPostModal(true);
-                      })}
-                      className="flex-1 bg-[#111] hover:bg-[#1A1A1A] rounded-full h-11 px-5 text-left text-[13px] font-bold text-white/40 border border-white/10 transition-all cursor-text"
-                    >
-                      Start a post
-                    </button>
-                  </div>
-                  
-                  <div className="flex items-center justify-around pt-1 md:pt-2 border-t border-white/5">
-                    <button 
-                      onClick={() => gateInteraction(() => {
-                        window.dispatchEvent(new CustomEvent('openCreateStory'));
-                      })}
-                      className="flex items-center justify-center flex-1 gap-2 text-white/60 hover:text-white hover:bg-white/5 py-2 md:py-2.5 rounded-[8px] transition-colors text-[11px] md:text-[13px] font-bold"
-                    >
-                      <Camera size={18} className="text-[#3b82f6]" />
-                      <span className="hidden md:inline">Story</span>
-                    </button>
-                    <button 
-                      onClick={() => gateInteraction(() => {
-                        if (window.innerWidth >= 768) setShowDesktopInlinePost(true);
-                        else setShowPostModal(true);
-                      })}
-                      className="flex items-center justify-center flex-1 gap-2 text-white/60 hover:text-white hover:bg-white/5 py-2 md:py-2.5 rounded-[8px] transition-colors text-[11px] md:text-[13px] font-bold"
-                    >
-                      <Image size={18} className="text-[#BFF367]" />
-                      <span className="hidden md:inline">Post</span>
-                    </button>
-                    <button 
-                      onClick={() => gateInteraction(() => navigate("/reels/upload"))}
-                      className="flex items-center justify-center flex-1 gap-2 text-white/60 hover:text-white hover:bg-white/5 py-2 md:py-2.5 rounded-[8px] transition-colors text-[11px] md:text-[13px] font-bold"
-                    >
-                      <Film size={18} className="text-[#ef4444]" />
-                      <span className="hidden md:inline">Reel</span>
-                    </button>
-                  </div>
-                </motion.div>
-              ) : (
-                <motion.div key="form" className="hidden md:block">
-                  <CreatePostModal
-                    isOpen={true}
-                    onClose={() => {
-                      setShowDesktopInlinePost(false);
-                      setEditingPost(null);
-                    }}
-                    editingPost={editingPost}
-                    user={user}
-                    isInline={true}
-                  />
-                </motion.div>
-              )}
-            </AnimatePresence>
+                  Start a post
+                </button>
+              </div>
+              
+              <div className="flex items-center justify-around pt-1 md:pt-2 border-t border-white/5">
+                <button 
+                  onClick={() => gateInteraction(() => navigate("/create-story"))}
+                  className="flex items-center justify-center flex-1 gap-2 text-white/60 hover:text-white hover:bg-white/5 py-2 md:py-2.5 rounded-[8px] transition-colors text-[11px] md:text-[13px] font-bold"
+                >
+                  <Camera size={18} className="text-[#3b82f6]" />
+                  <span className="hidden md:inline">Story</span>
+                </button>
+                <button 
+                  onClick={() => gateInteraction(() => navigate("/create-post"))}
+                  className="flex items-center justify-center flex-1 gap-2 text-white/60 hover:text-white hover:bg-white/5 py-2 md:py-2.5 rounded-[8px] transition-colors text-[11px] md:text-[13px] font-bold"
+                >
+                  <Image size={18} className="text-[#BFF367]" />
+                  <span className="hidden md:inline">Post</span>
+                </button>
+                <button 
+                  onClick={() => gateInteraction(() => navigate("/reels/upload"))}
+                  className="flex items-center justify-center flex-1 gap-2 text-white/60 hover:text-white hover:bg-white/5 py-2 md:py-2.5 rounded-[8px] transition-colors text-[11px] md:text-[13px] font-bold"
+                >
+                  <Film size={18} className="text-[#ef4444]" />
+                  <span className="hidden md:inline">Reel</span>
+                </button>
+              </div>
+            </motion.div>
           </div>
         )}
-
-        <CreatePostModal
-          isOpen={showPostModal}
-          onClose={() => {
-            setShowPostModal(false);
-            setEditingPost(null);
-          }}
-          editingPost={editingPost}
-          user={user}
-        />
 
         {/* Reels Section (Horizontal Mock Data) */}
         <div className="mb-2">

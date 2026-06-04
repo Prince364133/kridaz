@@ -421,7 +421,7 @@ export default function DesktopRightSidebar({ isRightDrawerOpen, setIsRightDrawe
                             <img 
                               src={booking.turf?.images?.[0] || "/default-turf.jpg"} 
                               className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" 
-                              onError={(e) => e.target.src = "https://images.unsplash.com/photo-1518605368461-1ee7111d4e7a?auto=format&fit=crop&q=80"} 
+                              onError={(e) => { e.target.onerror = null; e.target.src = "https://images.unsplash.com/photo-1540747913346-19e32dc3e97e?auto=format&fit=crop&q=80"; }} 
                               alt={booking.turf?.name}
                             />
                             {/* Pink Banner */}

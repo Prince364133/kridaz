@@ -15,7 +15,8 @@ const VenueCard = ({ t }) => (
     {/* Normal Card Content */}
     <div className="absolute inset-0 w-full h-full bg-[#111]">
       <img 
-        src={t.images?.[0] || "https://images.unsplash.com/photo-1518605368461-1ee7111d4e7a?auto=format&fit=crop&q=80"} 
+        src={t.images?.[0] || "https://images.unsplash.com/photo-1540747913346-19e32dc3e97e?auto=format&fit=crop&q=80"} 
+        onError={(e) => { e.target.onerror = null; e.target.src = "https://images.unsplash.com/photo-1540747913346-19e32dc3e97e?auto=format&fit=crop&q=80"; }}
         alt={t.name}
         draggable={false}
         className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 pointer-events-none" 

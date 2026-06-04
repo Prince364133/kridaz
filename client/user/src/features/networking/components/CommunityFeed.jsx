@@ -6,7 +6,6 @@ import { useLazyGetCommunityFeedQuery, useDeletePostMutation } from "@redux/api/
 import { useLazySearchPlayersQuery } from "@redux/api/teamApi";
 import { useSocket } from "@context/SocketContext";
 import PostItem from "./PostItem";
-import CreatePostModal from "./CreatePostModal";
 import ShareModal from "./ShareModal";
 import ReportModal from "./ReportModal";
 import toast from "react-hot-toast";
@@ -37,10 +36,6 @@ const CommunityFeed = ({ user, isLoggedIn, isAdmin, gateInteraction, activeFilte
   const [loadedPlayers, setLoadedPlayers] = useState([]);
   const [hasMorePlayers, setHasMorePlayers] = useState(true);
   const [playersLoading, setPlayersLoading] = useState(false);
-
-  // Modals / actions states
-  const [showPostModal, setShowPostModal] = useState(false);
-  const [editingPost, setEditingPost] = useState(null);
   const [sharePostId, setSharePostId] = useState(null);
   const [reportPostId, setReportPostId] = useState(null);
 
@@ -48,20 +43,16 @@ const CommunityFeed = ({ user, isLoggedIn, isAdmin, gateInteraction, activeFilte
   useEffect(() => {
     if (searchParams.get("createPost") === "true") {
       const text = searchParams.get("text");
-      if (text) {
-        setEditingPost({ content: text, isPrefill: true });
-      } else {
-        setEditingPost(null);
-      }
-      setShowPostModal(true);
-
+      
       // Clean up the URL
       const newParams = new URLSearchParams(searchParams);
       newParams.delete("createPost");
       newParams.delete("text");
       setSearchParams(newParams, { replace: true });
+      
+      navigate('/create-post', { state: { preSelectedText: text } });
     }
-  }, [searchParams, setSearchParams]);
+  }, [searchParams, setSearchParams, navigate]);
 
   // Reset lists and page numbers when search query or filters change
   useEffect(() => {
@@ -515,16 +506,6 @@ const CommunityFeed = ({ user, isLoggedIn, isAdmin, gateInteraction, activeFilte
           )}
         </div>
       )}
-
-      <CreatePostModal
-        isOpen={showPostModal}
-        onClose={() => {
-          setShowPostModal(false);
-          setEditingPost(null);
-        }}
-        editingPost={editingPost}
-        user={user}
-      />
 
       <AnimatePresence>
         {sharePostId && (
