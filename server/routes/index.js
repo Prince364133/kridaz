@@ -21,6 +21,7 @@
 
 import { Router } from "express";
 import { createDomainRouter } from "../modules/loader.js";
+import swaggerSpec from "../config/swagger.js";
 
 // ── Tier 1: Actor Hub Routers ─────────────────────────────────────────────────
 // These handle persona-specific flows (auth, profile, actor-specific resources).
@@ -59,5 +60,11 @@ rootRouter.use("/admin", adminRouter);
 rootRouter.use("/features", featureRouter);
 rootRouter.use("/upload", uploadRouter);
 rootRouter.use("/location", locationRouter);
+
+// Swagger Spec Endpoint
+rootRouter.get("/swagger.json", (req, res) => {
+  res.setHeader("Content-Type", "application/json");
+  res.send(swaggerSpec);
+});
 
 export default rootRouter;

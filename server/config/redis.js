@@ -41,7 +41,14 @@ bullmqConnection.on('connect', () => logger.info('[REDIS] BullMQ client connecte
 bullmqConnection.on('error', (err) => logger.error('[REDIS] BullMQ client error:', err));
 
 // ── Socket.io Redis Adapter Clients ────────────────────────────────────────
-export const pubClient = new Redis(REDIS_URL);
-export const subClient = pubClient.duplicate();
+export const pubClient = new Redis(REDIS_URL, {
+  maxRetriesPerRequest: null,
+});
+pubClient.on('error', (err) => logger.error('[REDIS] pubClient error:', err));
+
+export const subClient = new Redis(REDIS_URL, {
+  maxRetriesPerRequest: null,
+});
+subClient.on('error', (err) => logger.error('[REDIS] subClient error:', err));
 
 export default redisClient;

@@ -55,12 +55,17 @@ export const checkUsernameBloom = async (username) => {
         return true; // Available
     } catch (err) {
         logger.warn('[BLOOM] Redis lookup failed, falling back to DB', err);
-        // If Redis is down, we fall back to the reliable Database check.
-        const user = await prisma.user.findUnique({
-            where: { username: username.toLowerCase().trim() },
-            select: { id: true }
-        });
-        return !user;
+        try {
+            // If Redis is down, we fall back to the reliable Database check.
+            const user = await prisma.user.findUnique({
+                where: { username: username.toLowerCase().trim() },
+                select: { id: true }
+            });
+            return !user;
+        } catch (dbErr) {
+            logger.error('[BLOOM] Database fallback also failed', dbErr);
+            throw new Error("Database and Redis servers are currently unreachable. Please verify that your services are online.");
+        }
     }
 };
 
