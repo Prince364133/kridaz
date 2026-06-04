@@ -2324,8 +2324,13 @@ const StartScoringModal = ({ isOpen, onClose, onSuccess, initialData }) => {
   };
 
   // ─── Main Modal ───────────────────────────────────────────────────────────────
+  const portalTarget = typeof document !== 'undefined' ? (document.getElementById('root') || document.body) : null;
+  if (!portalTarget) return null;
+
   return createPortal(
-    <div className="fixed inset-0 z-[9999] flex items-center justify-center p-0">
+    <AnimatePresence>
+      {isOpen && (
+        <div className="fixed inset-0 z-[9999] flex items-center justify-center p-0">
       <div className="absolute inset-0 bg-black/85 backdrop-blur-sm" onClick={handleClose} />
       <motion.div
         initial={{ opacity: 0, scale: 0.95, y: 20 }}
@@ -3217,8 +3222,11 @@ const PlayingXIStep = ({ teamKey, teamName, players, maxMembers, teamDetails, on
         </AnimatePresence>
       </div>
 
-    </div>
-  , document.body);
+        </div>
+      )}
+    </AnimatePresence>,
+    portalTarget
+  );
 };
 
 // ─── Touch Slider Wheel Sub-component ──────────────────────────────────────────
