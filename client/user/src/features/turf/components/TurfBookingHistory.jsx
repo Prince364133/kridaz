@@ -1,9 +1,9 @@
-import * as Sentry from "@sentry/react";
 import {
- Clock, MapPin, Calendar, Zap, FileText, Ticket, AlertOctagon, Loader2, User,
- Star, ShieldAlert, X, RefreshCw, MessageCircle, CheckCircle
+ Clock, MapPin, Calendar, QrCode, ShieldCheck, Zap, Activity, Wallet,
+ CreditCard, FileText, Ticket, AlertOctagon, IndianRupee, Loader2, User,
+ Star, ShieldAlert, X, RefreshCw,
 } from "lucide-react";
-import { Link, useSearchParams, useNavigate } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
 import { useState, useEffect } from "react";
 import useBookingHistory from "../hooks/useBookingHistory";
 import useWriteReview from "@hooks/useWriteReview";
@@ -12,11 +12,10 @@ import WriteReview from "@components/reviews/WriteReview";
 import RaiseDisputeModal from "@components/dispute/RaiseDisputeModal";
 import useSimilarRecommendations from "@hooks/useSimilarRecommendations";
 import useRecommendations from "@hooks/useRecommendations";
-import { useSocket } from "@context/SocketContext";
 import { TurfCard } from "@features/turf";
 import axiosInstance from "@hooks/useAxiosInstance";
 import { useGetMyJoinedGamesQuery } from "@redux/api/gamesApi";
-import { useGetUserOnDemandBookingsQuery, useCreateMatchRequestMutation, useCompleteProfessionalBookingMutation } from "@redux/api/professionalApi";
+import { useGetUserOnDemandBookingsQuery, useCreateMatchRequestMutation } from "@redux/api/professionalApi";
 import toast from "react-hot-toast";
 
 // ── Design tokens (exact match to OwnerDashboard) ──────────────────────────
@@ -41,7 +40,6 @@ const hoursUntil = (dateStr) =>
   (new Date(dateStr).getTime() - new Date().getTime()) / (1000 * 60 * 60);
 
 const TurfBookingHistory = () => {
-  const navigate = useNavigate();
   const { loading, bookings, cancelBooking } = useBookingHistory();
   const {
     isReviewModalOpen, rating, review, isSubmitting,
@@ -52,43 +50,20 @@ const TurfBookingHistory = () => {
   const [selectedDisputeBooking, setSelectedDisputeBooking] = useState(null);
 
   // ── Professional Review & Dispute State ──────────────────────────────────
-  const [proReviewModal, setProReviewModal] = useState({ open: false, professionalId: null, professionalName: "", bookingId: null, isEdit: false });
+  const [proReviewModal, setProReviewModal] = useState({ open: false, professionalId: null, professionalName: "" });
   const [proReviewRating, setProReviewRating] = useState(0);
   const [proReviewContent, setProReviewContent] = useState("");
   const [proReviewSubmitting, setProReviewSubmitting] = useState(false);
   const [proDisputeBooking, setProDisputeBooking] = useState(null);
-  const [bookingToComplete, setBookingToComplete] = useState(null);
 
-  const canRaiseDispute = (booking) => {
-    if (booking.status === "ASSIGNED") return false;
-    if (booking.status === "CANCELLED" || booking.status === "DISPUTED") return false;
-    if (booking.status === "COMPLETED") {
-      if (booking.isManuallyCompleted) return false;
-      const twelveHours = 12 * 60 * 60 * 1000;
-      if (Date.now() - new Date(booking.updatedAt || booking.createdAt).getTime() > twelveHours) return false;
-    }
-    return true;
-  };
-
-  const openProReviewModal = (professionalId, professionalName, bookingId = null, existingReview = null) => {
-    setProReviewModal({ 
-      open: true, 
-      professionalId, 
-      professionalName, 
-      bookingId, 
-      isEdit: !!existingReview 
-    });
-    if (existingReview) {
-      setProReviewRating(existingReview.rating);
-      setProReviewContent(existingReview.comment || "");
-    } else {
-      setProReviewRating(0);
-      setProReviewContent("");
-    }
+  const openProReviewModal = (professionalId, professionalName) => {
+    setProReviewModal({ open: true, professionalId, professionalName });
+    setProReviewRating(0);
+    setProReviewContent("");
   };
 
   const closeProReviewModal = () => {
-    setProReviewModal({ open: false, professionalId: null, professionalName: "", bookingId: null, isEdit: false });
+    setProReviewModal({ open: false, professionalId: null, professionalName: "" });
     setProReviewRating(0);
     setProReviewContent("");
   };
@@ -100,14 +75,12 @@ const TurfBookingHistory = () => {
       await axiosInstance.post("/api/professional/review", {
         professionalId: proReviewModal.professionalId,
         rating: proReviewRating,
-        comment: proReviewContent,
-        bookingId: proReviewModal.bookingId
+        content: proReviewContent,
       });
-      toast.success(proReviewModal.isEdit ? "Review updated successfully!" : "Review submitted successfully!");
+      toast.success("Review submitted successfully!");
       closeProReviewModal();
-      if (refetchOnDemand) refetchOnDemand();
     } catch (err) {
-      Sentry.captureException(err);
+      console.error(err);
       toast.error(err.response?.data?.message || "Failed to submit review.");
     } finally {
       setProReviewSubmitting(false);
@@ -145,26 +118,6 @@ const TurfBookingHistory = () => {
   const onDemandBookings = onDemandData?.bookings || [];
   const failedRequests = onDemandData?.failedRequests || [];
 
-  const { socket } = useSocket();
-
-  useEffect(() => {
-    if (socket) {
-      const handleStatusUpdate = () => {
-        refetchOnDemand();
-      };
-
-      socket.on("professional:match_status_update", handleStatusUpdate);
-      socket.on("professional:match_failed", handleStatusUpdate);
-      socket.on("professional:match_confirmed", handleStatusUpdate);
-
-      return () => {
-        socket.off("professional:match_status_update", handleStatusUpdate);
-        socket.off("professional:match_failed", handleStatusUpdate);
-        socket.off("professional:match_confirmed", handleStatusUpdate);
-      };
-    }
-  }, [socket, refetchOnDemand]);
-
   const [createMatchRequest] = useCreateMatchRequestMutation();
 
   const handleRetryMatch = async (req) => {
@@ -181,24 +134,8 @@ const TurfBookingHistory = () => {
       toast.success("Match request re-created successfully!");
       if (refetchOnDemand) refetchOnDemand();
     } catch (err) {
-      Sentry.captureException(err);
+      console.error(err);
       toast.error(err?.data?.message || "Failed to retry match request.");
-    }
-  };
-
-  const [completeBooking] = useCompleteProfessionalBookingMutation();
-
-  const handleCompleteBooking = async () => {
-    if (!bookingToComplete) return;
-    try {
-      await completeBooking(bookingToComplete).unwrap();
-      toast.success("Booking completed successfully!");
-      setBookingToComplete(null);
-      if (refetchOnDemand) refetchOnDemand();
-    } catch (err) {
-      Sentry.captureException(err);
-      toast.error(err?.data?.message || "Failed to complete booking.");
-      setBookingToComplete(null);
     }
   };
 
@@ -215,7 +152,7 @@ const TurfBookingHistory = () => {
           setProfessionalBookings(res.data.bookings || []);
         }
       } catch (error) {
-        Sentry.captureException(error);
+        console.error("Failed to load professional bookings:", error);
       } finally {
         setLoadingProBookings(false);
       }
@@ -344,13 +281,10 @@ const TurfBookingHistory = () => {
                                 Cancel
                               </button>
                             )}
-                            {canRaiseDispute(booking) && (
+                            {booking.status !== "CANCELLED" && booking.status !== "DISPUTED" && (
                               <button onClick={() => setSelectedDisputeBooking(booking)} className="px-4 py-2 rounded-[6px] bg-white/5 border border-white/10 hover:border-yellow-500/50 hover:text-yellow-500 text-gray-400 text-[9px] font-black uppercase tracking-widest transition-colors flex items-center gap-1.5">
                                 Dispute
                               </button>
-                            )}
-                            {booking.status === "DISPUTED" && (
-                              <span className="px-3 py-1 bg-red-500/20 text-red-500 border border-red-500/30 rounded text-[10px] font-bold">DISPUTED (₹{booking.ownerRevenue})</span>
                             )}
                             {booking.status === "COMPLETED" && (
                               <button onClick={() => openReviewModal(booking.turf?.id || booking.turf?._id)} className="px-4 py-2 rounded-[6px] bg-white/5 border border-white/10 hover:border-[#CCFF00]/50 hover:text-[#CCFF00] text-gray-400 text-[9px] font-black uppercase tracking-widest transition-colors flex items-center gap-1.5">
@@ -619,48 +553,6 @@ const TurfBookingHistory = () => {
                                   <Clock size={10} className="text-[#BFF367] ml-2" /> {req.matchStartTime || "TBD"} - {req.matchEndTime || "TBD"}
                                 </div>
                               </div>
-
-                              {/* Live Matching Log / Timeline */}
-                              {req.offers && req.offers.length > 0 && (
-                                <div className="mt-4 pt-3 border-t border-white/5 space-y-2">
-                                  <span className="text-[8px] uppercase tracking-wider text-white/40 block font-bold">Matching Status Timeline</span>
-                                  <div className="space-y-1.5 max-h-32 overflow-y-auto pr-1">
-                                    {req.offers.map((offer, idx) => {
-                                      const name = offer.professional?.user?.name || "Professional";
-                                      const role = req.roles?.[0] || "Professional";
-                                      
-                                      let statusText = "";
-                                      let statusColor = "text-gray-400";
-                                      let bulletColor = "bg-gray-600";
-                                      
-                                      if (offer.status === "PENDING") {
-                                        statusText = `Requesting ${name} (${role})...`;
-                                        statusColor = "text-[#CCFF00] font-black animate-pulse";
-                                        bulletColor = "bg-[#CCFF00] shadow-[0_0_8px_#CCFF00]";
-                                      } else if (offer.status === "REJECTED") {
-                                        statusText = `${name} rejected the request.`;
-                                        statusColor = "text-red-400 font-semibold";
-                                        bulletColor = "bg-red-500";
-                                      } else if (offer.status === "EXPIRED") {
-                                        statusText = `${name} did not respond (skipped).`;
-                                        statusColor = "text-yellow-500/70 font-semibold";
-                                        bulletColor = "bg-yellow-600";
-                                      } else if (offer.status === "ACCEPTED") {
-                                        statusText = `${name} accepted the request!`;
-                                        statusColor = "text-green-400 font-black";
-                                        bulletColor = "bg-green-500 shadow-[0_0_8px_#10B981]";
-                                      }
-                                      
-                                      return (
-                                        <div key={offer.id || idx} className="flex items-start gap-2 text-[10px] font-sans">
-                                          <span className={`w-1.5 h-1.5 rounded-full mt-1 shrink-0 ${bulletColor}`} />
-                                          <span className={statusColor}>{statusText}</span>
-                                        </div>
-                                      );
-                                    })}
-                                  </div>
-                                </div>
-                              )}
                             </div>
                           </div>
                         ))}
@@ -715,48 +607,6 @@ const TurfBookingHistory = () => {
                                 </div>
                               </div>
 
-                              {/* Live Matching Log / Timeline */}
-                              {req.offers && req.offers.length > 0 && (
-                                <div className="mt-4 pt-3 border-t border-white/5 space-y-2">
-                                  <span className="text-[8px] uppercase tracking-wider text-white/40 block font-bold">Matching Status Timeline</span>
-                                  <div className="space-y-1.5 max-h-32 overflow-y-auto pr-1">
-                                    {req.offers.map((offer, idx) => {
-                                      const name = offer.professional?.user?.name || "Professional";
-                                      const role = req.roles?.[0] || "Professional";
-                                      
-                                      let statusText = "";
-                                      let statusColor = "text-gray-400";
-                                      let bulletColor = "bg-gray-600";
-                                      
-                                      if (offer.status === "PENDING") {
-                                        statusText = `Requesting ${name} (${role})...`;
-                                        statusColor = "text-[#CCFF00] font-black animate-pulse";
-                                        bulletColor = "bg-[#CCFF00] shadow-[0_0_8px_#CCFF00]";
-                                      } else if (offer.status === "REJECTED") {
-                                        statusText = `${name} rejected the request.`;
-                                        statusColor = "text-red-400 font-semibold";
-                                        bulletColor = "bg-red-500";
-                                      } else if (offer.status === "EXPIRED") {
-                                        statusText = `${name} did not respond (skipped).`;
-                                        statusColor = "text-yellow-500/70 font-semibold";
-                                        bulletColor = "bg-yellow-600";
-                                      } else if (offer.status === "ACCEPTED") {
-                                        statusText = `${name} accepted the request!`;
-                                        statusColor = "text-green-400 font-black";
-                                        bulletColor = "bg-green-500 shadow-[0_0_8px_#10B981]";
-                                      }
-                                      
-                                      return (
-                                        <div key={offer.id || idx} className="flex items-start gap-2 text-[10px] font-sans">
-                                          <span className={`w-1.5 h-1.5 rounded-full mt-1 shrink-0 ${bulletColor}`} />
-                                          <span className={statusColor}>{statusText}</span>
-                                        </div>
-                                      );
-                                    })}
-                                  </div>
-                                </div>
-                              )}
-
                               <div className="pt-3 border-t border-white/5 flex items-center justify-between flex-wrap gap-2 mt-2">
                                 <span className="text-[8px] text-gray-500 uppercase tracking-widest font-bold">
                                   Requested: {new Date(req.createdAt).toLocaleDateString('en-GB')} at {new Date(req.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
@@ -785,8 +635,8 @@ const TurfBookingHistory = () => {
                       </h4>
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         {onDemandBookings.map((booking) => {
-                          const pro = booking.professional?.user || booking.professional;
-                          const plainOtp = booking.otpCode || localStorage.getItem(`otp_${booking.id}`);
+                          const pro = booking.professional?.user;
+                          const plainOtp = localStorage.getItem(`otp_${booking.id}`);
                           const getInitials = (name) => name?.split(" ").map(w => w[0]).join("").toUpperCase().slice(0, 2) || "??";
 
                           return (
@@ -852,50 +702,26 @@ const TurfBookingHistory = () => {
 
                               {/* Action Buttons: Rate & Dispute */}
                               <div className="flex flex-wrap items-center gap-2 mt-4 pt-3 border-t border-white/5">
-                                {(!booking.reviews?.length || booking.status !== "COMPLETED") && ["IN_PROGRESS", "COMPLETED", "DISPUTED"].includes(booking.status) && (
+                                {booking.status === "COMPLETED" && (
                                   <button
-                                    onClick={() => {
-                                      const existingReview = booking.reviews?.[0];
-                                      openProReviewModal(
-                                        booking.professional?.id || booking.professionalId,
-                                        booking.professional?.name || pro?.name || "Professional",
-                                        booking.id,
-                                        existingReview
-                                      );
-                                    }}
+                                    onClick={() => openProReviewModal(
+                                      booking.professional?.id || booking.professionalId,
+                                      booking.professional?.name || pro?.name || "Professional"
+                                    )}
                                     className="px-4 py-2 rounded-[6px] bg-[#CCFF00]/10 border border-[#CCFF00]/20 hover:bg-[#CCFF00] hover:text-black text-[#CCFF00] text-[9px] font-black uppercase tracking-widest transition-all flex items-center gap-1.5 active:scale-95"
                                   >
-                                    <Star size={12} /> {booking.reviews && booking.reviews.length > 0 ? "Edit Review" : "Give Review"}
+                                    <Star size={12} /> Rate Professional
                                   </button>
                                 )}
-                                {["IN_PROGRESS"].includes(booking.status) && (
-                                  <button
-                                    onClick={() => setBookingToComplete(booking.id)}
-                                    className="px-4 py-2 rounded-[6px] bg-blue-500/10 border border-blue-500/20 hover:bg-blue-500 hover:text-white text-blue-400 text-[9px] font-black uppercase tracking-widest transition-all flex items-center gap-1.5 active:scale-95"
-                                  >
-                                    <CheckCircle size={12} /> Booking Complete
-                                  </button>
-                                )}
-                                {canRaiseDispute(booking) && (
+                                {booking.status !== "CANCELLED" && booking.status !== "DISPUTED" && (
                                   <button
                                     onClick={() => setProDisputeBooking({
                                       ...booking,
-                                      turf: { name: booking.professional?.name || booking.ground?.name || "Professional Service", ownerId: booking.professional?.id }
+                                      turf: { name: booking.professional?.name || booking.ground?.name || "Professional Service" }
                                     })}
                                     className="px-4 py-2 rounded-[6px] bg-white/5 border border-white/10 hover:border-red-500/50 hover:text-red-500 text-gray-400 text-[9px] font-black uppercase tracking-widest transition-all flex items-center gap-1.5 active:scale-95"
                                   >
                                     <ShieldAlert size={12} /> Raise Dispute
-                                  </button>
-                                )}
-                                {booking.status === "DISPUTED" && (
-                                  <span className="px-3 py-1 bg-red-500/20 text-red-500 border border-red-500/30 rounded text-[10px] font-bold">DISPUTED (₹{booking.blockedAmount || 0})</span>
-                                )}
-                                {pro?.id && booking.status !== "CANCELLED" && (
-                                  <button
-                                    onClick={() => navigate(`/messages?userId=${pro.id}`)}
-                                    className="px-4 py-2 rounded-[6px] bg-[#CCFF00]/10 border border-[#CCFF00]/20 hover:bg-[#CCFF00] hover:text-black text-[#CCFF00] text-[9px] font-black uppercase tracking-widest transition-all flex items-center gap-1.5 active:scale-95"
-                                  >
-                                    <MessageCircle size={12} /> Chat
                                   </button>
                                 )}
                               </div>
@@ -933,7 +759,7 @@ const TurfBookingHistory = () => {
                               slotsStr = booking.slots;
                             }
                           } catch (e) {
-                            Sentry.captureException(e);
+                            console.error(e);
                           }
 
                           return (
@@ -998,14 +824,6 @@ const TurfBookingHistory = () => {
                                         <ShieldAlert size={12} /> Raise Dispute
                                       </button>
                                     )}
-                                    {(booking.professional?.userId || booking.professional?.user?.id || booking.professionalId) && booking.status !== "CANCELLED" && (
-                                      <button
-                                        onClick={() => navigate(`/messages?userId=${booking.professional?.userId || booking.professional?.user?.id || booking.professionalId}`)}
-                                        className="px-4 py-2 rounded-[6px] bg-[#CCFF00]/10 border border-[#CCFF00]/20 hover:bg-[#CCFF00] hover:text-black text-[#CCFF00] text-[9px] font-black uppercase tracking-widest transition-all flex items-center gap-1.5 active:scale-95"
-                                      >
-                                        <MessageCircle size={12} /> Chat
-                                      </button>
-                                    )}
                                   </div>
                                 </div>
 
@@ -1055,39 +873,10 @@ const TurfBookingHistory = () => {
         {/* Professional-specific Dispute Modal */}
         {proDisputeBooking && (
           <RaiseDisputeModal
-            isOpen={!!proDisputeBooking}
-            onClose={() => setProDisputeBooking(null)}
             booking={proDisputeBooking}
+            onClose={() => setProDisputeBooking(null)}
+            onSuccess={fetchBookingsRefresh}
           />
-        )}
-
-        {/* Booking Complete Confirmation Modal */}
-        {bookingToComplete && (
-          <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
-            <div className="bg-[#111111] border border-white/10 p-6 rounded-2xl max-w-sm w-full animate-in fade-in zoom-in-95 duration-200">
-              <div className="flex items-center justify-center w-12 h-12 rounded-full bg-blue-500/10 mb-4 mx-auto">
-                <CheckCircle className="w-6 h-6 text-blue-500" />
-              </div>
-              <h3 className="text-lg font-black text-white text-center mb-2 uppercase tracking-tight">Complete Booking?</h3>
-              <p className="text-xs text-gray-400 text-center mb-6 leading-relaxed">
-                Are you sure you want to mark this booking as completed? This action cannot be undone. Once completed, you will be able to review the professional.
-              </p>
-              <div className="flex gap-3">
-                <button
-                  onClick={() => setBookingToComplete(null)}
-                  className="flex-1 px-4 py-3 bg-white/5 hover:bg-white/10 text-white rounded-[8px] text-xs font-bold transition-all uppercase tracking-widest"
-                >
-                  Cancel
-                </button>
-                <button
-                  onClick={handleCompleteBooking}
-                  className="flex-1 px-4 py-3 bg-blue-500 hover:bg-blue-600 text-white rounded-[8px] text-xs font-bold transition-all uppercase tracking-widest"
-                >
-                  Confirm
-                </button>
-              </div>
-            </div>
-          </div>
         )}
 
         {/* Professional Review Modal */}
@@ -1097,7 +886,7 @@ const TurfBookingHistory = () => {
               <button onClick={closeProReviewModal} className="absolute top-4 right-4 text-gray-500 hover:text-white transition-colors">
                 <X size={20} />
               </button>
-              <h2 className="text-2xl font-black uppercase tracking-tighter text-white mb-1">{proReviewModal.isEdit ? "Edit Review" : "Rate Professional"}</h2>
+              <h2 className="text-2xl font-black uppercase tracking-tighter text-white mb-1">Rate Professional</h2>
               <p className="text-[10px] font-bold text-[#CCFF00] uppercase tracking-widest mb-6">
                 {proReviewModal.professionalName}
               </p>
@@ -1152,7 +941,7 @@ const TurfBookingHistory = () => {
         )}
       </div>
     </div>
-  );
+ );
 };
 
 export default TurfBookingHistory;

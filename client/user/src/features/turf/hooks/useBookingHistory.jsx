@@ -1,4 +1,3 @@
-import * as Sentry from "@sentry/react";
 import { useEffect, useState } from "react";
 import axiosInstance from "@hooks/useAxiosInstance";
 import toast from "react-hot-toast";
@@ -35,7 +34,7 @@ export default function useBookingHistory() {
       const formattedBookings = formatBookingsData(result);
       setBookings(formattedBookings);
     } catch (error) {
-      Sentry.captureException("error");
+      console.error(error, "error");
       toast.error(error.response?.data?.message);
     } finally {
       setLoading(false);
@@ -62,7 +61,7 @@ export default function useBookingHistory() {
         return true;
       }
     } catch (error) {
-      Sentry.captureException(error);
+      console.error("Cancel booking error:", error);
       toast.error(error.response?.data?.message || "Failed to cancel booking.");
     }
     return false;

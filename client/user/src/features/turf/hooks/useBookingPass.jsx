@@ -1,4 +1,3 @@
-import * as Sentry from "@sentry/react";
 import { useEffect, useState } from "react";
 import axiosInstance from "@hooks/useAxiosInstance";
 import toast from "react-hot-toast";
@@ -32,7 +31,7 @@ export default function useBookingPass(bookingId) {
       const formattedBooking = formatBookingData(response.data);
       setBooking(formattedBooking);
     } catch (error) {
-      Sentry.captureException(error);
+      console.error("Error fetching booking pass:", error);
       toast.error(error.response?.data?.message || "Failed to fetch booking details");
     } finally {
       setLoading(false);

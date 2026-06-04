@@ -1,21 +1,109 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useLocation, Link } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
 import { 
   Clock, Calendar, MapPin, Star, UserPlus, UserMinus, Trophy, ArrowRight, 
   Ticket, IndianRupee, Sparkles, Info, Plus, Users, Zap, Share2, 
-  DollarSign, Activity, CheckCircle2, Wallet, ArrowUpRight, ChevronRight 
+  DollarSign, Activity, CheckCircle2, Wallet, ArrowUpRight, ChevronRight, ChevronLeft, Search
 } from "lucide-react";
 import axiosInstance from "@hooks/useAxiosInstance";
 import toast from "react-hot-toast";
 import { followUser, unfollowUser } from "@redux/slices/authSlice";
 import useLoginOnDemand from "@hooks/useLoginOnDemand";
+import { Liquid } from "../ui/button-1";
+import SearchTurf from "@components/search/SearchTurf.jsx";
+
+const LIQUID_COLORS = {
+  color1: '#FFFFFF',
+  color2: '#1E10C5',
+  color3: '#9089E2',
+  color4: '#FCFCFE',
+  color5: '#F9F9FD',
+  color6: '#B2B8E7',
+  color7: '#0E2DCB',
+  color8: '#0017E9',
+  color9: '#4743EF',
+  color10: '#7D7BF4',
+  color11: '#0B06FC',
+  color12: '#C5C1EA',
+  color13: '#1403DE',
+  color14: '#B6BAF6',
+  color15: '#C1BEEB',
+  color16: '#290ECB',
+  color17: '#3F4CC0',
+};
+const TOP_5_LIVE_MATCHES = [
+  {
+    id: 1,
+    venue: "Wankhede Stadium",
+    type: "Cricket (T20)",
+    crr: "7.8",
+    target: "154",
+    team1: { name: "Mumbai Indians", short: "MI", bg: "bg-[#111]", text: "text-white", score: "153/4", overs: "(20.0)" },
+    team2: { name: "Chennai S.K.", short: "CSK", bg: "bg-yellow-500/20", text: "text-yellow-500", score: "112/5", overs: "(14.2)" },
+  },
+  {
+    id: 2,
+    venue: "Eden Gardens",
+    type: "Cricket (T20)",
+    crr: "9.2",
+    target: "201",
+    team1: { name: "Kolkata K.R.", short: "KKR", bg: "bg-[#3B215D]", text: "text-purple-300", score: "200/6", overs: "(20.0)" },
+    team2: { name: "Royal Challengers", short: "RCB", bg: "bg-[#E83441]/20", text: "text-[#E83441]", score: "45/1", overs: "(4.5)" },
+  },
+  {
+    id: 3,
+    venue: "Chinnaswamy",
+    type: "Cricket (T20)",
+    crr: "6.5",
+    target: "120",
+    team1: { name: "Delhi Capitals", short: "DC", bg: "bg-[#004C93]", text: "text-blue-300", score: "119/8", overs: "(20.0)" },
+    team2: { name: "Sunrisers Hyd", short: "SRH", bg: "bg-[#F26522]/20", text: "text-orange-500", score: "15/0", overs: "(2.1)" },
+  },
+  {
+    id: 4,
+    venue: "Narendra Modi St.",
+    type: "Cricket (T20)",
+    crr: "10.1",
+    target: "215",
+    team1: { name: "Gujarat Titans", short: "GT", bg: "bg-[#1B2133]", text: "text-teal-300", score: "214/4", overs: "(20.0)" },
+    team2: { name: "Punjab Kings", short: "PBKS", bg: "bg-[#ED1B24]/20", text: "text-red-500", score: "55/3", overs: "(5.2)" },
+  },
+  {
+    id: 5,
+    venue: "Sawai Mansingh",
+    type: "Cricket (T20)",
+    crr: "8.4",
+    target: "165",
+    team1: { name: "Rajasthan Royals", short: "RR", bg: "bg-[#EA1A85]/20", text: "text-pink-500", score: "164/7", overs: "(20.0)" },
+    team2: { name: "Lucknow S.G.", short: "LSG", bg: "bg-[#1795D4]/20", text: "text-cyan-400", score: "90/2", overs: "(10.4)" },
+  },
+];
 
 export default function DesktopRightSidebar({ isRightDrawerOpen, setIsRightDrawerOpen }) {
   const location = useLocation();
+  const [minRating, setMinRating] = useState(0.0);
+  const [maxRating, setMaxRating] = useState(5.0);
   const dispatch = useDispatch();
   const { gateInteraction } = useLoginOnDemand();
   const { isLoggedIn, user, followingIds = [] } = useSelector((state) => state.auth);
+
+  const nearbyScrollRef = useRef(null);
+  const liveMatchesScrollRef = useRef(null);
+
+  const scrollNearby = (direction) => {
+    if (nearbyScrollRef.current) {
+      const scrollAmount = 145 + 12; // card width (145px) + gap (12px = gap-3)
+      nearbyScrollRef.current.scrollBy({ left: direction === 'left' ? -scrollAmount : scrollAmount, behavior: 'smooth' });
+    }
+  };
+
+  const scrollLiveMatches = (direction) => {
+    if (liveMatchesScrollRef.current) {
+      const scrollAmount = liveMatchesScrollRef.current.clientWidth;
+      liveMatchesScrollRef.current.scrollBy({ left: direction === 'left' ? -scrollAmount : scrollAmount, behavior: 'smooth' });
+    }
+  };
 
   // Parse path context
   const isHome = location.pathname === "/" || location.pathname === "/community";
@@ -26,6 +114,7 @@ export default function DesktopRightSidebar({ isRightDrawerOpen, setIsRightDrawe
 
   // Local states for real-time fetched data
   const [bookings, setBookings] = useState([]);
+  const [isInviteHovered, setIsInviteHovered] = useState(false);
   const [loadingBookings, setLoadingBookings] = useState(false);
   const [suggestedPlayers, setSuggestedPlayers] = useState([]);
   const [loadingPlayers, setLoadingPlayers] = useState(false);
@@ -33,7 +122,7 @@ export default function DesktopRightSidebar({ isRightDrawerOpen, setIsRightDrawe
   const [loadingVenues, setLoadingVenues] = useState(false);
   const [walletBalance, setWalletBalance] = useState(0);
   const [loadingWallet, setLoadingWallet] = useState(false);
-
+  const [currentLiveMatchIndex, setCurrentLiveMatchIndex] = useState(0);
   // Dynamic greetings
   const [greeting, setGreeting] = useState("Welcome");
 
@@ -155,329 +244,298 @@ export default function DesktopRightSidebar({ isRightDrawerOpen, setIsRightDrawe
         />
       )}
 
-      <aside className={`fixed top-[72px] right-0 bottom-0 w-[440px] bg-[#050505] border-l border-white/5 p-6 overflow-y-auto no-scrollbar transition-transform duration-300 z-[74] xl:z-[60] xl:translate-x-0 xl:block ${isRightDrawerOpen ? "translate-x-0" : "translate-x-full xl:translate-x-0"}`}>
+      <aside className={`fixed top-[77px] right-0 bottom-0 w-[440px] bg-[#050505] border-l border-white/5 p-6 overflow-y-auto no-scrollbar transition-transform duration-300 z-[74] xl:z-[60] xl:translate-x-0 xl:block ${isRightDrawerOpen ? "translate-x-0" : "translate-x-full xl:translate-x-0"}`}>
         <div className="space-y-6">
           {/* ── HOME & GENERAL PORTAL VIEW WIDGETS ── */}
           {isHome && (
             <>
-              {/* 1. Welcome Card */}
-              <div className="bg-[#0B0B0C] border border-white/[0.05] rounded-xl p-5 hover:border-white/[0.1] transition-all duration-300 shadow-[0_4px_20px_rgba(0,0,0,0.6)] space-y-4">
-                <div className="flex items-center gap-3.5">
-                  <div className="w-12 h-12 rounded-full overflow-hidden bg-white/5 border border-[#BFF367]/20 flex items-center justify-center shrink-0">
-                    {isLoggedIn && (user?.profilePicture || user?.profileImage) ? (
-                      <img src={user.profilePicture || user.profileImage} className="w-full h-full object-cover" alt="" />
-                    ) : (
-                      <span className="text-[#BFF367] font-black text-sm">
-                        {isLoggedIn && user?.name ? user.name.split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2) : "KR"}
-                      </span>
-                    )}
-                  </div>
-                  <div>
-                    <h3 className="text-[13px] font-black text-white uppercase tracking-tight leading-none">
-                      {greeting}, {greetingName}!
-                    </h3>
-                    <p className="text-[10px] text-white/40 font-bold uppercase tracking-wider mt-1.5 leading-none">
-                      {isLoggedIn ? "Ready to dominate the field?" : "Connect, Book & Play Local Sports"}
-                    </p>
-                  </div>
+              {/* Host Your Venues CTA */}
+              <Link to="/host" className="relative block overflow-hidden rounded-2xl h-[140px] shadow-[0_4px_20px_rgba(0,0,0,0.5)] group border border-white/[0.05] hover:border-[#BFF367]/50 transition-all duration-300">
+                {/* Background Image */}
+                <div 
+                  className="absolute inset-0 bg-cover bg-center group-hover:scale-105 transition-transform duration-700"
+                  style={{ backgroundImage: "url('/host-venue-bg-custom-2.png')" }}
+                />
+                
+                {/* Content Container (Left 40%) */}
+                <div className="relative z-10 w-[45%] h-full p-4 flex flex-col justify-center gap-1.5 pl-5">
+                  <h3 className="text-[16px] leading-tight font-black text-white uppercase drop-shadow-lg">
+                    Host Your Venue
+                  </h3>
+                  <p className="text-[9px] font-medium text-white/90 leading-snug drop-shadow-md">
+                    Partner with us to list your turf and manage bookings seamlessly.
+                  </p>
                 </div>
+              </Link>
 
-                {/* Wallet summary */}
-                {isLoggedIn ? (
-                  <div className="bg-white/[0.02] border border-white/[0.05] rounded-xl p-4 flex items-center justify-between shadow-[inset_0_1px_1px_rgba(255,255,255,0.01)]">
-                    <div className="space-y-1">
-                      <span className="text-[9px] font-black text-white/30 uppercase tracking-widest flex items-center gap-1.5">
-                        <Wallet size={11} className="text-[#BFF367]" />
-                        Wallet Balance
-                      </span>
-                      <div className="text-xl font-black text-white flex items-center leading-none">
-                        <IndianRupee size={15} className="mt-0.5" />
-                        {walletBalance.toFixed(2)}
-                      </div>
-                    </div>
-                    <Link 
-                      to="/wallet"
-                      className="px-3.5 py-2 bg-[#BFF367] hover:bg-[#a2d152] active:scale-95 text-black text-[9px] font-black uppercase tracking-widest rounded-lg transition-all shadow-[0_0_12px_rgba(191,243,103,0.15)] flex items-center gap-1 shrink-0"
+              {/* Live Now */}
+              <div className="space-y-3">
+                <div className="flex items-center justify-between px-1">
+                  <h4 className="text-[11px] font-black uppercase text-white/40 tracking-widest">Live Now</h4>
+                  <div className="flex items-center gap-1.5">
+                    <button 
+                      onClick={() => scrollLiveMatches('left')}
+                      className="p-1 rounded-full bg-white/5 border border-white/5 hover:bg-[#E83441]/20 hover:border-[#E83441]/50 text-white hover:text-[#E83441] transition-all"
                     >
-                      <Plus size={10} strokeWidth={3} /> Top Up
-                    </Link>
+                      <ChevronLeft size={14} />
+                    </button>
+                    <button 
+                      onClick={() => scrollLiveMatches('right')}
+                      className="p-1 rounded-full bg-white/5 border border-white/5 hover:bg-[#E83441]/20 hover:border-[#E83441]/50 text-white hover:text-[#E83441] transition-all"
+                    >
+                      <ChevronRight size={14} />
+                    </button>
                   </div>
-                ) : (
-                  <button 
-                    onClick={() => gateInteraction(() => {}, { title: "Join Kridaz", message: "Sign in to access your wallet, check bookings, and schedule matches." })}
-                    className="w-full py-3 bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl text-white text-[9px] font-black uppercase tracking-widest transition-all text-center flex items-center justify-center gap-1.5"
-                  >
-                    <Wallet size={12} className="text-[#BFF367]" />
-                    Log in to view wallet
-                  </button>
-                )}
-              </div>
-
-              {/* 2. Upcoming Bookings */}
-              <div className="space-y-3">
-                <div className="flex items-center justify-between px-1">
-                  <h4 className="text-[11px] font-black uppercase text-white/40 tracking-widest">Upcoming Bookings</h4>
-                  <Link to="/booking-history" className="text-[9px] font-black uppercase text-[#BFF367] hover:underline flex items-center gap-1 tracking-wider">
-                    View All <ChevronRight size={10} />
-                  </Link>
-                </div>
-
-                {isLoggedIn && bookings.length > 0 ? (
-                  <div className="space-y-2">
-                    {bookings.slice(0, 2).map((booking) => (
-                      <div key={booking._id || booking.id} className="bg-[#0B0B0C] border border-white/[0.05] hover:border-white/[0.1] rounded-xl p-4 transition-all duration-300 shadow-md flex gap-3.5 group">
-                        <div className="w-16 h-16 rounded-lg overflow-hidden bg-white/5 border border-white/5 shrink-0">
-                          <img 
-                            src={booking.turf?.images?.[0] || "https://images.unsplash.com/photo-1518605368461-1ee7111d4e7a?auto=format&fit=crop&q=80"} 
-                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" 
-                            alt="" 
-                          />
-                        </div>
-                        <div className="flex-1 min-w-0 flex flex-col justify-between py-0.5">
-                          <div>
-                            <div className="flex justify-between items-center gap-1.5">
-                              <span className="px-1.5 py-0.5 bg-[#BFF367]/10 text-[#BFF367] rounded-[4px] text-[7px] font-black uppercase tracking-wider">{booking.turf?.sportType || "Sports"}</span>
-                              <span className="px-1.5 py-0.5 bg-green-500/10 text-green-400 rounded-[4px] text-[7px] font-black uppercase tracking-wider border border-green-500/10">Confirmed</span>
-                            </div>
-                            <h5 className="text-[12px] font-black text-white truncate uppercase mt-1.5 group-hover:text-[#BFF367] transition-colors">{booking.turf?.name}</h5>
-                          </div>
-                          <div className="flex items-center justify-between text-[9px] font-medium text-white/50 mt-1">
-                            <div className="flex items-center gap-2">
-                              <span className="flex items-center gap-0.5"><Clock size={9} /> {booking.timeSlot?.formattedStartTime || "Slot"}</span>
-                              <span className="flex items-center gap-0.5"><Calendar size={9} /> {booking.timeSlot?.date || "Date"}</span>
-                            </div>
-                            <Link to={`/booking-pass/${booking.id || booking._id}`} className="text-[#BFF367] hover:underline flex items-center gap-0.5 font-bold uppercase tracking-wider text-[8px]">
-                              <Ticket size={9} /> Pass
-                            </Link>
-                          </div>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                ) : (
-                  <div className="bg-[#0B0B0C] border border-white/[0.05] rounded-xl p-5 text-center space-y-3.5">
-                    <p className="text-[10px] font-bold text-white/35 uppercase tracking-wide">
-                      {isLoggedIn ? "No upcoming matches booked" : "Please log in to view your bookings"}
-                    </p>
-                    <Link to="/venues" className="inline-flex items-center gap-1 px-4 py-2.5 rounded-lg bg-white/5 border border-white/10 hover:border-[#BFF367]/50 hover:bg-[#BFF367]/5 text-[9px] font-black text-[#BFF367] uppercase tracking-widest transition-all">
-                      Book A Turf <ArrowRight size={10} />
-                    </Link>
-                  </div>
-                )}
-              </div>
-
-              {/* 3. Recent Activity */}
-              <div className="space-y-3">
-                <div className="flex items-center justify-between px-1">
-                  <h4 className="text-[11px] font-black uppercase text-white/40 tracking-widest">Recent Activity</h4>
-                  <Link to="/booking-history" className="text-[9px] font-black uppercase text-[#BFF367] hover:underline flex items-center gap-1 tracking-wider">
-                    View All <ChevronRight size={10} />
-                  </Link>
                 </div>
                 
-                <div className="bg-[#0B0B0C] border border-white/[0.05] rounded-xl p-4.5 space-y-4 shadow-sm">
-                  {[
-                    { title: "Booking Confirmed", desc: "MRR Cricket Ground", time: "1 hour ago", icon: CheckCircle2, iconColor: "text-[#BFF367]" },
-                    { title: "Payment Successful", desc: "Paid ₹1,200 via Wallet", time: "3 hours ago", icon: DollarSign, iconColor: "text-blue-400" },
-                    { title: "Joined Match Lobby", desc: "T20 Practice League", time: "Yesterday", icon: Users, iconColor: "text-yellow-500" },
-                    { title: "Registered Tournament", desc: "Hyderabad Super Sixes", time: "2 days ago", icon: Trophy, iconColor: "text-purple-400" }
-                  ].map((act, index) => (
-                    <div key={index} className="flex items-start gap-3 relative last:mb-0 group">
-                      {index < 3 && (
-                        <div className="absolute left-[9px] top-6 bottom-[-16px] w-[1.5px] bg-white/[0.04]" />
-                      )}
-                      <div className={`w-5 h-5 rounded-full bg-white/5 flex items-center justify-center shrink-0 border border-white/5 mt-0.5 ${act.iconColor}`}>
-                        <act.icon size={11} />
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <div className="flex justify-between items-start">
-                          <h5 className="text-[11px] font-bold text-white leading-none uppercase">{act.title}</h5>
-                          <span className="text-[8px] text-white/30 font-bold uppercase tracking-wider">{act.time}</span>
+                <div 
+                  ref={liveMatchesScrollRef}
+                  className="flex overflow-x-auto no-scrollbar snap-x snap-mandatory scroll-smooth"
+                >
+                  {TOP_5_LIVE_MATCHES.map((match) => (
+                    <Link key={match.id} to={`/match/live/${match.id}`} className="min-w-full shrink-0 snap-start block bg-gradient-to-br from-[#E83441]/20 via-[#0B0B0C] to-[#0B0B0C] border border-[#E83441]/20 rounded-xl p-4 hover:border-[#E83441]/40 transition-all duration-300 shadow-[0_4px_20px_rgba(0,0,0,0.4)] backdrop-blur-sm group relative">
+                      {/* Top section: Status & Info */}
+                      <div className="flex justify-between items-start mb-4">
+                        <div className="flex gap-3 items-center">
+                          <div className="bg-[#E83441] text-white text-[9px] font-black uppercase px-2 py-0.5 rounded-[4px] tracking-widest shadow-[0_0_10px_rgba(232,52,65,0.4)]">
+                            LIVE
+                          </div>
+                          <div>
+                            <h5 className="text-[12px] font-bold text-white leading-none">{match.venue}</h5>
+                            <p className="text-[10px] text-white/50 mt-1 font-medium">{match.type}</p>
+                          </div>
                         </div>
-                        <p className="text-[10px] text-white/50 font-medium font-sans mt-1.5 leading-none">{act.desc}</p>
+                        <div className="text-[10px] font-medium text-right leading-tight">
+                          <span className="text-[#BFF367]">CRR: {match.crr}</span><br/>
+                          <span className="text-white/40 text-[9px]">Target: {match.target}</span>
+                        </div>
                       </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              {/* 4. Quick Actions */}
-              <div className="space-y-3">
-                <h4 className="text-[11px] font-black uppercase text-white/40 tracking-widest px-1">Quick Actions</h4>
-                <div className="grid grid-cols-2 gap-2.5">
-                  {[
-                    { label: "Create Match", path: "/my-teams", state: { openStartScoringModal: true }, icon: Plus, subtitle: "Score matches live" },
-                    { label: "Find Players", path: "/players", icon: Users, subtitle: "Local matchmaker" },
-                    { label: "AI Matchmaking", path: "/join-games", icon: Zap, subtitle: "Auto lobby join" },
-                    { label: "Invite & Earn", path: "/wallet", icon: Share2, subtitle: "Get ₹100 credit" }
-                  ].map((action, i) => (
-                    <Link 
-                      key={i} 
-                      to={action.path} 
-                      state={action.state}
-                      className="bg-[#0B0B0C] border border-white/[0.05] hover:border-[#BFF367]/30 rounded-xl p-3.5 transition-all duration-300 group flex flex-col justify-between h-[82px] shadow-sm"
-                    >
-                      <div className="flex justify-between items-start">
-                        <action.icon size={16} className="text-[#BFF367] group-hover:scale-110 transition-transform duration-300" />
-                        <ArrowUpRight size={10} className="text-white/20 group-hover:text-white transition-colors" />
-                      </div>
-                      <div>
-                        <h5 className="text-[11px] font-black text-white uppercase tracking-wider leading-none">{action.label}</h5>
-                        <p className="text-[8px] text-white/40 mt-1 font-bold uppercase tracking-wider leading-none">{action.subtitle}</p>
+                      
+                      {/* Bottom section: Scoreboard */}
+                      <div className="flex flex-col gap-2.5 relative pr-6">
+                        {/* Team 1 */}
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-2">
+                            <div className={`w-6 h-6 rounded ${match.team1.bg} border border-white/10 flex items-center justify-center shrink-0`}>
+                              <span className={`text-[10px] font-black ${match.team1.text}`}>{match.team1.short}</span>
+                            </div>
+                            <span className="text-[11px] font-bold text-white/60">{match.team1.name}</span>
+                          </div>
+                          <div className="text-[14px] font-black text-white/60 font-mono tracking-tight">
+                            {match.team1.score} <span className="text-[9px] font-medium text-white/40 ml-0.5">{match.team1.overs}</span>
+                          </div>
+                        </div>
+                        
+                        {/* Team 2 (Batting) */}
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-2">
+                            <div className={`w-6 h-6 rounded ${match.team2.bg} border border-white/10 flex items-center justify-center shrink-0`}>
+                              <span className={`text-[10px] font-black ${match.team2.text}`}>{match.team2.short}</span>
+                            </div>
+                            <span className="text-[11px] font-bold text-white">{match.team2.name}</span>
+                          </div>
+                          <div className="text-[14px] font-black text-[#BFF367] font-mono tracking-tight">
+                            {match.team2.score} <span className="text-[9px] font-medium text-[#BFF367]/60 ml-0.5">{match.team2.overs}</span>
+                          </div>
+                        </div>
+                        
+                        <div className="absolute right-0 top-1/2 -translate-y-1/2 w-5 h-5 rounded-full bg-white/5 flex items-center justify-center text-white/30 group-hover:text-white group-hover:bg-white/10 transition-all">
+                          <ChevronRight size={12} />
+                        </div>
                       </div>
                     </Link>
                   ))}
                 </div>
               </div>
 
-              {/* 5. Trending Tournaments */}
-              <div className="space-y-3">
-                <h4 className="text-[11px] font-black uppercase text-white/40 tracking-widest px-1">Trending Tournaments</h4>
-                <Link to="/leaderboard" className="block bg-[#0B0B0C] border border-white/[0.05] hover:border-white/[0.1] rounded-xl overflow-hidden shadow-lg group transition-all duration-300">
-                  <div className="h-28 w-full bg-gradient-to-br from-[#BFF367]/15 via-zinc-900 to-black p-4 flex flex-col justify-between relative">
-                    <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1508098682722-e99c43a406b2?auto=format&fit=crop&q=80')] mix-blend-overlay opacity-30 object-cover w-full h-full" />
-                    <div className="flex justify-between items-start z-10">
-                      <span className="px-2 py-0.5 bg-[#BFF367] text-black rounded text-[7px] font-black uppercase tracking-wider shadow-[0_0_10px_rgba(191,243,103,0.3)]">REGISTERING NOW</span>
-                      <span className="text-white/40 text-[8px] font-black uppercase tracking-wider">CRICKET</span>
-                    </div>
-                    <div className="z-10">
-                      <h4 className="text-[13px] font-black text-white uppercase tracking-tight leading-tight group-hover:text-[#BFF367] transition-colors duration-300">Hyderabad Super Sixes 2026</h4>
-                      <p className="text-[9px] text-[#BFF367] font-black uppercase tracking-widest mt-1">₹50,000 Cash Pool</p>
-                    </div>
-                  </div>
-                  <div className="p-3 bg-black/60 border-t border-white/5 flex justify-between items-center text-[9px] font-bold text-white/40 uppercase tracking-widest">
-                    <span>👥 28/32 Teams Registered</span>
-                    <span className="text-[#BFF367] hover:underline flex items-center gap-0.5">Register <ChevronRight size={9} /></span>
+              {/* Ad Space */}
+              <div className="relative block rounded-xl overflow-hidden shadow-[0_4px_20px_rgba(0,0,0,0.4)] group cursor-pointer h-[126px] bg-[#0B0B0C] border border-white/[0.05]">
+                <img 
+                  src="/ad_image.png" 
+                  alt="Advertisement" 
+                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" 
+                />
+              </div>
+
+
+
+              {/* Tournaments Section */}
+              <div className="mt-4">
+                <div className="flex items-center justify-between mb-4">
+                  <h4 className="text-[11px] font-black uppercase text-white/40 tracking-widest">Tournament</h4>
+                </div>
+                
+                <Link to="/coming-soon" className="relative block w-full h-[120px] rounded-xl overflow-hidden group border border-white/[0.05] shadow-[0_4px_20px_rgba(0,0,0,0.4)]">
+                  {/* Background Image */}
+                  <img 
+                    src="/tournament-bg-custom.png" 
+                    alt="Tournament Background" 
+                    className="absolute top-0 right-0 h-full w-auto max-w-none object-cover" 
+                  />
+                  
+                  {/* Left-to-right fade gradient */}
+                  <div className="absolute inset-0 bg-gradient-to-r from-[#030114] via-[#030114]/90 to-transparent w-[75%]" />
+                  <div className="absolute inset-0 bg-black/10 group-hover:bg-black/0 transition-colors duration-300" />
+                  
+                  {/* Content Container */}
+                  <div className="relative z-10 w-full h-full p-4 flex flex-col justify-center">
+                    <h3 className="text-[20px] font-black text-white leading-tight uppercase group-hover:text-[#BFF367] transition-colors">Kridaz Premier League</h3>
+                    <p className="text-[12px] font-medium text-white/50 tracking-widest uppercase mt-1">COMING SOON</p>
                   </div>
                 </Link>
               </div>
 
-              {/* 6. Trending Matches */}
-              <div className="space-y-3">
-                <h4 className="text-[11px] font-black uppercase text-white/40 tracking-widest px-1">Trending Matches</h4>
-                <div className="space-y-2.5">
-                  {/* Live Match */}
-                  <div className="bg-[#0B0B0C] border border-white/[0.05] rounded-xl p-3.5 space-y-2.5 hover:border-white/10 transition-colors">
-                    <div className="flex justify-between items-center">
-                      <span className="flex items-center gap-1.5">
-                        <span className="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse" />
-                        <span className="text-[8px] font-black text-red-500 uppercase tracking-wider">LIVE SCORING</span>
-                      </span>
-                      <span className="text-[8px] font-black text-white/30 uppercase tracking-widest">T20 LEAGUE</span>
-                    </div>
-                    <div className="flex items-center justify-between text-xs font-black uppercase">
-                      <div className="flex flex-col gap-1 min-w-0">
-                        <span className="truncate text-white">Cyberabad Titans</span>
-                        <span className="truncate text-white/50">Secunderabad Strikers</span>
-                      </div>
-                      <div className="text-right flex flex-col gap-1 text-[#BFF367]">
-                        <span>142/3 (15.4)</span>
-                        <span className="text-white/40 font-bold">Yet to bat</span>
-                      </div>
-                    </div>
-                    <div className="pt-2 border-t border-white/5 flex items-center justify-between text-[8px] font-bold text-white/40 uppercase tracking-widest">
-                      <span>📍 MRR Cricket Ground</span>
-                      <Link to="/leaderboard" className="text-[#BFF367] flex items-center gap-0.5 hover:underline">
-                        Spectate Match <ChevronRight size={9} />
-                      </Link>
-                    </div>
-                  </div>
-
-                  {/* Upcoming Match */}
-                  <div className="bg-[#0B0B0C] border border-white/[0.05] rounded-xl p-3.5 space-y-2.5 hover:border-white/10 transition-colors">
-                    <div className="flex justify-between items-center">
-                      <span className="px-1.5 py-0.5 bg-yellow-500/10 text-yellow-500 rounded text-[7px] font-black uppercase tracking-wider border border-yellow-500/20">UPCOMING</span>
-                      <span className="text-[8px] font-black text-white/30 uppercase tracking-widest">TODAY 18:00</span>
-                    </div>
-                    <div className="flex items-center justify-between text-xs font-black uppercase">
-                      <span className="truncate max-w-[150px] text-white">Gachibowli Kings</span>
-                      <span className="text-white/35 font-normal shrink-0 text-[9px] px-1">VS</span>
-                      <span className="truncate max-w-[150px] text-right text-white">Kondapur Warriors</span>
-                    </div>
+              {/* 8. Upcoming Bookings (Moved Above Players) */}
+              <div className="mt-4">
+                <div className="flex items-center justify-between mb-4">
+                  <h4 className="text-[11px] font-black uppercase text-white/40 tracking-widest">Upcoming Bookings</h4>
+                  <div className="flex items-center gap-1.5">
+                    <button 
+                      onClick={() => scrollNearby('left')}
+                      className="p-1 rounded-full bg-white/5 border border-white/5 hover:bg-white/10 hover:border-[#BFF367]/50 text-white hover:text-[#BFF367] transition-all"
+                    >
+                      <ChevronLeft size={14} />
+                    </button>
+                    <button 
+                      onClick={() => scrollNearby('right')}
+                      className="p-1 rounded-full bg-white/5 border border-white/5 hover:bg-white/10 hover:border-[#BFF367]/50 text-white hover:text-[#BFF367] transition-all"
+                    >
+                      <ChevronRight size={14} />
+                    </button>
                   </div>
                 </div>
-              </div>
+                <div 
+                  ref={nearbyScrollRef}
+                  className="flex gap-3 overflow-x-auto no-scrollbar pb-2 scroll-smooth"
+                >
+                  {isLoggedIn && bookings.length > 0 ? (
+                    bookings.map((booking, idx) => {
+                      const dateObj = new Date(booking.date || booking.timeSlot?.date || Date.now());
+                      const dayStr = dateObj.getDate().toString().padStart(2, '0');
+                      const monthStr = dateObj.toLocaleString('en-US', { month: 'short' }).toUpperCase();
 
-              {/* 7. Suggested Players */}
-              <div className="space-y-3">
-                <h4 className="text-[11px] font-black uppercase text-white/40 tracking-widest px-1">Suggested Players</h4>
-                <div className="space-y-2">
-                  {loadingPlayers ? (
-                    <div className="text-[10px] text-white/40 font-medium py-3 text-center">Loading players...</div>
-                  ) : suggestedPlayers.length > 0 ? (
-                    suggestedPlayers.slice(0, 3).map((player) => {
-                      const playerId = player._id || player.id;
-                      const isFollowed = followingIds.includes(playerId);
                       return (
-                        <div key={playerId} className="flex items-center justify-between bg-[#0B0B0C] border border-white/[0.05] rounded-xl p-3 hover:border-white/10 transition-colors">
-                          <Link to={`/profile/${playerId}`} className="flex items-center gap-2.5 min-w-0">
+                        <Link key={booking._id || booking.id} to={`/booking-pass/${booking.id || booking._id}`} className="min-w-[145px] w-[145px] flex flex-col rounded-xl border border-gray-600/60 bg-[#070708] overflow-hidden group shrink-0 shadow-sm transition-all hover:border-gray-500">
+                          {/* Image Section */}
+                          <div className="relative w-full aspect-[4/5] overflow-hidden bg-white/5">
                             <img 
-                              src={player.profilePicture || `https://api.dicebear.com/7.x/avataaars/svg?seed=${player.name}`} 
-                              className="w-8 h-8 rounded-full object-cover shrink-0 bg-white/5 border border-white/5" 
-                              alt=""
+                              src={booking.turf?.images?.[0] || "/default-turf.jpg"} 
+                              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" 
+                              onError={(e) => e.target.src = "https://images.unsplash.com/photo-1518605368461-1ee7111d4e7a?auto=format&fit=crop&q=80"} 
+                              alt={booking.turf?.name}
                             />
-                            <div className="min-w-0">
-                              <h5 className="text-[12px] font-bold text-white truncate hover:text-[#BFF367] transition-colors">{player.name}</h5>
-                              <span className="text-[9px] text-[#BFF367] font-bold uppercase tracking-wider block mt-0.5">{player.city || "Player"}</span>
+                            {/* Pink Banner */}
+                            <div className="absolute bottom-0 left-0 right-0 bg-[#E81E73] p-1 px-2">
+                              <p className="text-[9px] font-bold text-white text-center">Booked • {booking.timeSlot?.formattedStartTime || "Slot"}</p>
                             </div>
-                          </Link>
-                          <button
-                            onClick={() => handleFollowToggleLocal(player)}
-                            className={`p-2 rounded-full transition-all shrink-0 ${isFollowed ? "bg-white/5 text-white/40 hover:text-white" : "bg-[#BFF367] text-black hover:scale-105 active:scale-95 shadow-[0_0_12px_rgba(191,243,103,0.1)]"}`}
-                          >
-                            {isFollowed ? <UserMinus size={11} /> : <UserPlus size={11} />}
-                          </button>
-                        </div>
-                      );
-                    })
-                  ) : (
-                    <div className="text-[11px] font-medium text-white/30 italic text-center py-2">No suggested players found</div>
-                  )}
-                </div>
-              </div>
-
-              {/* 8. Nearby Grounds */}
-              <div className="space-y-3">
-                <h4 className="text-[11px] font-black uppercase text-white/40 tracking-widest px-1">Nearby Grounds</h4>
-                <div className="space-y-2">
-                  {loadingVenues ? (
-                    <div className="text-[10px] text-white/40 font-medium py-3 text-center">Loading grounds...</div>
-                  ) : nearbyVenues.length > 0 ? (
-                    nearbyVenues.slice(0, 3).map((venue, idx) => {
-                      const mockDistances = ["1.2 km away", "2.8 km away", "3.5 km away"];
-                      const distanceStr = venue.distance || mockDistances[idx % mockDistances.length];
-                      return (
-                        <Link key={venue._id} to={`/venue/${venue._id}`} className="block bg-[#0B0B0C] border border-white/[0.05] hover:border-[#BFF367]/30 rounded-xl p-3.5 transition-all group shadow-sm">
-                          <div className="flex gap-3">
-                            <img 
-                              src={venue.images?.[0] || "/default-turf.jpg"} 
-                              className="w-14 h-14 rounded-lg object-cover bg-white/5 shrink-0 border border-white/5" 
-                              onError={(e) => {
-                                const fallback = "https://images.unsplash.com/photo-1518605368461-1ee7111d4e7a?auto=format&fit=crop&q=80";
-                                if (e.target.src !== fallback) {
-                                  e.target.src = fallback;
-                                }
-                              }}
-                              alt=""
-                            />
-                            <div className="flex-1 min-w-0 flex flex-col justify-between py-0.5">
-                              <div>
-                                <h5 className="text-[12px] font-black text-white truncate uppercase group-hover:text-[#BFF367] transition-colors leading-none">{venue.name}</h5>
-                                <p className="text-[10px] font-bold text-[#BFF367] uppercase tracking-wider mt-1.5 leading-none">₹{venue.pricePerHour || 1200}/hr</p>
-                              </div>
-                              <div className="flex justify-between items-center text-[9px] text-white/40 mt-1">
-                                <span className="flex items-center gap-0.5"><MapPin size={9} /> {distanceStr}</span>
-                                <span className="flex items-center gap-0.5 text-yellow-500 font-bold"><Star size={9} fill="currentColor" /> {venue.averageRating || venue.rating || "4.8"}</span>
-                              </div>
+                          </div>
+                          
+                          {/* Text Section */}
+                          <div className="flex gap-2 p-2">
+                            {/* Date Box */}
+                            <div className="bg-[#2A2D34] rounded-lg p-1 w-[36px] h-[40px] flex flex-col items-center justify-center shrink-0">
+                              <span className="text-[11px] font-black text-white leading-none">{dayStr}</span>
+                              <span className="text-[7px] font-bold text-white/70 leading-none mt-1 uppercase">{monthStr}</span>
+                            </div>
+                            
+                            {/* Text Details */}
+                            <div className="flex-1 min-w-0 flex flex-col justify-center">
+                              <h5 className="text-[10px] font-bold text-white leading-tight group-hover:text-[#BFF367] transition-colors line-clamp-2">
+                                {booking.turf?.name}
+                              </h5>
+                              <p className="text-[8px] text-white/50 truncate mt-0.5 font-medium">{booking.turf?.city || "Confirmed"}</p>
                             </div>
                           </div>
                         </Link>
                       );
                     })
                   ) : (
-                    <div className="text-[11px] font-medium text-white/30 italic text-center py-2">No grounds found</div>
+                    <div className="text-[11px] font-medium text-white/30 italic text-center w-full py-2">
+                      {isLoggedIn ? "No upcoming matches booked" : "Please log in to view your bookings"}
+                    </div>
                   )}
                 </div>
+              </div>
+
+              {/* Suggested Players (Moved Below Upcoming Bookings) */}
+              <div className="bg-[#0B0B0C] border border-white/[0.05] rounded-xl p-4 shadow-[0_4px_20px_rgba(0,0,0,0.4)] mt-2">
+                <div className="flex items-center justify-between mb-4">
+                  <h4 className="text-[11px] font-black uppercase text-white/40 tracking-widest">Players You May Know</h4>
+                  <Link to="/players" className="text-[11px] font-bold text-[#BFF367] hover:underline">View All</Link>
+                </div>
+                
+                <div className="flex items-center justify-between gap-2 overflow-x-auto no-scrollbar pb-1">
+                  {loadingPlayers ? (
+                    <div className="text-[10px] text-white/40 font-medium py-3 text-center w-full">Loading players...</div>
+                  ) : suggestedPlayers.length > 0 ? (
+                    suggestedPlayers.slice(0, 4).map((player) => {
+                      const playerId = player._id || player.id;
+                      const isFollowed = followingIds.includes(playerId);
+                      const mutualCount = player.mutualFriendsCount || player.mutualFriends || 0;
+                      return (
+                        <div key={playerId} className="flex flex-col items-center min-w-[70px] gap-1">
+                          <div className="relative">
+                            <Link to={`/profile/${playerId}`} className="block relative group cursor-pointer">
+                              <img 
+                                src={player.profilePicture || `https://api.dicebear.com/7.x/avataaars/svg?seed=${player.name}`} 
+                                className="w-12 h-12 md:w-14 md:h-14 rounded-full object-cover shrink-0 bg-white/5 border border-white/5 group-hover:border-[#BFF367]/50 transition-colors" 
+                                alt={player.name}
+                              />
+                            </Link>
+                            <button
+                              onClick={(e) => { e.preventDefault(); handleFollowToggleLocal(player); }}
+                              className={`absolute -bottom-0.5 -right-0.5 p-1 rounded-full transition-all border-[1.5px] border-[#0B0B0C] z-10 ${isFollowed ? "bg-[#2A2D34] text-white/40 hover:text-white" : "bg-[#BFF367] text-black hover:scale-110 active:scale-95 shadow-[0_0_12px_rgba(191,243,103,0.2)]"}`}
+                            >
+                              {isFollowed ? <UserMinus size={8} /> : <Plus size={9} strokeWidth={4} />}
+                            </button>
+                          </div>
+                          <Link to={`/profile/${playerId}`} className="text-center mt-0.5 group">
+                            <h5 className="text-[11px] md:text-[12px] font-bold text-white truncate max-w-[70px] group-hover:text-[#BFF367] transition-colors">{player.name.split(' ')[0]}</h5>
+                            <span className="text-[8px] text-white/40 font-medium block mt-0.5">
+                              {mutualCount > 0 ? `${mutualCount} mutual` : "No mutual"}
+                            </span>
+                          </Link>
+                        </div>
+                      );
+                    })
+                  ) : (
+                    <div className="text-[11px] font-medium text-white/30 italic text-center w-full py-2">No suggested players found</div>
+                  )}
+                </div>
+              </div>
+
+              {/* Invite & Earn Strip (Moved to Bottom) */}
+              <div className="w-full mt-4 flex justify-center">
+                <Link
+                  to="/wallet"
+                  className="relative inline-block w-full h-[3.5em] group dark:bg-black bg-white dark:border-white border-black border rounded-xl overflow-visible">
+                  
+                  {/* Inner container */}
+                  <div className="relative w-full h-full overflow-hidden rounded-xl">
+                    <span className="absolute inset-0 rounded-xl bg-[#d9d9d9]"></span>
+                    <span className="absolute inset-0 rounded-xl bg-black"></span>
+                    <Liquid isHovered={isInviteHovered} colors={LIQUID_COLORS} />
+                    
+                    {[1, 2, 3, 4, 5].map((i) => (
+                      <span
+                        key={i}
+                        className={`absolute inset-0 rounded-xl border-solid border-[3px] border-gradient-to-b from-transparent to-white mix-blend-overlay filter ${i <= 2 ? 'blur-[3px]' : i === 3 ? 'blur-[5px]' : 'blur-[4px]'}`}></span>
+                    ))}
+                    <span className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-[40%] w-[70.8%] h-[42.85%] rounded-xl filter blur-[15px] bg-[#006]"></span>
+                  </div>
+                  
+                  {/* Button Content */}
+                  <div
+                    className="absolute inset-0 rounded-xl bg-transparent cursor-pointer flex items-center justify-between px-5"
+                    onMouseEnter={() => setIsInviteHovered(true)}
+                    onMouseLeave={() => setIsInviteHovered(false)}>
+                    <span className="flex items-center gap-3">
+                      <Share2 size={18} className="group-hover:text-yellow-400 text-white flex-shrink-0 transition-colors" />
+                      <span className="group-hover:text-yellow-400 text-white text-[14px] font-black tracking-wide whitespace-nowrap transition-colors uppercase">Invite & Earn</span>
+                    </span>
+                    <span className="group-hover:text-yellow-400 text-white/80 font-bold text-[10px] uppercase tracking-widest transition-colors">Get ₹100 / Friend</span>
+                  </div>
+                </Link>
               </div>
             </>
           )}
@@ -543,9 +601,97 @@ export default function DesktopRightSidebar({ isRightDrawerOpen, setIsRightDrawe
                   </div>
                 </div>
               ) : (
-                <div className="bg-[#0B0B0C] border border-white/[0.05] rounded-xl p-5 text-center space-y-2.5 shadow-md">
-                  <h4 className="text-[12px] font-black text-white uppercase tracking-wider">Venue Directory</h4>
-                  <p className="text-[10px] text-white/40 leading-relaxed font-sans uppercase font-bold tracking-wide">Select a venue from the list to see detailed summary, rates, location maps, and quick booking options.</p>
+                <div className="bg-[#0B0B0C] border border-white/[0.05] rounded-xl p-5 shadow-md">
+                  <SearchTurf onSearch={() => {}} />
+
+                  {/* Advanced Filters */}
+                  <div className="mt-8 space-y-8 border-t border-white/[0.05] pt-6">
+                    
+                    {/* Slot Availability */}
+                    <div className="space-y-4">
+                      <h5 className="text-[13px] font-black uppercase text-white tracking-wider">Slot Availability</h5>
+                      <div className="space-y-3">
+                        <label className="flex items-center gap-3 cursor-pointer group">
+                          <input type="checkbox" className="accent-[#BFF367] w-4 h-4 rounded border-[#333] bg-transparent cursor-pointer" />
+                          <span className="text-[13px] font-medium text-gray-400 group-hover:text-white transition-colors">Show Only Available Venues</span>
+                        </label>
+                        <label className="flex items-center gap-3 cursor-pointer group">
+                          <input type="checkbox" className="accent-[#BFF367] w-4 h-4 rounded border-[#333] bg-transparent cursor-pointer" />
+                          <span className="text-[13px] font-medium text-gray-400 group-hover:text-white transition-colors">Show Only Favorites</span>
+                        </label>
+                      </div>
+                    </div>
+
+                    {/* Slot Timings */}
+                    <div className="space-y-4">
+                      <h5 className="text-[13px] font-black uppercase text-white tracking-wider">Slot Timings</h5>
+                      <div className="space-y-3">
+                        <label className="flex items-center gap-3 cursor-pointer group">
+                          <input type="checkbox" className="accent-[#BFF367] w-4 h-4 rounded border-[#333] bg-transparent cursor-pointer" />
+                          <span className="text-[13px] font-medium text-gray-400 group-hover:text-white transition-colors">Morning (6:00 AM - 11:00 AM)</span>
+                        </label>
+                        <label className="flex items-center gap-3 cursor-pointer group">
+                          <input type="checkbox" className="accent-[#BFF367] w-4 h-4 rounded border-[#333] bg-transparent cursor-pointer" />
+                          <span className="text-[13px] font-medium text-gray-400 group-hover:text-white transition-colors">Afternoon (11:00 AM - 5:00 PM)</span>
+                        </label>
+                        <label className="flex items-center gap-3 cursor-pointer group">
+                          <input type="checkbox" className="accent-[#BFF367] w-4 h-4 rounded border-[#333] bg-transparent cursor-pointer" />
+                          <span className="text-[13px] font-medium text-gray-400 group-hover:text-white transition-colors">Evening (5:00 PM - 10:00 PM)</span>
+                        </label>
+                        <label className="flex items-center gap-3 cursor-pointer group">
+                          <input type="checkbox" className="accent-[#BFF367] w-4 h-4 rounded border-[#333] bg-transparent cursor-pointer" />
+                          <span className="text-[13px] font-medium text-gray-400 group-hover:text-white transition-colors">Late Night (After 10 PM)</span>
+                        </label>
+                      </div>
+                    </div>
+
+                    {/* Star Rating */}
+                    <div className="space-y-4">
+                      <h5 className="text-[13px] font-black uppercase text-white tracking-wider">Star Rating: {minRating.toFixed(1)} - {maxRating.toFixed(1)}</h5>
+                      <div className="space-y-5 px-1 pt-1">
+                        <div className="flex flex-col gap-2">
+                          <div className="flex justify-between text-[11px] font-bold uppercase tracking-wider text-gray-400">
+                            <span>Min Rating: {minRating.toFixed(1)}</span>
+                          </div>
+                          <input 
+                            type="range" min="0" max="5" step="0.5" 
+                            value={minRating}
+                            onChange={(e) => setMinRating(parseFloat(e.target.value))}
+                            style={{ background: `linear-gradient(to right, #BFF367 ${(minRating / 5) * 100}%, #1F1F1F ${(minRating / 5) * 100}%)` }}
+                            className="w-full h-1.5 rounded-lg appearance-none cursor-pointer [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-4 [&::-webkit-slider-thumb]:h-4 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-[#BFF367]" 
+                          />
+                        </div>
+                        <div className="flex flex-col gap-2">
+                          <div className="flex justify-between text-[11px] font-bold uppercase tracking-wider text-gray-400">
+                            <span>Max Rating: {maxRating.toFixed(1)}</span>
+                          </div>
+                          <input 
+                            type="range" min="0" max="5" step="0.5" 
+                            value={maxRating}
+                            onChange={(e) => setMaxRating(parseFloat(e.target.value))}
+                            style={{ background: `linear-gradient(to right, #BFF367 ${(maxRating / 5) * 100}%, #1F1F1F ${(maxRating / 5) * 100}%)` }}
+                            className="w-full h-1.5 rounded-lg appearance-none cursor-pointer [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-4 [&::-webkit-slider-thumb]:h-4 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-[#BFF367]" 
+                          />
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Price */}
+                    <div className="space-y-4">
+                      <h5 className="text-[13px] font-black uppercase text-white tracking-wider">Price</h5>
+                      <div className="space-y-3">
+                        <label className="flex items-center gap-3 cursor-pointer group">
+                          <input type="checkbox" className="accent-[#BFF367] w-4 h-4 rounded border-[#333] bg-transparent cursor-pointer" />
+                          <span className="text-[13px] font-medium text-gray-400 group-hover:text-white transition-colors">Less than ₹5000</span>
+                        </label>
+                        <label className="flex items-center gap-3 cursor-pointer group">
+                          <input type="checkbox" defaultChecked className="accent-[#BFF367] w-4 h-4 rounded border-[#333] bg-transparent cursor-pointer" />
+                          <span className="text-[13px] font-medium text-gray-400 group-hover:text-white transition-colors">₹5000 and above</span>
+                        </label>
+                      </div>
+                    </div>
+
+                  </div>
                 </div>
               )}
             </>

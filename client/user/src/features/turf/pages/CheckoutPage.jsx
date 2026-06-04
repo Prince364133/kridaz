@@ -1,26 +1,31 @@
-import * as Sentry from "@sentry/react";
 import React, { useEffect, useState } from "react";
 import { useLocation, useNavigate, useParams, Link } from "react-router-dom";
 import { useSelector } from "react-redux";
 import { 
+  IndianRupee, 
   ShieldCheck, 
   Clock, 
   Calendar, 
+  MapPin, 
   ChevronLeft, 
+  Zap, 
   Wallet, 
   Smartphone, 
+  CreditCard, 
   ArrowRight,
+  ArrowLeft,
   Check,
   Loader2,
   PlusCircle,
   Tag,
   Info,
+  Shield,
   Lock
 } from "lucide-react";
 import { format } from "date-fns";
 import axiosInstance from "@hooks/useAxiosInstance";
 import toast from "react-hot-toast";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { handlePayment, createOrder } from "@infrastructure/razorpay";
 
 const SUBHEADING_STYLE = { fontFamily: "'Inter 28pt Light', sans-serif", fontWeight: 300 };
@@ -71,7 +76,7 @@ const CheckoutPage = () => {
         const response = await axiosInstance.get("/api/settings/payout");
         setSettings(response.data.payoutSettings);
       } catch (err) {
-        Sentry.captureException(err);
+        console.error("Failed to fetch payout settings:", err);
       }
     };
     fetchSettings();
@@ -85,7 +90,7 @@ const CheckoutPage = () => {
           setCurrentBalance(response.data.usableBalance ?? response.data.balance);
         }
       } catch (err) {
-        Sentry.captureException(err);
+        console.error("Failed to fetch wallet data:", err);
       }
     };
     if (user) {
@@ -192,7 +197,7 @@ const CheckoutPage = () => {
         }
       }
     } catch (error) {
-      Sentry.captureException(error);
+      console.error("Payment Error:", error);
       const msg = error.response?.data?.message || error.message || "Payment failed. Please try again.";
       toast.error(msg);
       if (msg.toLowerCase().includes("insufficient")) {

@@ -1,7 +1,8 @@
 /* eslint-disable react/prop-types */
-import React, { useRef, useEffect } from "react";
+import React, { useRef, useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { Search, Star, Heart, MapPin } from "lucide-react";
+import { Search, ChevronRight, ChevronLeft, Star, Heart, MapPin } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
 
 const BDR = "#2A2A2A";
 
@@ -9,7 +10,7 @@ const VenueCard = ({ t }) => (
   <Link 
     to={`/venue/${t._id}`} 
     draggable={false}
-    className="block relative w-full h-full rounded-[12px] overflow-hidden group bg-[#111] border border-[#2A2A2A] hover:border-white/20 hover:scale-[1.02] transition-all duration-300 shadow-lg"
+    className="block relative w-full h-full rounded-[12px] overflow-hidden group bg-[#111] border-2 border-gray-600/60 hover:border-white/40 transition-all duration-300 shadow-lg"
   >
     {/* Normal Card Content */}
     <div className="absolute inset-0 w-full h-full bg-[#111]">
@@ -17,7 +18,7 @@ const VenueCard = ({ t }) => (
         src={t.images?.[0] || "https://images.unsplash.com/photo-1518605368461-1ee7111d4e7a?auto=format&fit=crop&q=80"} 
         alt={t.name}
         draggable={false}
-        className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 pointer-events-none" 
+        className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 pointer-events-none" 
       />
       
       {/* Dark gradient at the bottom */}
@@ -78,24 +79,29 @@ export default function VenuesSection({
 }) {
   const navigate = useNavigate();
   const scrollRef = useRef(null);
+  const [isHovered, setIsHovered] = useState(false);
 
   useEffect(() => {
-    const interval = setInterval(() => {
-      // Only auto-slide on desktop (min-width: 768px)
-      if (window.innerWidth >= 768 && scrollRef.current) {
-        const { scrollLeft, scrollWidth, clientWidth } = scrollRef.current;
-        
-        // If we reached the end, loop back to the start. Otherwise, scroll right by roughly one card width.
-        if (scrollLeft + clientWidth >= scrollWidth - 10) {
-          scrollRef.current.scrollTo({ left: 0, behavior: "smooth" });
-        } else {
-          scrollRef.current.scrollBy({ left: 396, behavior: "smooth" });
+    let interval;
+    if (!isHovered) {
+      interval = setInterval(() => {
+        // Only auto-slide on desktop (min-width: 768px)
+        if (window.innerWidth >= 768 && scrollRef.current) {
+          const { scrollLeft, scrollWidth, clientWidth } = scrollRef.current;
+          
+          // If we reached the end, loop back to the start. Otherwise, scroll right by roughly one card width.
+          if (scrollLeft + clientWidth >= scrollWidth - 10) {
+            scrollRef.current.scrollTo({ left: 0, behavior: "smooth" });
+          } else {
+            const cardWidth = scrollRef.current.children[0]?.clientWidth || 396;
+            scrollRef.current.scrollBy({ left: cardWidth + 16, behavior: "smooth" });
+          }
         }
-      }
-    }, 2000);
+      }, 2000);
+    }
 
     return () => clearInterval(interval);
-  }, []);
+  }, [isHovered]);
 
   const scroll = (direction) => {
     if (scrollRef.current) {
@@ -123,7 +129,7 @@ export default function VenuesSection({
           {[...Array(3)].map((_, i) => (
             <div
               key={i}
-              className="w-[80%] shrink-0 snap-start rounded-[12px] border animate-pulse aspect-[1080/1350]"
+              className="w-[85%] md:w-full shrink-0 snap-center rounded-[12px] border animate-pulse aspect-[1080/1350]"
               style={{ backgroundColor: "#111", borderColor: BDR }}
             />
           ))}
@@ -150,9 +156,11 @@ export default function VenuesSection({
             <div 
               ref={scrollRef}
               className="flex gap-4 overflow-x-auto snap-x snap-mandatory no-scrollbar pb-4 pr-4 scroll-smooth"
+              onMouseEnter={() => setIsHovered(true)}
+              onMouseLeave={() => setIsHovered(false)}
             >
               {displayTurfs.slice(0, 10).map((t) => (
-                <div key={t._id} className="w-[320px] lg:w-[380px] shrink-0 snap-center aspect-[1080/1350]">
+                <div key={t._id} className="w-[85%] md:w-full shrink-0 snap-center aspect-[1080/1350]">
                   <VenueCard t={t} />
                 </div>
               ))}
