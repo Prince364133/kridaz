@@ -38,11 +38,12 @@ const Root = () => {
   const searchParams = new URLSearchParams(location.search);
   const isReelsPage = location.pathname.startsWith('/reels') || location.pathname.startsWith('/shorts') || searchParams.get('tab') === 'shots';
   const isNewPostPage = location.pathname.startsWith('/new-post') || location.pathname.startsWith('/create-post') || location.pathname.startsWith('/create-story');
+  const isTeamsPage = location.pathname.startsWith('/my-teams');
   const hideNav = isReelsPage || location.pathname.startsWith('/messages') || isNewPostPage;
   const isHome = location.pathname === "/" || location.pathname === "/community";
   const isVenue = location.pathname.startsWith("/venue") || location.pathname === "/venues";
   const isUploadReel = location.pathname.startsWith("/reels/upload") || location.pathname.startsWith("/shorts/upload");
-  const useRestrictedWidth = isHome || isVenue || isUploadReel;
+  const useRestrictedWidth = isHome || isVenue || isUploadReel || isTeamsPage;
 
   const showRightSidebar = isHome || isVenue;
 
@@ -77,18 +78,18 @@ const Root = () => {
         <main className={`flex-grow ${
           isReelsPage || isNewPostPage
             ? 'pb-0' 
-            : location.pathname.startsWith('/messages') 
+            : location.pathname.startsWith('/messages') || isTeamsPage
               ? `pb-0 ${isSidebarCollapsed ? 'lg:ml-20' : 'lg:ml-64'}` 
               : `pb-20 lg:pb-0 ${isSidebarCollapsed ? 'lg:ml-20' : 'lg:ml-64'}`
-        } ${showRightSidebar ? 'xl:pr-[440px]' : ''} transition-all duration-300 min-w-0 flex justify-center ${isNewPostPage ? 'py-0' : 'py-6'}`}>
+        } ${showRightSidebar ? 'xl:pr-[440px]' : ''} transition-all duration-300 min-w-0 flex justify-center ${isNewPostPage || isTeamsPage ? 'py-0' : 'py-6'}`}>
           
-          <div className={`w-full ${isNewPostPage ? 'max-w-none px-0' : useRestrictedWidth ? 'max-w-[495px]' : 'px-4 md:px-8 max-w-none'} flex flex-col justify-between`}>
+          <div className={`w-full ${isNewPostPage || isTeamsPage ? 'max-w-none px-0' : useRestrictedWidth ? 'max-w-[495px]' : 'px-4 md:px-8 max-w-none'} flex flex-col justify-between`}>
             <div className="min-h-full">
               <Outlet />
             </div>
 
             {/* Desktop Footer */}
-            {!hideNav && location.pathname !== '/community' && (
+            {!hideNav && location.pathname !== '/community' && !isTeamsPage && (
               <div className="mt-12 border-t border-white/5 pt-8">
                 <UserFooter />
               </div>
