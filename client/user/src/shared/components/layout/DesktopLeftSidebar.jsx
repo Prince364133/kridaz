@@ -17,7 +17,7 @@ export default function DesktopLeftSidebar() {
   ];
 
   return (
-    <aside className="fixed top-[72px] left-0 bottom-0 w-[240px] bg-[#0A0A0A] border-r border-white/5 flex flex-col py-6 px-4 gap-1.5 z-[70] select-none">
+    <aside className="fixed top-[77px] left-0 bottom-0 w-[290px] bg-black border-r border-white/5 flex flex-col py-6 px-4 gap-1.5 z-[70] select-none">
       {sidebarItems.map((item) => {
         const isActive = item.path === "/" 
           ? location.pathname === "/" || location.pathname === "/community"

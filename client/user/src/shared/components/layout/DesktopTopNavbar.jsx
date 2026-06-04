@@ -1,9 +1,10 @@
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
-import { Search, Plus, MessageCircle, Bell, X, LogOut, Activity, Zap, Briefcase, Trophy, Clock, Users, Target, Bookmark, FileText, ArrowRight, Menu } from "lucide-react";
+import { Search, Plus, MessageCircle, Bell, User, X, LogOut, Activity, Zap, Briefcase, ShieldCheck, Trophy, Clock, Users, Target, Bookmark, FileText, ArrowRight, Menu, Camera, Image, Video } from "lucide-react";
 import { useState } from "react";
 import { createPortal } from "react-dom";
 import { logout } from "@redux/slices/authSlice";
+import { openLocationSidebar } from "@redux/slices/uiSlice";
 import useNotifications from "@hooks/shared/useNotifications";
 import { getDynamicProfileRoute } from "@utils/routeUtils";
 import axiosInstance from "@hooks/useAxiosInstance";
@@ -51,7 +52,7 @@ export default function DesktopTopNavbar({ isRightDrawerOpen, setIsRightDrawerOp
   };
 
   return (
-    <header className="fixed top-0 left-0 right-0 h-[72px] bg-black/95 backdrop-blur-xl border-b border-white/5 flex items-center justify-between px-6 z-[80] select-none">
+    <header className="fixed top-0 left-0 right-0 h-[77px] bg-black/95 backdrop-blur-xl border-b border-white/5 flex items-center justify-between px-6 z-[80] select-none">
       {/* Left: Logo & Search */}
       <div className="flex items-center gap-8">
         <Link to="/" className="flex items-center gap-3 hover:scale-102 transition-transform">
@@ -90,12 +91,22 @@ export default function DesktopTopNavbar({ isRightDrawerOpen, setIsRightDrawerOp
                     state={{ openStartScoringModal: true }}
                     className="flex items-center gap-3 p-3.5 text-xs font-bold text-white/60 hover:text-[#BFF367] hover:bg-white/5 transition-all"
                   >
-                    Score Match
+                    <Trophy size={16} /> Score Match
+                  </Link>
+                </li>
+                <li>
+                  <Link to="/?createStory=true" className="flex items-center gap-3 p-3.5 text-xs font-bold text-white/60 hover:text-[#BFF367] hover:bg-white/5 transition-all">
+                    <Camera size={16} /> Story
                   </Link>
                 </li>
                 <li>
                   <Link to="/?createPost=true" className="flex items-center gap-3 p-3.5 text-xs font-bold text-white/60 hover:text-[#BFF367] hover:bg-white/5 transition-all">
-                    Share Post
+                    <Image size={16} /> Post
+                  </Link>
+                </li>
+                <li>
+                  <Link to="/reels/upload" className="flex items-center gap-3 p-3.5 text-xs font-bold text-white/60 hover:text-[#BFF367] hover:bg-white/5 transition-all">
+                    <Video size={16} /> Reel
                   </Link>
                 </li>
               </ul>
