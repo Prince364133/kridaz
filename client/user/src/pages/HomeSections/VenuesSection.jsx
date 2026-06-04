@@ -130,7 +130,7 @@ export default function VenuesSection({
           {[...Array(3)].map((_, i) => (
             <div
               key={i}
-              className="w-[85%] md:w-full shrink-0 snap-center rounded-[12px] border animate-pulse aspect-[1080/1350]"
+              className="w-[65%] shrink-0 snap-start rounded-[12px] border animate-pulse aspect-[1080/1350]"
               style={{ backgroundColor: "#111", borderColor: BDR }}
             />
           ))}
@@ -161,7 +161,7 @@ export default function VenuesSection({
               onMouseLeave={() => setIsHovered(false)}
             >
               {displayTurfs.slice(0, 10).map((t) => (
-                <div key={t._id} className="w-[85%] md:w-full shrink-0 snap-center aspect-[1080/1350]">
+                <div key={t._id} className="w-[65%] shrink-0 snap-start aspect-[1080/1350]">
                   <VenueCard t={t} />
                 </div>
               ))}

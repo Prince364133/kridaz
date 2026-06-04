@@ -93,7 +93,7 @@ const StoriesSection = ({ user, isLoggedIn, isAdmin, gateInteraction }) => {
         {/* Add/View Your Story */}
         <div className="flex flex-col items-center gap-2.5 shrink-0 group relative">
           <div
-            className={`w-[96px] h-[143px] rounded-[7.2pt] p-[1px] relative ${
+            className={`w-[72px] h-[72px] rounded-full p-[2px] relative ${
               myStoryGroup && hasSeenGroup(myStoryGroup) ? "bg-white/20" : "bg-gradient-to-r from-[#BFF367] to-[#BFF367]"
             }`}
           >
@@ -105,9 +105,9 @@ const StoriesSection = ({ user, isLoggedIn, isAdmin, gateInteraction }) => {
                   gateInteraction(() => navigate('/create-story'));
                 }
               }}
-              className="w-full h-full rounded-[6.5pt] bg-[#0A0A0A] p-[2px] cursor-pointer"
+              className="w-full h-full rounded-full bg-[#0A0A0A] p-[2px] cursor-pointer"
             >
-              <div className="w-full h-full rounded-[5.5pt] flex items-center justify-center overflow-hidden bg-[#111]">
+              <div className="w-full h-full rounded-full flex items-center justify-center overflow-hidden bg-[#111]">
               {myStoryGroup && getStoryThumb(myStoryGroup.stories[0]) ? (
                 <img
                   src={getStoryThumb(myStoryGroup.stories[0])}
@@ -152,9 +152,9 @@ const StoriesSection = ({ user, isLoggedIn, isAdmin, gateInteraction }) => {
                 e.stopPropagation();
                 gateInteraction(() => navigate('/create-story'));
               }}
-              className="absolute -bottom-2 -right-2 w-[28px] h-[28px] bg-gradient-to-r from-[#BFF367] to-[#BFF367] rounded-full flex items-center justify-center border-2 border-[#0A0A0A] cursor-pointer hover:scale-110 transition-transform z-10 shadow-lg"
+              className="absolute bottom-0 right-0 w-[24px] h-[24px] bg-gradient-to-r from-[#BFF367] to-[#BFF367] rounded-full flex items-center justify-center border-2 border-[#0A0A0A] cursor-pointer hover:scale-110 transition-transform z-10 shadow-lg"
             >
-              <Plus size={16} strokeWidth={3} className="text-black" />
+              <Plus size={14} strokeWidth={3} className="text-black" />
             </div>
           </div>
           <span className="text-[10px] font-bold text-white/80 group-hover:text-[#BFF367] transition-colors truncate max-w-[68px]">
@@ -169,9 +169,9 @@ const StoriesSection = ({ user, isLoggedIn, isAdmin, gateInteraction }) => {
             onClick={() => setSelectedStoryGroup(group)}
             className="flex flex-col items-center gap-2.5 shrink-0 cursor-pointer group"
           >
-            <div className={`w-[96px] h-[143px] rounded-[7.2pt] p-[1px] relative ${hasSeenGroup(group) ? "bg-white/20" : "bg-gradient-to-r from-[#BFF367] to-[#BFF367]"}`}>
-              <div className="w-full h-full rounded-[6.5pt] bg-[#0A0A0A] p-[2px]">
-                <div className="w-full h-full rounded-[5.5pt] overflow-hidden bg-[#111]">
+            <div className={`w-[72px] h-[72px] rounded-full p-[2px] relative ${hasSeenGroup(group) ? "bg-white/20" : "bg-gradient-to-r from-[#BFF367] to-[#BFF367]"}`}>
+              <div className="w-full h-full rounded-full bg-[#0A0A0A] p-[2px]">
+                <div className="w-full h-full rounded-full overflow-hidden bg-[#111]">
                   {getStoryThumb(group.stories[0]) ? (
                     <img
                       src={getStoryThumb(group.stories[0])}

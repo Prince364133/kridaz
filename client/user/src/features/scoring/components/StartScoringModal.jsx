@@ -5,7 +5,7 @@ import { motion, AnimatePresence, useMotionValue, animate } from 'framer-motion'
 import {
   X, ChevronRight, ChevronLeft, Shield, Video, Users, Trophy,
   Search, Check, MapPin, UserCheck, SkipForward, Loader2,
-  Swords, Phone, MessageCircle, UserPlus, Plus, EyeOff, CheckSquare, Mic, Star, Heart
+  Swords, Phone, MessageCircle, UserPlus, Plus, Eye, EyeOff, CheckSquare, Mic, Star, Heart
 } from 'lucide-react';
 import { useSetupScoringMatchMutation } from '@redux/api/scoringApi';
 import {
@@ -67,10 +67,7 @@ const PITCH_TYPES = [
 
 const STEPS = [
   { id: 1, label: 'Match Setup' },
-  { id: 2, label: 'Select Teams' },
-  { id: 3, label: 'Playing XIs' },
-  { id: 4, label: 'Add-ons' },
-  { id: 5, label: 'Review & Confirm' },
+  { id: 2, label: 'Playing XIs' },
 ];
 
 // ─── Field/Select components ─────────────────────────────────────────────────
@@ -138,6 +135,9 @@ const CustomDropdown = ({ value, onChange, options, placeholder, className, disa
         )}
       </AnimatePresence>
     </div>
+
+
+
   );
 };
 
@@ -149,6 +149,10 @@ const StartScoringModal = ({ isOpen, onClose, onSuccess, initialData }) => {
   const [showCustomVenuePopup, setShowCustomVenuePopup] = useState(false);
   const [customVenueNameInput, setCustomVenueNameInput] = useState('');
   const [customVenueLocationInput, setCustomVenueLocationInput] = useState('');
+  const [showVenuePopup, setShowVenuePopup] = useState(false);
+  const [showProfessionalsPopup, setShowProfessionalsPopup] = useState(false);
+  const [showPasswordPopup, setShowPasswordPopup] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
   const [showLocationPopup, setShowLocationPopup] = useState(false);
   const [mapCoordinates, setMapCoordinates] = useState(null);
   const [isDetectingLocation, setIsDetectingLocation] = useState(false);
@@ -178,6 +182,7 @@ const StartScoringModal = ({ isOpen, onClose, onSuccess, initialData }) => {
     customDays: 1,
     customOversPerDay: 20,
     powerPlayOvers: 6,
+    powerPlayMapping: [],
     location: '',
     matchDateTime: '',
     pitchType: 'TURF',
@@ -522,7 +527,7 @@ const StartScoringModal = ({ isOpen, onClose, onSuccess, initialData }) => {
       city: proCityFilter || undefined,
       query: proSearchQuery || undefined
     },
-    { skip: step !== 4 && step !== 5 }
+    { skip: step !== 3 && step !== 4 }
   );
 
   const [searchPlayers, { data: searchPlayersData, isFetching: isSearchingPlayers }] = useLazySearchPlayersQuery();
@@ -561,14 +566,30 @@ const StartScoringModal = ({ isOpen, onClose, onSuccess, initialData }) => {
     const key = selectingTeam === 'A' ? 'teamAId' : 'teamBId';
     const nameKey = selectingTeam === 'A' ? 'teamAName' : 'teamBName';
     const playerKey = selectingTeam === 'A' ? 'teamAPlayers' : 'teamBPlayers';
+
+    if (selectingTeam === 'A' && teamId === formData.teamBId) {
+       toast.error("Team A and Team B cannot be the same team.");
+       return;
+    }
+    if (selectingTeam === 'B' && teamId === formData.teamAId) {
+       toast.error("Team A and Team B cannot be the same team.");
+       return;
+    }
+
     setFormData(f => ({ 
       ...f, 
       [key]: teamId, 
       [nameKey]: teamName || '',
       [playerKey]: [] 
     }));
+    
+    const teamKey = selectingTeam;
     setSelectingTeam(null);
     setTeamSearchQuery('');
+    
+    // Automatically open the Add Player popup on the Roster tab
+    setPlayerPopup({ teamKey: teamKey, action: 'ADD', replaceId: null });
+    setActivePlayerTab('roster');
   };
 
   const getTeamName = (id) => {
@@ -869,6 +890,7 @@ const StartScoringModal = ({ isOpen, onClose, onSuccess, initialData }) => {
     try {
       const payload = {
         ...formData,
+        matchName: formData.matchName || `${getTeamName(formData.teamAId)} vs ${getTeamName(formData.teamBId)}`,
         teamAData: { name: getTeamName(formData.teamAId) },
         teamBData: { name: getTeamName(formData.teamBId) },
       };
@@ -885,10 +907,9 @@ const StartScoringModal = ({ isOpen, onClose, onSuccess, initialData }) => {
   // ─── Step Validation ─────────────────────────────────────────────────────────
   const canGoNext = () => {
     switch (step) {
-      case 1: return formData.matchName.trim().length > 0;
-      case 2: return !!formData.teamAId && !!formData.teamBId && formData.teamAId !== formData.teamBId;
-      case 3: return formData.teamAPlayers.length > 0 && formData.teamBPlayers.length > 0;
-      case 5: return formData.scoringPassword.trim() !== '' && formData.scoringPassword.length >= 6;
+      case 1: return true;
+      case 2: return !!formData.teamAId && !!formData.teamBId && formData.teamAId !== formData.teamBId && formData.teamAPlayers.length > 0 && formData.teamBPlayers.length > 0;
+
       default: return true;
     }
   };
@@ -1574,6 +1595,50 @@ const StartScoringModal = ({ isOpen, onClose, onSuccess, initialData }) => {
               </div>
             </div>
 
+            {/* Power Play Overs Mapping */}
+            <div className="space-y-2 pt-2 border-t border-white/5">
+              <div className="flex justify-between items-end">
+                <label className="text-[10px] font-black text-white/40 uppercase tracking-widest block">
+                  Power Play Overs Mapping
+                </label>
+                <span className="text-xs text-[#BFF367] font-bold">{(formData.powerPlayMapping || []).length} Selected</span>
+              </div>
+              <p className="text-[11px] text-white/40 leading-snug">Select specific overs that will be played as power play overs.</p>
+              <div className="flex flex-wrap gap-2 max-h-[160px] overflow-y-auto scrollbar-hide py-1">
+                {Array.from({ length: (() => {
+                  const format = formData.format;
+                  if (format === 'T20') return 20;
+                  if (format === 'T10') return 10;
+                  if (format === 'ODI') return 50;
+                  if (format === 'THE_HUNDRED') return 20;
+                  if (format === 'CUSTOM') return formData.customOversPerDay || 20;
+                  return 90;
+                })() }).map((_, i) => {
+                  const overNum = i + 1;
+                  const isSelected = (formData.powerPlayMapping || []).includes(overNum);
+                  return (
+                    <button
+                      key={overNum}
+                      type="button"
+                      onClick={() => {
+                        setFormData(f => {
+                          const mapping = f.powerPlayMapping || [];
+                          if (isSelected) {
+                            return { ...f, powerPlayMapping: mapping.filter(n => n !== overNum) };
+                          } else {
+                            return { ...f, powerPlayMapping: [...mapping, overNum].sort((a,b)=>a-b) };
+                          }
+                        });
+                      }}
+                      className={`w-9 h-9 rounded-full flex items-center justify-center text-xs font-black transition-all border ${isSelected ? 'bg-[#BFF367] text-black border-[#BFF367] shadow-[0_0_10px_rgba(191,243,103,0.3)] scale-110' : 'bg-white/5 text-white/60 border-white/10 hover:border-white/30 hover:bg-white/10'}`}
+                    >
+                      {overNum}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
             <div className="flex gap-3 pt-2 flex-shrink-0">
               <button
                 type="button"
@@ -1706,8 +1771,7 @@ const StartScoringModal = ({ isOpen, onClose, onSuccess, initialData }) => {
              </button>
            </div>
          </motion.div>
-         
-         <CreateTeamModal 
+<CreateTeamModal 
            isOpen={showCreateTeam} 
            onClose={() => setShowCreateTeam(false)} 
            onSuccess={(newTeam) => {
@@ -1987,102 +2051,14 @@ const StartScoringModal = ({ isOpen, onClose, onSuccess, initialData }) => {
       case 1:
         return (
           <div className="space-y-6 pt-2 pb-2">
-            {/* Match Name */}
-            <div className="space-y-1 mt-2">
-              <label htmlFor="matchName" className={labelClass}>
-                Match Name
-              </label>
-              <input
-                id="matchName"
-                type="text"
-                autoComplete="off"
-                value={formData.matchName}
-                onChange={e => setFormData(f => ({ ...f, matchName: e.target.value }))}
-                className={inputClass}
-                placeholder="e.g. Weekend Championship Final"
-              />
-            </div>
-
             {/* Max Members */}
-            <div className="relative space-y-3">
-              <label className="text-[10px] font-black text-white/40 uppercase tracking-widest block">
-                Max Members per Team
-              </label>
-              
-              <div className="grid grid-cols-4 gap-2">
-                {[2, 6, 11].map(n => {
-                  const isActive = formData.maxMembers === n && !showCustomMembersInline;
-                  return (
-                    <button
-                      key={n}
-                      type="button"
-                      onClick={() => {
-                        setFormData(f => ({ ...f, maxMembers: n }));
-                        setShowCustomMembersInline(false);
-                      }}
-                      className={`py-3 px-2 rounded-[8px] border text-xs font-black uppercase tracking-widest transition-all text-center ${
-                        isActive
-                          ? 'bg-gradient-to-r from-[#55DEE8] to-[#BFF367] text-black border-transparent shadow-lg shadow-[#55DEE8]/10'
-                          : 'bg-white/[0.02] border-white/10 text-white/40 hover:border-white/20 hover:text-white'
-                      }`}
-                    >
-                      {n} <span className="hidden sm:inline">Players</span>
-                    </button>
-                  );
-                })}
-                
-                {/* Custom Box */}
-                {(() => {
-                  const isCustomActive = showCustomMembersInline || ![2, 6, 11].includes(formData.maxMembers);
-                  return (
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setShowCustomMembersInline(!showCustomMembersInline);
-                        setCustomMembersInput('');
-                      }}
-                      className={`py-3 px-2 rounded-[8px] border text-xs font-black uppercase tracking-widest transition-all text-center truncate ${
-                        isCustomActive
-                          ? 'bg-gradient-to-r from-[#55DEE8] to-[#BFF367] text-black border-transparent shadow-lg shadow-[#55DEE8]/10'
-                          : 'bg-white/[0.02] border-white/10 text-white/40 hover:border-white/20 hover:text-white'
-                      }`}
-                    >
-                      {isCustomActive && ![2, 6, 11].includes(formData.maxMembers) ? <>{formData.maxMembers} <span className="hidden sm:inline">Players</span></> : 'Custom'}
-                    </button>
-                  );
-                })()}
-              </div>
-
-              {/* Inline Custom Input Drawer */}
-              <AnimatePresence>
-                {showCustomMembersInline && (
-                  <motion.div
-                    initial={{ opacity: 0, height: 0 }}
-                    animate={{ opacity: 1, height: 'auto' }}
-                    exit={{ opacity: 0, height: 0 }}
-                    className="overflow-hidden"
-                  >
-                    <div className="space-y-1 pt-2">
-                      <input
-                        type="text"
-                        inputMode="numeric"
-                        pattern="[0-9]*"
-                        value={customMembersInput}
-                        onChange={e => handleCustomMembersChange(e.target.value)}
-                        onKeyDown={e => {
-                          if (e.key === 'Enter') {
-                            setShowCustomMembersInline(false);
-                          }
-                        }}
-                        className="w-full bg-[#0a0a0a] text-white border border-white/10 rounded-[8px] px-4 py-3 text-sm font-semibold text-center focus:outline-none focus:border-[#55DEE8]/30 transition-all"
-                        placeholder="Enter number of players"
-                        autoFocus
-                      />
-                    </div>
-                  </motion.div>
-                )}
-              </AnimatePresence>
-            </div>
+            <TouchSliderWheel
+              label="Max Members per Team"
+              value={formData.maxMembers || 11}
+              min={5}
+              max={15}
+              onChange={val => setFormData(f => ({ ...f, maxMembers: val }))}
+            />
 
             <div className="grid grid-cols-2 gap-4">
               {/* Match Format */}
@@ -2137,22 +2113,7 @@ const StartScoringModal = ({ isOpen, onClose, onSuccess, initialData }) => {
               </div>
             </div>
 
-            {/* Power Play Overs */}
-            <TouchSliderWheel
-              label="Power Play Overs"
-              value={formData.powerPlayOvers}
-              min={0}
-              max={(() => {
-                const format = formData.format;
-                if (format === 'T20') return 20;
-                if (format === 'T10') return 10;
-                if (format === 'ODI') return 50;
-                if (format === 'THE_HUNDRED') return 20;
-                if (format === 'CUSTOM') return formData.customOversPerDay || 20;
-                return 90;
-              })()}
-              onChange={val => setFormData(f => ({ ...f, powerPlayOvers: val }))}
-            />
+            
 
             {formData.format === 'CUSTOM' && (
               <div className="grid grid-cols-2 gap-4 bg-white/5 p-4 rounded-[8px] border border-white/10">
@@ -2187,19 +2148,36 @@ const StartScoringModal = ({ isOpen, onClose, onSuccess, initialData }) => {
               </div>
             )}
 
-            {/* Location */}
+            {/* Add Venue */}
             <div className="space-y-1">
               <label className={labelClass}>
-                Location
+                Venue
               </label>
               <button
                 type="button"
-                onClick={() => setShowLocationPopup(true)}
+                onClick={() => setShowVenuePopup(true)}
                 className="w-full bg-[#0a0a0a] border border-white/10 rounded-[8px] pl-12 pr-4 py-3 text-white text-left focus:outline-none focus:border-[#55DEE8]/30 transition-all text-sm font-semibold relative flex items-center min-h-[46px] hover:border-white/20 hover:scale-[1.005] transition-all"
               >
                 <MapPin className="absolute left-4 text-white/40 text-[18px]" size={18} />
                 <span className="block truncate">
-                  {formData.location || 'Search City or State'}
+                  {formData.customVenue ? formData.customVenue : formData.venueId ? (groundsData?.grounds?.find(g => g.id === formData.venueId)?.name || 'Venue Selected') : 'Add Venue'}
+                </span>
+              </button>
+            </div>
+
+            {/* Add Professional */}
+            <div className="space-y-1">
+              <label className={labelClass}>
+                Professional
+              </label>
+              <button
+                type="button"
+                onClick={() => setShowProfessionalsPopup(true)}
+                className="w-full bg-[#0a0a0a] border border-white/10 rounded-[8px] pl-12 pr-4 py-3 text-white text-left focus:outline-none focus:border-[#55DEE8]/30 transition-all text-sm font-semibold relative flex items-center min-h-[46px] hover:border-white/20 hover:scale-[1.005] transition-all"
+              >
+                <UserCheck className="absolute left-4 text-white/40 text-[18px]" size={18} />
+                <span className="block truncate">
+                  {formData.professionals.length > 0 || (formData.customProfessionals && formData.customProfessionals.length > 0) ? `${formData.professionals.length + (formData.customProfessionals?.length || 0)} Professional(s) Added` : 'Add Professional'}
                 </span>
               </button>
             </div>
@@ -2218,57 +2196,29 @@ const StartScoringModal = ({ isOpen, onClose, onSuccess, initialData }) => {
             </div>
 
 
-          </div>
-        );
-
-
-      // ── Step 2: Select Teams ──────────────────────────────────────────────────
-      case 2:
-        return (
-          <div className="space-y-4 pt-1">
-            <h3 className="text-[10px] text-white/40 font-black uppercase tracking-widest mb-3">SELECT COMPETING TEAMS</h3>
-            <div className="flex flex-col gap-4">
-              {[{ key: 'A', label: 'TEAM A', color: '#45DADA' }, { key: 'B', label: 'TEAM B', color: '#69DE80' }].map(({ key, label, color }) => {
-                const id = key === 'A' ? formData.teamAId : formData.teamBId;
-                const name = id ? getTeamName(id) : null;
-                const team = allTeams.find(t => (t._id || t.id) === id);
-                return (
-                  <button 
-                    key={key} 
-                    onClick={() => setSelectingTeam(key)}
-                    className="w-full bg-white/[0.02] border border-white/5 hover:bg-white/[0.05] hover:border-white/10 active:scale-[0.98] transition-all p-5 rounded-[12px] flex items-center justify-between group text-left"
-                  >
-                    <div className="flex items-center gap-4">
-                      {team?.logo ? (
-                        <img src={team.logo} className="w-16 h-16 rounded-[12px] object-cover border border-white/10" alt="" />
-                      ) : (
-                        <div 
-                          className="w-16 h-16 rounded-[12px] flex items-center justify-center transition-colors" 
-                          style={{ background: `${color}15`, border: `1px solid ${color}25` }}
-                        >
-                          <Users size={28} style={{ color }} />
-                        </div>
-                      )}
-                      <div>
-                        <span className="text-[10px] font-black uppercase tracking-widest block mb-1" style={{ color }}>{label}</span>
-                        <p className="text-white font-bold text-base transition-colors group-hover:text-[#45DADA]">{name || `Select ${label}`}</p>
-                      </div>
-                    </div>
-                    <ChevronRight size={20} className="text-white/30 group-hover:text-white transition-colors" />
-                  </button>
-                );
-              })}
+            {/* Match Name */}
+            <div className="space-y-1 mt-2">
+              <label htmlFor="matchName" className={labelClass}>
+                Match Name
+              </label>
+              <input
+                id="matchName"
+                type="text"
+                autoComplete="off"
+                value={formData.matchName}
+                onChange={e => setFormData(f => ({ ...f, matchName: e.target.value }))}
+                className={inputClass}
+                placeholder="e.g. Weekend Championship Final (Optional)"
+              />
             </div>
-            {formData.teamAId && formData.teamBId && formData.teamAId === formData.teamBId && (
-              <p className="text-xs text-red-400 bg-red-400/10 border border-red-400/20 rounded-[8px] p-3 mt-2">
-                Team A and Team B cannot be the same team.
-              </p>
-            )}
+
+
           </div>
         );
 
-      // ── Step 3: Playing XIs ───────────────────────────────────────────────────
-      case 3:
+
+      // ── Step 2: Playing XIs ───────────────────────────────────────────────────
+      case 2:
         return (
           <div className="space-y-4 h-full flex flex-col">
             <div className="flex border-b border-white/10 flex-shrink-0">
@@ -2286,376 +2236,86 @@ const StartScoringModal = ({ isOpen, onClose, onSuccess, initialData }) => {
               </button>
             </div>
             {xiTab === 'A' ? (
-              <PlayingXIStep
-                teamKey="A"
-                teamName={getTeamName(formData.teamAId)}
-                players={formData.teamAPlayers}
-                maxMembers={formData.maxMembers}
-                teamDetails={teamADetails?.team}
-                onInit={() => initPlayersFromTeam('A')}
-                onRemove={(id) => removePlayer('A', id)}
-                onAdd={() => {
-                  setPlayerPopup({ teamKey: 'A', action: 'ADD', replaceId: null });
-                  setActivePlayerTab('roster');
-                }}
-                onReplace={(id) => {
-                  setPlayerPopup({ teamKey: 'A', action: 'REPLACE', replaceId: id });
-                  setActivePlayerTab('roster');
-                }}
-                onRoleChange={(id, role) => changePlayerRole('A', id, role)}
-              />
+              !formData.teamAId ? (
+                <div className="flex flex-col gap-4 mt-8">
+                  <button 
+                    onClick={() => setSelectingTeam('A')}
+                    className="w-full bg-white/[0.02] border border-white/5 hover:bg-white/[0.05] hover:border-white/10 active:scale-[0.98] transition-all p-5 rounded-[12px] flex items-center justify-between group text-left"
+                  >
+                    <div className="flex items-center gap-4">
+                      <div className="w-16 h-16 rounded-[12px] flex items-center justify-center transition-colors" style={{ background: '#45DADA15', border: '1px solid #45DADA25' }}>
+                        <Users size={28} style={{ color: '#45DADA' }} />
+                      </div>
+                      <div>
+                        <span className="text-[10px] font-black uppercase tracking-widest block mb-1" style={{ color: '#45DADA' }}>TEAM A</span>
+                        <p className="text-white font-bold text-base transition-colors group-hover:text-[#45DADA]">Select TEAM A</p>
+                      </div>
+                    </div>
+                    <ChevronRight size={20} className="text-white/30 group-hover:text-white transition-colors" />
+                  </button>
+                </div>
+              ) : (
+                <PlayingXIStep
+                  teamKey="A"
+                  teamName={getTeamName(formData.teamAId)}
+                  players={formData.teamAPlayers}
+                  maxMembers={formData.maxMembers}
+                  teamDetails={teamADetails?.team}
+                  onInit={() => initPlayersFromTeam('A')}
+                  onRemove={(id) => removePlayer('A', id)}
+                  onAdd={() => {
+                    setPlayerPopup({ teamKey: 'A', action: 'ADD', replaceId: null });
+                    setActivePlayerTab('roster');
+                  }}
+                  onReplace={(id) => {
+                    setPlayerPopup({ teamKey: 'A', action: 'REPLACE', replaceId: id });
+                    setActivePlayerTab('roster');
+                  }}
+                  onRoleChange={(id, role) => changePlayerRole('A', id, role)}
+                />
+              )
             ) : (
-              <PlayingXIStep
-                teamKey="B"
-                teamName={getTeamName(formData.teamBId)}
-                players={formData.teamBPlayers}
-                maxMembers={formData.maxMembers}
-                teamDetails={teamBDetails?.team}
-                onInit={() => initPlayersFromTeam('B')}
-                onRemove={(id) => removePlayer('B', id)}
-                onAdd={() => {
-                  setPlayerPopup({ teamKey: 'B', action: 'ADD', replaceId: null });
-                  setActivePlayerTab('roster');
-                }}
-                onReplace={(id) => {
-                  setPlayerPopup({ teamKey: 'B', action: 'REPLACE', replaceId: id });
-                  setActivePlayerTab('roster');
-                }}
-                onRoleChange={(id, role) => changePlayerRole('B', id, role)}
-              />
+              !formData.teamBId ? (
+                <div className="flex flex-col gap-4 mt-8">
+                  <button 
+                    onClick={() => setSelectingTeam('B')}
+                    className="w-full bg-white/[0.02] border border-white/5 hover:bg-white/[0.05] hover:border-white/10 active:scale-[0.98] transition-all p-5 rounded-[12px] flex items-center justify-between group text-left"
+                  >
+                    <div className="flex items-center gap-4">
+                      <div className="w-16 h-16 rounded-[12px] flex items-center justify-center transition-colors" style={{ background: '#69DE8015', border: '1px solid #69DE8025' }}>
+                        <Users size={28} style={{ color: '#69DE80' }} />
+                      </div>
+                      <div>
+                        <span className="text-[10px] font-black uppercase tracking-widest block mb-1" style={{ color: '#69DE80' }}>TEAM B</span>
+                        <p className="text-white font-bold text-base transition-colors group-hover:text-[#69DE80]">Select TEAM B</p>
+                      </div>
+                    </div>
+                    <ChevronRight size={20} className="text-white/30 group-hover:text-white transition-colors" />
+                  </button>
+                </div>
+              ) : (
+                <PlayingXIStep
+                  teamKey="B"
+                  teamName={getTeamName(formData.teamBId)}
+                  players={formData.teamBPlayers}
+                  maxMembers={formData.maxMembers}
+                  teamDetails={teamBDetails?.team}
+                  onInit={() => initPlayersFromTeam('B')}
+                  onRemove={(id) => removePlayer('B', id)}
+                  onAdd={() => {
+                    setPlayerPopup({ teamKey: 'B', action: 'ADD', replaceId: null });
+                    setActivePlayerTab('roster');
+                  }}
+                  onReplace={(id) => {
+                    setPlayerPopup({ teamKey: 'B', action: 'REPLACE', replaceId: id });
+                    setActivePlayerTab('roster');
+                  }}
+                  onRoleChange={(id, role) => changePlayerRole('B', id, role)}
+                />
+              )
             )}
           </div>
         );
-
-      // ── Step 4: Add-ons (Venue + Professionals) ───────────────────────────────
-      case 4:
-        return (
-          <div className="space-y-5 h-full flex flex-col relative pb-16">
-            <div>
-              <h3 className="text-lg font-black text-white uppercase tracking-wide">Add-ons</h3>
-              <p className="text-sm text-white/40">Optionally hire a venue or professionals. You can skip this step.</p>
-            </div>
-
-            <div className="flex p-1 bg-[#1A1A1A] rounded-[8px] flex-shrink-0">
-              <button onClick={() => setAddonsTab('VENUE')}
-                className={`flex-1 py-3 text-xs font-bold uppercase tracking-wider rounded-[6px] transition-all ${addonsTab === 'VENUE' ? 'bg-gradient-to-r from-[#55DEE8] to-[#BFF367] text-black shadow-lg' : 'text-white/60 hover:text-white'}`}>
-                VENUE
-              </button>
-              <button onClick={() => setAddonsTab('PROFESSIONALS')}
-                className={`flex-1 py-3 text-xs font-bold uppercase tracking-wider rounded-[6px] transition-all ${addonsTab === 'PROFESSIONALS' ? 'bg-gradient-to-r from-[#55DEE8] to-[#BFF367] text-black shadow-lg' : 'text-white/60 hover:text-white'}`}>
-                PROFESSIONALS
-              </button>
-            </div>
-
-            <div className="flex-1 overflow-y-auto">
-              {addonsTab === 'VENUE' && (
-                <div className="space-y-4 pr-1">
-                  {/* Venue Search & Filters */}
-                  <div className="space-y-2">
-                    <div className="relative">
-                      <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-white/40" size={16} />
-                      <input
-                        type="text"
-                        placeholder="Search venues..."
-                        className={`${inputClass} pl-10 py-2 text-sm`}
-                        value={venueSearchQuery}
-                        onChange={e => setVenueSearchQuery(e.target.value)}
-                      />
-                    </div>
-                    <div className="flex gap-2 relative z-10">
-                      <CustomDropdown
-                        className="w-1/2"
-                        value={venueStateFilter}
-                        onChange={setVenueStateFilter}
-                        placeholder="All States"
-                        options={[{value: '', label: 'All States'}, ...states]}
-                      />
-                      <CustomDropdown
-                        className="w-1/2"
-                        value={venueCityFilter}
-                        onChange={setVenueCityFilter}
-                        placeholder="All Cities"
-                        options={[{value: '', label: 'All Cities'}, ...venueCities]}
-                        disabled={!venueStateFilter}
-                      />
-                    </div>
-                  </div>
-
-                  {/* Venue List */}
-                  <div className="space-y-2">
-                    {formData.customVenue && (
-                      <button onClick={() => setFormData(f => ({ ...f, customVenue: '', location: '' }))}
-                        className="w-full flex items-center justify-between p-4 rounded-[12px] border border-dashed transition-all text-left bg-[#1a1a1a] border-white/20 hover:border-white/40 group relative overflow-hidden">
-                        <div className="absolute inset-0 bg-gradient-to-r from-white/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
-                        
-                        <div className="flex items-center gap-4 relative z-10">
-                          <div className="w-10 h-10 rounded-[8px] bg-white/5 flex items-center justify-center border border-white/10 group-hover:scale-110 transition-transform">
-                            <MapPin size={18} className="text-white/60" />
-                          </div>
-                          <div>
-                            <div className="font-black text-white text-sm tracking-wide flex items-center gap-2">
-                              {formData.customVenue}
-                            </div>
-                            <div className="text-xs text-white/40 mt-0.5">{formData.location || 'Custom Location'}</div>
-                          </div>
-                        </div>
-                      </button>
-                    )}
-
-                    {isLoadingGrounds ? (
-                      <div className="flex justify-center p-4"><Loader2 className="animate-spin text-white/40" /></div>
-                    ) : (() => {
-                      const filteredVenues = groundsData?.grounds?.filter(g =>
-                        (!venueStateFilter || g.state === venueStateFilter) &&
-                        (!venueCityFilter || g.city === venueCityFilter) &&
-                        (!venueSearchQuery || 
-                          g.name.toLowerCase().includes(venueSearchQuery.toLowerCase()) || 
-                          (g.city && g.city.toLowerCase().includes(venueSearchQuery.toLowerCase())))
-                      ) || [];
-
-                      if (filteredVenues.length === 0 && !formData.customVenue) {
-                        return (
-                          <div className="flex flex-col items-center justify-center py-12 opacity-40">
-                            <EyeOff size={40} className="mb-4" />
-                            <div className="text-sm italic font-medium">No listed venues match your filters.</div>
-                          </div>
-                        );
-                      }
-
-                      return filteredVenues.map(g => (
-                        <button key={g.id} onClick={() => setFormData(f => ({ ...f, venueId: f.venueId === g.id ? null : g.id, customVenue: '' }))}
-                          className={`w-full flex items-center justify-between p-3 rounded-[8px] border transition-all text-left ${formData.venueId === g.id ? 'bg-[#55DEE8]/10 border-[#55DEE8]' : 'bg-white/5 border-white/10 hover:border-white/20'}`}>
-                          <div className="flex items-center gap-3">
-                            <MapPin size={18} className={formData.venueId === g.id ? 'text-[#55DEE8]' : 'text-white/40'} />
-                            <div>
-                              <div className="font-bold text-white text-sm">{g.name}</div>
-                              <div className="text-[10px] text-white/40">{g.city}</div>
-                            </div>
-                          </div>
-                          {formData.venueId === g.id && <Check size={16} className="text-[#55DEE8]" />}
-                        </button>
-                      ));
-                    })()}
-                  </div>
-
-                </div>
-              )}
-              {addonsTab === 'PROFESSIONALS' && (
-                <div className="space-y-4 pr-1">
-                  {/* Professionals Search & Filters */}
-                  <div className="space-y-2">
-                    <div className="relative">
-                      <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-white/40" size={16} />
-                      <input
-                        type="text"
-                        placeholder="Search professionals (name, phone, email)..."
-                        className={`${inputClass} pl-10 py-2 text-sm`}
-                        value={proSearchQuery}
-                        onChange={e => setProSearchQuery(e.target.value)}
-                      />
-                    </div>
-                    <div className="flex gap-2 relative z-10">
-                      <CustomDropdown
-                        className="w-1/2"
-                        value={proCityFilter}
-                        onChange={setProCityFilter}
-                        placeholder="All Cities"
-                        options={[{value: '', label: 'All Cities'}, ...Array.from(new Set(umpiresData?.umpires?.map(u => u.city).filter(Boolean) || []))]}
-                      />
-                      <CustomDropdown
-                        className="w-1/2"
-                        value={proRoleFilter}
-                        onChange={setProRoleFilter}
-                        placeholder="All Roles"
-                        options={[
-                          {value: '', label: 'All Roles'},
-                          {value: 'UMPIRE', label: 'Umpire'},
-                          {value: 'SCORER', label: 'Scorer'},
-                          {value: 'COMMENTATOR', label: 'Commentator'}
-                        ]}
-                      />
-                    </div>
-                  </div>
-
-                  <div className="flex flex-col gap-[25px]">
-                    {/* List Custom Professionals already added */}
-                    {formData.customProfessionals?.map((cp, idx) => (
-                      <div key={`custom-${idx}`} className="w-full flex flex-col p-0 rounded-[4px] overflow-hidden transition-all text-left bg-transparent relative">
-                        {/* Remove button */}
-                        <button onClick={() => setFormData(f => ({ ...f, customProfessionals: f.customProfessionals.filter((_, i) => i !== idx) }))}
-                          className="absolute top-3 right-3 z-10 w-8 h-8 rounded-full bg-black/40 backdrop-blur-md flex items-center justify-center hover:bg-red-500/80 transition-colors">
-                          <X size={16} className="text-white" />
-                        </button>
-                        
-                        {/* Image Section */}
-                        <div className="w-full aspect-[4/3] relative bg-white/5">
-                          {(() => {
-                            let roleImage = null;
-                            if (cp.role === 'UMPIRE') roleImage = '/images/roles/umpire.png';
-                            if (cp.role === 'SCORER') roleImage = '/images/roles/scorer.png';
-                            if (cp.role === 'COMMENTATOR') roleImage = '/images/roles/commentator.png';
-                            if (cp.role === 'STREAMER') roleImage = '/images/roles/streamer.png';
-                            
-                            if (roleImage) {
-                              return <img src={roleImage} alt={cp.role} className="w-full h-full object-cover" />;
-                            }
-                            return (
-                              <div className="w-full h-full flex flex-col items-center justify-center opacity-50 bg-[#1a1a1a]">
-                                {cp.role === 'COMMENTATOR' ? <Mic size={40} className="text-white/20 mb-2" /> : cp.role === 'SCORER' ? <CheckSquare size={40} className="text-white/20 mb-2" /> : <UserCheck size={40} className="text-white/20 mb-2" />}
-                                <span className="text-xs font-medium text-white/40">No Image</span>
-                              </div>
-                            );
-                          })()}
-                        </div>
-
-                        {/* Details Section */}
-                        <div className="pt-3 pb-4 px-3 flex flex-col gap-1 w-full bg-transparent">
-                          <div className="flex justify-between items-start w-full gap-2">
-                            <div className="flex items-center gap-2 flex-1 min-w-0">
-                              <span className="font-bold text-white text-[15px] truncate">{cp.name}</span>
-                            </div>
-                            <div className="flex items-center gap-1 shrink-0 mt-0.5">
-                              <span className="text-[10px] text-white/60 uppercase tracking-widest font-bold">{cp.role}</span>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    ))}
-
-                    {isLoadingUmpires ? (
-                      <div className="flex justify-center p-4"><Loader2 className="animate-spin text-white/40" /></div>
-                    ) : (() => {
-                      const filteredPros = umpiresData?.umpires?.filter(u =>
-                        (!proRoleFilter || u.role === proRoleFilter) &&
-                        (!proStateFilter || u.state === proStateFilter) &&
-                        (!proCityFilter || u.city === proCityFilter) &&
-                        (!proSearchQuery || 
-                          u.name?.toLowerCase().includes(proSearchQuery.toLowerCase()) || 
-                          u.username?.toLowerCase().includes(proSearchQuery.toLowerCase()))
-                      ) || [];
-
-                      return filteredPros.length > 0 ? (
-                        filteredPros.map(u => {
-                          const isSelected = formData.professionals.includes(u.id);
-                          return (
-                              <button key={u.id} onClick={() => setFormData(f => ({ ...f, professionals: isSelected ? f.professionals.filter(id => id !== u.id) : [...f.professionals, u.id] }))}
-                                className={`w-full flex flex-col p-0 rounded-[16px] overflow-hidden transition-all text-left ${isSelected ? 'shadow-[0_0_15px_rgba(191,243,103,0.15)] ring-1 ring-[#BFF367]' : 'bg-transparent'}`}>
-                                {/* Image Section */}
-                                <div className="w-full aspect-[4/3] relative bg-white/5">
-                                  {u.profilePicture ? (
-                                    <img src={u.profilePicture} className="w-full h-full object-cover" alt={u.name} />
-                                  ) : (
-                                    <div className="w-full h-full flex flex-col items-center justify-center opacity-50 bg-[#1a1a1a]">
-                                      <UserCheck size={40} className="text-white/20 mb-2" />
-                                      <span className="text-xs font-medium text-white/40">No Image</span>
-                                    </div>
-                                  )}
-                                  
-                                  {/* Heart / Favorite Icon */}
-                                  <div className="absolute top-3 right-3 w-8 h-8 rounded-full bg-black/20 backdrop-blur-md flex items-center justify-center hover:bg-black/40 transition-colors">
-                                    <Heart size={16} className="text-white" />
-                                  </div>
-
-                                  {/* Selected Overlay */}
-                                  {isSelected && (
-                                    <div className="absolute inset-0 bg-[#BFF367]/10 flex items-center justify-center backdrop-blur-[1px]">
-                                      <div className="w-12 h-12 rounded-full bg-[#BFF367] flex items-center justify-center shadow-xl">
-                                        <Check size={24} className="text-black" />
-                                      </div>
-                                    </div>
-                                  )}
-                                </div>
-
-                                {/* Details Section */}
-                                <div className="pt-3 pb-4 px-1 flex flex-col gap-1 w-full bg-transparent">
-                                  <div className="flex justify-between items-start w-full gap-2">
-                                    <div className="flex items-center gap-2 flex-1 min-w-0">
-                                      <div className="w-5 h-5 rounded-full bg-[#FFC107] flex items-center justify-center shrink-0">
-                                        <MapPin size={12} className="text-black fill-black" />
-                                      </div>
-                                      <span className="font-bold text-white text-[15px] truncate">{u.name || 'Professional'}</span>
-                                    </div>
-                                    <div className="flex items-center gap-1 shrink-0 mt-0.5">
-                                      <span className="text-[13px] text-[#FFC107] font-bold">{u.rating || '4.8'}</span>
-                                      <Star size={13} className="text-[#FFC107] fill-[#FFC107]" />
-                                    </div>
-                                  </div>
-                                  <div className="text-[13px] text-white/50 truncate">
-                                    {u.distance || '0.7 km away'}
-                                  </div>
-                                </div>
-                              </button>
-                          );
-                        })
-                      ) : (
-                        formData.customProfessionals?.length === 0 && (
-                          <div className="flex flex-col items-center justify-center py-12 opacity-40">
-                            <EyeOff size={40} className="mb-4" />
-                            <div className="text-sm italic font-medium">No professionals match your search.</div>
-                          </div>
-                        )
-                      );
-                    })()}
-                  </div>
-                </div>
-              )}
-            </div>
-          </div>
-        );
-
-      // ── Step 5: Final Review + Confirm ─────────────────────────────────────────
-      case 5: {
-        const teamAName = getTeamName(formData.teamAId);
-        const teamBName = getTeamName(formData.teamBId);
-        const formatLabel = CRICKET_FORMATS.find(f => f.value === formData.format)?.label || formData.format;
-        const ballLabel = BALL_TYPES.find(b => b.value === formData.ballType)?.label || formData.ballType;
-        const groundLabel = GROUND_TYPES.find(g => g.value === formData.groundType)?.label || formData.groundType;
-        const timingLabel = MATCH_TIMINGS.find(t => t.value === formData.matchTiming)?.label || formData.matchTiming;
-        const selectedVenueName = formData.venueId ? groundsData?.grounds?.find(g => g.id === formData.venueId)?.name : null;
-        return (
-          <div className="space-y-5">
-            {/* Match Summary */}
-            <div className="bg-white/[0.03] rounded-[8px] border border-white/5 p-4 space-y-8">
-              <div className="flex items-center justify-between w-full text-white font-black text-xl">
-                <span className="truncate flex-1 text-left">{teamAName}</span>
-                <span className="text-white/30 text-sm px-4">vs</span>
-                <span className="truncate flex-1 text-right">{teamBName}</span>
-              </div>
-              <div className="flex flex-col gap-3">
-                <div className="bg-white/5 rounded-[8px] p-4 flex items-center justify-between">
-                  <div className="text-xs text-white/40 uppercase font-bold tracking-wider">Ball</div>
-                  <div className="text-white text-sm font-bold">{ballLabel}</div>
-                </div>
-                <div className="bg-white/5 rounded-[8px] p-4 flex items-center justify-between">
-                  <div className="text-xs text-white/40 uppercase font-bold tracking-wider">Ground</div>
-                  <div className="text-white text-sm font-bold truncate text-right max-w-[60%]" title={selectedVenueName || groundLabel}>
-                    {selectedVenueName || groundLabel}
-                  </div>
-                </div>
-                <div className="bg-white/5 rounded-[8px] p-4 flex items-center justify-between">
-                  <div className="text-xs text-white/40 uppercase font-bold tracking-wider">Players</div>
-                  <div className="text-white text-sm font-bold">{formData.maxMembers} per side</div>
-                </div>
-              </div>
-
-            </div>
-            {/* Security */}
-            <div>
-              <label className={labelClass}><Shield size={12} className="inline mr-1" />Scoring App Password <span className="text-red-500">*</span></label>
-              <input type="password" value={formData.scoringPassword}
-                onChange={e => setFormData(f => ({ ...f, scoringPassword: e.target.value }))}
-                className={inputClass} placeholder="Minimum 6 characters required" />
-            </div>
-            {/* YouTube Live URL */}
-            <div>
-              <label className={labelClass}><Video size={12} className="inline mr-1" />YouTube Live URL <span className="text-white/30">(Optional)</span></label>
-              <input type="url" value={formData.youtubeLiveUrl}
-                onChange={e => setFormData(f => ({ ...f, youtubeLiveUrl: e.target.value }))}
-                className={inputClass} placeholder="https://youtube.com/live/..." />
-            </div>
-          </div>
-        );
-      }
 
       default:
         return null;
@@ -2696,33 +2356,6 @@ const StartScoringModal = ({ isOpen, onClose, onSuccess, initialData }) => {
         </div>
 
         {/* Persistent Add Custom Venue / Pro Button */}
-        {step === 4 && addonsTab === 'VENUE' && (
-          <div className="px-6 pt-3 pb-3 border-t border-white/5 bg-[#0a0a0a] flex flex-shrink-0 z-40 justify-end">
-            <button
-              type="button"
-              onClick={() => {
-                setCustomVenueNameInput(formData.customVenue || '');
-                setCustomVenueLocationInput(formData.location || '');
-                setShowCustomVenuePopup(true);
-              }}
-              className="bg-[#1a1a1a] text-white border border-white/20 shadow-xl px-5 py-3 rounded-[8px] font-black text-xs uppercase tracking-widest hover:bg-[#2a2a2a] hover:border-white/50 hover:text-white hover:scale-105 transition-all flex items-center gap-2"
-            >
-              <Plus size={16} /> Add Custom Venue
-            </button>
-          </div>
-        )}
-        {step === 4 && addonsTab === 'PROFESSIONALS' && (
-          <div className="px-6 pt-3 pb-3 border-t border-white/5 bg-[#0a0a0a] flex flex-shrink-0 z-40 justify-end">
-            <button
-              type="button"
-              onClick={() => setShowCustomProInvite(true)}
-              className="bg-[#1a1a1a] text-white border border-white/20 shadow-xl px-5 py-3 rounded-[8px] font-black text-xs uppercase tracking-widest hover:bg-[#2a2a2a] hover:border-white/50 hover:text-white hover:scale-105 transition-all flex items-center gap-2"
-            >
-              <UserPlus size={16} /> Invite Professional
-            </button>
-          </div>
-        )}
-
         <div className="flex gap-3 p-5 pb-10 border-t border-white/10 bg-black/40 flex-shrink-0">
           <button onClick={step > 1 ? handlePrev : handleClose}
             className="px-6 py-3 rounded-[8px] border border-white/10 text-white font-bold hover:bg-white/5 hover:border-white/20 transition-all flex items-center gap-2 text-xs uppercase tracking-widest">
@@ -2731,24 +2364,76 @@ const StartScoringModal = ({ isOpen, onClose, onSuccess, initialData }) => {
           {step < STEPS.length ? (
             <button onClick={handleNext} disabled={!canGoNext()}
               className="flex-1 py-3 px-4 rounded-[8px] bg-gradient-to-r from-[#45dada] to-[#69de80] text-black font-black hover:opacity-90 hover:scale-[1.02] hover:-translate-y-0.5 transition-all flex items-center justify-center gap-2 uppercase text-xs tracking-widest disabled:opacity-40 disabled:cursor-not-allowed shadow-lg shadow-[#45dada]/20">
-              {step === 4 ? (
-                (formData.professionals.length > 0 || formData.venueId || formData.customVenue || (formData.customProfessionals && formData.customProfessionals.length > 0)) ? (
-                  <>Next <ChevronRight size={14} /></>
-                ) : (
-                  <>Skip <SkipForward size={14} /></>
-                )
-              ) : (
-                <>Next <ChevronRight size={14} /></>
-              )}
+              <>Next <ChevronRight size={14} /></>
             </button>
           ) : (
-            <button onClick={handleSubmit} disabled={isLoading || !canGoNext()}
+            <button type="button" onClick={() => setShowPasswordPopup(true)} disabled={isLoading || !canGoNext()}
               className="flex-1 py-3 px-4 rounded-[8px] bg-gradient-to-r from-[#45dada] to-[#69de80] text-black font-black hover:opacity-90 hover:scale-[1.02] hover:-translate-y-0.5 transition-all flex items-center justify-center gap-2 uppercase text-xs tracking-widest disabled:opacity-40 disabled:cursor-not-allowed shadow-lg shadow-[#45dada]/20">
               {isLoading ? <><Loader2 size={16} className="animate-spin" /> Creating...</> : <><Trophy size={16} /> Create Match</>}
             </button>
           )}
         </div>
       </motion.div>
+
+      <AnimatePresence>
+        {showPasswordPopup && (
+          <div className="absolute inset-0 z-[1000] flex items-center justify-center p-6">
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="absolute inset-0 bg-black/80 backdrop-blur-sm"
+              onClick={() => setShowPasswordPopup(false)}
+            />
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 20 }}
+              className="relative w-full max-w-[340px] bg-[#111] border border-white/10 rounded-2xl p-6 shadow-2xl flex flex-col items-center"
+            >
+              <h3 className="text-xl font-black text-white uppercase tracking-wide mb-1 text-center font-display">Match Security</h3>
+              <p className="text-xs text-white/40 text-center mb-6 leading-relaxed">Set a password for the scoring app to prevent unauthorized access.</p>
+              
+              <div className="w-full mb-6">
+                <label className="text-white/60 text-[10px] font-bold uppercase tracking-widest mb-2 flex items-center gap-1.5">
+                  <Shield size={12} className="text-[#55DEE8]" /> SCORING APP PASSWORD <span className="text-red-500">*</span>
+                </label>
+                <div className="relative">
+                  <input type={showPassword ? "text" : "password"} value={formData.scoringPassword}
+                    onChange={e => setFormData(f => ({ ...f, scoringPassword: e.target.value }))}
+                    className="w-full bg-[#1A1A1A] text-white pl-4 pr-12 py-3.5 rounded-[8px] focus:outline-none focus:ring-1 focus:ring-[#55DEE8] border border-white/5 font-mono text-sm tracking-widest placeholder:tracking-normal placeholder:font-sans" 
+                    placeholder="Minimum 6 characters" />
+                  <button 
+                    type="button" 
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-white/40 hover:text-white transition-colors"
+                  >
+                    {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                  </button>
+                </div>
+              </div>
+              
+              <div className="flex gap-3 w-full">
+                <button onClick={() => setShowPasswordPopup(false)}
+                  className="flex-1 py-3 bg-white/5 border border-white/10 text-white rounded-[8px] text-[11px] font-bold uppercase tracking-widest hover:bg-white/10 transition-all flex items-center justify-center">
+                  Back
+                </button>
+                <button 
+                  onClick={() => {
+                    if (formData.scoringPassword.trim() !== '' && formData.scoringPassword.length >= 6) {
+                      setShowPasswordPopup(false);
+                      handleSubmit();
+                    }
+                  }} 
+                  disabled={isLoading || formData.scoringPassword.trim() === '' || formData.scoringPassword.length < 6}
+                  className="flex-[1.5] py-3 bg-gradient-to-r from-[#55DEE8] to-[#BFF367] text-black rounded-[8px] text-[11px] font-black uppercase tracking-widest hover:opacity-90 transition-all disabled:opacity-50 flex items-center justify-center gap-2 shadow-lg shadow-[#55DEE8]/10">
+                  {isLoading ? <Loader2 size={14} className="animate-spin" /> : <><Trophy size={14} /> Create Match</>}
+                </button>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
       <AnimatePresence>
         {playerPopupNode}
       </AnimatePresence>
@@ -2985,6 +2670,356 @@ const StartScoringModal = ({ isOpen, onClose, onSuccess, initialData }) => {
         )}
       </AnimatePresence>
 
+      
+         
+         
+      {/* Venue Popup */}
+      <AnimatePresence>
+        {showVenuePopup && (
+          <>
+            <motion.div 
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="absolute inset-0 z-[10000] bg-black/60 backdrop-blur-sm" 
+              onClick={() => setShowVenuePopup(false)}
+            />
+            <motion.div
+              initial={{ opacity: 0, y: "100%" }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: "100%" }}
+              transition={{ type: "spring", damping: 25, stiffness: 200 }}
+              className="absolute bottom-0 left-0 right-0 z-[10001] bg-[#121212] border-t border-white/10 rounded-t-[24px] flex flex-col px-6 pb-8 pt-4 shadow-2xl h-[85vh]"
+            >
+              <div className="w-12 h-1 bg-white/20 rounded-full mx-auto mb-6 shrink-0" />
+              <div className="flex justify-between items-center mb-6 shrink-0">
+                <h3 className="text-xl font-black text-white uppercase tracking-wider">Select Venue</h3>
+              </div>
+              <div className="flex-1 overflow-y-auto scrollbar-hide space-y-4">
+                 
+                  {/* Venue Search & Filters */}
+                  <div className="space-y-2">
+                    <div className="relative">
+                      <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-white/40" size={16} />
+                      <input
+                        type="text"
+                        placeholder="Search venues..."
+                        className={`${inputClass} pl-10 py-2 text-sm`}
+                        value={venueSearchQuery}
+                        onChange={e => setVenueSearchQuery(e.target.value)}
+                      />
+                    </div>
+                    <div className="flex gap-2 relative z-10">
+                      <CustomDropdown
+                        className="w-1/2"
+                        value={venueStateFilter}
+                        onChange={setVenueStateFilter}
+                        placeholder="All States"
+                        options={[{value: '', label: 'All States'}, ...states]}
+                      />
+                      <CustomDropdown
+                        className="w-1/2"
+                        value={venueCityFilter}
+                        onChange={setVenueCityFilter}
+                        placeholder="All Cities"
+                        options={[{value: '', label: 'All Cities'}, ...venueCities]}
+                        disabled={!venueStateFilter}
+                      />
+                    </div>
+                  </div>
+
+                  {/* Venue List */}
+                  <div className="space-y-2">
+                    {formData.customVenue && (
+                      <button onClick={() => setFormData(f => ({ ...f, customVenue: '', location: '' }))}
+                        className="w-full flex items-center justify-between p-4 rounded-[12px] border border-dashed transition-all text-left bg-[#1a1a1a] border-white/20 hover:border-white/40 group relative overflow-hidden">
+                        <div className="absolute inset-0 bg-gradient-to-r from-white/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+                        
+                        <div className="flex items-center gap-4 relative z-10">
+                          <div className="w-10 h-10 rounded-[8px] bg-white/5 flex items-center justify-center border border-white/10 group-hover:scale-110 transition-transform">
+                            <MapPin size={18} className="text-white/60" />
+                          </div>
+                          <div>
+                            <div className="font-black text-white text-sm tracking-wide flex items-center gap-2">
+                              {formData.customVenue}
+                            </div>
+                            <div className="text-xs text-white/40 mt-0.5">{formData.location || 'Custom Location'}</div>
+                          </div>
+                        </div>
+                      </button>
+                    )}
+
+                    {isLoadingGrounds ? (
+                      <div className="flex justify-center p-4"><Loader2 className="animate-spin text-white/40" /></div>
+                    ) : (() => {
+                      const filteredVenues = groundsData?.grounds?.filter(g =>
+                        (!venueStateFilter || g.state === venueStateFilter) &&
+                        (!venueCityFilter || g.city === venueCityFilter) &&
+                        (!venueSearchQuery || 
+                          g.name.toLowerCase().includes(venueSearchQuery.toLowerCase()) || 
+                          (g.city && g.city.toLowerCase().includes(venueSearchQuery.toLowerCase())))
+                      ) || [];
+
+                      if (filteredVenues.length === 0 && !formData.customVenue) {
+                        return (
+                          <div className="flex flex-col items-center justify-center py-12 opacity-40">
+                            <EyeOff size={40} className="mb-4" />
+                            <div className="text-sm italic font-medium">No listed venues match your filters.</div>
+                          </div>
+                        );
+                      }
+
+                      return filteredVenues.map(g => (
+                        <button key={g.id} onClick={() => { setFormData(f => ({ ...f, venueId: f.venueId === g.id ? null : g.id, customVenue: '' })); setShowVenuePopup(false); setShowGroundsDropdown(false); }}
+                          className={`w-full flex items-center justify-between p-3 rounded-[8px] border transition-all text-left ${formData.venueId === g.id ? 'bg-[#55DEE8]/10 border-[#55DEE8]' : 'bg-white/5 border-white/10 hover:border-white/20'}`}>
+                          <div className="flex items-center gap-3">
+                            <MapPin size={18} className={formData.venueId === g.id ? 'text-[#55DEE8]' : 'text-white/40'} />
+                            <div>
+                              <div className="font-bold text-white text-sm">{g.name}</div>
+                              <div className="text-[10px] text-white/40">{g.city}</div>
+                            </div>
+                          </div>
+                          {formData.venueId === g.id && <Check size={16} className="text-[#55DEE8]" />}
+                        </button>
+                      ));
+                    })()}
+                  </div>
+
+                
+              </div>
+              
+              <div className="flex flex-col gap-3 pt-6 mt-auto shrink-0 border-t border-white/10">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowVenuePopup(false);
+                    setCustomVenueNameInput(formData.customVenue || '');
+                    setCustomVenueLocationInput(formData.location || '');
+                    setShowCustomVenuePopup(true);
+                  }}
+                  className="bg-[#1a1a1a] text-white border border-white/20 shadow-xl w-full py-4 rounded-[8px] font-black text-xs uppercase tracking-widest hover:bg-[#2a2a2a] hover:border-white/50 hover:text-white hover:scale-[1.02] transition-all flex items-center justify-center gap-2"
+                >
+                  <Plus size={16} /> Add Custom Venue
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setShowVenuePopup(false)}
+                  className="px-6 py-4 rounded-[8px] border border-white/10 text-white font-bold hover:bg-white/5 hover:border-white/20 transition-all flex items-center justify-center gap-2 text-xs uppercase tracking-widest"
+                >
+                  <ChevronLeft size={14} /> Back
+                </button>
+              </div>
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
+
+      {/* Professionals Popup */}
+      <AnimatePresence>
+        {showProfessionalsPopup && (
+          <>
+            <motion.div 
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="absolute inset-0 z-[10000] bg-black/60 backdrop-blur-sm" 
+              onClick={() => setShowProfessionalsPopup(false)}
+            />
+            <motion.div
+              initial={{ opacity: 0, y: "100%" }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: "100%" }}
+              transition={{ type: "spring", damping: 25, stiffness: 200 }}
+              className="absolute bottom-0 left-0 right-0 z-[10001] bg-[#121212] border-t border-white/10 rounded-t-[24px] flex flex-col px-6 pb-8 pt-4 shadow-2xl h-[85vh]"
+            >
+              <div className="w-12 h-1 bg-white/20 rounded-full mx-auto mb-6 shrink-0" />
+              <div className="flex justify-between items-center mb-6 shrink-0">
+                <h3 className="text-xl font-black text-white uppercase tracking-wider">Select Professional</h3>
+              </div>
+              <div className="flex-1 overflow-y-auto scrollbar-hide space-y-4">
+                 
+                  {/* Professionals Search & Filters */}
+                  <div className="space-y-2">
+                    <div className="relative">
+                      <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-white/40" size={16} />
+                      <input
+                        type="text"
+                        placeholder="Search professionals (name, phone, email)..."
+                        className={`${inputClass} pl-10 py-2 text-sm`}
+                        value={proSearchQuery}
+                        onChange={e => setProSearchQuery(e.target.value)}
+                      />
+                    </div>
+                    <div className="flex gap-2 relative z-10">
+                      <CustomDropdown
+                        className="w-1/2"
+                        value={proCityFilter}
+                        onChange={setProCityFilter}
+                        placeholder="All Cities"
+                        options={[{value: '', label: 'All Cities'}, ...Array.from(new Set(umpiresData?.umpires?.map(u => u.city).filter(Boolean) || []))]}
+                      />
+                      <CustomDropdown
+                        className="w-1/2"
+                        value={proRoleFilter}
+                        onChange={setProRoleFilter}
+                        placeholder="All Roles"
+                        options={[
+                          {value: '', label: 'All Roles'},
+                          {value: 'UMPIRE', label: 'Umpire'},
+                          {value: 'SCORER', label: 'Scorer'},
+                          {value: 'COMMENTATOR', label: 'Commentator'}
+                        ]}
+                      />
+                    </div>
+                  </div>
+
+                  <div className="flex flex-col gap-[25px]">
+                    {/* List Custom Professionals already added */}
+                    {formData.customProfessionals?.map((cp, idx) => (
+                      <div key={`custom-${idx}`} className="w-full flex flex-col p-0 rounded-[4px] overflow-hidden transition-all text-left bg-transparent relative">
+                        {/* Remove button */}
+                        <button onClick={() => setFormData(f => ({ ...f, customProfessionals: f.customProfessionals.filter((_, i) => i !== idx) }))}
+                          className="absolute top-3 right-3 z-10 w-8 h-8 rounded-full bg-black/40 backdrop-blur-md flex items-center justify-center hover:bg-red-500/80 transition-colors">
+                          <X size={16} className="text-white" />
+                        </button>
+                        
+                        {/* Image Section */}
+                        <div className="w-full aspect-[4/3] relative bg-white/5">
+                          {(() => {
+                            let roleImage = null;
+                            if (cp.role === 'UMPIRE') roleImage = '/images/roles/umpire.png';
+                            if (cp.role === 'SCORER') roleImage = '/images/roles/scorer.png';
+                            if (cp.role === 'COMMENTATOR') roleImage = '/images/roles/commentator.png';
+                            if (cp.role === 'STREAMER') roleImage = '/images/roles/streamer.png';
+                            
+                            if (roleImage) {
+                              return <img src={roleImage} alt={cp.role} className="w-full h-full object-cover" />;
+                            }
+                            return (
+                              <div className="w-full h-full flex flex-col items-center justify-center opacity-50 bg-[#1a1a1a]">
+                                {cp.role === 'COMMENTATOR' ? <Mic size={40} className="text-white/20 mb-2" /> : cp.role === 'SCORER' ? <CheckSquare size={40} className="text-white/20 mb-2" /> : <UserCheck size={40} className="text-white/20 mb-2" />}
+                                <span className="text-xs font-medium text-white/40">No Image</span>
+                              </div>
+                            );
+                          })()}
+                        </div>
+
+                        {/* Details Section */}
+                        <div className="pt-3 pb-4 px-3 flex flex-col gap-1 w-full bg-transparent">
+                          <div className="flex justify-between items-start w-full gap-2">
+                            <div className="flex items-center gap-2 flex-1 min-w-0">
+                              <span className="font-bold text-white text-[15px] truncate">{cp.name}</span>
+                            </div>
+                            <div className="flex items-center gap-1 shrink-0 mt-0.5">
+                              <span className="text-[10px] text-white/60 uppercase tracking-widest font-bold">{cp.role}</span>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+
+                    {isLoadingUmpires ? (
+                      <div className="flex justify-center p-4"><Loader2 className="animate-spin text-white/40" /></div>
+                    ) : (() => {
+                      const filteredPros = umpiresData?.umpires?.filter(u =>
+                        (!proRoleFilter || u.role === proRoleFilter) &&
+                        (!proStateFilter || u.state === proStateFilter) &&
+                        (!proCityFilter || u.city === proCityFilter) &&
+                        (!proSearchQuery || 
+                          u.name?.toLowerCase().includes(proSearchQuery.toLowerCase()) || 
+                          u.username?.toLowerCase().includes(proSearchQuery.toLowerCase()))
+                      ) || [];
+
+                      return filteredPros.length > 0 ? (
+                        filteredPros.map(u => {
+                          const isSelected = formData.professionals.includes(u.id);
+                          return (
+                              <button key={u.id} onClick={() => { setFormData(f => ({ ...f, professionals: isSelected ? f.professionals.filter(id => id !== u.id) : [...f.professionals, u.id] })); setShowProfessionalsPopup(false); }}
+                                className={`w-full flex flex-col p-0 rounded-[16px] overflow-hidden transition-all text-left ${isSelected ? 'shadow-[0_0_15px_rgba(191,243,103,0.15)] ring-1 ring-[#BFF367]' : 'bg-transparent'}`}>
+                                {/* Image Section */}
+                                <div className="w-full aspect-[4/3] relative bg-white/5">
+                                  {u.profilePicture ? (
+                                    <img src={u.profilePicture} className="w-full h-full object-cover" alt={u.name} />
+                                  ) : (
+                                    <div className="w-full h-full flex flex-col items-center justify-center opacity-50 bg-[#1a1a1a]">
+                                      <UserCheck size={40} className="text-white/20 mb-2" />
+                                      <span className="text-xs font-medium text-white/40">No Image</span>
+                                    </div>
+                                  )}
+                                  
+                                  {/* Heart / Favorite Icon */}
+                                  <div className="absolute top-3 right-3 w-8 h-8 rounded-full bg-black/20 backdrop-blur-md flex items-center justify-center hover:bg-black/40 transition-colors">
+                                    <Heart size={16} className="text-white" />
+                                  </div>
+
+                                  {/* Selected Overlay */}
+                                  {isSelected && (
+                                    <div className="absolute inset-0 bg-[#BFF367]/10 flex items-center justify-center backdrop-blur-[1px]">
+                                      <div className="w-12 h-12 rounded-full bg-[#BFF367] flex items-center justify-center shadow-xl">
+                                        <Check size={24} className="text-black" />
+                                      </div>
+                                    </div>
+                                  )}
+                                </div>
+
+                                {/* Details Section */}
+                                <div className="pt-3 pb-4 px-1 flex flex-col gap-1 w-full bg-transparent">
+                                  <div className="flex justify-between items-start w-full gap-2">
+                                    <div className="flex items-center gap-2 flex-1 min-w-0">
+                                      <div className="w-5 h-5 rounded-full bg-[#FFC107] flex items-center justify-center shrink-0">
+                                        <MapPin size={12} className="text-black fill-black" />
+                                      </div>
+                                      <span className="font-bold text-white text-[15px] truncate">{u.name || 'Professional'}</span>
+                                    </div>
+                                    <div className="flex items-center gap-1 shrink-0 mt-0.5">
+                                      <span className="text-[13px] text-[#FFC107] font-bold">{u.rating || '4.8'}</span>
+                                      <Star size={13} className="text-[#FFC107] fill-[#FFC107]" />
+                                    </div>
+                                  </div>
+                                  <div className="text-[13px] text-white/50 truncate">
+                                    {u.distance || '0.7 km away'}
+                                  </div>
+                                </div>
+                              </button>
+                          );
+                        })
+                      ) : (
+                        formData.customProfessionals?.length === 0 && (
+                          <div className="flex flex-col items-center justify-center py-12 opacity-40">
+                            <EyeOff size={40} className="mb-4" />
+                            <div className="text-sm italic font-medium">No professionals match your search.</div>
+                          </div>
+                        )
+                      );
+                    })()}
+                  </div>
+                
+              </div>
+              
+              <div className="flex flex-col gap-3 pt-6 mt-auto shrink-0 border-t border-white/10">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowProfessionalsPopup(false);
+                    setShowCustomProInvite(true);
+                  }}
+                  className="bg-[#1a1a1a] text-white border border-white/20 shadow-xl w-full py-4 rounded-[8px] font-black text-xs uppercase tracking-widest hover:bg-[#2a2a2a] hover:border-white/50 hover:text-white hover:scale-[1.02] transition-all flex items-center justify-center gap-2"
+                >
+                  <UserPlus size={16} /> Invite Professional
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setShowProfessionalsPopup(false)}
+                  className="px-6 py-4 rounded-[8px] border border-white/10 text-white font-bold hover:bg-white/5 hover:border-white/20 transition-all flex items-center justify-center gap-2 text-xs uppercase tracking-widest"
+                >
+                  <ChevronLeft size={14} /> Back
+                </button>
+              </div>
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
+
       <CreateTeamModal 
         isOpen={showCreateTeam} 
         onClose={() => setShowCreateTeam(false)} 
@@ -3135,15 +3170,8 @@ const PlayingXIStep = ({ teamKey, teamName, players, maxMembers, teamDetails, on
         )}
       </AnimatePresence>
 
-      {/* Add Player / Auto-load Buttons */}
+      {/* Add Player Buttons */}
       <div className="flex flex-col gap-3 flex-shrink-0">
-        {!hasAutoLoaded && teamDetails?.members?.length > 0 && (
-          <button onClick={onInit}
-            className="w-full py-4 rounded-lg border text-xs font-bold uppercase tracking-wider transition-all flex items-center justify-center gap-2"
-            style={{ borderColor: `${color}40`, color, background: `${color}10` }}>
-            <Users size={16} /> Auto-load Roster
-          </button>
-        )}
         <button onClick={onAdd} disabled={players.length >= maxMembers}
           className="w-full py-4 bg-white/5 border border-white/10 text-white hover:bg-white/10 text-xs font-bold uppercase tracking-wider rounded-lg transition-all flex items-center justify-center gap-2 disabled:opacity-50">
           <Plus size={16} /> ADD PLAYER
@@ -3153,7 +3181,7 @@ const PlayingXIStep = ({ teamKey, teamName, players, maxMembers, teamDetails, on
       {/* Empty State */}
       {players.length === 0 && (
         <div className="text-center py-8 text-white/30 text-sm bg-white/5 rounded-lg border border-white/5 border-dashed flex-shrink-0">
-          No players added yet.<br />Auto-load from roster or add manually.
+          No players added yet.
         </div>
       )}
 
