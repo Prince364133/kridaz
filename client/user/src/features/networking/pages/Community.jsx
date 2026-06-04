@@ -2,10 +2,10 @@ import { useState, useEffect } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import axiosInstance from "@hooks/useAxiosInstance";
-import { Search, Loader2, X, MapPin, ChevronDown } from "lucide-react";
+import { Search, Loader2, X } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import useLoginOnDemand from "@hooks/useLoginOnDemand";
-import { setUserLocation, setLocationStatus, openLocationSidebar } from "@redux/slices/uiSlice";
+import { setUserLocation, setLocationStatus } from "@redux/slices/uiSlice";
 
 import StoriesSection from "../components/StoriesSection";
 import CommunityFeed from "../components/CommunityFeed";

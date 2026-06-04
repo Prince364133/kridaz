@@ -3,30 +3,24 @@ import React, { useEffect, useState } from "react";
 import { useLocation, useNavigate, useParams, Link } from "react-router-dom";
 import { useSelector } from "react-redux";
 import { 
-  IndianRupee, 
   ShieldCheck, 
   Clock, 
   Calendar, 
-  MapPin, 
   ChevronLeft, 
-  Zap, 
   Wallet, 
   Smartphone, 
-  CreditCard, 
   ArrowRight,
-  ArrowLeft,
   Check,
   Loader2,
   PlusCircle,
   Tag,
   Info,
-  Shield,
   Lock
 } from "lucide-react";
 import { format } from "date-fns";
 import axiosInstance from "@hooks/useAxiosInstance";
 import toast from "react-hot-toast";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
 import { handlePayment, createOrder } from "@infrastructure/razorpay";
 
 const SUBHEADING_STYLE = { fontFamily: "'Inter 28pt Light', sans-serif", fontWeight: 300 };

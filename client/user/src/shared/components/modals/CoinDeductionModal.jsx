@@ -9,7 +9,6 @@ import {
   Tag, 
   Check, 
   Loader2, 
-  ChevronRight, 
   Wallet, 
   CreditCard, 
   Smartphone, 
@@ -17,7 +16,6 @@ import {
   Clock,
   ArrowRight
 } from "lucide-react";
-import CountUp from "react-countup";
 import axiosInstance from "@hooks/useAxiosInstance";
 import toast from "react-hot-toast";
 import { format } from "date-fns";

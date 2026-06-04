@@ -1,7 +1,7 @@
-import React, { useState, useRef } from "react";
+import React, { useState } from "react";
 import { motion, useAnimation, useMotionValue } from "framer-motion";
 import { Link, useLocation } from "react-router-dom";
-import { Home, Search, Users, UserSearch, Trophy, Plus, Video, PenSquare, Gamepad2 } from "lucide-react";
+import { Home, Search, Users, UserSearch, Trophy, Plus, PenSquare, Gamepad2 } from "lucide-react";
 import { useSelector } from "react-redux";
 import { useScrollDirection } from "@hooks/useScrollDirection.js";
 import { getDynamicProfileRoute } from "@utils/routeUtils";

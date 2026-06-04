@@ -1,19 +1,15 @@
 import { useState, useEffect } from "react";
 import { Link, useParams, useSearchParams, useNavigate, useLocation } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
-import {
-  User, MapPin, Clock, IndianRupee, Calendar, Zap, Activity,
-  ArrowRight, ShieldCheck, Trophy, Star, Camera, Edit2, MessageSquare, Heart, Edit3, Trash2, Loader2, Send, MessageCircle,
-  Wallet, CreditCard, Award, Target, LogOut, Plus, Eye, TrendingUp, Mail, Phone, Ruler, LayoutGrid, CheckCircle2, UserPlus, BarChart, ExternalLink, Crown, Shield, BarChart3, Building2, AlertTriangle, Upload, Search, Medal, Users, Share2,
-  ChevronDown, ChevronUp, AlignLeft, Wifi, Radio
+import { MapPin, Clock, Zap,
+  ArrowRight, Camera, Edit2, MessageSquare, Heart, Loader2, MessageCircle, Award, Plus, TrendingUp, CheckCircle2, Crown, BarChart3, Medal, Users, Share2, Wifi, Radio
 } from "lucide-react";
 import { 
-  Radar, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, 
   LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer 
 } from 'recharts';
 import toast from "react-hot-toast";
 import axiosInstance from "@hooks/useAxiosInstance";
-import { login, logout, updateUser, followUser, unfollowUser } from "@redux/slices/authSlice";
+import { logout, updateUser, followUser, unfollowUser } from "@redux/slices/authSlice";
 import useLoginOnDemand from "@hooks/useLoginOnDemand";
 import { StoryViewer } from "@features/networking";
 import EditProfileModal from "@components/modals/EditProfileModal";

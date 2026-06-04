@@ -1,10 +1,9 @@
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
-import { Search, Plus, MessageCircle, Bell, User, X, LogOut, Activity, Zap, Briefcase, ShieldCheck, Trophy, Clock, Users, Target, Bookmark, FileText, ArrowRight, Menu } from "lucide-react";
+import { Search, Plus, MessageCircle, Bell, X, LogOut, Activity, Zap, Briefcase, Trophy, Clock, Users, Target, Bookmark, FileText, ArrowRight, Menu } from "lucide-react";
 import { useState } from "react";
 import { createPortal } from "react-dom";
 import { logout } from "@redux/slices/authSlice";
-import { openLocationSidebar } from "@redux/slices/uiSlice";
 import useNotifications from "@hooks/shared/useNotifications";
 import { getDynamicProfileRoute } from "@utils/routeUtils";
 import axiosInstance from "@hooks/useAxiosInstance";

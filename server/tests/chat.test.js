@@ -3,7 +3,6 @@ import app from "../app.js";
 import { prisma } from "../config/prisma.js";
 import dotenv from "dotenv";
 import { redisClient, bullmqConnection, pubClient, subClient } from "../config/redis.js";
-import logger from "../utils/logger.js";
 
 dotenv.config();
 

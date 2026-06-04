@@ -1,15 +1,14 @@
 import React from "react";
 import { 
-  Users, Landmark, CreditCard, Activity, ShieldCheck, Zap, 
+  Users, Landmark, CreditCard, Activity, ShieldCheck, 
   AlertCircle, RefreshCw, MessageSquare, ShieldAlert, Share2, 
-  Trophy, BookOpen, Wallet, ChevronRight, ArrowUpRight, Clock,
-  MapPin
+  Trophy, BookOpen, ChevronRight, Clock
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import CountUp from "react-countup";
 import { 
   AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, 
-  ResponsiveContainer, PieChart, Pie, Cell 
+  ResponsiveContainer 
 } from 'recharts';
 import useDashboardData from "@hooks/admin/useDashboardData";
 import DashboardSkeleton from "@features/venue-owner/Dashboard/DashboardSkeleton";

@@ -2,7 +2,7 @@ import { createBrowserRouter, Navigate, useParams } from "react-router-dom";
 import { lazy, Suspense } from "react";
 
 // Î“Ã¶Ã‡Î“Ã¶Ã‡ Eager: Layouts (used on nearly every route Î“Ã‡Ã¶ small files, no split benefit) Î“Ã¶Ã‡Î“Ã¶Ã‡
-import { PartnerLayout, GuestLayout, CoachLayout, UmpireLayout, StreamerLayout, ScorerLayout, ProfessionalLayout } from "@layouts";
+import { PartnerLayout, ProfessionalLayout } from "@layouts";
 import UserRoot from "@user/layouts/Root";
 
 // Î“Ã¶Ã‡Î“Ã¶Ã‡ Eager: Route guards & error utilities (must be synchronous) Î“Ã¶Ã‡Î“Ã¶Ã‡

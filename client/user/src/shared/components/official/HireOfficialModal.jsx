@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Search, User, X, Check, Loader2, MapPin } from 'lucide-react';
+import { Search, User, X, Loader2, MapPin } from 'lucide-react';
 import axios from 'axios';
 import { toast } from 'react-hot-toast';
 

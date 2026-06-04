@@ -452,7 +452,12 @@ export default function DesktopRightSidebar({ isRightDrawerOpen, setIsRightDrawe
                             <img 
                               src={venue.images?.[0] || "/default-turf.jpg"} 
                               className="w-14 h-14 rounded-lg object-cover bg-white/5 shrink-0 border border-white/5" 
-                              onError={(e) => e.target.src = "https://images.unsplash.com/photo-1518605368461-1ee7111d4e7a?auto=format&fit=crop&q=80"} 
+                              onError={(e) => {
+                                const fallback = "https://images.unsplash.com/photo-1518605368461-1ee7111d4e7a?auto=format&fit=crop&q=80";
+                                if (e.target.src !== fallback) {
+                                  e.target.src = fallback;
+                                }
+                              }}
                               alt=""
                             />
                             <div className="flex-1 min-w-0 flex flex-col justify-between py-0.5">

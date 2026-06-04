@@ -2,7 +2,7 @@
 import React from "react";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Info, Play, Heart, MessageSquare, Edit3, Plus, Camera, Image, Film, Eye } from "lucide-react";
+import { Play, Camera, Image, Film, Eye } from "lucide-react";
 import { useSelector } from "react-redux";
 import useLoginOnDemand from "@hooks/useLoginOnDemand";
 import { motion, AnimatePresence } from "framer-motion";

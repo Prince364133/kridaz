@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import axiosInstance from "@hooks/useAxiosInstance";
 import { toast } from "react-hot-toast";
-import { Activity, ToggleLeft, ToggleRight, Server } from "lucide-react";
+import { Activity, Server } from "lucide-react";
 
 export const FeatureFlags = () => {
   const [flags, setFlags] = useState([]);

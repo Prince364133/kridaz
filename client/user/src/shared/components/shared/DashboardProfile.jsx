@@ -10,11 +10,8 @@ import {
   MapPin, 
   Calendar,
   Save,
-  CheckCircle2,
-  Trash2,
   Bell,
   Lock,
-  Globe,
   Briefcase,
   Zap,
   ShieldCheck
@@ -22,7 +19,6 @@ import {
 import { logout } from "@redux/slices/authSlice.js";
 import { useNavigate } from "react-router-dom";
 import axiosInstance from "@hooks/useAxiosInstance";
-import toast from "react-hot-toast";
 
 const DashboardProfile = () => {
   const user = useSelector((state) => state.auth.user);

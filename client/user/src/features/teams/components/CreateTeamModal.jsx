@@ -1,7 +1,7 @@
 import React, { useState, useRef } from 'react';
 import { useCreateTeamMutation } from '@redux/api/teamApi';
 import { useUploadFileMutation } from '@redux/api/uploadApi';
-import { X, Camera, Loader2, Users, Upload, Trash2, MapPin, Map, Shield, Phone, MessageSquare, Sparkles } from 'lucide-react';
+import { X, Loader2, Users, Upload, Trash2, MapPin, Map, Shield, Phone, MessageSquare, Sparkles } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { toast } from 'react-hot-toast';
 

@@ -4,7 +4,7 @@ import axiosInstance from "@hooks/useAxiosInstance";
 import OwnerList from "./OwnerList";
 import SearchBar from "./SearchBar";
 import OwnersSkeleton from "./OwnersSkeleton";
-import { Users, Building, Activity, ShieldCheck, Search, Filter, Trash2, Ban, CheckCircle, X } from "lucide-react";
+import { Users, Building, Activity, ShieldCheck, Trash2, Ban, CheckCircle, X } from "lucide-react";
 import CountUp from "react-countup";
 import ConfirmationModal from "@components/shared/ConfirmationModal";
 

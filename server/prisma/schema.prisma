@@ -104,6 +104,7 @@ model User {
   devices                 UserDevice[]
 
   @@index([role])
+  @@index([latitude, longitude])
 }
 
 model UserProfile {

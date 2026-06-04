@@ -1,6 +1,5 @@
 import React, { useState } from "react";
 import { Outlet } from "react-router-dom";
-import { Menu } from "lucide-react";
 import { OwnerSidebar, AuthenticatedNavbar } from "@components/layout";
 import ScrollToTop from "@components/common/ScrollToTop";
 import MobileBottomNav from "@user/components/layout/MobileBottomNav";

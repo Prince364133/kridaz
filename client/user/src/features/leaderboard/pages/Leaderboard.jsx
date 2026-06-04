@@ -1,12 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { 
-  Trophy, Medal, Star, Target, Activity, Search, 
-  ChevronRight, ChevronLeft, BarChart3, Users, 
-  Shield, Settings, Crown, LayoutGrid, Clock, MapPin,
-  Circle, Zap, Award
+  Trophy, LayoutGrid
 } from 'lucide-react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 
 const PRI = "#BFF367";

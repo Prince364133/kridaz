@@ -5,14 +5,12 @@ import {
   LayoutDashboard, 
   Trophy, 
   Calendar, 
-  Settings, 
   HelpCircle, 
   Activity,
   IndianRupee,
   Landmark,
   Clock,
-  User,
-  Zap
+  User
 } from "lucide-react";
 import { useDispatch, useSelector } from "react-redux";
 import { logout } from "@redux/slices/authSlice.js";

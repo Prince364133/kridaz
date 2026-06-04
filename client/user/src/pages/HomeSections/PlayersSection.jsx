@@ -1,7 +1,7 @@
 /* eslint-disable react/prop-types */
 import React from "react";
 import { Link } from "react-router-dom";
-import { Users, MapPin, Check, ChevronRight } from "lucide-react";
+import { Users, MapPin, Check } from "lucide-react";
 
 const GRAD = "linear-gradient(90deg, #BFF367 0%, #BFF367 100%)";
 const BDR = "#2A2A2A";

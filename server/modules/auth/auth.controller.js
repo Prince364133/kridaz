@@ -8,7 +8,6 @@ import cloudinary, { uploadToCloudinary } from "../../utils/cloudinary.js";
 import { getIO } from "../../config/socket.js";
 import { redisClient } from "../../config/redis.js";
 import { prisma } from "../../config/prisma.js";
-import fs from 'fs';
 import { addUsernameToBloom, checkUsernameBloom, blacklistOtpIdentifier, isOtpBlacklisted } from "../../utils/bloomFilter.js";
 import { logAudit } from "../../utils/auditLogger.js";
 import logger from "../../utils/logger.js";

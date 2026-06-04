@@ -3,7 +3,7 @@ import TurfCardMobile from "./TurfCardMobile.jsx";
 import TurfCardSkeleton from "@components/ui/TurfCardSkeleton.jsx";
 import useTurfData from "../hooks/useTurfData.jsx";
 import SearchTurf from "@components/search/SearchTurf.jsx";
-import { Trophy, MapPin, Loader2, Sparkles } from "lucide-react";
+import { Trophy, MapPin, Sparkles } from "lucide-react";
 import useRecommendations from "@hooks/useRecommendations";
 
 /**

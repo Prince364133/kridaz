@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import { Users, ChevronDown, Globe, RotateCcw, Search, MapPin, Navigation, Loader2 } from "lucide-react";
+import { ChevronDown, RotateCcw, Search, MapPin, Navigation, Loader2 } from "lucide-react";
 import { searchLocations } from "@utils/locationService";
 
 const SPORTS_LIST = [

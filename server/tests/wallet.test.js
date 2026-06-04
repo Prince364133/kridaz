@@ -1,7 +1,6 @@
 import request from "supertest";
 import app from "../app.js";
 import { prisma } from "../config/prisma.js";
-import jwt from "jsonwebtoken";
 import dotenv from "dotenv";
 import logger from "../utils/logger.js";
 import razorpay from "../config/razorpay.js";

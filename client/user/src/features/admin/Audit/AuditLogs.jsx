@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Shield, Clock, Search, Filter, HardDrive, Terminal, User, Globe, Info } from "lucide-react";
+import { Shield, Search, HardDrive, Terminal, User, Globe, Info } from "lucide-react";
 import useAuditLogs from "@hooks/admin/useAuditLogs";
 
 const AuditLogs = () => {

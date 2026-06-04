@@ -1,5 +1,5 @@
 import React from "react";
-import { Mail, Calendar, ChevronRight, ShieldCheck, User, Trash2, Ban, CheckCircle, ExternalLink } from "lucide-react";
+import { Mail, Calendar, Trash2, Ban, CheckCircle, ExternalLink } from "lucide-react";
 import { format } from "date-fns";
 import Avatar from "react-avatar";
 import { useNavigate } from "react-router-dom";

@@ -3,9 +3,8 @@ import { useParams, useNavigate } from "react-router-dom";
 import { useSelector } from "react-redux";
 import axiosInstance from "@hooks/useAxiosInstance";
 import { 
-  MapPin, Star, Shield, Award, ChevronLeft, Loader2, User, Camera, Pencil,
-  Building, Globe, Clock, CheckCircle2, Layout, BookOpen, Play, X, Eye,
-  Trophy, Tv, Layers, ShieldCheck, MessageSquare, Users, UserPlus, Heart, MessageCircle, Share2
+  MapPin, Star, Shield, Award, Loader2, Pencil,
+  Building, Globe, Clock, Layout, BookOpen, Play, X, Eye, Tv, Layers, ShieldCheck, MessageSquare, Users, UserPlus, Heart, MessageCircle, Share2
 } from "lucide-react";
 import toast from "react-hot-toast";
 

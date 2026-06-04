@@ -1,11 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
 import axiosInstance from '@hooks/useAxiosInstance';
 import { toast } from 'react-hot-toast';
 import { 
-  Users, Check, X, Clock, MapPin, Video, MonitorPlay,
-  ChevronRight, Trophy, Info, AlertCircle, Calendar, User, PlayCircle, Search, Edit3,
-  FileText, Receipt, ExternalLink
+  Users, Check, X, Clock, MapPin, Trophy, Info, Calendar, User, PlayCircle, Search
 } from 'lucide-react';
 import { useNavigate, Link } from 'react-router-dom';
 import HireOfficialModal from '@components/official/HireOfficialModal';
