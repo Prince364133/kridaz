@@ -20,7 +20,7 @@ import {
 } from '@redux/api/teamApi';
 import { useGetGroundsQuery, useGetUmpiresQuery, useGetMyHostedGamesQuery, useGetMyJoinedGamesQuery } from '@redux/api/gamesApi';
 import toast from 'react-hot-toast';
-import { fetchStates, fetchCities, searchLocations } from '../../../shared/utils/locationService';
+import { fetchStates, fetchCities, searchLocations, reverseGeocode } from '../../../shared/utils/locationService';
 import { countryCodes } from '../../../utils/countryCodes';
 import CreateTeamModal from '../../teams/components/CreateTeamModal';
 
@@ -926,8 +926,7 @@ const StartScoringModal = ({ isOpen, onClose, onSuccess, initialData }) => {
     navigator.geolocation.getCurrentPosition(
       async (pos) => {
         try {
-          const res = await fetch(`https://nominatim.openstreetmap.org/reverse?lat=${pos.coords.latitude}&lon=${pos.coords.longitude}&format=json&addressdetails=1`);
-          const data = await res.json();
+          const data = await reverseGeocode(pos.coords.latitude, pos.coords.longitude);
           const userState = data.address?.state;
           let userCity = data.address?.city || data.address?.town || data.address?.village || data.address?.suburb;
           
@@ -3034,7 +3033,10 @@ const StartScoringModal = ({ isOpen, onClose, onSuccess, initialData }) => {
           setShowCreateTeam(false);
         }} 
       />
-    </div>
+        </div>
+      )}
+    </AnimatePresence>,
+    portalTarget
   );
 };
 
@@ -3221,11 +3223,7 @@ const PlayingXIStep = ({ teamKey, teamName, players, maxMembers, teamDetails, on
           ))}
         </AnimatePresence>
       </div>
-
-        </div>
-      )}
-    </AnimatePresence>,
-    portalTarget
+    </div>
   );
 };
 

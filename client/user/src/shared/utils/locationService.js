@@ -52,3 +52,20 @@ export const searchLocations = async (query) => {
     return [];
   }
 };
+
+export const reverseGeocode = async (lat, lon) => {
+  try {
+    const response = await axios.get(`https://nominatim.openstreetmap.org/reverse`, {
+      params: {
+        lat,
+        lon,
+        format: 'json',
+        addressdetails: 1
+      }
+    });
+    return response.data;
+  } catch (error) {
+    console.error("Error reverse geocoding:", error);
+    return null;
+  }
+};
