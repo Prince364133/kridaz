@@ -38,12 +38,12 @@ const Root = () => {
   const searchParams = new URLSearchParams(location.search);
   const isReelsPage = location.pathname.startsWith('/reels') || location.pathname.startsWith('/shorts') || searchParams.get('tab') === 'shots';
   const hideNav = isReelsPage || location.pathname.startsWith('/messages');
-  const showRightSidebar = location.pathname === "/" || location.pathname === "/community";
-
   const isHome = location.pathname === "/" || location.pathname === "/community";
   const isVenue = location.pathname.startsWith("/venue") || location.pathname === "/venues";
   const isUploadReel = location.pathname.startsWith("/reels/upload") || location.pathname.startsWith("/shorts/upload");
   const useRestrictedWidth = isHome || isVenue || isUploadReel;
+
+  const showRightSidebar = isHome || isVenue;
 
   return (
     <div className="min-h-screen bg-[#050505] text-white overflow-x-clip font-sans">
