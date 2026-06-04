@@ -5,7 +5,7 @@ import { motion, AnimatePresence, useMotionValue, animate } from 'framer-motion'
 import {
   X, ChevronRight, ChevronLeft, Shield, Video, Users, Trophy,
   Search, Check, MapPin, UserCheck, SkipForward, Loader2,
-  Swords, Circle, Phone, MessageCircle, Sparkles, UserPlus, Plus, EyeOff, CheckSquare, Mic, Star, Heart
+  Swords, Phone, MessageCircle, UserPlus, Plus, EyeOff, CheckSquare, Mic, Star, Heart
 } from 'lucide-react';
 import { useSetupScoringMatchMutation } from '@redux/api/scoringApi';
 import {

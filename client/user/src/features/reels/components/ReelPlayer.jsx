@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { Play, Pause, Volume2, VolumeX } from 'lucide-react';
+import { Play, Volume2, VolumeX } from 'lucide-react';
 import { useTrackHeartbeatMutation } from '@redux/api/reelsApi';
 import Hls from 'hls.js';
 

@@ -1,6 +1,5 @@
 import React from "react";
-import { User, Mail, Phone, Calendar, Fingerprint, ChevronRight, ShieldCheck, Zap, Trash2, Ban, CheckCircle, ExternalLink } from "lucide-react";
-import { format, parseISO } from "date-fns";
+import { Mail, Phone, Trash2, Ban, CheckCircle, ExternalLink } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
 const OwnerCard = ({ owner, isSelected, onSelect, onDelete, onToggleStatus }) => {

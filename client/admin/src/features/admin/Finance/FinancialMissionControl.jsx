@@ -15,7 +15,6 @@ import {
   CheckCircle,
   AlertCircle,
   ExternalLink,
-  ChevronRight,
   Activity,
   Upload,
   X,

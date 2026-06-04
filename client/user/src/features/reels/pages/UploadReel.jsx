@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
-import { ChevronLeft, ChevronRight, Upload, X, AlertCircle, Hash, Globe, MapPin, Video, Music } from 'lucide-react';
+import { ChevronLeft, Upload, X, Hash, Globe, MapPin } from 'lucide-react';
 import { useDispatch } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import { startUpload } from '@redux/slices/mediaUploadSlice';
 
 const UploadReel = () => {

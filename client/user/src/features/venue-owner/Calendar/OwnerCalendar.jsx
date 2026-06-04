@@ -3,7 +3,6 @@ import React, { useState, useEffect } from 'react';
 import { 
   ChevronLeft, 
   ChevronRight, 
-  Plus, 
   Filter, 
   Clock, 
   Calendar as CalendarIcon,
@@ -13,7 +12,6 @@ import {
 } from 'lucide-react';
 import useAxiosInstance from "@hooks/useAxiosInstance";
 import { format, addDays, subDays } from "date-fns";
-import CountUp from "react-countup";
 
 const OwnerCalendar = () => {
   const axiosInstance = useAxiosInstance;

@@ -1,5 +1,5 @@
 ﻿import React from "react";
-import { ArrowRight, Store, Award, Shield, Globe, Building2, Layout, BarChart3, Users, Tv } from "lucide-react";
+import { ArrowRight, Store, Award, Shield, Globe, Layout, Tv } from "lucide-react";
 import { Link } from "react-router-dom";
 
 const PRI = "#BFF367";

@@ -1,12 +1,11 @@
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { getDynamicProfileRoute } from "@utils/routeUtils";
 import { useSelector, useDispatch } from "react-redux";
-import { User, Users, Menu, X, LogOut, Activity, ShieldCheck, Zap, ArrowRight, Clock, Trophy, Target, MessageCircle, MapPin, ChevronRight, Bell, UserSearch, Search, Plus, Bookmark, FileText, Home, Briefcase, ChevronDown } from "lucide-react";
-import { useState, useEffect, useCallback } from "react";
+import { User, Users, X, LogOut, Activity, ShieldCheck, Zap, ArrowRight, Clock, Trophy, Target, MessageCircle, MapPin, Bell, UserSearch, Search, Plus, Bookmark, FileText, Home, Briefcase, ChevronDown } from "lucide-react";
+import { useState, useCallback } from "react";
 import { createPortal } from "react-dom";
 import { logout } from "@redux/slices/authSlice";
 import { setUserLocation, setLocationStatus, openLocationSidebar } from "@redux/slices/uiSlice";
-import { reelsApi } from "@redux/api/reelsApi";
 import toast from "react-hot-toast";
 import axiosInstance from "@hooks/useAxiosInstance";
 import useNotifications from "@hooks/shared/useNotifications";

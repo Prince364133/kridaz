@@ -211,7 +211,7 @@ const ClockPicker = ({ value, onChange, placeholder = "Select time", disabled = 
                   <g key={h}>
                     <circle cx={p.x} cy={p.y} r="6.5" fill={sel ? "#BFF367" : "transparent"} />
                     <text x={p.x} y={p.y + 0.5} textAnchor="middle" dominantBaseline="middle"
-                      fontSize="6" font-weight="900" fill={sel ? "#000" : "#fff"} style={{ userSelect: "none" }}>{h}</text>
+                      fontSize="6" fontWeight="900" fill={sel ? "#000" : "#fff"} style={{ userSelect: "none" }}>{h}</text>
                   </g>
                 );
               })}
@@ -222,7 +222,7 @@ const ClockPicker = ({ value, onChange, placeholder = "Select time", disabled = 
                   <g key={m}>
                     <circle cx={p.x} cy={p.y} r="6.5" fill={sel ? "#BFF367" : "transparent"} />
                     <text x={p.x} y={p.y + 0.5} textAnchor="middle" dominantBaseline="middle"
-                      fontSize="5" font-weight="900" fill={sel ? "#000" : "#fff"} style={{ userSelect: "none" }}>
+                      fontSize="5" fontWeight="900" fill={sel ? "#000" : "#fff"} style={{ userSelect: "none" }}>
                       {m === 0 ? "00" : m}
                     </text>
                   </g>

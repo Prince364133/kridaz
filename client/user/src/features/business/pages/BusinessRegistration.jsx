@@ -5,18 +5,13 @@ import { useSelector } from "react-redux";
 import axiosInstance from "@hooks/useAxiosInstance.js";
 import { 
   Building2, 
-  GraduationCap, 
-  Award, 
   ArrowRight, 
   CheckCircle2, 
   Clock, 
-  MapPin, 
-  FileText, 
-  ChevronLeft,
+  FileText,
   Briefcase,
   ShieldAlert,
   Loader2,
-  Navigation,
   Upload
 } from "lucide-react";
 import toast from "react-hot-toast";

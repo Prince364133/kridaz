@@ -4,9 +4,7 @@ import {
   Send, 
   MessageSquare, 
   CheckCircle2, 
-  AlertCircle,
-  Clock,
-  ArrowRight
+  AlertCircle
 } from "lucide-react";
 import axiosInstance from "../../../infrastructure/axios";
 

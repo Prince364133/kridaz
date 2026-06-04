@@ -607,7 +607,9 @@ export const getLeaderboard = async (req, res) => {
  * Optimized for map data payload
  */
 export const getNearbyPlayers = async (req, res) => {
-  const { lat, lng, radius = 5000, limit = 50 } = req.query;
+  const { lat, lng } = req.query;
+  const safeLimit  = Math.min(Math.max(parseInt(req.query.limit)  || 50,  1), 200);
+  const safeRadius = Math.min(Math.max(parseFloat(req.query.radius) || 5000, 100), 100_000);
   
   if (!lat || !lng) {
     return res.status(400).json({ success: false, message: "Location coordinates required" });
@@ -616,9 +618,9 @@ export const getNearbyPlayers = async (req, res) => {
   try {
     const whereClause = req.user?.id ? { id: { not: req.user.id } } : {};
     
-    const players = await findNearby('User', parseFloat(lat), parseFloat(lng), parseFloat(radius), {
+    const players = await findNearby('User', parseFloat(lat), parseFloat(lng), safeRadius, {
       where: whereClause,
-      take: parseInt(limit)
+      take: safeLimit
     });
 
     // Format for frontend (Decimal to Number)
@@ -627,7 +629,7 @@ export const getNearbyPlayers = async (req, res) => {
       id: p.id,
       lat: p.latitude != null ? parseFloat(String(p.latitude)) : null,
       lng: p.longitude != null ? parseFloat(String(p.longitude)) : null,
-      distanceKm: null // PostGIS distance can be added if needed
+      distanceKm: p.distance != null ? p.distance / 1000 : null // geo.util returns meters
     }));
 
     return res.status(200).json({ success: true, players: formattedPlayers });

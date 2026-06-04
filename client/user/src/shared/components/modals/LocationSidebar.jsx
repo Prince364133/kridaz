@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { createPortal } from "react-dom";
-import { X, ArrowLeft, Crosshair, MapPin, ArrowRight } from "lucide-react";
+import { ArrowLeft, Crosshair, MapPin, ArrowRight } from "lucide-react";
 import { closeLocationSidebar, setUserLocation, setLocationStatus } from "@redux/slices/uiSlice";
 import { motion, AnimatePresence } from "framer-motion";
 

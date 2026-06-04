@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import { ChevronDown, MapPin, RotateCcw, Building2, Trophy, Loader2, Search } from "lucide-react";
+import { MapPin, Building2, Trophy, Loader2, Search } from "lucide-react";
 import { fetchStates, fetchCities } from "@utils/locationService";
 
 /**

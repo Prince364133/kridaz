@@ -8,23 +8,9 @@ import GoogleAuthButton from "../components/GoogleAuthButton";
 import OnboardingModal from "@components/modals/OnboardingModal";
 import { Capacitor } from "@capacitor/core";
 import { 
-  ArrowRight, 
-  ShieldCheck, 
-  Zap, 
-  Activity, 
-  Target, 
-  Cpu, 
-  Globe, 
-  Lock, 
-  User, 
-  Trophy,
-  ChevronRight,
-  Monitor,
-  Fingerprint,
-  Radio,
+  ArrowRight,
   X
 } from "lucide-react";
-import { FormField } from "@components/common";
 
 import { useAuthModal } from "../../../context/AuthModalContext";
 

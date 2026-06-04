@@ -1,5 +1,5 @@
 import React from "react";
-import { Clock, ShieldX, Fingerprint, Briefcase, Mail, MapPin, ChevronRight, RotateCcw, AlertTriangle, Phone, Award } from "lucide-react";
+import { Clock, Fingerprint, Briefcase, Mail, MapPin, ChevronRight, RotateCcw, AlertTriangle, Phone, Award } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
 const OwnerRequestsCard = ({ request, onAccept, onReject, onReconsider, onViewDetail, isProcessing, type = "pending" }) => {

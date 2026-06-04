@@ -4,7 +4,6 @@ import {
   MessageSquare, 
   CornerDownRight, 
   CheckCircle,
-  Clock,
   ArrowRight
 } from "lucide-react";
 import { useSelector } from "react-redux";

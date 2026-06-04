@@ -1,7 +1,6 @@
 import * as Sentry from "@sentry/react";
 import {
- Clock, MapPin, Calendar, QrCode, ShieldCheck, Zap, Activity, Wallet,
- CreditCard, FileText, Ticket, AlertOctagon, IndianRupee, Loader2, User,
+ Clock, MapPin, Calendar, Zap, FileText, Ticket, AlertOctagon, Loader2, User,
  Star, ShieldAlert, X, RefreshCw, MessageCircle, CheckCircle
 } from "lucide-react";
 import { Link, useSearchParams, useNavigate } from "react-router-dom";

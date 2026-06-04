@@ -1,11 +1,9 @@
-﻿import React, { useEffect, useState } from "react";
-import { 
-  LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer,
+﻿import React, { useState } from "react";
+import { XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer,
   Radar, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Area, AreaChart
 } from "recharts";
 import { 
-  TrendingUp, Zap, Target, Activity, Calendar, Download, 
-  Share2, ChevronDown, AlertCircle, Percent
+  TrendingUp, Zap, Target, AlertCircle, Percent
 } from "lucide-react";
 import useOwnerDashboard from "@hooks/owner/useOwnerDashboard";
 import useOwnerBookings from "@hooks/owner/useOwnerBookings";

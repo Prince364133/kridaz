@@ -4,18 +4,13 @@ import {
   X, 
   LayoutGrid, 
   BookOpen, 
-  Calendar, 
   MapPin, 
-  Clock, 
   Users, 
   IndianRupee, 
   BarChart3, 
   Star, 
   Tag, 
-  Bell, 
-  Settings, 
-  HelpCircle, 
-  LogOut,
+  HelpCircle,
   Landmark
 } from "lucide-react";
 import { useDispatch } from "react-redux";

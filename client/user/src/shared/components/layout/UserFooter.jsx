@@ -1,20 +1,7 @@
 import React from "react";
-import { Link, useLocation } from "react-router-dom";
-import { 
-  Facebook, 
-  Linkedin, 
-  Instagram, 
-  Mail, 
-  MapPin, 
-  MessageCircle, 
-  ShieldCheck, 
-  Activity, 
-  Globe, 
-  Cpu,
-  ArrowUpRight,
-  Smartphone,
-  Zap
-} from "lucide-react";
+import { useLocation } from "react-router-dom";
+
+
 
 const UserFooter = () => {
   const location = useLocation();

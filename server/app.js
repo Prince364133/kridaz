@@ -1,9 +1,10 @@
 import express from "express";
 import helmet from "helmet";
 import cors from "cors";
-import mongoose from "mongoose";
 import dotenv from "dotenv";
 import cookieParser from "cookie-parser";
+import { prisma } from "./config/prisma.js";
+import { redisClient } from "./config/redis.js";
 import rootRouter from "./routes/index.js";
 import { errorHandler, notFound } from "./middleware/error.middleware.js";
 import {
@@ -111,12 +112,30 @@ app.use('/api/owner/wallet/withdraw', paymentLimiter);
 app.use("/api", rootRouter);
 
 // Health check route
-app.get("/api/health", (req, res) => {
-  const dbStatus = mongoose.connection.readyState === 1 ? "Connected" : "Disconnected/Connecting";
-  res.status(200).json({
-    status: "OK",
-    database: dbStatus,
-    timestamp: new Date().toISOString()
+app.get("/api/health", async (req, res) => {
+  const checks = { db: "unknown", redis: "unknown" };
+  let healthy = true;
+
+  try {
+    await prisma.$queryRaw`SELECT 1`;
+    checks.db = "connected";
+  } catch {
+    checks.db = "disconnected";
+    healthy = false;
+  }
+
+  try {
+    await redisClient.ping();
+    checks.redis = "connected";
+  } catch {
+    checks.redis = "disconnected";
+    // Redis down is degraded, not fatal
+  }
+
+  res.status(healthy ? 200 : 503).json({
+    status: healthy ? "OK" : "DEGRADED",
+    checks,
+    timestamp: new Date().toISOString(),
   });
 });
 

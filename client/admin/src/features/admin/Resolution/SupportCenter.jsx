@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { MessageSquare, Clock, CheckCircle, AlertCircle, Search, Filter, Send, User, ChevronRight } from "lucide-react";
+import { MessageSquare, Search, Send, User, ChevronRight } from "lucide-react";
 import useSupport from "@hooks/admin/useSupport";
 
 const SupportCenter = () => {

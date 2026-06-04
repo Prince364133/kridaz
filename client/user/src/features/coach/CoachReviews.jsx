@@ -1,6 +1,6 @@
 ﻿import React, { useState, useEffect } from "react";
 import axiosInstance from "@hooks/useAxiosInstance";
-import { Star, MessageSquare, Send, User, Loader2, Calendar, Reply } from "lucide-react";
+import { Star, MessageSquare, Send, Loader2, Reply } from "lucide-react";
 import toast from "react-hot-toast";
 import { format } from "date-fns";
 

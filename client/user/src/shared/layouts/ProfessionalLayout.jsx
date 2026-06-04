@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Outlet, Navigate, useLocation } from "react-router-dom";
+import { Outlet } from "react-router-dom";
 import ProfessionalSidebar from "@components/layout/ProfessionalSidebar";
 import { AuthenticatedNavbar } from "@components/layout";
 import ProfessionalBottomNav from "@components/layout/ProfessionalBottomNav";

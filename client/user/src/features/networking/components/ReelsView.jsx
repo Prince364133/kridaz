@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
-import { ArrowLeft, Plus, Loader2, PlaySquare } from "lucide-react";
+import { ArrowLeft, Loader2, PlaySquare } from "lucide-react";
 import { useGetReelsFeedQuery } from "@redux/api/reelsApi";
 import ReelItem from "@features/reels/components/ReelItem";
 

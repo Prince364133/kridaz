@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { useSelector } from "react-redux";
-import { Outlet, Navigate, useLocation } from "react-router-dom";
+import { Outlet } from "react-router-dom";
 import { StreamerSidebar, AuthenticatedNavbar } from "@components/layout";
 import MobileBottomNav from "@user/components/layout/MobileBottomNav";
 import RootErrorBoundary from "@components/common/RootErrorBoundary";

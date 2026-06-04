@@ -1,8 +1,7 @@
 /* eslint-disable react/prop-types */
-import React, { useRef, useState, useEffect } from "react";
+import React, { useRef, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { Search, ChevronRight, ChevronLeft, Star, Heart, MapPin } from "lucide-react";
-import { motion, AnimatePresence } from "framer-motion";
+import { Search, Star, Heart, MapPin } from "lucide-react";
 
 const BDR = "#2A2A2A";
 

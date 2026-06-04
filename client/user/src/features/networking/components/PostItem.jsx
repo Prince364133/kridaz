@@ -1,7 +1,6 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
-import { MoreVertical, ShieldCheck, Video, Trash2, AlertTriangle, Eye, Calendar, User as UserIcon, Loader2 } from "lucide-react";
-import LikeIcon from "../../../assets/icons/like_icon.png";
+import { MoreVertical, ShieldCheck, Video } from "lucide-react";
 import CommentIcon from "../../../assets/icons/comment_icon.png";
 import ShareIcon from "../../../assets/icons/share_icon.png";
 import { AnimatePresence, motion } from "framer-motion";

@@ -20,7 +20,6 @@ import {
   Users2,
   ChevronRight,
   Zap,
-  Info,
   CheckCircle2,
   Clock,
   ExternalLink,

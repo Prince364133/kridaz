@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useSelector } from "react-redux";
 import { useNavigate, useSearchParams } from "react-router-dom";
-import { Plus, Search, ChevronDown, PlaySquare, Loader2, Edit3 } from "lucide-react";
+import { ChevronDown, PlaySquare, Loader2 } from "lucide-react";
 import { useLazyGetCommunityFeedQuery, useDeletePostMutation } from "@redux/api/communityApi";
 import { useLazySearchPlayersQuery } from "@redux/api/teamApi";
 import { useSocket } from "@context/SocketContext";
@@ -10,7 +10,7 @@ import CreatePostModal from "./CreatePostModal";
 import ShareModal from "./ShareModal";
 import ReportModal from "./ReportModal";
 import toast from "react-hot-toast";
-import { motion, AnimatePresence } from "framer-motion";
+import { AnimatePresence } from "framer-motion";
 
 const HEADING_STYLE = { fontFamily: "'Open Sans', sans-serif" };
 

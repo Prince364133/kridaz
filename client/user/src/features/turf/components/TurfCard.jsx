@@ -1,7 +1,7 @@
 import * as Sentry from "@sentry/react";
 import { useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
-import { MapPin, Star, ChevronLeft, ChevronRight, Zap, Heart, Timer, MessageSquareShare } from "lucide-react";
+import { MapPin, Star, ChevronLeft, ChevronRight, Zap, Heart, Timer } from "lucide-react";
 import axiosInstance from "@hooks/useAxiosInstance";
 
 const TurfCard = ({ turf, featured = false, distance = "1.2km Away" }) => {
