@@ -1,5 +1,6 @@
 import * as Sentry from "@sentry/react";
 import React, { useState, useRef, useEffect, useMemo } from 'react';
+import { createPortal } from 'react-dom';
 import { useSelector } from 'react-redux';
 import { motion, AnimatePresence, useMotionValue, animate } from 'framer-motion';
 import {
@@ -2323,14 +2324,14 @@ const StartScoringModal = ({ isOpen, onClose, onSuccess, initialData }) => {
   };
 
   // ─── Main Modal ───────────────────────────────────────────────────────────────
-  return (
+  return createPortal(
     <div className="fixed inset-0 z-[9999] flex items-center justify-center p-0">
       <div className="absolute inset-0 bg-black/85 backdrop-blur-sm" onClick={handleClose} />
       <motion.div
         initial={{ opacity: 0, scale: 0.95, y: 20 }}
         animate={{ opacity: 1, scale: 1, y: 0 }}
         exit={{ opacity: 0, scale: 0.95, y: 20 }}
-        className="relative w-full max-w-[390px] h-screen bg-[#0a0a0a] border-x border-white/10 rounded-none shadow-2xl overflow-hidden flex flex-col flex-shrink-0"
+        className="relative w-full max-w-[390px] h-[100dvh] sm:h-screen bg-[#0a0a0a] border-x border-white/10 rounded-none shadow-2xl overflow-hidden flex flex-col flex-shrink-0"
       >
         {/* Header */}
         <div className="flex items-center justify-between px-6 pt-[35px] pb-5 border-b border-white/10 bg-black/40 flex-shrink-0">
@@ -3217,7 +3218,7 @@ const PlayingXIStep = ({ teamKey, teamName, players, maxMembers, teamDetails, on
       </div>
 
     </div>
-  );
+  , document.body);
 };
 
 // ─── Touch Slider Wheel Sub-component ──────────────────────────────────────────
