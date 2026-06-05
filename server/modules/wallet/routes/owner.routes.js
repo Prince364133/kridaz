@@ -8,6 +8,7 @@ import verifyOwnerToken from "../../../middleware/jwt/owner.middleware.js";
 import { validate } from "../../../middleware/validate.middleware.js";
 import { requestWithdrawalSchema } from "../wallet.validator.js";
 import { paymentLimiter } from "../../../middleware/rateLimiter.middleware.js";
+import { idempotency } from "../../../middleware/idempotency.middleware.js";
 
 const router = Router();
 
@@ -38,7 +39,7 @@ router.get("/data", verifyOwnerToken, getWalletData);
  *     security:
  *       - BearerAuth: []
  */
-router.post("/withdraw", paymentLimiter, verifyOwnerToken, validate(requestWithdrawalSchema), requestWithdrawal);
+router.post("/withdraw", paymentLimiter, verifyOwnerToken, idempotency, validate(requestWithdrawalSchema), requestWithdrawal);
 
 /**
  * @swagger

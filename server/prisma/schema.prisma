@@ -8,28 +8,29 @@ datasource db {
 }
 
 model User {
-  id                      String                @id @default(uuid())
-  email                   String                @unique
-  username                String                @unique
+  id                      String                        @id @default(uuid())
+  email                   String                        @unique
+  username                String                        @unique
   password                String
-  role                    Role                  @default(USER)
+  role                    Role                          @default(USER)
   name                    String
   phone                   String?
   profilePicture          String?
   city                    String?
   state                   String?
-  latitude                Decimal?              @db.Decimal(10, 8)
-  longitude               Decimal?              @db.Decimal(11, 8)
-  isVerified              Boolean               @default(false)
-  isOnboarded             Boolean               @default(false)
+  latitude                Decimal?                      @db.Decimal(10, 8)
+  longitude               Decimal?                      @db.Decimal(11, 8)
+  locationSharingEnabled  Boolean                       @default(true)
+  isVerified              Boolean                       @default(false)
+  isOnboarded             Boolean                       @default(false)
   gender                  String?
   dob                     DateTime?
   bio                     String?
   interests               String[]
   sportTypes              String[]
   googleId                String?
-  lastSeen                DateTime              @default(now())
-  status                  String                @default("active")
+  lastSeen                DateTime                      @default(now())
+  status                  String                        @default("active")
   migrationStatus         Json?
   youtubeAccessToken      String?
   youtubeRefreshToken     String?
@@ -43,26 +44,32 @@ model User {
   facebookPageThumb       String?
   socialAccounts          Json?
   notificationPreferences Json?
-  walletBalance           Decimal               @default(0) @db.Decimal(12, 2)
-  reservedBalance         Decimal               @default(0) @db.Decimal(12, 2)
-  bookingCount            Int                   @default(0)
-  fcmToken                String?
-  createdAt               DateTime              @default(now())
-  updatedAt               DateTime              @default(now()) @updatedAt
+  walletBalance           Decimal                       @default(0) @db.Decimal(12, 2)
+  reservedBalance         Decimal                       @default(0) @db.Decimal(12, 2)
+  bookingCount            Int                           @default(0)
+  // (User.fcmToken removed in this release — UserDevice is the only store.)
+  // Bumped by POST /user/auth/logout-all (and on password resets). The value
+  // is embedded in newly-issued access tokens; JWT middleware rejects any
+  // token whose embedded value is older than what's stored here. Tokens
+  // issued before this column existed don't carry the field at all — they
+  // bypass the check (treated as legacy) so the rollout is non-breaking.
+  tokenVersion            Int                           @default(0)
+  createdAt               DateTime                      @default(now())
+  updatedAt               DateTime                      @default(now()) @updatedAt
   auditLogs               AuditLog[]
   blogs                   Blog[]
   bookings                Booking[]
-  createdChats            Chat[]                @relation("ChatCreatorUser")
-  chatMemberships         ChatParticipant[]     @relation("UserChatMemberships")
+  createdChats            Chat[]                        @relation("ChatCreatorUser")
+  chatMemberships         ChatParticipant[]             @relation("UserChatMemberships")
   comments                Comment[]
-  disputes                Dispute[]             @relation("DisputeRaiser")
+  disputes                Dispute[]                     @relation("DisputeRaiser")
   gameDisputes            GameDispute[]
   gameSlots               GameSlot[]
-  hostedGames             HostedGame[]          @relation("HostRelation")
-  scoredGames             HostedGame[]          @relation("ScorerRelation")
-  streamedGames           HostedGame[]          @relation("StreamerRelation")
-  officiatedGames         HostedGame[]          @relation("UmpireRelation")
-  sentMessages            Message[]             @relation("MessageSenderUser")
+  hostedGames             HostedGame[]                  @relation("HostRelation")
+  scoredGames             HostedGame[]                  @relation("ScorerRelation")
+  streamedGames           HostedGame[]                  @relation("StreamerRelation")
+  officiatedGames         HostedGame[]                  @relation("UmpireRelation")
+  sentMessages            Message[]                     @relation("MessageSenderUser")
   notifications           Notification[]
   otp                     OTP?
   ownerProfile            OwnerProfile?
@@ -81,20 +88,20 @@ model User {
   stories                 Story[]
   supportTickets          SupportTicket[]
   systemSettings          SystemSetting[]
-  resolvedDisputes        Dispute[]             @relation("DisputeAdmin")
+  resolvedDisputes        Dispute[]                     @relation("DisputeAdmin")
   platformConfigs         PlatformConfig[]
-  ownedTeams              Team[]                @relation("TeamOwner")
+  ownedTeams              Team[]                        @relation("TeamOwner")
   teamMemberships         TeamMember[]
   oauth                   UserOAuth?
   profile                 UserProfile?
-  followers               UserRelationship[]    @relation("Following")
-  following               UserRelationship[]    @relation("Follower")
+  followers               UserRelationship[]            @relation("Following")
+  following               UserRelationship[]            @relation("Follower")
   stats                   UserStats?
   wallet                  Wallet?
   walletTransactions      WalletTransaction[]
-  likedPosts              Post[]                @relation("PostLikes")
-  studentSessions         ProfessionalSession[] @relation("SessionStudents")
-  viewedStories           Story[]               @relation("StoryViewers")
+  likedPosts              Post[]                        @relation("PostLikes")
+  studentSessions         ProfessionalSession[]         @relation("SessionStudents")
+  viewedStories           Story[]                       @relation("StoryViewers")
   turfLikes               TurfLike[]
   turfInteractions        TurfInteraction[]
   professionalCustomers   ProfessionalCustomer[]
@@ -108,19 +115,19 @@ model User {
 }
 
 model UserProfile {
-  id         String   @id @default(uuid())
-  userId     String   @unique
+  id         String    @id @default(uuid())
+  userId     String    @unique
   bio        String?
   gender     String?
   dob        DateTime?
-  interests  String[] @default([])
-  sportTypes String[] @default([])
+  interests  String[]  @default([])
+  sportTypes String[]  @default([])
   city       String?
   state      String?
-  latitude   Decimal? @db.Decimal(10, 8)
-  longitude  Decimal? @db.Decimal(11, 8)
-  updatedAt  DateTime @updatedAt
-  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  latitude   Decimal?  @db.Decimal(10, 8)
+  longitude  Decimal?  @db.Decimal(11, 8)
+  updatedAt  DateTime  @updatedAt
+  user       User      @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 model UserOAuth {
@@ -184,80 +191,80 @@ model OwnerRequest {
 }
 
 model OwnerProfile {
-  id                  String                     @id @default(uuid())
-  userId              String                     @unique
-  businessName        String
-  verified            Boolean                    @default(false)
-  walletBalance       Decimal                    @default(0) @db.Decimal(12, 2)
-  reservedBalance     Decimal                    @default(0) @db.Decimal(12, 2)
-  pendingBalance      Decimal                    @default(0) @db.Decimal(12, 2)
-  inProgressBalance   Decimal                    @default(0) @db.Decimal(12, 2)
-  disputeBalance      Decimal                    @default(0) @db.Decimal(12, 2)
-  withdrawnBalance    Decimal                    @default(0) @db.Decimal(12, 2)
-  price               Float                      @default(0)
-  dob                 DateTime?
-  gender              String?
-  bio                 String?
-  coachingLevel       String?
-  isOnline            Boolean                    @default(false)
-  latitude            Decimal?                   @db.Decimal(10, 8)
-  longitude           Decimal?                   @db.Decimal(11, 8)
-  lastLocationUpdate  DateTime?
-  trainingTypes       String[]
-  ageGroups           String[]
-  languages           String?
-  achievements        String?
-  experience          String?
-  specialization      String?
-  certifications      String[]
-  bannerUrl           String?
-  instagram           String?
-  linkedin            String?
-  youtube             String?
-  streamPlatforms     String[]
-  matchesCovered      String?
-  camerasSupported    Int?
-  streamQuality       String?
-  liveScoringSupport  Boolean?                   @default(false)
-  matchFormats        String[]
-  liveCommentarySupported Boolean?               @default(false)
-  panelDiscussionEnabled Boolean?                @default(false)
-  structuredAchievements Json?
-  portfolio           Json?
-  rating              Float                      @default(0)
-  numReviews          Int                        @default(0)
-  businessDetails     Json?
-  bankingDetails      Json?
-  verificationDocs    Json?
-  notificationPrefs   Json?
-  governmentId        String?                    @unique
-  maxTravelRadius     Int                        @default(50)
-  avgDailyActivePct   Float                      @default(0.0)
-  acceptanceRate30d   Float                      @default(100.0)
-  trustScore          Float                      @default(100.0)
-  createdAt           DateTime                   @default(now())
-  updatedAt           DateTime                   @updatedAt
-  createdChats        Chat[]                     @relation("ChatCreatorOwner")
-  chatMemberships     ChatParticipant[]          @relation("OwnerChatMemberships")
-  coupons             Coupon[]
-  disputes            Dispute[]
-  sentMessages        Message[]                  @relation("MessageSenderOwner")
-  notifications       Notification[]
-  user                User                       @relation(fields: [userId], references: [id])
-  profBookings        ProfessionalBooking[]
-  matchOffers         ProfessionalMatchOffer[]
-  onDemandBookings    OnDemandProfessionalBooking[]
-  sessions            ProfessionalSession[]
-  onlineSessions      ProfessionalOnlineSession[]
-  reviews             Review[]                   @relation("ProfessionalReview")
-  turfs               Turf[]
-  withdrawalRequests  WithdrawalRequest[]
-  customers           ProfessionalCustomer[]
-  tasks               ProfessionalTask[]
-  lockedBookings      OnDemandProfessionalBooking[] @relation("LockedBookings")
-  bookingNotifications BookingNotification[]
-  trustScoreEvents     TrustScoreEvent[]
-  umpireSessions       UmpireSession[]
+  id                      String                        @id @default(uuid())
+  userId                  String                        @unique
+  businessName            String
+  verified                Boolean                       @default(false)
+  walletBalance           Decimal                       @default(0) @db.Decimal(12, 2)
+  reservedBalance         Decimal                       @default(0) @db.Decimal(12, 2)
+  pendingBalance          Decimal                       @default(0) @db.Decimal(12, 2)
+  inProgressBalance       Decimal                       @default(0) @db.Decimal(12, 2)
+  disputeBalance          Decimal                       @default(0) @db.Decimal(12, 2)
+  withdrawnBalance        Decimal                       @default(0) @db.Decimal(12, 2)
+  price                   Float                         @default(0)
+  dob                     DateTime?
+  gender                  String?
+  bio                     String?
+  coachingLevel           String?
+  isOnline                Boolean                       @default(false)
+  latitude                Decimal?                      @db.Decimal(10, 8)
+  longitude               Decimal?                      @db.Decimal(11, 8)
+  lastLocationUpdate      DateTime?
+  trainingTypes           String[]
+  ageGroups               String[]
+  languages               String?
+  achievements            String?
+  experience              String?
+  specialization          String?
+  certifications          String[]
+  bannerUrl               String?
+  instagram               String?
+  linkedin                String?
+  youtube                 String?
+  streamPlatforms         String[]
+  matchesCovered          String?
+  camerasSupported        Int?
+  streamQuality           String?
+  liveScoringSupport      Boolean?                      @default(false)
+  matchFormats            String[]
+  liveCommentarySupported Boolean?                      @default(false)
+  panelDiscussionEnabled  Boolean?                      @default(false)
+  structuredAchievements  Json?
+  portfolio               Json?
+  rating                  Float                         @default(0)
+  numReviews              Int                           @default(0)
+  businessDetails         Json?
+  bankingDetails          Json?
+  verificationDocs        Json?
+  notificationPrefs       Json?
+  governmentId            String?                       @unique
+  maxTravelRadius         Int                           @default(50)
+  avgDailyActivePct       Float                         @default(0.0)
+  acceptanceRate30d       Float                         @default(100.0)
+  trustScore              Float                         @default(100.0)
+  createdAt               DateTime                      @default(now())
+  updatedAt               DateTime                      @updatedAt
+  createdChats            Chat[]                        @relation("ChatCreatorOwner")
+  chatMemberships         ChatParticipant[]             @relation("OwnerChatMemberships")
+  coupons                 Coupon[]
+  disputes                Dispute[]
+  sentMessages            Message[]                     @relation("MessageSenderOwner")
+  notifications           Notification[]
+  user                    User                          @relation(fields: [userId], references: [id])
+  profBookings            ProfessionalBooking[]
+  matchOffers             ProfessionalMatchOffer[]
+  onDemandBookings        OnDemandProfessionalBooking[]
+  sessions                ProfessionalSession[]
+  onlineSessions          ProfessionalOnlineSession[]
+  reviews                 Review[]                      @relation("ProfessionalReview")
+  turfs                   Turf[]
+  withdrawalRequests      WithdrawalRequest[]
+  customers               ProfessionalCustomer[]
+  tasks                   ProfessionalTask[]
+  lockedBookings          OnDemandProfessionalBooking[] @relation("LockedBookings")
+  bookingNotifications    BookingNotification[]
+  trustScoreEvents        TrustScoreEvent[]
+  umpireSessions          UmpireSession[]
 }
 
 model WithdrawalRequest {
@@ -277,42 +284,48 @@ model WithdrawalRequest {
 }
 
 model Turf {
-  id                  String       @id @default(uuid())
+  id                  String                        @id @default(uuid())
   ownerId             String
   name                String
   description         String?
   location            String
   city                String
   state               String
-  latitude            Decimal?     @db.Decimal(10, 8)
-  longitude           Decimal?     @db.Decimal(11, 8)
+  latitude            Decimal?                      @db.Decimal(10, 8)
+  longitude           Decimal?                      @db.Decimal(11, 8)
   image               String
   images              String[]
   sportTypes          String[]
   groundTypes         String[]
   facilities          String[]
   youtubeUrl          String?
-  pricePerHour        Decimal      @db.Decimal(10, 2)
+  pricePerHour        Decimal                       @db.Decimal(10, 2)
   openTime            String
   closeTime           String
-  isActive            Boolean      @default(true)
-  status              String       @default("pending")
-  slotDuration        Int          @default(60)
-  breakTime           Int          @default(0)
+  isActive            Boolean                       @default(true)
+  status              String                        @default("pending")
+  slotDuration        Int                           @default(60)
+  breakTime           Int                           @default(0)
   availableDays       String[]
   offDays             String[]
-  slotsConfigDuration String       @default("Until Changed")
+  slotsConfigDuration String                        @default("Until Changed")
   slotsConfigWeeks    Int?
   slotsConfigExpiry   DateTime?
-  slotsNeedsUpdate    Boolean      @default(false)
-  slug                String?      @unique
+  slotsNeedsUpdate    Boolean                       @default(false)
+  slug                String?                       @unique
   mapUrl              String?
-  policies            String?      @default("")
+  policies            String?                       @default("")
   managerContacts     Json?
   generatedSlots      Json?
+  // Stages owner edits to an approved turf for admin re-approval. Read by
+  // adminApproveTurf (which merges then clears) and by web EditTurf.jsx to
+  // show "pending" badges next to fields the owner has edited but admin
+  // hasn't approved yet. Without this column every owner edit on an approved
+  // turf was silently failing.
+  pendingUpdates      Json?
   verificationData    Json?
-  createdAt           DateTime     @default(now())
-  updatedAt           DateTime     @default(now()) @updatedAt
+  createdAt           DateTime                      @default(now())
+  updatedAt           DateTime                      @default(now()) @updatedAt
   bookings            Booking[]
   coupons             Coupon[]
   hostedGames         HostedGame[]
@@ -322,7 +335,7 @@ model Turf {
   turfInteractions    TurfInteraction[]
   matchRequests       ProfessionalMatchRequest[]
   onDemandBookings    OnDemandProfessionalBooking[]
-  owner               OwnerProfile @relation(fields: [ownerId], references: [id])
+  owner               OwnerProfile                  @relation(fields: [ownerId], references: [id])
 
   @@index([ownerId])
   @@index([city, state, status, isActive])
@@ -344,42 +357,42 @@ model TimeSlot {
 }
 
 model Booking {
-  id                 String              @id @default(uuid())
-  userId             String
-  turfId             String
-  timeSlotId         String?             @unique
-  totalPrice         Decimal             @db.Decimal(10, 2)
-  paidAmount         Decimal             @db.Decimal(10, 2)
-  balanceAmount      Decimal             @db.Decimal(10, 2)
-  advanceAmount      Decimal             @default(0) @db.Decimal(10, 2)
-  platformFee        Decimal             @default(0) @db.Decimal(10, 2)
-  gstAmount          Decimal             @default(0) @db.Decimal(10, 2)
-  ownerRevenue       Decimal             @default(0) @db.Decimal(10, 2)
-  status             BookingStatus       @default(PENDING)
-  revenueStatus      RevenueStatus       @default(PENDING)
-  bookingSource      String              @default("USER")
-  paymentMethod      String?
-  paymentType        String              @default("FULL")
-  qrCode               String?
-  isManuallyCompleted  Boolean            @default(false)
-  orderId            String?
-  paymentId          String?
-  paymentSignature   String?
-  paymentStatus      String?             @default("PENDING")
-  playStartTime      DateTime?
-  playEndTime        DateTime?
-  reviewWindowEndsAt DateTime?
-  settledAt          DateTime?
-  guestName          String?
-  guestPhone         String?
-  guestEmail         String?
-  createdAt          DateTime            @default(now())
-  updatedAt          DateTime            @default(now()) @updatedAt
-  timeSlot           TimeSlot?           @relation(fields: [timeSlotId], references: [id])
-  turf               Turf                @relation(fields: [turfId], references: [id])
-  user               User                @relation(fields: [userId], references: [id])
-  disputes           Dispute[]
-  walletTransactions WalletTransaction[]
+  id                  String              @id @default(uuid())
+  userId              String
+  turfId              String
+  timeSlotId          String?             @unique
+  totalPrice          Decimal             @db.Decimal(10, 2)
+  paidAmount          Decimal             @db.Decimal(10, 2)
+  balanceAmount       Decimal             @db.Decimal(10, 2)
+  advanceAmount       Decimal             @default(0) @db.Decimal(10, 2)
+  platformFee         Decimal             @default(0) @db.Decimal(10, 2)
+  gstAmount           Decimal             @default(0) @db.Decimal(10, 2)
+  ownerRevenue        Decimal             @default(0) @db.Decimal(10, 2)
+  status              BookingStatus       @default(PENDING)
+  revenueStatus       RevenueStatus       @default(PENDING)
+  bookingSource       String              @default("USER")
+  paymentMethod       String?
+  paymentType         String              @default("FULL")
+  qrCode              String?
+  isManuallyCompleted Boolean             @default(false)
+  orderId             String?
+  paymentId           String?
+  paymentSignature    String?
+  paymentStatus       String?             @default("PENDING")
+  playStartTime       DateTime?
+  playEndTime         DateTime?
+  reviewWindowEndsAt  DateTime?
+  settledAt           DateTime?
+  guestName           String?
+  guestPhone          String?
+  guestEmail          String?
+  createdAt           DateTime            @default(now())
+  updatedAt           DateTime            @default(now()) @updatedAt
+  timeSlot            TimeSlot?           @relation(fields: [timeSlotId], references: [id])
+  turf                Turf                @relation(fields: [turfId], references: [id])
+  user                User                @relation(fields: [userId], references: [id])
+  disputes            Dispute[]
+  walletTransactions  WalletTransaction[]
 
   @@index([userId, status])
   @@index([status, playStartTime])
@@ -419,70 +432,70 @@ model WalletTransaction {
 }
 
 model Review {
-  id             String        @id @default(uuid())
-  userId         String
-  turfId         String?
-  professionalId String?
-  rating         Int
-  comment        String
-  reply          String?
-  replyDate      DateTime?
-  createdAt      DateTime      @default(now())
-  updatedAt      DateTime      @updatedAt
-  bookingId      String?
-  professional   OwnerProfile? @relation("ProfessionalReview", fields: [professionalId], references: [id])
-  turf           Turf?         @relation(fields: [turfId], references: [id])
-  user           User          @relation(fields: [userId], references: [id])
+  id              String                       @id @default(uuid())
+  userId          String
+  turfId          String?
+  professionalId  String?
+  rating          Int
+  comment         String
+  reply           String?
+  replyDate       DateTime?
+  createdAt       DateTime                     @default(now())
+  updatedAt       DateTime                     @updatedAt
+  bookingId       String?
+  professional    OwnerProfile?                @relation("ProfessionalReview", fields: [professionalId], references: [id])
+  turf            Turf?                        @relation(fields: [turfId], references: [id])
+  user            User                         @relation(fields: [userId], references: [id])
   onDemandBooking OnDemandProfessionalBooking? @relation(fields: [bookingId], references: [id])
 
   @@unique([userId, bookingId])
 }
 
 model HostedGame {
-  id                String               @id @default(uuid())
-  hostId            String
-  gameType          String
-  gameMode          String               @default("PROFESSIONAL")
-  date              DateTime
-  time              String
-  turfId            String?
-  umpireId          String?
-  scorerId          String?
-  streamerId        String?
-  umpireRequest     Json?
-  scorerRequest     Json?
-  streamerRequest   Json?
-  streamConfig      Json?
-  perPlayerCharge   Decimal              @default(0) @db.Decimal(10, 2)
-  perSeatCharge     Decimal              @default(0) @db.Decimal(10, 2)
-  groundCost        Decimal              @default(0) @db.Decimal(10, 2)
-  umpireCost        Decimal              @default(0) @db.Decimal(10, 2)
-  streamerCost      Decimal              @default(0) @db.Decimal(10, 2)
-  discountAmount    Decimal              @default(0) @db.Decimal(10, 2)
-  platformFee       Decimal              @default(0) @db.Decimal(10, 2)
-  totalCost         Decimal              @default(0) @db.Decimal(10, 2)
-  couponId          String?
-  status            String               @default("ACTIVE")
-  shortId           String?              @unique
-  scoringStatus     String               @default("NOT_STARTED")
-  city              String?
-  state             String?
-  customVenue       String?
-  isLive            Boolean              @default(false)
-  streamStatus      String               @default("offline")
-  overlayConfig     Json?
-  liveStartedAt     DateTime?
-  overlayToken      String?
-  lastCommentary    String?
-  lastCommentaryAt  DateTime?
-  liveScoreSnapshot Json?
-  oversPerInnings   Int                  @default(20)
-  tickerTheme       String               @default("neon_classic")
-  customUmpire      Json?
-  customScorer      Json?
-  customStreamer    Json?
+  id                  String    @id @default(uuid())
+  hostId              String
+  gameType            String
+  gameMode            String    @default("PROFESSIONAL")
+  date                DateTime
+  time                String
+  turfId              String?
+  umpireId            String?
+  scorerId            String?
+  streamerId          String?
+  umpireRequest       Json?
+  scorerRequest       Json?
+  streamerRequest     Json?
+  streamConfig        Json?
+  perPlayerCharge     Decimal   @default(0) @db.Decimal(10, 2)
+  perSeatCharge       Decimal   @default(0) @db.Decimal(10, 2)
+  groundCost          Decimal   @default(0) @db.Decimal(10, 2)
+  umpireCost          Decimal   @default(0) @db.Decimal(10, 2)
+  streamerCost        Decimal   @default(0) @db.Decimal(10, 2)
+  discountAmount      Decimal   @default(0) @db.Decimal(10, 2)
+  platformFee         Decimal   @default(0) @db.Decimal(10, 2)
+  totalCost           Decimal   @default(0) @db.Decimal(10, 2)
+  couponId            String?
+  status              String    @default("ACTIVE")
+  shortId             String?   @unique
+  scoringStatus       String    @default("NOT_STARTED")
+  city                String?
+  state               String?
+  customVenue         String?
+  isLive              Boolean   @default(false)
+  streamStatus        String    @default("offline")
+  overlayConfig       Json?
+  liveStartedAt       DateTime?
+  overlayToken        String?
+  lastCommentary      String?
+  lastCommentaryAt    DateTime?
+  liveScoreSnapshot   Json?
+  oversPerInnings     Int       @default(20)
+  tickerTheme         String    @default("neon_classic")
+  customUmpire        Json?
+  customScorer        Json?
+  customStreamer      Json?
   customProfessionals Json?
-  
+
   // AI Commentary Settings
   isAiCommentaryEnabled Boolean @default(false)
   commentaryVoice       String  @default("en_US-lessac-medium") // Piper TTS voice model name
@@ -496,60 +509,60 @@ model HostedGame {
   groundType        String?
   scoringPassword   String?
   youtubeLiveUrl    String?
-  maxMembers        Int                  @default(11)
-  customDays        Int                  @default(1)
-  customOversPerDay Int                  @default(20)
-  
+  maxMembers        Int     @default(11)
+  customDays        Int     @default(1)
+  customOversPerDay Int     @default(20)
+
   // Escrow & Matchmaking fields
-  escrowAmount      Decimal              @default(0) @db.Decimal(10, 2)
-  disputeRaised     Boolean              @default(false)
-  payoutStatus      String               @default("PENDING") // PENDING, FROZEN, PAID, REFUNDED
-  scoringMatchId    String?
-  
-  createdAt         DateTime             @default(now())
-  updatedAt         DateTime             @updatedAt
-  broadcasts        Broadcast[]
-  cricketMatch      CricketMatch?
-  invites           CustomPlayerInvite[]
-  slots             GameSlot[]
-  teams             GameTeam[]
-  gameDisputes      GameDispute[]
+  escrowAmount   Decimal @default(0) @db.Decimal(10, 2)
+  disputeRaised  Boolean @default(false)
+  payoutStatus   String  @default("PENDING") // PENDING, FROZEN, PAID, REFUNDED
+  scoringMatchId String?
+
+  createdAt          DateTime             @default(now())
+  updatedAt          DateTime             @updatedAt
+  broadcasts         Broadcast[]
+  cricketMatch       CricketMatch?
+  invites            CustomPlayerInvite[]
+  slots              GameSlot[]
+  teams              GameTeam[]
+  gameDisputes       GameDispute[]
   coinTransferStatus String               @default("PENDING")
   votedStartedBy     String[]             @default([])
   scheduledStartAt   DateTime?
-  host              User                 @relation("HostRelation", fields: [hostId], references: [id])
-  scorer            User?                @relation("ScorerRelation", fields: [scorerId], references: [id])
-  streamer          User?                @relation("StreamerRelation", fields: [streamerId], references: [id])
-  turf              Turf?                @relation(fields: [turfId], references: [id])
-  umpire            User?                @relation("UmpireRelation", fields: [umpireId], references: [id])
-  coupon            Coupon?              @relation(fields: [couponId], references: [id])
+  host               User                 @relation("HostRelation", fields: [hostId], references: [id])
+  scorer             User?                @relation("ScorerRelation", fields: [scorerId], references: [id])
+  streamer           User?                @relation("StreamerRelation", fields: [streamerId], references: [id])
+  turf               Turf?                @relation(fields: [turfId], references: [id])
+  umpire             User?                @relation("UmpireRelation", fields: [umpireId], references: [id])
+  coupon             Coupon?              @relation(fields: [couponId], references: [id])
 }
 
 model GameTeam {
-  id        String     @id @default(uuid())
-  gameId    String
-  name      String
-  image     String?
-  teamKey   String
-  createdAt DateTime   @default(now())
-  slots      GameSlot[]
-  game       HostedGame @relation(fields: [gameId], references: [id], onDelete: Cascade)
+  id           String     @id @default(uuid())
+  gameId       String
+  name         String
+  image        String?
+  teamKey      String
+  createdAt    DateTime   @default(now())
+  slots        GameSlot[]
+  game         HostedGame @relation(fields: [gameId], references: [id], onDelete: Cascade)
   linkedTeamId String?
   linkedTeam   Team?      @relation(fields: [linkedTeamId], references: [id])
 }
 
 model GameDispute {
-  id          String     @id @default(uuid())
-  gameId      String
-  raisedById  String
-  reason      String?
-  status      String     @default("OPEN")
-  adminNote   String?
-  resolvedAt  DateTime?
-  createdAt   DateTime   @default(now())
-  updatedAt   DateTime   @updatedAt
-  game        HostedGame @relation(fields: [gameId], references: [id], onDelete: Cascade)
-  raisedBy    User       @relation(fields: [raisedById], references: [id])
+  id         String     @id @default(uuid())
+  gameId     String
+  raisedById String
+  reason     String?
+  status     String     @default("OPEN")
+  adminNote  String?
+  resolvedAt DateTime?
+  createdAt  DateTime   @default(now())
+  updatedAt  DateTime   @updatedAt
+  game       HostedGame @relation(fields: [gameId], references: [id], onDelete: Cascade)
+  raisedBy   User       @relation(fields: [raisedById], references: [id])
 }
 
 model GameSlot {
@@ -570,119 +583,127 @@ model GameSlot {
 }
 
 model CustomPlayerInvite {
-  id           String     @id @default(uuid())
-  gameId       String
-  name         String
-  email        String
-  phone        String?
-  userId       String?
-  role         String     @default("PLAYER")
-  isProfessional Boolean  @default(false)
-  inviteToken  String?    @unique
-  inviteStatus String     @default("PENDING")
-  mustPay      Boolean    @default(false)
-  invitedAt    DateTime   @default(now())
-  createdAt    DateTime   @default(now())
-  game         HostedGame @relation(fields: [gameId], references: [id], onDelete: Cascade)
-  slot         GameSlot?  @relation("SlotInvite")
+  id             String     @id @default(uuid())
+  gameId         String
+  name           String
+  email          String
+  phone          String?
+  userId         String?
+  role           String     @default("PLAYER")
+  isProfessional Boolean    @default(false)
+  inviteToken    String?    @unique
+  inviteStatus   String     @default("PENDING")
+  mustPay        Boolean    @default(false)
+  invitedAt      DateTime   @default(now())
+  createdAt      DateTime   @default(now())
+  game           HostedGame @relation(fields: [gameId], references: [id], onDelete: Cascade)
+  slot           GameSlot?  @relation("SlotInvite")
 }
 
 model CricketMatch {
-  id                  String            @id @default(uuid())
-  gameId              String            @unique
-  status              String            @default("NOT_STARTED")
-  timerState          String            @default("NOT_STARTED") // NOT_STARTED, RUNNING, PAUSED, ENDED
-  timerLastStartedAt  DateTime?
-  totalDurationSeconds Int              @default(0)
-  result              String?
-  tossWinner          String?
-  tossDecision        String?
-  currentInningsIndex Int               @default(0)
-  oversPerInnings     Int               @default(20)
-  strikerId           String?
-  nonStrikerId        String?
-  bowlerId            String?
-  revisedTarget       Int?
-  revisedOvers        Float?
-  matchOfficials      Json?
-  createdAt           DateTime          @default(now())
-  updatedAt           DateTime          @updatedAt
-  game                HostedGame        @relation(fields: [gameId], references: [id], onDelete: Cascade)
-  innings             Innings[]
-  timeline            MatchBall[]
-  playerStats         MatchPlayerStat[]
+  id                   String            @id @default(uuid())
+  gameId               String            @unique
+  status               String            @default("NOT_STARTED")
+  timerState           String            @default("NOT_STARTED") // NOT_STARTED, RUNNING, PAUSED, ENDED
+  timerLastStartedAt   DateTime?
+  totalDurationSeconds Int               @default(0)
+  result               String?
+  tossWinner           String?
+  tossDecision         String?
+  currentInningsIndex  Int               @default(0)
+  oversPerInnings      Int               @default(20)
+  strikerId            String?
+  nonStrikerId         String?
+  bowlerId             String?
+  revisedTarget        Int?
+  revisedOvers         Float?
+  // Free Hit (Law 21.18): set true after a no-ball, cleared on next fair
+  // delivery. While active, batter cannot be out by BOWLED/LBW/CAUGHT/
+  // STUMPED/HIT_WICKET.
+  freeHitActive        Boolean           @default(false)
+  // Per-match rule toggles for casual / tape-ball / gully formats that
+  // deviate from MCC laws. Null/missing = MCC defaults. Shape documented in
+  // scoring.utils.js → DEFAULT_HOUSE_RULES.
+  houseRules           Json?
+  matchOfficials       Json?
+  createdAt            DateTime          @default(now())
+  updatedAt            DateTime          @updatedAt
+  game                 HostedGame        @relation(fields: [gameId], references: [id], onDelete: Cascade)
+  innings              Innings[]
+  timeline             MatchBall[]
+  playerStats          MatchPlayerStat[]
 }
 
 model Innings {
-  id           String       @id @default(uuid())
-  matchId      String
-  inningsIndex Int
-  battingTeam  String
-  totalRuns    Int          @default(0)
-  totalWickets Int          @default(0)
-  totalBalls         Int          @default(0)
-  isCompleted        Boolean      @default(false)
-  extras             Json
-  battingTeamReviews Int          @default(2)
-  fieldingTeamReviews Int         @default(2)
-  powerplayOvers     Int          @default(0)
-  createdAt          DateTime     @default(now())
-  match        CricketMatch @relation(fields: [matchId], references: [id], onDelete: Cascade)
+  id                  String       @id @default(uuid())
+  matchId             String
+  inningsIndex        Int
+  battingTeam         String
+  totalRuns           Int          @default(0)
+  totalWickets        Int          @default(0)
+  totalBalls          Int          @default(0)
+  isCompleted         Boolean      @default(false)
+  extras              Json
+  battingTeamReviews  Int          @default(2)
+  fieldingTeamReviews Int          @default(2)
+  powerplayOvers      Int          @default(0)
+  createdAt           DateTime     @default(now())
+  match               CricketMatch @relation(fields: [matchId], references: [id], onDelete: Cascade)
 }
 
 model MatchBall {
-  id           String       @id @default(uuid())
-  matchId      String
-  inningsIndex Int
-  over         Int
-  ballInOver   Int
-  batterId     String
-  bowlerId     String
-  fielderId    String?
-  runs         Int          @default(0)
-  isExtra      Boolean      @default(false)
-  extraType    String       @default("NONE")
-  extraRuns    Int          @default(0)
-  isBoundary   Boolean      @default(false)
-  isFour       Boolean      @default(false)
-  isSix        Boolean      @default(false)
-  isWicket     Boolean      @default(false)
-  wicketType   String?
-  playerOutId  String?
-  wicketTakerId String?
+  id               String       @id @default(uuid())
+  matchId          String
+  inningsIndex     Int
+  over             Int
+  ballInOver       Int
+  batterId         String
+  bowlerId         String
+  fielderId        String?
+  runs             Int          @default(0)
+  isExtra          Boolean      @default(false)
+  extraType        String       @default("NONE")
+  extraRuns        Int          @default(0)
+  isBoundary       Boolean      @default(false)
+  isFour           Boolean      @default(false)
+  isSix            Boolean      @default(false)
+  isWicket         Boolean      @default(false)
+  wicketType       String?
+  playerOutId      String?
+  wicketTakerId    String?
   fieldingPosition String?
-  distance     String?
-  commentary   String?
-  timestamp    DateTime     @default(now())
-  match        CricketMatch @relation(fields: [matchId], references: [id], onDelete: Cascade)
+  distance         String?
+  commentary       String?
+  timestamp        DateTime     @default(now())
+  match            CricketMatch @relation(fields: [matchId], references: [id], onDelete: Cascade)
 }
 
 model MatchPlayerStat {
-  id             String       @id @default(uuid())
-  matchId        String
-  userId         String
-  inningsIndex   Int
-  battingRuns    Int          @default(0)
-  battingBalls   Int          @default(0)
-  battingFours   Int          @default(0)
-  battingSixes   Int          @default(0)
-  outStatus      String       @default("NOT_OUT")
-  dismissedById  String?
-  caughtById     String?
-  bowlingOvers   Float        @default(0)
-  bowlingBalls   Int          @default(0)
-  bowlingMaidens Int          @default(0)
-  bowlingRuns    Int          @default(0)
-  bowlingWickets Int          @default(0)
-  bowlingWides   Int          @default(0)
-  bowlingNoBalls Int          @default(0)
-  isSubstitute   Boolean      @default(false)
-  substituteForId String?
-  timeSpentSeconds Int        @default(0)
+  id                 String       @id @default(uuid())
+  matchId            String
+  userId             String
+  inningsIndex       Int
+  battingRuns        Int          @default(0)
+  battingBalls       Int          @default(0)
+  battingFours       Int          @default(0)
+  battingSixes       Int          @default(0)
+  outStatus          String       @default("NOT_OUT")
+  dismissedById      String?
+  caughtById         String?
+  bowlingOvers       Float        @default(0)
+  bowlingBalls       Int          @default(0)
+  bowlingMaidens     Int          @default(0)
+  bowlingRuns        Int          @default(0)
+  bowlingWickets     Int          @default(0)
+  bowlingWides       Int          @default(0)
+  bowlingNoBalls     Int          @default(0)
+  isSubstitute       Boolean      @default(false)
+  substituteForId    String?
+  timeSpentSeconds   Int          @default(0)
   timerLastStartedAt DateTime?
-  createdAt      DateTime     @default(now())
-  updatedAt      DateTime     @updatedAt
-  match          CricketMatch @relation(fields: [matchId], references: [id], onDelete: Cascade)
+  createdAt          DateTime     @default(now())
+  updatedAt          DateTime     @updatedAt
+  match              CricketMatch @relation(fields: [matchId], references: [id], onDelete: Cascade)
 
   @@unique([matchId, userId, inningsIndex])
 }
@@ -890,20 +911,20 @@ model ReelReport {
 }
 
 model Post {
-  id          String    @id @default(uuid())
-  authorId    String    @map("creatorId")
+  id          String       @id @default(uuid())
+  authorId    String       @map("creatorId")
   title       String?
   content     String?
-  mediaType   String    @default("image")
+  mediaType   String       @default("image")
   mediaUrls   String[]
   placeholder String?
-  status      String    @default("ready")
+  status      String       @default("ready")
   hashtags    String[]
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @default(now()) @updatedAt
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @default(now()) @updatedAt
   comments    Comment[]
-  author      User      @relation(fields: [authorId], references: [id])
-  likes       User[]    @relation("PostLikes")
+  author      User         @relation(fields: [authorId], references: [id])
+  likes       User[]       @relation("PostLikes")
   reports     PostReport[]
 
   @@index([authorId])
@@ -975,7 +996,7 @@ model Coupon {
   code          String        @unique
   ownerId       String?
   turfId        String?
-  discountType  String        // e.g. 'PERCENTAGE', 'FIXED'
+  discountType  String // e.g. 'PERCENTAGE', 'FIXED'
   discountValue Decimal       @db.Decimal(10, 2)
   validUntil    DateTime
   usageLimit    Int           @default(0)
@@ -987,7 +1008,6 @@ model Coupon {
   turf          Turf?         @relation(fields: [turfId], references: [id])
   hostedGames   HostedGame[]
 }
-
 
 model FeatureFlag {
   id          String   @id @default(uuid())
@@ -1151,28 +1171,28 @@ model TicketReply {
 }
 
 model Dispute {
-  id             String         @id @default(uuid())
-  bookingId      String?
-  raisedById     String
-  ownerId        String?
-  reason         String
-  description    String
-  images         String[]
-  status         String         @default("PENDING")
-  resolution     Json?
-  bookingDetails Json?
-  outcome        String?
-  resolvedAt     DateTime?
-  adminId        String?
+  id                String                       @id @default(uuid())
+  bookingId         String?
+  raisedById        String
+  ownerId           String?
+  reason            String
+  description       String
+  images            String[]
+  status            String                       @default("PENDING")
+  resolution        Json?
+  bookingDetails    Json?
+  outcome           String?
+  resolvedAt        DateTime?
+  adminId           String?
   onDemandBookingId String?
-  createdAt      DateTime       @default(now())
-  updatedAt      DateTime       @updatedAt
-  booking        Booking?       @relation(fields: [bookingId], references: [id])
-  owner          OwnerProfile?  @relation(fields: [ownerId], references: [id])
-  raisedBy       User           @relation("DisputeRaiser", fields: [raisedById], references: [id])
-  onDemandBooking OnDemandProfessionalBooking? @relation(fields: [onDemandBookingId], references: [id])
-  admin          User?          @relation("DisputeAdmin", fields: [adminId], references: [id])
-  replies        DisputeReply[]
+  createdAt         DateTime                     @default(now())
+  updatedAt         DateTime                     @updatedAt
+  booking           Booking?                     @relation(fields: [bookingId], references: [id])
+  owner             OwnerProfile?                @relation(fields: [ownerId], references: [id])
+  raisedBy          User                         @relation("DisputeRaiser", fields: [raisedById], references: [id])
+  onDemandBooking   OnDemandProfessionalBooking? @relation(fields: [onDemandBookingId], references: [id])
+  admin             User?                        @relation("DisputeAdmin", fields: [adminId], references: [id])
+  replies           DisputeReply[]
 
   @@index([status, createdAt])
 }
@@ -1230,30 +1250,30 @@ model ProfessionalOnlineSession {
 }
 
 model ProfessionalMatchRequest {
-  id             String                   @id @default(uuid())
+  id             String  @id @default(uuid())
   userId         String
   groundId       String?
   customLocation Json?
-  latitude       Decimal                  @db.Decimal(10, 8)
-  longitude      Decimal                  @db.Decimal(11, 8)
+  latitude       Decimal @db.Decimal(10, 8)
+  longitude      Decimal @db.Decimal(11, 8)
   roles          Role[]
-  minBudget      Decimal                  @db.Decimal(10, 2)
-  maxBudget      Decimal                  @db.Decimal(10, 2)
-  
-  matchDate       String?
-  matchStartTime  String?
-  matchEndTime    String?
-  
+  minBudget      Decimal @db.Decimal(10, 2)
+  maxBudget      Decimal @db.Decimal(10, 2)
+
+  matchDate      String?
+  matchStartTime String?
+  matchEndTime   String?
+
   queuePositions       Json?
-  currentPositionIndex Int?                     @default(0)
+  currentPositionIndex Int?      @default(0)
   lastRoutedAt         DateTime?
 
-  status         MatchRequestStatus       @default(SEARCHING)
-  createdAt      DateTime                 @default(now())
-  expiresAt      DateTime
-  user           User                     @relation(fields: [userId], references: [id])
-  ground         Turf?                    @relation(fields: [groundId], references: [id])
-  offers         ProfessionalMatchOffer[]
+  status    MatchRequestStatus       @default(SEARCHING)
+  createdAt DateTime                 @default(now())
+  expiresAt DateTime
+  user      User                     @relation(fields: [userId], references: [id])
+  ground    Turf?                    @relation(fields: [groundId], references: [id])
+  offers    ProfessionalMatchOffer[]
 }
 
 model ProfessionalMatchOffer {
@@ -1267,47 +1287,47 @@ model ProfessionalMatchOffer {
 }
 
 model OnDemandProfessionalBooking {
-  id             String                @id @default(uuid())
-  requestId      String                @unique
+  id             String  @id @default(uuid())
+  requestId      String  @unique
   userId         String
   professionalId String
   role           Role
   groundId       String?
   customLocation Json?
-  latitude       Decimal               @db.Decimal(10, 8)
-  longitude      Decimal               @db.Decimal(11, 8)
-  hourlyRate     Decimal               @db.Decimal(10, 2)
-  
-  matchDate       String?
-  matchStartTime  String?
-  matchEndTime    String?
-  matchEndParsed  DateTime?
+  latitude       Decimal @db.Decimal(10, 8)
+  longitude      Decimal @db.Decimal(11, 8)
+  hourlyRate     Decimal @db.Decimal(10, 2)
 
-  otpHash        String
-  status         OnDemandBookingStatus @default(ASSIGNED)
-  isManuallyCompleted Boolean   @default(false)
-  verifiedAt     DateTime?
-  createdAt      DateTime              @default(now())
-  updatedAt      DateTime              @updatedAt
-  blockedAmount  Decimal               @default(0) @db.Decimal(12, 2)
-  commissionAmount Decimal?            @db.Decimal(12, 2)
-  payoutAmount   Decimal?              @db.Decimal(12, 2)
-  cycleNumber    Int                   @default(1)
-  lockedForProId String?
-  otpCode        String?
-  otpAttempts    Int                   @default(0)
-  otpEnteredAt   DateTime?
-  disputeRaisedAt DateTime?
-  fundsReleasedAt DateTime?
+  matchDate      String?
+  matchStartTime String?
+  matchEndTime   String?
+  matchEndParsed DateTime?
 
-  user           User                  @relation(fields: [userId], references: [id])
-  professional   OwnerProfile          @relation(fields: [professionalId], references: [id])
-  ground         Turf?                 @relation(fields: [groundId], references: [id])
-  lockedForPro   OwnerProfile?         @relation("LockedBookings", fields: [lockedForProId], references: [id])
-  notifications  BookingNotification[]
+  otpHash             String
+  status              OnDemandBookingStatus @default(ASSIGNED)
+  isManuallyCompleted Boolean               @default(false)
+  verifiedAt          DateTime?
+  createdAt           DateTime              @default(now())
+  updatedAt           DateTime              @updatedAt
+  blockedAmount       Decimal               @default(0) @db.Decimal(12, 2)
+  commissionAmount    Decimal?              @db.Decimal(12, 2)
+  payoutAmount        Decimal?              @db.Decimal(12, 2)
+  cycleNumber         Int                   @default(1)
+  lockedForProId      String?
+  otpCode             String?
+  otpAttempts         Int                   @default(0)
+  otpEnteredAt        DateTime?
+  disputeRaisedAt     DateTime?
+  fundsReleasedAt     DateTime?
+
+  user             User                  @relation(fields: [userId], references: [id])
+  professional     OwnerProfile          @relation(fields: [professionalId], references: [id])
+  ground           Turf?                 @relation(fields: [groundId], references: [id])
+  lockedForPro     OwnerProfile?         @relation("LockedBookings", fields: [lockedForProId], references: [id])
+  notifications    BookingNotification[]
   trustScoreEvents TrustScoreEvent[]
-  reviews        Review[]
-  disputes       Dispute[]
+  reviews          Review[]
+  disputes         Dispute[]
 }
 
 enum OnDemandBookingStatus {
@@ -1342,8 +1362,6 @@ enum OfferStatus {
   REJECTED
   EXPIRED
 }
-
-
 
 model ProfessionalBooking {
   id              String       @id @default(uuid())
@@ -1401,9 +1419,9 @@ model TurfLike {
   userId    String
   turfId    String
   createdAt DateTime @default(now())
-  
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  turf      Turf     @relation(fields: [turfId], references: [id], onDelete: Cascade)
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  turf Turf @relation(fields: [turfId], references: [id], onDelete: Cascade)
 
   @@unique([userId, turfId])
   @@index([userId])
@@ -1414,12 +1432,12 @@ model TurfInteraction {
   id              String   @id @default(uuid())
   userId          String?
   turfId          String
-  interactionType String   // 'VIEW', 'SHARE', 'CLICK', 'SEARCH'
+  interactionType String // 'VIEW', 'SHARE', 'CLICK', 'SEARCH'
   duration        Int      @default(0) // Dwell time in seconds (for views)
   createdAt       DateTime @default(now())
 
-  user            User?    @relation(fields: [userId], references: [id], onDelete: Cascade)
-  turf            Turf     @relation(fields: [turfId], references: [id], onDelete: Cascade)
+  user User? @relation(fields: [userId], references: [id], onDelete: Cascade)
+  turf Turf  @relation(fields: [turfId], references: [id], onDelete: Cascade)
 
   @@index([userId, interactionType])
   @@index([turfId, interactionType])
@@ -1427,22 +1445,22 @@ model TurfInteraction {
 }
 
 model ProfessionalCustomer {
-  id              String       @id @default(uuid())
-  professionalId  String
-  userId          String?
-  name            String
-  email           String?
-  phone           String?
-  createdAt       DateTime     @default(now())
-  updatedAt       DateTime     @updatedAt
+  id             String   @id @default(uuid())
+  professionalId String
+  userId         String?
+  name           String
+  email          String?
+  phone          String?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
 
-  professional    OwnerProfile @relation(fields: [professionalId], references: [id])
-  user            User?        @relation(fields: [userId], references: [id])
-  tasks           ProfessionalTask[]
+  professional OwnerProfile       @relation(fields: [professionalId], references: [id])
+  user         User?              @relation(fields: [userId], references: [id])
+  tasks        ProfessionalTask[]
 }
 
 model ProfessionalTask {
-  id              String       @id @default(uuid())
+  id              String   @id @default(uuid())
   professionalId  String
   customerId      String?
   title           String
@@ -1450,12 +1468,12 @@ model ProfessionalTask {
   date            DateTime
   startTime       String
   endTime         String
-  reminderMinutes Int          @default(30)
-  createdAt       DateTime     @default(now())
-  updatedAt       DateTime     @updatedAt
+  reminderMinutes Int      @default(30)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
 
-  professional    OwnerProfile @relation(fields: [professionalId], references: [id])
-  customer        ProfessionalCustomer? @relation(fields: [customerId], references: [id])
+  professional OwnerProfile          @relation(fields: [professionalId], references: [id])
+  customer     ProfessionalCustomer? @relation(fields: [customerId], references: [id])
 }
 
 model UserBadge {
@@ -1468,41 +1486,41 @@ model UserBadge {
   badgeIcon   String
   earnedAt    DateTime @default(now())
   user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  
+
   @@index([userId, sportType])
 }
 
 model PlayerCareerStats {
-  id                 String   @id @default(uuid())
-  userId             String
-  sportType          String   @default("CRICKET")
-  
-  matchesPlayed      Int      @default(0)
-  matchesWon         Int      @default(0)
-  matchesLost        Int      @default(0)
-  winPercentage      Float    @default(0.0)
-  
-  totalRuns          Int      @default(0)
-  ballsFaced         Int      @default(0)
-  fours              Int      @default(0)
-  sixes              Int      @default(0)
-  centuries          Int      @default(0)
-  halfCenturies      Int      @default(0)
-  highestScore       Int      @default(0)
-  battingAverage     Float    @default(0.0)
-  battingStrikeRate  Float    @default(0.0)
-  
-  ballsBowled        Int      @default(0)
-  runsConceded       Int      @default(0)
-  wickets            Int      @default(0)
-  fiveWicketHauls    Int      @default(0)
-  bestBowlingRuns    Int      @default(0)
-  bestBowlingWickets  Int      @default(0)
-  bowlingAverage     Float    @default(0.0)
-  bowlingEconomy     Float    @default(0.0)
+  id        String @id @default(uuid())
+  userId    String
+  sportType String @default("CRICKET")
 
-  updatedAt          DateTime @updatedAt
-  user               User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  matchesPlayed Int   @default(0)
+  matchesWon    Int   @default(0)
+  matchesLost   Int   @default(0)
+  winPercentage Float @default(0.0)
+
+  totalRuns         Int   @default(0)
+  ballsFaced        Int   @default(0)
+  fours             Int   @default(0)
+  sixes             Int   @default(0)
+  centuries         Int   @default(0)
+  halfCenturies     Int   @default(0)
+  highestScore      Int   @default(0)
+  battingAverage    Float @default(0.0)
+  battingStrikeRate Float @default(0.0)
+
+  ballsBowled        Int   @default(0)
+  runsConceded       Int   @default(0)
+  wickets            Int   @default(0)
+  fiveWicketHauls    Int   @default(0)
+  bestBowlingRuns    Int   @default(0)
+  bestBowlingWickets Int   @default(0)
+  bowlingAverage     Float @default(0.0)
+  bowlingEconomy     Float @default(0.0)
+
+  updatedAt DateTime @updatedAt
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([userId, sportType])
   @@index([userId])
@@ -1524,45 +1542,45 @@ model PostReport {
 }
 
 model BookingNotification {
-  id             String                      @id @default(uuid())
+  id             String    @id @default(uuid())
   bookingId      String
   professionalId String
-  sentAt         DateTime                    @default(now())
+  sentAt         DateTime  @default(now())
   expiresAt      DateTime
-  action         String?                     // Enum: ACCEPTED, REJECTED, SKIPPED, EXPIRED
+  action         String? // Enum: ACCEPTED, REJECTED, SKIPPED, EXPIRED
   actedAt        DateTime?
-  
-  booking        OnDemandProfessionalBooking @relation(fields: [bookingId], references: [id], onDelete: Cascade)
-  professional   OwnerProfile                @relation(fields: [professionalId], references: [id])
-  
+
+  booking      OnDemandProfessionalBooking @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+  professional OwnerProfile                @relation(fields: [professionalId], references: [id])
+
   @@index([bookingId, professionalId])
   @@index([expiresAt, action])
 }
 
 model TrustScoreEvent {
-  id             String                      @id @default(uuid())
+  id             String   @id @default(uuid())
   professionalId String
   bookingId      String?
-  eventType      String                      // e.g. ONBOARDING, ACCEPTED, REVIEW, SKIPPED, CANCEL_OVER_72, CANCEL_UNDER_72, NO_SHOW, DECAY
+  eventType      String // e.g. ONBOARDING, ACCEPTED, REVIEW, SKIPPED, CANCEL_OVER_72, CANCEL_UNDER_72, NO_SHOW, DECAY
   delta          Float
   reason         String?
-  createdAt      DateTime                    @default(now())
-  
-  professional   OwnerProfile                @relation(fields: [professionalId], references: [id])
-  booking        OnDemandProfessionalBooking? @relation(fields: [bookingId], references: [id])
-  
+  createdAt      DateTime @default(now())
+
+  professional OwnerProfile                 @relation(fields: [professionalId], references: [id])
+  booking      OnDemandProfessionalBooking? @relation(fields: [bookingId], references: [id])
+
   @@index([professionalId])
 }
 
 model UmpireSession {
-  id                   String       @id @default(uuid())
+  id                   String    @id @default(uuid())
   professionalId       String
-  sessionStart         DateTime     @default(now())
+  sessionStart         DateTime  @default(now())
   sessionEnd           DateTime?
-  consecutiveSkipCount Int          @default(0)
-  
-  professional         OwnerProfile @relation(fields: [professionalId], references: [id])
-  
+  consecutiveSkipCount Int       @default(0)
+
+  professional OwnerProfile @relation(fields: [professionalId], references: [id])
+
   @@index([professionalId, sessionEnd])
 }
 
@@ -1573,19 +1591,21 @@ model PlatformConfig {
   description String?
   updatedAt   DateTime @updatedAt
   updatedBy   String?
-  
-  user        User?    @relation(fields: [updatedBy], references: [id])
+
+  user User? @relation(fields: [updatedBy], references: [id])
 }
 
 model UserDevice {
-  id        String   @id @default(uuid())
-  userId    String
-  token     String   @unique
-  platform  String   // "web", "android", "ios"
-  createdAt DateTime @default(now())
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  id         String    @id @default(uuid())
+  userId     String
+  token      String    @unique
+  platform   String // "web", "android", "ios"
+  deviceId   String? // OS-level device identifier (Flutter device_info_plus)
+  appVersion String? // semver, used for min-client gating
+  locale     String? // BCP-47 e.g. "en-IN" — drives notification language
+  lastSeenAt DateTime?
+  createdAt  DateTime  @default(now())
+  user       User      @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId])
 }
-
-

@@ -69,11 +69,25 @@ class MockRedis {
     this.callbacks = {};
   }
   
+  async ping() {
+    // ioredis returns "PONG" — the health check just needs the promise to
+    // resolve. Mirror the real reply so callers that compare strings work.
+    return "PONG";
+  }
+
   async get(key) {
     return this.store.get(key) || null;
   }
   
   async set(key, val, ...args) {
+    // Honor common SET option flags so dev-mode (no real Redis) behaves like
+    // production for code that uses SETNX / SETXX semantics — single-use
+    // tokens, distributed locks, etc.
+    const flags = args.map(a => String(a).toUpperCase());
+    const onlyIfAbsent = flags.includes('NX');
+    const onlyIfExists = flags.includes('XX');
+    if (onlyIfAbsent && this.store.has(key)) return null;
+    if (onlyIfExists && !this.store.has(key)) return null;
     this.store.set(key, String(val));
     return 'OK';
   }

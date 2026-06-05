@@ -5,24 +5,14 @@ import { sendPushNotification } from "../utils/pushHelper.js";
 export const getUserDeviceTokens = async (userId) => {
   if (!userId) return [];
 
-  const [user, userDevices] = await Promise.all([
-    prisma.user.findUnique({
-      where: { id: userId },
-      select: { fcmToken: true }
-    }),
-    prisma.userDevice.findMany({
-      where: { userId },
-      select: { token: true }
-    })
-  ]);
-
-  const tokenSet = new Set();
-  if (user?.fcmToken) tokenSet.add(user.fcmToken);
-  userDevices.forEach((device) => {
-    if (device.token) tokenSet.add(device.token);
+  // user.fcmToken removed in favor of the UserDevice table; this is now the
+  // single source of truth for FCM dispatch.
+  const userDevices = await prisma.userDevice.findMany({
+    where: { userId },
+    select: { token: true },
   });
 
-  return Array.from(tokenSet);
+  return [...new Set(userDevices.map((d) => d.token).filter(Boolean))];
 };
 
 export const processInAppNotification = async ({

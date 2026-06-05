@@ -44,6 +44,51 @@ const formatGameForClient = (game) => {
   return formatted;
 };
 
+/**
+ * Decorate a game with the viewer's participation flags. Pure function over
+ * the already-fetched include tree — no extra queries. Returns:
+ *   isHost          — viewer hosted the game
+ *   youJoined       — viewer holds a slot (any status) in Quick.slots or any team.slots
+ *   yourSlotId      — the matching gameSlot id (null if not joined)
+ *   yourSlotStatus  — OPEN/PENDING/JOINED/HELD/etc. (null if not joined)
+ *
+ * Unauthenticated viewers get { isHost: false, youJoined: false, yourSlotId: null, yourSlotStatus: null }.
+ */
+const decorateViewerFlags = (game, viewerId) => {
+  if (!viewerId) {
+    return { isHost: false, youJoined: false, yourSlotId: null, yourSlotStatus: null };
+  }
+
+  // Slot ownership can come through two shapes depending on the include
+  // tree the controller used: raw scalar `userId` (fullGameInclude) or only
+  // the nested `user: { id }` (compactGameInclude). Check both.
+  const matches = (s) =>
+    s && (s.userId === viewerId || s.user?.id === viewerId);
+
+  const quickSlots = Array.isArray(game.slots) ? game.slots : [];
+  const teamRows = Array.isArray(game.teams)
+    ? game.teams
+    : game.teams && typeof game.teams === 'object'
+      ? Object.values(game.teams).filter(Boolean)
+      : [];
+
+  let found = quickSlots.find(matches);
+  if (!found) {
+    for (const team of teamRows) {
+      const teamSlots = Array.isArray(team?.slots) ? team.slots : [];
+      const hit = teamSlots.find(matches);
+      if (hit) { found = hit; break; }
+    }
+  }
+
+  return {
+    isHost: game.hostId === viewerId,
+    youJoined: !!found,
+    yourSlotId: found?.id || null,
+    yourSlotStatus: found?.status || null,
+  };
+};
+
 const populateRequestUsers = async (games) => {
   if (!games || !games.length) return games;
 
@@ -259,6 +304,65 @@ export const getStreamersForHosting = async (req, res) => {
     return res.status(200).json({ streamers: formattedStreamers });
   } catch (error) {
     logger.error("getStreamersForHosting error:", error);
+    return res.status(500).json({ message: error.message });
+  }
+};
+
+/**
+ * Picker for the host-game flow's "Pick a scorer" step. Mirror of the
+ * streamer/umpire endpoints — same filters, same shape on each row.
+ */
+export const getScorersForHosting = async (req, res) => {
+  try {
+    const { city, state, query: searchTerm } = req.query;
+
+    const scorers = await prisma.ownerProfile.findMany({
+      where: {
+        user: {
+          role: "SCORER",
+          ...(city ? { city: { contains: city, mode: 'insensitive' } } : {}),
+          ...(state ? { state: { contains: state, mode: 'insensitive' } } : {}),
+          ...(searchTerm ? {
+            OR: [
+              { name:  { contains: searchTerm, mode: 'insensitive' } },
+              { phone: { contains: searchTerm, mode: 'insensitive' } },
+              { email: { contains: searchTerm, mode: 'insensitive' } }
+            ]
+          } : {})
+        }
+      },
+      select: {
+        id: true,
+        price: true,
+        user: {
+          select: {
+            name: true,
+            email: true,
+            phone: true,
+            profilePicture: true,
+            city: true,
+            state: true,
+            sportTypes: true
+          }
+        }
+      }
+    });
+
+    const formattedScorers = scorers.map(s => ({
+      id: s.id,
+      price: s.price,
+      gameTypes: s.user.sportTypes || [],
+      name: s.user.name,
+      email: s.user.email,
+      phone: s.user.phone,
+      profilePicture: s.user.profilePicture,
+      city: s.user.city,
+      state: s.user.state
+    }));
+
+    return res.status(200).json({ scorers: formattedScorers });
+  } catch (error) {
+    logger.error("getScorersForHosting error:", error);
     return res.status(500).json({ message: error.message });
   }
 };
@@ -614,7 +718,15 @@ export const getAllHostedGames = async (req, res) => {
       include: compactGameInclude
     });
 
-    const formattedGames = games.map(formatGameForClient);
+    // Decorate using the still-pre-formatted games (slots live at game.slots
+    // and game.teams[].slots before formatGameForClient reshapes the trees).
+    const viewerId = req.user?.id || null;
+    const flagsByGame = new Map(games.map(g => [g.id, decorateViewerFlags(g, viewerId)]));
+
+    const formattedGames = games.map(g => ({
+      ...formatGameForClient(g),
+      ...flagsByGame.get(g.id),
+    }));
 
     return res.status(200).json({ games: formattedGames });
   } catch (error) {
@@ -624,7 +736,7 @@ export const getAllHostedGames = async (req, res) => {
 
 export const joinHostedGame = async (req, res) => {
   try {
-    await runInTransaction(async ({ tx }) => {
+    const txResult = await runInTransaction(async ({ tx }) => {
       const userId = req.user.id;
       const { gameId, team, slotIndex, role, slotId } = req.body;
 
@@ -698,30 +810,55 @@ export const joinHostedGame = async (req, res) => {
         }
       });
 
+      // PUBLIC games auto-join (no host approval needed) — matches the
+      // "Public/Private" toggle in the Flutter create-game UI. PRIVATE games
+      // (or any older row missing the field) still go through the approval
+      // flow.
+      const isPublic = String(game.visibility || "PUBLIC").toUpperCase() === "PUBLIC";
+
       await tx.gameSlot.update({
         where: { id: targetSlot.id },
         data: {
           userId,
           role: role || "Player",
-          status: "PENDING",
-          paymentStatus: "RESERVED"
-        }
+          status: isPublic ? "JOINED" : "PENDING",
+          paymentStatus: "RESERVED",
+        },
       });
 
-      NotificationService.sendInApp({
-        recipientId: game.hostId,
-        senderId: userId,
-        type: "GAME_JOIN_REQUEST",
-        title: "New Join Request",
-        message: `A player has requested to join your ${game.gameType} match.`,
-        relatedId: game.id,
-        onModel: "HostedGame"
-      });
+      NotificationService.sendInApp(
+        isPublic
+          ? {
+              recipientId: game.hostId,
+              senderId: userId,
+              type: "GAME_JOIN_CONFIRMED",
+              title: "New Player Joined",
+              message: `A player just joined your ${game.gameType} match.`,
+              relatedId: game.id,
+              onModel: "HostedGame",
+            }
+          : {
+              recipientId: game.hostId,
+              senderId: userId,
+              type: "GAME_JOIN_REQUEST",
+              title: "New Join Request",
+              message: `A player has requested to join your ${game.gameType} match.`,
+              relatedId: game.id,
+              onModel: "HostedGame",
+            }
+      );
 
-      return true;
+      return { autoJoined: isPublic };
     });
 
-    return res.status(200).json({ success: true, message: "Join request sent. Coins reserved." });
+    const autoJoined = !!txResult?.autoJoined;
+    return res.status(200).json({
+      success: true,
+      message: autoJoined
+        ? "Joined the game. Coins reserved."
+        : "Join request sent. Coins reserved.",
+      data: { autoJoined },
+    });
 
   } catch (error) {
     logger.error("Error in joinHostedGame:", error);
@@ -733,7 +870,9 @@ export const approveJoinRequest = async (req, res) => {
   try {
     await runInTransaction(async ({ tx }) => {
       const hostId = req.user.id || req.user.user;
-      const { gameId, team, slotIndex, slotId } = req.body;
+      // Flutter parity: accept `userId` and resolve the pending slot from it,
+      // so the host UI doesn't have to compute (team, slotIndex) client-side.
+      let { gameId, team, slotIndex, slotId, userId: requestedUserId } = req.body;
 
       const game = await tx.hostedGame.findUnique({
         where: { id: gameId },
@@ -748,6 +887,17 @@ export const approveJoinRequest = async (req, res) => {
         const error = new Error("Cannot modify roster for a game that is already locked for scoring.");
         error.status = 400;
         throw error;
+      }
+
+      // If only userId was sent, find the PENDING slot held by that user in
+      // this game and convert it to a slotId — downstream code is unchanged.
+      if (!slotId && requestedUserId && (team == null || slotIndex == null)) {
+        const pendingSlot = await tx.gameSlot.findFirst({
+          where: { gameId, userId: requestedUserId, status: "PENDING" }
+        });
+        if (pendingSlot) {
+          slotId = pendingSlot.id;
+        }
       }
 
       let targetTeam = null;
@@ -881,7 +1031,8 @@ export const rejectJoinRequest = async (req, res) => {
   try {
     await runInTransaction(async ({ tx }) => {
       const hostId = req.user.id || req.user.user;
-      const { gameId, team, slotIndex, slotId } = req.body;
+      // Flutter parity: accept userId, same convention as approveJoinRequest.
+      let { gameId, team, slotIndex, slotId, userId: requestedUserId } = req.body;
 
       const game = await tx.hostedGame.findUnique({
         where: { id: gameId },
@@ -896,6 +1047,13 @@ export const rejectJoinRequest = async (req, res) => {
         const error = new Error("Cannot modify roster for a game that is already locked for scoring.");
         error.status = 400;
         throw error;
+      }
+
+      if (!slotId && requestedUserId && (team == null || slotIndex == null)) {
+        const pendingSlot = await tx.gameSlot.findFirst({
+          where: { gameId, userId: requestedUserId, status: "PENDING" }
+        });
+        if (pendingSlot) slotId = pendingSlot.id;
       }
 
       let targetSlot;
@@ -1560,7 +1718,7 @@ export const respondToOfficialInvitation = async (req, res) => {
     }
 
     const updatedUser = await prisma.user.findUnique({ where: { id: userId } });
-    const token = generateUserToken(updatedUser.id, updatedUser.role);
+    const token = await generateUserToken(updatedUser.id, updatedUser.role);
 
     return res.status(200).json({
       success: true,
@@ -1704,9 +1862,12 @@ export const getHostedGameById = async (req, res) => {
         (!!game.scorerId || game.scorerRequest?.status === 'APPROVED')
     };
 
+    // Compute against the pre-format game (raw slots/teams arrays).
+    const viewerFlags = decorateViewerFlags(game, req.user?.id || null);
+
     return res.status(200).json({
       success: true,
-      game: formatGameForClient(game),
+      game: { ...formatGameForClient(game), ...viewerFlags },
       officialSetupStatus
     });
   } catch (error) {
@@ -2030,7 +2191,7 @@ export const claimInviteSlot = async (req, res) => {
     });
 
     if (result.updatedRole && result.updatedRole !== req.user?.role) {
-      const newToken = generateUserToken(req.user.id || req.user.user, result.updatedRole, result.updatedOwnerId);
+      const newToken = await generateUserToken(req.user.id || req.user.user, result.updatedRole, result.updatedOwnerId);
       const isProd = process.env.NODE_ENV === "production" || !!process.env.RAILWAY_ENVIRONMENT || !!process.env.RAILWAY_ENVIRONMENT_NAME || !!process.env.RAILWAY_PROJECT_ID;
       res.cookie("auth_token", newToken, {
         httpOnly: true,

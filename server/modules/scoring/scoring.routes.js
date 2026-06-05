@@ -30,11 +30,17 @@ import {
   setPowerplayOvers,
   toggleTimer,
   addPenalty,
-  getMatchReport
+  updateHouseRules,
+  getMatchReport,
+  // View tabs (public read-only)
+  getScorecard,
+  getSquads,
+  getOvers,
+  getLiveMatches,
 } from "./scoring.controller.js";
 import verifyAuth from "../../middleware/jwt/auth.middleware.js";
 import { validate } from "../../middleware/validate.middleware.js";
-import { startScoringSchema, updateScoreSchema, tossSchema, setupScoringGameSchema, undoLastBallSchema, completeMatchSchema, startNextInningsSchema, setPlayersSchema } from "./scoring.validator.js";
+import { startScoringSchema, updateScoreSchema, tossSchema, setupScoringGameSchema, undoLastBallSchema, completeMatchSchema, startNextInningsSchema, setPlayersSchema, updateHouseRulesSchema } from "./scoring.validator.js";
 
 const router = Router();
 
@@ -118,6 +124,48 @@ router.get("/analytics/:matchId", getMatchAnalytics);
  *         description: Live score snapshot
  */
 router.get("/live-score/:matchId", getLiveScore);
+
+/**
+ * @swagger
+ * /scoring/live:
+ *   get:
+ *     summary: List currently live + recently completed matches
+ *     description: Home/landing tab data — paginated by `?limit=N` (max 100).
+ *     tags: [Scoring]
+ */
+router.get("/live", getLiveMatches);
+
+/**
+ * @swagger
+ * /scoring/{matchId}/scorecard:
+ *   get:
+ *     summary: Full scorecard (batting, bowling, FoW, partnerships, extras)
+ *     description: Powers the SCORECARD tab. Returns every innings.
+ *     tags: [Scoring]
+ */
+router.get("/:matchId/scorecard", getScorecard);
+
+/**
+ * @swagger
+ * /scoring/{matchId}/squads:
+ *   get:
+ *     summary: Playing XI + Bench per side
+ *     description: Powers the SQUADS tab.
+ *     tags: [Scoring]
+ */
+router.get("/:matchId/squads", getSquads);
+
+/**
+ * @swagger
+ * /scoring/{matchId}/overs:
+ *   get:
+ *     summary: Per-over breakdown with ball-by-ball labels
+ *     description: |
+ *       Powers the OVERS tab. Optional `?innings=N` (0 or 1) to filter to one
+ *       innings; omit for both. Overs returned latest-first.
+ *     tags: [Scoring]
+ */
+router.get("/:matchId/overs", getOvers);
 
 /**
  * @swagger
@@ -517,6 +565,24 @@ router.put("/toggle-timer", verifyAuth, toggleTimer);
  *     tags: [Scoring]
  */
 router.put("/penalty", verifyAuth, addPenalty);
+
+/**
+ * @swagger
+ * /scoring/house-rules:
+ *   patch:
+ *     summary: Update per-match house rules
+ *     description: |
+ *       Partial update of CricketMatch.houseRules. Send any subset of:
+ *       enforceConsecutiveOverBlock, enforceFreeHit, penaltyEnabled,
+ *       wideIsLegalBall, noBallIsLegalBall, ballsPerOver (1–12),
+ *       playersPerTeam (2–30), lastManStands, maxRunsPerBall (1–12).
+ *       Send `null` for a key to revert it to the MCC default.
+ *
+ *       Allowed callers: the assigned umpire, the assigned scorer, OR a token
+ *       derived from the scoring-app password (POST /scoring/auth/:gameId).
+ *     tags: [Scoring]
+ */
+router.patch("/house-rules", verifyAuth, validate(updateHouseRulesSchema), updateHouseRules);
 
 /**
  * @swagger

@@ -606,33 +606,89 @@ export const getLeaderboard = async (req, res) => {
  * Get nearby players for the Live Map
  * Optimized for map data payload
  */
+/**
+ * Public-safe fields for the discovery payload. Anything not in this allowlist
+ * never leaves the server — keeps password/fcmToken/googleId/email/phone/
+ * notificationPreferences/youtubeAccessToken/facebookAccessToken/etc. out of
+ * an endpoint that's reachable with an OPTIONAL auth token (so a logged-out
+ * scraper could otherwise enumerate users near a coordinate).
+ */
+const NEARBY_PLAYER_FIELDS = {
+  id: true,
+  name: true,
+  username: true,
+  profilePicture: true,
+  bio: true,
+  city: true,
+  state: true,
+  role: true,
+  sportTypes: true,
+  interests: true,
+  lastSeen: true,
+  latitude: true,
+  longitude: true,
+};
+
 export const getNearbyPlayers = async (req, res) => {
-  const { lat, lng } = req.query;
-  const safeLimit  = Math.min(Math.max(parseInt(req.query.limit)  || 50,  1), 200);
-  const safeRadius = Math.min(Math.max(parseFloat(req.query.radius) || 5000, 100), 100_000);
-  
+  const { lat, lng, radius, limit } = req.query;
+
   if (!lat || !lng) {
     return res.status(400).json({ success: false, message: "Location coordinates required" });
   }
 
+  const safeLat = parseFloat(lat);
+  const safeLng = parseFloat(lng);
+  if (!Number.isFinite(safeLat) || !Number.isFinite(safeLng) ||
+      safeLat < -90 || safeLat > 90 || safeLng < -180 || safeLng > 180) {
+    return res.status(400).json({ success: false, message: "Invalid coordinates" });
+  }
+
+  // Clamp untrusted query params so callers can't scrape the user table.
+  const safeRadius = Math.min(Math.max(parseFloat(radius) || 5000, 100), 100_000); // meters
+  const safeLimit  = Math.min(Math.max(parseInt(limit) || 50, 1), 200);
+
   try {
-    const whereClause = req.user?.id ? { id: { not: req.user.id } } : {};
-    
-    const players = await findNearby('User', parseFloat(lat), parseFloat(lng), safeRadius, {
+    const viewerId = req.user?.id || null;
+    const whereClause = viewerId
+      ? { id: { not: viewerId }, locationSharingEnabled: { not: false } }
+      : { locationSharingEnabled: { not: false } };
+
+    const players = await findNearby('User', safeLat, safeLng, safeRadius, {
       where: whereClause,
-      take: safeLimit
+      take: safeLimit,
+      select: NEARBY_PLAYER_FIELDS,
     });
 
-    // Format for frontend (Decimal to Number)
+    // For an authed viewer, fetch the subset of these targets the viewer
+    // already follows in one query. Anonymous viewers always get false.
+    let followedSet = new Set();
+    if (viewerId && players.length) {
+      const follows = await prisma.userRelationship.findMany({
+        where: {
+          userId: viewerId,
+          targetId: { in: players.map(p => p.id) },
+          type: "FOLLOW",
+        },
+        select: { targetId: true },
+      });
+      followedSet = new Set(follows.map(f => f.targetId));
+    }
+
+    // Format for frontend (Decimal to Number, meters → km) + follow flag.
     const formattedPlayers = players.map(p => ({
       ...p,
-      id: p.id,
       lat: p.latitude != null ? parseFloat(String(p.latitude)) : null,
       lng: p.longitude != null ? parseFloat(String(p.longitude)) : null,
-      distanceKm: p.distance != null ? p.distance / 1000 : null // geo.util returns meters
+      distanceKm: p.distance != null ? p.distance / 1000 : null,
+      isFollowing: followedSet.has(p.id),
     }));
 
-    return res.status(200).json({ success: true, players: formattedPlayers });
+    // Wrapped envelope (additive) so new clients can read `data.players` directly.
+    return res.status(200).json({
+      success: true,
+      players: formattedPlayers,
+      data: { players: formattedPlayers },
+    });
   } catch (err) {
     logger.error("Nearby players error:", err);
     return res.status(500).json({ success: false, message: err.message });
@@ -650,18 +706,25 @@ export const updateUserLocation = async (req, res) => {
     return res.status(401).json({ success: false, message: "Unauthorized" });
   }
 
+  const sharingEnabled = sharing !== false;
+
   try {
-    let update = {};
-    
-    if (sharing === false || (lat === 0 && lng === 0)) {
+    let update = { locationSharingEnabled: sharingEnabled };
+
+    if (!sharingEnabled || (lat === 0 && lng === 0)) {
       // Clear location for privacy
-      update = { latitude: null, longitude: null };
+      update.latitude = null;
+      update.longitude = null;
     } else if (lat && lng) {
-      update = {
-        latitude: parseFloat(lat),
-        longitude: parseFloat(lng),
-        lastSeen: new Date()
-      };
+      const safeLat = parseFloat(lat);
+      const safeLng = parseFloat(lng);
+      if (!Number.isFinite(safeLat) || !Number.isFinite(safeLng) ||
+          safeLat < -90 || safeLat > 90 || safeLng < -180 || safeLng > 180) {
+        return res.status(400).json({ success: false, message: "Invalid coordinates" });
+      }
+      update.latitude = safeLat;
+      update.longitude = safeLng;
+      update.lastSeen = new Date();
     } else {
       return res.status(400).json({ success: false, message: "Invalid location data" });
     }
@@ -675,24 +738,33 @@ export const updateUserLocation = async (req, res) => {
         where: { userId: userId },
         create: {
           userId: userId,
-          latitude: update.latitude !== undefined ? update.latitude : undefined,
-          longitude: update.longitude !== undefined ? update.longitude : undefined
+          latitude: update.latitude,
+          longitude: update.longitude
         },
         update: {
-          latitude: update.latitude !== undefined ? update.latitude : undefined,
-          longitude: update.longitude !== undefined ? update.longitude : undefined
+          latitude: update.latitude,
+          longitude: update.longitude
         }
       })
     ]);
 
-    // Sync PostGIS geoPoint
-    if (lat && lng && sharing !== false) {
-      await updateGeoPoint('User', userId, parseFloat(lat), parseFloat(lng));
+    if (sharingEnabled && update.latitude != null && update.longitude != null) {
+      await updateGeoPoint('User', userId, update.latitude, update.longitude);
+    } else {
+      // Privacy ON: purge this user from live discovery state so they vanish from active maps.
+      try {
+        await Promise.all([
+          redisClient.del(`kridaz:location:${userId}`),
+          redisClient.zrem("kridaz:geo:online", userId.toString())
+        ]);
+      } catch (e) {
+        logger.warn("Failed to purge geo state on privacy toggle:", e?.message);
+      }
     }
-    
-    return res.status(200).json({ 
-      success: true, 
-      message: sharing ? "Location updated" : "Location cleared (Privacy mode)" 
+
+    return res.status(200).json({
+      success: true,
+      message: sharingEnabled ? "Location updated" : "Location cleared (Privacy mode)"
     });
   } catch (err) {
     logger.error("Update location error:", err);

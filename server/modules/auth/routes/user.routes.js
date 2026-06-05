@@ -8,6 +8,7 @@ import {
   googleAuth,
   getMe,
   logout,
+  logoutAll,
   refreshToken,
   updateProfile,
   updateProfilePicture,
@@ -139,6 +140,19 @@ router.get("/getMe", userAuth, getMe);
  *     tags: [Auth]
  */
 router.post("/logout", logout);
+
+/**
+ * @swagger
+ * /user/auth/logout-all:
+ *   post:
+ *     summary: Log out from every device by bumping User.tokenVersion.
+ *     description: |
+ *       Every access token issued before this call carries the old tokenVersion
+ *       in its payload, so middleware will reject them with code: TOKEN_REVOKED.
+ *       Refresh tokens are also revoked server-side.
+ *     tags: [Auth]
+ */
+router.post("/logout-all", userAuth, logoutAll);
 
 /**
  * @swagger

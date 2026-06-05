@@ -16,9 +16,17 @@ export const updateScoreSchema = z.object({
   body: z.object({
     scoringId: z.string().min(1, "Scoring ID is required"),
     ballData: z.object({
-      runs: z.number().int().min(0).max(7),
+      // Off-the-bat runs only. Max is 6 (boundary). 7 isn't a legal cricket
+      // outcome from striking the ball — overthrows / extras land on
+      // `extraRuns`. Previous cap of 7 was too generous; meanwhile a 4 + 4
+      // overthrow boundary case (Law 19.8) was rejected entirely. Now: 6 off
+      // the bat, and extraRuns covers anything above.
+      runs: z.number().int().min(0).max(6),
+      // Wides/no-balls/byes/leg-byes/penalty + overthrows. Cap at 10 to allow
+      // pathological-but-legal cases like a no-ball + 4 overthrows + 4 byes.
+      extraRuns: z.number().int().min(0).max(10).optional(),
       isExtra: z.boolean().optional(),
-      extraType: z.string().optional(),
+      extraType: z.enum(["NONE", "WIDE", "NO_BALL", "BYE", "LEG_BYE", "PENALTY"]).optional(),
       isWicket: z.boolean().optional(),
       wicketType: z.string().optional(),
       batsmanId: z.string().min(1, "Batsman ID is required"),
@@ -90,5 +98,24 @@ export const setPlayersSchema = z.object({
     nonStrikerId: z.string().min(1).optional().nullable(),
     bowlerId: z.string().min(1).optional().nullable(),
     wicketKeeperId: z.string().min(1).optional().nullable(),
+  }),
+});
+
+export const updateHouseRulesSchema = z.object({
+  body: z.object({
+    scoringId: z.string().min(1, "Scoring ID is required"),
+    houseRules: z.object({
+      enforceConsecutiveOverBlock: z.boolean().nullable().optional(),
+      enforceFreeHit: z.boolean().nullable().optional(),
+      penaltyEnabled: z.boolean().nullable().optional(),
+      wideIsLegalBall: z.boolean().nullable().optional(),
+      noBallIsLegalBall: z.boolean().nullable().optional(),
+      ballsPerOver: z.number().int().min(1).max(12).nullable().optional(),
+      playersPerTeam: z.number().int().min(2).max(30).nullable().optional(),
+      lastManStands: z.boolean().nullable().optional(),
+      maxRunsPerBall: z.number().int().min(1).max(12).nullable().optional(),
+    }).refine((obj) => Object.keys(obj).length > 0, {
+      message: "At least one rule must be supplied",
+    }),
   }),
 });

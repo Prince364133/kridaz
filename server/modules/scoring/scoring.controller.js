@@ -1,4 +1,5 @@
 import * as scoringService from "./scoring.service.js";
+import * as scoringViews from "./scoring.views.js";
 import logger from "../../utils/logger.js";
 import { prisma } from "../../config/prisma.js";
 
@@ -69,7 +70,13 @@ export const authenticateScoringApp = async (req, res) => {
     }
 
     const result = await scoringService.verifyScoringPassword(gameId, password);
-    res.status(200).json({ success: true, token: result.token, gameId });
+    // Both top-level (legacy) and data.* (Flutter) — additive envelope.
+    res.status(200).json({
+      success: true,
+      token: result.token,
+      gameId,
+      data: { token: result.token, gameId },
+    });
   } catch (error) {
     logger.error("[Scoring] Auth Error:", error);
     if (error.message === "INVALID_PASSWORD" || error.message === "GAME_NOT_FOUND") {
@@ -511,6 +518,101 @@ export const addPenalty = async (req, res) => {
     res.status(200).json({ success: true, ...result });
   } catch (error) {
     logger.error("[Scoring] Add Penalty Error:", error);
+    handleControllerError(res, error);
+  }
+};
+
+// ─────────────────────────────────────────────────────────────────────────
+// View-tab controllers — read-only shaped responses for the mobile match UI.
+//
+// All four endpoints support `If-None-Match` so polling clients short-
+// circuit to 304 Not Modified when nothing has changed. The ETag is a weak
+// fingerprint of (updatedAt + last-ball) so it changes the moment a ball is
+// scored, an innings advances, or house rules are edited — and only then.
+// ─────────────────────────────────────────────────────────────────────────
+
+// Cache-Control on the polling routes — tells well-behaved CDNs / proxies
+// to short-circuit identical conditional requests too. `must-revalidate`
+// means the client/CDN can never serve stale content past 0 seconds without
+// re-validating with the origin (our ETag check).
+const POLLING_CACHE_CONTROL = "private, max-age=0, must-revalidate";
+
+const handleEtag = (req, res, etag) => {
+  if (!etag) return false; // caller will run the full path
+  res.setHeader("ETag", etag);
+  res.setHeader("Cache-Control", POLLING_CACHE_CONTROL);
+  const inm = req.headers["if-none-match"];
+  if (inm && inm === etag) {
+    res.status(304).end();
+    return true;
+  }
+  return false;
+};
+
+export const getScorecard = async (req, res) => {
+  try {
+    const etag = await scoringViews.computeMatchEtag(req.params.matchId);
+    if (handleEtag(req, res, etag)) return;
+    const data = await scoringViews.buildScorecard(req.params.matchId);
+    res.status(200).json({ success: true, data });
+  } catch (error) {
+    logger.error("[Scoring] Scorecard Error:", error);
+    handleControllerError(res, error);
+  }
+};
+
+export const getSquads = async (req, res) => {
+  try {
+    const etag = await scoringViews.computeSquadsEtag(req.params.matchId);
+    if (handleEtag(req, res, etag)) return;
+    const data = await scoringViews.buildSquads(req.params.matchId);
+    res.status(200).json({ success: true, data });
+  } catch (error) {
+    logger.error("[Scoring] Squads Error:", error);
+    handleControllerError(res, error);
+  }
+};
+
+export const getOvers = async (req, res) => {
+  try {
+    const { innings, afterBallId } = req.query;
+    // ETag still applies — even with a cursor, if nothing changed at all
+    // we 304 and skip the whole shaping step.
+    const etag = await scoringViews.computeMatchEtag(req.params.matchId);
+    if (handleEtag(req, res, etag)) return;
+    const data = await scoringViews.buildOvers(req.params.matchId, innings, { afterBallId });
+    res.status(200).json({ success: true, data });
+  } catch (error) {
+    logger.error("[Scoring] Overs Error:", error);
+    handleControllerError(res, error);
+  }
+};
+
+export const getLiveMatches = async (req, res) => {
+  try {
+    const etag = await scoringViews.computeLiveListEtag();
+    if (handleEtag(req, res, etag)) return;
+    const data = await scoringViews.listLiveMatches({ limit: req.query.limit });
+    res.status(200).json({ success: true, data });
+  } catch (error) {
+    logger.error("[Scoring] Live Matches Error:", error);
+    handleControllerError(res, error);
+  }
+};
+
+export const updateHouseRules = async (req, res) => {
+  try {
+    const { scoringId, houseRules } = req.body;
+    if (!scoringId) {
+      return res.status(400).json({ success: false, code: "MISSING_SCORING_ID", message: "scoringId is required" });
+    }
+    if (!houseRules || typeof houseRules !== "object" || Array.isArray(houseRules)) {
+      return res.status(400).json({ success: false, code: "INVALID_HOUSE_RULES", message: "houseRules must be an object" });
+    }
+    const result = await scoringService.updateHouseRules(scoringId, req.user, houseRules);
+    res.status(200).json({ success: true, data: result });
+  } catch (error) {
+    logger.error("[Scoring] Update House Rules Error:", error);
     handleControllerError(res, error);
   }
 };

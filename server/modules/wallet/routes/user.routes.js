@@ -4,6 +4,7 @@ import {
   verifyTopup,
   getWalletData,
   checkPaymentStatus,
+  cancelReservation,
 } from "../wallet.controller.js";
 import verifyToken from "../../../middleware/jwt/user.middleware.js";
 import { validate } from "../../../middleware/validate.middleware.js";
@@ -12,6 +13,7 @@ import {
   verifyTopupSchema,
 } from "../wallet.validator.js";
 import { paymentLimiter } from "../../../middleware/rateLimiter.middleware.js";
+import { idempotency } from "../../../middleware/idempotency.middleware.js";
 
 const router = Router();
 
@@ -47,6 +49,7 @@ router.get("/data", getWalletData);
 router.post(
   "/topup/create-order",
   paymentLimiter,
+  idempotency,
   validate(createTopupSchema),
   createTopupOrder
 );
@@ -63,6 +66,7 @@ router.post(
 router.post(
   "/topup/verify",
   paymentLimiter,
+  idempotency,
   validate(verifyTopupSchema),
   verifyTopup
 );
@@ -77,5 +81,16 @@ router.post(
  *       - BearerAuth: []
  */
 router.get("/topup/check-status/:orderId", checkPaymentStatus);
+
+/**
+ * @swagger
+ * /wallet/transactions/{id}/cancel:
+ *   post:
+ *     summary: Cancel a RESERVED wallet transaction and release the coins
+ *     tags: [Wallet]
+ *     security:
+ *       - BearerAuth: []
+ */
+router.post("/transactions/:id/cancel", cancelReservation);
 
 export default router;

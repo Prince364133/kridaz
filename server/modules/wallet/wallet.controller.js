@@ -293,3 +293,58 @@ export const getOwnerWithdrawals = async (req, res) => {
     return res.status(500).json({ message: error.message });
   }
 };
+
+
+/**
+ * Cancel a RESERVED wallet transaction. Releases the reserved coins back
+ * to usable balance. Only the owner can cancel; only RESERVED rows are
+ * eligible (SUCCESS / FAILED / REFUNDED already settled).
+ */
+export const cancelReservation = async (req, res) => {
+  try {
+    const userId = req.user.id || req.user.user;
+    const { id } = req.params;
+
+    const tx = await prisma.walletTransaction.findUnique({ where: { id } });
+    if (!tx || tx.userId !== userId) {
+      return res.status(404).json({
+        success: false,
+        code: "TRANSACTION_NOT_FOUND",
+        message: "Transaction not found.",
+      });
+    }
+    if (tx.status !== "RESERVED") {
+      return res.status(400).json({
+        success: false,
+        code: "TRANSACTION_NOT_RESERVED",
+        message: "Only RESERVED transactions can be cancelled.",
+      });
+    }
+
+    // Wallet.reservedBalance is a cached column — decrement alongside the
+    // status flip so the next getWalletData read sees the freed coins.
+    const amount = Number(tx.amount);
+    await prisma.$transaction([
+      prisma.walletTransaction.update({
+        where: { id },
+        data: { status: "CANCELLED" },
+      }),
+      prisma.wallet.update({
+        where: { userId },
+        data: { reservedBalance: { decrement: amount } },
+      }),
+    ]);
+
+    return res.status(200).json({
+      success: true,
+      data: { id, status: "CANCELLED", releasedAmount: amount },
+    });
+  } catch (error) {
+    logger.error("cancelReservation error:", error);
+    return res.status(500).json({
+      success: false,
+      code: "INTERNAL_ERROR",
+      message: "Could not cancel reservation.",
+    });
+  }
+};

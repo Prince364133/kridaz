@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
-import { useSelector } from "react-redux";
+import { useSelector, useDispatch } from "react-redux";
+import { updateUser } from "@redux/slices/authSlice";
 import axiosInstance from "@hooks/useAxiosInstance";
 import { fetchStates, fetchCities } from "../../../shared/utils/locationService";
 import { 
@@ -276,6 +277,7 @@ const TeamCard = ({ team, navigate }) => {
 
 const FindPlayers = () => {
   const { user: currentUser } = useSelector((state) => state.auth);
+  const dispatch = useDispatch();
   const { gateInteraction } = useLoginOnDemand();
   const navigate = useNavigate();
 
@@ -338,8 +340,19 @@ const FindPlayers = () => {
   // Adaptive tracking & Privacy states
   const [isTrackingActive, setIsTrackingActive] = useState(true);
   const [isLocationSharing, setIsLocationSharing] = useState(() => {
+    // Prefer server truth (synced into localStorage by authSlice) over an
+    // unset/legacy value. Falls back to "ON" for users who pre-date the column.
+    if (typeof currentUser?.locationSharingEnabled === "boolean") {
+      return currentUser.locationSharingEnabled;
+    }
     return localStorage.getItem("kridaz_location_sharing") !== "false";
   });
+
+  useEffect(() => {
+    if (typeof currentUser?.locationSharingEnabled === "boolean") {
+      setIsLocationSharing(currentUser.locationSharingEnabled);
+    }
+  }, [currentUser?.locationSharingEnabled]);
   const [isMapTilesLoaded, setIsMapTilesLoaded] = useState(false);
   const [locationError, setLocationError] = useState(null);
   
@@ -504,14 +517,15 @@ const FindPlayers = () => {
     const newState = !isLocationSharing;
     setIsLocationSharing(newState);
     localStorage.setItem("kridaz_location_sharing", newState.toString());
-    
+    dispatch(updateUser({ locationSharingEnabled: newState }));
+
     try {
       await axiosInstance.post("/api/user/players/location", {
         sharing: newState,
         lat: userLocation?.lat || 0,
         lng: userLocation?.lng || 0
       });
-      
+
       if (!newState) {
         toast.success("Privacy On: You are now hidden from others");
       } else {
@@ -521,6 +535,8 @@ const FindPlayers = () => {
       console.error("Failed to update privacy setting:", err);
       toast.error("Failed to update privacy setting");
       setIsLocationSharing(!newState);
+      localStorage.setItem("kridaz_location_sharing", (!newState).toString());
+      dispatch(updateUser({ locationSharingEnabled: !newState }));
     }
   };
 

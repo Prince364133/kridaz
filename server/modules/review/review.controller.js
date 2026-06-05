@@ -1,5 +1,6 @@
 import { prisma } from "../../config/prisma.js";
 import logger from "../../utils/logger.js";
+import { invalidateCache } from "../../utils/cache.js";
 
 export const addReview = async (req, res) => {
   const userId = req.user.id || req.user.user;
@@ -24,6 +25,8 @@ export const addReview = async (req, res) => {
         comment
       }
     });
+
+    await invalidateCache("turfs:list:*");
 
     return res.status(201).json({ message: "Review added successfully" });
   } catch (error) {
