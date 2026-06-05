@@ -86,6 +86,12 @@ const editTurfSchema = z.object({
       })
     )
     .optional(),
+  gstRegistration: z.any().optional(),
+  saleDeed: z.any().optional(),
+  rentalAgreement: z.any().optional(),
+  ownershipAgreement: z.any().optional(),
+  googleProfileScreenshot: z.any().optional(),
+  electricityBill: z.any().optional(),
 }).refine((data) => {
   if (data.slotsConfigDuration === "Fixed Weeks") {
     return data.slotsConfigWeeks !== undefined && data.slotsConfigWeeks >= 1 && data.slotsConfigWeeks <= 52;
@@ -115,6 +121,8 @@ export default function useEditTurf(turfId) {
     control,
     setValue,
     watch,
+    trigger,
+    getValues,
   } = useForm({
     resolver: zodResolver(editTurfSchema),
     defaultValues: {
@@ -148,6 +156,43 @@ export default function useEditTurf(turfId) {
   const [groundTypes, setGroundTypes] = useState([]);
   const [facilities, setFacilities] = useState([]);
   const [generatedSlots, setGeneratedSlots] = useState([]);
+
+  useEffect(() => {
+    const savedDraft = localStorage.getItem(`editVenueDraft_${turfId}`);
+    if (savedDraft) {
+      try {
+        const parsed = JSON.parse(savedDraft);
+        Object.keys(parsed).forEach((key) => {
+          if (key === "openTime" || key === "closeTime") {
+            if (parsed[key]) setValue(key, new Date(parsed[key]));
+          } else {
+            setValue(key, parsed[key]);
+          }
+        });
+        if (parsed.managerContacts) setManagerContacts(parsed.managerContacts);
+        if (parsed.sportTypes) setSportTypes(parsed.sportTypes);
+        if (parsed.groundTypes) setGroundTypes(parsed.groundTypes);
+        if (parsed.facilities) setFacilities(parsed.facilities);
+        toast.success("Draft loaded successfully!");
+      } catch (e) {
+        console.error("Failed to load draft");
+      }
+    }
+  }, [setValue, turfId]);
+
+  const saveDraft = () => {
+    const data = getValues();
+    const dataToSave = { ...data };
+    delete dataToSave.images;
+    delete dataToSave.saleDeed;
+    delete dataToSave.electricityBill;
+    delete dataToSave.rentalAgreement;
+    delete dataToSave.ownershipAgreement;
+    delete dataToSave.gstRegistration;
+    delete dataToSave.googleProfileScreenshot;
+    localStorage.setItem(`editVenueDraft_${turfId}`, JSON.stringify(dataToSave));
+    toast.success("Draft saved successfully! (Files are not saved)");
+  };
   
   const openTime = watch("openTime");
   const closeTime = watch("closeTime");
@@ -409,7 +454,9 @@ export default function useEditTurf(turfId) {
       } else if (key === "managerContacts") {
         formData.append(key, JSON.stringify(data[key]));
       } else {
-        formData.append(key, data[key]);
+        if (data[key] !== null && data[key] !== undefined) {
+          formData.append(key, data[key]);
+        }
       }
     });
 
@@ -427,6 +474,7 @@ export default function useEditTurf(turfId) {
         }
       );
       toast.success(response.data.message);
+      localStorage.removeItem(`editVenueDraft_${turfId}`);
       navigate(`/venue-owner/turf/${turfId}`);
     } catch (error) {
       toast.error(error.response?.data?.message || "Update failed");
@@ -496,7 +544,9 @@ export default function useEditTurf(turfId) {
     removeManagerContact,
     updateSlotPrice,
     turf,
-    settings
+    settings,
+    trigger,
+    saveDraft,
   };
 }
 

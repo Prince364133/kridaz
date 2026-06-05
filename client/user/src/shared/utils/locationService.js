@@ -45,7 +45,9 @@ export const searchLocations = async (query) => {
       state: item.address.state || "",
       postcode: item.address.postcode || "",
       suburb: item.address.suburb || item.address.neighbourhood || "",
-      road: item.address.road || ""
+      road: item.address.road || "",
+      lat: item.lat,
+      lon: item.lon
     }));
   } catch (error) {
     console.error("Error searching locations:", error);
@@ -68,4 +70,30 @@ export const reverseGeocode = async (lat, lon) => {
     console.error("Error reverse geocoding:", error);
     return null;
   }
+};
+export const extractLocationFromGoogleMapsUrl = (url) => {
+  if (!url) return null;
+  
+  // Match @lat,lng format
+  const regex = /@(-?\d+\.\d+),(-?\d+\.\d+)/;
+  const match = url.match(regex);
+  if (match) {
+    return { lat: match[1], lon: match[2] };
+  }
+  
+  // Match q=lat,lng format
+  const qRegex = /[?&]q=(-?\d+\.\d+),(-?\d+\.\d+)/;
+  const qMatch = url.match(qRegex);
+  if (qMatch) {
+    return { lat: qMatch[1], lon: qMatch[2] };
+  }
+
+  // Match query=lat,lng format
+  const queryRegex = /[?&]query=(-?\d+\.\d+),(-?\d+\.\d+)/;
+  const queryMatch = url.match(queryRegex);
+  if (queryMatch) {
+    return { lat: queryMatch[1], lon: queryMatch[2] };
+  }
+
+  return null;
 };
