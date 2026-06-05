@@ -37,7 +37,7 @@ const MyTeams = () => {
   }, [teamIdParam, teamData]);
 
   return (
-    <div className="h-[calc(100vh-80px)] flex bg-[#0a0a0a] overflow-hidden" style={{ fontFamily: "'Open Sans', sans-serif" }}>
+    <div className="h-[calc(100dvh-140px)] lg:h-[100dvh] flex bg-[#0a0a0a] overflow-hidden w-full" style={{ fontFamily: "'Open Sans', sans-serif" }}>
       {/* Sidebar */}
       <div className={`${selectedTeam ? 'hidden md:block' : 'block'} w-full md:w-80 h-full shrink-0`}>
         <TeamSidebar 

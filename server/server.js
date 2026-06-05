@@ -25,7 +25,6 @@ server.headersTimeout = 76000;
 // Initialize Socket.io
 socketConfig(server);
 
-import { execSync } from "child_process";
 
 // Function to start the server
 const startServer = () => {

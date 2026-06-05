@@ -121,36 +121,30 @@ const SearchTurf = ({ onSearch, userLocation }) => {
 
   return (
     <div className="w-full max-w-4xl animate-fade-in-up relative z-[50]">
-      <div className="relative group">
-        <div className="relative flex flex-col md:flex-row items-center bg-[#0a0a0c]/80 backdrop-blur-2xl border border-white/10 rounded-[8px] p-1.5 shadow-2xl transition-all duration-500 hover:border-[#BFF367]/30 min-h-[56px] md:min-h-[64px]">
-          
-          {/* Search Input */}
-          <div className="w-full md:w-auto md:flex-[2] md:min-w-[150px] relative z-[100] border-b md:border-b-0 md:border-r border-white/5 flex items-center px-4 py-2 md:py-0">
-            <Search size={16} className="text-gray-500 mr-2 flex-shrink-0" />
-            <input 
-              type="text" 
-              placeholder="Search arenas..." 
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full h-full bg-transparent text-white py-1 md:py-3 outline-none text-xs font-bold placeholder-gray-500 tracking-wide"
-            />
-          </div>
+      <div className="flex flex-col gap-3">
+        
+        {/* Search Input Box */}
+        <div className="w-full relative flex items-center bg-[#18181A] rounded-[12px] p-4 shadow-xl">
+          <Search size={22} className="text-white mr-3 flex-shrink-0" />
+          <input 
+            type="text" 
+            placeholder="Search arenas..." 
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="w-full h-full bg-transparent text-white outline-none text-[16px] font-medium placeholder-gray-400 tracking-wide"
+          />
+        </div>
 
-          <div className="flex w-full md:w-auto flex-1 items-center">
+        {/* Filter Buttons Row */}
+        <div className="flex gap-2 sm:gap-3 items-center w-full">
+          
           {/* Sport Selector */}
-          <div className="flex-1 md:flex-[0.6] min-w-0 md:min-w-[100px] relative z-[100] border-r border-white/5" ref={sportDropdownRef}>
+          <div className="flex-1 relative" ref={sportDropdownRef}>
             <button
               onClick={() => { setShowSportDropdown(!showSportDropdown); setShowStateDropdown(false); setShowCityDropdown(false); }}
-              className="flex items-center gap-2 w-full h-full px-3 py-2 transition-all hover:bg-white/5 rounded-[8px] group/btn"
+              className="w-full flex items-center justify-center px-2 py-3 bg-[#18181A] hover:bg-[#222] rounded-[8px] text-white text-[13px] sm:text-[14px] font-medium transition-colors"
             >
-              <div className="pr-2 transition-colors hidden sm:block">
-                <Trophy size={14} className={`${showSportDropdown ? "text-[#BFF367]" : "text-gray-500"}`} />
-              </div>
-              <div className="flex flex-col text-left overflow-hidden">
-                <span className="text-[8px] font-black text-gray-500 uppercase tracking-widest leading-none mb-1">Sport</span>
-                <span className="text-[11px] font-bold text-white uppercase tracking-tight truncate w-full">{sport || "All"}</span>
-              </div>
-              <ChevronDown size={12} className={`ml-auto text-gray-600 transition-transform duration-500 ${showSportDropdown ? "rotate-180 text-[#BFF367]" : ""}`} />
+              <span className="truncate">{sport || "Sport"}</span>
             </button>
 
             {showSportDropdown && (
@@ -179,19 +173,12 @@ const SearchTurf = ({ onSearch, userLocation }) => {
           </div>
 
           {/* State Selector */}
-          <div className="flex-1 md:flex-[0.6] min-w-0 md:min-w-[100px] relative z-[95] border-r border-white/5" ref={stateDropdownRef}>
+          <div className="flex-1 relative" ref={stateDropdownRef}>
             <button
               onClick={() => { setShowStateDropdown(!showStateDropdown); setShowSportDropdown(false); setShowCityDropdown(false); }}
-              className="flex items-center gap-2 w-full h-full px-3 py-2 transition-all hover:bg-white/5 rounded-[8px] group/btn"
+              className="w-full flex items-center justify-center px-2 py-3 bg-[#18181A] hover:bg-[#222] rounded-[8px] text-white text-[13px] sm:text-[14px] font-medium transition-colors"
             >
-              <div className="pr-2 transition-colors hidden sm:block">
-                <MapPin size={14} className={`${selectedState ? "text-white" : "text-gray-500"}`} />
-              </div>
-              <div className="flex flex-col text-left flex-1 min-w-0 overflow-hidden">
-                <span className="text-[8px] font-black text-gray-500 uppercase tracking-widest leading-none mb-1">State</span>
-                <span className="text-[11px] font-bold text-white uppercase tracking-tight truncate">{selectedState || "All"}</span>
-              </div>
-              <ChevronDown size={12} className={`ml-auto text-gray-600 transition-transform duration-500 flex-shrink-0 ${showStateDropdown ? "rotate-180 text-[#BFF367]" : ""}`} />
+              <span className="truncate">{selectedState || "State"}</span>
             </button>
 
             {showStateDropdown && (
@@ -230,19 +217,12 @@ const SearchTurf = ({ onSearch, userLocation }) => {
           </div>
 
           {/* City Selector */}
-          <div className="flex-1 md:flex-[0.6] min-w-0 md:min-w-[100px] relative z-[90]" ref={cityDropdownRef}>
+          <div className="flex-1 relative" ref={cityDropdownRef}>
             <button
               onClick={() => { setShowCityDropdown(!showCityDropdown); setShowSportDropdown(false); setShowStateDropdown(false); }}
-              className="flex items-center gap-2 w-full h-full px-3 py-2 transition-all hover:bg-white/5 rounded-[8px] group/btn"
+              className="w-full flex items-center justify-center px-2 py-3 bg-[#18181A] hover:bg-[#222] rounded-[8px] text-white text-[13px] sm:text-[14px] font-medium transition-colors"
             >
-              <div className="pr-2 transition-colors hidden sm:block">
-                <Building2 size={14} className={`${selectedCity ? "text-[#BFF367]" : "text-gray-500"}`} />
-              </div>
-              <div className="flex flex-col text-left flex-1 min-w-0 overflow-hidden">
-                <span className="text-[8px] font-black text-gray-500 uppercase tracking-widest leading-none mb-1">City</span>
-                <span className="text-[11px] font-bold text-white uppercase tracking-tight truncate">{selectedCity || "All"}</span>
-              </div>
-              <ChevronDown size={12} className={`ml-auto text-gray-600 transition-transform duration-500 flex-shrink-0 ${showCityDropdown ? "rotate-180 text-[#BFF367]" : ""}`} />
+              <span className="truncate">{selectedCity || "City"}</span>
             </button>
 
             {showCityDropdown && (
@@ -280,7 +260,6 @@ const SearchTurf = ({ onSearch, userLocation }) => {
                 </div>
               </div>
             )}
-          </div>
           </div>
         </div>
       </div>

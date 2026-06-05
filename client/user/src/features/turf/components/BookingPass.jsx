@@ -1,4 +1,3 @@
-import * as Sentry from "@sentry/react";
 import React, { useRef, useState } from "react";
 import { useParams, Link } from "react-router-dom";
 import { 
@@ -55,7 +54,7 @@ const BookingPass = () => {
       
       toast.success("Pass downloaded successfully!", { id: toastId });
     } catch (error) {
-      Sentry.captureException(error);
+      console.error("Error generating pass:", error);
       toast.dismiss();
       toast.error("Failed to download pass.");
     }
@@ -70,7 +69,7 @@ const BookingPass = () => {
           url: window.location.href,
         });
       } catch (error) {
-        Sentry.captureException(error);
+        console.error("Error sharing:", error);
       }
     } else {
       navigator.clipboard.writeText(window.location.href);

@@ -1,17 +1,99 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react';
 import { X, Trash2, Eye, Calendar, User as UserIcon } from 'lucide-react';
 import { Link } from 'react-router-dom';
+
+const StoryVideoPlayer = ({ src, onDurationReady }) => {
+  const videoRef = useRef(null);
+
+  const finalSrc = useMemo(() => {
+    if (!src) return src;
+    const cdnUrl = import.meta.env.VITE_REELS_CDN_URL;
+    if (import.meta.env.DEV && cdnUrl && src.startsWith(cdnUrl)) {
+      return src.replace(cdnUrl, '/r2-reels');
+    }
+    return src;
+  }, [src]);
+
+  useEffect(() => {
+    const video = videoRef.current;
+    if (!video || !src) return;
+
+    const handleLoadedMeta = () => {
+      if (video.duration && isFinite(video.duration) && onDurationReady) {
+        onDurationReady(video.duration);
+      }
+    };
+    video.addEventListener('loadedmetadata', handleLoadedMeta);
+
+    let hls;
+    if (finalSrc.includes('.m3u8')) {
+      import('hls.js').then((HlsModule) => {
+        const Hls = HlsModule.default;
+        if (Hls.isSupported()) {
+          hls = new Hls({ capLevelToPlayerSize: true, autoStartLoad: true });
+          hls.loadSource(finalSrc);
+          hls.attachMedia(video);
+          hls.on(Hls.Events.MANIFEST_PARSED, () => {
+            video.muted = true;
+            video.play().catch(e => console.warn("Autoplay prevented:", e));
+          });
+        } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
+          video.src = finalSrc;
+          video.muted = true;
+          video.play().catch(e => console.warn("Autoplay prevented:", e));
+        }
+      });
+    } else {
+      video.src = finalSrc;
+      video.muted = true;
+      video.play().catch(e => console.warn("Autoplay prevented:", e));
+    }
+
+    return () => {
+      video.removeEventListener('loadedmetadata', handleLoadedMeta);
+      if (hls) {
+        hls.destroy();
+      }
+    };
+  }, [finalSrc, src, onDurationReady]);
+
+  return (
+    <video
+      ref={videoRef}
+      className="w-full h-full object-contain"
+      playsInline
+      loop
+      muted
+      autoPlay
+    />
+  );
+};
 
 const StoryViewer = ({ storyGroup, onClose, onDelete, currentUser, isAdmin, initialIndex = 0, onNextUser, onPrevUser }) => {
  const [currentStoryIndex, setCurrentStoryIndex] = useState(initialIndex);
  const [showViewers, setShowViewers] = useState(false);
  const [touchStart, setTouchStart] = useState(null);
  const [touchEnd, setTouchEnd] = useState(null);
+ const [storyDuration, setStoryDuration] = useState(5); // seconds — default for images
 
  // Reset index when storyGroup changes
  useEffect(() => {
    setCurrentStoryIndex(initialIndex);
  }, [storyGroup, initialIndex]);
+
+ // Reset duration to default when story changes (will be overridden by video callback)
+ useEffect(() => {
+   const story = storyGroup?.stories?.[currentStoryIndex];
+   if (story?.mediaType !== 'video') {
+     setStoryDuration(5);
+   }
+ }, [currentStoryIndex, storyGroup]);
+
+ const handleVideoDuration = useCallback((dur) => {
+   if (dur && isFinite(dur) && dur > 0) {
+     setStoryDuration(Math.ceil(dur));
+   }
+ }, []);
 
  useEffect(() => {
  if (!storyGroup || showViewers) return;
@@ -23,10 +105,10 @@ const StoryViewer = ({ storyGroup, onClose, onDelete, currentUser, isAdmin, init
  if (onNextUser) onNextUser();
  else onClose();
  }
- }, 5000);
+ }, storyDuration * 1000);
 
  return () => clearTimeout(timer);
- }, [currentStoryIndex, storyGroup, onClose, onNextUser, showViewers]);
+ }, [currentStoryIndex, storyGroup, onClose, onNextUser, showViewers, storyDuration]);
 
  if (!storyGroup) return null;
 
@@ -97,8 +179,8 @@ const StoryViewer = ({ storyGroup, onClose, onDelete, currentUser, isAdmin, init
  {storyGroup.stories.map((_, idx) => (
  <div key={idx} className="h-1 flex-1 bg-white/20 rounded-full overflow-hidden">
  <div 
- className={`h-full bg-[#BFF367] transition-all duration-300 ${idx < currentStoryIndex ? 'w-full' : idx === currentStoryIndex ? 'w-full animate-progress' : 'w-0'}`}
- style={{ animationDuration: '5s' }}
+  className={`h-full bg-[#BFF367] transition-all duration-300 ${idx < currentStoryIndex ? 'w-full' : idx === currentStoryIndex ? 'w-full animate-progress' : 'w-0'}`}
+  style={{ animationDuration: `${storyDuration}s` }}
  />
  </div>
  ))}
@@ -107,11 +189,15 @@ const StoryViewer = ({ storyGroup, onClose, onDelete, currentUser, isAdmin, init
  {/* Content */}
  <div className="relative flex-1 flex items-center justify-center bg-black overflow-hidden">
  {currentStory.mediaUrl ? (
- <img 
- src={currentStory.mediaUrl} 
- alt="" 
- className="w-full h-full object-contain"
- />
+   currentStory.mediaType === 'video' ? (
+     <StoryVideoPlayer src={currentStory.mediaUrl} onDurationReady={handleVideoDuration} />
+   ) : (
+    <img 
+      src={currentStory.mediaUrl} 
+      alt="" 
+      className="w-full h-full object-contain"
+    />
+  )
  ) : (
  <div className="p-12 text-center w-full">
  <p className="text-2xl md:text-3xl font-bold leading-relaxed text-white">{currentStory.content}</p>

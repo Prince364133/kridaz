@@ -8,24 +8,16 @@ import {
   Search, 
   MapPin, 
   Users,
-  Trophy,
   ShieldCheck,
   Swords,
   ChevronRight,
   Target,
-  Crown,
   Loader2,
   Navigation,
   MessageCircle,
-  Star,
   UserPlus,
-  Activity,
-  ChevronUp,
-  ChevronDown,
-  Compass,
   Eye,
   EyeOff,
-  WifiOff,
   AlertCircle
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
@@ -518,13 +510,18 @@ const FindPlayers = () => {
   useEffect(() => {
     if (activeTab === 'players' && snapState !== 'COLLAPSED') {
       document.body.style.overflow = 'hidden';
+      document.documentElement.style.overflow = 'hidden';
     } else {
-      document.body.style.overflow = 'unset';
+      document.body.style.overflow = '';
+      document.documentElement.style.overflow = '';
       if (activeTab === 'players' && snapState === 'COLLAPSED') {
         window.scrollTo({ top: 0, behavior: 'smooth' });
       }
     }
-    return () => { document.body.style.overflow = 'unset'; };
+    return () => {
+      document.body.style.overflow = '';
+      document.documentElement.style.overflow = '';
+    };
   }, [snapState, activeTab]);
 
   const toggleLocationSharing = async () => {
@@ -868,7 +865,7 @@ const FindPlayers = () => {
   };
 
   return (
-    <div className={`bg-black text-white flex flex-col ${activeTab === "players" ? "fixed inset-0 lg:left-64 overflow-hidden pt-16 lg:pt-0" : "min-h-screen overflow-y-auto no-scrollbar"}`}>
+    <div className={`bg-black text-white flex flex-col ${activeTab === "players" ? "fixed inset-0 lg:left-64 overflow-hidden pt-16 lg:pt-0" : "min-h-screen"}`}>
       
       {activeTab === "players" && (
         <>

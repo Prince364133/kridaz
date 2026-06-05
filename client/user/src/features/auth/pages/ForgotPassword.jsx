@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { ArrowLeft, Mail, KeyRound, ShieldCheck, Zap, ArrowRight, CheckCircle2 } from "lucide-react";
+import { ArrowLeft, Mail, KeyRound, ShieldCheck, ArrowRight, CheckCircle2 } from "lucide-react";
 import axiosInstance from "@hooks/useAxiosInstance";
 import toast from "react-hot-toast";
 import { Capacitor } from "@capacitor/core";

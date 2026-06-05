@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import { X, User, Phone, MapPin, AlignLeft, Loader2, Check, Info, Navigation, Camera } from "lucide-react";
+import { X, User, Phone, MapPin, AlignLeft, Loader2, Check, Camera } from "lucide-react";
 import toast from "react-hot-toast";
 import axiosInstance from "@hooks/useAxiosInstance";
 import { useDispatch } from "react-redux";

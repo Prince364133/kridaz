@@ -2,11 +2,10 @@
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import {
-  Users, Trophy, MapPin, Calendar, Shield, ChevronLeft,
+  Users, Trophy, MapPin, Calendar, Shield,
   UserPlus, Swords, MessageCircle, Share2, Copy,
-  CheckCircle2, AlertCircle, Loader2, Info, Zap, QrCode, Download,
-  Target, Star, ArrowRight, Play, Settings, LayoutDashboard,
-  Clock, TrendingUp, BarChart3, Fingerprint, Crown, Ticket, X
+  CheckCircle2, AlertCircle, Loader2, Zap, QrCode,
+  Target, Star, ArrowRight, Play, TrendingUp, BarChart3, Fingerprint, Crown, Ticket, X
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {

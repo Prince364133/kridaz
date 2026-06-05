@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -52,6 +52,12 @@ const addTurfSchema = z.object({
       phone: z.string().regex(/^\d{10}$/, "Phone must be 10 digits"),
     })
   ).optional(),
+  gstRegistration: z.any().optional(),
+  saleDeed: z.any().refine((val) => val != null, "Sale Deed is mandatory"),
+  rentalAgreement: z.any().optional(),
+  ownershipAgreement: z.any().optional(),
+  googleProfileScreenshot: z.any().optional(),
+  electricityBill: z.any().refine((val) => val != null, "Electricity Bill is mandatory"),
 }).refine(data => data.closeTime > data.openTime, {
   message: "Close time must be after open time",
   path: ["closeTime"],
@@ -68,6 +74,9 @@ export default function useAddTurf() {
     control,
     setValue,
     watch,
+    trigger,
+    clearErrors,
+    getValues,
   } = useForm({
     resolver: zodResolver(addTurfSchema),
     defaultValues: {
@@ -104,6 +113,45 @@ export default function useAddTurf() {
   const [newGroundType, setNewGroundType] = useState("");
   const [newFacility, setNewFacility] = useState("");
   const [generatedSlots, setGeneratedSlots] = useState([]);
+  
+  // Load draft from local storage on mount
+  useEffect(() => {
+    const savedDraft = localStorage.getItem("addVenueDraft");
+    if (savedDraft) {
+      try {
+        const parsed = JSON.parse(savedDraft);
+        Object.keys(parsed).forEach((key) => {
+          if (key === "openTime" || key === "closeTime") {
+            if (parsed[key]) setValue(key, new Date(parsed[key]));
+          } else {
+            setValue(key, parsed[key]);
+          }
+        });
+        if (parsed.managerContacts) setManagerContacts(parsed.managerContacts);
+        if (parsed.sportTypes) setSportTypes(parsed.sportTypes);
+        if (parsed.groundTypes) setGroundTypes(parsed.groundTypes);
+        if (parsed.facilities) setFacilities(parsed.facilities);
+        toast.success("Draft loaded successfully!");
+      } catch (e) {
+        console.error("Failed to load draft");
+      }
+    }
+  }, [setValue]);
+
+  const saveDraft = () => {
+    const data = getValues();
+    const dataToSave = { ...data };
+    // Remove files
+    delete dataToSave.images;
+    delete dataToSave.saleDeed;
+    delete dataToSave.electricityBill;
+    delete dataToSave.rentalAgreement;
+    delete dataToSave.ownershipAgreement;
+    delete dataToSave.gstRegistration;
+    delete dataToSave.googleProfileScreenshot;
+    localStorage.setItem("addVenueDraft", JSON.stringify(dataToSave));
+    toast.success("Draft saved successfully! (Files are not saved)");
+  };
   
   const openTime = watch("openTime");
   const closeTime = watch("closeTime");
@@ -242,7 +290,7 @@ export default function useAddTurf() {
     setGeneratedSlots(newSlots);
   };
 
-  const onSubmit = async (data) => {
+  const submitToServer = async (data) => {
     setLoading(true);
 
     const formData = new FormData();
@@ -269,15 +317,15 @@ export default function useAddTurf() {
       } else if (key === "managerContacts") {
         formData.append(key, JSON.stringify(data[key]));
       } else {
-        formData.append(key, data[key]);
+        if (data[key] !== null && data[key] !== undefined) {
+          formData.append(key, data[key]);
+        }
       }
     });
 
     // Append generated slots
     formData.append("generatedSlots", JSON.stringify(generatedSlots));
 
-    for (let [key, value] of formData.entries()) {
-     }
     try {
       const response = await axiosInstance.post(
         "/api/owner/turf/owner/register",
@@ -302,6 +350,11 @@ export default function useAddTurf() {
     } finally {
       setLoading(false);
     }
+  };
+
+  const onSubmit = async (data) => {
+    await submitToServer(data);
+    localStorage.removeItem("addVenueDraft"); // Clear draft on successful submission
   };
 
   const getMyLocation = () => {
@@ -367,7 +420,10 @@ export default function useAddTurf() {
     setNewManagerPhone,
     addManagerContact,
     removeManagerContact,
-    updateSlotPrice
+    updateSlotPrice,
+    trigger,
+    clearErrors,
+    getValues,
+    saveDraft
   };
 }
-

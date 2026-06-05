@@ -1,5 +1,5 @@
 import React from "react";
-import { Star, MessageSquare, Award, ThumbsUp } from "lucide-react";
+import { Star, Award, ThumbsUp } from "lucide-react";
 import useUmpireDashboard from "@hooks/owner/useUmpireDashboard";
 import DashboardSkeleton from "@features/venue-owner/Dashboard/DashboardSkeleton";
 

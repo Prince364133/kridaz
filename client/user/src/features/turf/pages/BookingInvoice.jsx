@@ -1,4 +1,3 @@
-import * as Sentry from "@sentry/react";
 import React, { useState, useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
 import { ChevronLeft, Download, Loader2, ShieldCheck } from "lucide-react";
@@ -18,7 +17,7 @@ const BookingInvoice = () => {
         const response = await axiosInstance.get(`/api/user/booking/${id}`);
         setBooking(response.data);
       } catch (err) {
-        Sentry.captureException(err);
+        console.error("Error fetching invoice data:", err);
         setError(err.response?.data?.message || "Failed to load invoice details");
       } finally {
         setLoading(false);

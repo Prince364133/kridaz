@@ -1,4 +1,3 @@
-import * as Sentry from "@sentry/react";
 import React, { useEffect, useState } from "react";
 import { useLocation, useNavigate, useParams, Link } from "react-router-dom";
 import { useSelector } from "react-redux";
@@ -77,7 +76,7 @@ const CheckoutPage = () => {
         const response = await axiosInstance.get("/api/settings/payout");
         setSettings(response.data.payoutSettings);
       } catch (err) {
-        Sentry.captureException(err);
+        console.error("Failed to fetch payout settings:", err);
       }
     };
     fetchSettings();
@@ -91,7 +90,7 @@ const CheckoutPage = () => {
           setCurrentBalance(response.data.usableBalance ?? response.data.balance);
         }
       } catch (err) {
-        Sentry.captureException(err);
+        console.error("Failed to fetch wallet data:", err);
       }
     };
     if (user) {
@@ -198,7 +197,7 @@ const CheckoutPage = () => {
         }
       }
     } catch (error) {
-      Sentry.captureException(error);
+      console.error("Payment Error:", error);
       const msg = error.response?.data?.message || error.message || "Payment failed. Please try again.";
       toast.error(msg);
       if (msg.toLowerCase().includes("insufficient")) {

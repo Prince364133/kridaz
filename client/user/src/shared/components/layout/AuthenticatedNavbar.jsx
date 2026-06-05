@@ -4,14 +4,7 @@ import {
   Menu, 
   Bell, 
   LogOut, 
-  Trash2, 
-  CheckCircle, 
-  Clock, 
-  Search, 
   Plus,
-  Command,
-  User,
-  ChevronDown,
   CreditCard,
   MessageSquare,
   AlertTriangle,
@@ -19,8 +12,7 @@ import {
   ShieldAlert,
   ExternalLink,
   ArrowLeft,
-  HelpCircle,
-  Zap
+  HelpCircle
 } from "lucide-react";
 import { useDispatch, useSelector } from "react-redux";
 import { logout, updateUser } from "@redux/slices/authSlice.js";

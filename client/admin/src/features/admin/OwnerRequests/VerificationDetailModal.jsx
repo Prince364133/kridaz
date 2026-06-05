@@ -1,11 +1,10 @@
 import React, { useState, useEffect } from "react";
 import { 
   X, Shield, Mail, Phone, Briefcase, Award, Clock, MapPin, 
-  FileText, ExternalLink, ChevronRight, CheckCircle, AlertTriangle, 
+  FileText, ExternalLink, ChevronRight, AlertTriangle, 
   User, Image as ImageIcon, Globe, Zap, Database, AlertCircle
 } from "lucide-react";
 import axiosInstance from "@hooks/useAxiosInstance";
-import toast from "react-hot-toast";
 
 const VerificationDetailModal = ({ request, onClose, onAccept, onReject, isProcessing, type = "pending" }) => {
   const [grounds, setGrounds] = useState([]);

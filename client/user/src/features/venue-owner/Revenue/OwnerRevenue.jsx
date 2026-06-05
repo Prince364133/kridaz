@@ -1,7 +1,6 @@
 import React, { useState } from "react";
 import { 
-  IndianRupee, TrendingUp, Calendar, Download, 
-  CreditCard, Clock, CheckCircle2,
+  IndianRupee, TrendingUp, Calendar, Download, Clock, CheckCircle2,
   Wallet, Landmark, X, AlertCircle, ShieldCheck,
   AlertOctagon, CheckCircle, Hourglass, ArrowUpRight, ArrowDownLeft
 } from "lucide-react";

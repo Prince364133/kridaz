@@ -4,8 +4,6 @@ import { redisClient as redis, pubClient, subClient } from "./redis.js";
 import { prisma } from "./prisma.js";
 import logger from "../utils/logger.js";
 import { SOCKET } from "@kridaz/shared-constants/socketEvents";
-import fs from "fs";
-import path from "path";
 import jwt from "jsonwebtoken";
 import { getAccessSecret } from "../utils/jwtSecrets.js";
 let io;
@@ -290,13 +288,12 @@ const socketConfig = (server) => {
         }).catch(() => { });
 
         await redis.srem('kridaz:online:users', socket.userId.toString());
+        await redis.zrem('kridaz:geo:online', socket.userId.toString()).catch(() => {});
+        await redis.del(`kridaz:location:${socket.userId}`).catch(() => {});
         schedulePresenceBroadcast();
 
         const onlineUserIds = await redis.smembers('kridaz:online:users');
         io.emit('online users', onlineUserIds);
-
-        await redis.del(`kridaz:location:${socket.userId}`);
-        await redis.zrem("kridaz:geo:online", socket.userId.toString());
 
         io.emit("user last seen", { userId: socket.userId, lastSeen });
       }

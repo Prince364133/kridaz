@@ -1,8 +1,6 @@
 import * as Sentry from "@sentry/react";
 import React, { useState, useEffect } from "react";
-import {
-  LifeBuoy, MessageSquare, ChevronRight, Clock, AlertCircle, Zap,
-  HelpCircle, Landmark, Shield, X, Plus
+import { MessageSquare, Clock, AlertCircle, Shield, X, Plus
 } from "lucide-react";
 import axiosInstance from "@hooks/useAxiosInstance";
 import toast from "react-hot-toast";

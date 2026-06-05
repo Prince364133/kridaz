@@ -3,7 +3,7 @@ import useUsers from "@hooks/admin/useUsers";
 import UserSkeleton from "./UserSkeleton";
 import UserCard from "./UserCard";
 import SearchInput from "./SearchInput";
-import { Activity, Trash2, Ban, CheckCircle, X } from "lucide-react";
+import { Trash2, Ban, CheckCircle, X } from "lucide-react";
 import ConfirmationModal from "@components/shared/ConfirmationModal";
 
 const UserPage = () => {

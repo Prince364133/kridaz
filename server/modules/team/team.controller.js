@@ -1,7 +1,7 @@
 import crypto from "crypto";
 import { prisma } from "../../config/prisma.js";
 import { uploadToCloudinary } from "../../utils/cloudinary.js";
-import { createUniqueTeamCode, ensureTeamQRCode, getTeamWithDetails } from "./team.service.js";
+import { createUniqueTeamCode } from "./team.service.js";
 import { updateGeoPoint } from "../../utils/geo.util.js";
 import logger from "../../utils/logger.js";
 import generateQRCode from "../../utils/generateQRCode.js";

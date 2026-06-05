@@ -498,8 +498,12 @@ export const updateCommentarySettings = async (req, res) => {
 
 export const toggleTimer = async (req, res) => {
   try {
-    const { scoringId } = req.body;
-    const result = await scoringService.toggleMatchTimer(scoringId);
+    // Accept both matchId (Flutter) and scoringId (web) for backward compat
+    const matchId = req.body.matchId ?? req.body.scoringId;
+    if (!matchId) {
+      return res.status(400).json({ success: false, message: "matchId is required" });
+    }
+    const result = await scoringService.toggleMatchTimer(matchId);
     res.status(200).json({ success: true, ...result });
   } catch (error) {
     logger.error("[Scoring] Toggle Timer Error:", error);

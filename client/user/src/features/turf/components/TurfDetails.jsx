@@ -1,4 +1,3 @@
-import * as Sentry from "@sentry/react";
 import React, { useState, useEffect } from "react";
 import { useNavigate, useParams, Link, useSearchParams } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
@@ -87,7 +86,7 @@ const TurfDetails = () => {
       turfId: id,
       type: "VIEW",
       duration: 0
-    }).catch(err => Sentry.captureException(err));
+    }).catch(err => console.error("[TELEMETRY] Failed to log page view:", err));
 
     const entryTime = Date.now();
 
@@ -99,7 +98,7 @@ const TurfDetails = () => {
           turfId: id,
           type: "VIEW",
           duration: dwellSeconds
-        }).catch(err => Sentry.captureException(err));
+        }).catch(err => console.error("[TELEMETRY] Failed to log dwell time:", err));
       }
     };
   }, [id]);
@@ -192,7 +191,7 @@ const TurfDetails = () => {
         toast.success("Link copied to clipboard");
       }
     } catch (err) {
-      if (err.name !== 'AbortError') Sentry.captureException(err);
+      if (err.name !== 'AbortError') console.error("Error sharing:", err);
     }
   };
 
