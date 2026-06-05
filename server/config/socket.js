@@ -94,6 +94,21 @@ const socketConfig = (server) => {
       } catch (e) { }
     });
 
+    // Counterpart so viewers stop receiving score updates when they navigate
+    // away. Without this, every JOIN_MATCH accumulated a phantom subscriber
+    // and every ball was broadcast to dead sockets.
+    socket.on(SOCKET.LEAVE_MATCH, async (matchId) => {
+      if (!matchId) return;
+      socket.leave(matchId);
+      logger.info(`[Socket] Socket ${socket.id} left match room: ${matchId}`);
+      try {
+        if (!matchId.includes("-")) {
+          const game = await prisma.hostedGame.findUnique({ where: { shortId: matchId }, select: { id: true } });
+          if (game) socket.leave(game.id);
+        }
+      } catch (e) { /* best-effort cleanup */ }
+    });
+
     socket.on(SOCKET.OVERLAY_JOIN, async ({ matchId, token }) => {
       if (!matchId) return;
       socket.join(matchId);

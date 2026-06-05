@@ -57,6 +57,16 @@ router.get("/streamers", controller.getStreamersForHosting);
 
 /**
  * @swagger
+ * /hosted-game/scorers:
+ *   get:
+ *     summary: Get list of available scorers for hosting
+ *     description: Returns scorers filtered by city/state/query for the host-game picker.
+ *     tags: [HostedGame]
+ */
+router.get("/scorers", controller.getScorersForHosting);
+
+/**
+ * @swagger
  * /hosted-game/list:
  *   get:
  *     summary: List all hosted games

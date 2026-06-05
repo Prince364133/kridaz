@@ -4,6 +4,7 @@ import {
   verifyTopup,
   getWalletData,
   checkPaymentStatus,
+  cancelReservation,
 } from "../wallet.controller.js";
 import verifyToken from "../../../middleware/jwt/user.middleware.js";
 import { validate } from "../../../middleware/validate.middleware.js";
@@ -80,5 +81,16 @@ router.post(
  *       - BearerAuth: []
  */
 router.get("/topup/check-status/:orderId", checkPaymentStatus);
+
+/**
+ * @swagger
+ * /wallet/transactions/{id}/cancel:
+ *   post:
+ *     summary: Cancel a RESERVED wallet transaction and release the coins
+ *     tags: [Wallet]
+ *     security:
+ *       - BearerAuth: []
+ */
+router.post("/transactions/:id/cancel", cancelReservation);
 
 export default router;

@@ -52,11 +52,17 @@ export const errorHandler = (err, req, res, next) => {
     // Legacy message-as-code shim — see LEGACY_MESSAGE_AS_CODE.
     const message = code && LEGACY_MESSAGE_AS_CODE.has(code) ? code : err.message;
 
+    // Sanitize Prisma internals out of the wire body regardless of env —
+    // server-side method signatures should never reach the client even in
+    // dev, since they leak schema details.
+    const sanitizedMessage = looksLikePrismaInternal(message)
+      ? 'Internal server error.'
+      : message;
+
     return res.status(err.statusCode).json({
       success: false,
-      error:   err.name,
       code,
-      message,
+      message: sanitizedMessage,
       ...(hasDetails && { details: detailsRest }),
       ...(requestId && { requestId }),
     });
@@ -68,15 +74,20 @@ export const errorHandler = (err, req, res, next) => {
     extra: { path: req.originalUrl, method: req.method, requestId },
   });
 
+  const rawMessage = process.env.NODE_ENV === 'production' ? 'Something went wrong.' : err.message;
+  const safeMessage = looksLikePrismaInternal(rawMessage) ? 'Internal server error.' : rawMessage;
+
   return res.status(500).json({
     success: false,
-    error:   'InternalError',
     code:    'INTERNAL_ERROR',
-    message: process.env.NODE_ENV === 'production' ? 'Something went wrong.' : err.message,
-    stack:   process.env.NODE_ENV === 'development' ? err.stack : undefined,
+    message: safeMessage,
     ...(requestId && { requestId }),
   });
 };
+
+/** Strip Prisma method signatures / Where-input shapes from response bodies. */
+const looksLikePrismaInternal = (msg) =>
+  typeof msg === 'string' && /prisma\.|WhereInput|StringNullableFilter|NullableJsonNullValueInput/i.test(msg);
 
 /**
  * 404 handler — must be registered BEFORE errorHandler in app.js.

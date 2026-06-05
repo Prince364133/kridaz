@@ -14,12 +14,9 @@ import { logAudit } from "../../utils/auditLogger.js";
 import logger from "../../utils/logger.js";
 import { userRegistrationTotal } from "../../utils/metrics.js";
 import { SOCKET } from "@kridaz/shared-constants/socketEvents";
-<<<<<<< Updated upstream
 import { sanitizeUser } from "../../utils/sanitizeUser.js";
 import { getRegistrationSecret } from "../../utils/jwtSecrets.js";
-=======
 import { bumpTokenVersion } from "../../utils/tokenVersion.js";
->>>>>>> Stashed changes
 
 
 

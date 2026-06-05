@@ -308,6 +308,65 @@ export const getStreamersForHosting = async (req, res) => {
   }
 };
 
+/**
+ * Picker for the host-game flow's "Pick a scorer" step. Mirror of the
+ * streamer/umpire endpoints — same filters, same shape on each row.
+ */
+export const getScorersForHosting = async (req, res) => {
+  try {
+    const { city, state, query: searchTerm } = req.query;
+
+    const scorers = await prisma.ownerProfile.findMany({
+      where: {
+        user: {
+          role: "SCORER",
+          ...(city ? { city: { contains: city, mode: 'insensitive' } } : {}),
+          ...(state ? { state: { contains: state, mode: 'insensitive' } } : {}),
+          ...(searchTerm ? {
+            OR: [
+              { name:  { contains: searchTerm, mode: 'insensitive' } },
+              { phone: { contains: searchTerm, mode: 'insensitive' } },
+              { email: { contains: searchTerm, mode: 'insensitive' } }
+            ]
+          } : {})
+        }
+      },
+      select: {
+        id: true,
+        price: true,
+        user: {
+          select: {
+            name: true,
+            email: true,
+            phone: true,
+            profilePicture: true,
+            city: true,
+            state: true,
+            sportTypes: true
+          }
+        }
+      }
+    });
+
+    const formattedScorers = scorers.map(s => ({
+      id: s.id,
+      price: s.price,
+      gameTypes: s.user.sportTypes || [],
+      name: s.user.name,
+      email: s.user.email,
+      phone: s.user.phone,
+      profilePicture: s.user.profilePicture,
+      city: s.user.city,
+      state: s.user.state
+    }));
+
+    return res.status(200).json({ scorers: formattedScorers });
+  } catch (error) {
+    logger.error("getScorersForHosting error:", error);
+    return res.status(500).json({ message: error.message });
+  }
+};
+
 export const createHostedGame = async (req, res) => {
   try {
     const result = await runInTransaction(async ({ tx }) => {
@@ -811,7 +870,9 @@ export const approveJoinRequest = async (req, res) => {
   try {
     await runInTransaction(async ({ tx }) => {
       const hostId = req.user.id || req.user.user;
-      const { gameId, team, slotIndex, slotId } = req.body;
+      // Flutter parity: accept `userId` and resolve the pending slot from it,
+      // so the host UI doesn't have to compute (team, slotIndex) client-side.
+      let { gameId, team, slotIndex, slotId, userId: requestedUserId } = req.body;
 
       const game = await tx.hostedGame.findUnique({
         where: { id: gameId },
@@ -826,6 +887,17 @@ export const approveJoinRequest = async (req, res) => {
         const error = new Error("Cannot modify roster for a game that is already locked for scoring.");
         error.status = 400;
         throw error;
+      }
+
+      // If only userId was sent, find the PENDING slot held by that user in
+      // this game and convert it to a slotId — downstream code is unchanged.
+      if (!slotId && requestedUserId && (team == null || slotIndex == null)) {
+        const pendingSlot = await tx.gameSlot.findFirst({
+          where: { gameId, userId: requestedUserId, status: "PENDING" }
+        });
+        if (pendingSlot) {
+          slotId = pendingSlot.id;
+        }
       }
 
       let targetTeam = null;
@@ -959,7 +1031,8 @@ export const rejectJoinRequest = async (req, res) => {
   try {
     await runInTransaction(async ({ tx }) => {
       const hostId = req.user.id || req.user.user;
-      const { gameId, team, slotIndex, slotId } = req.body;
+      // Flutter parity: accept userId, same convention as approveJoinRequest.
+      let { gameId, team, slotIndex, slotId, userId: requestedUserId } = req.body;
 
       const game = await tx.hostedGame.findUnique({
         where: { id: gameId },
@@ -974,6 +1047,13 @@ export const rejectJoinRequest = async (req, res) => {
         const error = new Error("Cannot modify roster for a game that is already locked for scoring.");
         error.status = 400;
         throw error;
+      }
+
+      if (!slotId && requestedUserId && (team == null || slotIndex == null)) {
+        const pendingSlot = await tx.gameSlot.findFirst({
+          where: { gameId, userId: requestedUserId, status: "PENDING" }
+        });
+        if (pendingSlot) slotId = pendingSlot.id;
       }
 
       let targetSlot;

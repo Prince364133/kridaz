@@ -70,7 +70,13 @@ export const authenticateScoringApp = async (req, res) => {
     }
 
     const result = await scoringService.verifyScoringPassword(gameId, password);
-    res.status(200).json({ success: true, token: result.token, gameId });
+    // Both top-level (legacy) and data.* (Flutter) — additive envelope.
+    res.status(200).json({
+      success: true,
+      token: result.token,
+      gameId,
+      data: { token: result.token, gameId },
+    });
   } catch (error) {
     logger.error("[Scoring] Auth Error:", error);
     if (error.message === "INVALID_PASSWORD" || error.message === "GAME_NOT_FOUND") {

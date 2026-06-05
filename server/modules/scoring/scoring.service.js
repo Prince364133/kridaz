@@ -1121,13 +1121,6 @@ export const revertLastBall = async (scoringId) => {
     throw new BadRequestError("Innings not found for undo");
   }
 
-<<<<<<< Updated upstream
-  // Must match the forward path's definition exactly (processScoreUpdate):
-  // wides, no-balls, and penalties do NOT count as legal deliveries. Byes and
-  // leg-byes DO. The previous version of this undo treated PENALTY as legal,
-  // causing the ball count to drift backward on every penalty-then-undo cycle.
-  const isLegalBall = !["WIDE", "NO_BALL", "PENALTY"].includes(lastBall.extraType);
-=======
   // Must match the forward path's definition exactly (processScoreUpdate),
   // including the same houseRules overrides — otherwise an undo decrements
   // totalBalls that the forward never incremented (or vice versa).
@@ -1136,7 +1129,6 @@ export const revertLastBall = async (scoringId) => {
     lastBall.extraType !== "PENALTY" &&
     (lastBall.extraType !== "WIDE"    || houseRules.wideIsLegalBall) &&
     (lastBall.extraType !== "NO_BALL" || houseRules.noBallIsLegalBall);
->>>>>>> Stashed changes
   const runs = lastBall.runs ?? 0;
   const extraRuns = lastBall.extraRuns ?? (lastBall.isExtra ? 1 : 0);
 
@@ -2354,8 +2346,6 @@ export const addPenaltyRuns = async (scoringId, runs, teamId) => {
   const currentInnings = match.innings.find(i => i.inningsIndex === match.currentInningsIndex);
   if (!currentInnings) throw new Error("Innings not active");
 
-<<<<<<< Updated upstream
-=======
   // Casual / pickup games often disable penalties entirely.
   const houseRules = resolveHouseRules(match.houseRules);
   if (!houseRules.penaltyEnabled) {
@@ -2365,7 +2355,6 @@ export const addPenaltyRuns = async (scoringId, runs, teamId) => {
     );
   }
 
->>>>>>> Stashed changes
   // teamId is the team the penalty is awarded AGAINST. Per MCC Law 41:
   //   - Penalty against fielding team → batting side gains <runs> in CURRENT innings.
   //   - Penalty against batting team  → fielding side gains <runs>, applied to
@@ -2373,23 +2362,10 @@ export const addPenaltyRuns = async (scoringId, runs, teamId) => {
   //
   // Previous version routed the second case to the "other innings" — which
   // doesn't exist during innings 0. The penalty silently no-op'd, so umpires
-<<<<<<< Updated upstream
-  // thought they'd awarded runs that never landed.
-  //
-  // Simplification: in every case, the runs land on the current innings. The
-  // distinction "against batting" vs "against fielding" only changes whose
-  // total goes up, but in our data model `Innings.totalRuns` is the batting
-  // side's score; a penalty against the batting team affecting their next
-  // innings is so rare (and our model can't represent "credit a future
-  // innings that doesn't exist yet" cleanly) that we record it as a ledger
-  // entry on the current innings and let the umpire's discretion handle
-  // pre-/post-match reconciliation.
-=======
   // thought they'd awarded runs that never landed. In every case now we
   // apply to the current innings; the rare "credit the bowling side's next
   // innings" case is left for umpire reconciliation rather than silently
   // dropping the runs.
->>>>>>> Stashed changes
   const penaltyRuns = parseInt(runs);
   const over = Math.floor(currentInnings.totalBalls / 6);
   const ballInOver = currentInnings.totalBalls % 6;
@@ -2413,8 +2389,6 @@ export const addPenaltyRuns = async (scoringId, runs, teamId) => {
   const updatedInnings = await prisma.innings.update({
     where: { id: currentInnings.id },
     data: { totalRuns: { increment: penaltyRuns } }
-<<<<<<< Updated upstream
-=======
   });
 
   // io may be null in unit tests / smoke scripts without a running socket.
@@ -2459,7 +2433,6 @@ export const updateHouseRules = async (scoringId, viewer, incoming) => {
   const scoring = await prisma.cricketMatch.findUnique({
     where: { id: scoringId },
     select: { id: true, gameId: true, houseRules: true, status: true },
->>>>>>> Stashed changes
   });
   if (!scoring) {
     throw new NotFoundError("Scoring session not found");

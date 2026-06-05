@@ -39,6 +39,7 @@ export const SOCKET = Object.freeze({
 
   // ── Live Scoring ───────────────────────────────────────────────────────────
   JOIN_MATCH: 'joinMatch',
+  LEAVE_MATCH: 'leaveMatch',
   OVERLAY_JOIN: 'overlayJoin',
   SCORE_UPDATED: 'scoreUpdated',
   BALL_EVENT: 'ballEvent',
