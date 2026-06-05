@@ -46,13 +46,16 @@ const TossModal = ({ teamA, teamB, hasPassword, onConfirm, onCancel }) => {
   const handleStartMatch = async () => {
     if (hasPassword && !password) return;
     setIsSubmitting(true);
-    await onConfirm({ winnerTeam, decision, password });
-    setIsSubmitting(false);
+    try {
+      await onConfirm({ winnerTeam, decision, password });
+      // Parent handles loading overlay — don't reset isSubmitting so button stays disabled
+    } catch {
+      setIsSubmitting(false);
+    }
   };
 
   const handleReToss = () => {
     setStep('FLIP_IDLE');
-    setWinnerTeam(null);
     setWinnerTeam(null);
     setDecision(null);
     setCoinResult(null);
@@ -164,8 +167,8 @@ const TossModal = ({ teamA, teamB, hasPassword, onConfirm, onCancel }) => {
                 <h2 className="text-[20px] font-black text-white uppercase tracking-wider" style={{ fontFamily: 'Anton, sans-serif' }}>WHO WON THE TOSS?</h2>
               </div>
 
-              {/* Team Selection Grid */}
-              <div className="grid grid-cols-1 gap-3">
+              {/* Team Selection Grid - Side by Side */}
+              <div className="grid grid-cols-2 gap-3">
                 {teams.map((team, index) => {
                   const isSelected = winnerTeam === team.id;
                   const isTeamA = index === 0;
@@ -174,24 +177,24 @@ const TossModal = ({ teamA, teamB, hasPassword, onConfirm, onCancel }) => {
                     <button
                       key={team.id}
                       onClick={() => setWinnerTeam(team.id)}
-                      className={`group relative flex items-center justify-between p-4 bg-[#1c1b1b] border rounded-xl transition-all active:scale-[0.98] text-left overflow-hidden ${isSelected ? 'border-[#7bf090] bg-[#222222]' : 'border-[#3e4a3e]'}`}
+                      className={`group relative flex flex-col items-center justify-center p-4 bg-[#1c1b1b] border rounded-xl transition-all active:scale-[0.98] text-center overflow-hidden ${isSelected ? 'border-[#7bf090] bg-[#222222]' : 'border-[#3e4a3e]'}`}
                     >
                       {/* Animated Green Outline */}
                       {isSelected && (
                         <div className="absolute inset-0 pointer-events-none rounded-xl border-2 border-[#7bf090] animate-[pulse_1.5s_cubic-bezier(0.4,0,0.6,1)_infinite] shadow-[0_0_15px_rgba(123,240,144,0.3)]" />
                       )}
 
-                      <div className="flex items-center gap-4 relative z-10">
+                      <div className="flex flex-col items-center gap-2 relative z-10">
                         {team.logo || team.image ? (
-                          <img src={team.logo || team.image} alt={team.name} className="w-10 h-10 rounded-lg object-cover bg-white/5 border border-[#3e4a3e]" />
+                          <img src={team.logo || team.image} alt={team.name} className="w-12 h-12 rounded-lg object-cover bg-white/5 border border-[#3e4a3e]" />
                         ) : (
-                          <div className={`w-10 h-10 rounded-lg flex items-center justify-center font-normal text-[24px] tracking-[0.05em] ${isTeamA ? 'bg-[#7bf090] text-[#006d2d]' : 'bg-[#00bbbc] text-[#004545]'}`} style={{ fontFamily: 'Anton, sans-serif' }}>
+                          <div className={`w-12 h-12 rounded-lg flex items-center justify-center font-normal text-[28px] tracking-[0.05em] ${isTeamA ? 'bg-[#7bf090] text-[#006d2d]' : 'bg-[#00bbbc] text-[#004545]'}`} style={{ fontFamily: 'Anton, sans-serif' }}>
                             {isTeamA ? 'A' : 'B'}
                           </div>
                         )}
-                        <div>
+                        <div className="text-center">
                           <p className="text-[10px] font-bold tracking-[0.08em] text-[#bdcaba] uppercase mb-0.5" style={{ fontFamily: 'Inter, sans-serif' }}>TEAM {isTeamA ? 'ALPHA' : 'BRAVO'}</p>
-                          <p className="text-[16px] font-normal text-white uppercase tracking-[0.02em]" style={{ fontFamily: 'Anton, sans-serif' }}>{team.name}</p>
+                          <p className="text-[14px] font-normal text-white uppercase tracking-[0.02em] leading-tight" style={{ fontFamily: 'Anton, sans-serif' }}>{team.name}</p>
                         </div>
                       </div>
                     </button>
@@ -206,20 +209,18 @@ const TossModal = ({ teamA, teamB, hasPassword, onConfirm, onCancel }) => {
                   <h2 className="text-[20px] font-black text-white uppercase tracking-wider" style={{ fontFamily: 'Anton, sans-serif' }}>DECISION</h2>
                 </div>
 
-                <div className="flex flex-col gap-3">
+                <div className="grid grid-cols-2 gap-3">
                   {/* BAT */}
                   <button
                     onClick={() => {
                       if (winnerTeam) setDecision('BAT');
                     }}
                     disabled={!winnerTeam}
-                    className={`group relative flex items-center justify-between p-4 rounded-xl transition-all active:scale-[0.98] text-left overflow-hidden ${!winnerTeam ? 'opacity-40 cursor-not-allowed bg-[#131313] border border-[#2a2a2a]' : decision === 'BAT' ? 'bg-[linear-gradient(135deg,#7bf090_0%,#45dada_100%)] text-[#003914] shadow-[0_0_20px_rgba(123,240,144,0.2)]' : 'bg-[#1c1b1b] border border-[#3e4a3e] text-white hover:bg-[#222]'}`}
+                    className={`group relative flex flex-col items-center justify-center p-4 rounded-xl transition-all active:scale-[0.98] text-center overflow-hidden ${!winnerTeam ? 'opacity-40 cursor-not-allowed bg-[#131313] border border-[#2a2a2a]' : decision === 'BAT' ? 'bg-[linear-gradient(135deg,#7bf090_0%,#45dada_100%)] text-[#003914] shadow-[0_0_20px_rgba(123,240,144,0.2)]' : 'bg-[#1c1b1b] border border-[#3e4a3e] text-white hover:bg-[#222]'}`}
                   >
-                    <div className="relative z-10">
-                      <h3 className="text-[28px] uppercase leading-none" style={{ fontFamily: 'Anton, sans-serif' }}>BAT</h3>
-                      <p className={`text-[10px] font-bold tracking-[0.08em] mt-1 ${decision === 'BAT' ? 'text-[#004f26]' : 'text-[#bdcaba]'}`} style={{ fontFamily: 'Inter, sans-serif' }}>SET THE TARGET</p>
-                    </div>
-                    <Activity className={`absolute right-4 -top-2 ${decision === 'BAT' ? 'text-[#004f26] opacity-20' : 'text-[#bdcaba] opacity-10'}`} size={48} />
+                    <Activity className={`mb-2 ${decision === 'BAT' ? 'text-[#004f26]' : 'text-[#bdcaba] opacity-40'}`} size={28} />
+                    <h3 className="text-[24px] uppercase leading-none" style={{ fontFamily: 'Anton, sans-serif' }}>BAT</h3>
+                    <p className={`text-[9px] font-bold tracking-[0.08em] mt-1 ${decision === 'BAT' ? 'text-[#004f26]' : 'text-[#bdcaba]'}`} style={{ fontFamily: 'Inter, sans-serif' }}>SET THE TARGET</p>
                   </button>
 
                   {/* BOWL */}
@@ -228,13 +229,11 @@ const TossModal = ({ teamA, teamB, hasPassword, onConfirm, onCancel }) => {
                       if (winnerTeam) setDecision('BOWL');
                     }}
                     disabled={!winnerTeam}
-                    className={`group relative flex items-center justify-between p-4 rounded-xl transition-all active:scale-[0.98] text-left overflow-hidden ${!winnerTeam ? 'opacity-40 cursor-not-allowed bg-[#131313] border border-[#2a2a2a]' : decision === 'BOWL' ? 'bg-[linear-gradient(135deg,#7bf090_0%,#45dada_100%)] text-[#003914] shadow-[0_0_20px_rgba(123,240,144,0.2)]' : 'bg-[#1c1b1b] border border-[#3e4a3e] text-white hover:bg-[#222]'}`}
+                    className={`group relative flex flex-col items-center justify-center p-4 rounded-xl transition-all active:scale-[0.98] text-center overflow-hidden ${!winnerTeam ? 'opacity-40 cursor-not-allowed bg-[#131313] border border-[#2a2a2a]' : decision === 'BOWL' ? 'bg-[linear-gradient(135deg,#7bf090_0%,#45dada_100%)] text-[#003914] shadow-[0_0_20px_rgba(123,240,144,0.2)]' : 'bg-[#1c1b1b] border border-[#3e4a3e] text-white hover:bg-[#222]'}`}
                   >
-                    <div className="relative z-10">
-                      <h3 className="text-[28px] uppercase leading-none" style={{ fontFamily: 'Anton, sans-serif' }}>BOWL</h3>
-                      <p className={`text-[10px] font-bold tracking-[0.08em] mt-1 ${decision === 'BOWL' ? 'text-[#004f26]' : 'text-[#bdcaba]'}`} style={{ fontFamily: 'Inter, sans-serif' }}>CHASE LATER</p>
-                    </div>
-                    <CircleDot className={`absolute right-4 -top-2 ${decision === 'BOWL' ? 'text-[#004f26] opacity-20' : 'text-[#bdcaba] opacity-10'}`} size={48} />
+                    <CircleDot className={`mb-2 ${decision === 'BOWL' ? 'text-[#004f26]' : 'text-[#bdcaba] opacity-40'}`} size={28} />
+                    <h3 className="text-[24px] uppercase leading-none" style={{ fontFamily: 'Anton, sans-serif' }}>BOWL</h3>
+                    <p className={`text-[9px] font-bold tracking-[0.08em] mt-1 ${decision === 'BOWL' ? 'text-[#004f26]' : 'text-[#bdcaba]'}`} style={{ fontFamily: 'Inter, sans-serif' }}>CHASE LATER</p>
                   </button>
                 </div>
               </div>
@@ -310,30 +309,6 @@ const TossModal = ({ teamA, teamB, hasPassword, onConfirm, onCancel }) => {
                 </div>
               </div>
 
-              {/* Format & Overs */}
-              <div className="grid grid-cols-2 gap-3">
-                <div className="bg-[#1c1b1b] border border-[#3e4a3e] p-4 rounded-xl">
-                  <span className="font-bold text-[10px] text-[#879485] uppercase tracking-widest block mb-1 flex items-center gap-1"><Timer size={14} /> FORMAT</span>
-                  <p className="text-[18px] font-black text-white uppercase tracking-wide" style={{ fontFamily: 'Inter, sans-serif' }}>T20 MATCH</p>
-                </div>
-                <div className="bg-[#1c1b1b] border border-[#3e4a3e] p-4 rounded-xl">
-                  <span className="font-bold text-[10px] text-[#879485] uppercase tracking-widest block mb-1 flex items-center gap-1"><Hash size={14} /> OVERS</span>
-                  <p className="text-[18px] font-black text-white uppercase tracking-wide" style={{ fontFamily: 'Inter, sans-serif' }}>20.0 OVERS</p>
-                </div>
-              </div>
-              
-              {/* Venue Background Card */}
-              <div className="bg-[#1c1b1b] border border-[#3e4a3e] rounded-xl overflow-hidden relative h-[90px] flex items-end p-4">
-                <div className="absolute inset-0 opacity-20 bg-[url('https://images.unsplash.com/photo-1540747913346-19e32dc3e97e?q=80&w=1000&auto=format&fit=crop')] bg-cover bg-center grayscale" />
-                <div className="absolute inset-0 bg-gradient-to-t from-[#131313] to-transparent" />
-                <div className="relative z-10 w-full flex items-center gap-2">
-                  <MapPin className="text-[#bdcaba]" size={24} />
-                  <div>
-                    <span className="font-bold text-[9px] text-[#bdcaba] uppercase tracking-widest block mb-0.5">VENUE</span>
-                    <p className="text-[16px] font-black text-white uppercase tracking-wide" style={{ fontFamily: 'Inter, sans-serif' }}>NATIONAL ARENA, DUBAI</p>
-                  </div>
-                </div>
-              </div>
 
               {/* Password */}
               {hasPassword && (

@@ -298,7 +298,7 @@ const ScoringApp = () => {
     const handleMessage = (e) => {
       if (e.origin !== window.location.origin) return;
       if (e.data?.type === 'STREAM_KEYS_READY' && e.data?.matchId === matchId) {
-        toast.success("Stream Keys Ready! Please start broadcasting in OBS.");
+        toast.success("Stream is ready! Start broadcasting now.");
         refresh();
       }
     };
@@ -310,6 +310,7 @@ const ScoringApp = () => {
   const [showWicketModal, setShowWicketModal] = useState(false);
   const [showBowlerModal, setShowBowlerModal] = useState(false);
   const [showTossModal, setShowTossModal] = useState(false);
+  const [matchStarting, setMatchStarting] = useState(false);
   const [showThemeStore, setShowThemeStore] = useState(false);
   const [extraModal, setExtraModal] = useState(null);
   const [showEndMatchModal, setShowEndMatchModal] = useState(false);
@@ -440,7 +441,7 @@ const ScoringApp = () => {
 
   const checkTimerActive = () => {
     if (matchData?.timerState === 'PAUSED') {
-      toast.error("Match is paused. Start the timer to score.");
+      toast.error("Match is paused. Resume the timer to continue scoring.");
       return false;
     }
     return true;
@@ -450,7 +451,7 @@ const ScoringApp = () => {
     if (isMutating) return { success: false, message: "Action in progress" };
     if (!checkTimerActive()) return { success: false, message: "Match is paused" };
     if (!matchData?.strikerId || !matchData?.bowlerId) {
-      toast.error("Please setup the next pair and bowler first.");
+      toast.error("Please select the batsmen and bowler first.");
       return { success: false, message: "Missing players" };
     }
     const fullPayload = {
@@ -460,7 +461,7 @@ const ScoringApp = () => {
     };
     const result = await recordBall(fullPayload);
     if (!result.success) {
-      toast.error(result.error || "Failed to update score.");
+      toast.error("Something went wrong. Please try again.");
     }
     if (result.success && result.overComplete) {
       setShowBowlerModal(true);
@@ -470,7 +471,7 @@ const ScoringApp = () => {
 
   const handleScoringClick = (callback) => {
     if (isMutating) {
-      toast.error("Action in progress. Please wait.");
+      toast.error("Please wait, processing your last action.");
       return;
     }
     if (!checkTimerActive()) return;
@@ -565,14 +566,14 @@ const ScoringApp = () => {
                     });
                     const data = response.data;
                     if (data.success) {
-                      toast.success('2nd Innings Initiated!');
+                      toast.success('2nd innings is starting!');
                       refresh();
                       setShowInningsSetup(true);
                     } else {
-                      toast.error(data.message || 'Transition failed');
+                      toast.error('Could not start the next innings. Try again.');
                     }
                   } catch (err) {
-                    toast.error('Connection lost during transition');
+                    toast.error('Connection issue. Please check your network.');
                   }
                 }}
                 className="w-full py-5 rounded-[8px] font-black uppercase text-[11px] tracking-[0.2em] transition-all transform active:scale-95 shadow-xl"
@@ -647,8 +648,8 @@ const ScoringApp = () => {
                 <button
                   onClick={() => handleScoringClick(async () => {
                     const result = await undoBall();
-                    if (result.success) toast.success('Reverted last ball');
-                    else toast.error(result.error || 'Undo limit reached');
+                    if (result.success) toast.success('Last ball undone!');
+                    else toast.error('Unable to undo. Please try again.');
                   })}
                   className="flex-[3] bg-white/[0.05] border border-white/10 rounded-none flex items-center justify-center hover:bg-white/10 transition-all transform active:scale-95">
                   <span className="text-white font-inter font-semibold uppercase tracking-widest text-[16px]">UNDO</span>
@@ -707,6 +708,17 @@ const ScoringApp = () => {
       )}
       <div className={`w-full max-w-[450px] bg-black h-[100dvh] relative flex flex-col shadow-[0_0_50px_rgba(0,0,0,0.5)] border-x border-white/5 overflow-hidden ${isLocked ? 'blur-sm pointer-events-none' : ''}`}>
       
+      {/* Match Starting Loading Overlay — lives in PARENT so it persists across TossModal unmount */}
+      {matchStarting && (
+        <div className="absolute inset-0 z-[200] bg-[#121212] flex flex-col items-center justify-center gap-6">
+          <div className="w-16 h-16 rounded-full border-4 border-[#7bf090]/20 border-t-[#7bf090] animate-spin" />
+          <div className="text-center">
+            <h2 className="text-[22px] font-black text-white uppercase tracking-wider mb-2" style={{ fontFamily: 'Anton, sans-serif' }}>STARTING MATCH</h2>
+            <p className="text-[12px] text-[#bdcaba] tracking-widest uppercase">Preparing the scoring console...</p>
+          </div>
+        </div>
+      )}
+
       {needsMatchStart ? (() => {
             const game = matchData?.hostedGameId || matchData;
             const tA = game?.teamA || (Array.isArray(game?.teams) ? game?.teams?.find(t => t.teamKey === 'teamA') : game?.teams?.teamA);
@@ -717,30 +729,6 @@ const ScoringApp = () => {
 
             return (
               <div className="flex-1 flex flex-col p-4 bg-[#121212] relative overflow-y-auto no-scrollbar">
-                 {/* Matchup Card */}
-                 <div className="w-full bg-[#1e1e1e] border border-white/5 rounded-[12px] p-6 flex items-center justify-between shadow-lg mb-4 mt-2">
-                    <div className="flex flex-col items-center gap-3 w-[30%]">
-                      <div className="w-14 h-14 rounded-full bg-[#81FBB8] flex items-center justify-center shadow-[0_0_15px_rgba(129,251,184,0.3)] shrink-0 overflow-hidden">
-                         {(tA?.image || tA?.logo) ? <img src={tA.image || tA.logo} alt={tAName} className="w-full h-full object-cover" /> : <Shield size={24} className="text-[#1a1a1a]" fill="currentColor" />}
-                      </div>
-                      <span className="text-[14px] font-black uppercase tracking-wider text-white truncate w-full text-center" style={{ fontFamily: '"Bebas Neue", Anton, sans-serif' }}>
-                         {tAName}
-                      </span>
-                    </div>
-                    
-                    <div className="w-[40%] flex items-center justify-center">
-                       <span className="text-3xl font-black text-white/10 uppercase" style={{ fontFamily: '"Bebas Neue", Anton, sans-serif' }}>VS</span>
-                    </div>
-
-                    <div className="flex flex-col items-center gap-3 w-[30%]">
-                      <div className="w-14 h-14 rounded-full bg-[#2FD1C6] flex items-center justify-center shadow-[0_0_15px_rgba(47,209,198,0.3)] shrink-0 overflow-hidden">
-                         {(tB?.image || tB?.logo) ? <img src={tB.image || tB.logo} alt={tBName} className="w-full h-full object-cover" /> : <Zap size={24} className="text-[#1a1a1a]" fill="currentColor" />}
-                      </div>
-                      <span className="text-[14px] font-black uppercase tracking-wider text-white truncate w-full text-center" style={{ fontFamily: '"Bebas Neue", Anton, sans-serif' }}>
-                         {tBName}
-                      </span>
-                    </div>
-                 </div>
                  
                   <div className="mt-4 border-t border-white/5 pt-4 flex-1 flex flex-col">
                     <TossModal
@@ -757,12 +745,15 @@ const ScoringApp = () => {
                               localStorage.setItem(`scorer_token_${matchId}`, authRes.data.token);
                               setPasswordVerified(true);
                             } else {
-                              return toast.error('Invalid password');
+                              return toast.error('Wrong password. Please try again.');
                             }
                           } catch (e) {
-                            return toast.error('Error verifying password');
+                            return toast.error('Could not verify password. Try again.');
                           }
                         }
+
+                        // Show loading overlay BEFORE any API call
+                        setMatchStarting(true);
 
                         try {
                           // Determine batting team
@@ -786,13 +777,17 @@ const ScoringApp = () => {
                           });
                           const data = response.data;
                           if (data.success) {
-                            toast.success('Match started successfully!');
+                            toast.success('Match is live! Let\'s go 🏏');
                             await refresh();
+                            // matchStarting will auto-clear when needsMatchStart becomes false
+                            setMatchStarting(false);
                           } else {
-                            toast.error('Failed to start match');
+                            toast.error('Could not start match. Please try again.');
+                            setMatchStarting(false);
                           }
                         } catch (e) {
-                          toast.error('Error starting match');
+                          toast.error('Connection issue. Please try again.');
+                          setMatchStarting(false);
                         }
                       }}
                     />
@@ -1050,13 +1045,13 @@ const ScoringApp = () => {
                           });
                           const data = response.data;
                           if (data.success) {
-                            toast.success('Broadcast Linked!');
+                            toast.success('Live broadcast connected!');
                             refresh();
                           } else {
-                            toast.error('Link failure');
+                            toast.error('Could not connect broadcast. Try again.');
                           }
                         } catch (err) {
-                          toast.error('Network failure');
+                          toast.error('Network issue. Please check your connection.');
                         }
                       }}
                       className="w-full py-[14.5px] bg-[#222] border border-white/10 text-[#00C187] text-[10px] font-black uppercase tracking-widest rounded-[8px] hover:bg-[#00C187] hover:text-black transition-all"
@@ -1111,8 +1106,8 @@ const ScoringApp = () => {
                     <button
                       onClick={async () => {
                         const res = await updateMatchStatus('LIVE');
-                        if (res.success) toast.success('Match Resumed!');
-                        else toast.error('Failed to update status');
+                        if (res.success) toast.success('Match resumed!');
+                        else toast.error('Could not resume match. Try again.');
                       }}
                       className={`py-[14.5px] rounded-[8px] text-[10px] font-black uppercase transition-all ${matchData?.status === 'LIVE' ? 'bg-[#222] text-[#00C187] border border-white/10' : 'bg-white/5 text-neutral-400 hover:bg-white/10'}`}
                     >
@@ -1121,8 +1116,8 @@ const ScoringApp = () => {
                     <button
                       onClick={async () => {
                         const res = await updateMatchStatus('RAIN_DELAY');
-                        if (res.success) toast.success('Match Paused: Rain Delay');
-                        else toast.error('Failed to update status');
+                        if (res.success) toast.success('Match paused — Rain delay');
+                        else toast.error('Could not pause match. Try again.');
                       }}
                       className={`py-[14.5px] rounded-[8px] text-[10px] font-black uppercase transition-all ${matchData?.status === 'RAIN_DELAY' ? 'bg-blue-500/20 text-blue-400 border border-blue-500/30' : 'bg-white/5 text-neutral-400 hover:bg-white/10'}`}
                     >
@@ -1131,8 +1126,8 @@ const ScoringApp = () => {
                     <button
                       onClick={async () => {
                         const res = await updateMatchStatus('BAD_LIGHT');
-                        if (res.success) toast.success('Match Paused: Bad Light');
-                        else toast.error('Failed to update status');
+                        if (res.success) toast.success('Match paused — Bad light');
+                        else toast.error('Could not pause match. Try again.');
                       }}
                       className={`py-[14.5px] rounded-[8px] text-[10px] font-black uppercase transition-all ${matchData?.status === 'BAD_LIGHT' ? 'bg-orange-500/20 text-orange-400 border border-orange-500/30' : 'bg-white/5 text-neutral-400 hover:bg-white/10'}`}
                     >
@@ -1213,12 +1208,12 @@ const ScoringApp = () => {
                             });
                             const data = response.data;
                             if (data.success) {
-                              toast.success('Commentary settings saved!');
+                              toast.success('Commentary settings updated!');
                             } else {
-                              toast.error('Failed to save settings');
+                              toast.error('Could not save settings. Try again.');
                             }
                           } catch (err) {
-                            toast.error('Network error saving settings');
+                            toast.error('Connection issue. Please try again.');
                           }
                         }}
                         className="w-full py-[14.5px] bg-[#222] text-[#00C187] text-[10px] font-black uppercase tracking-widest rounded-[8px] border border-white/10 hover:bg-[#00C187] hover:text-black transition-all"
@@ -1252,10 +1247,10 @@ const ScoringApp = () => {
                     onClick={async () => {
                       const tgt = parseInt(document.getElementById('revisedTarget').value);
                       const ovr = parseFloat(document.getElementById('revisedOvers').value);
-                      if (isNaN(tgt) || isNaN(ovr)) return toast.error('Enter valid target and overs');
+                      if (isNaN(tgt) || isNaN(ovr)) return toast.error('Please enter a valid target and overs');
                       const res = await reviseTargetAndOvers(tgt, ovr);
-                      if (res.success) toast.success('Target Revised!');
-                      else toast.error('Failed to revise target');
+                      if (res.success) toast.success('Target revised successfully!');
+                      else toast.error('Could not revise target. Try again.');
                     }}
                     className="w-full py-[14.5px] bg-purple-500/10 text-purple-400 text-[10px] font-black uppercase tracking-widest rounded-[8px] border border-purple-500/20 hover:bg-purple-500 hover:text-white transition-all"
                   >
@@ -1295,8 +1290,8 @@ const ScoringApp = () => {
                         const umpire2 = document.getElementById('umpire2').value;
                         const matchReferee = document.getElementById('matchReferee').value;
                         const res = await setMatchOfficials({ umpire1, umpire2, matchReferee });
-                        if (res.success) toast.success('Officials Updated!');
-                        else toast.error('Failed to update officials');
+                        if (res.success) toast.success('Match officials updated!');
+                        else toast.error('Could not update officials. Try again.');
                       }}
                       className="w-full py-[14.5px] bg-blue-500/10 text-blue-400 text-[10px] font-black uppercase tracking-widest rounded-[8px] border border-blue-500/20 hover:bg-blue-500 hover:text-white transition-all"
                     >
@@ -1319,10 +1314,10 @@ const ScoringApp = () => {
                     <button
                       onClick={async () => {
                         const overs = parseInt(document.getElementById('powerplayOvers').value);
-                        if (isNaN(overs)) return toast.error('Enter valid overs');
+                        if (isNaN(overs)) return toast.error('Please enter valid overs');
                         const res = await setPowerplayOvers(overs);
-                        if (res.success) toast.success('Powerplay Overs Updated!');
-                        else toast.error('Failed to update powerplay');
+                        if (res.success) toast.success('Powerplay overs updated!');
+                        else toast.error('Could not update powerplay. Try again.');
                       }}
                       className="w-full py-[14.5px] bg-[#222] text-[#00C187] text-[10px] font-black uppercase tracking-widest rounded-[8px] border border-white/10 hover:bg-[#00C187] hover:text-black transition-all"
                     >
@@ -1335,8 +1330,8 @@ const ScoringApp = () => {
                       onClick={async () => {
                         const isSuccess = window.confirm("Was the Batting Team's review successful? (Click OK for Yes, Cancel for No)");
                         const res = await useReview('batting', isSuccess);
-                        if (res.success) toast.success(isSuccess ? 'Review Retained' : 'Review Lost');
-                        else toast.error('Failed to use review');
+                        if (res.success) toast.success(isSuccess ? 'Review successful!' : 'Review unsuccessful');
+                        else toast.error('Could not process review. Try again.');
                       }}
                       className="w-full py-[14.5px] bg-yellow-500/10 text-yellow-400 text-[10px] font-black uppercase tracking-widest rounded-[8px] border border-yellow-500/20 hover:bg-yellow-500 hover:text-white transition-all"
                     >
@@ -1347,8 +1342,8 @@ const ScoringApp = () => {
                       onClick={async () => {
                         const isSuccess = window.confirm("Was the Fielding Team's review successful? (Click OK for Yes, Cancel for No)");
                         const res = await useReview('fielding', isSuccess);
-                        if (res.success) toast.success(isSuccess ? 'Review Retained' : 'Review Lost');
-                        else toast.error('Failed to use review');
+                        if (res.success) toast.success(isSuccess ? 'Review successful!' : 'Review unsuccessful');
+                        else toast.error('Could not process review. Try again.');
                       }}
                       className="w-full py-[14.5px] bg-yellow-500/10 text-yellow-400 text-[10px] font-black uppercase tracking-widest rounded-[8px] border border-yellow-500/20 hover:bg-yellow-500 hover:text-white transition-all"
                     >
@@ -1398,12 +1393,12 @@ const ScoringApp = () => {
           onConfirm={async (players) => {
             const result = await setPlayers(players);
             if (result.success) {
-              toast.success('Node established! Scoring ready.');
+              toast.success('You\'re all set! Start scoring 🏏');
               if (matchData?.timerState === 'PAUSED') {
                 toggleTimer();
               }
             } else {
-              toast.error(result.error || 'Player sync failed');
+              toast.error('Could not set players. Please try again.');
             }
             setShowInningsSetup(false);
           }}
@@ -1431,7 +1426,7 @@ const ScoringApp = () => {
             if (result.success) {
               toast.success(`Wicket Confirmed`);
             } else {
-              toast.error(result.error || 'Sync failure');
+              toast.error('Something went wrong. Please try again.');
             }
             setShowWicketModal(false);
           }}
@@ -1458,7 +1453,7 @@ const ScoringApp = () => {
           onConfirm={async (teamId, runs) => {
             const res = await addPenalty(teamId, runs);
             if (res.success) toast.success(`Added ${runs} penalty runs`);
-            else toast.error(res.message || 'Failed to add penalty');
+            else toast.error('Could not add penalty. Try again.');
             setShowPenaltyModal(false);
           }}
         />
@@ -1504,11 +1499,11 @@ const ScoringApp = () => {
                 setShowInningsCompleteModal(false);
                 const res = await advanceToNextInnings(bowlingTeamKey);
                 if (res.success) {
-                  toast.success("Ready for 2nd Innings Setup!");
+                  toast.success("2nd innings is ready! Select the openers.");
                   // Force the UI to show the InningsSetupModal for the next innings
                   setShowInningsSetup(true);
                 } else {
-                  toast.error("Failed to advance innings: " + res.message);
+                  toast.error("Could not start next innings. Please try again.");
                 }
               }}
               className="w-full py-4 bg-gradient-to-r from-[#55DEE8] to-[#BFF367] text-black font-black text-sm uppercase tracking-wider rounded-[8px] hover:opacity-90 transition-opacity"
@@ -1529,14 +1524,14 @@ const ScoringApp = () => {
           onConfirm={async (players) => {
             const result = await setPlayers(players);
             if (result.success) {
-              toast.success('Node established! Scoring ready.');
+              toast.success('You\'re all set! Start scoring 🏏');
               if (matchData?.timerState === 'PAUSED' || hasAutoPausedTimer) {
                 toggleTimer();
                 setHasAutoPausedTimer(false);
                 toast("Match Resumed", { icon: "▶️" });
               }
             } else {
-              toast.error(result.error || 'Player sync failed');
+              toast.error('Could not set players. Please try again.');
             }
             setShowInningsSetup(false);
           }}
@@ -1564,7 +1559,7 @@ const ScoringApp = () => {
             if (result.success) {
               toast.success(`Wicket Confirmed`);
             } else {
-              toast.error(result.error || 'Sync failure');
+              toast.error('Something went wrong. Please try again.');
             }
             setShowWicketModal(false);
           }}
@@ -1603,8 +1598,8 @@ const ScoringApp = () => {
               extraType: extraModal,
               isBoundary: false,
             });
-            if (result.success) toast.success(`${extraModal} Event Recorded`);
-            else toast.error(result.error || 'Sync failure');
+            if (result.success) toast.success('Extra recorded!');
+            else toast.error('Something went wrong. Please try again.');
             setExtraModal(null);
           }}
           onClose={() => setExtraModal(null)}
@@ -1620,7 +1615,7 @@ const ScoringApp = () => {
               toast.success('Next bowler selected');
               setShowBowlerModal(false);
             } else {
-              toast.error(res.error || 'Failed to select bowler');
+              toast.error('Could not select bowler. Please try again.');
             }
           }}
         />
@@ -1664,7 +1659,7 @@ const ScoringApp = () => {
           onConfirm={async (teamId, runs) => {
             const res = await addPenalty(teamId, runs);
             if (res.success) toast.success(`Added ${runs} penalty runs`);
-            else toast.error(res.message || 'Failed to add penalty');
+            else toast.error('Could not add penalty. Try again.');
             setShowPenaltyModal(false);
           }}
         />
