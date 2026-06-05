@@ -742,7 +742,7 @@ const ScoringApp = () => {
                     </div>
                  </div>
                  
-                 <div className="mt-4 border-t border-white/5 pt-4">
+                  <div className="mt-4 border-t border-white/5 pt-4 flex-1 flex flex-col">
                     <TossModal
                       teamA={matchData?.teamA || matchData?.hostedGameId?.teamA || (Array.isArray(matchData?.hostedGameId?.teams) ? matchData.hostedGameId.teams.find(t => t.teamKey === 'teamA') : null)}
                       teamB={matchData?.teamB || matchData?.hostedGameId?.teamB || (Array.isArray(matchData?.hostedGameId?.teams) ? matchData.hostedGameId.teams.find(t => t.teamKey === 'teamB') : null)}

@@ -60,7 +60,7 @@ const TossModal = ({ teamA, teamB, hasPassword, onConfirm, onCancel }) => {
   };
 
   return (
-    <div className="w-full text-[#e5e2e1] flex flex-col" style={{ fontFamily: 'Inter, sans-serif' }}>
+    <div className="w-full text-[#e5e2e1] flex-1 flex flex-col justify-between" style={{ fontFamily: 'Inter, sans-serif' }}>
 
       {/* CSS for 3D coin */}
       <style>{`
@@ -71,11 +71,11 @@ const TossModal = ({ teamA, teamB, hasPassword, onConfirm, onCancel }) => {
 
 
       {/* Main Content */}
-      <div className="w-full flex flex-col items-center py-4">
+      <div className="w-full flex-1 flex flex-col items-center justify-between py-4">
 
         {/* COIN FLIP STEPS */}
         {(step === 'FLIP_IDLE' || step === 'FLIPPING' || step === 'FLIP_RESULT') && (
-          <div className="flex flex-col items-center w-full h-full">
+          <div className="flex flex-col items-center w-full flex-1 justify-between">
             {/* 3D Coin — centered in remaining space */}
             <div className="flex-1 flex items-center justify-center">
               <div className="relative w-52 h-52 perspective-1000">
