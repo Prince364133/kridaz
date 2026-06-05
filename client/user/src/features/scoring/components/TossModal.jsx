@@ -103,6 +103,7 @@ const TossModal = ({ teamA, teamB, hasPassword, onConfirm, onCancel }) => {
                     backfaceVisibility: 'hidden',
                   }}
                 >
+                  <div className="flex flex-col items-center gap-2">
                     <Shield size={64} className="text-[#003914] mb-2" />
                     <span className="font-black text-[#003914] text-xl uppercase tracking-widest" style={{ fontFamily: 'Anton, sans-serif' }}>HEADS</span>
                   </div>
