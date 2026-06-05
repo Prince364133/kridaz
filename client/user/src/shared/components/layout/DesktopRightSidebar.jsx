@@ -111,6 +111,10 @@ export default function DesktopRightSidebar({ isRightDrawerOpen, setIsRightDrawe
   const isPlayerPage = location.pathname.startsWith("/players") || location.pathname.startsWith("/profile");
   const isTournamentPage = location.pathname.startsWith("/leaderboard") || location.pathname.startsWith("/match");
   const isMessagesPage = location.pathname.startsWith("/messages");
+  const isProfessionalPage = location.pathname.startsWith("/professionals") || location.pathname.startsWith("/professional");
+  const isJoinGamesPage = location.pathname.startsWith("/join-games");
+
+  const showHomeWidgets = isHome;
 
   // Local states for real-time fetched data
   const [bookings, setBookings] = useState([]);
@@ -143,7 +147,7 @@ export default function DesktopRightSidebar({ isRightDrawerOpen, setIsRightDrawe
 
   // Fetch Core/Home Widgets Data
   useEffect(() => {
-    if (isHome) {
+    if (showHomeWidgets) {
       // 1. Fetch suggested players (publicly available)
       setLoadingPlayers(true);
       axiosInstance.get("/api/user/players", { params: { limit: 3, sortBy: "newest" } })
@@ -178,7 +182,7 @@ export default function DesktopRightSidebar({ isRightDrawerOpen, setIsRightDrawe
           .finally(() => setLoadingWallet(false));
       }
     }
-  }, [isHome, isLoggedIn]);
+  }, [showHomeWidgets, isLoggedIn]);
 
   // Fetch Venue Context Details
   useEffect(() => {
@@ -244,10 +248,10 @@ export default function DesktopRightSidebar({ isRightDrawerOpen, setIsRightDrawe
         />
       )}
 
-      <aside className={`fixed top-[77px] right-0 bottom-0 w-[440px] bg-[#050505] border-l border-white/5 p-6 overflow-y-auto no-scrollbar transition-transform duration-300 z-[74] xl:z-[60] xl:translate-x-0 xl:block ${isRightDrawerOpen ? "translate-x-0" : "translate-x-full xl:translate-x-0"}`}>
+      <aside className={`fixed xl:sticky top-[77px] xl:top-[96px] right-0 bottom-0 xl:bottom-auto w-[440px] xl:w-[350px] bg-[#050505] xl:bg-transparent border-l border-white/5 xl:border-l-0 p-6 xl:p-0 xl:pl-6 overflow-y-auto xl:overflow-y-auto no-scrollbar transition-transform duration-300 z-[74] xl:z-[50] h-auto xl:h-[calc(100vh-120px)] shrink-0 ${isRightDrawerOpen ? "translate-x-0" : "translate-x-full xl:translate-x-0"}`}>
         <div className="space-y-6">
           {/* ── HOME & GENERAL PORTAL VIEW WIDGETS ── */}
-          {isHome && (
+          {showHomeWidgets && (
             <>
               {/* Host Your Venues CTA */}
               <Link to="/host" className="relative block overflow-hidden rounded-2xl h-[140px] shadow-[0_4px_20px_rgba(0,0,0,0.5)] group border border-white/[0.05] hover:border-[#BFF367]/50 transition-all duration-300">
@@ -800,16 +804,18 @@ export default function DesktopRightSidebar({ isRightDrawerOpen, setIsRightDrawe
                   </div>
                 </div>
               ) : (
-                <div className="bg-[#0B0B0C] border border-white/[0.05] rounded-xl p-5 text-center space-y-2.5 shadow-md">
-                  <h4 className="text-[12px] font-black text-white uppercase tracking-wider">Player Profiles</h4>
-                  <p className="text-[10px] text-white/40 leading-relaxed font-sans uppercase font-bold tracking-wide">Select a profile from the directory to review their matchup statistics, ratings, and send games invites.</p>
-                </div>
+                location.pathname === "/players" ? null : (
+                  <div className="bg-[#0B0B0C] border border-white/[0.05] rounded-xl p-5 text-center space-y-2.5 shadow-md">
+                    <h4 className="text-[12px] font-black text-white uppercase tracking-wider">Player Profiles</h4>
+                    <p className="text-[10px] text-white/40 leading-relaxed font-sans uppercase font-bold tracking-wide">Select a profile from the directory to review their matchup statistics, ratings, and send games invites.</p>
+                  </div>
+                )
               )}
             </>
           )}
 
           {/* ── DEFAULT WIDGETS (Fallback for other general pages) ── */}
-          {!isHome && !isVenuePage && !isPlayerPage && !isTournamentPage && (
+          {!isHome && !isVenuePage && !isPlayerPage && !isTournamentPage && !isProfessionalPage && !isJoinGamesPage && (
             <>
               {/* Quick Info */}
               <div className="bg-gradient-to-br from-[#BFF367]/5 to-transparent border border-white/5 rounded-xl p-4.5 space-y-3">

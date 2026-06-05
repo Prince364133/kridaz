@@ -6,5 +6,4 @@ export { default as usePartnerSignUpForm } from "./hooks/usePartnerSignUpForm.js
 export { default as Login } from "./pages/Login.jsx";
 export { default as SignUp } from "./pages/SignUp.jsx";
 export { default as ForgotPassword } from "./pages/ForgotPassword.jsx";
-export { default as PartnersGateway } from "./pages/PartnersGateway.jsx";
 

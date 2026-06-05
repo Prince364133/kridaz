@@ -41,52 +41,7 @@ export default function SocialArenaSection({ reelsFeed }) {
           </div>
         </div>
 
-        {/* Create Post unified trigger / input mock */}
-        {isLoggedIn && (
-          <div className="mb-6">
-            <motion.div
-              key="trigger"
-              initial={{ height: 0, opacity: 0 }}
-              animate={{ height: "auto", opacity: 1 }}
-              exit={{ height: 0, opacity: 0 }}
-              className="bg-[#0A0A0A] border border-white/5 rounded-[12px] p-3 md:p-4 flex flex-col gap-3 md:gap-4"
-            >
-              <div className="flex items-center gap-3">
-                <img src={user?.profilePicture || "/default-avatar.png"} className="w-10 h-10 rounded-full object-cover border border-white/10 shrink-0" alt="" />
-                <button
-                  onClick={() => gateInteraction(() => navigate("/create-post"))}
-                  className="flex-1 bg-[#111] hover:bg-[#1A1A1A] rounded-full h-11 px-5 text-left text-[13px] font-bold text-white/40 border border-white/10 transition-all cursor-text"
-                >
-                  Start a post
-                </button>
-              </div>
-              
-              <div className="flex items-center justify-around pt-1 md:pt-2 border-t border-white/5">
-                <button 
-                  onClick={() => gateInteraction(() => navigate("/create-story"))}
-                  className="flex items-center justify-center flex-1 gap-2 text-white/60 hover:text-white hover:bg-white/5 py-2 md:py-2.5 rounded-[8px] transition-colors text-[11px] md:text-[13px] font-bold"
-                >
-                  <Camera size={18} className="text-[#3b82f6]" />
-                  <span className="hidden md:inline">Story</span>
-                </button>
-                <button 
-                  onClick={() => gateInteraction(() => navigate("/create-post"))}
-                  className="flex items-center justify-center flex-1 gap-2 text-white/60 hover:text-white hover:bg-white/5 py-2 md:py-2.5 rounded-[8px] transition-colors text-[11px] md:text-[13px] font-bold"
-                >
-                  <Image size={18} className="text-[#BFF367]" />
-                  <span className="hidden md:inline">Post</span>
-                </button>
-                <button 
-                  onClick={() => gateInteraction(() => navigate("/reels/upload"))}
-                  className="flex items-center justify-center flex-1 gap-2 text-white/60 hover:text-white hover:bg-white/5 py-2 md:py-2.5 rounded-[8px] transition-colors text-[11px] md:text-[13px] font-bold"
-                >
-                  <Film size={18} className="text-[#ef4444]" />
-                  <span className="hidden md:inline">Reel</span>
-                </button>
-              </div>
-            </motion.div>
-          </div>
-        )}
+
 
         {/* Reels Section (Horizontal Mock Data) */}
         <div className="mb-2">

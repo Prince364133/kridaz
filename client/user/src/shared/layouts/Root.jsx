@@ -42,8 +42,11 @@ const Root = () => {
   const hideNav = isReelsPage || location.pathname.startsWith('/messages') || isNewPostPage;
   const isHome = location.pathname === "/" || location.pathname === "/community";
   const isVenue = location.pathname.startsWith("/venue") || location.pathname === "/venues";
+  const isPlayer = location.pathname.startsWith("/players");
+  const isProfessional = location.pathname.startsWith("/professionals");
+  const isJoinGames = location.pathname.startsWith("/join-games");
   const isUploadReel = location.pathname.startsWith("/reels/upload") || location.pathname.startsWith("/shorts/upload");
-  const useRestrictedWidth = isHome || isVenue || isUploadReel || isTeamsPage;
+  const useRestrictedWidth = isHome || isVenue || isUploadReel || isTeamsPage || isPlayer || isProfessional || isJoinGames;
 
   const showRightSidebar = isHome || isVenue;
 
@@ -73,37 +76,39 @@ const Root = () => {
       {/* Collapsible Left Navigation (Previous Layout Navbar) */}
       {!isReelsPage && !isNewPostPage && <Navbar />}
 
-      <div className="flex flex-1 relative w-full">
-        {/* Main Content Area - Shifted by Left Sidebar and right padded by Right Sidebar on Desktop */}
-        <main className={`flex-grow ${
-          isReelsPage || isNewPostPage
-            ? 'pb-0' 
-            : location.pathname.startsWith('/messages') || isTeamsPage
-              ? `pb-0 ${isSidebarCollapsed ? 'lg:ml-20' : 'lg:ml-64'}` 
-              : `pb-20 lg:pb-0 ${isSidebarCollapsed ? 'lg:ml-20' : 'lg:ml-64'}`
-        } ${showRightSidebar ? 'xl:pr-[440px]' : ''} transition-all duration-300 min-w-0 flex justify-center ${isNewPostPage || isTeamsPage ? 'py-0' : 'py-6'}`}>
-          
-          <div className={`w-full ${isNewPostPage || isTeamsPage ? 'max-w-none px-0' : useRestrictedWidth ? 'max-w-[495px]' : 'px-4 md:px-8 max-w-none'} flex flex-col justify-between`}>
-            <div className="min-h-full">
-              <Outlet />
-            </div>
-
-            {/* Desktop Footer */}
-            {!hideNav && location.pathname !== '/community' && !isTeamsPage && (
-              <div className="mt-12 border-t border-white/5 pt-8">
-                <UserFooter />
+      <div className="flex flex-1 justify-center w-full relative lg:pl-28 xl:pl-40">
+        <div className={`flex w-full ${useRestrictedWidth ? 'max-w-[860px]' : 'max-w-none'} justify-between relative`}>
+          {/* Main Content Area - Centered alongside the right sidebar on desktop */}
+          <main className={`flex-grow ${
+            isReelsPage || isNewPostPage
+              ? 'pb-0' 
+              : location.pathname.startsWith('/messages') || isTeamsPage
+                ? 'pb-0' 
+                : 'pb-20 lg:pb-28'
+          } transition-all duration-300 min-w-0 flex justify-center ${isNewPostPage || isTeamsPage ? 'py-0' : 'py-6'}`}>
+            
+            <div className={`w-full ${isNewPostPage || isTeamsPage ? 'max-w-none px-0' : (useRestrictedWidth && showRightSidebar) ? 'max-w-[495px]' : 'px-4 md:px-8 max-w-none'} flex flex-col justify-between`}>
+              <div className="min-h-full">
+                <Outlet />
               </div>
-            )}
-          </div>
-        </main>
 
-        {/* Right Sidebar */}
-        {showRightSidebar && (
-          <DesktopRightSidebar 
-            isRightDrawerOpen={isRightDrawerOpen} 
-            setIsRightDrawerOpen={setIsRightDrawerOpen} 
-          />
-        )}
+              {/* Desktop Footer */}
+              {!hideNav && location.pathname !== '/community' && !isTeamsPage && (
+                <div className="mt-12 border-t border-white/5 pt-8">
+                  <UserFooter />
+                </div>
+              )}
+            </div>
+          </main>
+
+          {/* Right Sidebar */}
+          {showRightSidebar && (
+            <DesktopRightSidebar 
+              isRightDrawerOpen={isRightDrawerOpen} 
+              setIsRightDrawerOpen={setIsRightDrawerOpen} 
+            />
+          )}
+        </div>
       </div>
 
       {!hideNav && <MobileBottomNav />}

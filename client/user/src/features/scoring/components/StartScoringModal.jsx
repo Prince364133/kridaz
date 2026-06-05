@@ -2025,7 +2025,7 @@ const StartScoringModal = ({ isOpen, onClose, onSuccess, initialData }) => {
               }}
               className={`${activePlayerTab === 'custom' && !customInviteData ? 'px-6' : 'w-full'} py-3 rounded-[8px] border border-white/10 text-white font-bold hover:bg-white/5 hover:border-white/20 transition-all flex items-center justify-center gap-2 text-xs uppercase tracking-widest`}
             >
-              <ChevronLeft size={14} /> Back
+              Next <ChevronRight size={14} />
             </button>
             {activePlayerTab === 'custom' && !customInviteData && (
               <button 
@@ -2327,8 +2327,19 @@ const StartScoringModal = ({ isOpen, onClose, onSuccess, initialData }) => {
   if (!portalTarget) return null;
 
   return createPortal(
-    <AnimatePresence>
-      {isOpen && (
+    <>
+      <AnimatePresence>
+        {isLoading && (
+          <div className="fixed inset-0 z-[20000] flex flex-col items-center justify-center bg-black/60 backdrop-blur-md">
+            <div className="flex flex-col items-center gap-4">
+              <Loader2 className="animate-spin text-[#55DEE8] w-12 h-12" />
+              <p className="text-white text-xs font-black tracking-widest uppercase animate-pulse">Creating Match...</p>
+            </div>
+          </div>
+        )}
+      </AnimatePresence>
+      <AnimatePresence>
+        {isOpen && (
         <div className="fixed inset-0 z-[9999] flex items-center justify-center p-0">
       <div className="absolute inset-0 bg-black/85 backdrop-blur-sm" onClick={handleClose} />
       <motion.div
@@ -3035,7 +3046,8 @@ const StartScoringModal = ({ isOpen, onClose, onSuccess, initialData }) => {
       />
         </div>
       )}
-    </AnimatePresence>,
+    </AnimatePresence>
+    </>,
     portalTarget
   );
 };

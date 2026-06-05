@@ -60,7 +60,7 @@ const TossModal = ({ teamA, teamB, hasPassword, onConfirm, onCancel }) => {
   };
 
   return (
-    <div className="fixed inset-0 z-[100] bg-black text-[#e5e2e1] flex flex-col overflow-hidden" style={{ fontFamily: 'Inter, sans-serif' }}>
+    <div className="w-full text-[#e5e2e1] flex flex-col" style={{ fontFamily: 'Inter, sans-serif' }}>
 
       {/* CSS for 3D coin */}
       <style>{`
@@ -71,7 +71,7 @@ const TossModal = ({ teamA, teamB, hasPassword, onConfirm, onCancel }) => {
 
 
       {/* Main Content */}
-      <div className="flex-1 flex flex-col items-center px-5 py-8 overflow-y-auto">
+      <div className="w-full flex flex-col items-center py-4">
 
         {/* COIN FLIP STEPS */}
         {(step === 'FLIP_IDLE' || step === 'FLIPPING' || step === 'FLIP_RESULT') && (
@@ -103,12 +103,7 @@ const TossModal = ({ teamA, teamB, hasPassword, onConfirm, onCancel }) => {
                     backfaceVisibility: 'hidden',
                   }}
                 >
-                  <div className="flex flex-col items-center gap-2">
-                    {teamA?.logo || teamA?.image ? (
-                      <img src={teamA.logo || teamA.image} className="w-16 h-16 rounded-full object-cover mb-2 border-2 border-[#003914]" alt={teamA.name} />
-                    ) : (
-                      <Shield size={64} className="text-[#003914] mb-2" />
-                    )}
+                    <Shield size={64} className="text-[#003914] mb-2" />
                     <span className="font-black text-[#003914] text-xl uppercase tracking-widest" style={{ fontFamily: 'Anton, sans-serif' }}>HEADS</span>
                   </div>
                 </div>
@@ -124,11 +119,7 @@ const TossModal = ({ teamA, teamB, hasPassword, onConfirm, onCancel }) => {
                   }}
                 >
                   <div className="flex flex-col items-center gap-2">
-                    {teamB?.logo || teamB?.image ? (
-                      <img src={teamB.logo || teamB.image} className="w-16 h-16 rounded-full object-cover mb-2 border-2 border-[#002020]" alt={teamB.name} />
-                    ) : (
-                      <Swords size={64} className="text-[#002020] mb-2" />
-                    )}
+                    <Swords size={64} className="text-[#002020] mb-2" />
                     <span className="font-black text-[#002020] text-xl uppercase tracking-widest" style={{ fontFamily: 'Anton, sans-serif' }}>TAILS</span>
                   </div>
                 </div>

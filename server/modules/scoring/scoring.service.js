@@ -1,4 +1,5 @@
 import { prisma } from "../../config/prisma.js";
+import { randomUUID } from "crypto";
 import { BadRequestError, NotFoundError, ForbiddenError, UnauthorizedError, InternalError } from "@kridaz/common";
 import StatsService from "../../services/stats.service.js";
 import CareerStatsService from "../../services/careerStats.service.js";
@@ -1844,23 +1845,23 @@ export const createScoringMatch = async (userId, matchData) => {
 
   // Assign players to GameSlots for each team
   const slotCreates = [];
+  const customInviteCreates = [];
 
-  const processPlayerSlot = async (p, teamRecord) => {
+  const processPlayerSlotSync = (p, teamRecord) => {
     if (p.isCustom) {
-      // Create CustomPlayerInvite
-      const customInvite = await prisma.customPlayerInvite.create({
-        data: {
-          gameId: game.id,
-          name: p.name,
-          email: `${p.id}@kridaz.custom`, // Dummy email
-          inviteStatus: 'ACCEPTED',
-        }
+      const inviteId = randomUUID();
+      customInviteCreates.push({
+        id: inviteId,
+        gameId: game.id,
+        name: p.name,
+        email: `${p.id || inviteId}@kridaz.custom`, // Dummy email
+        inviteStatus: 'ACCEPTED',
       });
       return {
         gameId: game.id,
         teamId: teamRecord.id,
         userId: null,
-        customPlayerId: customInvite.id,
+        customPlayerId: inviteId,
         status: 'CONFIRMED',
         role: p.role || 'PLAYER'
       };
@@ -1877,14 +1878,20 @@ export const createScoringMatch = async (userId, matchData) => {
 
   const teamARecord = game.teams.find(t => t.teamKey === 'teamA');
   if (teamARecord && teamAPlayers && teamAPlayers.length > 0) {
-    const aSlots = await Promise.all(teamAPlayers.map(p => processPlayerSlot(p, teamARecord)));
-    slotCreates.push(...aSlots);
+    teamAPlayers.forEach(p => {
+      slotCreates.push(processPlayerSlotSync(p, teamARecord));
+    });
   }
 
   const teamBRecord = game.teams.find(t => t.teamKey === 'teamB');
   if (teamBRecord && teamBPlayers && teamBPlayers.length > 0) {
-    const bSlots = await Promise.all(teamBPlayers.map(p => processPlayerSlot(p, teamBRecord)));
-    slotCreates.push(...bSlots);
+    teamBPlayers.forEach(p => {
+      slotCreates.push(processPlayerSlotSync(p, teamBRecord));
+    });
+  }
+
+  if (customInviteCreates.length > 0) {
+    await prisma.customPlayerInvite.createMany({ data: customInviteCreates });
   }
 
   if (slotCreates.length > 0) {

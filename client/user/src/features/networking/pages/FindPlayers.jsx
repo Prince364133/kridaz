@@ -35,17 +35,21 @@ const SNAP_STATES = { COLLAPSED: 0, HALF: 33, EXPANDED: 85 };
 
 
 
-const PlayerCard = ({ player, followingIds, handleFollowToggle, handleAvatarClick, currentUser, navigate, gateInteraction }) => {
-  const isFollowing = followingIds.includes(player.id || player._id);
+const PlayerCard = ({ player, followingIds = [], handleFollowToggle, handleAvatarClick, navigate, gateInteraction }) => {
   const playerId = player.id || player._id;
+  const isFollowing = followingIds.includes(playerId);
+  const initials =
+    player.name
+      ?.split(" ")
+      .map((w) => w[0])
+      .join("")
+      .toUpperCase()
+      .slice(0, 2) || "??";
 
-  const sportTypes = player.sportTypes || (player.sport ? [player.sport] : []);
-
-  const locationParts = [
-    player.city,
-    player.state,
-    player.country,
-  ].filter(Boolean);
+  const city = player.city ? player.city.split(",")[0].trim() : "Nearby";
+  const country = player.country || "India";
+  const locationText = `${city}, ${country}`;
+  const primarySport = player.preferredSport || (player.sportTypes && player.sportTypes[0]) || (player.interests && player.interests[0]) || "Athlete";
 
   return (
     <motion.div
@@ -53,100 +57,85 @@ const PlayerCard = ({ player, followingIds, handleFollowToggle, handleAvatarClic
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true }}
       transition={{ duration: 0.25 }}
-      className="flex items-center gap-3 bg-[#0D0D0D] border border-white/[0.07] rounded-2xl px-4 py-3 group hover:border-[#BFF367]/20 transition-all duration-300"
-      style={{ boxShadow: '0 4px 20px rgba(0,0,0,0.4)' }}
+      className="relative rounded-[16px] p-[1px] bg-white/5 transition-all duration-500 group hover:bg-gradient-to-b hover:from-[#BFF367]/30 hover:to-transparent hover:shadow-[0_15px_30px_rgba(0,0,0,0.4)] h-full"
     >
-      {/* Avatar */}
-      <div
-        className="relative shrink-0 cursor-pointer"
-        onClick={() => handleAvatarClick(player)}
-      >
+      <div className="relative bg-[#121212] rounded-[15px] p-3 flex flex-col items-center text-center h-full">
+        {/* Circular Profile Image Container */}
         <div
-          className="w-14 h-14 rounded-2xl overflow-hidden bg-[#111] flex items-center justify-center border-2 border-transparent"
-          style={{ boxShadow: '0 0 0 2px rgba(191,243,103,0.4)' }}
+          className="relative w-16 h-16 md:w-20 md:h-20 rounded-full overflow-hidden mb-3 border-2 border-white/10 group-hover:border-[#BFF367] transition-all duration-300 shadow-inner cursor-pointer"
+          onClick={() => handleAvatarClick(player)}
         >
-          {player.profilePicture ? (
-            <img src={player.profilePicture} alt="" className="w-full h-full object-cover" />
-          ) : (
-            <span className="text-[#BFF367] font-black text-xl leading-none">
-              {player.name?.charAt(0).toUpperCase()}
-            </span>
-          )}
+          <div className="w-full h-full bg-[#1A1A1A] flex items-center justify-center">
+            {player.profilePicture || player.profileImage ? (
+              <img
+                src={player.profilePicture || player.profileImage}
+                alt={player.name}
+                className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                onError={(e) => {
+                  e.target.style.display = "none";
+                  e.target.nextElementSibling.style.display = "flex";
+                }}
+              />
+            ) : null}
+            <div
+              className="relative z-10 flex items-center justify-center w-full h-full bg-gradient-to-br from-[#1a1a1a] to-[#0a0a0a]"
+              style={{
+                display: player.profilePicture || player.profileImage ? "none" : "flex",
+              }}
+            >
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#BFF367] to-[#BFF367] font-black text-xl md:text-2xl tracking-tighter opacity-70 group-hover:opacity-100 transition-opacity duration-500">
+                {initials}
+              </span>
+            </div>
+          </div>
         </div>
-        {/* online dot */}
-        <div className="absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 bg-[#BFF367] rounded-full border-2 border-[#0D0D0D]" />
-      </div>
 
-      {/* Info block */}
-      <div className="flex-1 min-w-0">
-        {/* Name row */}
-        <div className="flex items-center gap-2 mb-0.5">
-          <h3
-            className="text-sm font-black text-white uppercase tracking-tight truncate cursor-pointer hover:text-[#BFF367] transition-colors"
-            style={HEADING_STYLE}
-            onClick={() => navigate(`/profile/${playerId}`)}
-          >
-            {player.name}
+        {/* Player Name */}
+        <div onClick={() => navigate(`/profile/${playerId}`)} className="w-full cursor-pointer">
+          <h3 className="text-white font-bold text-xs md:text-sm tracking-tight group-hover:text-[#BFF367] transition-colors line-clamp-1 mb-1 font-open-sans">
+            {player.name || "Anonymous"}
           </h3>
-          {player.isVerified && (
-            <ShieldCheck size={12} className="text-[#BFF367] shrink-0" />
-          )}
         </div>
 
-        {/* Followers only */}
-        <div className="flex items-center gap-1 mb-2">
-          <span className="text-[10px] text-white/40 font-bold">
-            <span className="text-white font-black">{player.followersCount ?? player.followers?.length ?? 0}</span> Followers
+        {/* Location: City and Country */}
+        <p className="text-[#888] text-[9px] md:text-[10px] font-medium line-clamp-1 mb-2">
+          {locationText}
+        </p>
+
+        {/* Primary Sport badge */}
+        <div className="mb-3">
+          <span className="inline-block px-2 py-0.5 rounded-full bg-[#BFF367]/10 text-[#BFF367] text-[8px] md:text-[9px] font-black uppercase tracking-wider border border-[#BFF367]/20">
+            {primarySport}
           </span>
         </div>
 
-        {/* Sports chips – max 2 */}
-        {sportTypes.length > 0 && (
-          <div className="flex gap-1 mb-2">
-            {sportTypes.slice(0, 2).map(s => (
-              <span
-                key={s}
-                className="px-2 py-0.5 rounded-full text-[8px] font-black uppercase tracking-widest text-black"
-                style={{ background: GRAD }}
-              >
-                {s}
-              </span>
-            ))}
-            {sportTypes.length > 2 && (
-              <span className="px-2 py-0.5 rounded-full text-[8px] font-black uppercase tracking-widest text-white/30 bg-white/5 border border-white/10">
-                +{sportTypes.length - 2}
-              </span>
-            )}
-          </div>
-        )}
-
-        {/* Location */}
-        {locationParts.length > 0 && (
-          <div className="flex items-center gap-1 text-[9px] text-white/30 font-semibold">
-            <MapPin size={9} className="text-[#BFF367] shrink-0" />
-            <span className="truncate">{locationParts.join(', ')}</span>
-          </div>
-        )}
-      </div>
-
-      {/* Single action button – Follow or Message */}
-      <div className="shrink-0">
-        {isFollowing ? (
+        {/* Follow / Message Row */}
+        <div className="w-full mt-auto flex items-center gap-1.5">
           <button
-            onClick={() => gateInteraction(() => navigate(`/messages?userId=${playerId}`))}
-            className="flex items-center gap-1.5 px-4 py-1.5 rounded-xl text-[9px] font-black uppercase tracking-widest text-white bg-white/10 border border-white/20 hover:bg-white/20 active:scale-95 transition-all whitespace-nowrap"
+            onClick={(e) => {
+              e.stopPropagation();
+              handleFollowToggle(playerId);
+            }}
+            className={`flex-1 py-1.5 rounded-lg text-[9px] font-black uppercase tracking-widest transition-all active:scale-95 text-center ${
+              isFollowing
+                ? "text-white bg-white/5 border border-white/10 hover:bg-white/10"
+                : "text-black bg-[#BFF367] hover:bg-[#BFF367]/90 shadow-sm"
+            }`}
+          >
+            {isFollowing ? "Following" : "Follow"}
+          </button>
+          
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              gateInteraction(() => navigate(`/messages?userId=${playerId}`));
+            }}
+            className="w-8 h-8 rounded-lg text-white bg-white/5 border border-white/10 hover:bg-white/10 active:scale-95 transition-all flex items-center justify-center shrink-0"
+            title="Message"
           >
             <MessageCircle size={12} className="shrink-0" />
-            Message
           </button>
-        ) : (
-          <button
-            onClick={() => handleFollowToggle(playerId)}
-            className="px-4 py-1.5 rounded-xl text-[9px] font-black uppercase tracking-widest text-black bg-white active:scale-95 transition-all whitespace-nowrap shadow-[0_4px_14px_rgba(255,255,255,0.15)]"
-          >
-            Follow
-          </button>
-        )}
+        </div>
       </div>
     </motion.div>
   );
@@ -849,7 +838,7 @@ const FindPlayers = () => {
   };
 
   return (
-    <div className={`bg-black text-white flex flex-col ${activeTab === "players" ? "fixed inset-0 lg:left-64 overflow-hidden pt-16 lg:pt-0" : "min-h-screen"}`}>
+    <div className={`bg-black text-white flex flex-col ${activeTab === "players" ? "fixed inset-0 lg:relative lg:inset-auto lg:left-0 lg:overflow-visible overflow-hidden pt-16 lg:pt-0" : "min-h-screen"}`}>
       
       {activeTab === "players" && (
         <>
@@ -1116,13 +1105,27 @@ const FindPlayers = () => {
 
           {/* Content Grid */}
           {loading ? (
-            <div className="space-y-3">
-              {[1, 2, 3, 4, 5].map(i => (
-                <div key={i} className="h-20 bg-white/[0.02] border border-white/5 rounded-2xl animate-pulse" />
-              ))}
-            </div>
+            activeTab === "players" ? (
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+                {[...Array(10)].map((_, i) => (
+                  <div
+                    key={i}
+                    className="w-full aspect-[3/4] rounded-[16px] border border-white/5 animate-pulse bg-white/5"
+                  />
+                ))}
+              </div>
+            ) : (
+              <div className="grid grid-cols-2 lg:grid-cols-3 gap-4 md:gap-8">
+                {[...Array(6)].map((_, i) => (
+                  <div
+                    key={i}
+                    className="w-full h-64 rounded-2xl border border-white/5 animate-pulse bg-white/5"
+                  />
+                ))}
+              </div>
+            )
           ) : activeTab === "players" ? (
-            <div className="space-y-3">
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
               {players.map((player) => (
                 <div key={player.id || player._id} id={`player-card-${player.id || player._id}`}>
                   <PlayerCard
@@ -1130,7 +1133,6 @@ const FindPlayers = () => {
                     followingIds={followingIds}
                     handleFollowToggle={handleFollowToggle}
                     handleAvatarClick={handleAvatarClick}
-                    currentUser={currentUser}
                     navigate={navigate}
                     gateInteraction={gateInteraction}
                   />

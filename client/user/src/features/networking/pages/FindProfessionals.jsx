@@ -346,10 +346,10 @@ export default function FindProfessionals() {
   };
 
   return (
-    <div className="min-h-screen bg-black text-white pb-20 px-1 md:px-3 font-sans">
+    <div className="min-h-screen bg-black text-white px-4 md:px-8 pt-6 pb-20 font-sans">
 
       {/* Search & Filters */}
-      <div className="max-w-7xl mx-auto px-2 pt-4 mb-8">
+      <div className="max-w-7xl mx-auto mb-8">
         <div className="max-w-7xl mx-auto">
           <form onSubmit={handleSearch} className="relative mb-6" ref={filterMenuRef}>
             <div className="flex items-center rounded-full border border-white/10 bg-[#262626] shadow-lg transition-colors focus-within:border-[#BFF367]/70 hover:bg-[#303030]">

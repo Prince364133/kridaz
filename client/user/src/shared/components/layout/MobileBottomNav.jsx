@@ -39,7 +39,7 @@ const MobileBottomNav = () => {
     if (roleStr.includes("admin")) return "/admin";
     if (["venu_owners", "owner", "venue_owner", "verified_venue_owner"].some(r => roleStr.includes(r))) return "/venue-owner";
     if (roleStr.includes("coach")) return "/professional/coach";
-    if (roleStr.includes("umpire")) return "/umpire";
+    if (roleStr.includes("umpire")) return "/professional/umpire";
     return getDynamicProfileRoute(user, role);
   };
 

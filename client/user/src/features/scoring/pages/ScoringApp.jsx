@@ -836,20 +836,61 @@ const ScoringApp = () => {
                    );
                  })()}
                  
-                 <div className="flex gap-3 w-full mt-auto pb-4 pt-4">
-                    <button
-                      onClick={() => window.history.back()}
-                      className="flex-1 h-14 bg-[#1e1e1e] border border-white/5 rounded-[8px] flex items-center justify-center gap-2 text-white text-[13px] font-black uppercase tracking-[0.1em] hover:bg-white/10 transition-all shadow-xl"
-                    >
-                      <ChevronLeft size={16} /> BACK
-                    </button>
-                    <button
-                      onClick={() => setShowTossModal(true)}
-                      className="flex-[1.5] h-14 bg-[#00C187]/10 border border-[#00C187]/30 rounded-[8px] flex items-center justify-center gap-2 text-[#00C187] text-[13px] font-black uppercase tracking-[0.1em] shadow-xl hover:bg-[#00C187]/20 transition-all"
-                    >
-                      START MATCH <Play size={14} />
-                    </button>
-                 </div>
+                 <div className="mt-4 border-t border-white/5 pt-4">
+                    <TossModal
+                      teamA={matchData?.teamA || matchData?.hostedGameId?.teamA || (Array.isArray(matchData?.hostedGameId?.teams) ? matchData.hostedGameId.teams.find(t => t.teamKey === 'teamA') : null)}
+                      teamB={matchData?.teamB || matchData?.hostedGameId?.teamB || (Array.isArray(matchData?.hostedGameId?.teams) ? matchData.hostedGameId.teams.find(t => t.teamKey === 'teamB') : null)}
+                      hasPassword={hasPassword && !passwordVerified}
+                      onCancel={() => window.history.back()}
+                      onConfirm={async ({ winnerTeam, decision, password }) => {
+                        // If a password was provided, verify it first or store it
+                        if (password) {
+                          try {
+                            const authRes = await axiosInstance.post(`/api/scoring/auth/${matchId}`, { password });
+                            if (authRes.data.success) {
+                              localStorage.setItem(`scorer_token_${matchId}`, authRes.data.token);
+                              setPasswordVerified(true);
+                            } else {
+                              return toast.error('Invalid password');
+                            }
+                          } catch (e) {
+                            return toast.error('Error verifying password');
+                          }
+                        }
+
+                        try {
+                          // Determine batting team
+                          const isTeamAWinner = winnerTeam === (matchData?.teamA?.id || matchData?.hostedGameId?.teamA?.id);
+                          let battingTeam = 'teamA';
+                          if ((isTeamAWinner && decision === 'BAT') || (!isTeamAWinner && decision === 'BOWL')) {
+                            battingTeam = 'teamA';
+                          } else {
+                            battingTeam = 'teamB';
+                          }
+
+                          const response = await axiosInstance.post(`/api/scoring/start`, {
+                            matchId: matchData._id || matchData.id || matchData.hostedGameId?.id,
+                            battingTeam,
+                            tossWinner: winnerTeam,
+                            tossDecision: decision
+                          }, {
+                            headers: {
+                              'Authorization': `Bearer ${localStorage.getItem(`scorer_token_${matchId}`) || ''}`
+                            }
+                          });
+                          const data = response.data;
+                          if (data.success) {
+                            toast.success('Match started successfully!');
+                            await refresh();
+                          } else {
+                            toast.error('Failed to start match');
+                          }
+                        } catch (e) {
+                          toast.error('Error starting match');
+                        }
+                      }}
+                    />
+                  </div>
               </div>
             );
       })() : (
@@ -1678,63 +1719,7 @@ const ScoringApp = () => {
           }}
         />
       )}
-      {showTossModal && (
-        <TossModal
-          teamA={matchData?.teamA || matchData?.hostedGameId?.teamA || (Array.isArray(matchData?.hostedGameId?.teams) ? matchData.hostedGameId.teams.find(t => t.teamKey === 'teamA') : null)}
-          teamB={matchData?.teamB || matchData?.hostedGameId?.teamB || (Array.isArray(matchData?.hostedGameId?.teams) ? matchData.hostedGameId.teams.find(t => t.teamKey === 'teamB') : null)}
-          hasPassword={hasPassword && !passwordVerified}
-          onCancel={() => setShowTossModal(false)}
-          onConfirm={async ({ winnerTeam, decision, password }) => {
 
-            // If a password was provided, verify it first or store it
-            if (password) {
-              try {
-                const authRes = await axiosInstance.post(`/api/scoring/auth/${matchId}`, { password });
-                if (authRes.data.success) {
-                  localStorage.setItem(`scorer_token_${matchId}`, authRes.data.token);
-                  setPasswordVerified(true);
-                } else {
-                  return toast.error('Invalid password');
-                }
-              } catch (e) {
-                return toast.error('Error verifying password');
-              }
-            }
-
-            try {
-              // Determine batting team
-              const isTeamAWinner = winnerTeam === (matchData?.teamA?.id || matchData?.hostedGameId?.teamA?.id);
-              let battingTeam = 'teamA';
-              if ((isTeamAWinner && decision === 'BAT') || (!isTeamAWinner && decision === 'BOWL')) {
-                battingTeam = 'teamA';
-              } else {
-                battingTeam = 'teamB';
-              }
-
-              const response = await axiosInstance.post(`/api/scoring/start`, {
-                matchId: matchData._id || matchData.id || matchData.hostedGameId?.id,
-                battingTeam,
-                tossWinner: winnerTeam,
-                tossDecision: decision
-              }, {
-                headers: {
-                  'Authorization': `Bearer ${localStorage.getItem(`scorer_token_${matchId}`) || ''}`
-                }
-              });
-              const data = response.data;
-              if (data.success) {
-                toast.success('Match started successfully!');
-                setShowTossModal(false);
-                await refresh();
-              } else {
-                toast.error('Failed to start match');
-              }
-            } catch (e) {
-              toast.error('Error starting match');
-            }
-          }}
-        />
-      )}
       {showAuthModal && (
         <ScoringPasswordModal
           matchId={matchId}

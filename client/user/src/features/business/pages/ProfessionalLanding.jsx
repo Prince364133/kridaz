@@ -87,10 +87,10 @@ export default function ProfessionalLanding() {
       data.append("phone", user?.phone || "");
       data.append("role", selectedRoles[0]);
       
-      data.append("documents", aadharFront);
-      data.append("documents", aadharBack);
-      data.append("documents", panFront);
-      data.append("documents", panBack);
+      data.append("documents", aadharFront, `aadhar_front_${aadharFront.name}`);
+      data.append("documents", aadharBack, `aadhar_back_${aadharBack.name}`);
+      data.append("documents", panFront, `pan_front_${panFront.name}`);
+      data.append("documents", panBack, `pan_back_${panBack.name}`);
 
       const response = await axiosInstance.post("/api/user/auth/upgrade-request", data, {
         headers: { "Content-Type": "multipart/form-data" }

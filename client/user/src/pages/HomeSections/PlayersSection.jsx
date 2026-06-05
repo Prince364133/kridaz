@@ -1,7 +1,8 @@
 /* eslint-disable react/prop-types */
 import React from "react";
-import { Link } from "react-router-dom";
-import { Users, MapPin, Check } from "lucide-react";
+import { Link, useNavigate } from "react-router-dom";
+import { Users, MapPin, Check, MessageCircle } from "lucide-react";
+import useLoginOnDemand from "@hooks/useLoginOnDemand";
 
 const GRAD = "linear-gradient(90deg, #BFF367 0%, #BFF367 100%)";
 const BDR = "#2A2A2A";
@@ -9,9 +10,12 @@ const BDR = "#2A2A2A";
 export default function PlayersSection({
   loading,
   players,
-  followingIds,
+  followingIds = [],
   handleFollowToggle,
 }) {
+  const navigate = useNavigate();
+  const { gateInteraction } = useLoginOnDemand();
+
   return (
     <section className="mb-8 w-full">
       <div className="w-full">
@@ -48,8 +52,8 @@ export default function PlayersSection({
             {[...Array(10)].map((_, i) => (
               <div
                 key={i}
-                className="shrink-0 w-[38%] snap-start rounded-[8px] border border-white/5 animate-pulse bg-white/5"
-                style={{ height: 300 }}
+                className="shrink-0 w-[145px] sm:w-[165px] md:w-[185px] snap-start rounded-[16px] border border-white/5 animate-pulse bg-white/5"
+                style={{ height: 260 }}
               />
             ))}
           </div>
@@ -71,6 +75,8 @@ export default function PlayersSection({
         ) : (
           <div className="flex gap-3 overflow-x-auto snap-x snap-mandatory no-scrollbar pb-2">
             {players.slice(0, 10).map((p) => {
+              const playerId = p.id || p._id;
+              const isFollowing = followingIds.includes(playerId);
               const initials =
                 p.name
                   ?.split(" ")
@@ -78,30 +84,24 @@ export default function PlayersSection({
                   .join("")
                   .toUpperCase()
                   .slice(0, 2) || "??";
-              const isFollowing = followingIds.includes(p.id || p._id);
-              const formatLoc = (loc) => {
-                if (!loc) return "Nearby Player";
-                const pts = loc.split(",").map((s) => s.trim());
-                return pts.length >= 3
-                  ? `${pts[0]}, ${pts[pts.length - 2]}, ${pts[pts.length - 1]}`
-                  : loc;
-              };
+
+              const city = p.city ? p.city.split(",")[0].trim() : "Nearby";
+              const country = p.country || "India";
+              const locationText = `${city}, ${country}`;
+              const primarySport = p.preferredSport || (p.sportTypes && p.sportTypes[0]) || (p.interests && p.interests[0]) || "Athlete";
 
               return (
                 <div
-                  key={p.id || p._id}
-                  className="shrink-0 w-[38%] snap-start group"
+                  key={playerId}
+                  className="shrink-0 w-[145px] sm:w-[165px] md:w-[185px] snap-start group"
                 >
-                  <div className="relative rounded-[8px] p-[1px] bg-white/5 transition-all duration-500 group-hover:bg-gradient-to-r group-hover:from-[#BFF367] group-hover:to-[#BFF367] group-hover:shadow-[0_15px_30px_rgba(0,0,0,0.4)]">
-                    {/* Profile Image */}
-                    <div className="relative bg-[#121212] rounded-[8px] p-2.5 h-full">
+                  <div className="relative rounded-[16px] p-[1px] bg-white/5 transition-all duration-500 group-hover:bg-gradient-to-b group-hover:from-[#BFF367]/30 group-hover:to-transparent group-hover:shadow-[0_15px_30px_rgba(0,0,0,0.4)] h-full">
+                    <div className="relative bg-[#121212] rounded-[15px] p-3 flex flex-col items-center text-center h-full">
+                      {/* Circular Profile Image Container */}
                       <Link
-                        to={`/profile/${p.id || p._id}`}
-                        className="relative aspect-[1/1.1] rounded-[8px] overflow-hidden block mb-4"
+                        to={`/profile/${playerId}`}
+                        className="relative w-16 h-16 md:w-20 md:h-20 rounded-full overflow-hidden mb-3 border-2 border-white/10 group-hover:border-[#BFF367] transition-all duration-300 shadow-inner block"
                       >
-                        <div className="absolute top-2 right-2 z-20 px-1.5 py-0.5 bg-gradient-to-r from-[#BFF367] to-[#BFF367] rounded border border-black/20 text-[8px] font-black text-black uppercase tracking-widest shadow-[0_4px_10px_rgba(0,0,0,0.5)]">
-                          {p.preferredSport || "ATHLETE"}
-                        </div>
                         <div className="w-full h-full bg-[#1A1A1A] flex items-center justify-center">
                           {p.profilePicture || p.profileImage ? (
                             <img
@@ -110,66 +110,70 @@ export default function PlayersSection({
                               className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
                               onError={(e) => {
                                 e.target.style.display = "none";
-                                e.target.nextElementSibling.style.display =
-                                  "flex";
+                                e.target.nextElementSibling.style.display = "flex";
                               }}
                             />
                           ) : null}
                           <div
                             className="relative z-10 flex items-center justify-center w-full h-full bg-gradient-to-br from-[#1a1a1a] to-[#0a0a0a]"
                             style={{
-                              display:
-                                p.profilePicture || p.profileImage
-                                  ? "none"
-                                  : "flex",
+                              display: p.profilePicture || p.profileImage ? "none" : "flex",
                             }}
                           >
-                            <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#BFF367] to-[#BFF367] font-black text-5xl tracking-tighter opacity-40 group-hover:opacity-80 transition-opacity duration-500">
+                            <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#BFF367] to-[#BFF367] font-black text-xl md:text-2xl tracking-tighter opacity-70 group-hover:opacity-100 transition-opacity duration-500">
                               {initials}
                             </span>
                           </div>
                         </div>
                       </Link>
 
-                      {/* Content Section */}
-                      <div className="px-2 pb-1.5">
-                        <div className="flex items-center gap-1.5 mb-1">
-                          <Link to={`/profile/${p.id || p._id}`}>
-                            <h3 className="text-white font-bold text-[15px] tracking-tight group-hover:text-[#BFF367] transition-colors line-clamp-1 font-open-sans">
-                              {p.name || "Anonymous"}
-                            </h3>
-                          </Link>
-                          <div className="flex items-center justify-center w-3.5 h-3.5 rounded-full bg-blue-500 shadow-[0_0_8px_rgba(59,130,246,0.5)] shrink-0">
-                            <Check
-                              size={8}
-                              strokeWidth={4}
-                              className="text-white"
-                            />
-                          </div>
-                        </div>
+                      {/* Player Name */}
+                      <Link to={`/profile/${playerId}`} className="w-full">
+                        <h3 className="text-white font-bold text-xs md:text-sm tracking-tight group-hover:text-[#BFF367] transition-colors line-clamp-1 mb-1 font-open-sans">
+                          {p.name || "Anonymous"}
+                        </h3>
+                      </Link>
 
-                        <p className="text-[#BFF367] text-[10px] font-medium leading-tight mb-4 flex items-center gap-1.5 w-full">
-                          <MapPin size={10} className="text-white shrink-0" />
-                          <span className="truncate">
-                            {p.distance
-                              ? `${(p.distance / 1000).toFixed(1)} km Away`
-                              : formatLoc(p.city)}
-                          </span>
-                        </p>
+                      {/* Location: City and Country */}
+                      <p className="text-[#888] text-[9px] md:text-[10px] font-medium line-clamp-1 mb-2">
+                        {locationText}
+                      </p>
 
-                        {/* Bottom Bar */}
-                        <div className="w-full">
-                          <button
-                            onClick={(e) => handleFollowToggle(e, p)}
-                            className={`w-full py-1.5 rounded-[6px] font-black text-[9px] uppercase tracking-wider transition-all duration-300 ${
-                              isFollowing
-                                ? "bg-white/5 border border-white/10 text-white/30 hover:bg-white/10"
-                                : "bg-white text-black hover:bg-white/90 shadow-lg"
-                            }`}
-                          >
-                            {isFollowing ? "Following" : "Follow +"}
-                          </button>
-                        </div>
+                      {/* Primary Sport badge */}
+                      <div className="mb-3">
+                        <span className="inline-block px-2 py-0.5 rounded-full bg-[#BFF367]/10 text-[#BFF367] text-[8px] md:text-[9px] font-black uppercase tracking-wider border border-[#BFF367]/20">
+                          {primarySport}
+                        </span>
+                      </div>
+
+                      {/* Follow / Message Row */}
+                      <div className="w-full mt-auto flex items-center gap-1.5">
+                        <button
+                          onClick={(e) => {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            handleFollowToggle(playerId);
+                          }}
+                          className={`flex-1 py-1.5 rounded-lg text-[9px] font-black uppercase tracking-widest transition-all active:scale-95 text-center ${
+                            isFollowing
+                              ? "text-white bg-white/5 border border-white/10 hover:bg-white/10"
+                              : "text-black bg-[#BFF367] hover:bg-[#BFF367]/90 shadow-sm"
+                          }`}
+                        >
+                          {isFollowing ? "Following" : "Follow"}
+                        </button>
+                        
+                        <button
+                          onClick={(e) => {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            gateInteraction(() => navigate(`/messages?userId=${playerId}`));
+                          }}
+                          className="w-8 h-8 rounded-lg text-white bg-white/5 border border-white/10 hover:bg-white/10 active:scale-95 transition-all flex items-center justify-center shrink-0"
+                          title="Message"
+                        >
+                          <MessageCircle size={12} className="shrink-0" />
+                        </button>
                       </div>
                     </div>
                   </div>

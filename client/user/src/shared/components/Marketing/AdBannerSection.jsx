@@ -93,28 +93,62 @@ export const AdBannerSection = ({ banners = [] }) => {
             />
           </div>
 
-          {/* Banner Media */}
-          <div className="absolute inset-0 transition-all duration-700 ease-in-out">
-            {isVideo ? (
-              <video
-                ref={videoRef}
-                src={currentBanner.videoUrl}
-                className="w-full h-full object-cover opacity-90"
-                autoPlay
-                muted={isMuted}
-                loop
-                playsInline
-                key={currentBanner.videoUrl} // Force reload video element on banner switch
-              />
-            ) : (
-              <img 
-                src={currentBanner.imageUrl} 
-                alt={currentBanner.title}
-                className="w-full h-full object-cover opacity-90"
-              />
-            )}
-            <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/30 to-transparent" />
-            <div className="absolute inset-0 bg-gradient-to-r from-black/75 via-transparent to-transparent" />
+          {/* Banner Media Container (Horizontal Slides) */}
+          <div 
+            className="flex h-full w-full transition-transform duration-700 ease-in-out"
+            style={{ transform: `translateX(-${currentIndex * 100}%)` }}
+          >
+            {banners.map((banner, idx) => {
+              const isBannerVideo = !!banner.videoUrl;
+              const isCurrent = idx === currentIndex;
+              return (
+                <div key={idx} className="relative w-full h-full shrink-0">
+                  {isBannerVideo ? (
+                    <video
+                      ref={isCurrent ? videoRef : null}
+                      src={banner.videoUrl}
+                      className="w-full h-full object-cover opacity-90"
+                      autoPlay={isCurrent}
+                      muted={isMuted}
+                      loop
+                      playsInline
+                    />
+                  ) : (
+                    <img 
+                      src={banner.imageUrl} 
+                      alt={banner.title}
+                      className="w-full h-full object-cover opacity-90"
+                    />
+                  )}
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/30 to-transparent" />
+                  <div className="absolute inset-0 bg-gradient-to-r from-black/75 via-transparent to-transparent" />
+
+                  {/* Content per slide */}
+                  <div className="absolute inset-0 flex flex-col justify-end p-8 md:p-12 z-20">
+                    <div className="max-w-2xl space-y-3">
+                      <h2 className="font-display text-3xl md:text-5xl lg:text-6xl uppercase leading-none text-white tracking-tight">
+                        {banner.title}
+                      </h2>
+                      {banner.description && (
+                        <p className="text-white/80 text-xs md:text-sm line-clamp-2 max-w-xl font-medium leading-relaxed">
+                          {banner.description}
+                        </p>
+                      )}
+                      {banner.targetUrl && (
+                        <a 
+                          href={banner.targetUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-flex items-center gap-2 bg-white text-black px-5 py-2.5 rounded-[6px] font-bold hover:bg-[#BFF367] hover:scale-105 transition-all text-xs group"
+                        >
+                          Explore Now <ExternalLink size={12} className="group-hover:translate-x-1 transition-transform" />
+                        </a>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
           </div>
 
           {/* Video Control Overlays */}
@@ -136,30 +170,6 @@ export const AdBannerSection = ({ banners = [] }) => {
               </button>
             </div>
           )}
-
-          {/* Content */}
-          <div className="absolute inset-0 flex flex-col justify-end p-8 md:p-12 z-20">
-            <div className="max-w-2xl space-y-3">
-              <h2 className="font-display text-3xl md:text-5xl lg:text-6xl uppercase leading-none text-white tracking-tight">
-                {currentBanner.title}
-              </h2>
-              {currentBanner.description && (
-                <p className="text-white/80 text-xs md:text-sm line-clamp-2 max-w-xl font-medium leading-relaxed">
-                  {currentBanner.description}
-                </p>
-              )}
-              {currentBanner.targetUrl && (
-                <a 
-                  href={currentBanner.targetUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center gap-2 bg-white text-black px-5 py-2.5 rounded-[6px] font-bold hover:bg-[#BFF367] hover:scale-105 transition-all text-xs group"
-                >
-                  Explore Now <ExternalLink size={12} className="group-hover:translate-x-1 transition-transform" />
-                </a>
-              )}
-            </div>
-          </div>
 
           {/* Navigation Controls */}
           <div className="absolute inset-y-0 left-4 flex items-center opacity-0 group-hover:opacity-100 transition-opacity z-20">

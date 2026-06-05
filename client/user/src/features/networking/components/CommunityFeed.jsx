@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useSelector } from "react-redux";
 import { useNavigate, useSearchParams } from "react-router-dom";
-import { ChevronDown, PlaySquare, Loader2 } from "lucide-react";
+import { ChevronDown, Loader2 } from "lucide-react";
 import { useLazyGetCommunityFeedQuery, useDeletePostMutation } from "@redux/api/communityApi";
 import { useLazySearchPlayersQuery } from "@redux/api/teamApi";
 import { useSocket } from "@context/SocketContext";
@@ -334,20 +334,7 @@ const CommunityFeed = ({ user, isLoggedIn, isAdmin, gateInteraction, activeFilte
       {!debouncedSearchQuery.trim() && (
         <div className="mb-6">
           {/* Unified View Filters Dropdowns */}
-          <div className="grid grid-cols-3 md:flex gap-2 items-center w-full pb-1">
-            {/* Reels Toggle */}
-            <button
-              onClick={() => handleSetActiveFilter(activeFilter === "Reels" ? "All" : "Reels")}
-              className={`flex items-center justify-center gap-1 px-1 py-2 rounded-[8px] text-[10px] sm:text-[11px] font-bold uppercase tracking-wider transition-all shrink-0 min-w-0 ${
-                activeFilter === "Reels" 
-                  ? "bg-[#BFF367] text-black shadow-[0_0_10px_rgba(191,243,103,0.3)] border-transparent" 
-                  : "bg-[#111] text-white/70 hover:bg-[#1A1A1A] hover:text-white border border-white/10"
-              }`}
-            >
-              <PlaySquare size={13} className={`shrink-0 ${activeFilter === "Reels" ? "text-black" : "text-white/70"}`} />
-              <span className="truncate">Reels</span>
-            </button>
-
+          <div className="grid grid-cols-2 md:flex gap-2 items-center w-full pb-1">
             {/* Post Type Filter */}
             <div className="relative min-w-0">
               <select
@@ -382,22 +369,6 @@ const CommunityFeed = ({ user, isLoggedIn, isAdmin, gateInteraction, activeFilte
               </select>
               <div className="pointer-events-none absolute right-2 sm:right-3 top-1/2 -translate-y-1/2 text-white/40">
                 <ChevronDown size={12} />
-              </div>
-            </div>
-            
-            <div className="ml-auto hidden md:flex shrink-0 pl-2">
-              <div className="relative">
-                <select
-                  className="bg-[#111] border border-white/10 rounded-[8px] py-2 pl-4 pr-8 text-white text-[11px] font-bold focus:outline-none focus:border-[#BFF367]/50 transition-all appearance-none cursor-pointer hover:bg-[#1A1A1A]"
-                  value={sortOrder}
-                  onChange={(e) => setSortOrder(e.target.value)}
-                >
-                  <option value="latest" className="bg-neutral-900 text-white">Latest</option>
-                  <option value="top" className="bg-neutral-900 text-white">Top Posts</option>
-                </select>
-                <div className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-white/40">
-                  <ChevronDown size={12} />
-                </div>
               </div>
             </div>
           </div>
