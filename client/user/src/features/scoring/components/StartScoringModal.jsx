@@ -1,6 +1,7 @@
 import * as Sentry from "@sentry/react";
 import React, { useState, useRef, useEffect, useMemo } from 'react';
 import { createPortal } from 'react-dom';
+import { useNavigate } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import { motion, AnimatePresence, useMotionValue, animate } from 'framer-motion';
 import {
@@ -145,6 +146,7 @@ const CustomDropdown = ({ value, onChange, options, placeholder, className, disa
 // ─── Main Component ──────────────────────────────────────────────────────────
 
 const StartScoringModal = ({ isOpen, onClose, onSuccess, initialData }) => {
+  const navigate = useNavigate();
   const { user } = useSelector((state) => state.auth);
   const [step, setStep] = useState(1);
   const [showCustomVenuePopup, setShowCustomVenuePopup] = useState(false);
@@ -895,10 +897,14 @@ const StartScoringModal = ({ isOpen, onClose, onSuccess, initialData }) => {
         teamAData: { name: getTeamName(formData.teamAId) },
         teamBData: { name: getTeamName(formData.teamBId) },
       };
-      await setupMatch(payload).unwrap();
+      const res = await setupMatch(payload).unwrap();
       toast.success('Scoring match created!');
-      // Invoke onSuccess before closing to ensure tab switch occurs while modal is still mounted
-      if (onSuccess) onSuccess();
+      const matchId = res.game?.id || res.game?._id;
+      if (matchId) {
+        navigate(`/scoring/${matchId}`);
+      } else {
+        if (onSuccess) onSuccess();
+      }
       handleClose();
     } catch (err) {
       toast.error(err?.data?.message || 'Failed to create match');
