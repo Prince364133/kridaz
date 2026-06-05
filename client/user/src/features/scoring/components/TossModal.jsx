@@ -157,15 +157,15 @@ const TossModal = ({ teamA, teamB, hasPassword, onConfirm, onCancel }) => {
         {/* WINNER SELECT */}
         {step === 'WINNER_SELECT' && (
           <div className="w-full h-full flex flex-col max-w-md mx-auto">
-            <div className="flex-1 pt-12">
+            <div className="flex-1 pt-4">
               {/* Modal Header */}
-              <div className="text-left mb-10">
-                <span className="text-[12px] font-bold tracking-[0.08em] text-[#45dada] mb-2 block uppercase">MATCH PROTOCOL</span>
-                <h2 className="text-[24px] font-black text-white uppercase tracking-wider" style={{ fontFamily: 'Anton, sans-serif' }}>WHO WON THE TOSS?</h2>
+              <div className="text-left mb-4">
+                <span className="text-[12px] font-bold tracking-[0.08em] text-[#45dada] mb-1 block uppercase">MATCH PROTOCOL</span>
+                <h2 className="text-[20px] font-black text-white uppercase tracking-wider" style={{ fontFamily: 'Anton, sans-serif' }}>WHO WON THE TOSS?</h2>
               </div>
 
               {/* Team Selection Grid */}
-              <div className="grid grid-cols-1 gap-4">
+              <div className="grid grid-cols-1 gap-3">
                 {teams.map((team, index) => {
                   const isSelected = winnerTeam === team.id;
                   const isTeamA = index === 0;
@@ -174,7 +174,7 @@ const TossModal = ({ teamA, teamB, hasPassword, onConfirm, onCancel }) => {
                     <button
                       key={team.id}
                       onClick={() => setWinnerTeam(team.id)}
-                      className={`group relative flex items-center justify-between p-5 bg-[#1c1b1b] border rounded-xl transition-all active:scale-[0.98] text-left overflow-hidden ${isSelected ? 'border-[#7bf090] bg-[#222222]' : 'border-[#3e4a3e]'}`}
+                      className={`group relative flex items-center justify-between p-4 bg-[#1c1b1b] border rounded-xl transition-all active:scale-[0.98] text-left overflow-hidden ${isSelected ? 'border-[#7bf090] bg-[#222222]' : 'border-[#3e4a3e]'}`}
                     >
                       {/* Animated Green Outline */}
                       {isSelected && (
@@ -183,34 +183,74 @@ const TossModal = ({ teamA, teamB, hasPassword, onConfirm, onCancel }) => {
 
                       <div className="flex items-center gap-4 relative z-10">
                         {team.logo || team.image ? (
-                          <img src={team.logo || team.image} alt={team.name} className="w-12 h-12 rounded-lg object-cover bg-white/5 border border-[#3e4a3e]" />
+                          <img src={team.logo || team.image} alt={team.name} className="w-10 h-10 rounded-lg object-cover bg-white/5 border border-[#3e4a3e]" />
                         ) : (
-                          <div className={`w-12 h-12 rounded-lg flex items-center justify-center font-normal text-[32px] tracking-[0.05em] ${isTeamA ? 'bg-[#7bf090] text-[#006d2d]' : 'bg-[#00bbbc] text-[#004545]'}`} style={{ fontFamily: 'Anton, sans-serif' }}>
+                          <div className={`w-10 h-10 rounded-lg flex items-center justify-center font-normal text-[24px] tracking-[0.05em] ${isTeamA ? 'bg-[#7bf090] text-[#006d2d]' : 'bg-[#00bbbc] text-[#004545]'}`} style={{ fontFamily: 'Anton, sans-serif' }}>
                             {isTeamA ? 'A' : 'B'}
                           </div>
                         )}
                         <div>
-                          <p className="text-[12px] font-bold tracking-[0.08em] text-[#bdcaba] uppercase mb-0.5" style={{ fontFamily: 'Inter, sans-serif' }}>TEAM {isTeamA ? 'ALPHA' : 'BRAVO'}</p>
-                          <p className="text-[18px] font-normal text-white uppercase tracking-[0.02em]" style={{ fontFamily: 'Anton, sans-serif' }}>{team.name}</p>
+                          <p className="text-[10px] font-bold tracking-[0.08em] text-[#bdcaba] uppercase mb-0.5" style={{ fontFamily: 'Inter, sans-serif' }}>TEAM {isTeamA ? 'ALPHA' : 'BRAVO'}</p>
+                          <p className="text-[16px] font-normal text-white uppercase tracking-[0.02em]" style={{ fontFamily: 'Anton, sans-serif' }}>{team.name}</p>
                         </div>
                       </div>
                     </button>
                   );
                 })}
               </div>
+
+              {/* Decision Section */}
+              <div className="mt-6">
+                <div className="text-left mb-3">
+                  <span className="text-[12px] font-bold tracking-[0.08em] text-[#45dada] mb-1 block uppercase">TOSS DECISION</span>
+                  <h2 className="text-[20px] font-black text-white uppercase tracking-wider" style={{ fontFamily: 'Anton, sans-serif' }}>DECISION</h2>
+                </div>
+
+                <div className="flex flex-col gap-3">
+                  {/* BAT */}
+                  <button
+                    onClick={() => {
+                      if (winnerTeam) setDecision('BAT');
+                    }}
+                    disabled={!winnerTeam}
+                    className={`group relative flex items-center justify-between p-4 rounded-xl transition-all active:scale-[0.98] text-left overflow-hidden ${!winnerTeam ? 'opacity-40 cursor-not-allowed bg-[#131313] border border-[#2a2a2a]' : decision === 'BAT' ? 'bg-[linear-gradient(135deg,#7bf090_0%,#45dada_100%)] text-[#003914] shadow-[0_0_20px_rgba(123,240,144,0.2)]' : 'bg-[#1c1b1b] border border-[#3e4a3e] text-white hover:bg-[#222]'}`}
+                  >
+                    <div className="relative z-10">
+                      <h3 className="text-[28px] uppercase leading-none" style={{ fontFamily: 'Anton, sans-serif' }}>BAT</h3>
+                      <p className={`text-[10px] font-bold tracking-[0.08em] mt-1 ${decision === 'BAT' ? 'text-[#004f26]' : 'text-[#bdcaba]'}`} style={{ fontFamily: 'Inter, sans-serif' }}>SET THE TARGET</p>
+                    </div>
+                    <Activity className={`absolute right-4 -top-2 ${decision === 'BAT' ? 'text-[#004f26] opacity-20' : 'text-[#bdcaba] opacity-10'}`} size={48} />
+                  </button>
+
+                  {/* BOWL */}
+                  <button
+                    onClick={() => {
+                      if (winnerTeam) setDecision('BOWL');
+                    }}
+                    disabled={!winnerTeam}
+                    className={`group relative flex items-center justify-between p-4 rounded-xl transition-all active:scale-[0.98] text-left overflow-hidden ${!winnerTeam ? 'opacity-40 cursor-not-allowed bg-[#131313] border border-[#2a2a2a]' : decision === 'BOWL' ? 'bg-[linear-gradient(135deg,#7bf090_0%,#45dada_100%)] text-[#003914] shadow-[0_0_20px_rgba(123,240,144,0.2)]' : 'bg-[#1c1b1b] border border-[#3e4a3e] text-white hover:bg-[#222]'}`}
+                  >
+                    <div className="relative z-10">
+                      <h3 className="text-[28px] uppercase leading-none" style={{ fontFamily: 'Anton, sans-serif' }}>BOWL</h3>
+                      <p className={`text-[10px] font-bold tracking-[0.08em] mt-1 ${decision === 'BOWL' ? 'text-[#004f26]' : 'text-[#bdcaba]'}`} style={{ fontFamily: 'Inter, sans-serif' }}>CHASE LATER</p>
+                    </div>
+                    <CircleDot className={`absolute right-4 -top-2 ${decision === 'BOWL' ? 'text-[#004f26] opacity-20' : 'text-[#bdcaba] opacity-10'}`} size={48} />
+                  </button>
+                </div>
+              </div>
             </div>
 
-            {/* Action Area - Anchored to bottom */}
+            {/* Bottom Actions */}
             <div className="flex flex-col gap-3 pb-4 pt-6 mt-auto">
               <button
                 onClick={() => {
-                  if (winnerTeam) setStep('DECISION_SELECT');
+                  if (winnerTeam && decision) setStep('SUMMARY');
                 }}
-                disabled={!winnerTeam}
-                className={`w-full py-4 rounded-lg font-bold text-[13px] text-[#003914] uppercase tracking-widest shadow-lg transition-all ${!winnerTeam ? 'opacity-50 cursor-not-allowed bg-[#2a2a2a] text-white/50' : 'active:scale-95'}`}
-                style={{ background: winnerTeam ? 'linear-gradient(135deg, #7bf090 0%, #45dada 100%)' : undefined }}
+                disabled={!winnerTeam || !decision}
+                className={`w-full py-4 rounded-lg font-bold text-[13px] text-[#003914] uppercase tracking-widest shadow-lg transition-all ${(!winnerTeam || !decision) ? 'opacity-50 cursor-not-allowed bg-[#2a2a2a] text-white/50' : 'active:scale-95'}`}
+                style={{ background: (winnerTeam && decision) ? 'linear-gradient(135deg, #7bf090 0%, #45dada 100%)' : undefined }}
               >
-                CONFIRM TOSS WINNER
+                PROCEED TO SUMMARY
               </button>
               <button
                 onClick={() => {
@@ -219,66 +259,6 @@ const TossModal = ({ teamA, teamB, hasPassword, onConfirm, onCancel }) => {
                 className="w-full py-4 bg-[#1c1b1b] border border-[#3e4a3e] text-[#bdcaba] rounded-lg font-bold text-[13px] uppercase tracking-widest hover:text-white hover:bg-[#2a2a2a] transition-all"
               >
                 SKIP TO MATCH
-              </button>
-            </div>
-          </div>
-        )}
-
-        {/* DECISION SELECT */}
-        {step === 'DECISION_SELECT' && (
-          <div className="w-full h-full flex flex-col max-w-md mx-auto">
-            <div className="flex-1 pt-12">
-              {/* Header */}
-              <div className="text-left mb-10">
-                <span className="text-[12px] font-bold tracking-[0.08em] text-[#45dada] mb-2 block uppercase">TOSS WON BY {teams.find(t => t.id === winnerTeam)?.name}</span>
-                <h2 className="text-[24px] font-black text-white uppercase tracking-wider" style={{ fontFamily: 'Anton, sans-serif' }}>DECISION</h2>
-              </div>
-
-              {/* BAT OR BOWL CARDS */}
-              <div className="flex flex-col gap-4">
-                {/* BAT */}
-                <button
-                  onClick={() => setDecision('BAT')}
-                  className={`group relative flex items-center justify-between p-6 rounded-xl transition-all active:scale-[0.98] text-left overflow-hidden ${decision === 'BAT' ? 'bg-[linear-gradient(135deg,#7bf090_0%,#45dada_100%)] text-[#003914] shadow-[0_0_20px_rgba(123,240,144,0.2)]' : 'bg-[#1c1b1b] border border-[#3e4a3e] text-white hover:bg-[#222]'}`}
-                >
-                  <div className="relative z-10">
-                    <h3 className="text-[40px] uppercase leading-none" style={{ fontFamily: 'Anton, sans-serif' }}>BAT</h3>
-                    <p className={`text-[12px] font-bold tracking-[0.08em] mt-2 ${decision === 'BAT' ? 'text-[#004f26]' : 'text-[#bdcaba]'}`} style={{ fontFamily: 'Inter, sans-serif' }}>SET THE TARGET</p>
-                  </div>
-                  <Activity className={`absolute right-4 -top-2 ${decision === 'BAT' ? 'text-[#004f26] opacity-20' : 'text-[#bdcaba] opacity-10'}`} size={64} />
-                </button>
-
-                {/* BOWL */}
-                <button
-                  onClick={() => setDecision('BOWL')}
-                  className={`group relative flex items-center justify-between p-6 rounded-xl transition-all active:scale-[0.98] text-left overflow-hidden ${decision === 'BOWL' ? 'bg-[linear-gradient(135deg,#7bf090_0%,#45dada_100%)] text-[#003914] shadow-[0_0_20px_rgba(123,240,144,0.2)]' : 'bg-[#1c1b1b] border border-[#3e4a3e] text-white hover:bg-[#222]'}`}
-                >
-                  <div className="relative z-10">
-                    <h3 className="text-[40px] uppercase leading-none" style={{ fontFamily: 'Anton, sans-serif' }}>BOWL</h3>
-                    <p className={`text-[12px] font-bold tracking-[0.08em] mt-2 ${decision === 'BOWL' ? 'text-[#004f26]' : 'text-[#bdcaba]'}`} style={{ fontFamily: 'Inter, sans-serif' }}>CHASE LATER</p>
-                  </div>
-                  <CircleDot className={`absolute right-4 -top-2 ${decision === 'BOWL' ? 'text-[#004f26] opacity-20' : 'text-[#bdcaba] opacity-10'}`} size={64} />
-                </button>
-              </div>
-
-
-            </div>
-
-            {/* Bottom Actions */}
-            <div className="flex gap-3 pb-4 pt-6 mt-auto">
-              <button
-                onClick={() => { setDecision(null); setStep('WINNER_SELECT'); }}
-                className="px-6 py-4 bg-[#1c1b1b] border border-[#3e4a3e] text-[#bdcaba] rounded-lg font-bold text-[13px] uppercase tracking-widest hover:text-white hover:bg-[#2a2a2a] transition-all"
-              >
-                BACK TO TOSS
-              </button>
-              <button
-                onClick={() => setStep('SUMMARY')}
-                disabled={!decision}
-                className={`flex-1 py-4 rounded-lg font-bold text-[13px] text-[#003914] uppercase tracking-widest shadow-lg transition-all ${!decision ? 'opacity-50 cursor-not-allowed bg-[#2a2a2a] text-white/50' : 'active:scale-95'}`}
-                style={{ background: decision ? 'linear-gradient(135deg, #7bf090 0%, #45dada 100%)' : undefined }}
-              >
-                PROCEED
               </button>
             </div>
           </div>
