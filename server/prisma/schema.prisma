@@ -47,10 +47,19 @@ model User {
   walletBalance           Decimal               @default(0) @db.Decimal(12, 2)
   reservedBalance         Decimal               @default(0) @db.Decimal(12, 2)
   bookingCount            Int                   @default(0)
+<<<<<<< Updated upstream
   fcmToken                String?
   // Bumped on password change / "logout all sessions". Future PR will reject
   // access tokens whose embedded tokenVersion != current. Today it's plumbed
   // through the JWT payload but verification is permissive.
+=======
+  // (User.fcmToken removed in this release — UserDevice is the only store.)
+  // Bumped by POST /user/auth/logout-all (and on password resets). The value
+  // is embedded in newly-issued access tokens; JWT middleware rejects any
+  // token whose embedded value is older than what's stored here. Tokens
+  // issued before this column existed don't carry the field at all — they
+  // bypass the check (treated as legacy) so the rollout is non-breaking.
+>>>>>>> Stashed changes
   tokenVersion            Int                   @default(0)
   createdAt               DateTime              @default(now())
   updatedAt               DateTime              @default(now()) @updatedAt
@@ -316,10 +325,16 @@ model Turf {
   managerContacts     Json?
   generatedSlots      Json?
   // Stages owner edits to an approved turf for admin re-approval. Read by
+<<<<<<< Updated upstream
   // turf.controller.js adminApproveTurf (which merges into the turf and clears
   // this) and by web EditTurf.jsx to show "pending" badges next to fields the
   // owner has edited but admin hasn't approved yet. Was missing from the
   // schema — every owner edit to an approved turf was silently failing.
+=======
+  // adminApproveTurf (which merges then clears) and by web EditTurf.jsx to
+  // show "pending" badges. Missing this column made every owner edit on an
+  // approved turf crash silently.
+>>>>>>> Stashed changes
   pendingUpdates      Json?
   verificationData    Json?
   createdAt           DateTime     @default(now())
@@ -615,6 +630,14 @@ model CricketMatch {
   bowlerId            String?
   revisedTarget       Int?
   revisedOvers        Float?
+  // Free Hit (Law 21.18): set true after a no-ball, cleared on next fair
+  // delivery. While active, batter cannot be out by BOWLED/LBW/CAUGHT/
+  // STUMPED/HIT_WICKET.
+  freeHitActive       Boolean             @default(false)
+  // Per-match rule toggles for casual / tape-ball / gully formats that
+  // deviate from MCC laws. Null/missing = MCC defaults. Shape documented in
+  // scoring.utils.js → DEFAULT_HOUSE_RULES.
+  houseRules          Json?
   matchOfficials      Json?
   createdAt           DateTime          @default(now())
   updatedAt           DateTime          @updatedAt

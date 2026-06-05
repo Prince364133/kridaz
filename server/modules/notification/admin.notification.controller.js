@@ -19,22 +19,12 @@ const summarizeDispatchResults = (results) => {
 };
 
 const getUsersWithRegisteredDevices = async () => {
-  const [usersWithFallbackToken, userDevices] = await Promise.all([
-    prisma.user.findMany({
-      where: { fcmToken: { not: null } },
-      select: { id: true }
-    }),
-    prisma.userDevice.findMany({
-      select: { userId: true },
-      distinct: ["userId"]
-    })
-  ]);
-
-  const userIds = new Set();
-  usersWithFallbackToken.forEach((user) => userIds.add(user.id));
-  userDevices.forEach((device) => userIds.add(device.userId));
-
-  return Array.from(userIds).map((id) => ({ id }));
+  // user.fcmToken removed; UserDevice is the only source.
+  const userDevices = await prisma.userDevice.findMany({
+    select: { userId: true },
+    distinct: ["userId"],
+  });
+  return userDevices.map((d) => ({ id: d.userId }));
 };
 
 /**
@@ -171,7 +161,7 @@ export const sendAdminPushNotification = async (req, res) => {
 
       const user = await prisma.user.findUnique({
         where: { id: recipientId },
-        select: { id: true, fcmToken: true }
+        select: { id: true }
       });
 
       if (!user) {

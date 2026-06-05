@@ -683,7 +683,12 @@ export const getNearbyPlayers = async (req, res) => {
       isFollowing: followedSet.has(p.id),
     }));
 
-    return res.status(200).json({ success: true, players: formattedPlayers });
+    // Wrapped envelope (additive) so new clients can read `data.players` directly.
+    return res.status(200).json({
+      success: true,
+      players: formattedPlayers,
+      data: { players: formattedPlayers },
+    });
   } catch (err) {
     logger.error("Nearby players error:", err);
     return res.status(500).json({ success: false, message: err.message });

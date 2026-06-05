@@ -14,8 +14,12 @@ import { logAudit } from "../../utils/auditLogger.js";
 import logger from "../../utils/logger.js";
 import { userRegistrationTotal } from "../../utils/metrics.js";
 import { SOCKET } from "@kridaz/shared-constants/socketEvents";
+<<<<<<< Updated upstream
 import { sanitizeUser } from "../../utils/sanitizeUser.js";
 import { getRegistrationSecret } from "../../utils/jwtSecrets.js";
+=======
+import { bumpTokenVersion } from "../../utils/tokenVersion.js";
+>>>>>>> Stashed changes
 
 
 
@@ -555,7 +559,7 @@ export const registerUser = async (req, res) => {
     // Track registration metric
     userRegistrationTotal.inc({ role: user.role || "USER", method: "email" });
 
-    const token = generateUserToken(user.id, user.role, ownerProfileId);
+    const token = await generateUserToken(user.id, user.role, ownerProfileId);
 
     const tokens = await issueTokens(res, user.id, token);
 
@@ -660,7 +664,7 @@ export const registerOwner = async (req, res) => {
     // Track registration metric
     userRegistrationTotal.inc({ role: user.role || "OWNER", method: "email" });
 
-    const token = generateOwnerToken(user.id, owner.role, owner.id);
+    const token = await generateOwnerToken(user.id, owner.role, owner.id);
 
     const tokens = await issueTokens(res, user.id, token);
 
@@ -714,11 +718,11 @@ export const loginStep1 = async (req, res) => {
     const isSuperAdmin = user.role?.toUpperCase() === "ADMIN";
     const role = user.role;
     const ownerProfileId = user.ownerProfile ? user.ownerProfile.id : null;
-    const token = isSuperAdmin
+    const token = await (isSuperAdmin
       ? generateUserToken(user.id, role, ownerProfileId)
       : (user.ownerProfile
         ? generateOwnerToken(user.id, role, ownerProfileId)
-        : generateUserToken(user.id, role));
+        : generateUserToken(user.id, role)));
 
     const tokens = await issueTokens(res, user.id, token);
 
@@ -807,11 +811,11 @@ export const login = async (req, res) => {
     const isSuperAdmin = user.role?.toUpperCase() === "ADMIN";
     const role = user.role;
     const ownerProfileId = user.ownerProfile ? user.ownerProfile.id : null;
-    const token = isSuperAdmin
+    const token = await (isSuperAdmin
       ? generateUserToken(user.id, role, ownerProfileId)
-      : (user.ownerProfile 
+      : (user.ownerProfile
         ? generateOwnerToken(user.id, role, ownerProfileId)
-        : generateUserToken(user.id, role));
+        : generateUserToken(user.id, role)));
 
     if (otpRecord) {
       await prisma.oTP.delete({
@@ -940,7 +944,7 @@ export const loginWithRecoveryToken = async (req, res) => {
     });
 
     const role = user.role;
-    const token = generateUserToken(user.id, user.role);
+    const token = await generateUserToken(user.id, user.role);
 
     const tokens = await issueTokens(res, user.id, token);
 
@@ -1016,9 +1020,9 @@ export const googleAuth = async (req, res) => {
     if (user) {
       roleToReturn = user.role;
       const ownerProfileId = user.ownerProfile ? user.ownerProfile.id : null;
-      token = user.ownerProfile 
+      token = await (user.ownerProfile
         ? generateOwnerToken(user.id, roleToReturn, ownerProfileId)
-        : generateUserToken(user.id, user.role);
+        : generateUserToken(user.id, user.role));
     } else {
       // New account creation via Google.
       // Always seed a random hash — the user authenticates via Google, not
@@ -1086,9 +1090,9 @@ export const googleAuth = async (req, res) => {
       roleToReturn = (requestedRole && requestedRole !== "user" && requestedRole.toUpperCase() !== "ADMIN") 
         ? requestedRole.toUpperCase() 
         : "USER";
-      token = result.ownerProfileId 
+      token = await (result.ownerProfileId
         ? generateOwnerToken(user.id, roleToReturn, result.ownerProfileId)
-        : generateUserToken(user.id, user.role);
+        : generateUserToken(user.id, user.role));
       
       // Update Bloom Filter for new Google users
       addUsernameToBloom(user.username);
@@ -1146,7 +1150,7 @@ export const googleAuth = async (req, res) => {
           });
 
           roleToReturn = "UMPIRE";
-          token = generateOwnerToken(user.id, roleToReturn, targetOwner.id);
+          token = await generateOwnerToken(user.id, roleToReturn, targetOwner.id);
         }
       }
     }
@@ -1204,6 +1208,36 @@ export const logout = async (req, res) => {
   } catch (err) {
     logger.error("Logout Error:", err);
     return res.status(500).json({ success: false, message: "Logout failed" });
+  }
+};
+
+/**
+ * Log out from EVERY device by bumping the user's tokenVersion. Subsequent
+ * verifies that present a token with the old tv are rejected with
+ * code: TOKEN_REVOKED. Also revokes refresh tokens server-side and clears
+ * the cookies for the originating device.
+ */
+export const logoutAll = async (req, res) => {
+  try {
+    const userId = req.user?.id || req.user?.userId;
+    if (!userId) {
+      return res.status(401).json({ success: false, message: "Unauthorized" });
+    }
+
+    await bumpTokenVersion(userId);
+    await prisma.refreshToken.updateMany({
+      where: { userId, revokedAt: null },
+      data:  { revokedAt: new Date() },
+    });
+
+    const isProd = process.env.NODE_ENV === "production" || !!process.env.RAILWAY_ENVIRONMENT || !!process.env.RAILWAY_ENVIRONMENT_NAME || !!process.env.RAILWAY_PROJECT_ID;
+    res.clearCookie("auth_token",    { httpOnly: true, secure: isProd, sameSite: isProd ? "none" : "lax", path: "/" });
+    res.clearCookie("refresh_token", { httpOnly: true, secure: isProd, sameSite: isProd ? "none" : "lax", path: "/" });
+
+    return res.status(200).json({ success: true, message: "Logged out from all devices." });
+  } catch (err) {
+    logger.error("LogoutAll Error:", err);
+    return res.status(500).json({ success: false, message: "Logout-all failed" });
   }
 };
 
@@ -1275,14 +1309,14 @@ export const refreshToken = async (req, res) => {
           
           if (isSuperAdmin) {
               role = user.role;
-              newToken = generateUserToken(user.id, role, user.ownerProfile?.id || null);
+              newToken = await generateUserToken(user.id, role, user.ownerProfile?.id || null);
               if (user.ownerProfile) account = { ...user, ...user.ownerProfile };
           } else if (user.ownerProfile) {
               role = user.role;
-              newToken = generateOwnerToken(user.id, role, user.ownerProfile.id);
+              newToken = await generateOwnerToken(user.id, role, user.ownerProfile.id);
               account = { ...user, ...user.ownerProfile };
           } else {
-              newToken = generateUserToken(user.id, user.role);
+              newToken = await generateUserToken(user.id, user.role);
           }
 
           // Update auth_token cookie with new token
@@ -1333,14 +1367,14 @@ export const refreshToken = async (req, res) => {
       
       if (isSuperAdmin) {
           role = user.role;
-          newToken = generateUserToken(user.id, role, user.ownerProfile?.id || null);
+          newToken = await generateUserToken(user.id, role, user.ownerProfile?.id || null);
           if (user.ownerProfile) account = { ...user, ...user.ownerProfile };
       } else if (user.ownerProfile) {
           role = user.role;
-          newToken = generateOwnerToken(user.id, role, user.ownerProfile.id);
+          newToken = await generateOwnerToken(user.id, role, user.ownerProfile.id);
           account = { ...user, ...user.ownerProfile };
       } else {
-          newToken = generateUserToken(user.id, user.role);
+          newToken = await generateUserToken(user.id, user.role);
       }
 
       // Invalidate current token

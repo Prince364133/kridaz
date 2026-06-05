@@ -217,6 +217,11 @@ export const saveDeviceToken = async (req, res) => {
       create: { userId: id, token, ...baseData },
     });
 
+<<<<<<< Updated upstream
+=======
+    // UserDevice is now the only source of truth. The legacy user.fcmToken
+    // mirror has been removed in this release.
+>>>>>>> Stashed changes
     res.status(200).json({ success: true, message: "Device token registered successfully" });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });

@@ -8,7 +8,11 @@ import { findNearby, updateGeoPoint } from "../../utils/geo.util.js";
 import { getOrSetCache, generateCacheKey, invalidateCache } from "../../utils/cache.js";
 import logger from "../../utils/logger.js";
 import { getGroundRecommendations } from "../../services/recommendation.service.js";
+<<<<<<< Updated upstream
 import { computeLowestHourlyRate } from "../../utils/turfPricing.js";
+=======
+import { wrapped } from "../../utils/envelope.js";
+>>>>>>> Stashed changes
 
 // --- USER OPERATIONS ---
 
@@ -159,7 +163,7 @@ export const getAllTurfs = async (req, res) => {
       });
     }, 900); // 15 minute TTL
 
-    return res.status(200).json({ turfs: formattedTurfs });
+    return wrapped(res, { turfs: formattedTurfs });
   } catch (err) {
     logger.error("Error in getAllTurfs", err);
     return res.status(500).json({ message: err.message });
@@ -272,7 +276,7 @@ export const getTurfById = async (req, res) => {
       }
     }
 
-    return res.status(200).json({ turf: formattedTurf });
+    return wrapped(res, { turf: formattedTurf });
   } catch (error) {
     logger.error("Error in getTurfById", error);
     return res.status(500).json({ message: error.message });
@@ -337,7 +341,7 @@ export const getTimeSlotByTurfId = async (req, res) => {
       });
     }
 
-    return res.status(200).json({ timeSlots: turfDetails, bookedTime });
+    return wrapped(res, { timeSlots: turfDetails, bookedTime });
   } catch (error) {
     logger.error("Error in getTimeSlotByTurfId", error);
     return res.status(500).json({ message: error.message });

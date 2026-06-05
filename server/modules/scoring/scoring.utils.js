@@ -1,6 +1,66 @@
 import crypto from "crypto";
 
 /**
+ * House-rule defaults — MCC-standard cricket. Any field a particular match
+ * doesn't override stays here, so existing matches keep working unchanged.
+ *
+ *   enforceConsecutiveOverBlock — Law 17.6. Reject same bowler back-to-back.
+ *   enforceFreeHit              — Law 21.18. Set freeHit on no-ball; reject
+ *                                 BOWLED/LBW/CAUGHT/STUMPED/HIT_WICKET while active.
+ *   penaltyEnabled              — allow addPenaltyRuns() at all.
+ *   wideIsLegalBall             — count wides toward totalBalls + bowlingBalls
+ *                                 (rare; some tape-ball formats do this).
+ *   noBallIsLegalBall           — same for no-balls.
+ *   ballsPerOver                — 6 default. Beach cricket uses 4; historical
+ *                                 8-ball overs were used in test cricket.
+ *   playersPerTeam              — falls back to HostedGame.maxMembers if null.
+ *   lastManStands               — when true, all-out is never declared (the
+ *                                 last batter bats alone). Gully cricket staple.
+ *   maxRunsPerBall              — soft cap exposed for clients; the validator
+ *                                 still hard-caps at 6 off-the-bat to keep
+ *                                 z-schema static.
+ */
+// MVP scoring weights. Defaults are the ones the engine has always used —
+// product can tune via PATCH /scoring/house-rules with `mvpWeights: { ... }`.
+const DEFAULT_MVP_WEIGHTS = Object.freeze({
+  perRun: 1,
+  bonus30: 10, bonus50: 20, bonus100: 30,
+  srMinBalls: 10, srThreshold: 150, srBonus: 15,
+  perWicket: 20,
+  bonus3w: 10, bonus5w: 25,
+  econMinBalls: 12, econThreshold: 6.0, econBonus: 15,
+});
+
+export const DEFAULT_HOUSE_RULES = Object.freeze({
+  enforceConsecutiveOverBlock: true,
+  enforceFreeHit: true,
+  penaltyEnabled: true,
+  wideIsLegalBall: false,
+  noBallIsLegalBall: false,
+  ballsPerOver: 6,
+  playersPerTeam: null,   // null → derive from match.maxMembers (default 11)
+  lastManStands: false,
+  maxRunsPerBall: 6,
+  mvpWeights: { ...DEFAULT_MVP_WEIGHTS },
+});
+
+/**
+ * Merge stored houseRules with defaults. Treats null/missing values as
+ * "use default" so a partial override only specifies the keys it cares about.
+ *
+ * @param {object} [stored]  the value of cricketMatch.houseRules
+ * @returns {typeof DEFAULT_HOUSE_RULES}
+ */
+export const resolveHouseRules = (stored) => {
+  if (!stored || typeof stored !== "object") return { ...DEFAULT_HOUSE_RULES };
+  const out = { ...DEFAULT_HOUSE_RULES };
+  for (const key of Object.keys(DEFAULT_HOUSE_RULES)) {
+    if (stored[key] !== undefined && stored[key] !== null) out[key] = stored[key];
+  }
+  return out;
+};
+
+/**
  * Generates a unique short ID for matches
  * Format: KRZ-XXXX (e.g., KRZ-A92B)
  */
@@ -25,40 +85,89 @@ export const computeScoreSnapshot = (scoring, match) => {
   
   if (!currentInnings) return null;
 
+  const houseRules = resolveHouseRules(scoring.houseRules);
+  const ballsPerOver = houseRules.ballsPerOver || 6;
+
   const isTeamABatting = currentInnings.battingTeam === "teamA";
   const battingTeamName = isTeamABatting ? (match.teamA?.name || "Team A") : (match.teamB?.name || "Team B");
 
-  // Calculate Overs & Balls
+  // Calculate Overs & Balls (ballsPerOver may be 4 / 6 / 8 depending on format)
   const totalValidBalls = currentInnings.totalBalls || 0;
-  const overs = Math.floor(totalValidBalls / 6);
-  const balls = totalValidBalls % 6;
+  const overs = Math.floor(totalValidBalls / ballsPerOver);
+  const balls = totalValidBalls % ballsPerOver;
   const overString = `${overs}.${balls}`;
 
   // Current Run Rate
   const totalRuns = currentInnings.totalRuns || 0;
   const totalWickets = currentInnings.totalWickets || 0;
-  const crr = totalValidBalls > 0 ? (totalRuns / (totalValidBalls / 6)).toFixed(2) : "0.00";
+  const crr = totalValidBalls > 0 ? (totalRuns / (totalValidBalls / ballsPerOver)).toFixed(2) : "0.00";
 
   // Last 6 balls from timeline
+  // Last-6 labels follow Cricinfo convention so commentators can read the
+  // sequence at a glance: "6", "W", "4b", "1nb", "6nb", "Wnb", "5p".
+  // Suffix legend: nb = no-ball, wd = wide, b = bye, lb = leg-bye, p = penalty.
+  const EXTRA_SUFFIX = {
+    NO_BALL: 'nb',
+    WIDE: 'wd',
+    BYE: 'b',
+    LEG_BYE: 'lb',
+    PENALTY: 'p',
+  };
   const lastBalls = (scoring.timeline || []).slice(-6).map(ball => {
-    if (ball.isWicket) return { type: 'wicket', label: 'W', isExtra: ball.isExtra };
-    if (ball.isFour) return { type: 'boundary', label: '4', isExtra: false };
-    if (ball.isSix) return { type: 'boundary', label: '6', isExtra: false };
-    if (ball.isExtra && ball.extraType === 'PENALTY') return { type: 'run', label: `P${ball.extraRuns || ball.runs}`, isExtra: true };
-    return { type: 'run', label: (ball.runs + (ball.extraRuns || 0)).toString(), isExtra: ball.isExtra };
+    const suffix = EXTRA_SUFFIX[ball.extraType] || '';
+    const extraRuns = ball.extraRuns || 0;
+    const offBat = ball.runs || 0;
+    // Wicket overrides — keep "W" prominent but annotate if it was off an extra.
+    if (ball.isWicket) {
+      return { type: 'wicket', label: suffix ? `W${suffix}` : 'W', isExtra: ball.isExtra };
+    }
+    // Boundary off the bat.
+    if (ball.isFour) {
+      return { type: 'boundary', label: suffix ? `4${suffix}` : '4', isExtra: ball.isExtra };
+    }
+    if (ball.isSix) {
+      return { type: 'boundary', label: suffix ? `6${suffix}` : '6', isExtra: ball.isExtra };
+    }
+    // Pure penalty (no batting involvement): "5p".
+    if (ball.extraType === 'PENALTY') {
+      return { type: 'run', label: `${extraRuns || offBat}p`, isExtra: true };
+    }
+    // For byes/leg-byes the runs live on extraRuns; for wides/no-balls the
+    // total is offBat + extraRuns (e.g. no-ball + 2 ran off bat = "3nb").
+    const total =
+      (ball.extraType === 'BYE' || ball.extraType === 'LEG_BYE')
+        ? extraRuns
+        : offBat + extraRuns;
+    return { type: 'run', label: suffix ? `${total}${suffix}` : `${total}`, isExtra: ball.isExtra };
   });
 
-  // Target & Chase Info
+  // Target & Chase Info.
+  //
+  // DLS-lite: when an umpire calls `reviseTargetAndOvers` (rain interruption),
+  // CricketMatch.revisedTarget and revisedOvers hold the new par. We prefer
+  // those over the naive "first-innings + 1" math. Anything missing falls back
+  // to the original calculation so non-revised matches behave unchanged.
   let target = null;
   let runsNeeded = null;
   let ballsRemaining = null;
-  
+  let isRevised = false;
+
   if (currentInningsIndex === 1) {
     const firstInnings = scoring.innings.find(i => i.inningsIndex === 0);
-    target = (firstInnings?.totalRuns || 0) + 1;
+
+    if (scoring.revisedTarget != null) {
+      target = Number(scoring.revisedTarget);
+      isRevised = true;
+    } else {
+      target = (firstInnings?.totalRuns || 0) + 1;
+    }
     runsNeeded = Math.max(0, target - totalRuns);
-    const maxOvers = match.oversPerInnings || 20;
-    ballsRemaining = Math.max(0, (maxOvers * 6) - totalValidBalls);
+
+    const effectiveMaxOvers = scoring.revisedOvers != null
+      ? Number(scoring.revisedOvers)
+      : (match.oversPerInnings || 20);
+    if (scoring.revisedOvers != null) isRevised = true;
+    ballsRemaining = Math.max(0, Math.floor(effectiveMaxOvers * ballsPerOver) - totalValidBalls);
   }
 
   // Resolver for player names using slots
@@ -106,11 +215,11 @@ export const computeScoreSnapshot = (scoring, match) => {
       id: scoring.bowlerId,
       name: getPlayerName(scoring.bowlerId),
       profilePicture: getPlayerImage(scoring.bowlerId),
-      overs: bStat ? Math.floor(bStat.bowlingBalls / 6) : 0,
-      balls: bStat ? (bStat.bowlingBalls % 6) : 0,
+      overs: bStat ? Math.floor(bStat.bowlingBalls / ballsPerOver) : 0,
+      balls: bStat ? (bStat.bowlingBalls % ballsPerOver) : 0,
       runs: bStat?.bowlingRuns || 0,
       wickets: bStat?.bowlingWickets || 0,
-      economy: bStat?.bowlingBalls > 0 ? Number(((bStat.bowlingRuns / bStat.bowlingBalls) * 6).toFixed(2)) : 0
+      economy: bStat?.bowlingBalls > 0 ? Number(((bStat.bowlingRuns / bStat.bowlingBalls) * ballsPerOver).toFixed(2)) : 0
     };
   }
 
@@ -128,61 +237,82 @@ export const computeScoreSnapshot = (scoring, match) => {
     currentOversRuns += ball.runs + (ball.extraRuns || 0);
     if (ball.isWicket) currentOversWickets++;
     
-    // Check if it's a valid ball (not a wide or no-ball, unless it's a penalty)
-    if (!ball.isExtra || ball.extraType === 'PENALTY' || ball.extraType === 'BYE' || ball.extraType === 'LEG_BYE') {
+    // Legal-delivery counter must match the main engine (processScoreUpdate)
+    // and undo path. Penalties never count; wides/no-balls only count when
+    // house rules promote them.
+    const ballIsLegal =
+      ball.extraType !== 'PENALTY' &&
+      (ball.extraType !== 'WIDE'    || houseRules.wideIsLegalBall) &&
+      (ball.extraType !== 'NO_BALL' || houseRules.noBallIsLegalBall);
+    if (ballIsLegal) {
       validBallsInInnings++;
     }
 
-    if (validBallsInInnings > 0 && validBallsInInnings % 6 === 0) {
+    if (validBallsInInnings > 0 && validBallsInInnings % ballsPerOver === 0) {
       // Avoid pushing multiple times for the same over if consecutive extras happen
-      const currentOver = validBallsInInnings / 6;
+      const currentOver = validBallsInInnings / ballsPerOver;
       if (!wormData.find(w => w.over === currentOver)) {
         wormData.push({ over: currentOver, runs: currentOversRuns, wickets: currentOversWickets });
       }
     }
   }
-  if (validBallsInInnings % 6 !== 0) {
-    wormData.push({ over: Number((validBallsInInnings / 6).toFixed(1)), runs: currentOversRuns, wickets: currentOversWickets });
+  if (validBallsInInnings % ballsPerOver !== 0) {
+    wormData.push({ over: Number((validBallsInInnings / ballsPerOver).toFixed(1)), runs: currentOversRuns, wickets: currentOversWickets });
   }
 
   // --- Phase 6: NRR Effective Overs ---
   const maxOvers = match.oversPerInnings || 20;
-  const isAllOut = totalWickets >= 10;
-  const nrrEffectiveBalls = (currentInnings.isCompleted && isAllOut) ? (maxOvers * 6) : totalValidBalls;
-  const nrrEffectiveOvers = nrrEffectiveBalls / 6;
+  // All-out = wickets-down equals (playersPerTeam - 1). House rules may
+  // override playersPerTeam; otherwise we fall back to match.maxMembers.
+  // When `lastManStands` is on (gully cricket), all-out is never declared —
+  // the innings ends only via overs exhausted (or target reached for chase).
+  const playersPerTeam = houseRules.playersPerTeam || match.maxMembers || 11;
+  const wicketsForAllOut = Math.max(1, playersPerTeam - 1);
+  const isAllOut = !houseRules.lastManStands && totalWickets >= wicketsForAllOut;
+  const nrrEffectiveBalls = (currentInnings.isCompleted && isAllOut) ? (maxOvers * ballsPerOver) : totalValidBalls;
+  const nrrEffectiveOvers = nrrEffectiveBalls / ballsPerOver;
 
   // --- Phase 6: MVP/Player of the Match Engine ---
+  // Weights are configurable per match via houseRules.mvpWeights. Any field
+  // not overridden falls back to DEFAULT_MVP_WEIGHTS.
+  const w = { ...DEFAULT_MVP_WEIGHTS, ...(houseRules.mvpWeights || {}) };
   const mvpLeaderboard = (scoring.playerStats || []).map(stat => {
     let points = 0;
-    // Batting points
-    points += stat.battingRuns; // 1 pt per run
-    if (stat.battingRuns >= 30) points += 10;
-    if (stat.battingRuns >= 50) points += 20;
-    if (stat.battingRuns >= 100) points += 30;
-    
+    // Batting
+    points += (stat.battingRuns || 0) * w.perRun;
+    if (stat.battingRuns >= 30)  points += w.bonus30;
+    if (stat.battingRuns >= 50)  points += w.bonus50;
+    if (stat.battingRuns >= 100) points += w.bonus100;
+
     const sr = stat.battingBalls > 0 ? (stat.battingRuns / stat.battingBalls) * 100 : 0;
-    if (stat.battingBalls >= 10 && sr > 150) points += 15;
-    
-    // Bowling points
-    points += stat.bowlingWickets * 20;
-    if (stat.bowlingWickets >= 3) points += 10;
-    if (stat.bowlingWickets >= 5) points += 25;
-    
-    const econ = stat.bowlingBalls > 0 ? (stat.bowlingRuns / stat.bowlingBalls) * 6 : 0;
-    if (stat.bowlingBalls >= 12 && econ < 6.0) points += 15;
-    
+    if (stat.battingBalls >= w.srMinBalls && sr > w.srThreshold) points += w.srBonus;
+
+    // Bowling
+    points += (stat.bowlingWickets || 0) * w.perWicket;
+    if (stat.bowlingWickets >= 3) points += w.bonus3w;
+    if (stat.bowlingWickets >= 5) points += w.bonus5w;
+
+    const econ = stat.bowlingBalls > 0 ? (stat.bowlingRuns / stat.bowlingBalls) * ballsPerOver : 0;
+    if (stat.bowlingBalls >= w.econMinBalls && econ < w.econThreshold) points += w.econBonus;
+
     return {
       userId: stat.userId,
       name: getPlayerName(stat.userId),
       profilePicture: getPlayerImage(stat.userId),
-      points
+      points,
     };
-  }).sort((a, b) => b.points - a.points).slice(0, 5); // Top 5 MVP candidates
+  }).sort((a, b) => b.points - a.points).slice(0, 5);
 
   // --- Innings & Match Completion Detection ---
-  const oversFinished = totalValidBalls >= (maxOvers * 6);
+  // Use revisedOvers when present (rain interruption) so the chase ends at
+  // the umpire-imposed cut-off, not the original maxOvers.
+  const effectiveMaxOvers = (currentInningsIndex === 1 && scoring.revisedOvers != null)
+    ? Number(scoring.revisedOvers)
+    : maxOvers;
+  const oversFinished = totalValidBalls >= Math.floor(effectiveMaxOvers * ballsPerOver);
   let isInningsComplete = isAllOut || oversFinished;
   let isMatchComplete = false;
+  let matchResult = null;
 
   if (currentInningsIndex === 1) {
     const targetReached = target !== null && totalRuns >= target;
@@ -190,6 +320,33 @@ export const computeScoreSnapshot = (scoring, match) => {
       isInningsComplete = true;
     }
     isMatchComplete = isInningsComplete;
+
+    if (isMatchComplete) {
+      const firstInnings = scoring.innings.find(i => i.inningsIndex === 0);
+      // For a revised chase, the "par score" the defending side is compared
+      // against is target - 1, not the raw innings total.
+      const defendingScore = isRevised
+        ? Math.max(0, target - 1)
+        : (firstInnings?.totalRuns || 0);
+      const chasingScore = totalRuns;
+      const teamAName = match.teamA?.name || 'Team A';
+      const teamBName = match.teamB?.name || 'Team B';
+      const chasingTeamName = battingTeamName;
+      const defendingTeamName = chasingTeamName === teamAName ? teamBName : teamAName;
+      const wicketsRemaining = Math.max(0, wicketsForAllOut - totalWickets);
+      const tag = isRevised ? ' (DLS)' : '';
+
+      if (targetReached) {
+        matchResult = wicketsRemaining > 0
+          ? `${chasingTeamName} won by ${wicketsRemaining} wicket${wicketsRemaining === 1 ? '' : 's'}${tag}`
+          : `${chasingTeamName} won${tag}`;
+      } else if (chasingScore === defendingScore) {
+        matchResult = `Match Tied${tag}`;
+      } else {
+        const runMargin = defendingScore - chasingScore;
+        matchResult = `${defendingTeamName} won by ${runMargin} run${runMargin === 1 ? '' : 's'}${tag}`;
+      }
+    }
   }
 
   return {
@@ -210,7 +367,7 @@ export const computeScoreSnapshot = (scoring, match) => {
     target,
     runsNeeded,
     ballsRemaining,
-    rrr: (runsNeeded && ballsRemaining) ? ((runsNeeded / ballsRemaining) * 6).toFixed(2) : null,
+    rrr: (runsNeeded && ballsRemaining) ? ((runsNeeded / ballsRemaining) * ballsPerOver).toFixed(2) : null,
     last6Balls: lastBalls,
     lastBallRaw: scoring.timeline && scoring.timeline.length > 0 ? scoring.timeline[0] : null,
     batters: activeBatters,
@@ -235,6 +392,13 @@ export const computeScoreSnapshot = (scoring, match) => {
     powerplayOvers: currentInnings.powerplayOvers || 0,
     isInningsComplete,
     isMatchComplete,
+    // DLS-lite signals — UI can show "Revised Target: 142 in 18 overs" etc.
+    revisedTarget:  scoring.revisedTarget ?? null,
+    revisedOvers:   scoring.revisedOvers ?? null,
+    isRevised,
+    // Human-readable result string when the match is done. Null otherwise.
+    // Examples: "Team A won by 24 runs", "Team B won by 6 wickets", "Match Tied".
+    matchResult,
     currentInningsIndex,
     location: match.city || match.state ? `${match.city || ''} ${match.state || ''}`.trim() : null,
     venueId: match.turfId || null,

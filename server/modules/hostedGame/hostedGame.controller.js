@@ -1638,7 +1638,7 @@ export const respondToOfficialInvitation = async (req, res) => {
     }
 
     const updatedUser = await prisma.user.findUnique({ where: { id: userId } });
-    const token = generateUserToken(updatedUser.id, updatedUser.role);
+    const token = await generateUserToken(updatedUser.id, updatedUser.role);
 
     return res.status(200).json({
       success: true,
@@ -2111,7 +2111,7 @@ export const claimInviteSlot = async (req, res) => {
     });
 
     if (result.updatedRole && result.updatedRole !== req.user?.role) {
-      const newToken = generateUserToken(req.user.id || req.user.user, result.updatedRole, result.updatedOwnerId);
+      const newToken = await generateUserToken(req.user.id || req.user.user, result.updatedRole, result.updatedOwnerId);
       const isProd = process.env.NODE_ENV === "production" || !!process.env.RAILWAY_ENVIRONMENT || !!process.env.RAILWAY_ENVIRONMENT_NAME || !!process.env.RAILWAY_PROJECT_ID;
       res.cookie("auth_token", newToken, {
         httpOnly: true,

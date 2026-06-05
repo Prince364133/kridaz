@@ -8,7 +8,7 @@ import jwt from "jsonwebtoken";
 import logger from "../../utils/logger.js";
 import { getAccessSecret } from "../../utils/jwtSecrets.js";
 import { SOCKET } from "@kridaz/shared-constants/socketEvents";
-import { computeScoreSnapshot } from "./scoring.utils.js";
+import { computeScoreSnapshot, resolveHouseRules } from "./scoring.utils.js";
 
 const HOSTED_GAME_SCORING_INCLUDE = {
   turf: true,
@@ -519,10 +519,20 @@ export const finalizeMatch = async (scoringId) => {
     throw new NotFoundError("Scoring session not found");
   }
 
+  // Compute the result string ("Team A won by 24 runs" etc.) and persist it
+  // on cricketMatch.result so downstream (post-match screens, share images,
+  // notifications) can read a single canonical verdict instead of re-deriving.
+  const hostedGameForResult = await prisma.hostedGame.findUnique({
+    where: { id: scoring.gameId },
+    include: HOSTED_GAME_SCORING_INCLUDE,
+  });
+  const resultSnapshot = computeScoreSnapshot(scoring, mapHostedGame(hostedGameForResult));
+  const resultString = resultSnapshot?.matchResult || null;
+
   await prisma.$transaction([
     prisma.cricketMatch.update({
       where: { id: scoringId },
-      data: { status: "COMPLETED" }
+      data: { status: "COMPLETED", result: resultString }
     }),
     prisma.hostedGame.update({
       where: { id: scoring.gameId },
@@ -693,6 +703,52 @@ export const advanceToNextInnings = async (scoringId, battingTeamId) => {
     throw new NotFoundError("Scoring session not found");
   }
 
+  // Guard 1 — already in (or past) innings 1, refuse to re-create.
+  if (scoring.currentInningsIndex !== 0) {
+    throw new BadRequestError(
+      "Cannot advance — match is already past innings 1.",
+      { code: "INNINGS_ALREADY_ADVANCED" }
+    );
+  }
+
+  // Guard 2 — match already declared complete.
+  if (scoring.status === "COMPLETED") {
+    throw new BadRequestError(
+      "Cannot advance — match has been finalized.",
+      { code: "MATCH_ALREADY_COMPLETE" }
+    );
+  }
+
+  const firstInnings = scoring.innings.find((i) => i.inningsIndex === 0);
+  if (!firstInnings) {
+    throw new BadRequestError(
+      "Cannot advance — innings 0 doesn't exist.",
+      { code: "NO_FIRST_INNINGS" }
+    );
+  }
+
+  // Guard 3 — innings 0 must actually be done (all-out OR overs finished).
+  // Without this an umpire could prematurely flip innings and lose runs.
+  const maxOvers = scoring.oversPerInnings || 20;
+  const oversFinished = firstInnings.totalBalls >= maxOvers * 6;
+  const isAllOut = firstInnings.totalWickets >= 10; // conservative; per-match
+                                                   // playersPerTeam lives on HostedGame
+                                                   // and isn't fetched here.
+  if (!firstInnings.isCompleted && !oversFinished && !isAllOut) {
+    throw new BadRequestError(
+      "Innings 0 is not complete yet (no all-out, no overs exhausted).",
+      { code: "INNINGS_NOT_COMPLETE" }
+    );
+  }
+
+  // Guard 4 — the new batting team must differ from innings 0's batting team.
+  if (battingTeamId === firstInnings.battingTeam) {
+    throw new BadRequestError(
+      "Innings 1 batting team must differ from innings 0.",
+      { code: "SAME_BATTING_TEAM" }
+    );
+  }
+
   await prisma.$transaction([
     prisma.innings.updateMany({
       where: { matchId: scoringId, inningsIndex: 0 },
@@ -712,7 +768,9 @@ export const advanceToNextInnings = async (scoringId, battingTeamId) => {
         currentInningsIndex: 1,
         strikerId: null,
         nonStrikerId: null,
-        bowlerId: null
+        bowlerId: null,
+        // Don't carry a stale free-hit flag into the new innings.
+        freeHitActive: false,
       }
     })
   ]);
@@ -982,8 +1040,14 @@ export const updateActivePlayers = async (scoringId, { strikerId, nonStrikerId, 
     throw new NotFoundError("Scoring session not found");
   }
 
-  if (bowlerId && scoring.bowlerId === bowlerId) {
-    throw new BadRequestError("Same bowler cannot bowl consecutive overs");
+  // Law 17.6 — a bowler cannot bowl two consecutive overs. Disabled for
+  // casual house rules where one good bowler is allowed to keep going.
+  const houseRules = resolveHouseRules(scoring.houseRules);
+  if (houseRules.enforceConsecutiveOverBlock && bowlerId && scoring.bowlerId === bowlerId) {
+    throw new BadRequestError(
+      "Same bowler cannot bowl consecutive overs",
+      { code: "SAME_BOWLER_CONSECUTIVE_OVERS" }
+    );
   }
 
   const finalStrikerId = strikerId !== undefined ? strikerId : scoring.strikerId;
@@ -998,13 +1062,36 @@ export const updateActivePlayers = async (scoringId, { strikerId, nonStrikerId, 
   if (strikerId !== undefined) updateData.strikerId = strikerId;
   if (nonStrikerId !== undefined) updateData.nonStrikerId = nonStrikerId;
 
-  return await prisma.cricketMatch.update({
+  // Retired-hurt comeback: when a player retired hurt is sent back in to bat,
+  // flip their stat row's outStatus from RETIRED_HURT → NOT_OUT so the
+  // scorecard correctly shows them as active again. Without this they keep
+  // accumulating runs but the scorecard still shows them as retired.
+  const incomingBatterIds = [strikerId, nonStrikerId].filter(
+    (id) => typeof id === "string" && id.length > 0
+  );
+  const resetRetiredHurtOps = incomingBatterIds.map((userId) =>
+    prisma.matchPlayerStat.updateMany({
+      where: {
+        matchId: scoringId,
+        userId,
+        inningsIndex: scoring.currentInningsIndex,
+        outStatus: "RETIRED_HURT",
+      },
+      data: { outStatus: "NOT_OUT" },
+    })
+  );
+
+  await prisma.$transaction([
+    prisma.cricketMatch.update({
+      where: { id: scoringId },
+      data: updateData,
+    }),
+    ...resetRetiredHurtOps,
+  ]);
+
+  return await prisma.cricketMatch.findUnique({
     where: { id: scoringId },
-    data: updateData,
-    include: {
-      innings: true,
-      playerStats: true
-    }
+    include: { innings: true, playerStats: true },
   });
 };
 
@@ -1034,11 +1121,22 @@ export const revertLastBall = async (scoringId) => {
     throw new BadRequestError("Innings not found for undo");
   }
 
+<<<<<<< Updated upstream
   // Must match the forward path's definition exactly (processScoreUpdate):
   // wides, no-balls, and penalties do NOT count as legal deliveries. Byes and
   // leg-byes DO. The previous version of this undo treated PENALTY as legal,
   // causing the ball count to drift backward on every penalty-then-undo cycle.
   const isLegalBall = !["WIDE", "NO_BALL", "PENALTY"].includes(lastBall.extraType);
+=======
+  // Must match the forward path's definition exactly (processScoreUpdate),
+  // including the same houseRules overrides — otherwise an undo decrements
+  // totalBalls that the forward never incremented (or vice versa).
+  const houseRules = resolveHouseRules(scoring.houseRules);
+  const isLegalBall =
+    lastBall.extraType !== "PENALTY" &&
+    (lastBall.extraType !== "WIDE"    || houseRules.wideIsLegalBall) &&
+    (lastBall.extraType !== "NO_BALL" || houseRules.noBallIsLegalBall);
+>>>>>>> Stashed changes
   const runs = lastBall.runs ?? 0;
   const extraRuns = lastBall.extraRuns ?? (lastBall.isExtra ? 1 : 0);
 
@@ -1086,7 +1184,9 @@ export const revertLastBall = async (scoringId) => {
       where: { matchId: scoring.id, userId: lastBall.batterId, inningsIndex: lastBall.inningsIndex },
       data: {
         battingRuns: { decrement: runs },
-        battingBalls: { decrement: (!["WIDE", "PENALTY"].includes(lastBall.extraType)) ? 1 : 0 },
+        // Match the forward path: batter faced it iff the delivery counted
+        // as legal (which respects houseRules.wideIsLegalBall / .noBallIsLegalBall).
+        battingBalls: { decrement: isLegalBall ? 1 : 0 },
         battingFours: { decrement: lastBall.isFour ? 1 : 0 },
         battingSixes: { decrement: lastBall.isSix ? 1 : 0 }
       }
@@ -1097,14 +1197,18 @@ export const revertLastBall = async (scoringId) => {
         bowlingRuns: { decrement: (!["BYE", "LEG_BYE", "PENALTY"].includes(lastBall.extraType)) ? (runs + extraRuns) : 0 },
         bowlingBalls: { decrement: isLegalBall ? 1 : 0 },
         bowlingMaidens: { decrement: wasMaiden ? 1 : 0 },
-        bowlingWickets: { decrement: (lastBall.isWicket && !["RUN_OUT", "RETIRED_HURT", "RETIRED_OUT", "OBSTRUCTING", "TIMED_OUT", "OBSTRUCTING_FIELD", "HIT_BALL_TWICE", "HANDLED_BALL"].includes(lastBall.wicketType)) ? 1 : 0 }
+        bowlingWickets: { decrement: (lastBall.isWicket && !["RUN_OUT", "RETIRED_HURT", "RETIRED_OUT", "TIMED_OUT", "OBSTRUCTING_FIELD", "HIT_BALL_TWICE", "HANDLED_BALL"].includes(lastBall.wicketType)) ? 1 : 0 }
       }
     }),
     ...(lastBall.isWicket ? [
       prisma.matchPlayerStat.updateMany({
         where: { matchId: scoring.id, userId: lastBall.playerOutId || lastBall.batterId, inningsIndex: lastBall.inningsIndex },
         data: {
-          outStatus: "NOT_OUT"
+          outStatus: "NOT_OUT",
+          // Clear the dismissal-credit fields so the row mirrors the
+          // forward-path state before the wicket was recorded.
+          dismissedById: null,
+          caughtById: null,
         }
       })
     ] : [])
@@ -1142,17 +1246,62 @@ export const processScoreUpdate = async (scoringId, ballData) => {
   const isBye = ballData.extraType === "BYE";
   const isLegBye = ballData.extraType === "LEG_BYE";
   const isPenalty = ballData.extraType === "PENALTY";
-  const runs = ballData.runs ?? 0;
-  const extraRuns = ballData.extraRuns ?? (ballData.isExtra ? 1 : 0);
+
+  // Default extraRuns: wides and no-balls carry an implicit +1; byes,
+  // leg-byes and penalties only count what the caller explicitly states.
+  // (Previously this defaulted to 1 for every `isExtra`, which caused
+  // `{ extraType: BYE, runs: 4 }` to record 1 + 4 = 5 byes instead of 4.)
+  let runs = ballData.runs ?? 0;
+  let extraRuns = ballData.extraRuns ?? ((isWide || isNoBall) ? 1 : 0);
+
+  // For byes/leg-byes the batter doesn't hit the ball, so any runs the
+  // batters ran belong on `extraRuns`, not `runs`. Re-route before any state
+  // update so those runs don't inflate the batter's individual score.
+  // Callers can either send `{ extraType: BYE, runs: 4 }` OR
+  // `{ extraType: BYE, extraRuns: 4 }`; both end up the same.
+  if ((isBye || isLegBye) && runs > 0) {
+    extraRuns = (extraRuns || 0) + runs;
+    runs = 0;
+  }
+
+  const houseRules = resolveHouseRules(scoring.houseRules);
+
+  // Free Hit (Law 21.18): if active and this is a regular delivery (not
+  // wide/no-ball/penalty), the batter cannot be out via these modes. The
+  // umpire-side UI should already prevent these inputs, but reject server-
+  // side too so the database can't ever record an illegal dismissal.
+  // Allowed on a free hit: RUN_OUT, HIT_BALL_TWICE, OBSTRUCTING_FIELD, HANDLED_BALL.
+  // Disabled entirely when houseRules.enforceFreeHit is false (casual games).
+  const FREE_HIT_FORBIDDEN_WICKETS = new Set([
+    "BOWLED", "LBW", "CAUGHT", "STUMPED", "HIT_WICKET",
+  ]);
+  if (
+    houseRules.enforceFreeHit &&
+    scoring.freeHitActive &&
+    ballData.isWicket &&
+    FREE_HIT_FORBIDDEN_WICKETS.has(ballData.wicketType)
+  ) {
+    throw new BadRequestError(
+      `Batter cannot be out ${ballData.wicketType} on a free hit (Law 21.18).`,
+      { code: "FREE_HIT_INVALID_DISMISSAL" }
+    );
+  }
 
   const strikerId = scoring.strikerId || ballData.batterId || ballData.batsmanId;
   const bowlerId = scoring.bowlerId || ballData.bowlerId;
   const nonStrikerId = scoring.nonStrikerId;
 
-  const overNumber = Math.floor(currentInnings.totalBalls / 6);
-  const ballInOver = currentInnings.totalBalls % 6;
+  // ballsPerOver is configurable (default 6); some formats use 4 or 8.
+  const ballsPerOver = houseRules.ballsPerOver || 6;
+  const overNumber = Math.floor(currentInnings.totalBalls / ballsPerOver);
+  const ballInOver = currentInnings.totalBalls % ballsPerOver;
 
-  const isLegalBall = !isWide && !isNoBall && !isPenalty;
+  // Legal-ball definition. House rules can promote wide and/or no-ball to
+  // count as a legal delivery (tape-ball formats often do this for wides).
+  const isLegalBall =
+    !isPenalty &&
+    (!isWide || houseRules.wideIsLegalBall) &&
+    (!isNoBall || houseRules.noBallIsLegalBall);
   const newExtras = { ...currentInnings.extras };
   if (isWide) newExtras.wides += extraRuns;
   else if (isNoBall) newExtras.noBalls += extraRuns;
@@ -1163,7 +1312,7 @@ export const processScoreUpdate = async (scoringId, ballData) => {
   // Strike Rotation Logic
   let newStrikerId = strikerId;
   let newNonStrikerId = nonStrikerId;
-  const isOverComplete = isLegalBall && (ballInOver === 5);
+  const isOverComplete = isLegalBall && (ballInOver === ballsPerOver - 1);
 
   const physicalRunsRan = runs + (isBye || isLegBye ? extraRuns : 0) + ((isWide || isNoBall) && extraRuns > 1 ? extraRuns - 1 : 0);
   const pOutId = ballData.isWicket ? (ballData.playerOutId || strikerId) : null;
@@ -1250,20 +1399,26 @@ export const processScoreUpdate = async (scoringId, ballData) => {
         },
         update: {
           battingRuns: { increment: runs },
-          battingBalls: { increment: (!isWide && !isPenalty) ? 1 : 0 },
+          battingBalls: { increment: isLegalBall ? 1 : 0 },
           battingFours: { increment: ballData.isFour ? 1 : 0 },
           battingSixes: { increment: ballData.isSix ? 1 : 0 },
-          outStatus: (ballData.isWicket && pOutId === strikerId) ? ballData.wicketType : undefined
+          outStatus: (ballData.isWicket && pOutId === strikerId) ? ballData.wicketType : undefined,
+          // Persist who took the wicket / made the catch so the scorecard
+          // can render "c Fielder b Bowler" without re-walking the timeline.
+          dismissedById: (ballData.isWicket && pOutId === strikerId) ? (ballData.wicketTakerId || bowlerId) : undefined,
+          caughtById:    (ballData.isWicket && pOutId === strikerId) ? (ballData.fielderId || null)        : undefined,
         },
         create: {
           matchId: scoring.id,
           userId: strikerId,
           inningsIndex: scoring.currentInningsIndex,
           battingRuns: runs,
-          battingBalls: (!isWide && !isPenalty) ? 1 : 0,
+          battingBalls: isLegalBall ? 1 : 0,
           battingFours: ballData.isFour ? 1 : 0,
           battingSixes: ballData.isSix ? 1 : 0,
-          outStatus: (ballData.isWicket && pOutId === strikerId) ? ballData.wicketType : "NOT_OUT"
+          outStatus: (ballData.isWicket && pOutId === strikerId) ? ballData.wicketType : "NOT_OUT",
+          dismissedById: (ballData.isWicket && pOutId === strikerId) ? (ballData.wicketTakerId || bowlerId) : null,
+          caughtById:    (ballData.isWicket && pOutId === strikerId) ? (ballData.fielderId || null)        : null,
         }
       })
     ] : []),
@@ -1277,7 +1432,9 @@ export const processScoreUpdate = async (scoringId, ballData) => {
           }
         },
         update: {
-          outStatus: ballData.wicketType
+          outStatus: ballData.wicketType,
+          dismissedById: ballData.wicketTakerId || bowlerId,
+          caughtById: ballData.fielderId || null,
         },
         create: {
           matchId: scoring.id,
@@ -1287,7 +1444,9 @@ export const processScoreUpdate = async (scoringId, ballData) => {
           battingBalls: 0,
           battingFours: 0,
           battingSixes: 0,
-          outStatus: ballData.wicketType
+          outStatus: ballData.wicketType,
+          dismissedById: ballData.wicketTakerId || bowlerId,
+          caughtById: ballData.fielderId || null,
         }
       })
     ] : []),
@@ -1303,7 +1462,7 @@ export const processScoreUpdate = async (scoringId, ballData) => {
         update: {
           bowlingRuns: { increment: (!isBye && !isLegBye && !isPenalty) ? (runs + extraRuns) : 0 },
           bowlingBalls: { increment: isLegalBall ? 1 : 0 },
-          bowlingWickets: { increment: (ballData.isWicket && !["RUN_OUT", "RETIRED_HURT", "RETIRED_OUT", "OBSTRUCTING", "TIMED_OUT", "OBSTRUCTING_FIELD", "HIT_BALL_TWICE", "HANDLED_BALL"].includes(ballData.wicketType)) ? 1 : 0 }
+          bowlingWickets: { increment: (ballData.isWicket && !["RUN_OUT", "RETIRED_HURT", "RETIRED_OUT", "TIMED_OUT", "OBSTRUCTING_FIELD", "HIT_BALL_TWICE", "HANDLED_BALL"].includes(ballData.wicketType)) ? 1 : 0 }
         },
         create: {
           matchId: scoring.id,
@@ -1311,7 +1470,7 @@ export const processScoreUpdate = async (scoringId, ballData) => {
           inningsIndex: scoring.currentInningsIndex,
           bowlingRuns: (!isBye && !isLegBye && !isPenalty) ? (runs + extraRuns) : 0,
           bowlingBalls: isLegalBall ? 1 : 0,
-          bowlingWickets: (ballData.isWicket && !["RUN_OUT", "RETIRED_HURT", "RETIRED_OUT", "OBSTRUCTING", "TIMED_OUT", "OBSTRUCTING_FIELD", "HIT_BALL_TWICE", "HANDLED_BALL"].includes(ballData.wicketType)) ? 1 : 0
+          bowlingWickets: (ballData.isWicket && !["RUN_OUT", "RETIRED_HURT", "RETIRED_OUT", "TIMED_OUT", "OBSTRUCTING_FIELD", "HIT_BALL_TWICE", "HANDLED_BALL"].includes(ballData.wicketType)) ? 1 : 0
         }
       })
     ] : []),
@@ -1319,7 +1478,20 @@ export const processScoreUpdate = async (scoringId, ballData) => {
       where: { id: scoring.id },
       data: {
         strikerId: newStrikerId,
-        nonStrikerId: newNonStrikerId
+        nonStrikerId: newNonStrikerId,
+        // Free Hit lifecycle (Law 21.18):
+        //   - SET on every no-ball (the NEXT delivery is the free hit).
+        //   - PERSISTS through subsequent wides / no-balls (the free hit
+        //     window stays open until a fair ball is bowled).
+        //   - CLEARED on the next fair delivery (anything that isn't a
+        //     wide or no-ball, which means a legal ball OR a bye/leg-bye/
+        //     penalty — those count as fair from the umpire's POV).
+        //   - When enforceFreeHit is OFF, we never set the flag.
+        freeHitActive: !houseRules.enforceFreeHit
+          ? false
+          : (isNoBall
+              ? true
+              : (isWide ? scoring.freeHitActive : false)),
       }
     })
   ]);
@@ -2182,6 +2354,18 @@ export const addPenaltyRuns = async (scoringId, runs, teamId) => {
   const currentInnings = match.innings.find(i => i.inningsIndex === match.currentInningsIndex);
   if (!currentInnings) throw new Error("Innings not active");
 
+<<<<<<< Updated upstream
+=======
+  // Casual / pickup games often disable penalties entirely.
+  const houseRules = resolveHouseRules(match.houseRules);
+  if (!houseRules.penaltyEnabled) {
+    throw new BadRequestError(
+      "Penalty runs are disabled for this match.",
+      { code: "PENALTY_DISABLED" }
+    );
+  }
+
+>>>>>>> Stashed changes
   // teamId is the team the penalty is awarded AGAINST. Per MCC Law 41:
   //   - Penalty against fielding team → batting side gains <runs> in CURRENT innings.
   //   - Penalty against batting team  → fielding side gains <runs>, applied to
@@ -2189,6 +2373,7 @@ export const addPenaltyRuns = async (scoringId, runs, teamId) => {
   //
   // Previous version routed the second case to the "other innings" — which
   // doesn't exist during innings 0. The penalty silently no-op'd, so umpires
+<<<<<<< Updated upstream
   // thought they'd awarded runs that never landed.
   //
   // Simplification: in every case, the runs land on the current innings. The
@@ -2199,6 +2384,12 @@ export const addPenaltyRuns = async (scoringId, runs, teamId) => {
   // innings that doesn't exist yet" cleanly) that we record it as a ledger
   // entry on the current innings and let the umpire's discretion handle
   // pre-/post-match reconciliation.
+=======
+  // thought they'd awarded runs that never landed. In every case now we
+  // apply to the current innings; the rare "credit the bowling side's next
+  // innings" case is left for umpire reconciliation rather than silently
+  // dropping the runs.
+>>>>>>> Stashed changes
   const penaltyRuns = parseInt(runs);
   const over = Math.floor(currentInnings.totalBalls / 6);
   const ballInOver = currentInnings.totalBalls % 6;
@@ -2222,17 +2413,155 @@ export const addPenaltyRuns = async (scoringId, runs, teamId) => {
   const updatedInnings = await prisma.innings.update({
     where: { id: currentInnings.id },
     data: { totalRuns: { increment: penaltyRuns } }
+<<<<<<< Updated upstream
+=======
   });
 
+  // io may be null in unit tests / smoke scripts without a running socket.
   const io = getIO();
-  io.to(match.gameId).emit('scoreUpdated', {
-    ballId: newBall.id,
-    type: 'penalty',
-    runs: parseInt(runs),
-    match: match
-  });
+  if (io) {
+    io.to(match.gameId).emit('scoreUpdated', {
+      ballId: newBall.id,
+      type: 'penalty',
+      runs: penaltyRuns,
+      match: match
+    });
+  }
 
   return { newBall, updatedInnings };
+};
+
+/**
+ * Update per-match house rules (consecutive-over block, free hit, ballsPerOver,
+ * lastManStands, penaltyEnabled, etc.). The caller can change one key or many
+ * — partial overrides merge with stored values; null/undefined incoming values
+ * are ignored. To revert a key to MCC default, send it as null inside the
+ * incoming object; the service strips nulls then merges, so `null` effectively
+ * means "drop this override".
+ *
+ * Authorization: caller must be either
+ *   (a) the assigned umpire on the HostedGame,
+ *   (b) the assigned scorer on the HostedGame, OR
+ *   (c) holding a SCORER token derived from the scoring-app password
+ *       (role === 'scorer' or 'SCORER' in the JWT payload).
+ *
+ * @param {string} scoringId  CricketMatch.id
+ * @param {object} viewer     req.user (with id and role)
+ * @param {object} incoming   partial houseRules payload
+ */
+export const updateHouseRules = async (scoringId, viewer, incoming) => {
+  if (!viewer || (!viewer.id && viewer.role?.toLowerCase() !== "scorer")) {
+    const err = new UnauthorizedError("Authentication required to change house rules.");
+    err.meta = { code: "AUTH_REQUIRED" };
+    throw err;
+  }
+
+  const scoring = await prisma.cricketMatch.findUnique({
+    where: { id: scoringId },
+    select: { id: true, gameId: true, houseRules: true, status: true },
+>>>>>>> Stashed changes
+  });
+  if (!scoring) {
+    throw new NotFoundError("Scoring session not found");
+  }
+
+  if (scoring.status === "COMPLETED") {
+    throw new BadRequestError(
+      "Cannot change house rules after the match is finalized.",
+      { code: "MATCH_ALREADY_COMPLETE" }
+    );
+  }
+
+  const game = await prisma.hostedGame.findUnique({
+    where: { id: scoring.gameId },
+    select: { umpireId: true, scorerId: true },
+  });
+
+  const role = (viewer.role || "").toLowerCase();
+  const isScorerToken = role === "scorer";
+  const isAssignedUmpire = viewer.id && game?.umpireId === viewer.id;
+  const isAssignedScorer = viewer.id && game?.scorerId === viewer.id;
+
+  if (!isScorerToken && !isAssignedUmpire && !isAssignedScorer) {
+    const err = new ForbiddenError(
+      "Only the umpire, the scorer, or a scoring-password holder can change house rules."
+    );
+    // ForbiddenError's constructor doesn't accept meta in the current
+    // @kridaz/common build, so attach the code post-construction. The error
+    // middleware reads meta.code the same way either path.
+    err.meta = { code: "FORBIDDEN_HOUSE_RULES" };
+    throw err;
+  }
+
+  // Allowlist of toggles — anything else the caller sends is silently dropped
+  // (rather than persisting arbitrary JSON that the engine wouldn't read).
+  const ALLOWED_KEYS = [
+    "enforceConsecutiveOverBlock",
+    "enforceFreeHit",
+    "penaltyEnabled",
+    "wideIsLegalBall",
+    "noBallIsLegalBall",
+    "ballsPerOver",
+    "playersPerTeam",
+    "lastManStands",
+    "maxRunsPerBall",
+    "mvpWeights",
+  ];
+
+  const stored = (scoring.houseRules && typeof scoring.houseRules === "object")
+    ? scoring.houseRules
+    : {};
+  const merged = { ...stored };
+  for (const key of ALLOWED_KEYS) {
+    if (!(key in incoming)) continue;
+    const v = incoming[key];
+    if (v === null) {
+      delete merged[key]; // null = remove override / revert to default
+    } else {
+      merged[key] = v;
+    }
+  }
+
+  // Validate numeric bounds — protects the engine from poison values like
+  // ballsPerOver=0 (divide by zero) or playersPerTeam=1 (always all-out).
+  if (merged.ballsPerOver != null && (!Number.isInteger(merged.ballsPerOver) || merged.ballsPerOver < 1 || merged.ballsPerOver > 12)) {
+    throw new BadRequestError("ballsPerOver must be an integer between 1 and 12.", { code: "INVALID_BALLS_PER_OVER" });
+  }
+  if (merged.playersPerTeam != null && (!Number.isInteger(merged.playersPerTeam) || merged.playersPerTeam < 2 || merged.playersPerTeam > 30)) {
+    throw new BadRequestError("playersPerTeam must be an integer between 2 and 30.", { code: "INVALID_PLAYERS_PER_TEAM" });
+  }
+  if (merged.maxRunsPerBall != null && (!Number.isInteger(merged.maxRunsPerBall) || merged.maxRunsPerBall < 1 || merged.maxRunsPerBall > 12)) {
+    throw new BadRequestError("maxRunsPerBall must be an integer between 1 and 12.", { code: "INVALID_MAX_RUNS_PER_BALL" });
+  }
+
+  const next = Object.keys(merged).length ? merged : null;
+
+  const updated = await prisma.cricketMatch.update({
+    where: { id: scoringId },
+    data: { houseRules: next },
+    select: { id: true, gameId: true, houseRules: true },
+  });
+
+  // Push a fresh snapshot so any connected scoring/overlay clients pick up
+  // the new rules immediately (the snapshot reads houseRules to derive CRR,
+  // ball-progress, all-out etc.).
+  const hostedGame = await prisma.hostedGame.findUnique({
+    where: { id: updated.gameId },
+    include: HOSTED_GAME_SCORING_INCLUDE,
+  });
+  const fullScoring = await prisma.cricketMatch.findUnique({
+    where: { id: scoringId },
+    include: { innings: true, playerStats: true, timeline: { orderBy: { timestamp: "desc" } } },
+  });
+  const liveData = computeScoreSnapshot(fullScoring, mapHostedGame(hostedGame));
+  await liveStateService.setLiveScore(updated.gameId, liveData);
+
+  const io = getIO();
+  if (io) {
+    io.to(updated.gameId).emit(SOCKET.SCORE_UPDATED, liveData);
+  }
+
+  return { houseRules: updated.houseRules, liveData };
 };
 
 export const getMatchReport = async (matchId) => {
