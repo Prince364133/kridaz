@@ -1,3 +1,4 @@
+import asyncHandler from "../../utils/asyncHandler.js";
 import crypto from "crypto";
 import { prisma } from "../../config/prisma.js";
 import logger from "../../utils/logger.js";
@@ -8,56 +9,53 @@ import { paymentTotal, paymentSuccessTotal, walletTopupTotal, bookingConfirmedTo
  * This endpoint should be public and not require authentication.
  * It uses Razorpay Signature validation to ensure the request is genuine.
  */
-export const handleRazorpayWebhook = async (req, res) => {
+export const handleRazorpayWebhook = asyncHandler(async (req, res) => {
   const secret = process.env.RAZORPAY_WEBHOOK_SECRET;
   const signature = req.headers["x-razorpay-signature"];
-
-  try {
-    // 1. Verify Signature
-    const shasum = crypto.createHmac("sha256", secret);
-    shasum.update(req.rawBody);
-    const digest = shasum.digest("hex");
-
-    if (digest !== signature) {
-      logger.error("[WEBHOOK] Invalid signature detected");
-      return res.status(400).json({ status: "invalid_signature" });
-    }
-
-    const event = req.body.event;
-    const payload = req.body.payload;
-
-    logger.info(`[WEBHOOK] Received event: ${event}`);
-
-    // 2. Handle Events
-    switch (event) {
-      case "payment.captured":
-        await handlePaymentCaptured(payload.payment.entity);
-        break;
-      
-      case "order.paid":
-        // Usually order.paid is triggered when the full amount is captured
-        break;
-
-      default:
-        logger.info(`[WEBHOOK] Unhandled event: ${event}`);
-    }
-
-    return res.status(200).json({ status: "ok" });
-  } catch (error) {
-    logger.error("[WEBHOOK] Error:", error.message);
-    return res.status(500).json({ status: "error", message: error.message });
+  // 1. Verify Signature
+  const shasum = crypto.createHmac("sha256", secret);
+  shasum.update(req.rawBody);
+  const digest = shasum.digest("hex");
+  if (digest !== signature) {
+    logger.error("[WEBHOOK] Invalid signature detected");
+    return res.status(400).json({
+      status: "invalid_signature"
+    });
   }
-};
+  const event = req.body.event;
+  const payload = req.body.payload;
+  logger.info(`[WEBHOOK] Received event: ${event}`);
+
+  // 2. Handle Events
+  switch (event) {
+    case "payment.captured":
+      await handlePaymentCaptured(payload.payment.entity);
+      break;
+    case "order.paid":
+      // Usually order.paid is triggered when the full amount is captured
+      break;
+    default:
+      logger.info(`[WEBHOOK] Unhandled event: ${event}`);
+  }
+  return res.status(200).json({
+    status: "ok"
+  });
+});
 
 /**
  * Handle payment.captured event
  * Useful for Wallet Topups and Booking confirmations as a fallback
  */
 async function handlePaymentCaptured(payment) {
-  const { order_id, id: payment_id, status } = payment;
-
+  const {
+    order_id,
+    id: payment_id,
+    status
+  } = payment;
   const alreadyProcessed = await prisma.walletTransaction.findFirst({
-    where: { razorpayPaymentId: payment_id }
+    where: {
+      razorpayPaymentId: payment_id
+    }
   });
   if (alreadyProcessed) {
     logger.info(`[WEBHOOK] Idempotency: payment ${payment_id} already processed. Skipping.`);
@@ -66,45 +64,68 @@ async function handlePaymentCaptured(payment) {
 
   // Check if it's a Wallet Topup
   const transaction = await prisma.walletTransaction.findFirst({
-    where: { 
+    where: {
       razorpayOrderId: order_id,
-      status: "PENDING" 
+      status: "PENDING"
     }
   });
-
   if (transaction) {
     logger.info(`[WEBHOOK] Processing wallet topup for order: ${order_id}`);
-    
+
     // Find the user or owner
-    const user = await prisma.user.findUnique({ where: { id: transaction.userId } });
-    const owner = !user ? await prisma.ownerProfile.findFirst({ where: { userId: transaction.userId } }) : null;
-    
+    const user = await prisma.user.findUnique({
+      where: {
+        id: transaction.userId
+      }
+    });
+    const owner = !user ? await prisma.ownerProfile.findFirst({
+      where: {
+        userId: transaction.userId
+      }
+    }) : null;
     if (user || owner) {
-      await prisma.$transaction(async (tx) => {
+      await prisma.$transaction(async tx => {
         if (user) {
           await tx.user.update({
-            where: { id: user.id },
-            data: { walletBalance: { increment: transaction.amount } }
+            where: {
+              id: user.id
+            },
+            data: {
+              walletBalance: {
+                increment: transaction.amount
+              }
+            }
           });
         } else {
           await tx.ownerProfile.update({
-            where: { id: owner.id },
-            data: { walletBalance: { increment: transaction.amount } }
+            where: {
+              id: owner.id
+            },
+            data: {
+              walletBalance: {
+                increment: transaction.amount
+              }
+            }
           });
         }
-
         await tx.walletTransaction.update({
-          where: { id: transaction.id },
+          where: {
+            id: transaction.id
+          },
           data: {
             status: "SUCCESS",
             razorpayPaymentId: payment_id
           }
         });
       });
-      
       logger.info(`[WEBHOOK] Wallet topped up for ${user?.name || owner?.businessName}`);
-      paymentTotal.inc({ status: "success" });
-      paymentSuccessTotal.inc({ gateway: "razorpay", type: "wallet_topup" });
+      paymentTotal.inc({
+        status: "success"
+      });
+      paymentSuccessTotal.inc({
+        gateway: "razorpay",
+        type: "wallet_topup"
+      });
       walletTopupTotal.inc();
     }
     return;
@@ -112,24 +133,32 @@ async function handlePaymentCaptured(payment) {
 
   // Check if it's a Booking
   const booking = await prisma.booking.findFirst({
-    where: { 
+    where: {
       orderId: order_id,
       status: "PENDING"
     }
   });
-
   if (booking) {
     logger.info(`[WEBHOOK] Processing booking confirmation for order: ${order_id}`);
     await prisma.booking.update({
-      where: { id: booking.id },
+      where: {
+        id: booking.id
+      },
       data: {
         status: "CONFIRMED",
         paymentId: payment_id,
         paymentStatus: "SUCCESS"
       }
     });
-    paymentTotal.inc({ status: "success" });
-    paymentSuccessTotal.inc({ gateway: "razorpay", type: "booking" });
-    bookingConfirmedTotal.inc({ payment_method: "online" });
+    paymentTotal.inc({
+      status: "success"
+    });
+    paymentSuccessTotal.inc({
+      gateway: "razorpay",
+      type: "booking"
+    });
+    bookingConfirmedTotal.inc({
+      payment_method: "online"
+    });
   }
 }

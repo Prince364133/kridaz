@@ -6,6 +6,7 @@ import logger from "../utils/logger.js";
 import { SOCKET } from "@kridaz/shared-constants/socketEvents";
 import jwt from "jsonwebtoken";
 import { getAccessSecret } from "../utils/jwtSecrets.js";
+import { activeSocketConnections } from "../utils/metrics.js";
 let io;
 
 const socketConfig = (server) => {
@@ -78,7 +79,7 @@ const socketConfig = (server) => {
   };
 
   io.on("connection", (socket) => {
-    // TODO (Prometheus P4-2): Increment socket_connections_total gauge here
+    activeSocketConnections.inc();
 
     socket.on("setup", async (userData) => {
       const userId = userData?.id;
@@ -294,7 +295,7 @@ const socketConfig = (server) => {
     });
 
     socket.on("disconnect", async () => {
-      // TODO (Prometheus P4-2): Decrement socket_connections_total gauge here
+      activeSocketConnections.dec();
 
       if (socket.scoringMatchId) {
         const lockKey = `kridaz:scoring_lock:${socket.scoringMatchId}`;
