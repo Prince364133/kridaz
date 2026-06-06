@@ -178,7 +178,10 @@ const socketConfig = (server) => {
     // files are automatically cleaned up after 30s in commentary.service.js
 
     socket.on("location:update", async (data) => {
-      const { lat, lng, radiusKm, accuracy } = data || {};
+      const { lat: rawLat, lng: rawLng, radiusKm, accuracy } = data || {};
+      // Fuzz the location: round to 3 decimal places for privacy (~100m radius)
+      const lat = parseFloat(parseFloat(rawLat).toFixed(3));
+      const lng = parseFloat(parseFloat(rawLng).toFixed(3));
       if (!socket.userId || isNaN(lat) || isNaN(lng)) return;
 
       const now = Date.now();

@@ -8,8 +8,10 @@ import { useSocket } from "@context/SocketContext";
 import PostItem from "./PostItem";
 import ShareModal from "./ShareModal";
 import ReportModal from "./ReportModal";
+import DeleteConfirmModal from "./DeleteConfirmModal";
 import toast from "react-hot-toast";
-import { AnimatePresence } from "framer-motion";
+import { AnimatePresence, motion } from "framer-motion";
+import PostDetailModal from "./PostDetailModal";
 
 const HEADING_STYLE = { fontFamily: "'Open Sans', sans-serif" };
 
@@ -96,6 +98,8 @@ const CommunityFeed = ({ user, isLoggedIn, isAdmin, gateInteraction, activeFilte
   const [playersLoading, setPlayersLoading] = useState(false);
   const [sharePostId, setSharePostId] = useState(null);
   const [reportPostId, setReportPostId] = useState(null);
+  const [deletePostId, setDeletePostId] = useState(null);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   // Check URL params for creating a post (e.g. from Team Profile share)
   useEffect(() => {
@@ -372,14 +376,22 @@ const CommunityFeed = ({ user, isLoggedIn, isAdmin, gateInteraction, activeFilte
   };
 
   // Handle post card deletion callbacks
-  const handleDeletePost = async (postId) => {
-    if (!window.confirm("Are you sure you want to delete this post?")) return;
+  const handleDeletePost = (postId) => {
+    setDeletePostId(postId);
+  };
+
+  const confirmDeletePost = async () => {
+    if (!deletePostId) return;
+    setIsDeleting(true);
     try {
-      await deletePost(postId).unwrap();
+      await deletePost(deletePostId).unwrap();
       toast.success("Post deleted");
-      setLoadedPosts((prev) => prev.filter((p) => (p._id || p.id) !== postId));
+      setLoadedPosts((prev) => prev.filter((p) => (p._id || p.id) !== deletePostId));
     } catch (error) {
       toast.error(error?.data?.message || "Failed to delete post");
+    } finally {
+      setIsDeleting(false);
+      setDeletePostId(null);
     }
   };
 
@@ -518,11 +530,35 @@ const CommunityFeed = ({ user, isLoggedIn, isAdmin, gateInteraction, activeFilte
       )}
 
       <AnimatePresence>
+        {searchParams.get("post") && (
+          <PostDetailModal
+            postId={searchParams.get("post")}
+            onClose={() => {
+              const newParams = new URLSearchParams(searchParams);
+              newParams.delete("post");
+              setSearchParams(newParams, { replace: true });
+            }}
+            user={user}
+            isAdmin={isAdmin}
+            gateInteraction={gateInteraction}
+            onUpdatePost={handleUpdatePost}
+            onDeletePost={handleDeletePost}
+            onSharePost={(id) => setSharePostId(id)}
+            onReportPost={(id) => setReportPostId(id)}
+          />
+        )}
         {sharePostId && (
           <ShareModal postId={sharePostId} onClose={() => setSharePostId(null)} />
         )}
         {reportPostId && (
           <ReportModal postId={reportPostId} onClose={() => setReportPostId(null)} />
+        )}
+        {deletePostId && (
+          <DeleteConfirmModal 
+            onClose={() => setDeletePostId(null)} 
+            onConfirm={confirmDeletePost}
+            isDeleting={isDeleting}
+          />
         )}
       </AnimatePresence>
     </div>

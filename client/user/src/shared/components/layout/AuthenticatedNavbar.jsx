@@ -23,6 +23,7 @@ import { useGetDashboardStatsQuery, useToggleOnlineMutation } from "@redux/api/p
 import { formatDistanceToNow } from 'date-fns';
 import toast from "react-hot-toast";
 import { getDynamicProfileRoute } from "@utils/routeUtils";
+import GlobalBackButton from '@/shared/components/GlobalBackButton';
 
 /**
  * AuthenticatedNavbar Rs � Role-aware top navigation.
@@ -190,9 +191,7 @@ const AuthenticatedNavbar = ({ toggleSidebar }) => {
             </button>
           )}
           {(isProfessionalDashboard || isVenueOwner) && (
-            <button onClick={() => navigate(-1)} className="p-2 text-white hover:opacity-80 transition-opacity" style={{ color: themeColor }}>
-              <ArrowLeft size={24} />
-            </button>
+            <GlobalBackButton />
           )}
           <Link to="/" className="flex items-center gap-4 group">
             <div className="w-20 h-10 sm:w-32 sm:h-12 bg-transparent flex items-center justify-center overflow-hidden">

@@ -185,6 +185,33 @@ export default function DesktopTopNavbar({ isRightDrawerOpen, setIsRightDrawerOp
                       </div>
                     </Link>
 
+                    {/* Play */}
+                    <div className="flex flex-col">
+                      <span className="text-[9px] font-bold text-white/30 uppercase tracking-[0.2em] mb-2 px-1">Play</span>
+                      <div className="flex flex-col gap-1">
+                        <Link to="/booking-history" onClick={() => setIsSidebarOpen(false)} className="flex items-center gap-3 p-2.5 rounded-[8px] hover:bg-white/5 text-white/75 hover:text-white transition-all">
+                          <Clock size={16} className="text-white/40" />
+                          <span className="text-xs font-semibold">My Bookings</span>
+                        </Link>
+                        <Link to="/my-teams" onClick={() => setIsSidebarOpen(false)} className="flex items-center gap-3 p-2.5 rounded-[8px] hover:bg-white/5 text-white/75 hover:text-white transition-all">
+                          <Users size={16} className="text-white/40" />
+                          <span className="text-xs font-semibold">My Teams</span>
+                        </Link>
+                        <Link to="/my-joined-games" onClick={() => setIsSidebarOpen(false)} className="flex items-center gap-3 p-2.5 rounded-[8px] hover:bg-white/5 text-white/75 hover:text-white transition-all">
+                          <Trophy size={16} className="text-white/40" />
+                          <span className="text-xs font-semibold">My Joined Matches</span>
+                        </Link>
+                        <Link to="/my-hosted-games" onClick={() => setIsSidebarOpen(false)} className="flex items-center gap-3 p-2.5 rounded-[8px] hover:bg-white/5 text-white/75 hover:text-white transition-all">
+                          <Target size={16} className="text-white/40" />
+                          <span className="text-xs font-semibold">My Hosted Games</span>
+                        </Link>
+                        <Link to="/wallet" onClick={() => setIsSidebarOpen(false)} className="flex items-center gap-3 p-2.5 rounded-[8px] hover:bg-white/5 text-white/75 hover:text-white transition-all">
+                          <Zap size={16} className="text-white/40" />
+                          <span className="text-xs font-semibold">My Wallet</span>
+                        </Link>
+                      </div>
+                    </div>
+
                     {/* Professional Hub */}
                     <div className="flex flex-col">
                       <span className="text-[9px] font-bold text-white/30 uppercase tracking-[0.2em] mb-2 px-1">Professional Hub</span>
@@ -211,33 +238,6 @@ export default function DesktopTopNavbar({ isRightDrawerOpen, setIsRightDrawerOp
                             </Link>
                           </>
                         )}
-                      </div>
-                    </div>
-
-                    {/* Play */}
-                    <div className="flex flex-col">
-                      <span className="text-[9px] font-bold text-white/30 uppercase tracking-[0.2em] mb-2 px-1">Play</span>
-                      <div className="flex flex-col gap-1">
-                        <Link to="/booking-history" onClick={() => setIsSidebarOpen(false)} className="flex items-center gap-3 p-2.5 rounded-[8px] hover:bg-white/5 text-white/75 hover:text-white transition-all">
-                          <Clock size={16} className="text-white/40" />
-                          <span className="text-xs font-semibold">My Bookings</span>
-                        </Link>
-                        <Link to="/my-teams" onClick={() => setIsSidebarOpen(false)} className="flex items-center gap-3 p-2.5 rounded-[8px] hover:bg-white/5 text-white/75 hover:text-white transition-all">
-                          <Users size={16} className="text-white/40" />
-                          <span className="text-xs font-semibold">My Teams</span>
-                        </Link>
-                        <Link to="/my-joined-games" onClick={() => setIsSidebarOpen(false)} className="flex items-center gap-3 p-2.5 rounded-[8px] hover:bg-white/5 text-white/75 hover:text-white transition-all">
-                          <Trophy size={16} className="text-white/40" />
-                          <span className="text-xs font-semibold">My Joined Matches</span>
-                        </Link>
-                        <Link to="/my-hosted-games" onClick={() => setIsSidebarOpen(false)} className="flex items-center gap-3 p-2.5 rounded-[8px] hover:bg-white/5 text-white/75 hover:text-white transition-all">
-                          <Target size={16} className="text-white/40" />
-                          <span className="text-xs font-semibold">My Hosted Games</span>
-                        </Link>
-                        <Link to="/wallet" onClick={() => setIsSidebarOpen(false)} className="flex items-center gap-3 p-2.5 rounded-[8px] hover:bg-white/5 text-white/75 hover:text-white transition-all">
-                          <Zap size={16} className="text-white/40" />
-                          <span className="text-xs font-semibold">My Wallet</span>
-                        </Link>
                       </div>
                     </div>
 

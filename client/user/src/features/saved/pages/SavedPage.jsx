@@ -6,6 +6,7 @@ import { useSelector } from 'react-redux';
 import { useGetSavedTurfsQuery } from '@redux/api/turfApi';
 import TurfCardMobile from '../../turf/components/TurfCardMobile';
 import TurfCardSkeleton from '@components/ui/TurfCardSkeleton';
+import GlobalBackButton from '@/shared/components/GlobalBackButton';
 
 const SavedPage = () => {
   const navigate = useNavigate();
@@ -112,12 +113,7 @@ const SavedPage = () => {
       <div className="sticky top-0 z-40 bg-black/80 backdrop-blur-md border-b border-zinc-800">
         <div className="max-w-5xl mx-auto px-4 py-4 sm:py-6">
           <div className="flex items-center gap-4 mb-4 sm:mb-6">
-            <button 
-              onClick={() => navigate(-1)}
-              className="w-10 h-10 rounded-full bg-zinc-900 border border-zinc-800 flex items-center justify-center text-zinc-400 hover:text-white hover:border-zinc-700 transition-all"
-            >
-              <ChevronLeft className="w-5 h-5" />
-            </button>
+            <GlobalBackButton />
             <div>
               <h1 className="text-2xl sm:text-4xl font-black uppercase tracking-tighter flex items-center gap-3">
                 <Bookmark className="w-6 h-6 sm:w-8 sm:h-8 text-[#BFF367]" /> 

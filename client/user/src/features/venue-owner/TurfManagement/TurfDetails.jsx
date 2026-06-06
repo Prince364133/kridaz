@@ -9,6 +9,7 @@ import {
 import useTurfDetails from "@hooks/venue-owner/useTurfDetails";
 import DashboardSkeleton from "../Dashboard/DashboardSkeleton";
 import toast from "react-hot-toast";
+import GlobalBackButton from '@/shared/components/GlobalBackButton';
 
 // Booking Information Popup
 const BookingModal = ({ slot, onClose }) => {
@@ -155,7 +156,7 @@ export default function TurfDetails() {
       <AlertCircle className="text-red-500 mb-6" size={48} />
       <h2 className="text-2xl font-bold text-white mb-2 uppercase tracking-tight font-['Open_Sans']">Error Synchronizing Data</h2>
       <p className="text-[#878C9F] mb-8 max-w-md">{error || "Connection failure to server intelligence roster."}</p>
-      <button onClick={() => navigate(-1)} className="px-8 py-3 bg-[#BFF367] text-black font-bold uppercase tracking-widest rounded-[8px] text-[11px]">Revert to Inventory</button>
+      <GlobalBackButton />
     </div>
   );
 
@@ -164,7 +165,7 @@ export default function TurfDetails() {
       <Zap size={48} className="text-[#2D2D2D] mb-6" />
       <h2 className="text-2xl font-bold text-white mb-2 uppercase tracking-tight font-['Open_Sans']">Arena Missing</h2>
       <p className="text-[#878C9F] mb-8">We couldn't retrieve the operational metrics for this facility.</p>
-      <button onClick={() => navigate(-1)} className="px-8 py-3 bg-[#BFF367] text-black font-bold uppercase tracking-widest rounded-[8px] text-[11px]">Revert to Inventory</button>
+      <GlobalBackButton />
     </div>
   );
 
@@ -221,13 +222,7 @@ export default function TurfDetails() {
       {/* Navigation & Header */}
       <div className="flex flex-col gap-8">
         <div className="flex items-center gap-4">
-          <button 
-            onClick={() => navigate(-1)}
-            className="w-10 h-10 flex items-center justify-center bg-[#111] border border-white/5 text-[#878C9F] hover:text-[#BFF367] hover:border-[#BFF367]/40 rounded-full transition-all group"
-            title="Back to Roster"
-          >
-            <ArrowLeft size={18} className="group-hover:-translate-x-0.5 transition-transform" />
-          </button>
+          <GlobalBackButton />
           <div className="h-px flex-1 bg-[#2D2D2D]/50" />
         </div>
 

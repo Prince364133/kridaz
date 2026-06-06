@@ -28,6 +28,7 @@ import axiosInstance from "@hooks/useAxiosInstance";
 import toast from "react-hot-toast";
 import { motion, AnimatePresence } from "framer-motion";
 import { handlePayment, createOrder } from "@infrastructure/razorpay";
+import GlobalBackButton from '@/shared/components/GlobalBackButton';
 
 const SUBHEADING_STYLE = { fontFamily: "'Inter 28pt Light', sans-serif", fontWeight: 300 };
 
@@ -273,13 +274,7 @@ const CheckoutPage = () => {
       <div className="max-w-6xl mx-auto">
         {/* Header */}
         <div className="flex items-center gap-3 mb-2 px-0.5">
-          <button 
-            onClick={() => navigate(-1)}
-            className="flex items-center justify-center gap-2 px-3 h-[36px] rounded-[12px] bg-[#1B1B1B] border border-[rgba(255,255,255,0.08)] text-[#FFFFFF] shrink-0"
-          >
-            <ChevronLeft size={16} />
-            <span className="text-[12px] font-[700] uppercase tracking-widest">Back</span>
-          </button>
+          <GlobalBackButton />
           <div>
             <h1 className="text-[20px] font-[700] tracking-tight uppercase font-inter text-[#FFFFFF]">Checkout</h1>
           </div>

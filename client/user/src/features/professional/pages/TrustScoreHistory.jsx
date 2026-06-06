@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { ArrowLeft, Shield, AlertTriangle, CheckCircle, Clock, ShieldAlert, Award } from "lucide-react";
 import { useGetTrustScoreHistoryQuery } from "../../../redux/api/professionalApi";
 import Loader2 from "lucide-react/dist/esm/icons/loader-2";
+import GlobalBackButton from '@/shared/components/GlobalBackButton';
 
 const TrustScoreHistory = () => {
   const navigate = useNavigate();
@@ -43,12 +44,7 @@ const TrustScoreHistory = () => {
         
         {/* Header with Back button */}
         <div className="flex items-center gap-4">
-          <button 
-            onClick={() => navigate(-1)} 
-            className="p-2.5 bg-white/5 border border-white/10 hover:bg-white/10 rounded-xl transition-all active:scale-95"
-          >
-            <ArrowLeft size={18} />
-          </button>
+          <GlobalBackButton />
           <div>
             <h1 className="text-xl sm:text-2xl font-black uppercase tracking-tight">Trust Score Ledger</h1>
             <p className="text-xs text-gray-500 uppercase tracking-widest mt-1">Track your professional status and points ledger</p>

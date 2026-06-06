@@ -24,6 +24,7 @@ import {
 } from "lucide-react";
 import axiosInstance from "@hooks/useAxiosInstance";
 import { toast } from "react-hot-toast";
+import GlobalBackButton from '@/shared/components/GlobalBackButton';
 
 export default function StreamSetup() {
   const { id: paramId, matchId } = useParams();
@@ -406,9 +407,7 @@ export default function StreamSetup() {
       <div className="flex flex-col items-center justify-center min-h-screen bg-black text-center">
         <AlertCircle className="text-red-500 mb-4" size={48} />
         <h2 className="text-2xl font-black text-white uppercase tracking-tighter mb-2">Match Not Found</h2>
-        <button onClick={() => navigate(-1)} className="text-violet-500 text-xs font-bold uppercase tracking-widest hover:underline mt-4">
-          Return
-        </button>
+        <GlobalBackButton />
       </div>
     );
   }
@@ -430,9 +429,7 @@ export default function StreamSetup() {
         <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6 pb-6 border-b border-white/5">
           <div className="space-y-2">
             <div className="flex items-center gap-3 mb-4">
-              <button onClick={() => navigate(-1)} className="text-gray-500 hover:text-white transition-colors">
-                <Shield size={20} />
-              </button>
+              <GlobalBackButton />
               <span className="px-3 py-1 bg-violet-500/10 text-violet-500 text-[10px] font-black uppercase tracking-widest rounded-full border border-violet-500/20">
                 Match ID: {match.shortId}
               </span>

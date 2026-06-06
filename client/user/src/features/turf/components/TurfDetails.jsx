@@ -13,6 +13,7 @@ import useSimilarRecommendations from "@hooks/useSimilarRecommendations";
 import TurfCard from "./TurfCard.jsx";
 import toast from "react-hot-toast";
 import {
+import GlobalBackButton from '@/shared/components/GlobalBackButton';
   MapPin,
   Clock,
   IndianRupee,
@@ -342,19 +343,14 @@ const TurfDetails = () => {
         </svg>
 
         <main
-          className="relative flex flex-col w-full max-w-5xl items-start justify-center gap-6 lg:gap-8 mx-auto"
+          className="relative flex flex-col w-full max-w-5xl items-start justify-center gap-4 lg:gap-6 mx-auto"
           aria-label="Venue booking page"
         >
           {/* VenueOverviewSection */}
-          <div className="w-full flex-none space-y-6 lg:space-y-8">
+          <div className="w-full flex-none space-y-4 lg:space-y-6">
 
             {/* Back Button */}
-            <button 
-              onClick={() => navigate(-1)}
-              className="flex items-center gap-1.5 text-[rgba(255,255,255,0.70)] hover:text-white transition-colors font-[700] uppercase tracking-widest text-[12px] py-4 pl-4 pr-6 md:px-2 md:py-2 -ml-2 active:bg-white/5 rounded-lg"
-            >
-              <ChevronLeft className="w-5 h-5" /> BACK
-            </button>
+            <GlobalBackButton />
 
             {/* Venue Big Heading */}
             <h1 className="text-[28px] md:text-[32px] font-[700] leading-tight text-[#FFFFFF] px-4 md:px-2 font-inter">
@@ -667,6 +663,50 @@ const TurfDetails = () => {
           </div>
         </main>
       </div>
+
+      {/* Sticky Book Button for Mobile & Desktop */}
+      <div className="fixed bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-black via-black/80 to-transparent z-50 pointer-events-none flex justify-center pb-6">
+        <button
+          onClick={() => setIsBookingModalOpen(true)}
+          className="pointer-events-auto bg-gradient-to-r from-[#55DEE8] to-[#B3DC26] text-[#000000] w-full max-w-md h-[56px] rounded-[16px] font-inter text-[18px] font-[700] leading-[28px] shadow-[0px_8px_24px_rgba(179,220,38,0.25)] hover:scale-[1.02] active:scale-[0.98] transition-all duration-300"
+        >
+          Book Venue
+        </button>
+      </div>
+
+      {/* Booking Modal */}
+      <AnimatePresence>
+        {isBookingModalOpen && (
+          <div className="fixed inset-0 z-[100] flex items-end justify-center md:items-center sm:p-4">
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setIsBookingModalOpen(false)}
+              className="absolute inset-0 bg-black/80 backdrop-blur-sm"
+            />
+            <motion.div
+              initial={{ opacity: 0, y: "100%" }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: "100%" }}
+              transition={{ type: "spring", damping: 25, stiffness: 200 }}
+              className="relative w-full max-w-md lg:max-w-xl z-10"
+            >
+              <div className="relative bg-[#121212] rounded-t-[20px] md:rounded-[8px] shadow-2xl w-full flex flex-col max-h-[90vh]">
+                <div className="flex items-center justify-between p-4 border-b border-[rgba(255,255,255,0.08)] shrink-0">
+                  <h2 className="text-[18px] font-[700] text-white">Book Slot</h2>
+                  <button onClick={() => setIsBookingModalOpen(false)} className="text-[rgba(255,255,255,0.70)] hover:text-white bg-white/5 rounded-full p-2 transition-colors">
+                    <X className="w-5 h-5" />
+                  </button>
+                </div>
+                <div className="flex-1 overflow-y-auto custom-scrollbar p-0">
+                  {bookingSelectorContent}
+                </div>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
     </div>
   );
 };

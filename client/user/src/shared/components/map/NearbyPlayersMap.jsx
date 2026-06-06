@@ -5,6 +5,7 @@ import L from "leaflet";
 import { Navigation } from "lucide-react";
 import iconUrl from "leaflet/dist/images/marker-icon.png";
 import iconShadow from "leaflet/dist/images/marker-shadow.png";
+import { formatDistanceToNow } from "date-fns";
 
 // Fix default icon issue in Leaflet with Vite
 delete L.Icon.Default.prototype._getIconUrl;
@@ -150,37 +151,66 @@ const createClusterIcon = (count, previews) => {
   });
 };
 
-const createPlayerIcon = (profilePicture) => {
+const getTimeAgo = (lastSeen) => {
+  if (!lastSeen) return null;
+  const date = new Date(lastSeen);
+  const now = new Date();
+  const diffMinutes = (now - date) / (1000 * 60);
+  
+  if (diffMinutes < 5) return "Online Now";
+  
+  let text = formatDistanceToNow(date, { addSuffix: true });
+  text = text.replace('about ', '');
+  return `Active ${text}`;
+};
+
+const createPlayerIcon = (player) => {
+  const isOnline = player.lastSeen ? (new Date() - new Date(player.lastSeen)) / (1000 * 60) < 5 : false;
+  const timeAgoText = getTimeAgo(player.lastSeen) || "";
+
+  const markerBorderColor = isOnline ? '#BFF367' : 'rgba(255,255,255,0.4)';
+  
+  const onlineDot = isOnline 
+    ? `<div style="position:absolute; bottom:12px; right:-2px; width:12px; height:12px; background:#22c55e; border-radius:50%; border:2px solid #0a0a0a; box-shadow: 0 0 5px rgba(34,197,94,0.5); z-index:10;"></div>`
+    : ``;
+    
+  const inactiveText = !isOnline && timeAgoText
+    ? `<div style="position:absolute; bottom:-16px; left:50%; transform:translateX(-50%); background:rgba(0,0,0,0.8); color:#ccc; font-size:9px; padding:2px 5px; border-radius:4px; white-space:nowrap; border:1px solid rgba(255,255,255,0.1); font-family: sans-serif; pointer-events:none;">${timeAgoText}</div>`
+    : ``;
+
   const markerHtml = `
     <div style="position:relative; cursor:pointer">
       <div style="
         width: 40px;
         height: 40px;
         border-radius: 50%;
-        border: 2.5px solid #BFF367;
+        border: 2.5px solid ${markerBorderColor};
         overflow: hidden;
         box-shadow: 0 2px 8px rgba(0,0,0,0.5);
         background: #0a0a0a;
+        position: relative;
       ">
-        <img src="${getValidAvatar(profilePicture)}" 
-             style="width:100%;height:100%;object-fit:cover" 
+        <img src="${getValidAvatar(player.profilePicture)}" 
+             style="width:100%;height:100%;object-fit:cover${!isOnline ? '; filter: grayscale(40%)' : ''}" 
              onerror="this.src='https://pngimg.com/d/cricket_PNG102.png'; this.onerror=null;"
         />
       </div>
+      ${onlineDot}
       <div style="
         width: 0; height: 0;
         border-left: 6px solid transparent;
         border-right: 6px solid transparent;
-        border-top: 8px solid #BFF367;
+        border-top: 8px solid ${markerBorderColor};
         margin: 0 auto;
       "></div>
+      ${inactiveText}
     </div>
   `;
   return L.divIcon({
     html: markerHtml,
     className: "",
-    iconSize: [40, 48],
-    iconAnchor: [20, 48]
+    iconSize: [40, 56],
+    iconAnchor: [20, 50]
   });
 };
 
@@ -193,7 +223,7 @@ const PlayerMarker = ({ player, onPlayerClick }) => {
     }
   }, [player.lat, player.lng]);
 
-  const icon = useMemo(() => createPlayerIcon(player.profilePicture), [player.profilePicture]);
+  const icon = useMemo(() => createPlayerIcon(player), [player.profilePicture, player.lastSeen]);
 
   return (
     <Marker

@@ -1,7 +1,7 @@
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { getDynamicProfileRoute } from "@utils/routeUtils";
 import { useSelector, useDispatch } from "react-redux";
-import { User, Users, X, LogOut, Activity, ShieldCheck, Zap, ArrowRight, Clock, Trophy, Target, MessageCircle, MapPin, Bell, UserSearch, Search, Plus, Bookmark, FileText, Home, Briefcase, ChevronDown, Award } from "lucide-react";
+import { User, Users, X, LogOut, Activity, ShieldCheck, Zap, ArrowRight, Clock, Trophy, Target, MessageCircle, MapPin, Bell, UserSearch, Search, Plus, Bookmark, FileText, Home, Briefcase, ChevronDown, Award, Mail, HelpCircle } from "lucide-react";
 import { useState, useCallback } from "react";
 import { createPortal } from "react-dom";
 import { logout } from "@redux/slices/authSlice";
@@ -425,6 +425,51 @@ const Navbar = () => {
                       </div>
                     </Link>
 
+                    {/* COMMUNICATION */}
+                    <div className="flex flex-col">
+                      <span className="text-[10px] font-bold text-white/30 uppercase tracking-[0.2em] mb-2 px-1">Communication</span>
+                      <div className="flex flex-col gap-1">
+                        <Link to="/messages" onClick={() => setIsSidebarOpen(false)} className="flex items-center gap-3 p-3 rounded-[8px] hover:bg-white/5 text-white/70 hover:text-white transition-all">
+                          <MessageCircle size={18} className="text-white/40" />
+                          <span className="text-sm font-semibold">Messages</span>
+                        </Link>
+                        <Link to="/notifications" onClick={() => setIsSidebarOpen(false)} className="flex items-center gap-3 p-3 rounded-[8px] hover:bg-white/5 text-white/70 hover:text-white transition-all">
+                          <div className="relative">
+                            <Bell size={18} className="text-white/40" />
+                            <NotificationBadge />
+                          </div>
+                          <span className="text-sm font-semibold">Notifications</span>
+                        </Link>
+                      </div>
+                    </div>
+
+                    {/* PLAY */}
+                    <div className="flex flex-col">
+                      <span className="text-[10px] font-bold text-white/30 uppercase tracking-[0.2em] mb-2 px-1">Play</span>
+                      <div className="flex flex-col gap-1">
+                        <Link to="/booking-history" onClick={() => setIsSidebarOpen(false)} className="flex items-center gap-3 p-3 rounded-[8px] hover:bg-white/5 text-white/70 hover:text-white transition-all">
+                          <Clock size={18} className="text-white/40" />
+                          <span className="text-sm font-semibold">My Bookings</span>
+                        </Link>
+                        <Link to="/my-teams" onClick={() => setIsSidebarOpen(false)} className="flex items-center gap-3 p-3 rounded-[8px] hover:bg-white/5 text-white/70 hover:text-white transition-all">
+                          <Users size={18} className="text-white/40" />
+                          <span className="text-sm font-semibold">My Teams</span>
+                        </Link>
+                        <Link to="/my-joined-games" onClick={() => setIsSidebarOpen(false)} className="flex items-center gap-3 p-3 rounded-[8px] hover:bg-white/5 text-white/70 hover:text-white transition-all">
+                          <Trophy size={18} className="text-white/40" />
+                          <span className="text-sm font-semibold">My Joined Matches</span>
+                        </Link>
+                        <Link to="/my-hosted-games" onClick={() => setIsSidebarOpen(false)} className="flex items-center gap-3 p-3 rounded-[8px] hover:bg-white/5 text-white/70 hover:text-white transition-all">
+                          <Target size={18} className="text-white/40" />
+                          <span className="text-sm font-semibold">My Hosted Games</span>
+                        </Link>
+                        <Link to="/wallet" onClick={() => setIsSidebarOpen(false)} className="flex items-center gap-3 p-3 rounded-[8px] hover:bg-white/5 text-white/70 hover:text-white transition-all">
+                          <Zap size={18} className="text-white/40" />
+                          <span className="text-sm font-semibold">My Wallet</span>
+                        </Link>
+                      </div>
+                    </div>
+
                     {/* PROFESSIONAL HUB */}
                     <div className="flex flex-col">
                       <span className="text-[10px] font-bold text-white/30 uppercase tracking-[0.2em] mb-2 px-1">Professional Hub</span>
@@ -457,51 +502,6 @@ const Navbar = () => {
                       </div>
                     </div>
 
-                    {/* PLAY */}
-                    <div className="flex flex-col">
-                      <span className="text-[10px] font-bold text-white/30 uppercase tracking-[0.2em] mb-2 px-1">Play</span>
-                      <div className="flex flex-col gap-1">
-                        <Link to="/booking-history" onClick={() => setIsSidebarOpen(false)} className="flex items-center gap-3 p-3 rounded-[8px] hover:bg-white/5 text-white/70 hover:text-white transition-all">
-                          <Clock size={18} className="text-white/40" />
-                          <span className="text-sm font-semibold">My Bookings</span>
-                        </Link>
-                        <Link to="/my-teams" onClick={() => setIsSidebarOpen(false)} className="flex items-center gap-3 p-3 rounded-[8px] hover:bg-white/5 text-white/70 hover:text-white transition-all">
-                          <Users size={18} className="text-white/40" />
-                          <span className="text-sm font-semibold">My Teams</span>
-                        </Link>
-                        <Link to="/my-joined-games" onClick={() => setIsSidebarOpen(false)} className="flex items-center gap-3 p-3 rounded-[8px] hover:bg-white/5 text-white/70 hover:text-white transition-all">
-                          <Trophy size={18} className="text-white/40" />
-                          <span className="text-sm font-semibold">My Joined Matches</span>
-                        </Link>
-                        <Link to="/my-hosted-games" onClick={() => setIsSidebarOpen(false)} className="flex items-center gap-3 p-3 rounded-[8px] hover:bg-white/5 text-white/70 hover:text-white transition-all">
-                          <Target size={18} className="text-white/40" />
-                          <span className="text-sm font-semibold">My Hosted Games</span>
-                        </Link>
-                        <Link to="/wallet" onClick={() => setIsSidebarOpen(false)} className="flex items-center gap-3 p-3 rounded-[8px] hover:bg-white/5 text-white/70 hover:text-white transition-all">
-                          <Zap size={18} className="text-white/40" />
-                          <span className="text-sm font-semibold">My Wallet</span>
-                        </Link>
-                      </div>
-                    </div>
-
-                    {/* COMMUNICATION */}
-                    <div className="flex flex-col">
-                      <span className="text-[10px] font-bold text-white/30 uppercase tracking-[0.2em] mb-2 px-1">Communication</span>
-                      <div className="flex flex-col gap-1">
-                        <Link to="/messages" onClick={() => setIsSidebarOpen(false)} className="flex items-center gap-3 p-3 rounded-[8px] hover:bg-white/5 text-white/70 hover:text-white transition-all">
-                          <MessageCircle size={18} className="text-white/40" />
-                          <span className="text-sm font-semibold">Messages</span>
-                        </Link>
-                        <Link to="/notifications" onClick={() => setIsSidebarOpen(false)} className="flex items-center gap-3 p-3 rounded-[8px] hover:bg-white/5 text-white/70 hover:text-white transition-all">
-                          <div className="relative">
-                            <Bell size={18} className="text-white/40" />
-                            <NotificationBadge />
-                          </div>
-                          <span className="text-sm font-semibold">Notifications</span>
-                        </Link>
-                      </div>
-                    </div>
-
                     {/* COMMUNITY */}
                     <div className="flex flex-col">
                       <span className="text-[10px] font-bold text-white/30 uppercase tracking-[0.2em] mb-2 px-1">Community</span>
@@ -517,6 +517,29 @@ const Navbar = () => {
                         <Link to="/blogs" onClick={() => setIsSidebarOpen(false)} className="flex items-center gap-3 p-3 rounded-[8px] hover:bg-white/5 text-white/70 hover:text-white transition-all">
                           <FileText size={18} className="text-white/40" />
                           <span className="text-sm font-semibold">Blogs</span>
+                        </Link>
+                      </div>
+                    </div>
+
+                    {/* SUPPORT & LEGAL */}
+                    <div className="flex flex-col">
+                      <span className="text-[10px] font-bold text-white/30 uppercase tracking-[0.2em] mb-2 px-1">Support & Legal</span>
+                      <div className="flex flex-col gap-1">
+                        <Link to="/contact-us" onClick={() => setIsSidebarOpen(false)} className="flex items-center gap-3 p-3 rounded-[8px] hover:bg-white/5 text-white/70 hover:text-white transition-all">
+                          <Mail size={18} className="text-white/40" />
+                          <span className="text-sm font-semibold">Contact Us</span>
+                        </Link>
+                        <Link to="/faq" onClick={() => setIsSidebarOpen(false)} className="flex items-center gap-3 p-3 rounded-[8px] hover:bg-white/5 text-white/70 hover:text-white transition-all">
+                          <HelpCircle size={18} className="text-white/40" />
+                          <span className="text-sm font-semibold">FAQ</span>
+                        </Link>
+                        <Link to="/terms-of-service" onClick={() => setIsSidebarOpen(false)} className="flex items-center gap-3 p-3 rounded-[8px] hover:bg-white/5 text-white/70 hover:text-white transition-all">
+                          <FileText size={18} className="text-white/40" />
+                          <span className="text-sm font-semibold">Terms & Conditions</span>
+                        </Link>
+                        <Link to="/privacy-policy" onClick={() => setIsSidebarOpen(false)} className="flex items-center gap-3 p-3 rounded-[8px] hover:bg-white/5 text-white/70 hover:text-white transition-all">
+                          <ShieldCheck size={18} className="text-white/40" />
+                          <span className="text-sm font-semibold">Privacy Policy</span>
                         </Link>
                       </div>
                     </div>

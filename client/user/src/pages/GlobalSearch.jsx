@@ -172,11 +172,6 @@ const GlobalSearch = () => {
     <div className="min-h-screen bg-[#050505] text-white pt-4 px-1 md:px-3 font-inter relative overflow-hidden">
       <div className="max-w-3xl mx-auto space-y-6 pb-20">
         
-        {/* Header */}
-        <div className="flex items-center justify-between">
-          <h1 className="text-3xl font-bold text-white tracking-tight" style={HEADING_STYLE}>Explore</h1>
-        </div>
-
         {/* Search Bar */}
         <div className="relative flex items-center w-full bg-[#1A1A1A] rounded-xl overflow-hidden shadow-lg border border-white/5 group focus-within:border-[#BFF367]/30 transition-colors">
           <Search size={20} className="absolute left-4 text-white/40 group-focus-within:text-[#BFF367] transition-colors" />

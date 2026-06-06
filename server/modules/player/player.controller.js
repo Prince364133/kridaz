@@ -619,6 +619,7 @@ const NEARBY_PLAYER_FIELDS = {
   username: true,
   profilePicture: true,
   bio: true,
+  lastSeen: true,
   city: true,
   state: true,
   role: true,
@@ -648,10 +649,13 @@ export const getNearbyPlayers = async (req, res) => {
   const safeLimit  = Math.min(Math.max(parseInt(limit) || 50, 1), 200);
 
   try {
+    const fourteenDaysAgo = new Date();
+    fourteenDaysAgo.setDate(fourteenDaysAgo.getDate() - 14);
+
     const viewerId = req.user?.id || null;
     const whereClause = viewerId
-      ? { id: { not: viewerId }, locationSharingEnabled: { not: false } }
-      : { locationSharingEnabled: { not: false } };
+      ? { id: { not: viewerId }, locationSharingEnabled: { not: false }, lastSeen: { gte: fourteenDaysAgo } }
+      : { locationSharingEnabled: { not: false }, lastSeen: { gte: fourteenDaysAgo } };
 
     const players = await findNearby('User', safeLat, safeLng, safeRadius, {
       where: whereClause,
@@ -675,13 +679,19 @@ export const getNearbyPlayers = async (req, res) => {
     }
 
     // Format for frontend (Decimal to Number, meters → km) + follow flag.
-    const formattedPlayers = players.map(p => ({
-      ...p,
-      lat: p.latitude != null ? parseFloat(String(p.latitude)) : null,
-      lng: p.longitude != null ? parseFloat(String(p.longitude)) : null,
-      distanceKm: p.distance != null ? p.distance / 1000 : null,
-      isFollowing: followedSet.has(p.id),
-    }));
+    const formattedPlayers = players.map(p => {
+      // Very slight random jitter to prevent perfect stacking (approx +/- 10 meters)
+      const jitterLat = (Math.random() - 0.5) * 0.0002;
+      const jitterLng = (Math.random() - 0.5) * 0.0002;
+
+      return {
+        ...p,
+        lat: p.latitude != null ? parseFloat(String(p.latitude)) + jitterLat : null,
+        lng: p.longitude != null ? parseFloat(String(p.longitude)) + jitterLng : null,
+        distanceKm: p.distance != null ? p.distance / 1000 : null,
+        isFollowing: followedSet.has(p.id),
+      };
+    });
 
     // Wrapped envelope (additive) so new clients can read `data.players` directly.
     return res.status(200).json({
@@ -716,8 +726,9 @@ export const updateUserLocation = async (req, res) => {
       update.latitude = null;
       update.longitude = null;
     } else if (lat && lng) {
-      const safeLat = parseFloat(lat);
-      const safeLng = parseFloat(lng);
+      // Fuzz the location: round to 3 decimal places for privacy (~100m radius)
+      const safeLat = parseFloat(parseFloat(lat).toFixed(3));
+      const safeLng = parseFloat(parseFloat(lng).toFixed(3));
       if (!Number.isFinite(safeLat) || !Number.isFinite(safeLng) ||
           safeLat < -90 || safeLat > 90 || safeLng < -180 || safeLng > 180) {
         return res.status(400).json({ success: false, message: "Invalid coordinates" });

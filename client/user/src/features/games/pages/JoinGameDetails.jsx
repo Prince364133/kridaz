@@ -12,6 +12,7 @@ import {
 import { GiCricketBat, GiGloves, GiRun } from 'react-icons/gi';
 import CoinAnimation from '@components/CoinAnimation';
 import useLoginOnDemand from "@hooks/useLoginOnDemand";
+import GlobalBackButton from '@/shared/components/GlobalBackButton';
 
 // Custom cricket ball SVG icon for Bowler role
 const CricketBallIcon = ({ size = 12, className = '' }) => (
@@ -192,12 +193,7 @@ const JoinGameDetails = () => {
         <div className="w-full pb-20">
           {/* Top Navigation Row */}
           <div className="max-w-4xl mx-auto flex items-center justify-between gap-4 mb-8">
-            <button 
-              onClick={() => navigate('/join-games')}
-              className="flex items-center gap-2 text-white/60 hover:text-white transition-colors text-[12px] font-black uppercase tracking-wider"
-            >
-              ← Back
-            </button>
+            <GlobalBackButton />
             
             <div className="flex items-center gap-4">
               <span className="text-[#B3DC26] text-[12px] font-black uppercase tracking-widest">

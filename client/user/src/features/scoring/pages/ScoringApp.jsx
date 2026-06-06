@@ -23,6 +23,7 @@ import EndMatchModal from '../components/EndMatchModal';
 import MatchReportModal from '../components/MatchReportModal';
 import MatchExitModal from '../components/MatchExitModal';
 import cricketLoadingGif from '../../../assets/cricket-loading.gif';
+import GlobalBackButton from '@/shared/components/GlobalBackButton';
 
 const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:6001';
 /**
@@ -536,7 +537,7 @@ const ScoringApp = () => {
     <div className="min-h-screen bg-black flex flex-col items-center justify-center p-6 text-center font-inter">
       <AlertCircle style={{ color: THEME_COLOR }} className="mb-6" size={56} />
       <h2 className="text-2xl font-black uppercase tracking-tighter mb-3">Sync Interrupted</h2>
-      <button onClick={() => navigate(-1)} className="px-6 py-3 bg-white/5 rounded-[8px] text-[10px] font-black uppercase tracking-widest text-[#00C187] border border-[#00C187]/20">Establish New Link</button>
+      <GlobalBackButton />
     </div>
   );
 

@@ -10,6 +10,7 @@ import axiosInstance from "@hooks/useAxiosInstance";
 import { useSocket } from "@context/SocketContext";
 import { formatDistanceToNow } from "date-fns";
 import useNotifications from "@hooks/shared/useNotifications";
+import GlobalBackButton from '@/shared/components/GlobalBackButton';
 
 const PRI = "#84CC16";
 const HEADING_STYLE = { fontFamily: "'Open Sans', sans-serif" };
@@ -180,12 +181,7 @@ const NotificationsPage = () => {
 
         {/* ── Header ──────────────────────────────────────────────── */}
         <div className="flex items-center gap-4 mb-8">
-          <button
-            onClick={() => navigate(-1)}
-            className="w-10 h-10 rounded-[8px] bg-white/5 border border-white/5 flex items-center justify-center text-white/50 hover:text-white hover:border-white/10 transition-all"
-          >
-            <ArrowLeft size={18} />
-          </button>
+          <GlobalBackButton />
           <div className="flex-1">
             <h1
               className="text-xl sm:text-2xl font-black text-white uppercase tracking-wider"

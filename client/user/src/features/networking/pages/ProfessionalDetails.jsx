@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useSelector } from "react-redux";
 import axiosInstance from "@hooks/useAxiosInstance";
+import cricketLoading from "../../../assets/cricket-loading.gif";
 import { 
   MapPin, Star, Shield, Award, Loader2, Pencil,
   Building, Globe, Clock, Layout, BookOpen, Play, X, Eye, Tv, Layers, ShieldCheck, MessageSquare, Users, UserPlus, Heart, MessageCircle, Share2, ChevronLeft
@@ -29,6 +30,7 @@ export default function ProfessionalDetails() {
   const [grounds, setGrounds] = useState([]);
   const [activeMedia, setActiveMedia] = useState(null); // Lightbox state
   const [activeCertificate, setActiveCertificate] = useState(null); // Certificate popup state
+  const [isBioExpanded, setIsBioExpanded] = useState(false);
 
   useEffect(() => {
     fetchProDetails();
@@ -197,7 +199,7 @@ export default function ProfessionalDetails() {
 
   if (loading && !pro) return (
     <div className="min-h-screen bg-black flex items-center justify-center font-sans">
-      <Loader2 className="animate-spin text-[#B3DC26]" size={40} />
+      <img src={cricketLoading} alt="Loading..." className="w-16 h-16 object-contain" />
     </div>
   );
 
@@ -235,21 +237,18 @@ export default function ProfessionalDetails() {
           </button>
 
           {/* Background Image (Top Half) */}
-          <div className="absolute top-0 left-0 right-0 h-[280px] md:h-[340px]">
+          <div className="absolute top-0 left-0 right-0 h-[200px] md:h-[312px]">
             {pro.bannerUrl ? (
-              <img src={pro.bannerUrl} alt="Cover Banner" className="w-full h-full object-cover opacity-80" />
+              <img src={pro.bannerUrl} alt="Cover Banner" className="w-full h-full object-cover" />
             ) : (
               <div className="w-full h-full bg-white/[0.01] flex items-center justify-center opacity-30">
                 <span className="text-[10px] font-black uppercase tracking-[0.4em] text-white">BOOKMYSPORTZ PROFESSIONAL PARTNER</span>
               </div>
             )}
-            {/* Gradients for readability */}
-            <div className="absolute inset-0 bg-gradient-to-t from-[#1A1A1A] via-[#1A1A1A]/60 to-transparent" />
-            <div className="absolute inset-0 bg-gradient-to-r from-[#1A1A1A]/80 via-[#1A1A1A]/20 to-transparent" />
           </div>
 
           {/* Profile Content Overlay */}
-          <div className="relative z-10 p-6 md:p-8 pt-[200px] md:pt-[240px]">
+          <div className="relative z-10 p-6 md:p-8 pt-[144px] md:pt-[240px]">
             
             {/* Top Row: Picture + Basic Info */}
             <div className="flex flex-col md:flex-row gap-6 md:gap-8 items-start">
@@ -346,9 +345,19 @@ export default function ProfessionalDetails() {
               )}
 
               <div className="flex flex-col xl:flex-row xl:items-start justify-between gap-6 mt-1 w-full overflow-hidden">
-                <p className="text-white/60 leading-relaxed text-xs font-sans max-w-2xl break-words whitespace-pre-wrap" style={SUBHEADING_STYLE}>
-                  {pro.bio || "Not Specified"}
-                </p>
+                <div className="max-w-2xl">
+                  <p className={`text-white/60 leading-relaxed text-xs font-sans break-words whitespace-pre-wrap ${!isBioExpanded ? 'line-clamp-4' : ''}`} style={SUBHEADING_STYLE}>
+                    {pro.bio || "Not Specified"}
+                  </p>
+                  {pro.bio && pro.bio.length > 150 && (
+                    <button 
+                      onClick={() => setIsBioExpanded(!isBioExpanded)}
+                      className="mt-2 text-[#B3DC26] text-xs font-bold hover:underline transition-colors"
+                    >
+                      {isBioExpanded ? "Read less" : "Read more"}
+                    </button>
+                  )}
+                </div>
 
                 <div className="flex flex-wrap items-center gap-2.5 shrink-0">
                   {/* Sport Tags */}
@@ -374,7 +383,7 @@ export default function ProfessionalDetails() {
           <div className={activeTab === "overview" ? "lg:col-span-8 space-y-8" : "lg:col-span-12 space-y-8"}>
 
             {/* HIGH-FIDELITY GLASSMORPHIC TAB MENU */}
-            <div className="flex overflow-x-auto hide-scrollbar bg-[#1A1A1A] p-1 rounded-xl border border-white/5 shadow-xl">
+            <div className="flex overflow-x-auto bg-[#1A1A1A] p-1 rounded-xl border border-white/5 shadow-xl [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
               {[
                 { id: "overview", label: "Overview", icon: BookOpen },
                 { id: "posts", label: "Posts", icon: MessageSquare },

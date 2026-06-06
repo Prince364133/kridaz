@@ -7,6 +7,7 @@ import { Calendar, Clock, MapPin,
 } from 'lucide-react';
 import axiosInstance from '@hooks/useAxiosInstance';
 import { toast } from 'react-hot-toast';
+import GlobalBackButton from '@/shared/components/GlobalBackButton';
 
 const MatchDetails = () => {
  const { matchId } = useParams();
@@ -49,9 +50,7 @@ const MatchDetails = () => {
  <div className="sticky top-0 z-50 bg-black/60 backdrop-blur-2xl border-b border-white/5 p-4">
  <div className="max-w-7xl mx-auto flex items-center justify-between">
  <div className="flex items-center gap-4">
- <button onClick={() => navigate(-1)} className="p-2 hover:bg-white/5 rounded-full transition-colors">
- <ArrowLeft size={20} />
- </button>
+ <GlobalBackButton />
  <div>
  <h1 className="text-sm font-black uppercase tracking-tighter">MATCH DETAILS</h1>
  <p className="text-[10px] text-gray-500 font-bold uppercase tracking-widest">

@@ -571,7 +571,8 @@ const FindPlayers = () => {
             lng: p.lng,
             distanceKm: p.distanceKm,
             city: p.city,
-            sportTypes: p.sportTypes
+            sportTypes: p.sportTypes,
+            lastSeen: p.lastSeen
           }))
           .filter(p => p.lat != null && p.lng != null);
 

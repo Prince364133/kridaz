@@ -22,8 +22,8 @@ const VenueCard = ({ t, onClick }) => {
 
         {/* Heart Icon top right */}
         <div className="absolute top-4 right-4 z-10">
-          <button className="w-10 h-10 rounded-full bg-white flex items-center justify-center hover:scale-110 transition-transform shadow-md" onClick={(e) => e.preventDefault()}>
-            <Heart size={18} className="text-gray-800" strokeWidth={2} />
+          <button className="w-6 h-6 rounded-full bg-white flex items-center justify-center hover:scale-110 transition-transform shadow-md" onClick={(e) => e.preventDefault()}>
+            <Heart size={12} className="text-gray-800" strokeWidth={2} />
           </button>
         </div>
 
@@ -40,15 +40,15 @@ const VenueCard = ({ t, onClick }) => {
           {/* Location & Rating Row */}
           <div className="flex justify-between items-center mt-1">
             {/* Plain Text Location */}
-            <div className="flex items-center gap-1.5 text-white/80">
-              <MapPin size={14} className="text-white/70" />
-              <span className="text-[12px] font-medium">{t.distance ? `${Math.round(t.distance)} km` : "1 km"} away</span>
+            <div className="flex items-center gap-1 text-white/80">
+              <MapPin size={10} className="text-white/70" />
+              <span className="text-[10px] font-medium">{t.distance ? `${Math.round(t.distance)} km` : "1 km"} away</span>
             </div>
             
             {/* Rating Pill on the right */}
-            <div className="flex items-center gap-1.5 px-3 py-1.5 bg-white/20 backdrop-blur-md rounded-full border border-white/10 shrink-0 ml-2">
-              <Star size={12} className="text-white" fill="currentColor" />
-              <span className="text-[11px] font-semibold text-white">{t.averageRating || t.avgRating || t.rating || "4.8"}</span>
+            <div className="flex items-center gap-1 px-2 py-1 bg-white/20 backdrop-blur-md rounded-full border border-white/10 shrink-0 ml-2">
+              <Star size={10} className="text-white" fill="currentColor" />
+              <span className="text-[9px] font-semibold text-white">{t.averageRating || t.avgRating || t.rating || "4.8"}</span>
             </div>
           </div>
         </div>

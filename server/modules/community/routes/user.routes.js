@@ -1,7 +1,8 @@
 import express from 'express';
 import { 
   createPost, 
-  getPosts, 
+  getPosts,
+  getPostById,
   updatePost, 
   deletePost,
   likePost,
@@ -41,6 +42,16 @@ const router = express.Router();
  *     tags: [Community]
  */
 router.get('/', optionalAuth, getPosts);
+
+/**
+ * @swagger
+ * /community/{id}:
+ *   get:
+ *     summary: Get a specific community post
+ *     tags: [Community]
+ */
+router.get('/:id', getPostById);
+
 
 /**
  * @swagger

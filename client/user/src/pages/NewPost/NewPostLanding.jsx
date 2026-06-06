@@ -13,6 +13,7 @@ const NewPostLanding = () => {
   const holdTimerRef = useRef(null);
   
   const [stream, setStream] = useState(null);
+  const streamRef = useRef(null);
   const [activeTab, setActiveTab] = useState("Story");
   const [facingMode, setFacingMode] = useState("environment");
   const [isRecording, setIsRecording] = useState(false);
@@ -31,6 +32,7 @@ const NewPostLanding = () => {
         audio: true 
       });
       setStream(mediaStream);
+      streamRef.current = mediaStream;
       if (videoRef.current) {
         videoRef.current.srcObject = mediaStream;
       }
@@ -41,6 +43,7 @@ const NewPostLanding = () => {
           video: { facingMode }
         });
         setStream(mediaStreamFallback);
+        streamRef.current = mediaStreamFallback;
         if (videoRef.current) {
           videoRef.current.srcObject = mediaStreamFallback;
         }
@@ -55,17 +58,16 @@ const NewPostLanding = () => {
   };
 
   const stopCamera = useCallback(() => {
+    if (streamRef.current) {
+      streamRef.current.getTracks().forEach(track => track.stop());
+      streamRef.current = null;
+    }
     if (videoRef.current && videoRef.current.srcObject) {
       const tracks = videoRef.current.srcObject.getTracks();
       tracks.forEach(track => track.stop());
       videoRef.current.srcObject = null;
     }
-    setStream((currentStream) => {
-      if (currentStream) {
-        currentStream.getTracks().forEach(track => track.stop());
-      }
-      return null;
-    });
+    setStream(null);
   }, []);
 
   // Start the camera when the component mounts
