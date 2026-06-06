@@ -1208,20 +1208,20 @@ const HostGame = () => {
                   setFillingTeamKey('quick');
                   setShowTeamFillModal(true);
                 }}
-                className="flex items-center gap-2 px-6 py-3 bg-[#BFF367]/10 border border-[#BFF367]/20 rounded-[8px] text-[#BFF367] font-black text-xs uppercase tracking-widest hover:bg-gradient-to-r hover:from-[#BFF367] hover:to-[#BFF367] hover:text-black transition-all"
+                className="flex items-center gap-1.5 px-3 py-2 bg-[#BFF367]/10 border border-[#BFF367]/20 rounded-[8px] text-[#BFF367] font-black text-[10px] uppercase tracking-widest hover:bg-gradient-to-r hover:from-[#BFF367] hover:to-[#BFF367] hover:text-black transition-all"
               >
-                <ShieldCheck size={16} /> Fill <span className="hidden sm:inline">from My </span>Team
+                <ShieldCheck size={14} /> Fill <span className="hidden sm:inline">from My </span>Team
               </button>
             </div>
 
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <div className="grid grid-cols-4 gap-2 sm:gap-4">
               {gameData.quickSlotsData.map((slot, idx) => (
                 <div 
                   key={idx}
                   onClick={() => idx !== 0 && setActiveSlotPicker({ idx })}
-                  className={`relative p-6 rounded-[8px] border-2 transition-all cursor-pointer group flex flex-col items-center justify-center text-center h-48 ${ slot.userId || slot.customPlayer ? 'border-[#BFF367]/30 bg-[#BFF367]/5' : 'border-neutral-800 bg-neutral-900/50 hover:border-neutral-700' }`}
+                  className={`relative p-1 sm:p-4 rounded-[8px] border-2 transition-all cursor-pointer group flex flex-col items-center justify-center text-center h-28 sm:h-36 ${ slot.userId || slot.customPlayer ? 'border-[#BFF367]/30 bg-[#BFF367]/5' : 'border-neutral-800 bg-neutral-900/50 hover:border-neutral-700' }`}
                 >
-                  <div className={`w-16 h-16 rounded-[8px] flex items-center justify-center mb-3 transition-transform duration-500 group-hover:scale-110 overflow-hidden ${ slot.userId || slot.customPlayer ? 'border-2 border-[#BFF367] bg-neutral-900' : 'bg-neutral-800 text-neutral-500' }`}>
+                  <div className={`w-10 h-10 sm:w-14 sm:h-14 rounded-[8px] flex items-center justify-center mb-1 sm:mb-2 transition-transform duration-500 group-hover:scale-110 overflow-hidden ${ slot.userId || slot.customPlayer ? 'border-2 border-[#BFF367] bg-neutral-900' : 'bg-neutral-800 text-neutral-500' }`}>
                     {slot.profilePicture ? (
                       <img src={slot.profilePicture} alt={slot.name} className="w-full h-full object-cover" />
                     ) : (slot.userId && user?._id && slot.userId === user._id) ? (
@@ -1241,9 +1241,9 @@ const HostGame = () => {
                     )}
                   </div>
                   
-                  <div className="space-y-1">
-                    <p className="text-[10px] font-black uppercase tracking-widest text-neutral-500">Slot {idx + 1}</p>
-                    <h4 className="font-black truncate w-full px-2">
+                  <div className="space-y-0.5 sm:space-y-1 w-full">
+                    <p className="text-[8px] sm:text-[10px] font-black uppercase tracking-widest text-neutral-500">Slot {idx + 1}</p>
+                    <h4 className="font-black truncate w-full px-1 sm:px-2 text-[10px] sm:text-base leading-tight">
                       {(slot.userId && user?._id && slot.userId === user._id) ? (user?.name || "You (Host)") : (slot.name || slot.customPlayer?.name || slot.customPlayer?.email || "Open Slot")}
                     </h4>
                   </div>
@@ -1277,11 +1277,11 @@ const HostGame = () => {
               ))}
             </div>
 
-            <div className="flex gap-4">
-              <button onClick={() => setStep(4)} className="flex-1 py-5 bg-neutral-900 text-neutral-400 font-black rounded-[8px] border-2 border-neutral-800 hover:border-neutral-700 transition-all text-lg uppercase tracking-widest">Back</button>
+            <div className="flex gap-4 max-w-lg mx-auto w-full">
+              <button onClick={() => setStep(4)} className="flex-1 py-3 sm:py-3.5 bg-neutral-900 text-neutral-400 font-black rounded-[8px] border-2 border-neutral-800 hover:border-neutral-700 transition-all text-sm sm:text-base uppercase tracking-widest">BACK</button>
               <button
                 onClick={() => setStep(5)}
-                className="flex-[2] py-5 bg-gradient-to-r from-[#BFF367] to-[#BFF367] text-black font-black rounded-[8px] hover:scale-[1.01] active:scale-[0.99] transition-all duration-300 text-lg shadow-[0_10px_30px_rgba(85,222,232,0.25)] uppercase tracking-widest"
+                className="flex-[2] py-3 bg-gradient-to-r from-[#BFF367] to-[#BFF367] text-black font-black rounded-[8px] hover:scale-[1.01] active:scale-[0.99] transition-all duration-300 text-sm font-open-sans shadow-[0_10px_25px_rgba(85,222,232,0.25)] uppercase tracking-widest"
               >
                 PREVIEW MATCH
               </button>
