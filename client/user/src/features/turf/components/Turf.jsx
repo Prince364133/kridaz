@@ -1,32 +1,25 @@
 import { useState, useEffect } from "react";
+import { useSelector, useDispatch } from "react-redux";
 import TurfCardMobile from "./TurfCardMobile.jsx";
 import TurfCardSkeleton from "@components/ui/TurfCardSkeleton.jsx";
 import useTurfData from "../hooks/useTurfData.jsx";
 import SearchTurf from "@components/search/SearchTurf.jsx";
 import { Trophy, MapPin, Loader2, Sparkles, Search, Filter, Dribbble, X, ChevronRight } from "lucide-react";
 import useRecommendations from "@hooks/useRecommendations";
+import { setFilters } from "@redux/slices/turfSlice";
 
 /**
  * Turf — Venue discovery page.
- *
- * Behaviour:
- * 1. On mount, silently requests browser geolocation.
- * 2. If granted → backend receives lat/lng → MongoDB $geoNear sorts by proximity
- *    → nearest venues appear at the top.
- * 3. If denied  → falls back to normal listing (no distance data).
- * 4. All search filter changes (sport / state / city) always include the
- *    latest userLocation so proximity sort is preserved while filtering.
  */
 const Turf = () => {
-  const [searchFilters, setSearchFilters] = useState({});
+  const dispatch = useDispatch();
+  const searchFilters = useSelector((state) => state.turf.filters);
   const [userLocation, setUserLocation] = useState(null);
   const [locationStatus, setLocationStatus] = useState("detecting"); // 'detecting' | 'granted' | 'denied'
 
   // Mobile Drawers
   const [isMobileFilterOpen, setIsMobileFilterOpen] = useState(false);
   const [isMobileSportsOpen, setIsMobileSportsOpen] = useState(false);
-  const [minRating, setMinRating] = useState(0.0);
-  const [maxRating, setMaxRating] = useState(5.0);
 
   const { turfs, loading } = useTurfData(searchFilters);
 
@@ -66,8 +59,7 @@ const Turf = () => {
         setUserLocation(loc);
         setLocationStatus("granted");
         
-        setSearchFilters((prev) => ({ 
-          ...prev,
+        dispatch(setFilters({ 
           lat,
           lng
         }));
@@ -92,8 +84,7 @@ const Turf = () => {
         setUserLocation(loc);
         setLocationStatus("granted");
         
-        setSearchFilters((prev) => ({ 
-          ...prev,
+        dispatch(setFilters({ 
           lat,
           lng
         }));
@@ -111,11 +102,11 @@ const Turf = () => {
 
   // ── Handle search filters from the SearchTurf bar ─────────────────
   const handleSearch = (filters) => {
-    setSearchFilters({
+    dispatch(setFilters({
       ...filters,
       lat: userLocation?.lat,
       lng: userLocation?.lng,
-    });
+    }));
   };
 
   return (
@@ -262,11 +253,21 @@ const Turf = () => {
             <h5 className="text-[13px] font-black uppercase text-white tracking-wider">Slot Availability</h5>
             <div className="space-y-3">
               <label className="flex items-center gap-3 cursor-pointer group">
-                <input type="checkbox" className="accent-[#BFF367] w-4 h-4 rounded border-[#333] bg-transparent cursor-pointer" />
+                <input 
+                  type="checkbox" 
+                  checked={searchFilters.onlyAvailable || false}
+                  onChange={(e) => dispatch(setFilters({ onlyAvailable: e.target.checked }))}
+                  className="accent-[#BFF367] w-4 h-4 rounded border-[#333] bg-transparent cursor-pointer" 
+                />
                 <span className="text-[13px] font-medium text-gray-400 group-hover:text-white transition-colors">Show Only Available Venues</span>
               </label>
               <label className="flex items-center gap-3 cursor-pointer group">
-                <input type="checkbox" className="accent-[#BFF367] w-4 h-4 rounded border-[#333] bg-transparent cursor-pointer" />
+                <input 
+                  type="checkbox" 
+                  checked={searchFilters.onlyFavorites || false}
+                  onChange={(e) => dispatch(setFilters({ onlyFavorites: e.target.checked }))}
+                  className="accent-[#BFF367] w-4 h-4 rounded border-[#333] bg-transparent cursor-pointer" 
+                />
                 <span className="text-[13px] font-medium text-gray-400 group-hover:text-white transition-colors">Show Only Favorites</span>
               </label>
             </div>
@@ -277,19 +278,39 @@ const Turf = () => {
             <h5 className="text-[13px] font-black uppercase text-white tracking-wider">Slot Timings</h5>
             <div className="space-y-3">
               <label className="flex items-center gap-3 cursor-pointer group">
-                <input type="checkbox" className="accent-[#BFF367] w-4 h-4 rounded border-[#333] bg-transparent cursor-pointer" />
+                <input 
+                  type="checkbox" 
+                  checked={searchFilters.timingMorning || false}
+                  onChange={(e) => dispatch(setFilters({ timingMorning: e.target.checked }))}
+                  className="accent-[#BFF367] w-4 h-4 rounded border-[#333] bg-transparent cursor-pointer" 
+                />
                 <span className="text-[13px] font-medium text-gray-400 group-hover:text-white transition-colors">Morning (6:00 AM - 11:00 AM)</span>
               </label>
               <label className="flex items-center gap-3 cursor-pointer group">
-                <input type="checkbox" className="accent-[#BFF367] w-4 h-4 rounded border-[#333] bg-transparent cursor-pointer" />
+                <input 
+                  type="checkbox" 
+                  checked={searchFilters.timingAfternoon || false}
+                  onChange={(e) => dispatch(setFilters({ timingAfternoon: e.target.checked }))}
+                  className="accent-[#BFF367] w-4 h-4 rounded border-[#333] bg-transparent cursor-pointer" 
+                />
                 <span className="text-[13px] font-medium text-gray-400 group-hover:text-white transition-colors">Afternoon (11:00 AM - 5:00 PM)</span>
               </label>
               <label className="flex items-center gap-3 cursor-pointer group">
-                <input type="checkbox" className="accent-[#BFF367] w-4 h-4 rounded border-[#333] bg-transparent cursor-pointer" />
+                <input 
+                  type="checkbox" 
+                  checked={searchFilters.timingEvening || false}
+                  onChange={(e) => dispatch(setFilters({ timingEvening: e.target.checked }))}
+                  className="accent-[#BFF367] w-4 h-4 rounded border-[#333] bg-transparent cursor-pointer" 
+                />
                 <span className="text-[13px] font-medium text-gray-400 group-hover:text-white transition-colors">Evening (5:00 PM - 10:00 PM)</span>
               </label>
               <label className="flex items-center gap-3 cursor-pointer group">
-                <input type="checkbox" className="accent-[#BFF367] w-4 h-4 rounded border-[#333] bg-transparent cursor-pointer" />
+                <input 
+                  type="checkbox" 
+                  checked={searchFilters.timingLateNight || false}
+                  onChange={(e) => dispatch(setFilters({ timingLateNight: e.target.checked }))}
+                  className="accent-[#BFF367] w-4 h-4 rounded border-[#333] bg-transparent cursor-pointer" 
+                />
                 <span className="text-[13px] font-medium text-gray-400 group-hover:text-white transition-colors">Late Night (After 10 PM)</span>
               </label>
             </div>
@@ -297,29 +318,17 @@ const Turf = () => {
 
           {/* Star Rating */}
           <div className="space-y-4">
-            <h5 className="text-[13px] font-black uppercase text-white tracking-wider">Star Rating: {minRating.toFixed(1)} - {maxRating.toFixed(1)}</h5>
+            <h5 className="text-[13px] font-black uppercase text-white tracking-wider">Star Rating: {(searchFilters.minRating || 0).toFixed(1)} - 5.0</h5>
             <div className="space-y-5 px-1 pt-1">
               <div className="flex flex-col gap-2">
                 <div className="flex justify-between text-[11px] font-bold uppercase tracking-wider text-gray-400">
-                  <span>Min Rating: {minRating.toFixed(1)}</span>
+                  <span>Min Rating: {(searchFilters.minRating || 0).toFixed(1)}</span>
                 </div>
                 <input 
                   type="range" min="0" max="5" step="0.5" 
-                  value={minRating}
-                  onChange={(e) => setMinRating(parseFloat(e.target.value))}
-                  style={{ background: `linear-gradient(to right, #BFF367 ${(minRating / 5) * 100}%, #1F1F1F ${(minRating / 5) * 100}%)` }}
-                  className="w-full h-1.5 rounded-lg appearance-none cursor-pointer [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-4 [&::-webkit-slider-thumb]:h-4 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-[#BFF367]" 
-                />
-              </div>
-              <div className="flex flex-col gap-2">
-                <div className="flex justify-between text-[11px] font-bold uppercase tracking-wider text-gray-400">
-                  <span>Max Rating: {maxRating.toFixed(1)}</span>
-                </div>
-                <input 
-                  type="range" min="0" max="5" step="0.5" 
-                  value={maxRating}
-                  onChange={(e) => setMaxRating(parseFloat(e.target.value))}
-                  style={{ background: `linear-gradient(to right, #BFF367 ${(maxRating / 5) * 100}%, #1F1F1F ${(maxRating / 5) * 100}%)` }}
+                  value={searchFilters.minRating || 0}
+                  onChange={(e) => dispatch(setFilters({ minRating: parseFloat(e.target.value) }))}
+                  style={{ background: `linear-gradient(to right, #BFF367 ${((searchFilters.minRating || 0) / 5) * 100}%, #1F1F1F ${((searchFilters.minRating || 0) / 5) * 100}%)` }}
                   className="w-full h-1.5 rounded-lg appearance-none cursor-pointer [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-4 [&::-webkit-slider-thumb]:h-4 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-[#BFF367]" 
                 />
               </div>

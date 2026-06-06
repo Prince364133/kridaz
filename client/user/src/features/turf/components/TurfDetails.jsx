@@ -332,7 +332,7 @@ const TurfDetails = () => {
           />
         )}
       </AnimatePresence>
-      <div className="max-w-[1400px] mx-auto px-4">
+      <div className="max-w-[1400px] mx-auto md:px-4 px-0 mt-0 md:mt-4">
 
         <svg width="0" height="0" className="absolute">
           <linearGradient id="theme-gradient" x1="0%" y1="0%" x2="100%" y2="0%">
@@ -342,27 +342,27 @@ const TurfDetails = () => {
         </svg>
 
         <main
-          className="relative flex flex-col lg:flex-row w-[1400px] max-w-full items-start justify-between gap-6 lg:gap-4 mx-auto"
+          className="relative flex flex-col w-full max-w-5xl items-start justify-center gap-6 lg:gap-8 mx-auto"
           aria-label="Venue booking page"
         >
           {/* VenueOverviewSection */}
-          <div className="w-full lg:w-[813px] flex-none space-y-6 lg:space-y-8">
+          <div className="w-full flex-none space-y-6 lg:space-y-8">
 
             {/* Back Button */}
             <button 
               onClick={() => navigate(-1)}
-              className="flex items-center gap-1.5 text-zinc-400 hover:text-[#BFF367] transition-colors font-bold uppercase tracking-widest text-[11px] mb-[-10px] px-2"
+              className="flex items-center gap-1.5 text-zinc-400 hover:text-[#BFF367] transition-colors font-bold uppercase tracking-widest text-[11px] mb-[-10px] px-4 md:px-2 pt-4 md:pt-0"
             >
               <ChevronLeft className="w-4 h-4" /> Back
             </button>
 
             {/* Venue Big Heading */}
-            <h1 className="text-3xl md:text-5xl lg:text-6xl font-inter font-black uppercase tracking-tight text-white leading-tight px-2">
+            <h1 className="text-3xl md:text-5xl lg:text-6xl font-inter font-black uppercase tracking-tight text-white leading-tight px-4 md:px-2">
               {turf.name}
             </h1>
 
             {/* Quick Info Bar */}
-            <div className="flex flex-wrap items-center justify-start md:justify-between gap-y-3 gap-x-4 text-[10px] md:text-[12px] font-bold uppercase tracking-widest px-2 font-inter w-full">
+            <div className="flex flex-wrap items-center justify-start md:justify-between gap-y-3 gap-x-4 text-[10px] md:text-[12px] font-bold uppercase tracking-widest px-4 md:px-2 font-inter w-full">
               <div className="flex items-center gap-2 shrink-0">
                 <Star className="w-4 h-4" style={{ stroke: "url(#theme-gradient)", fill: "url(#theme-gradient)" }} />
                 <span className="bg-gradient-to-r from-[#BFF367] to-[#BFF367] inline-block text-transparent bg-clip-text">{averageRating ? averageRating.toFixed(1) : "5.0"}</span>
@@ -374,11 +374,6 @@ const TurfDetails = () => {
                 <span className="text-zinc-400 font-medium">{turf.city || turf.location?.split(',')[0]} , {turf.state || "DODA"}</span>
               </div>
               <div className="w-px h-3 bg-zinc-800" />
-              <div className="flex items-center gap-2 shrink-0">
-                <Clock className="w-4 h-4" style={{ stroke: "url(#theme-gradient)" }} />
-                <span className="text-zinc-400 font-medium">{turf.openingTime || "01:10 AM"} — {turf.closingTime || "11:00 PM"}</span>
-              </div>
-              <div className="w-px h-3 bg-zinc-800" />
               <div
                 onClick={() => setIsPoliciesModalOpen(true)}
                 className="flex items-center gap-2 cursor-pointer hover:text-white transition-colors group shrink-0"
@@ -388,214 +383,215 @@ const TurfDetails = () => {
               </div>
             </div>
 
-            {/* Hero Image */}
-            <div
-              className="relative w-full h-[300px] md:h-[500px] overflow-hidden border border-zinc-800 shadow-2xl bg-zinc-900 group"
-              style={{
-                borderRadius: '15px'
-              }}
-            >
-              <AnimatePresence mode="wait">
-                <motion.div
-                  key={activeImageIndex}
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  exit={{ opacity: 0 }}
-                  transition={{ duration: 0.6 }}
-                  className="w-full h-full"
+            {/* Main Content Grid */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-8 w-full items-start">
+              
+              {/* Left Column: Media */}
+              <div className="space-y-6 w-full">
+                {/* Hero Image */}
+                <div
+                  className="relative w-full aspect-video overflow-hidden border-y border-x-0 md:border-x border-zinc-800 shadow-2xl bg-zinc-900 group md:rounded-[15px] rounded-none"
                 >
-                  {mediaItems[activeImageIndex].type === "youtube" ? (
-                    <iframe
-                      src={`https://www.youtube.com/embed/${mediaItems[activeImageIndex].id}?autoplay=1&mute=1&loop=1&playlist=${mediaItems[activeImageIndex].id}&controls=0&showinfo=0&rel=0`}
-                      title="Venue Video"
-                      className="w-full h-full object-cover border-0"
-                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                      allowFullScreen
-                    />
-                  ) : mediaItems[activeImageIndex].type === "video" ? (
-                    <video
-                      src={mediaItems[activeImageIndex].url}
-                      autoPlay
-                      muted
-                      loop
-                      playsInline
-                      className="w-full h-full object-cover"
-                    />
-                  ) : (
-                    <img
-                      src={mediaItems[activeImageIndex].url}
-                      alt={turf.name}
-                      className="w-full h-full object-cover"
-                    />
+                  <AnimatePresence mode="wait">
+                    <motion.div
+                      key={activeImageIndex}
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      exit={{ opacity: 0 }}
+                      transition={{ duration: 0.6 }}
+                      className="w-full h-full"
+                    >
+                      {mediaItems[activeImageIndex].type === "youtube" ? (
+                        <iframe
+                          src={`https://www.youtube.com/embed/${mediaItems[activeImageIndex].id}?autoplay=1&mute=1&loop=1&playlist=${mediaItems[activeImageIndex].id}&controls=0&showinfo=0&rel=0`}
+                          title="Venue Video"
+                          className="w-full h-full object-cover border-0"
+                          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                          allowFullScreen
+                        />
+                      ) : mediaItems[activeImageIndex].type === "video" ? (
+                        <video
+                          src={mediaItems[activeImageIndex].url}
+                          autoPlay
+                          muted
+                          loop
+                          playsInline
+                          className="w-full h-full object-cover"
+                        />
+                      ) : (
+                        <img
+                          src={mediaItems[activeImageIndex].url}
+                          alt={turf.name}
+                          className="w-full h-full object-cover"
+                        />
+                      )}
+                    </motion.div>
+                  </AnimatePresence>
+
+                  {/* Navigation Arrows */}
+                  {mediaItems.length > 1 && (
+                    <>
+                      <button
+                        onClick={handlePrev}
+                        className="absolute left-4 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-black/40 backdrop-blur-md border border-white/10 flex items-center justify-center text-white opacity-0 group-hover:opacity-100 transition-all hover:bg-[#BFF367] hover:text-black z-30"
+                      >
+                        <ChevronLeft size={20} />
+                      </button>
+                      <button
+                        onClick={handleNext}
+                        className="absolute right-4 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-black/40 backdrop-blur-md border border-white/10 flex items-center justify-center text-white opacity-0 group-hover:opacity-100 transition-all hover:bg-[#BFF367] hover:text-black z-30"
+                      >
+                        <ChevronRight size={20} />
+                      </button>
+                    </>
                   )}
-                </motion.div>
-              </AnimatePresence>
 
-              {/* Navigation Arrows */}
-              {mediaItems.length > 1 && (
-                <>
-                  <button
-                    onClick={handlePrev}
-                    className="absolute left-4 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-black/40 backdrop-blur-md border border-white/10 flex items-center justify-center text-white opacity-0 group-hover:opacity-100 transition-all hover:bg-[#BFF367] hover:text-black z-30"
-                  >
-                    <ChevronLeft size={20} />
-                  </button>
-                  <button
-                    onClick={handleNext}
-                    className="absolute right-4 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-black/40 backdrop-blur-md border border-white/10 flex items-center justify-center text-white opacity-0 group-hover:opacity-100 transition-all hover:bg-[#BFF367] hover:text-black z-30"
-                  >
-                    <ChevronRight size={20} />
-                  </button>
-                </>
-              )}
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent pointer-events-none" />
 
-              <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent pointer-events-none" />
-
-              {/* Like and Share Actions */}
-              <div className="absolute top-4 right-4 z-40 flex items-center gap-3">
-                <button onClick={() => setIsFavorite(!isFavorite)} className={`p-3 rounded-[8px] bg-black/40 backdrop-blur-md border ${isFavorite ? 'border-[#BFF367] text-[#BFF367]' : 'border-white/10 text-white'} hover:bg-[#BFF367] hover:text-black hover:border-transparent transition-all shadow-lg`}>
-                  <Heart className={`w-5 h-5 ${isFavorite ? 'fill-current' : ''}`} />
-                </button>
-                <button onClick={handleShare} className="p-3 rounded-[8px] bg-black/40 backdrop-blur-md border border-white/10 text-white hover:bg-[#BFF367] hover:text-black hover:border-transparent transition-all shadow-lg">
-                  <Share2 className="w-5 h-5" />
-                </button>
-              </div>
-            </div>
-
-            {/* Image Thumbnails */}
-            {mediaItems.length > 1 && (
-              <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-hide snap-x mt-4">
-                {mediaItems.map((item, idx) => (
-                  <button
-                    key={idx}
-                    onClick={() => setActiveImageIndex(idx)}
-                    className={`relative flex-none w-24 h-16 md:w-32 md:h-20 rounded-[8px] overflow-hidden border-[2.5px] transition-all snap-start ${activeImageIndex === idx ? "border-[#BFF367]" : "border-transparent opacity-50 hover:opacity-100"}`}
-                  >
-                    {item.type === "youtube" ? (
-                      <img src={`https://img.youtube.com/vi/${item.id}/hqdefault.jpg`} alt="Thumbnail" className="w-full h-full object-cover" />
-                    ) : item.type === "video" ? (
-                      <video src={item.url} className="w-full h-full object-cover pointer-events-none" />
-                    ) : (
-                      <img src={item.url} alt="Thumbnail" className="w-full h-full object-cover" />
-                    )}
-                  </button>
-                ))}
-              </div>
-            )}
-
-            {/* Venue Details Card */}
-            <div className="bg-[#121212] rounded-[8px] border border-zinc-800 p-8 space-y-8 font-inter">
-
-              {/* Title & Stats */}
-              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 sm:gap-0">
-                <div className="space-y-3">
-                  <div className="flex flex-wrap items-center gap-4 md:gap-6">
-                    <div className="flex items-baseline gap-2">
-                      <span className="bg-gradient-to-r from-[#BFF367] to-[#BFF367] inline-block text-transparent bg-clip-text text-2xl md:text-3xl font-inter font-bold">₹{turf.pricePerHour}</span>
-                      <span className="text-zinc-500 text-[10px] md:text-xs font-inter font-bold uppercase tracking-widest">onwards</span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <Star className="w-4 h-4 md:w-5 md:h-5" style={{ stroke: "url(#theme-gradient)", fill: "url(#theme-gradient)" }} />
-                      <span className="bg-gradient-to-r from-[#BFF367] to-[#BFF367] inline-block text-transparent bg-clip-text text-lg md:text-xl font-inter font-bold">{averageRating ? averageRating.toFixed(1) : "5.0"}</span>
-                      <span className="text-zinc-500 text-[10px] md:text-xs font-inter font-bold uppercase tracking-widest">Star</span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <div className="flex flex-wrap items-start gap-12">
-                {/* Sports Available */}
-                <div className="space-y-4">
-                  <h2 className="text-sm font-inter font-bold uppercase tracking-[0.15em] text-white">
-                    Sports available
-                  </h2>
-                  <div className="flex flex-wrap gap-3">
-                    {turf.sportTypes?.map((sport, i) => (
-                      <div key={i} className="px-4 py-1.5 rounded-[6px] bg-zinc-900/50 border border-zinc-800 flex items-center gap-2 text-white group hover:border-[#BFF367] transition-all duration-300">
-                        <div className="w-1.5 h-1.5 rounded-full bg-gradient-to-r from-[#BFF367] to-[#BFF367]" />
-                        <span className="text-[10px] font-bold uppercase tracking-wider font-inter">{sport}</span>
-                      </div>
-                    ))}
-                    {!turf.sportTypes?.length && (
-                      <div className="px-4 py-1.5 rounded-[6px] bg-zinc-900/50 border border-zinc-800 flex items-center gap-2 text-zinc-400">
-                        <Activity className="w-3 h-3" />
-                        <span className="text-[10px] font-bold uppercase tracking-wider font-inter">Multisport</span>
-                      </div>
-                    )}
-                  </div>
-                </div>
-
-                {/* Ground Composition */}
-                <div className="space-y-4">
-                  <h2 className="text-sm font-inter font-bold uppercase tracking-[0.15em] text-white">Ground Composition</h2>
-                  <div className="flex flex-wrap gap-3">
-                    <div className="px-4 py-1.5 rounded-[6px] bg-zinc-900 border border-zinc-800 flex items-center justify-center">
-                      <span className="text-[10px] font-black uppercase tracking-widest text-white font-inter">
-                        {turf.turfType || "Natural Grass"}
-                      </span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              {/* Personnel & Support Section */}
-              <div className="space-y-4 pt-2">
-                <div className="flex items-center gap-2.5">
-                  <div className="w-1 h-5 bg-gradient-to-b from-[#BFF367] to-[#BFF367] rounded-full" />
-                  <h2 className="text-[13px] font-inter font-bold uppercase tracking-[0.1em] text-white">Personnel & Support</h2>
-                </div>
-
-                {/* Venue Managers */}
-                <div className="space-y-3 w-full max-w-[300px]">
-                  <p className="text-[9px] font-black text-zinc-600 uppercase tracking-widest font-inter">Venue Managers</p>
-                  <div className="bg-[#0a0a0a] border border-zinc-800 border-dashed rounded-[12px] p-3.5 flex items-center justify-between">
-                    <div className="space-y-0.5">
-                      <p className="text-[12px] font-black text-white uppercase font-inter">{turf.name?.split(' ')[0] || "Princess"}</p>
-                      <p className="text-[10px] font-bold text-zinc-500 font-inter tracking-tight">7896541230</p>
-                    </div>
-                    <button className="w-9 h-9 rounded-[8px] bg-gradient-to-br from-[#BFF367] to-[#BFF367] flex items-center justify-center text-black hover:brightness-110 transition-all shadow-[0_0_15px_rgba(85,222,232,0.2)]">
-                      <Phone size={16} fill="currentColor" />
+                  {/* Like and Share Actions */}
+                  <div className="absolute top-4 right-4 z-40 flex items-center gap-3">
+                    <button onClick={() => setIsFavorite(!isFavorite)} className={`p-3 rounded-[8px] bg-black/40 backdrop-blur-md border ${isFavorite ? 'border-[#BFF367] text-[#BFF367]' : 'border-white/10 text-white'} hover:bg-[#BFF367] hover:text-black hover:border-transparent transition-all shadow-lg`}>
+                      <Heart className={`w-5 h-5 ${isFavorite ? 'fill-current' : ''}`} />
+                    </button>
+                    <button onClick={handleShare} className="p-3 rounded-[8px] bg-black/40 backdrop-blur-md border border-white/10 text-white hover:bg-[#BFF367] hover:text-black hover:border-transparent transition-all shadow-lg">
+                      <Share2 className="w-5 h-5" />
                     </button>
                   </div>
                 </div>
-              </div>
 
-              {/* Facilities */}
-              <div className="space-y-4">
-                <h2 className="text-sm font-inter font-bold uppercase tracking-[0.15em] text-white">Facilities</h2>
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                  {turf.facilities?.map((facility, index) => (
-                    <div key={index} className="flex items-center gap-3 group">
-                      <div className="w-5 h-5 rounded-full bg-gradient-to-r from-[#BFF367] to-[#BFF367] flex items-center justify-center shrink-0 shadow-[0_0_15px_rgba(85,222,232,0.3)]">
-                        <Check className="w-3 h-3 text-black" strokeWidth={4} />
-                      </div>
-                      <span className="text-xs font-inter font-bold text-zinc-400 uppercase tracking-tight group-hover:text-white transition-colors">{facility}</span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              {/* About Venue */}
-              <div className="space-y-4">
-                <h2 className="text-sm font-inter font-bold uppercase tracking-[0.15em] text-white">About Venue</h2>
-                <div className={`text-zinc-500 text-sm font-inter leading-relaxed max-w-3xl whitespace-pre-line font-medium break-all ${!isDescExpanded ? 'line-clamp-4' : ''}`}>
-                  {turf.description || "No description available for this venue."}
-                </div>
-                {turf.description && turf.description.length > 150 && (
-                  <button
-                    onClick={() => setIsDescExpanded(!isDescExpanded)}
-                    className="text-[#84CC16] hover:text-[#a3e635] text-xs font-bold uppercase tracking-widest transition-colors mt-2"
-                  >
-                    {isDescExpanded ? "Read Less" : "Read More"}
-                  </button>
+                {/* Image Thumbnails */}
+                {mediaItems.length > 1 && (
+                  <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-hide snap-x px-4 md:px-0">
+                    {mediaItems.map((item, idx) => (
+                      <button
+                        key={idx}
+                        onClick={() => setActiveImageIndex(idx)}
+                        className={`relative flex-none w-20 h-14 md:w-24 md:h-16 rounded-[8px] overflow-hidden border-[2px] transition-all snap-start ${activeImageIndex === idx ? "border-[#BFF367]" : "border-transparent opacity-50 hover:opacity-100"}`}
+                      >
+                        {item.type === "youtube" ? (
+                          <img src={`https://img.youtube.com/vi/${item.id}/hqdefault.jpg`} alt="Thumbnail" className="w-full h-full object-cover" />
+                        ) : item.type === "video" ? (
+                          <video src={item.url} className="w-full h-full object-cover pointer-events-none" />
+                        ) : (
+                          <img src={item.url} alt="Thumbnail" className="w-full h-full object-cover" />
+                        )}
+                      </button>
+                    ))}
+                  </div>
                 )}
               </div>
 
+              {/* Right Column: Venue Details */}
+              <div className="bg-[#121212] rounded-none md:rounded-[8px] border-y md:border border-zinc-800 p-6 md:p-8 space-y-8 font-inter h-full">
+
+                <div className="flex flex-wrap items-start gap-10">
+                  {/* Sports Available */}
+                  <div className="space-y-4">
+                    <h2 className="text-sm font-inter font-bold uppercase tracking-[0.15em] text-white">
+                      Sports available
+                    </h2>
+                    <div className="flex flex-wrap gap-2">
+                      {turf.sportTypes?.map((sport, i) => (
+                        <div key={i} className="px-4 py-1.5 rounded-[6px] bg-zinc-900/50 border border-zinc-800 flex items-center gap-2 text-white group hover:border-[#BFF367] transition-all duration-300">
+                          <div className="w-1.5 h-1.5 rounded-full bg-gradient-to-r from-[#BFF367] to-[#BFF367]" />
+                          <span className="text-[10px] font-bold uppercase tracking-wider font-inter">{sport}</span>
+                        </div>
+                      ))}
+                      {!turf.sportTypes?.length && (
+                        <div className="px-4 py-1.5 rounded-[6px] bg-zinc-900/50 border border-zinc-800 flex items-center gap-2 text-zinc-400">
+                          <Activity className="w-3 h-3" />
+                          <span className="text-[10px] font-bold uppercase tracking-wider font-inter">Multisport</span>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Ground Composition */}
+                  <div className="space-y-4">
+                    <h2 className="text-sm font-inter font-bold uppercase tracking-[0.15em] text-white">Ground Composition</h2>
+                    <div className="flex flex-wrap gap-3">
+                      <div className="px-4 py-1.5 rounded-[6px] bg-zinc-900 border border-zinc-800 flex items-center justify-center">
+                        <span className="text-[10px] font-black uppercase tracking-widest text-white font-inter">
+                          {turf.turfType || "Natural Grass"}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Personnel & Support Section */}
+                <div className="space-y-4">
+                  <div className="flex items-center gap-2.5">
+                    <div className="w-1 h-5 bg-gradient-to-b from-[#BFF367] to-[#BFF367] rounded-full" />
+                    <h2 className="text-[13px] font-inter font-bold uppercase tracking-[0.1em] text-white">Personnel & Support</h2>
+                  </div>
+
+                  {/* Venue Managers */}
+                  <div className="w-full max-w-sm">
+                    <div className="bg-[#0a0a0a] border border-zinc-800 border-dashed rounded-[12px] p-3.5 flex items-center justify-between">
+                      <div className="space-y-0.5">
+                        <p className="text-[12px] font-black text-white uppercase font-inter">{turf.name?.split(' ')[0] || "Princess"}</p>
+                        <p className="text-[10px] font-bold text-zinc-500 font-inter tracking-tight">7896541230</p>
+                      </div>
+                      <button className="w-9 h-9 rounded-[8px] bg-gradient-to-br from-[#BFF367] to-[#BFF367] flex items-center justify-center text-black hover:brightness-110 transition-all shadow-[0_0_15px_rgba(85,222,232,0.2)]">
+                        <Phone size={16} fill="currentColor" />
+                      </button>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Facilities */}
+                <div className="space-y-4">
+                  <h2 className="text-sm font-inter font-bold uppercase tracking-[0.15em] text-white">Facilities</h2>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    {turf.facilities?.map((facility, index) => (
+                      <div key={index} className="flex items-center gap-3 group">
+                        <div className="w-5 h-5 rounded-full bg-gradient-to-r from-[#BFF367] to-[#BFF367] flex items-center justify-center shrink-0 shadow-[0_0_15px_rgba(85,222,232,0.3)]">
+                          <Check className="w-3 h-3 text-black" strokeWidth={4} />
+                        </div>
+                        <span className="text-xs font-inter font-bold text-zinc-400 uppercase tracking-tight group-hover:text-white transition-colors">{facility}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* About Venue */}
+                <div className="space-y-4">
+                  <h2 className="text-sm font-inter font-bold uppercase tracking-[0.15em] text-white">About Venue</h2>
+                  <div className={`text-zinc-500 text-sm font-inter leading-relaxed whitespace-pre-line font-medium break-all ${!isDescExpanded ? 'line-clamp-4' : ''}`}>
+                    {turf.description || "No description available for this venue."}
+                  </div>
+                  {turf.description && turf.description.length > 150 && (
+                    <button
+                      onClick={() => setIsDescExpanded(!isDescExpanded)}
+                      className="text-[#84CC16] hover:text-[#a3e635] text-xs font-bold uppercase tracking-widest transition-colors mt-2"
+                    >
+                      {isDescExpanded ? "Read Less" : "Read More"}
+                    </button>
+                  )}
+                </div>
+
+              </div>
+            </div>
+
+            {/* Map Section Before Reviews */}
+            <div className="pt-8 px-4 md:px-0 border-t border-zinc-900 mt-8 w-full">
+              <div className="flex items-center justify-between mb-6">
+                <h2 className="text-xl md:text-2xl font-black uppercase tracking-tighter" style={{ fontFamily: "'Open Sans', sans-serif" }}>Location & Directions</h2>
+                <div className="flex items-center gap-2 font-black text-zinc-500">
+                  <MapPin className="w-5 h-5" />
+                  <span className="text-sm md:text-base font-inter">Get there</span>
+                </div>
+              </div>
+              <div className="rounded-[8px] overflow-hidden border border-zinc-800 shadow-2xl h-[350px] relative group w-full">
+                <VenueMap turf={turf} />
+                <div className="absolute inset-0 bg-black/10 group-hover:bg-transparent transition-colors pointer-events-none" />
+              </div>
             </div>
 
             {/* Similar Arenas Nearby Section */}
             {(similarLoading || (similarTurfs && similarTurfs.length > 0)) && (
-              <div className="pt-8 border-t border-zinc-900 animate-fade-in">
+              <div className="pt-8 px-4 md:px-0 border-t border-zinc-900 animate-fade-in">
                 <div className="relative flex flex-col md:flex-row md:items-center justify-between gap-6 mb-8">
                   <div className="relative">
                     <div className="absolute -left-4 top-1/2 -translate-y-1/2 w-1.5 h-8 bg-[#84CC16] rounded-full shadow-[0_0_20px_rgba(132,204,22,0.4)] hidden md:block"></div>
@@ -631,7 +627,7 @@ const TurfDetails = () => {
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-5">
                     {similarTurfs.slice(0, 4).map((t) => (
                       <TurfCard
-                        key={t.id || t._id}
+                         key={t.id || t._id}
                         turf={t}
                         distance={t.distance ? `${(t.distance / 1000).toFixed(1)} km Away` : "Nearby"}
                       />
@@ -655,68 +651,7 @@ const TurfDetails = () => {
             </div>
 
           </div>
-
-          {/* BookingSidebarSection */}
-          <div className="w-full lg:flex-1 lg:min-w-[350px] space-y-8 lg:sticky lg:top-24">
-
-            {/* Desktop Inline Booking Selector */}
-            <div className="hidden lg:block">
-              {bookingSelectorContent}
-            </div>
-
-            {/* Mobile Booking Card Modal */}
-            <div className="lg:hidden">
-              <AnimatePresence>
-                {isBookingModalOpen && (
-                  <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
-                    <motion.div
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 1 }}
-                      exit={{ opacity: 0 }}
-                      className="absolute inset-0 bg-black/80 backdrop-blur-sm"
-                      onClick={() => setIsBookingModalOpen(false)}
-                    />
-                    <motion.div
-                      initial={{ opacity: 0, y: 100, scale: 0.95 }}
-                      animate={{ opacity: 1, y: 0, scale: 1 }}
-                      exit={{ opacity: 0, y: 100, scale: 0.95 }}
-                      className="relative z-10 w-full max-w-lg"
-                    >
-                      <button
-                        onClick={() => setIsBookingModalOpen(false)}
-                        className="absolute -top-12 right-0 text-white/60 hover:text-white bg-white/10 hover:bg-white/20 p-2 rounded-full transition-colors"
-                      >
-                        <X size={20} />
-                      </button>
-                      {bookingSelectorContent}
-                    </motion.div>
-                  </div>
-                )}
-              </AnimatePresence>
-            </div>
-
-            {/* Map Card */}
-            <div className="rounded-[8px] overflow-hidden border border-zinc-800 shadow-2xl h-[200px] relative group">
-              <VenueMap turf={turf} />
-              <div className="absolute inset-0 bg-black/10 group-hover:bg-transparent transition-colors pointer-events-none" />
-            </div>
-
-          </div>
-
         </main>
-
-        {/* Floating Book Now Button */}
-        {!isBookingModalOpen && (
-          <div className="fixed bottom-24 md:bottom-6 right-4 z-[90] lg:hidden">
-            <button
-              onClick={() => setIsBookingModalOpen(true)}
-              className="px-6 py-3 rounded-[6px] bg-gradient-to-r from-[#BFF367] to-[#BFF367] text-black font-black uppercase text-sm tracking-widest shadow-[0_10px_30px_rgba(191,243,103,0.3)] hover:scale-105 transition-transform flex items-center justify-center gap-2"
-            >
-              Book Venue Now <ArrowRight size={18} />
-            </button>
-          </div>
-        )}
-
       </div>
     </div>
   );

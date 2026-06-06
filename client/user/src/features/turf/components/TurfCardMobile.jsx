@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { createPortal } from "react-dom";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { 
@@ -54,12 +54,11 @@ const TurfCardMobile = ({ turf, distance: distanceProp }) => {
   const baseTo = `/venue/${targetId}`;
   const to = returnTo ? `${baseTo}?returnTo=${encodeURIComponent(returnTo)}` : baseTo;
   const images = turf.images?.length > 0 ? turf.images : [turf.image];
-  const rating = turf.averageRating ?? turf.avgRating ?? turf.rating ?? 4.8;
-  const reviewsCount = turf.reviewsCount ?? 128; // fallback mock
+  const rating = turf.averageRating ?? turf.avgRating ?? turf.rating ?? 0;
+  const reviewsCount = turf.reviewsCount ?? 0;
   
   // Extract sports
-  const sportTypes = turf.sportTypes || ["SPORTS"];
-  const sportDisplay = sportTypes[0] || "Football (5v5)";
+  const sportTypes = turf.sportTypes || [];
 
   // Dates & Slots
   const [dates] = useState(generateDates());
@@ -86,12 +85,50 @@ const TurfCardMobile = ({ turf, distance: distanceProp }) => {
   };
   const calendarDays = getDaysInMonth(currentMonthDate);
 
-  const defaultSlots = [
-    "06:30 - 07:30",
-    "07:30 - 08:30",
-    "14:30 - 15:30",
-    "15:30 - 16:30"
-  ];
+  const activeSlots = Array.isArray(turf.generatedSlots) 
+    ? turf.generatedSlots.filter(s => s.isActive !== false) 
+    : [];
+
+  const displaySlots = activeSlots.length > 0
+    ? activeSlots.map(s => `${s.startTime} - ${s.endTime}`)
+    : [];
+
+  // ── Carousel Logic ──
+  const carouselItems = [];
+  if (turf.youtubeUrl) {
+    const getYouTubeId = (url) => {
+      if (!url) return null;
+      const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/;
+      const match = url.match(regExp);
+      return (match && match[2].length === 11) ? match[2] : null;
+    };
+    const videoId = getYouTubeId(turf.youtubeUrl);
+    if (videoId) {
+      carouselItems.push({ type: 'video', id: videoId });
+    }
+  }
+  images.forEach(img => {
+    carouselItems.push({ type: 'image', url: img });
+  });
+
+  const scrollContainerRef = useRef(null);
+  useEffect(() => {
+    if (carouselItems.length <= 1) return;
+    const interval = setInterval(() => {
+      const container = scrollContainerRef.current;
+      if (!container) return;
+      
+      const width = container.clientWidth;
+      const currentIdx = Math.round(container.scrollLeft / width);
+      const nextIdx = (currentIdx + 1) % carouselItems.length;
+      
+      container.scrollTo({
+        left: nextIdx * width,
+        behavior: 'smooth'
+      });
+    }, 3000);
+    return () => clearInterval(interval);
+  }, [carouselItems.length]);
 
   // ── Distance calculation ──
   const [calcDistance, setCalcDistance] = useState(null);
@@ -151,25 +188,71 @@ const TurfCardMobile = ({ turf, distance: distanceProp }) => {
   };
 
   return (
-    <div className="w-full aspect-[7/10] md:aspect-[4/5] bg-[#0B0B0C] rounded-[20px] overflow-hidden border border-white/5 font-inter shadow-2xl flex flex-col">
-      {/* ── Top Image Header (1080x447 ratio fixed) ── */}
-      <div className="relative w-full aspect-[1080/447] shrink-0 group">
-        <div className="absolute inset-0 flex overflow-x-auto snap-x snap-mandatory no-scrollbar">
-          {images.map((img, idx) => (
-            <img
-              key={idx}
-              src={img || "https://images.unsplash.com/photo-1551958219-acbc608c6377?w=800&q=80"}
-              alt={`${turf.name} - ${idx + 1}`}
-              className="w-full h-full object-cover shrink-0 snap-center transition-transform duration-700"
-            />
+    <div className="w-full h-auto bg-[#0B0B0C] rounded-[20px] overflow-hidden border border-white/5 font-inter shadow-2xl flex flex-col">
+      {/* ── Top Image Header (16:9 ratio) ── */}
+      <div className="relative w-full aspect-video shrink-0 group">
+        <div 
+          ref={scrollContainerRef}
+          className="absolute inset-0 flex overflow-x-auto snap-x snap-mandatory no-scrollbar"
+        >
+          {carouselItems.map((item, idx) => (
+            <div key={idx} className="w-full h-full shrink-0 snap-center">
+              {item.type === 'video' ? (
+                <iframe
+                  className="w-full h-full object-cover pointer-events-none"
+                  src={`https://www.youtube.com/embed/${item.id}?autoplay=1&mute=1&controls=0&loop=1&playlist=${item.id}&playsinline=1`}
+                  allow="autoplay; encrypted-media"
+                  allowFullScreen
+                />
+              ) : (
+                <img
+                  src={item.url || "https://images.unsplash.com/photo-1551958219-acbc608c6377?w=800&q=80"}
+                  alt={`${turf.name} - ${idx + 1}`}
+                  className="w-full h-full object-cover"
+                />
+              )}
+            </div>
           ))}
         </div>
         <div className="absolute inset-0 bg-gradient-to-t from-[#111] via-transparent to-black/40 pointer-events-none" />
 
-        {/* Featured Badge */}
-        <div className="absolute top-4 left-4 z-20 flex items-center gap-1.5 bg-black/60 backdrop-blur-md border border-[#BFF367]/30 px-3 py-1.5 rounded-full">
-          <Star size={12} className="text-[#BFF367] fill-[#BFF367]" />
-          <span className="text-[10px] font-black text-[#BFF367] uppercase tracking-wider">Featured</span>
+        {/* Action Buttons Overlay */}
+        <div className="absolute top-4 right-4 z-20 flex flex-col gap-2">
+          <button 
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              navigate(to);
+            }}
+            className="flex items-center justify-center w-8 h-8 rounded-full bg-black/60 backdrop-blur-md border border-white/10 text-white hover:bg-black/80 transition-colors"
+          >
+            <Info size={16} />
+          </button>
+          <button 
+            onClick={toggleWishlist}
+            className="flex items-center justify-center w-8 h-8 rounded-full bg-black/60 backdrop-blur-md border border-white/10 text-white hover:bg-black/80 transition-colors"
+          >
+            <Heart size={14} className={isWishlisted ? "fill-red-500 text-red-500" : "text-white"} />
+          </button>
+          <button 
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              if (navigator.share) {
+                navigator.share({
+                  title: turf.name,
+                  text: 'Check out this venue on Kridaz!',
+                  url: window.location.origin + '/venue/' + targetId,
+                }).catch(err => console.log('Share failed:', err));
+              } else {
+                navigator.clipboard.writeText(window.location.origin + '/venue/' + targetId);
+                toast.success("Link copied to clipboard");
+              }
+            }}
+            className="flex items-center justify-center w-8 h-8 rounded-full bg-black/60 backdrop-blur-md border border-white/10 text-white hover:bg-black/80 transition-colors"
+          >
+            <Share2 size={14} />
+          </button>
         </div>
 
         {/* Pagination Dots */}
@@ -194,7 +277,7 @@ const TurfCardMobile = ({ turf, distance: distanceProp }) => {
             <div className="flex items-center gap-1.5 text-white/50 mt-0.5">
               <MapPin size={12} className="text-[#BFF367]" />
               <p className="text-xs font-medium">
-                {turf.location || turf.city || 'Sector 42, Gurugram, Haryana'}
+                {turf.location || turf.city || 'Location unavailable'}
               </p>
             </div>
           </div>
@@ -207,19 +290,27 @@ const TurfCardMobile = ({ turf, distance: distanceProp }) => {
           </div>
         </div>
 
-        {/* Info Pills */}
-        <div className="flex flex-nowrap overflow-x-auto no-scrollbar items-center gap-3">
-          <div className="flex items-center gap-1 shrink-0">
-            <Zap size={12} className="text-white/60" />
-            <span className="text-[10px] font-semibold text-white/80">{sportDisplay}</span>
-          </div>
 
-          <div className="w-[1px] h-3 bg-white/20 shrink-0" />
-
-          <div className="flex items-center justify-center gap-1 shrink-0">
-            <Wallet size={12} className="text-[#BFF367]" />
-            <span className="text-[10px] font-bold text-white leading-none">250 Coins</span>
-          </div>
+        {/* Detailed Info Row */}
+        <div className="flex flex-wrap gap-2">
+          {sportTypes && sportTypes.length > 0 && (
+            <div className="bg-white/5 border border-white/10 px-2 py-1 rounded-md flex items-center gap-1">
+              <span className="text-[9px] text-white/50 font-medium uppercase tracking-wider">Sports</span>
+              <span className="text-[10px] text-white font-bold">{sportTypes.join(", ")}</span>
+            </div>
+          )}
+          {turf.groundTypes && turf.groundTypes.length > 0 && (
+            <div className="bg-white/5 border border-white/10 px-2 py-1 rounded-md flex items-center gap-1">
+              <span className="text-[9px] text-white/50 font-medium uppercase tracking-wider">Ground</span>
+              <span className="text-[10px] text-white font-bold">{turf.groundTypes.join(", ")}</span>
+            </div>
+          )}
+          {turf.venueType && (
+            <div className="bg-white/5 border border-white/10 px-2 py-1 rounded-md flex items-center gap-1">
+              <span className="text-[9px] text-white/50 font-medium uppercase tracking-wider">Venue</span>
+              <span className="text-[10px] text-white font-bold">{turf.venueType}</span>
+            </div>
+          )}
         </div>
 
         {/* Date Selector */}
@@ -232,22 +323,22 @@ const TurfCardMobile = ({ turf, distance: distanceProp }) => {
                 <button
                   key={idx}
                   onClick={() => setSelectedDate(d)}
-                  className={`flex flex-col items-center justify-center w-full aspect-[3/4] rounded-xl border transition-all ${
+                  className={`flex flex-col items-center justify-center w-full py-1.5 rounded-xl border transition-all ${
                     isSelected 
                       ? "border-[#BFF367] text-[#BFF367] bg-[#BFF367]/10" 
                       : "border-[#222] bg-[#1A1A1A] text-white/60 hover:border-white/20 hover:text-white"
                   }`}
                 >
                   <span className="text-[9px] uppercase tracking-widest opacity-70 mb-0.5">{d.dayName.substring(0, 3)}</span>
-                  <span className="text-lg font-black leading-none">{d.dateNum}</span>
+                  <span className="text-sm font-black leading-none">{d.dateNum}</span>
                 </button>
               );
             })}
             <button
               onClick={(e) => { e.preventDefault(); e.stopPropagation(); setIsDateTimeDrawerOpen(true); }}
-              className="flex flex-col items-center justify-center w-full aspect-[3/4] rounded-xl border border-[#222] bg-[#1A1A1A] text-white/60 hover:border-white/20 hover:text-white transition-all group"
+              className="flex flex-col items-center justify-center w-full py-1.5 rounded-xl border border-[#222] bg-[#1A1A1A] text-white/60 hover:border-white/20 hover:text-white transition-all group"
             >
-              <Calendar size={18} className="group-hover:scale-110 transition-transform" />
+              <Calendar size={16} className="group-hover:scale-110 transition-transform" />
             </button>
           </div>
         </div>
@@ -264,14 +355,14 @@ const TurfCardMobile = ({ turf, distance: distanceProp }) => {
               <span className="text-[8px]">All slots are 1 hour</span>
             </div>
           </div>
-          <div className="grid grid-cols-2 gap-2">
-            {defaultSlots.map((slot, idx) => {
+          <div className="flex flex-nowrap overflow-x-auto no-scrollbar gap-2 pb-1">
+            {displaySlots.length > 0 ? displaySlots.map((slot, idx) => {
               const isSelected = selectedSlot === slot;
               return (
                 <button
                   key={idx}
                   onClick={() => setSelectedSlot(slot)}
-                  className={`relative py-1.5 rounded-lg border transition-all text-[11px] font-bold flex items-center justify-center ${
+                  className={`shrink-0 relative px-3 py-1.5 rounded-lg border transition-all text-[11px] font-bold flex items-center justify-center ${
                     isSelected
                       ? "bg-[#BFF367] border-[#BFF367] text-black"
                       : "border-[#222] bg-[#1A1A1A] text-white/60 hover:border-white/20 hover:text-white"
@@ -280,7 +371,7 @@ const TurfCardMobile = ({ turf, distance: distanceProp }) => {
                   {slot}
                 </button>
               );
-            })}
+            }) : <div className="text-[10px] text-white/40 py-1.5 px-1 italic">No slots available</div>}
           </div>
         </div>
 
@@ -288,9 +379,9 @@ const TurfCardMobile = ({ turf, distance: distanceProp }) => {
         <div className="flex flex-col gap-2 mt-auto">
           <button 
             onClick={handleBookNow}
-            className="w-full bg-[#BFF367] hover:bg-[#aade55] text-black font-black text-sm py-2.5 rounded-xl flex items-center justify-center transition-colors relative"
+            className={`w-full font-black text-sm py-2.5 rounded-xl flex items-center justify-center transition-colors relative ${selectedSlot ? "bg-[#BFF367] hover:bg-[#aade55] text-black" : "bg-[#222] text-white/40 cursor-not-allowed"}`}
           >
-            <span>Book Now</span>
+            <span>{selectedSlot ? (turf.pricePerHour ? `Book Now - ₹${turf.pricePerHour}` : "Book Now") : "Select a Time Slot"}</span>
           </button>
         </div>
       </div>
@@ -386,7 +477,7 @@ const TurfCardMobile = ({ turf, distance: distanceProp }) => {
 
             <h4 className="text-sm font-bold text-white mb-3 shrink-0">Time Slots</h4>
             <div className="grid grid-cols-2 gap-3 mb-6 shrink-0">
-              {defaultSlots.map((slot, idx) => {
+              {displaySlots.length > 0 ? displaySlots.map((slot, idx) => {
                 const isSelected = selectedSlot === slot;
                 return (
                   <button
@@ -399,14 +490,21 @@ const TurfCardMobile = ({ turf, distance: distanceProp }) => {
                     {slot}
                   </button>
                 );
-              })}
+              }) : <div className="col-span-2 text-center text-xs text-white/40 py-4 italic">No slots available for this day.</div>}
             </div>
             
             <button 
-              onClick={(e) => { e.stopPropagation(); setIsDateTimeDrawerOpen(false); }}
-              className="w-full mt-auto md:mt-4 bg-white/10 hover:bg-white/20 text-white font-bold py-3.5 rounded-xl transition-colors shrink-0"
+              onClick={(e) => {
+                e.stopPropagation();
+                if (selectedSlot) {
+                  handleBookNow(e);
+                } else {
+                  setIsDateTimeDrawerOpen(false);
+                }
+              }}
+              className={`w-full mt-auto md:mt-4 font-bold py-3.5 rounded-xl transition-colors shrink-0 ${selectedSlot ? "bg-[#BFF367] text-black hover:bg-[#aade55]" : "bg-white/10 text-white hover:bg-white/20"}`}
             >
-              Confirm Selection
+              {selectedSlot ? (turf.pricePerHour ? `Book Now - ₹${turf.pricePerHour}` : "Book Now") : "Close"}
             </button>
           </div>
         </div>,

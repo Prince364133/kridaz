@@ -9,6 +9,7 @@ import {
 import axiosInstance from "@hooks/useAxiosInstance";
 import toast from "react-hot-toast";
 import { followUser, unfollowUser } from "@redux/slices/authSlice";
+import { setFilters } from "@redux/slices/turfSlice";
 import useLoginOnDemand from "@hooks/useLoginOnDemand";
 import { Liquid } from "../ui/button-1";
 import SearchTurf from "@components/search/SearchTurf.jsx";
@@ -21,7 +22,7 @@ import {
   useUnfollowPlayerMutation
 } from "@redux/api/userApi";
 import { useGetTurfsQuery, useGetTurfDetailsQuery } from "@redux/api/turfApi";
-
+import { useGetMyScoringGamesQuery } from "@redux/api/scoringApi";
 const LIQUID_COLORS = {
   color1: '#FFFFFF',
   color2: '#1E10C5',
@@ -41,59 +42,11 @@ const LIQUID_COLORS = {
   color16: '#290ECB',
   color17: '#3F4CC0',
 };
-const TOP_5_LIVE_MATCHES = [
-  {
-    id: 1,
-    venue: "Wankhede Stadium",
-    type: "Cricket (T20)",
-    crr: "7.8",
-    target: "154",
-    team1: { name: "Mumbai Indians", short: "MI", bg: "bg-[#111]", text: "text-white", score: "153/4", overs: "(20.0)" },
-    team2: { name: "Chennai S.K.", short: "CSK", bg: "bg-yellow-500/20", text: "text-yellow-500", score: "112/5", overs: "(14.2)" },
-  },
-  {
-    id: 2,
-    venue: "Eden Gardens",
-    type: "Cricket (T20)",
-    crr: "9.2",
-    target: "201",
-    team1: { name: "Kolkata K.R.", short: "KKR", bg: "bg-[#3B215D]", text: "text-purple-300", score: "200/6", overs: "(20.0)" },
-    team2: { name: "Royal Challengers", short: "RCB", bg: "bg-[#E83441]/20", text: "text-[#E83441]", score: "45/1", overs: "(4.5)" },
-  },
-  {
-    id: 3,
-    venue: "Chinnaswamy",
-    type: "Cricket (T20)",
-    crr: "6.5",
-    target: "120",
-    team1: { name: "Delhi Capitals", short: "DC", bg: "bg-[#004C93]", text: "text-blue-300", score: "119/8", overs: "(20.0)" },
-    team2: { name: "Sunrisers Hyd", short: "SRH", bg: "bg-[#F26522]/20", text: "text-orange-500", score: "15/0", overs: "(2.1)" },
-  },
-  {
-    id: 4,
-    venue: "Narendra Modi St.",
-    type: "Cricket (T20)",
-    crr: "10.1",
-    target: "215",
-    team1: { name: "Gujarat Titans", short: "GT", bg: "bg-[#1B2133]", text: "text-teal-300", score: "214/4", overs: "(20.0)" },
-    team2: { name: "Punjab Kings", short: "PBKS", bg: "bg-[#ED1B24]/20", text: "text-red-500", score: "55/3", overs: "(5.2)" },
-  },
-  {
-    id: 5,
-    venue: "Sawai Mansingh",
-    type: "Cricket (T20)",
-    crr: "8.4",
-    target: "165",
-    team1: { name: "Rajasthan Royals", short: "RR", bg: "bg-[#EA1A85]/20", text: "text-pink-500", score: "164/7", overs: "(20.0)" },
-    team2: { name: "Lucknow S.G.", short: "LSG", bg: "bg-[#1795D4]/20", text: "text-cyan-400", score: "90/2", overs: "(10.4)" },
-  },
-];
 
 export default function DesktopRightSidebar({ isRightDrawerOpen, setIsRightDrawerOpen }) {
   const location = useLocation();
-  const [minRating, setMinRating] = useState(0.0);
-  const [maxRating, setMaxRating] = useState(5.0);
   const dispatch = useDispatch();
+  const searchFilters = useSelector((state) => state.turf?.filters || {});
   const { gateInteraction } = useLoginOnDemand();
   const { isLoggedIn, user, followingIds = [] } = useSelector((state) => state.auth);
 
@@ -160,7 +113,24 @@ export default function DesktopRightSidebar({ isRightDrawerOpen, setIsRightDrawe
     undefined,
     { skip: !showHomeWidgets || !isLoggedIn }
   );
-  const bookings = bookingsData || [];
+  
+  const upcomingBookingsList = (bookingsData || []).filter((booking) => {
+    const bookingDate = new Date(booking.date || booking.timeSlot?.date || booking.createdAt);
+    bookingDate.setHours(0, 0, 0, 0);
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    return bookingDate >= today;
+  });
+
+  // Live Matches (RTK Query)
+  const { data: scoringGamesData, isLoading: loadingScoringGames } = useGetMyScoringGamesQuery(
+    undefined,
+    { skip: !showHomeWidgets || !isLoggedIn }
+  );
+  
+  const scoringGames = scoringGamesData?.games || (Array.isArray(scoringGamesData) ? scoringGamesData : []);
+  const liveNetworkMatches = scoringGames.filter(game => game.status === "LIVE" || game.status === "ONGOING" || game.status === "live");
+
 
   // 4. Wallet Balance (RTK Query)
   const { data: walletData, isLoading: loadingWallet } = useGetUserWalletQuery(
@@ -229,12 +199,12 @@ export default function DesktopRightSidebar({ isRightDrawerOpen, setIsRightDrawe
       )}
 
       <aside className={`fixed xl:sticky top-[77px] xl:top-[96px] right-0 bottom-0 xl:bottom-auto w-[440px] xl:w-[350px] bg-[#050505] xl:bg-transparent border-l border-white/5 xl:border-l-0 p-6 xl:p-0 xl:pl-6 overflow-y-auto xl:overflow-y-auto no-scrollbar transition-transform duration-300 z-[74] xl:z-[50] h-auto xl:h-[calc(100vh-120px)] shrink-0 ${isRightDrawerOpen ? "translate-x-0" : "translate-x-full xl:translate-x-0"}`}>
-        <div className="space-y-6">
+        <div className="space-y-4">
           {/* ── HOME & GENERAL PORTAL VIEW WIDGETS ── */}
           {showHomeWidgets && (
             <>
               {/* Host Your Venues CTA */}
-              <Link to="/host" className="relative block overflow-hidden rounded-2xl h-[140px] shadow-[0_4px_20px_rgba(0,0,0,0.5)] group border border-white/[0.05] hover:border-[#BFF367]/50 transition-all duration-300">
+              <Link to="/host" className="relative block overflow-hidden rounded-2xl w-full aspect-video shadow-[0_4px_20px_rgba(0,0,0,0.5)] group border border-white/[0.05] hover:border-[#BFF367]/50 transition-all duration-300 my-0">
                 {/* Background Image */}
                 <div 
                   className="absolute inset-0 bg-cover bg-center group-hover:scale-105 transition-transform duration-700"
@@ -253,121 +223,92 @@ export default function DesktopRightSidebar({ isRightDrawerOpen, setIsRightDrawe
               </Link>
 
               {/* Live Now */}
-              <div className="space-y-3">
-                <div className="flex items-center justify-between px-1">
-                  <h4 className="text-[11px] font-black uppercase text-white/40 tracking-widest">Live Now</h4>
-                  <div className="flex items-center gap-1.5">
-                    <button 
-                      onClick={() => scrollLiveMatches('left')}
-                      className="p-1 rounded-full bg-white/5 border border-white/5 hover:bg-[#E83441]/20 hover:border-[#E83441]/50 text-white hover:text-[#E83441] transition-all"
-                    >
-                      <ChevronLeft size={14} />
-                    </button>
-                    <button 
-                      onClick={() => scrollLiveMatches('right')}
-                      className="p-1 rounded-full bg-white/5 border border-white/5 hover:bg-[#E83441]/20 hover:border-[#E83441]/50 text-white hover:text-[#E83441] transition-all"
-                    >
-                      <ChevronRight size={14} />
-                    </button>
+              {isLoggedIn && (loadingScoringGames || liveNetworkMatches.length > 0) && (
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between px-1">
+                    <h4 className="text-[11px] font-black uppercase text-white/40 tracking-widest">Live Now</h4>
+                    <div className="flex items-center gap-1.5">
+                      <button 
+                        onClick={() => scrollLiveMatches('left')}
+                        className="p-1 rounded-full bg-white/5 border border-white/5 hover:bg-[#E83441]/20 hover:border-[#E83441]/50 text-white hover:text-[#E83441] transition-all"
+                      >
+                        <ChevronLeft size={14} />
+                      </button>
+                      <button 
+                        onClick={() => scrollLiveMatches('right')}
+                        className="p-1 rounded-full bg-white/5 border border-white/5 hover:bg-[#E83441]/20 hover:border-[#E83441]/50 text-white hover:text-[#E83441] transition-all"
+                      >
+                        <ChevronRight size={14} />
+                      </button>
+                    </div>
+                  </div>
+                  
+                  <div 
+                    ref={liveMatchesScrollRef}
+                    className="flex overflow-x-auto no-scrollbar snap-x snap-mandatory scroll-smooth"
+                  >
+                    {loadingScoringGames ? (
+                      <div className="w-full py-4 flex justify-center items-center">
+                        <div className="w-4 h-4 border-2 border-[#E83441] border-t-transparent rounded-full animate-spin"></div>
+                      </div>
+                    ) : (
+                      liveNetworkMatches.map((match) => {
+                        const teamA = match.teamA || (Array.isArray(match.teams) ? match.teams.find(t => t.teamKey === 'teamA') : match.teams?.teamA) || {};
+                        const teamB = match.teamB || (Array.isArray(match.teams) ? match.teams.find(t => t.teamKey === 'teamB') : match.teams?.teamB) || {};
+                        return (
+                          <Link key={match._id || match.id} to={`/match/live/${match._id || match.id}`} className="min-w-full shrink-0 snap-start block bg-gradient-to-br from-[#E83441]/20 via-[#0B0B0C] to-[#0B0B0C] border border-[#E83441]/20 rounded-xl p-4 hover:border-[#E83441]/40 transition-all duration-300 shadow-[0_4px_20px_rgba(0,0,0,0.4)] backdrop-blur-sm group relative">
+                            {/* Top section: Status & Info */}
+                            <div className="flex justify-between items-start mb-4">
+                              <div className="flex gap-3 items-center">
+                                <div className="bg-[#E83441] text-white text-[9px] font-black uppercase px-2 py-0.5 rounded-[4px] tracking-widest shadow-[0_0_10px_rgba(232,52,65,0.4)]">
+                                  LIVE
+                                </div>
+                                <div>
+                                  <h5 className="text-[12px] font-bold text-white leading-none">{match.venue || "Kridaz Arena"}</h5>
+                                  <p className="text-[10px] text-white/50 mt-1 font-medium">{match.sportType || match.gameType || "Match"}</p>
+                                </div>
+                              </div>
+                              <div className="text-[10px] font-medium text-right leading-tight">
+                                <span className="text-[#BFF367]">Overs: {match.overs || 0}</span><br/>
+                                {match.target && <span className="text-white/40 text-[9px]">Target: {match.target}</span>}
+                              </div>
+                            </div>
+                            
+                            {/* Bottom section: Scoreboard */}
+                            <div className="flex flex-col gap-2.5 relative pr-6">
+                              {/* Team 1 */}
+                              <div className="flex items-center justify-between">
+                                <div className="flex items-center gap-2">
+                                  <div className={`w-6 h-6 rounded bg-[#111] border border-white/10 flex items-center justify-center shrink-0`}>
+                                    {teamA.logo ? <img src={teamA.logo} alt="A" className="w-full h-full object-cover rounded" /> : <span className={`text-[10px] font-black text-white`}>{(teamA.name || "A").substring(0,2)}</span>}
+                                  </div>
+                                  <span className="text-[11px] font-bold text-white/60">{teamA.name || "Team A"}</span>
+                                </div>
+                                <div className="text-[14px] font-black text-white/60 font-mono tracking-tight">
+                                  {teamA.score || "0"} <span className="text-[9px] font-medium text-white/40 ml-0.5">({teamA.oversPlayed || "0.0"})</span>
+                                </div>
+                              </div>
+                              
+                              {/* Team 2 (Batting) */}
+                              <div className="flex items-center justify-between">
+                                <div className="flex items-center gap-2">
+                                  <div className={`w-6 h-6 rounded bg-yellow-500/20 border border-white/10 flex items-center justify-center shrink-0`}>
+                                    {teamB.logo ? <img src={teamB.logo} alt="B" className="w-full h-full object-cover rounded" /> : <span className={`text-[10px] font-black text-yellow-500`}>{(teamB.name || "B").substring(0,2)}</span>}
+                                  </div>
+                                  <span className="text-[11px] font-bold text-white">{teamB.name || "Team B"}</span>
+                                </div>
+                                <div className="text-[14px] font-black text-white font-mono tracking-tight shadow-[#BFF367]">
+                                  {teamB.score || "0"} <span className="text-[9px] font-medium text-white/60 ml-0.5">({teamB.oversPlayed || "0.0"})</span>
+                                </div>
+                              </div>
+                            </div>
+                          </Link>
+                        );
+                      })
+                    )}
                   </div>
                 </div>
-                
-                <div 
-                  ref={liveMatchesScrollRef}
-                  className="flex overflow-x-auto no-scrollbar snap-x snap-mandatory scroll-smooth"
-                >
-                  {TOP_5_LIVE_MATCHES.map((match) => (
-                    <Link key={match.id} to={`/match/live/${match.id}`} className="min-w-full shrink-0 snap-start block bg-gradient-to-br from-[#E83441]/20 via-[#0B0B0C] to-[#0B0B0C] border border-[#E83441]/20 rounded-xl p-4 hover:border-[#E83441]/40 transition-all duration-300 shadow-[0_4px_20px_rgba(0,0,0,0.4)] backdrop-blur-sm group relative">
-                      {/* Top section: Status & Info */}
-                      <div className="flex justify-between items-start mb-4">
-                        <div className="flex gap-3 items-center">
-                          <div className="bg-[#E83441] text-white text-[9px] font-black uppercase px-2 py-0.5 rounded-[4px] tracking-widest shadow-[0_0_10px_rgba(232,52,65,0.4)]">
-                            LIVE
-                          </div>
-                          <div>
-                            <h5 className="text-[12px] font-bold text-white leading-none">{match.venue}</h5>
-                            <p className="text-[10px] text-white/50 mt-1 font-medium">{match.type}</p>
-                          </div>
-                        </div>
-                        <div className="text-[10px] font-medium text-right leading-tight">
-                          <span className="text-[#BFF367]">CRR: {match.crr}</span><br/>
-                          <span className="text-white/40 text-[9px]">Target: {match.target}</span>
-                        </div>
-                      </div>
-                      
-                      {/* Bottom section: Scoreboard */}
-                      <div className="flex flex-col gap-2.5 relative pr-6">
-                        {/* Team 1 */}
-                        <div className="flex items-center justify-between">
-                          <div className="flex items-center gap-2">
-                            <div className={`w-6 h-6 rounded ${match.team1.bg} border border-white/10 flex items-center justify-center shrink-0`}>
-                              <span className={`text-[10px] font-black ${match.team1.text}`}>{match.team1.short}</span>
-                            </div>
-                            <span className="text-[11px] font-bold text-white/60">{match.team1.name}</span>
-                          </div>
-                          <div className="text-[14px] font-black text-white/60 font-mono tracking-tight">
-                            {match.team1.score} <span className="text-[9px] font-medium text-white/40 ml-0.5">{match.team1.overs}</span>
-                          </div>
-                        </div>
-                        
-                        {/* Team 2 (Batting) */}
-                        <div className="flex items-center justify-between">
-                          <div className="flex items-center gap-2">
-                            <div className={`w-6 h-6 rounded ${match.team2.bg} border border-white/10 flex items-center justify-center shrink-0`}>
-                              <span className={`text-[10px] font-black ${match.team2.text}`}>{match.team2.short}</span>
-                            </div>
-                            <span className="text-[11px] font-bold text-white">{match.team2.name}</span>
-                          </div>
-                          <div className="text-[14px] font-black text-[#BFF367] font-mono tracking-tight">
-                            {match.team2.score} <span className="text-[9px] font-medium text-[#BFF367]/60 ml-0.5">{match.team2.overs}</span>
-                          </div>
-                        </div>
-                        
-                        <div className="absolute right-0 top-1/2 -translate-y-1/2 w-5 h-5 rounded-full bg-white/5 flex items-center justify-center text-white/30 group-hover:text-white group-hover:bg-white/10 transition-all">
-                          <ChevronRight size={12} />
-                        </div>
-                      </div>
-                    </Link>
-                  ))}
-                </div>
-              </div>
-
-              {/* Ad Space */}
-              <div className="relative block rounded-xl overflow-hidden shadow-[0_4px_20px_rgba(0,0,0,0.4)] group cursor-pointer h-[126px] bg-[#0B0B0C] border border-white/[0.05]">
-                <img 
-                  src="/ad_image.png" 
-                  alt="Advertisement" 
-                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" 
-                />
-              </div>
-
-
-
-              {/* Tournaments Section */}
-              <div className="mt-4">
-                <div className="flex items-center justify-between mb-4">
-                  <h4 className="text-[11px] font-black uppercase text-white/40 tracking-widest">Tournament</h4>
-                </div>
-                
-                <Link to="/coming-soon" className="relative block w-full h-[120px] rounded-xl overflow-hidden group border border-white/[0.05] shadow-[0_4px_20px_rgba(0,0,0,0.4)]">
-                  {/* Background Image */}
-                  <img 
-                    src="/tournament-bg-custom.png" 
-                    alt="Tournament Background" 
-                    className="absolute top-0 right-0 h-full w-auto max-w-none object-cover" 
-                  />
-                  
-                  {/* Left-to-right fade gradient */}
-                  <div className="absolute inset-0 bg-gradient-to-r from-[#030114] via-[#030114]/90 to-transparent w-[75%]" />
-                  <div className="absolute inset-0 bg-black/10 group-hover:bg-black/0 transition-colors duration-300" />
-                  
-                  {/* Content Container */}
-                  <div className="relative z-10 w-full h-full p-4 flex flex-col justify-center">
-                    <h3 className="text-[20px] font-black text-white leading-tight uppercase group-hover:text-[#BFF367] transition-colors">Kridaz Premier League</h3>
-                    <p className="text-[12px] font-medium text-white/50 tracking-widest uppercase mt-1">COMING SOON</p>
-                  </div>
-                </Link>
-              </div>
+              )}
 
               {/* 8. Upcoming Bookings (Moved Above Players) */}
               <div className="mt-4">
@@ -392,42 +333,57 @@ export default function DesktopRightSidebar({ isRightDrawerOpen, setIsRightDrawe
                   ref={nearbyScrollRef}
                   className="flex gap-3 overflow-x-auto no-scrollbar pb-2 scroll-smooth"
                 >
-                  {isLoggedIn && bookings.length > 0 ? (
-                    bookings.map((booking, idx) => {
-                      const dateObj = new Date(booking.date || booking.timeSlot?.date || Date.now());
+                  {loadingBookings ? (
+                    <div className="w-full py-4 flex justify-center items-center">
+                      <div className="w-4 h-4 border-2 border-[#BFF367] border-t-transparent rounded-full animate-spin"></div>
+                    </div>
+                  ) : isLoggedIn && upcomingBookingsList.length > 0 ? (
+                    upcomingBookingsList.map((booking, idx) => {
+                      const dateObj = new Date(booking.date || booking.bookingDate || booking.timeSlot?.date || Date.now());
                       const dayStr = dateObj.getDate().toString().padStart(2, '0');
                       const monthStr = dateObj.toLocaleString('en-US', { month: 'short' }).toUpperCase();
+                      
+                      let startTime = booking.timeSlot?.formattedStartTime || booking.startTime || "Slot";
+                      if (booking.startTime && booking.startTime.includes('T')) {
+                        startTime = new Date(booking.startTime).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+                      } else if (booking.playStartTime) {
+                        startTime = new Date(booking.playStartTime).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+                      }
+
+                      const turfName = booking.turf?.name || booking.turfName || booking.customVenue || "Confirmed Venue";
+                      const turfAddress = booking.turf?.address || booking.turf?.city || booking.turfCity || booking.city || booking.location || "View Details";
+                      const turfImage = booking.turf?.images?.[0] || booking.turfImage || "/default-turf.jpg";
 
                       return (
-                        <Link key={booking._id || booking.id} to={`/booking-pass/${booking.id || booking._id}`} className="min-w-[145px] w-[145px] flex flex-col rounded-xl border border-gray-600/60 bg-[#070708] overflow-hidden group shrink-0 shadow-sm transition-all hover:border-gray-500">
+                        <Link key={booking._id || booking.id} to={`/booking-pass/${booking.id || booking._id}`} className="min-w-[145px] w-[145px] flex flex-col rounded-xl border border-gray-600/60 bg-[#070708] overflow-hidden group shrink-0 shadow-sm transition-all hover:border-[#BFF367]/50">
                           {/* Image Section */}
                           <div className="relative w-full aspect-[4/5] overflow-hidden bg-white/5">
                             <img 
-                              src={booking.turf?.images?.[0] || "/default-turf.jpg"} 
+                              src={turfImage} 
                               className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" 
                               onError={(e) => { e.target.onerror = null; e.target.src = "https://images.unsplash.com/photo-1540747913346-19e32dc3e97e?auto=format&fit=crop&q=80"; }} 
-                              alt={booking.turf?.name}
+                              alt={turfName}
                             />
-                            {/* Pink Banner */}
+                            {/* Banner */}
                             <div className="absolute bottom-0 left-0 right-0 bg-[#E81E73] p-1 px-2">
-                              <p className="text-[9px] font-bold text-white text-center">Booked • {booking.timeSlot?.formattedStartTime || "Slot"}</p>
+                              <p className="text-[9px] font-bold text-white text-center">Booked • {startTime}</p>
                             </div>
                           </div>
                           
                           {/* Text Section */}
                           <div className="flex gap-2 p-2">
                             {/* Date Box */}
-                            <div className="bg-[#2A2D34] rounded-lg p-1 w-[36px] h-[40px] flex flex-col items-center justify-center shrink-0">
+                            <div className="bg-[#2A2D34] rounded-lg p-1 w-[36px] h-[40px] flex flex-col items-center justify-center shrink-0 border border-white/5">
                               <span className="text-[11px] font-black text-white leading-none">{dayStr}</span>
-                              <span className="text-[7px] font-bold text-white/70 leading-none mt-1 uppercase">{monthStr}</span>
+                              <span className="text-[7px] font-bold text-[#BFF367] leading-none mt-1 uppercase">{monthStr}</span>
                             </div>
                             
                             {/* Text Details */}
                             <div className="flex-1 min-w-0 flex flex-col justify-center">
                               <h5 className="text-[10px] font-bold text-white leading-tight group-hover:text-[#BFF367] transition-colors line-clamp-2">
-                                {booking.turf?.name}
+                                {turfName}
                               </h5>
-                              <p className="text-[8px] text-white/50 truncate mt-0.5 font-medium">{booking.turf?.city || "Confirmed"}</p>
+                              <p className="text-[8px] text-white/50 truncate mt-0.5 font-medium">{turfAddress}</p>
                             </div>
                           </div>
                         </Link>
@@ -441,52 +397,9 @@ export default function DesktopRightSidebar({ isRightDrawerOpen, setIsRightDrawe
                 </div>
               </div>
 
-              {/* Suggested Players (Moved Below Upcoming Bookings) */}
-              <div className="bg-[#0B0B0C] border border-white/[0.05] rounded-xl p-4 shadow-[0_4px_20px_rgba(0,0,0,0.4)] mt-2">
-                <div className="flex items-center justify-between mb-4">
-                  <h4 className="text-[11px] font-black uppercase text-white/40 tracking-widest">Players You May Know</h4>
-                  <Link to="/players" className="text-[11px] font-bold text-[#BFF367] hover:underline">View All</Link>
-                </div>
-                
-                <div className="flex items-center justify-between gap-2 overflow-x-auto no-scrollbar pb-1">
-                  {loadingPlayers ? (
-                    <div className="text-[10px] text-white/40 font-medium py-3 text-center w-full">Loading players...</div>
-                  ) : suggestedPlayers.length > 0 ? (
-                    suggestedPlayers.slice(0, 4).map((player) => {
-                      const playerId = player._id || player.id;
-                      const isFollowed = followingIds.includes(playerId);
-                      const mutualCount = player.mutualFriendsCount || player.mutualFriends || 0;
-                      return (
-                        <div key={playerId} className="flex flex-col items-center min-w-[70px] gap-1">
-                          <div className="relative">
-                            <Link to={`/profile/${playerId}`} className="block relative group cursor-pointer">
-                              <img 
-                                src={player.profilePicture || `https://api.dicebear.com/7.x/avataaars/svg?seed=${player.name}`} 
-                                className="w-12 h-12 md:w-14 md:h-14 rounded-full object-cover shrink-0 bg-white/5 border border-white/5 group-hover:border-[#BFF367]/50 transition-colors" 
-                                alt={player.name}
-                              />
-                            </Link>
-                            <button
-                              onClick={(e) => { e.preventDefault(); handleFollowToggleLocal(player); }}
-                              className={`absolute -bottom-0.5 -right-0.5 p-1 rounded-full transition-all border-[1.5px] border-[#0B0B0C] z-10 ${isFollowed ? "bg-[#2A2D34] text-white/40 hover:text-white" : "bg-[#BFF367] text-black hover:scale-110 active:scale-95 shadow-[0_0_12px_rgba(191,243,103,0.2)]"}`}
-                            >
-                              {isFollowed ? <UserMinus size={8} /> : <Plus size={9} strokeWidth={4} />}
-                            </button>
-                          </div>
-                          <Link to={`/profile/${playerId}`} className="text-center mt-0.5 group">
-                            <h5 className="text-[11px] md:text-[12px] font-bold text-white truncate max-w-[70px] group-hover:text-[#BFF367] transition-colors">{player.name.split(' ')[0]}</h5>
-                            <span className="text-[8px] text-white/40 font-medium block mt-0.5">
-                              {mutualCount > 0 ? `${mutualCount} mutual` : "No mutual"}
-                            </span>
-                          </Link>
-                        </div>
-                      );
-                    })
-                  ) : (
-                    <div className="text-[11px] font-medium text-white/30 italic text-center w-full py-2">No suggested players found</div>
-                  )}
-                </div>
-              </div>
+
+
+
 
               {/* Invite & Earn Strip (Moved to Bottom) */}
               <div className="w-full mt-4 flex justify-center">
@@ -586,7 +499,7 @@ export default function DesktopRightSidebar({ isRightDrawerOpen, setIsRightDrawe
                 </div>
               ) : (
                 <div className="bg-[#0B0B0C] border border-white/[0.05] rounded-xl p-5 shadow-md">
-                  <SearchTurf onSearch={() => {}} />
+                  <SearchTurf onSearch={(filters) => dispatch(setFilters(filters))} />
 
                   {/* Advanced Filters */}
                   <div className="mt-8 space-y-8 border-t border-white/[0.05] pt-6">
@@ -596,11 +509,21 @@ export default function DesktopRightSidebar({ isRightDrawerOpen, setIsRightDrawe
                       <h5 className="text-[13px] font-black uppercase text-white tracking-wider">Slot Availability</h5>
                       <div className="space-y-3">
                         <label className="flex items-center gap-3 cursor-pointer group">
-                          <input type="checkbox" className="accent-[#BFF367] w-4 h-4 rounded border-[#333] bg-transparent cursor-pointer" />
+                          <input 
+                            type="checkbox" 
+                            checked={searchFilters.onlyAvailable || false}
+                            onChange={(e) => dispatch(setFilters({ onlyAvailable: e.target.checked }))}
+                            className="accent-[#BFF367] w-4 h-4 rounded border-[#333] bg-transparent cursor-pointer" 
+                          />
                           <span className="text-[13px] font-medium text-gray-400 group-hover:text-white transition-colors">Show Only Available Venues</span>
                         </label>
                         <label className="flex items-center gap-3 cursor-pointer group">
-                          <input type="checkbox" className="accent-[#BFF367] w-4 h-4 rounded border-[#333] bg-transparent cursor-pointer" />
+                          <input 
+                            type="checkbox" 
+                            checked={searchFilters.onlyFavorites || false}
+                            onChange={(e) => dispatch(setFilters({ onlyFavorites: e.target.checked }))}
+                            className="accent-[#BFF367] w-4 h-4 rounded border-[#333] bg-transparent cursor-pointer" 
+                          />
                           <span className="text-[13px] font-medium text-gray-400 group-hover:text-white transition-colors">Show Only Favorites</span>
                         </label>
                       </div>
@@ -611,19 +534,39 @@ export default function DesktopRightSidebar({ isRightDrawerOpen, setIsRightDrawe
                       <h5 className="text-[13px] font-black uppercase text-white tracking-wider">Slot Timings</h5>
                       <div className="space-y-3">
                         <label className="flex items-center gap-3 cursor-pointer group">
-                          <input type="checkbox" className="accent-[#BFF367] w-4 h-4 rounded border-[#333] bg-transparent cursor-pointer" />
+                          <input 
+                            type="checkbox" 
+                            checked={searchFilters.timingMorning || false}
+                            onChange={(e) => dispatch(setFilters({ timingMorning: e.target.checked }))}
+                            className="accent-[#BFF367] w-4 h-4 rounded border-[#333] bg-transparent cursor-pointer" 
+                          />
                           <span className="text-[13px] font-medium text-gray-400 group-hover:text-white transition-colors">Morning (6:00 AM - 11:00 AM)</span>
                         </label>
                         <label className="flex items-center gap-3 cursor-pointer group">
-                          <input type="checkbox" className="accent-[#BFF367] w-4 h-4 rounded border-[#333] bg-transparent cursor-pointer" />
+                          <input 
+                            type="checkbox" 
+                            checked={searchFilters.timingAfternoon || false}
+                            onChange={(e) => dispatch(setFilters({ timingAfternoon: e.target.checked }))}
+                            className="accent-[#BFF367] w-4 h-4 rounded border-[#333] bg-transparent cursor-pointer" 
+                          />
                           <span className="text-[13px] font-medium text-gray-400 group-hover:text-white transition-colors">Afternoon (11:00 AM - 5:00 PM)</span>
                         </label>
                         <label className="flex items-center gap-3 cursor-pointer group">
-                          <input type="checkbox" className="accent-[#BFF367] w-4 h-4 rounded border-[#333] bg-transparent cursor-pointer" />
+                          <input 
+                            type="checkbox" 
+                            checked={searchFilters.timingEvening || false}
+                            onChange={(e) => dispatch(setFilters({ timingEvening: e.target.checked }))}
+                            className="accent-[#BFF367] w-4 h-4 rounded border-[#333] bg-transparent cursor-pointer" 
+                          />
                           <span className="text-[13px] font-medium text-gray-400 group-hover:text-white transition-colors">Evening (5:00 PM - 10:00 PM)</span>
                         </label>
                         <label className="flex items-center gap-3 cursor-pointer group">
-                          <input type="checkbox" className="accent-[#BFF367] w-4 h-4 rounded border-[#333] bg-transparent cursor-pointer" />
+                          <input 
+                            type="checkbox" 
+                            checked={searchFilters.timingLateNight || false}
+                            onChange={(e) => dispatch(setFilters({ timingLateNight: e.target.checked }))}
+                            className="accent-[#BFF367] w-4 h-4 rounded border-[#333] bg-transparent cursor-pointer" 
+                          />
                           <span className="text-[13px] font-medium text-gray-400 group-hover:text-white transition-colors">Late Night (After 10 PM)</span>
                         </label>
                       </div>
@@ -631,29 +574,17 @@ export default function DesktopRightSidebar({ isRightDrawerOpen, setIsRightDrawe
 
                     {/* Star Rating */}
                     <div className="space-y-4">
-                      <h5 className="text-[13px] font-black uppercase text-white tracking-wider">Star Rating: {minRating.toFixed(1)} - {maxRating.toFixed(1)}</h5>
+                      <h5 className="text-[13px] font-black uppercase text-white tracking-wider">Star Rating: {(searchFilters.minRating || 0).toFixed(1)} - 5.0</h5>
                       <div className="space-y-5 px-1 pt-1">
                         <div className="flex flex-col gap-2">
                           <div className="flex justify-between text-[11px] font-bold uppercase tracking-wider text-gray-400">
-                            <span>Min Rating: {minRating.toFixed(1)}</span>
+                            <span>Min Rating: {(searchFilters.minRating || 0).toFixed(1)}</span>
                           </div>
                           <input 
                             type="range" min="0" max="5" step="0.5" 
-                            value={minRating}
-                            onChange={(e) => setMinRating(parseFloat(e.target.value))}
-                            style={{ background: `linear-gradient(to right, #BFF367 ${(minRating / 5) * 100}%, #1F1F1F ${(minRating / 5) * 100}%)` }}
-                            className="w-full h-1.5 rounded-lg appearance-none cursor-pointer [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-4 [&::-webkit-slider-thumb]:h-4 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-[#BFF367]" 
-                          />
-                        </div>
-                        <div className="flex flex-col gap-2">
-                          <div className="flex justify-between text-[11px] font-bold uppercase tracking-wider text-gray-400">
-                            <span>Max Rating: {maxRating.toFixed(1)}</span>
-                          </div>
-                          <input 
-                            type="range" min="0" max="5" step="0.5" 
-                            value={maxRating}
-                            onChange={(e) => setMaxRating(parseFloat(e.target.value))}
-                            style={{ background: `linear-gradient(to right, #BFF367 ${(maxRating / 5) * 100}%, #1F1F1F ${(maxRating / 5) * 100}%)` }}
+                            value={searchFilters.minRating || 0}
+                            onChange={(e) => dispatch(setFilters({ minRating: parseFloat(e.target.value) }))}
+                            style={{ background: `linear-gradient(to right, #BFF367 ${((searchFilters.minRating || 0) / 5) * 100}%, #1F1F1F ${((searchFilters.minRating || 0) / 5) * 100}%)` }}
                             className="w-full h-1.5 rounded-lg appearance-none cursor-pointer [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-4 [&::-webkit-slider-thumb]:h-4 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-[#BFF367]" 
                           />
                         </div>

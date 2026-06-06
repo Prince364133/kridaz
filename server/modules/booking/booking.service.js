@@ -611,7 +611,7 @@ export const findBookingDetailsById = async (id) => {
     }
   });
 
-  if (hostedGame && hostedGame.turf) {
+  if (hostedGame) {
     let startTime;
     if (hostedGame.time && hostedGame.time.includes(':')) {
       const [startHour, startMinute] = hostedGame.time.split(':');

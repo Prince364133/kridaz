@@ -88,7 +88,7 @@ const StoriesSection = ({ user, isLoggedIn, isAdmin, gateInteraction }) => {
   };
 
   return (
-    <div className="py-1 px-2">
+    <div className="pb-1 px-2">
       <div className="flex gap-4 overflow-x-auto no-scrollbar scroll-smooth items-center pb-2">
         {/* Add/View Your Story */}
         <div className="flex flex-col items-center gap-2.5 shrink-0 group relative">

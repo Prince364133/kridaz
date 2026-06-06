@@ -94,7 +94,7 @@ const BookingPass = () => {
 
     try {
       setIsCancelling(true);
-      await axiosInstance.post(`/api/user/booking/${id}/cancel`);
+      await axiosInstance.post(`/api/booking/user/cancel/${id}`);
       toast.success("Booking cancelled successfully!");
       window.location.reload();
     } catch (err) {
