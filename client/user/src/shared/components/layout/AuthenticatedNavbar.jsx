@@ -189,10 +189,10 @@ const AuthenticatedNavbar = ({ toggleSidebar }) => {
               <Menu size={24} />
             </button>
           )}
-          {isProfessionalDashboard && (
-            <Link to="/" className="p-2 text-white hover:opacity-80 transition-opacity" style={{ color: themeColor }}>
+          {(isProfessionalDashboard || isVenueOwner) && (
+            <button onClick={() => navigate(-1)} className="p-2 text-white hover:opacity-80 transition-opacity" style={{ color: themeColor }}>
               <ArrowLeft size={24} />
-            </Link>
+            </button>
           )}
           <Link to="/" className="flex items-center gap-4 group">
             <div className="w-20 h-10 sm:w-32 sm:h-12 bg-transparent flex items-center justify-center overflow-hidden">
