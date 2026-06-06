@@ -1,6 +1,6 @@
 import * as Sentry from "@sentry/react";
 import React, { useState } from 'react';
-import { X, Check, Sparkles, Palette, RefreshCw, Circle } from 'lucide-react';
+import { X, Check, Eye, Sparkles, Tv, Layers, Palette, RefreshCw, Circle } from 'lucide-react';
 import toast from 'react-hot-toast';
 const THEMES = [
   {

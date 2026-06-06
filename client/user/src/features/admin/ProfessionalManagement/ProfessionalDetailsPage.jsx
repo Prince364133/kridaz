@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { 
-  ArrowLeft, Mail, MapPin, Shield, Calendar, 
+  ArrowLeft, Mail, Phone, MapPin, Shield, Calendar, 
   IndianRupee, Star, Briefcase, Award, Clock, Activity, CreditCard, Trash2 
 } from "lucide-react";
 import useProfessionals from "@hooks/admin/useProfessionals";

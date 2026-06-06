@@ -1,10 +1,10 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { useGetMessagesQuery, useSendMessageMutation, useMarkMessagesReadMutation, useRemoveFromGroupMutation, useDeleteMessagesMutation, useDeleteChatMutation, useGetChatsQuery, transformMessage } from '@redux/api/chatApi';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
+import { useGetMessagesQuery, useSendMessageMutation, useMarkMessagesReadMutation, useRemoveFromGroupMutation, useDeleteMessagesMutation, useCreateGroupChatMutation, useDeleteChatMutation, useGetChatsQuery, transformMessage } from '@redux/api/chatApi';
 import { useSocket } from '@context/SocketContext';
 import { useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import GroupInfoModal from './GroupInfoModal';
-import { Plus, Users, MessageSquare, Globe } from 'lucide-react';
+import { Plus, Users, MessageSquare, ChevronLeft, Search, MoreVertical, Send, CheckCheck, Trash2, Globe } from 'lucide-react';
 import AddGroupToCommunityModal from './AddGroupToCommunityModal';
 
 const ChatWindow = ({ chat, onBack, onSelectChat }) => {

@@ -1,11 +1,12 @@
 import { useState, useEffect } from "react";
 import { useSelector } from "react-redux";
 import { useNavigate, useSearchParams } from "react-router-dom";
-import { ChevronDown, PlaySquare, Loader2 } from "lucide-react";
+import { Plus, Search, ChevronDown, PlaySquare, Loader2, Edit3 } from "lucide-react";
 import { useLazyGetCommunityFeedQuery, useDeletePostMutation } from "@redux/api/communityApi";
 import { useLazySearchPlayersQuery } from "@redux/api/teamApi";
 import { useSocket } from "@context/SocketContext";
 import PostItem from "./PostItem";
+import CreatePostModal from "./CreatePostModal";
 import ShareModal from "./ShareModal";
 import ReportModal from "./ReportModal";
 import toast from "react-hot-toast";
@@ -29,13 +30,15 @@ const CommunityFeed = ({ user, isLoggedIn, isAdmin, gateInteraction, activeFilte
   const [loadedPosts, setLoadedPosts] = useState([]);
   const [hasMorePosts, setHasMorePosts] = useState(true);
   const [postsLoading, setPostsLoading] = useState(false);
-  const [showDesktopInlinePost, setShowDesktopInlinePost] = useState(false);
-  const [sortOrder, setSortOrder] = useState("latest");
 
   const [playersPage, setPlayersPage] = useState(1);
   const [loadedPlayers, setLoadedPlayers] = useState([]);
   const [hasMorePlayers, setHasMorePlayers] = useState(true);
   const [playersLoading, setPlayersLoading] = useState(false);
+
+  // Modals / actions states
+  const [showPostModal, setShowPostModal] = useState(false);
+  const [editingPost, setEditingPost] = useState(null);
   const [sharePostId, setSharePostId] = useState(null);
   const [reportPostId, setReportPostId] = useState(null);
 
@@ -43,16 +46,20 @@ const CommunityFeed = ({ user, isLoggedIn, isAdmin, gateInteraction, activeFilte
   useEffect(() => {
     if (searchParams.get("createPost") === "true") {
       const text = searchParams.get("text");
-      
+      if (text) {
+        setEditingPost({ content: text, isPrefill: true });
+      } else {
+        setEditingPost(null);
+      }
+      setShowPostModal(true);
+
       // Clean up the URL
       const newParams = new URLSearchParams(searchParams);
       newParams.delete("createPost");
       newParams.delete("text");
       setSearchParams(newParams, { replace: true });
-      
-      navigate('/create-post', { state: { preSelectedText: text } });
     }
-  }, [searchParams, setSearchParams, navigate]);
+  }, [searchParams, setSearchParams]);
 
   // Reset lists and page numbers when search query or filters change
   useEffect(() => {
@@ -63,7 +70,7 @@ const CommunityFeed = ({ user, isLoggedIn, isAdmin, gateInteraction, activeFilte
     setLoadedPlayers([]);
     setPlayersPage(1);
     setHasMorePlayers(true);
-  }, [debouncedSearchQuery, activeFilter, activeSportFilter, sortOrder]);
+  }, [debouncedSearchQuery, activeFilter, activeSportFilter]);
 
   // Fetch function for posts feed
   const fetchPosts = async (pageNumber, isSearch) => {
@@ -74,7 +81,6 @@ const CommunityFeed = ({ user, isLoggedIn, isAdmin, gateInteraction, activeFilte
       const params = {
         page: pageNumber,
         limit: 10,
-        sort: sortOrder,
       };
 
       if (isSearch) {
@@ -149,7 +155,7 @@ const CommunityFeed = ({ user, isLoggedIn, isAdmin, gateInteraction, activeFilte
     if (postsPage === 1) {
       fetchPosts(1, !!debouncedSearchQuery.trim());
     }
-  }, [postsPage, debouncedSearchQuery, activeFilter, activeSportFilter, sortOrder, userLocation, locationStatus]);
+  }, [postsPage, debouncedSearchQuery, activeFilter, activeSportFilter, userLocation, locationStatus]);
 
   useEffect(() => {
     if (postsPage > 1) {
@@ -326,78 +332,125 @@ const CommunityFeed = ({ user, isLoggedIn, isAdmin, gateInteraction, activeFilte
   };
 
   return (
-    <div className="space-y-6 mb-4">
+    <div className="space-y-3 mb-2">
       {/* Search overlay/children placeholder */}
       {!debouncedSearchQuery.trim() && children}
 
       {/* Filters Row */}
       {!debouncedSearchQuery.trim() && (
-        <div className="mb-6">
-          {/* Unified View Filters Dropdowns */}
-          <div className="grid grid-cols-3 md:flex gap-2 items-center w-full pb-1">
-            {/* Reels Toggle */}
+        <div>
+          {/* Desktop View Filters Row */}
+          <div className="hidden md:flex gap-2 overflow-x-auto no-scrollbar items-center">
+            {["All", "Following", "Reels", "Highlights", "Match Moments", "Announcements"].map((filter) => (
+              <button
+                key={filter}
+                onClick={() => handleSetActiveFilter(filter)}
+                className={`px-4 py-2 rounded-[6px] text-[11px] font-bold whitespace-nowrap transition-all border ${
+                  activeFilter === filter
+                    ? "bg-gradient-to-r from-[#BFF367] to-[#BFF367] text-black border-transparent hover:brightness-110"
+                    : "bg-transparent text-white/70 border-white/10 hover:bg-white/5 hover:text-white"
+                }`}
+              >
+                {filter}
+              </button>
+            ))}
+            <div className="ml-auto flex items-center gap-2 shrink-0">
+              <div className="relative">
+                <select
+                  className="bg-neutral-900 border border-white/10 rounded-full py-2 pl-3 pr-7 text-white text-[11px] font-bold focus:outline-none focus:border-[#BFF367]/40 transition-all appearance-none cursor-pointer"
+                  style={{ fontFamily: "'Inter', sans-serif" }}
+                  value={activeSportFilter}
+                  onChange={(e) => setActiveSportFilter(e.target.value)}
+                >
+                  <option value="" className="bg-neutral-950 text-white">All Categories</option>
+                  {["Cricket", "Football", "Rugby", "Baseball", "Hockey", "Athletics"].map((s) => (
+                    <option key={s} value={s.toLowerCase()} className="bg-neutral-950 text-white">
+                      {s}
+                    </option>
+                  ))}
+                </select>
+                <div className="pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 text-white/40">
+                  <ChevronDown size={11} />
+                </div>
+              </div>
+              <button className="px-3 py-2 rounded-[6px] bg-transparent border border-white/10 text-white/70 hover:bg-white/5 text-[11px] font-bold flex items-center gap-1.5">
+                Latest <ChevronDown size={12} />
+              </button>
+            </div>
+          </div>
+
+          {/* Mobile View Filters Dropdowns */}
+          <div className="flex md:hidden gap-2.5 items-center justify-start">
             <button
               onClick={() => handleSetActiveFilter(activeFilter === "Reels" ? "All" : "Reels")}
-              className={`flex items-center justify-center gap-1 px-1 py-2 rounded-[8px] text-[10px] sm:text-[11px] font-bold uppercase tracking-wider transition-all shrink-0 min-w-0 ${
-                activeFilter === "Reels" 
-                  ? "bg-[#BFF367] text-black shadow-[0_0_10px_rgba(191,243,103,0.3)] border-transparent" 
-                  : "bg-[#111] text-white/70 hover:bg-[#1A1A1A] hover:text-white border border-white/10"
+              className={`relative flex items-center gap-1.5 px-3 py-1.5 rounded-[8px] text-[10px] font-bold uppercase tracking-wider transition-all shrink-0 z-10 group ${
+                activeFilter === "Reels" ? "text-[#BFF367] bg-[#BFF367]/10" : "text-white/70 hover:text-white"
               }`}
             >
-              <PlaySquare size={13} className={`shrink-0 ${activeFilter === "Reels" ? "text-black" : "text-white/70"}`} />
-              <span className="truncate">Reels</span>
+              <svg className="absolute inset-0 w-full h-full pointer-events-none z-[-1]">
+                <defs>
+                  <linearGradient id="mob-reels-grad" x1="0%" y1="0%" x2="100%" y2="0%">
+                    <stop stopColor="#BFF367" offset="0%" />
+                    <stop stopColor="#BFF367" offset="100%" />
+                  </linearGradient>
+                </defs>
+                <rect
+                  x="1"
+                  y="1"
+                  width="calc(100% - 2px)"
+                  height="calc(100% - 2px)"
+                  rx="14"
+                  fill="none"
+                  stroke="url(#mob-reels-grad)"
+                  strokeWidth="1.5"
+                  strokeDasharray="3 4"
+                  strokeLinecap="round"
+                  className={`transition-opacity ${activeFilter === "Reels" ? "opacity-100" : "opacity-70 group-hover:opacity-100"}`}
+                />
+              </svg>
+              <PlaySquare size={12} className={activeFilter === "Reels" ? "text-[#BFF367]" : "text-white/70 group-hover:text-white transition-colors"} />
+              Reels
             </button>
 
-            {/* Post Type Filter */}
-            <div className="relative min-w-0">
+            <div className="relative w-[115px]">
               <select
-                className="w-full bg-[#111] border border-white/10 rounded-[8px] py-2 pl-2 pr-5 sm:pl-4 sm:pr-8 text-white text-[10px] sm:text-[11px] font-bold focus:outline-none focus:border-[#BFF367]/50 transition-all appearance-none cursor-pointer hover:bg-[#1A1A1A] truncate"
+                className="w-full bg-neutral-900 border border-white/10 rounded-[8px] py-1.5 pl-2.5 pr-6 text-white text-[10px] font-bold focus:outline-none focus:border-[#BFF367]/40 transition-all appearance-none cursor-pointer"
+                style={{ fontFamily: "'Inter', sans-serif" }}
                 value={activeFilter}
                 onChange={(e) => handleSetActiveFilter(e.target.value)}
               >
-                {["All", "Following", "Highlights", "Match Moments", "Announcements"].map((filter) => (
-                  <option key={filter} value={filter} className="bg-neutral-900 text-white">
+                {["All", "Following", "Reels", "Highlights", "Match Moments", "Announcements"].map((filter) => (
+                  <option key={filter} value={filter} className="bg-neutral-950 text-white">
                     {filter}
                   </option>
                 ))}
               </select>
-              <div className="pointer-events-none absolute right-2 sm:right-3 top-1/2 -translate-y-1/2 text-white/40">
-                <ChevronDown size={12} />
+              <div className="pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 flex items-center text-white/40">
+                <ChevronDown size={10} />
               </div>
             </div>
 
-            {/* Sport Category Filter */}
-            <div className="relative min-w-0">
+            <div className="relative w-[115px]">
               <select
-                className="w-full bg-[#111] border border-white/10 rounded-[8px] py-2 pl-2 pr-5 sm:pl-4 sm:pr-8 text-white text-[10px] sm:text-[11px] font-bold focus:outline-none focus:border-[#BFF367]/50 transition-all appearance-none cursor-pointer hover:bg-[#1A1A1A] truncate"
+                className="w-full border border-transparent rounded-[8px] py-1.5 pl-2.5 pr-6 text-white text-[10px] font-bold focus:outline-none transition-all appearance-none cursor-pointer shadow-[0_0_15px_rgba(85,222,232,0.1)]"
+                style={{
+                  fontFamily: "'Inter', sans-serif",
+                  backgroundImage: "linear-gradient(rgba(10, 10, 10, 0.95), rgba(10, 10, 10, 0.95)), linear-gradient(to right, #BFF367, #BFF367)",
+                  backgroundOrigin: "border-box",
+                  backgroundClip: "padding-box, border-box",
+                }}
                 value={activeSportFilter}
                 onChange={(e) => setActiveSportFilter(e.target.value)}
               >
-                <option value="" className="bg-neutral-900 text-white">All Categories</option>
+                <option value="" className="bg-neutral-950 text-white">Categories</option>
                 {["Cricket", "Football", "Rugby", "Baseball", "Hockey", "Athletics"].map((s) => (
-                  <option key={s} value={s.toLowerCase()} className="bg-neutral-900 text-white">
+                  <option key={s} value={s.toLowerCase()} className="bg-neutral-950 text-white">
                     {s}
                   </option>
                 ))}
               </select>
-              <div className="pointer-events-none absolute right-2 sm:right-3 top-1/2 -translate-y-1/2 text-white/40">
-                <ChevronDown size={12} />
-              </div>
-            </div>
-            
-            <div className="ml-auto hidden md:flex shrink-0 pl-2">
-              <div className="relative">
-                <select
-                  className="bg-[#111] border border-white/10 rounded-[8px] py-2 pl-4 pr-8 text-white text-[11px] font-bold focus:outline-none focus:border-[#BFF367]/50 transition-all appearance-none cursor-pointer hover:bg-[#1A1A1A]"
-                  value={sortOrder}
-                  onChange={(e) => setSortOrder(e.target.value)}
-                >
-                  <option value="latest" className="bg-neutral-900 text-white">Latest</option>
-                  <option value="top" className="bg-neutral-900 text-white">Top Posts</option>
-                </select>
-                <div className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-white/40">
-                  <ChevronDown size={12} />
-                </div>
+              <div className="pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 flex items-center text-white/40">
+                <ChevronDown size={10} />
               </div>
             </div>
           </div>
@@ -473,7 +526,19 @@ const CommunityFeed = ({ user, isLoggedIn, isAdmin, gateInteraction, activeFilte
         </div>
       )}
 
-
+      {/* Create Post floating trigger / input mock */}
+      {isLoggedIn && !debouncedSearchQuery.trim() && (
+        <div className="bg-[#0A0A0A] border border-white/5 rounded-[8px] p-4 flex items-center gap-3">
+          <img src={user?.profilePicture || "/default-avatar.png"} className="w-8 h-8 rounded-full object-cover border border-white/10" alt="" />
+          <button
+            onClick={() => gateInteraction(() => setShowPostModal(true))}
+            className="flex-1 bg-white/5 hover:bg-white/10 rounded-[8px] h-9 px-4 text-left text-[11px] font-bold text-white/40 border border-white/5 transition-all flex items-center justify-between"
+          >
+            <span>What's happening in your match?</span>
+            <Edit3 size={14} className="text-white/40" />
+          </button>
+        </div>
+      )}
 
       {/* Feed list */}
       {postsLoading && loadedPosts.length === 0 ? (
@@ -506,6 +571,16 @@ const CommunityFeed = ({ user, isLoggedIn, isAdmin, gateInteraction, activeFilte
           )}
         </div>
       )}
+
+      <CreatePostModal
+        isOpen={showPostModal}
+        onClose={() => {
+          setShowPostModal(false);
+          setEditingPost(null);
+        }}
+        editingPost={editingPost}
+        user={user}
+      />
 
       <AnimatePresence>
         {sharePostId && (

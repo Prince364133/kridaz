@@ -5,13 +5,18 @@ import { useSelector } from "react-redux";
 import axiosInstance from "@hooks/useAxiosInstance.js";
 import { 
   Building2, 
+  GraduationCap, 
+  Award, 
   ArrowRight, 
   CheckCircle2, 
   Clock, 
-  FileText,
+  MapPin, 
+  FileText, 
+  ChevronLeft,
   Briefcase,
   ShieldAlert,
   Loader2,
+  Navigation,
   Upload
 } from "lucide-react";
 import toast from "react-hot-toast";
@@ -42,6 +47,13 @@ export default function BusinessRegistration({ defaultRole }) {
   });
 
   const [files, setFiles] = useState({
+    BUSINESS: null,
+    GST: null,
+    OWNERSHIP: null,
+    SALE_DEED: null,
+    PROPERTY_TAX: null,
+    ELECTRICITY: null,
+    GOOGLE: null,
     PAN: null,
     AADHAR: null,
   });
@@ -141,6 +153,13 @@ export default function BusinessRegistration({ defaultRole }) {
   };
 
   const requiredDocs = [
+    { key: 'BUSINESS', label: 'Business Registration' },
+    { key: 'GST', label: 'GST Registration' },
+    { key: 'OWNERSHIP', label: 'Ownership Proof / Rental Agreement' },
+    { key: 'SALE_DEED', label: 'Sale Deed' },
+    { key: 'PROPERTY_TAX', label: 'Property Tax Receipt' },
+    { key: 'ELECTRICITY', label: 'Electricity Bill' },
+    { key: 'GOOGLE', label: 'Google Business Profile' },
     { key: 'PAN', label: 'PAN Card' },
     { key: 'AADHAR', label: 'Aadhaar Card' },
   ];
@@ -370,7 +389,35 @@ export default function BusinessRegistration({ defaultRole }) {
                    <p className="text-[12px] text-gray-500 tracking-wide mt-1" style={{ fontFamily: "'Inter', sans-serif" }}>Accepted formats: JPG, PNG, PDF &nbsp;&bull;&nbsp; <span className="text-[#BFF367]">Max file size: 10MB</span></p>
                  </div>
 
-                 <div className="grid grid-cols-1 md:grid-cols-2 gap-x-4 gap-y-6">
+                 <div className="grid grid-cols-1 md:grid-cols-4 gap-x-4 gap-y-6">
+                   <DocumentSection title="Business Registration">
+                     <DocumentUploadBox id="BUSINESS" onFileSelect={(f) => handleFileChange('BUSINESS', f)} selectedFile={files.BUSINESS} />
+                   </DocumentSection>
+                   
+                   <DocumentSection title="GST Registration">
+                     <DocumentUploadBox id="GST" onFileSelect={(f) => handleFileChange('GST', f)} selectedFile={files.GST} />
+                   </DocumentSection>
+                   
+                   <DocumentSection title="Ownership Proof / Rental Agreement">
+                     <DocumentUploadBox id="OWNERSHIP" onFileSelect={(f) => handleFileChange('OWNERSHIP', f)} selectedFile={files.OWNERSHIP} />
+                   </DocumentSection>
+                   
+                   <DocumentSection title="Sale Deed">
+                     <DocumentUploadBox id="SALE_DEED" onFileSelect={(f) => handleFileChange('SALE_DEED', f)} selectedFile={files.SALE_DEED} />
+                   </DocumentSection>
+                   
+                   <DocumentSection title="Property Tax Receipt">
+                     <DocumentUploadBox id="PROPERTY_TAX" onFileSelect={(f) => handleFileChange('PROPERTY_TAX', f)} selectedFile={files.PROPERTY_TAX} />
+                   </DocumentSection>
+                   
+                   <DocumentSection title="Electricity Bill">
+                     <DocumentUploadBox id="ELECTRICITY" onFileSelect={(f) => handleFileChange('ELECTRICITY', f)} selectedFile={files.ELECTRICITY} />
+                   </DocumentSection>
+                   
+                   <DocumentSection title="Google Business Profile">
+                     <DocumentUploadBox id="GOOGLE" onFileSelect={(f) => handleFileChange('GOOGLE', f)} selectedFile={files.GOOGLE} />
+                   </DocumentSection>
+                   
                    <DocumentSection title="PAN Card" subtitle="Upload 2 photos front and back">
                      <DocumentUploadBox id="PAN" onFileSelect={(f) => handleFileChange('PAN', f)} selectedFile={files.PAN} multiple />
                    </DocumentSection>

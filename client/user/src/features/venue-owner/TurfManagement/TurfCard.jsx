@@ -1,5 +1,5 @@
-import { Link } from "react-router-dom";
-import { Edit2, Trash2, Tag, Star, Eye, EyeOff } from "lucide-react";
+import { Link, useNavigate } from "react-router-dom";
+import { Edit2, Trash2, Clock, MapPin, Tag, Star, LayoutDashboard, Eye, EyeOff } from "lucide-react";
 
 const TurfCard = ({ turf, onEdit, onDelete, onToggleVisibility }) => {
   return (
@@ -33,7 +33,7 @@ const TurfCard = ({ turf, onEdit, onDelete, onToggleVisibility }) => {
                   <div className={`px-2 py-0.5 rounded-[4px] text-[9px] font-bold uppercase tracking-widest border ${ turf.status === 'approved' ? 'bg-[#BFF367]/10 border-[#BFF367]/20 text-[#BFF367]' : turf.status === 'rejected' ? 'bg-red-500/10 border-red-500/20 text-red-500' : turf.status === 'decommissioned' ? 'bg-orange-500/10 border-orange-500/20 text-orange-500' : turf.status === 'deleted' ? 'bg-zinc-800 border-zinc-700 text-zinc-500' : 'bg-[#1A1A1A] border-[#2D2D2D] text-yellow-500' }`}>
                      {turf.status}
                   </div>
-                  <span className="text-[10px] text-[#444] font-medium uppercase tracking-widest">Gï¿½ï¿½</span>
+                  <span className="text-[10px] text-[#444] font-medium uppercase tracking-widest">GÇó</span>
                   <div className="flex items-center text-[#878C9F] text-[9px] font-bold uppercase tracking-widest">
                     {turf.status === 'decommissioned' ? (
                       <span className="text-orange-500/80 animate-pulse">Action Required: Re-apply</span>

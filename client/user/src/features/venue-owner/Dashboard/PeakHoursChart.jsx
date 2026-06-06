@@ -1,15 +1,18 @@
 import * as Sentry from "@sentry/react";
 import React, { useState, useEffect } from 'react';
 import { 
+  BarChart, 
+  Bar, 
   XAxis, 
   YAxis, 
   CartesianGrid, 
   Tooltip, 
   ResponsiveContainer,
+  Cell,
   AreaChart,
   Area
 } from 'recharts';
-import { Calendar, TrendingUp } from 'lucide-react';
+import { Filter, Calendar, TrendingUp } from 'lucide-react';
 import axiosInstance from '@hooks/useAxiosInstance';
 
 const PeakHoursChart = () => {

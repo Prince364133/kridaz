@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
+import { motion } from 'framer-motion';
 import axios from 'axios';
 import { toast } from 'react-hot-toast';
 import { 
   Users, LogOut, Clock, MapPin, 
-  Trophy, Info, Calendar, User, Search
+  Trophy, Info, Calendar, Coins, User, Search
 } from 'lucide-react';
 
 const SUBHEADING_STYLE = { fontFamily: "'Inter 28pt Light', sans-serif", fontWeight: 300 };

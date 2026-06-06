@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Mail, Search, Trash2, Ban, CheckCircle, X, ExternalLink } from "lucide-react";
+import { Shield, Mail, Phone, MapPin, IndianRupee, Search, ChevronRight, Zap, Briefcase, Trash2, Ban, CheckCircle, X, ExternalLink } from "lucide-react";
 import useProfessionals from "@hooks/admin/useProfessionals";
 import ConfirmationModal from "@components/shared/ConfirmationModal";
 

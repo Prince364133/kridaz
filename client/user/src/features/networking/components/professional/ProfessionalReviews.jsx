@@ -1,7 +1,7 @@
 ﻿import { useState, useEffect } from "react";
 import { useSelector } from "react-redux";
 import axiosInstance from "@hooks/useAxiosInstance";
-import { Star, MessageSquare, Send, Loader2, Reply, X, BadgeCheck } from "lucide-react";
+import { Star, MessageSquare, Send, User, Loader2, Calendar, Reply, X, BadgeCheck } from "lucide-react";
 import toast from "react-hot-toast";
 import { format } from "date-fns";
 import { useNavigate } from "react-router-dom";

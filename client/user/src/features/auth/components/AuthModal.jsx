@@ -14,7 +14,6 @@ const AuthModal = () => {
       setIsClosing(false);
       setIsAnimating(true);
       document.body.style.overflow = 'hidden';
-      document.documentElement.style.overflow = 'hidden';
       
       // Trigger slide up after initial mount
       const timer = setTimeout(() => {
@@ -23,12 +22,10 @@ const AuthModal = () => {
       
       return () => clearTimeout(timer);
     } else {
-      document.body.style.overflow = '';
-      document.documentElement.style.overflow = '';
+      document.body.style.overflow = 'unset';
     }
     return () => {
-      document.body.style.overflow = '';
-      document.documentElement.style.overflow = '';
+      document.body.style.overflow = 'unset';
     };
   }, [isOpen]);
 

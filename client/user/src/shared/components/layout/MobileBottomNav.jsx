@@ -1,7 +1,7 @@
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import { motion, useAnimation, useMotionValue } from "framer-motion";
 import { Link, useLocation } from "react-router-dom";
-import { Home, Search, Users, UserSearch, Trophy, Plus, PenSquare, Gamepad2 } from "lucide-react";
+import { Home, Search, Users, UserSearch, Trophy, Plus, Video, PenSquare, Gamepad2 } from "lucide-react";
 import { useSelector } from "react-redux";
 import { useScrollDirection } from "@hooks/useScrollDirection.js";
 import { getDynamicProfileRoute } from "@utils/routeUtils";
@@ -21,11 +21,8 @@ const MobileBottomNav = () => {
   const handleToggle = () => {
     if (isMenuOpen) {
       setIsScattered(false);
-      setIsMenuOpen(false);
-      // Wait for the fast closing animation to finish before moving back to original dragged position
-      setTimeout(() => {
-        controls.start({ x: savedPos.x, y: savedPos.y, transition: { type: "spring", stiffness: 300, damping: 25 } });
-      }, 200);
+      controls.start({ x: savedPos.x, y: savedPos.y, transition: { type: "spring", stiffness: 300, damping: 25 } });
+      setTimeout(() => setIsMenuOpen(false), 250);
     } else {
       setSavedPos({ x: x.get(), y: y.get() });
       controls.start({ x: 0, y: 0, transition: { type: "spring", stiffness: 300, damping: 25 } });
@@ -88,29 +85,29 @@ const MobileBottomNav = () => {
           <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-6 flex justify-center items-center">
             
             {/* Create Post (Far Left) */}
-            <div className={`absolute z-50 transition-all ${isMenuOpen ? "duration-500 ease-[cubic-bezier(0.34,1.56,0.64,1)] delay-[100ms] translate-x-[-90px] translate-y-[-40px] scale-100 opacity-100 pointer-events-auto" : "duration-200 ease-in delay-0 translate-x-[0px] translate-y-[20px] scale-0 opacity-0 pointer-events-none"}`}>
-              <Link to="/new-post" onClick={handleToggle} title="Create Post" className="w-12 h-12 rounded-full bg-[#1A1A1A] border border-[#BFF367]/30 text-[#BFF367] flex items-center justify-center hover:bg-[#222] transition-colors shadow-xl">
+            <div className={`absolute z-50 transition-all duration-500 ease-[cubic-bezier(0.34,1.56,0.64,1)] ${isMenuOpen ? "delay-[100ms] translate-x-[-90px] translate-y-[-40px] scale-100 opacity-100 pointer-events-auto" : "delay-[100ms] translate-x-[0px] translate-y-[20px] scale-0 opacity-0 pointer-events-none"}`}>
+              <Link to="/create-post" onClick={handleToggle} title="Create Post" className="w-12 h-12 rounded-full bg-[#1A1A1A] border border-[#BFF367]/30 text-[#BFF367] flex items-center justify-center hover:bg-[#222] transition-colors shadow-xl">
                 <PenSquare size={22} />
               </Link>
             </div>
 
             {/* Join Game (Inner Left) */}
-            <div className={`absolute z-50 transition-all ${isMenuOpen ? "duration-500 ease-[cubic-bezier(0.34,1.56,0.64,1)] delay-[150ms] translate-x-[-40px] translate-y-[-90px] scale-100 opacity-100 pointer-events-auto" : "duration-200 ease-in delay-0 translate-x-[0px] translate-y-[20px] scale-0 opacity-0 pointer-events-none"}`}>
+            <div className={`absolute z-50 transition-all duration-500 ease-[cubic-bezier(0.34,1.56,0.64,1)] ${isMenuOpen ? "delay-[150ms] translate-x-[-40px] translate-y-[-90px] scale-100 opacity-100 pointer-events-auto" : "delay-[75ms] translate-x-[0px] translate-y-[20px] scale-0 opacity-0 pointer-events-none"}`}>
               <Link to="/join-games" onClick={handleToggle} title="Join Game" className="w-12 h-12 rounded-full bg-[#1A1A1A] border border-[#BFF367]/30 text-[#BFF367] flex items-center justify-center hover:bg-[#222] transition-colors shadow-xl">
                 <Trophy size={22} />
               </Link>
             </div>
 
             {/* Professionals (Inner Right) */}
-            <div className={`absolute z-50 transition-all ${isMenuOpen ? "duration-500 ease-[cubic-bezier(0.34,1.56,0.64,1)] delay-[200ms] translate-x-[40px] translate-y-[-90px] scale-100 opacity-100 pointer-events-auto" : "duration-200 ease-in delay-0 translate-x-[0px] translate-y-[20px] scale-0 opacity-0 pointer-events-none"}`}>
+            <div className={`absolute z-50 transition-all duration-500 ease-[cubic-bezier(0.34,1.56,0.64,1)] ${isMenuOpen ? "delay-[200ms] translate-x-[40px] translate-y-[-90px] scale-100 opacity-100 pointer-events-auto" : "delay-[50ms] translate-x-[0px] translate-y-[20px] scale-0 opacity-0 pointer-events-none"}`}>
               <Link to="/professionals" onClick={handleToggle} title="Professionals" className="w-12 h-12 rounded-full bg-[#1A1A1A] border border-[#BFF367]/30 text-[#BFF367] flex items-center justify-center hover:bg-[#222] transition-colors shadow-xl">
                 <UserSearch size={22} />
               </Link>
             </div>
 
             {/* Scoring (Far Right) */}
-            <div className={`absolute z-50 transition-all ${isMenuOpen ? "duration-500 ease-[cubic-bezier(0.34,1.56,0.64,1)] delay-[250ms] translate-x-[90px] translate-y-[-40px] scale-100 opacity-100 pointer-events-auto" : "duration-200 ease-in delay-0 translate-x-[0px] translate-y-[20px] scale-0 opacity-0 pointer-events-none"}`}>
-              <Link to="/my-teams" state={{ openStartScoringModal: true }} onClick={handleToggle} title="Scoring" className="w-12 h-12 rounded-full bg-[#1A1A1A] border border-[#BFF367]/30 text-[#BFF367] flex items-center justify-center hover:bg-[#222] transition-colors shadow-xl">
+            <div className={`absolute z-50 transition-all duration-500 ease-[cubic-bezier(0.34,1.56,0.64,1)] ${isMenuOpen ? "delay-[250ms] translate-x-[90px] translate-y-[-40px] scale-100 opacity-100 pointer-events-auto" : "delay-0 translate-x-[0px] translate-y-[20px] scale-0 opacity-0 pointer-events-none"}`}>
+              <Link to="/scoring" onClick={handleToggle} title="Scoring" className="w-12 h-12 rounded-full bg-[#1A1A1A] border border-[#BFF367]/30 text-[#BFF367] flex items-center justify-center hover:bg-[#222] transition-colors shadow-xl">
                 <Gamepad2 size={22} />
               </Link>
             </div>
@@ -132,8 +129,8 @@ const MobileBottomNav = () => {
                 key={item.name}
                 to={item.path}
                 onClick={handleToggle}
-                className={`absolute top-1/2 left-1/2 -mt-7 -ml-7 min-w-[56px] w-auto px-1 h-14 flex flex-col items-center justify-center gap-1 transition-all ease-out
-                  ${!isMenuOpen ? "duration-200 translate-x-0 translate-y-0 scale-0 opacity-0 pointer-events-none" : isScattered ? `duration-500 ${targetTranslate} translate-y-0 scale-100 opacity-100 pointer-events-auto` : "duration-500 translate-x-0 translate-y-0 scale-100 opacity-100 pointer-events-none"}
+                className={`absolute top-1/2 left-1/2 -mt-7 -ml-7 min-w-[56px] w-auto px-1 h-14 flex flex-col items-center justify-center gap-1 transition-all duration-500 ease-out
+                  ${!isMenuOpen ? "translate-x-0 translate-y-0 scale-0 opacity-0 pointer-events-none" : isScattered ? `${targetTranslate} translate-y-0 scale-100 opacity-100 pointer-events-auto` : "translate-x-0 translate-y-0 scale-100 opacity-100 pointer-events-none"}
                   ${isActive ? "text-[#BFF367]" : "text-white/40 hover:text-white/60"} -z-10`}
               >
                 <div className={`relative p-1 rounded-[8px] transition-all duration-300 ${ isActive ? "scale-110" : "" }`}>

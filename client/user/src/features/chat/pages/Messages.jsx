@@ -19,10 +19,8 @@ const Messages = () => {
   // Disable body scroll when viewing messages to lock layout in viewport
   useEffect(() => {
     document.body.style.overflow = "hidden";
-    document.documentElement.style.overflow = "hidden";
     return () => {
-      document.body.style.overflow = "";
-      document.documentElement.style.overflow = "";
+      document.body.style.overflow = "auto";
     };
   }, []);
 

@@ -1,5 +1,5 @@
 ﻿import React from "react";
-import { Star, ThumbsUp, ThumbsDown, MessageCircleReply, Activity } from "lucide-react";
+import { Star, MessageSquare, ThumbsUp, ThumbsDown, MessageCircleReply, Activity } from "lucide-react";
 import useOwnerReviews from "@hooks/owner/useOwnerReviews";
 import ReviewsSkeleton from "./ReviewSkeleton";
 import { useNavigate } from "react-router-dom";

@@ -6,15 +6,21 @@ import {
   Users, 
   Calendar, 
   Video, 
-  HelpCircle,
+  Settings, 
+  HelpCircle, 
+  LogOut,
+  Home,
+  Target,
   Activity,
   Clock,
+  MessageSquare,
   User,
   IndianRupee,
   Landmark
 } from "lucide-react";
 import { useDispatch, useSelector } from "react-redux";
 import { logout } from "@redux/slices/authSlice.js";
+import { getDynamicProfileRoute } from "@utils/routeUtils";
 import { useNavigate } from "react-router-dom";
 
 const CoachSidebar = ({ isOpen, toggleSidebar, isMinimized, className }) => {

@@ -287,11 +287,6 @@ h2, h3, .font-display {
   border-color: #BFF367 !important;
 }
 
-html {
-  overflow-x: clip;
-  overflow-y: auto;
-}
-
 body {
   margin: 0;
   font-family: "Open Sans", sans-serif;
@@ -299,8 +294,7 @@ body {
   color: var(--fg);
   min-height: 100vh;
   -webkit-font-smoothing: antialiased;
-  overflow-x: clip;
-  overflow-y: visible;
+  overflow-x: hidden;
 }
 
 /* ── Base Reset ─────────────────────────────────────────────────── */

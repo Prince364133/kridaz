@@ -8,8 +8,10 @@ import SlotPickerPopup from '@components/SlotPickerPopup';
 import MaterialDateTimePicker from '../../../shared/components/MaterialDateTimePicker';
 import { 
   Trophy, Calendar, Clock, MapPin, 
-  Users, UserCheck, Search, Coins, CheckCircle2,
-  ShieldCheck, Zap, Trash2, Plus, Minus, ImageIcon, ChevronDown, Mail, ShieldAlert, Receipt, ArrowRight
+  Users, UserCheck, ChevronRight, Search,
+  ArrowLeft, Coins, CheckCircle2, AlertCircle,
+  ShieldCheck, Zap, Trash2, Plus, Minus, ImageIcon, ChevronUp, ChevronDown,
+  Gift, Mail, Info, ShieldAlert, Video, Award, Receipt, ArrowRight
 } from 'lucide-react';
 import { useGetMyTeamsQuery } from '@redux/api/teamApi';
 import CoinAnimation from '@components/CoinAnimation';

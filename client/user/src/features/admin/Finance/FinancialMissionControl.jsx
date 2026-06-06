@@ -15,6 +15,7 @@ import {
   CheckCircle,
   AlertCircle,
   ExternalLink,
+  ChevronRight,
   Activity
 } from "lucide-react";
 import CountUp from "react-countup";

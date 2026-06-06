@@ -1,6 +1,6 @@
 import React from 'react';
 import { useGetCreatorAnalyticsQuery } from '@redux/api/reelsApi';
-import { ChevronLeft, TrendingUp, Play, ThumbsUp, MessageCircle, Share2 } from 'lucide-react';
+import { ChevronLeft, TrendingUp, Users, Play, ThumbsUp, MessageCircle, Share2 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
 const ReelAnalytics = () => {

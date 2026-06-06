@@ -2,7 +2,8 @@
 import useOwnerBookings from "@hooks/owner/useOwnerBookings";
 import BookingsSkeleton from "./BookingsSkeleton";
 import { format } from "date-fns";
-import { ArrowUpDown, Calendar, Clock, Filter, Download, Ticket, FileText } from "lucide-react";
+import { ArrowUpDown, Calendar, Clock, User, IndianRupee, Filter, Download, Ticket, FileText } from "lucide-react";
+import Avatar from "react-avatar";
 
 const OwnerBookings = () => {
   const {

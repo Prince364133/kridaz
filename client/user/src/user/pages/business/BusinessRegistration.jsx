@@ -5,6 +5,7 @@ import { useSelector } from "react-redux";
 import axiosInstance from "@hooks/useAxiosInstance.js";
 import { 
   Building2, 
+  GraduationCap, 
   Award, 
   ArrowRight, 
   CheckCircle2, 

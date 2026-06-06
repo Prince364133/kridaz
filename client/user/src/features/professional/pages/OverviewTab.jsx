@@ -59,7 +59,9 @@ const skippedRequests = [
 ];
 
 import { 
+  LayoutDashboard, 
   MapPin, 
+  Phone, 
   Activity, 
   IndianRupee, 
   Star, 

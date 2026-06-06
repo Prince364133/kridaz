@@ -1,11 +1,12 @@
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { getDynamicProfileRoute } from "@utils/routeUtils";
 import { useSelector, useDispatch } from "react-redux";
-import { User, Users, X, LogOut, Activity, ShieldCheck, Zap, ArrowRight, Clock, Trophy, Target, MessageCircle, MapPin, Bell, UserSearch, Search, Plus, Bookmark, FileText, Home, Briefcase, ChevronDown } from "lucide-react";
-import { useState, useCallback } from "react";
+import { User, Users, Menu, X, LogOut, Activity, ShieldCheck, Zap, ArrowRight, Clock, Trophy, Target, MessageCircle, MapPin, ChevronRight, Bell, UserSearch, Search, Plus, Bookmark, FileText, Home, Briefcase, ChevronDown } from "lucide-react";
+import { useState, useEffect, useCallback } from "react";
 import { createPortal } from "react-dom";
 import { logout } from "@redux/slices/authSlice";
 import { setUserLocation, setLocationStatus, openLocationSidebar } from "@redux/slices/uiSlice";
+import { reelsApi } from "@redux/api/reelsApi";
 import toast from "react-hot-toast";
 import axiosInstance from "@hooks/useAxiosInstance";
 import useNotifications from "@hooks/shared/useNotifications";
@@ -109,7 +110,7 @@ const Navbar = () => {
     <>
       <nav className={`sticky top-0 w-full lg:fixed lg:top-0 lg:left-0 z-[90] flex flex-col transition-all duration-300 group/nav overflow-hidden
         ${ scrollDirection === "down" && window.innerWidth < 1024 ? "-translate-y-full" : "translate-y-0" }
-        lg:transform-none lg:h-screen lg:w-64 lg:border-r lg:border-white/10 bg-black/40 lg:bg-[#050505] backdrop-blur-xl lg:backdrop-blur-none
+        lg:transform-none lg:h-screen lg:w-[72px] lg:hover:w-64 lg:border-r lg:border-white/10 bg-black/40 lg:bg-[#050505] backdrop-blur-xl lg:backdrop-blur-none
       `}>
         <div className={`flex justify-center transition-all duration-500 lg:h-full`}>
           <div className={`relative w-full max-w-full h-16 sm:h-20 lg:h-auto border-b border-white/10 lg:border-none flex items-center lg:items-start lg:flex-col justify-between lg:justify-start px-2 sm:px-4 lg:px-4 lg:pt-8 transition-all duration-500`}>
@@ -161,13 +162,13 @@ const Navbar = () => {
                   </div>
                 </div>
 
-                {/* Logo */}
-                <Link to="/" className="group hidden lg:flex items-center justify-start w-full overflow-hidden transition-all duration-300 mt-2 lg:mt-0">
+                {/* Desktop Logo */}
+                <Link to="/" className="group hidden lg:flex items-center justify-start w-full lg:w-[32px] lg:group-hover/nav:w-full overflow-hidden transition-all duration-300">
                   <img src="/logo.png" alt="Kridaz" className="h-10 sm:h-12 lg:h-10 w-auto max-w-none brightness-125 group-hover:scale-105 transition-transform duration-500" />
                 </Link>
               </div>
             ) : (
-              <Link to="/" className="group flex items-center justify-start w-full overflow-hidden transition-all duration-300">
+              <Link to="/" className="group flex items-center justify-start w-full lg:w-[32px] lg:group-hover/nav:w-full overflow-hidden transition-all duration-300">
                 <img src="/logo.png" alt="Kridaz" className="h-10 sm:h-12 lg:h-10 w-auto max-w-none brightness-125 group-hover:scale-105 transition-transform duration-500" />
               </Link>
             )}
@@ -186,11 +187,11 @@ const Navbar = () => {
                       className={`flex w-full p-3 rounded-xl text-base font-bold items-center gap-4 cursor-pointer transition-all ${location.pathname.startsWith("/partners") ? "text-primary" : "text-white/60 hover:text-white"}`}
                     >
                       <Icon size={24} className="min-w-[24px]" />
-                      <span className="whitespace-nowrap overflow-hidden">
+                      <span className="opacity-0 lg:group-hover/nav:opacity-100 transition-opacity duration-300 whitespace-nowrap overflow-hidden">
                         {link.name}
                       </span>
                     </label>
-                    <ul tabIndex={0} className="dropdown-content z-[100] mt-1 p-1 shadow-2xl bg-[#0A0A0A] border border-white/10 rounded-[8px] w-48 overflow-hidden backdrop-blur-xl">
+                    <ul tabIndex={0} className="dropdown-content z-[100] mt-1 p-1 shadow-2xl bg-[#0A0A0A] border border-white/10 rounded-[8px] w-48 overflow-hidden backdrop-blur-xl opacity-0 lg:group-hover/nav:opacity-100 transition-opacity duration-300">
                       <li>
                         <Link to="/business/venue" className="flex items-center gap-3 p-4 text-sm font-medium text-white/60 hover:text-[#84CC16] hover:bg-white/5 transition-all">
                           Venue Owner
@@ -214,7 +215,7 @@ const Navbar = () => {
                   }`}
                 >
                   <Icon size={24} className="min-w-[24px]" />
-                  <span className="whitespace-nowrap overflow-hidden">
+                  <span className="opacity-0 lg:group-hover/nav:opacity-100 transition-opacity duration-300 whitespace-nowrap overflow-hidden">
                     {link.name}
                   </span>
                 </Link>
@@ -251,14 +252,6 @@ const Navbar = () => {
               className="relative w-9 sm:w-11 h-9 sm:h-11 border border-white/10 flex items-center justify-center bg-white/5 hover:border-[#84CC16]/50 transition-all cursor-pointer rounded-full group"
             >
               <Search size={18} className="text-white/40 group-hover:text-[#84CC16] transition-colors" />
-            </Link>
-
-            {/* Message Button */}
-            <Link
-              to="/messages"
-              className="relative w-9 sm:w-11 h-9 sm:h-11 border border-white/10 flex items-center justify-center bg-white/5 hover:border-[#84CC16]/50 transition-all cursor-pointer rounded-full group"
-            >
-              <MessageCircle size={18} className="text-white/40 group-hover:text-[#84CC16] transition-colors" />
             </Link>
 
             {/* Plus Dropdown */}

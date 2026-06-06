@@ -1,4 +1,5 @@
 import { prisma } from "../config/prisma.js";
+import WalletService from "./wallet.service.js";
 import logger from "../utils/logger.js";
 
 /**

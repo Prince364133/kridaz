@@ -1,8 +1,8 @@
 import * as Sentry from "@sentry/react";
-import React, { useState, useEffect } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ChevronLeft, Settings, History, Users, Zap, CheckCircle2, AlertCircle, Shield, User, Trophy, Play, Sparkles, X, Pause, FileText, TrendingUp, MapPin, Timer, Hash, Crosshair, Share2 } from 'lucide-react';
+import { ChevronLeft, Settings, History, Users, Circle, Zap, CheckCircle2, AlertCircle, Filter, Shield, User, PlayCircle, Undo2, Trophy, Play, Sparkles, X, Pause, FileText, TrendingUp, MapPin, Timer, Hash, Crosshair, Share2 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { useSelector } from 'react-redux';
 import useCricketScoring from '../hooks/useCricketScoring';

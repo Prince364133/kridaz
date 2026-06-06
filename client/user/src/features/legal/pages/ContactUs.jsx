@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Mail, MapPin, MessageCircle, Send, Clock, CheckCircle } from "lucide-react";
+import { Mail, MapPin, Phone, MessageCircle, Send, Clock, CheckCircle } from "lucide-react";
 
 const GRAD = "linear-gradient(135deg, #BFF367 0%, #BFF367 100%)";
 const BDR = "rgba(255,255,255,0.08)";

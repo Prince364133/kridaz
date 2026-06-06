@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
-import { motion } from 'framer-motion';
-import { Lock, Shield, Swords, Coins, Timer, Hash, MapPin, CircleDot, Activity } from 'lucide-react';
+import React, { useState, useRef } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { Lock, RotateCcw, Shield, Swords, Coins, Timer, Hash, MapPin, CircleDot, Activity } from 'lucide-react';
 
 /**
  * TossModal

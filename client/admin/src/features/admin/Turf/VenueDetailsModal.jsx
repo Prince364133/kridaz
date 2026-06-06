@@ -1,6 +1,7 @@
 import React from "react";
 import { 
-  X, MapPin, Clock, Calendar, Check, X as XIcon, Shield, Info, Phone, User, Globe
+  X, MapPin, Clock, Star, Calendar, Check, X as XIcon, 
+  Wifi, Coffee, Car, Shield, Info, Phone, User, Globe
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { format } from "date-fns";

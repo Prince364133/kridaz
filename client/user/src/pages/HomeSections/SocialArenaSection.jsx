@@ -1,29 +1,21 @@
 /* eslint-disable react/prop-types */
 import React from "react";
-import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Play, Camera, Image, Film, Eye } from "lucide-react";
-import { useSelector } from "react-redux";
-import useLoginOnDemand from "@hooks/useLoginOnDemand";
-import { motion, AnimatePresence } from "framer-motion";
+import { Info, Play, Heart, MessageSquare } from "lucide-react";
 
 const GRAD = "linear-gradient(90deg, #BFF367 0%, #BFF367 100%)";
 const BDR = "#2A2A2A";
 
 export default function SocialArenaSection({ reelsFeed }) {
   const navigate = useNavigate();
-  const { user, isLoggedIn } = useSelector((state) => state.auth);
-  const { gateInteraction } = useLoginOnDemand();
-
-  const [editingPost, setEditingPost] = useState(null);
 
   return (
-    <section className="mb-8 w-full overflow-hidden">
+    <section className="py-6 mb-6 w-full overflow-hidden">
       <div className="w-full">
-        <div className="relative flex flex-row items-center justify-between gap-4 mb-6 lg:mb-8">
-          <div className="relative flex items-center gap-2">
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-end mb-6 lg:mb-10 gap-4">
+          <div>
             <h2
-              className="text-[18px] md:text-[25px] font-black text-white tracking-tighter leading-none flex items-center gap-2 md:gap-3"
+              className="text-3xl md:text-5xl lg:text-6xl font-black text-white uppercase tracking-tighter leading-none flex items-center gap-2 md:gap-3"
               style={{ fontFamily: "'Open Sans', sans-serif" }}
             >
               Your{" "}
@@ -36,60 +28,20 @@ export default function SocialArenaSection({ reelsFeed }) {
                 }}
               >
                 Social Arena
-              </span>
+              </span>{" "}
+              <Info className="w-4 h-4 md:w-5 md:h-5 text-gray-600 cursor-help shrink-0" />
             </h2>
+            <p
+              className="text-xs md:text-sm font-medium text-gray-400 mt-2"
+              style={{ fontFamily: "'Inter 28pt Light', sans-serif" }}
+            >
+              Swipe to see what's happening in the field
+            </p>
           </div>
         </div>
 
-        {/* Create Post unified trigger / input mock */}
-        {isLoggedIn && (
-          <div className="mb-6">
-            <motion.div
-              key="trigger"
-              initial={{ height: 0, opacity: 0 }}
-              animate={{ height: "auto", opacity: 1 }}
-              exit={{ height: 0, opacity: 0 }}
-              className="bg-[#0A0A0A] border border-white/5 rounded-[12px] p-3 md:p-4 flex flex-col gap-3 md:gap-4"
-            >
-              <div className="flex items-center gap-3">
-                <img src={user?.profilePicture || "/default-avatar.png"} className="w-10 h-10 rounded-full object-cover border border-white/10 shrink-0" alt="" />
-                <button
-                  onClick={() => gateInteraction(() => navigate("/create-post"))}
-                  className="flex-1 bg-[#111] hover:bg-[#1A1A1A] rounded-full h-11 px-5 text-left text-[13px] font-bold text-white/40 border border-white/10 transition-all cursor-text"
-                >
-                  Start a post
-                </button>
-              </div>
-              
-              <div className="flex items-center justify-around pt-1 md:pt-2 border-t border-white/5">
-                <button 
-                  onClick={() => gateInteraction(() => navigate("/create-story"))}
-                  className="flex items-center justify-center flex-1 gap-2 text-white/60 hover:text-white hover:bg-white/5 py-2 md:py-2.5 rounded-[8px] transition-colors text-[11px] md:text-[13px] font-bold"
-                >
-                  <Camera size={18} className="text-[#3b82f6]" />
-                  <span className="hidden md:inline">Story</span>
-                </button>
-                <button 
-                  onClick={() => gateInteraction(() => navigate("/create-post"))}
-                  className="flex items-center justify-center flex-1 gap-2 text-white/60 hover:text-white hover:bg-white/5 py-2 md:py-2.5 rounded-[8px] transition-colors text-[11px] md:text-[13px] font-bold"
-                >
-                  <Image size={18} className="text-[#BFF367]" />
-                  <span className="hidden md:inline">Post</span>
-                </button>
-                <button 
-                  onClick={() => gateInteraction(() => navigate("/reels/upload"))}
-                  className="flex items-center justify-center flex-1 gap-2 text-white/60 hover:text-white hover:bg-white/5 py-2 md:py-2.5 rounded-[8px] transition-colors text-[11px] md:text-[13px] font-bold"
-                >
-                  <Film size={18} className="text-[#ef4444]" />
-                  <span className="hidden md:inline">Reel</span>
-                </button>
-              </div>
-            </motion.div>
-          </div>
-        )}
-
         {/* Reels Section (Horizontal Mock Data) */}
-        <div className="mb-2">
+        <div className="mb-8">
           <div className="flex gap-4 overflow-x-auto pb-4 scrollbar-hide snap-x">
             {reelsFeed.length === 0 ? (
               <div className="w-full py-12 flex items-center justify-center border border-white/5 bg-white/5 rounded-[12px]">
@@ -127,17 +79,9 @@ export default function SocialArenaSection({ reelsFeed }) {
                       <Play size={24} />
                     </div>
                   )}
-                  <div className="absolute inset-0 bg-black/20 group-hover:bg-black/40 transition-colors pointer-events-none"></div>
-                  {/* Views Pill */}
-                  <div className="absolute bottom-3 left-3 z-10 pointer-events-none">
-                    <div className="flex items-center gap-1.5 w-fit px-3 py-1.5 bg-black/40 backdrop-blur-md rounded-full border border-white/10 shadow-sm">
-                      <Eye size={16} className="text-white" strokeWidth={2.5} />
-                      <span className="text-white text-xs font-bold tracking-wide drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)]">
-                        {Intl.NumberFormat('en-US', { notation: 'compact', maximumFractionDigits: 1 }).format(
-                          typeof reel.views === 'number' ? reel.views : 
-                          reel.stats?.views || reel.viewsCount || 0
-                        ).toLowerCase()}
-                      </span>
+                  <div className="absolute inset-0 flex items-center justify-center bg-black/20 group-hover:bg-black/40 transition-colors">
+                    <div className="w-10 h-10 rounded-full bg-white/20 backdrop-blur-md flex items-center justify-center border border-white/40">
+                      <Play size={16} className="text-white fill-white ml-1" />
                     </div>
                   </div>
                 </div>

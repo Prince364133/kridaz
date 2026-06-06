@@ -3,9 +3,9 @@ import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { useSelector } from "react-redux";
 import axiosInstance from "@hooks/useAxiosInstance";
 import {
-  Search, MapPin, Star, Users, Shield, Trophy,
-  Activity, Filter, Loader2, Check, X,
-  Video, ChevronDown, Navigation, Zap, Calendar, Clock
+  Search, MapPin, Star, Users, User, Shield, Trophy,
+  Activity, CheckCircle, Filter, Loader2, Check, X,
+  Video, Dribbble, ChevronDown, Sparkles, Navigation, Zap, Calendar, Clock
 } from "lucide-react";
 import toast from "react-hot-toast";
 import { fetchStates, fetchCities } from "@utils/locationService";

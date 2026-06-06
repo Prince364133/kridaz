@@ -1,5 +1,5 @@
-import React, { useState } from "react";
-import { CheckCircle2, Palette, Zap, Star, Shield, ArrowLeft, Loader2, Play } from "lucide-react";
+import React, { useState, useEffect } from "react";
+import { Layout, CheckCircle2, Eye, Palette, Zap, Star, Shield, ArrowLeft, Loader2, Play } from "lucide-react";
 import { useNavigate, useParams } from "react-router-dom";
 import axiosInstance from "@hooks/useAxiosInstance";
 import { toast } from "react-hot-toast";

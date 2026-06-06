@@ -1,3 +1,4 @@
+import { jest } from '@jest/globals';
 import { addUsernameToBloom, checkUsernameBloom, addReelInteractionToBloom, checkReelInteractionBloom, blacklistOtpIdentifier, isOtpBlacklisted } from '../utils/bloomFilter.js';
 import { redisClient } from '../config/redis.js';
 

@@ -1,5 +1,5 @@
 import React from "react";
-import { Calendar, MapPin, Users, Clock } from "lucide-react";
+import { Calendar, MapPin, Users, Clock, ArrowRight } from "lucide-react";
 import useStreamerDashboard from "@hooks/owner/useStreamerDashboard";
 import DashboardSkeleton from "@features/venue-owner/Dashboard/DashboardSkeleton";
 

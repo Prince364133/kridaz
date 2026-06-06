@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { CheckCircle2, Lock, Loader2 } from 'lucide-react';
 import axiosInstance from '@hooks/useAxiosInstance';
 

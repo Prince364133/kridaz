@@ -1,6 +1,6 @@
 import * as Sentry from "@sentry/react";
 import React, { useState, useEffect } from 'react';
-import { Clock, Phone, Mail, X } from 'lucide-react';
+import { Clock, User, Phone, Mail, MapPin, X } from 'lucide-react';
 import axiosInstance from '@hooks/useAxiosInstance';
 
 const OccupancyHeatmap = () => {

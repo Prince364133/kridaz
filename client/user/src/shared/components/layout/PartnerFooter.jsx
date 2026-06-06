@@ -5,7 +5,12 @@ import {
   Linkedin, 
   Instagram, 
   Mail, 
-  MapPin
+  MapPin, 
+  Globe, 
+  ShieldCheck,
+  ArrowUpRight,
+  Building2,
+  Phone
 } from "lucide-react";
 
 const PartnerFooter = () => {

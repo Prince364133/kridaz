@@ -3,8 +3,9 @@ import { useSelector } from "react-redux";
 import axiosInstance from "@hooks/useAxiosInstance";
 import {
   User, Mail, Phone, MapPin, Award, Save, Loader2, Plus, Trash2,
-  CheckCircle2, ChevronLeft, ChevronRight, FileText, Image as ImageIcon, Play, Layout, X, ChevronDown, Zap, ShieldCheck,
-  Globe, DollarSign, Building, Search, Trophy
+  CheckCircle2, ChevronLeft, ChevronRight, FileText, Image as ImageIcon,
+  Video, Play, Layout, X, ChevronDown, Zap, ShieldCheck, Target,
+  Globe, Calendar, DollarSign, Building, Search, Map, Trophy
 } from "lucide-react";
 import toast from "react-hot-toast";
 

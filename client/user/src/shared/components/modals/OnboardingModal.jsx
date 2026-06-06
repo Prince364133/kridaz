@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import { Check, Trophy, Activity, Zap, Target, MapPin, ChevronLeft, Loader2, Image as ImageIcon, ChevronDown } from "lucide-react";
+import { Check, Trophy, Activity, Zap, Target, MapPin, Phone, Mail, User as UserIcon, Calendar, ChevronRight, ChevronLeft, Loader2, Image as ImageIcon, ChevronDown } from "lucide-react";
 import axiosInstance from "@hooks/useAxiosInstance";
 import toast from "react-hot-toast";
 import { useDispatch } from "react-redux";

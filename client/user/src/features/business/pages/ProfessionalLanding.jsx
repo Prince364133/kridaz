@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { ArrowRight, Users, Target, Video, CheckCircle, Trophy, X, Landmark, User, QrCode, FileCheck, Loader2, Clock } from "lucide-react";
+import { ArrowRight, Users, Target, Video, CheckCircle, Trophy, X, Landmark, User, QrCode, FileCheck, Loader2 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useSelector } from "react-redux";
 import axiosInstance from "@hooks/useAxiosInstance.js";
@@ -35,18 +35,6 @@ export default function ProfessionalLanding() {
   
   const navigate = useNavigate();
   const { user, isLoggedIn } = useSelector((state) => state.auth);
-
-  // Compute user registration status
-  const professionalRoles = ["coach", "umpire", "streamer", "commentator", "venue_owner", "venu_owners"];
-  const hasExistingRole = isLoggedIn && (user?.ownerProfile || professionalRoles.includes(user?.role?.toLowerCase()));
-  const hasPendingApplication = isLoggedIn && user?.applicationStatus === "pending";
-
-  const getDashboardPath = () => {
-    const role = user?.role?.toLowerCase();
-    if (role === "venue_owner" || role === "venu_owners" || user?.ownerProfile) return "/venue-owner";
-    if (["coach", "umpire", "streamer", "commentator", "scorer"].includes(role)) return `/professional/${role}`;
-    return "/";
-  };
 
   const toggleRole = (roleId) => {
     if (selectedRoles.includes(roleId)) {
@@ -191,41 +179,13 @@ export default function ProfessionalLanding() {
             <p className="text-gray-400 mb-6 max-w-lg mx-auto md:mx-0 leading-relaxed text-sm md:text-base" style={{ fontFamily: "'Inter 28pt Light', sans-serif", fontWeight: 300 }}>
               Take your professional career to the next level. Kridaz provides the digital infrastructure to manage your clients, schedule sessions, and grow your brand as a Coach, Umpire, Scorer, or Streamer.
             </p>
-            {hasExistingRole ? (
-              <div className="w-full max-w-md">
-                <div className="w-full bg-white/5 border border-[#BFF367]/20 backdrop-blur-sm rounded-[10px] p-5 md:p-6 text-center md:text-left">
-                  <div className="flex items-center justify-center md:justify-start gap-2 mb-2">
-                    <CheckCircle className="w-5 h-5 text-[#BFF367]" />
-                    <span className="text-white font-black uppercase tracking-wider text-sm md:text-base">Already a Professional</span>
-                  </div>
-                  <p className="text-white/60 text-xs mb-3 leading-relaxed">You already have an active role as <span className="text-[#BFF367] font-bold">{user?.role}</span>.</p>
-                  <button
-                    onClick={() => navigate(getDashboardPath())}
-                    className="bg-[#BFF367] text-black font-black uppercase tracking-widest rounded-[8px] hover:brightness-110 transition-all flex items-center justify-center gap-2 mx-auto md:mx-0 px-6 py-2.5 text-xs md:text-sm"
-                  >
-                    Go to Dashboard <ArrowRight size={16} />
-                  </button>
-                </div>
-              </div>
-            ) : hasPendingApplication ? (
-              <div className="w-full max-w-md">
-                <div className="w-full bg-white/5 border border-amber-500/20 backdrop-blur-sm rounded-[10px] p-5 md:p-6 text-center md:text-left">
-                  <div className="flex items-center justify-center md:justify-start gap-2 mb-2">
-                    <Clock className="w-5 h-5 text-amber-400 animate-pulse" />
-                    <span className="text-white font-black uppercase tracking-wider text-sm md:text-base">Application Pending</span>
-                  </div>
-                  <p className="text-white/60 text-xs leading-relaxed">You have applied for <span className="text-amber-400 font-bold">{user?.applicationRole || 'a professional role'}</span>. We are verifying your application. You will be notified once approved.</p>
-                </div>
-              </div>
-            ) : (
-              <button
-                onClick={() => setModalStep(1)}
-                className="inline-flex items-center gap-3 font-bold text-black rounded-[6px] px-8 py-4 hover:brightness-110 transition-all uppercase tracking-widest text-sm md:text-base"
-                style={{ background: GRADIENT }}
-              >
-                Join as a Professional <ArrowRight size={20} />
-              </button>
-            )}
+            <button
+              onClick={() => setModalStep(1)}
+              className="inline-flex items-center gap-3 font-bold text-black rounded-[6px] px-8 py-4 hover:brightness-110 transition-all uppercase tracking-widest text-sm md:text-base"
+              style={{ background: GRADIENT }}
+            >
+              Join as a Professional <ArrowRight size={20} />
+            </button>
           </div>
 
           <div className="grid gap-4 md:gap-6">
@@ -323,7 +283,7 @@ export default function ProfessionalLanding() {
                   You already have an active professional role ({user?.role}). You can manage your professional profile from your dashboard.
                 </p>
                 <button 
-                  onClick={() => { setModalStep(0); navigate(getDashboardPath()); }}
+                  onClick={() => { setModalStep(0); navigate("/business/dashboard"); }}
                   className="w-full py-4 rounded-[10px] font-bold text-black uppercase tracking-widest hover:brightness-110 transition-all"
                   style={{ background: GRADIENT, fontFamily: "'Inter'" }}
                 >
@@ -337,7 +297,7 @@ export default function ProfessionalLanding() {
                 </div>
                 <h2 className="text-2xl font-bold mb-4 uppercase tracking-wider text-white" style={{ fontFamily: "'Open Sans'" }}>Application Pending</h2>
                 <p className="text-gray-400 text-sm mb-6 leading-relaxed">
-                  You have applied for <span className="text-[#BFF367] font-bold">{user?.applicationRole || 'a professional role'}</span>. Please wait for our team to review it. We will notify you once a decision is made.
+                  You already have a pending application for a professional role. Please wait for our team to review it. We will notify you once a decision is made.
                 </p>
                 <button 
                   onClick={() => setModalStep(0)}

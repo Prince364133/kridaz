@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import ReelPlayer from './ReelPlayer';
-import { ThumbsUp, MessageCircle, Share2, MoreVertical, Music } from 'lucide-react';
+import { ThumbsUp, MessageCircle, Share2, Bookmark, MoreVertical, Music } from 'lucide-react';
 import { useInteractWithReelMutation, useDeleteReelMutation, useAddReelCommentMutation, useReportReelMutation, useGetReelCommentsQuery } from '@redux/api/reelsApi';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useSelector, useDispatch } from 'react-redux';

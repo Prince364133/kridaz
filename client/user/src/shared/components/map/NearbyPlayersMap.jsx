@@ -2,7 +2,7 @@ import { MapContainer, TileLayer, useMap, useMapEvents, Marker, Popup } from "re
 import "leaflet/dist/leaflet.css";
 import { useEffect, useRef, useMemo } from "react";
 import L from "leaflet";
-import { Navigation } from "lucide-react";
+import { Activity, Users, MapPin, User, Navigation } from "lucide-react";
 import iconUrl from "leaflet/dist/images/marker-icon.png";
 import iconShadow from "leaflet/dist/images/marker-shadow.png";
 

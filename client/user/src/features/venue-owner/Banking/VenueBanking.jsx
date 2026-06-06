@@ -1,7 +1,9 @@
 import React, { useState, useMemo } from "react";
-import { Landmark, ArrowUpRight, TrendingUp, 
-  History, ShieldCheck, Download, Plus, 
-  FileText, CheckCircle, AlertCircle, Lock
+import { 
+  Coins, Landmark, CreditCard, ArrowUpRight, TrendingUp, 
+  History, Calendar, ShieldCheck, Download, Plus, 
+  FileText, Upload, CheckCircle, AlertCircle, Lock,
+  ArrowDownLeft, IndianRupee, Wallet, CalendarDays, Zap
 } from "lucide-react";
 import useBanking from "@hooks/owner/useBanking";
 import useOwnerDashboard from "@hooks/owner/useOwnerDashboard";

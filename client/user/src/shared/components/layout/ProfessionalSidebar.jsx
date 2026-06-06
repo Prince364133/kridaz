@@ -2,14 +2,25 @@ import React from "react";
 import { Link, useLocation, useParams } from "react-router-dom";
 import { 
   X, 
-  LayoutDashboard,
+  LayoutDashboard, 
+  Users, 
+  Calendar, 
+  Video, 
+  HelpCircle, 
+  Home,
+  Target,
   Activity,
+  Clock,
   User,
   IndianRupee,
+  Landmark,
+  Trophy,
+  Play,
   Star
 } from "lucide-react";
 import { useDispatch, useSelector } from "react-redux";
 import { logout } from "@redux/slices/authSlice.js";
+import { getDynamicProfileRoute } from "@utils/routeUtils";
 import { useNavigate } from "react-router-dom";
 
 const ProfessionalSidebar = ({ isOpen, toggleSidebar, isMinimized, className }) => {

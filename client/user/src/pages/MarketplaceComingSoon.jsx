@@ -1,6 +1,6 @@
 ﻿import React from "react";
 import { Link } from "react-router-dom";
-import { ShoppingBag, Zap, Sparkles, Clock } from "lucide-react";
+import { ShoppingBag, ArrowLeft, Zap, Sparkles, Clock } from "lucide-react";
 
 const MarketplaceComingSoon = () => {
   return (

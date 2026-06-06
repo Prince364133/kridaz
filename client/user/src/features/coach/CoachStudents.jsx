@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Users, Mail, Phone, ShieldCheck, Calendar } from "lucide-react";
+import { Users, Mail, Phone, ExternalLink, ShieldCheck, Calendar } from "lucide-react";
 import useCoachDashboard from "@hooks/owner/useCoachDashboard";
 import DashboardSkeleton from "@features/venue-owner/Dashboard/DashboardSkeleton";
 

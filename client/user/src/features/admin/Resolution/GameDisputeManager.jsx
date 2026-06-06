@@ -1,5 +1,5 @@
 ﻿import React, { useState } from "react";
-import { ShieldAlert, CheckCircle, Search, Trophy, User, Users } from "lucide-react";
+import { ShieldAlert, CheckCircle, Search, Trophy, Phone, User, Users } from "lucide-react";
 import useGameDisputes from "@hooks/admin/useGameDisputes";
 
 const GameDisputeManager = () => {

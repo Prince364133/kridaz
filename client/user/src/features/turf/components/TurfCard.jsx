@@ -1,3 +1,4 @@
+import * as Sentry from "@sentry/react";
 import { useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { MapPin, Star, ChevronLeft, ChevronRight, Zap, Heart, Timer, MessageSquareShare } from "lucide-react";
@@ -44,7 +45,7 @@ const TurfCard = ({ turf, featured = false, distance = "1.2km Away" }) => {
       await axiosInstance.post("/api/user/turf/user/like", { turfId: targetId });
     } catch (err) {
       setIsWishlisted(isWishlisted); // Revert state on failure
-      console.error("[TELEMETRY] Failed to toggle wishlist like:", err);
+      Sentry.captureException(err);
     }
   };
 
@@ -61,7 +62,7 @@ const TurfCard = ({ turf, featured = false, distance = "1.2km Away" }) => {
       
       await axiosInstance.post("/api/user/turf/user/share", { turfId: targetId });
     } catch (err) {
-      console.error("[TELEMETRY] Failed to record turf share:", err);
+      Sentry.captureException(err);
     }
   };
 

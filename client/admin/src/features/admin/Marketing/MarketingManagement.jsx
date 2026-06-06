@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import axiosInstance from "@hooks/useAxiosInstance";
 import { toast } from "react-hot-toast";
-import { Plus, Trash2, Edit2, Layout, X, Upload, Image as ImageIcon, Activity as BellIcon } from "lucide-react";
+import { Plus, Trash2, Edit2, Layout, Check, X, Upload, Image as ImageIcon, Activity as BellIcon } from "lucide-react";
 import PushComposer from "./PushComposer";
 
 export const MarketingManagement = () => {

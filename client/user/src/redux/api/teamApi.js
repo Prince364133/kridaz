@@ -64,7 +64,7 @@ export const teamApi = baseApi.injectEndpoints({
       providesTags: ["Team"],
     }),
     getNetwork: builder.query({
-      query: () => '/api/user/players/network',
+      query: () => '/api/players/network',
     }),
     requestToJoin: builder.mutation({
       query: (id) => ({

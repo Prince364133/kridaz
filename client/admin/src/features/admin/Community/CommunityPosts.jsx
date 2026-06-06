@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
-import { ShieldAlert, Trash2 } from 'lucide-react';
+import { ShieldAlert, Trash2, Search, ExternalLink } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import { useGetPostReportsQuery, useDeleteAdminPostMutation } from '@redux/api/communityApi';
 import { format } from 'date-fns';

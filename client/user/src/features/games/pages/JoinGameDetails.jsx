@@ -7,7 +7,8 @@ import { useNavigate, useParams } from 'react-router-dom';
 import axiosInstance from '@hooks/useAxiosInstance';
 import { toast } from 'react-hot-toast';
 import { 
-  Users, MapPin, Coins, Trophy, Info
+  Users, MapPin, Calendar, Clock, Coins, ChevronRight, ChevronDown,
+  UserCheck, Trophy, Info, Zap, ShieldCheck, X, Share2, Award, ArrowLeft
 } from 'lucide-react';
 import { GiCricketBat, GiGloves, GiRun } from 'react-icons/gi';
 import CoinAnimation from '@components/CoinAnimation';

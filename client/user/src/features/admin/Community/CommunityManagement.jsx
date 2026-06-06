@@ -9,7 +9,10 @@ import {
   Search,
   Filter,
   Loader2,
-  Eye
+  Image as ImageIcon,
+  MoreVertical,
+  Eye,
+  Settings
 } from "lucide-react";
 import toast from "react-hot-toast";
 

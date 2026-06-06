@@ -46,23 +46,14 @@ export const getUploadUrl = async (req, res) => {
  */
 export const confirmPost = async (req, res) => {
   try {
-    const { postId, key, mediaType, title, content, mediaItems } = req.body;
+    const { postId, key, mediaType, title, content } = req.body;
     const authorId = await resolveUserId(req.user.id);
 
-    let mediaUrls = [];
-    let finalMediaType = mediaType || 'text';
     let placeholder = null;
+    const mediaUrl = `${process.env.REELS_CDN_URL}/${key}`;
 
-    if (mediaItems && Array.isArray(mediaItems) && mediaItems.length > 0) {
-      mediaUrls = mediaItems.map(item => `${process.env.REELS_CDN_URL}/${item.key}`);
-      finalMediaType = mediaItems[0].mediaType;
-    } else if (key) {
-      mediaUrls = [`${process.env.REELS_CDN_URL}/${key}`];
-      finalMediaType = mediaType || 'image';
-    }
-
-    if (finalMediaType === 'image' && mediaUrls.length > 0) {
-      placeholder = await generatePlaceholder(mediaUrls[0]);
+    if (mediaType === 'image') {
+      placeholder = await generatePlaceholder(mediaUrl);
     }
 
     const post = await prisma.post.create({
@@ -71,10 +62,10 @@ export const confirmPost = async (req, res) => {
         authorId,
         title,
         content,
-        mediaType: finalMediaType,
-        mediaUrls: mediaUrls,
+        mediaType: mediaType || 'image',
+        mediaUrls: [mediaUrl],
         placeholder,
-        status: finalMediaType === 'video' ? 'pending' : 'ready'
+        status: mediaType === 'video' ? 'pending' : 'ready'
       },
       include: {
         author: { select: { id: true, name: true, profilePicture: true, username: true } }

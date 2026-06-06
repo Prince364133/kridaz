@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { ChevronRight, Eye, ThumbsUp, ArrowLeft, Search } from 'lucide-react';
+import { ChevronRight, Eye, ThumbsUp, ArrowLeft, Search, Calendar, Clock, Tag } from 'lucide-react';
 import axios from 'axios';
 
 const PRI = "#BFF367";

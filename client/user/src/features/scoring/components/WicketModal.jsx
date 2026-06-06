@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, ChevronRight, Users } from 'lucide-react';
+import { X, AlertTriangle, ChevronRight, Users } from 'lucide-react';
 
 /**
  * WicketModal — P1.1

@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useSelector } from 'react-redux';
-import { motion } from 'framer-motion';
-import { Calendar, Clock, MapPin, 
- Users, Shield, ArrowLeft, Zap, Activity, Share2, User
+import { motion, AnimatePresence } from 'framer-motion';
+import { 
+ Trophy, Calendar, Clock, MapPin, 
+ Users, Shield, ArrowLeft, Zap,
+ Info, Activity, Share2, User, CheckCircle
 } from 'lucide-react';
 import axiosInstance from '@hooks/useAxiosInstance';
 import { toast } from 'react-hot-toast';

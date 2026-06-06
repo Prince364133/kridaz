@@ -1,8 +1,6 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
-import { MoreVertical, ShieldCheck, Video } from "lucide-react";
-import CommentIcon from "../../../assets/icons/comment_icon.png";
-import ShareIcon from "../../../assets/icons/share_icon.png";
+import { ThumbsUp, MessageCircle, Send, MoreVertical, ShieldCheck, Video, Trash2, AlertTriangle, Eye, Calendar, User as UserIcon, Loader2 } from "lucide-react";
 import { AnimatePresence, motion } from "framer-motion";
 import { useLikePostMutation, useAddPostCommentMutation } from "@redux/api/communityApi";
 import toast from "react-hot-toast";
@@ -19,15 +17,6 @@ const PostItem = React.memo(({ post, user, isAdmin, gateInteraction, onUpdatePos
   const [expandedComments, setExpandedComments] = useState(false);
   const [commentInput, setCommentInput] = useState("");
   const [activeDropdown, setActiveDropdown] = useState(false);
-  const [activeMediaIndex, setActiveMediaIndex] = useState(0);
-
-  const handleMediaScroll = (e) => {
-    if (!e.target) return;
-    const index = Math.round(e.target.scrollLeft / e.target.clientWidth);
-    if (index !== activeMediaIndex) {
-      setActiveMediaIndex(index);
-    }
-  };
 
   // Relative / formatted time helper
   const getFormattedTime = (dateString) => {
@@ -171,9 +160,9 @@ const PostItem = React.memo(({ post, user, isAdmin, gateInteraction, onUpdatePos
     post.authorId === currentUserId;
 
   return (
-    <div className="bg-[#0A0A0A] border border-white/5 rounded-[12px] overflow-hidden flex flex-col">
+    <div className="bg-[#0A0A0A] border border-white/5 rounded-[8px] p-5 space-y-4">
       {/* Post Header */}
-      <div className="flex items-center justify-between p-4 pb-2">
+      <div className="flex items-center justify-between">
         <Link
           to={`/profile/${post.adminId?.id || post.adminId?._id || post.author?.id || post.author?._id || post.authorId}`}
           className="flex items-center gap-3 group"
@@ -234,95 +223,18 @@ const PostItem = React.memo(({ post, user, isAdmin, gateInteraction, onUpdatePos
 
       {/* Caption */}
       {(post.title || post.content) && (
-        <div className="text-[13.5px] font-medium leading-relaxed px-4 pb-3">
+        <div className="text-[12px] font-medium leading-relaxed">
           {post.title && <span className="font-bold mr-2">{post.title}</span>}
           <span className="text-white/90 whitespace-pre-wrap">{post.content}</span>
         </div>
       )}
 
       {/* Media Display */}
-      {post.mediaUrls && post.mediaUrls.length > 0 ? (
-        <div className="relative w-full aspect-[4/5] bg-[#050505] group overflow-hidden">
-          <div 
-            className="flex overflow-x-auto snap-x snap-mandatory h-full w-full [&::-webkit-scrollbar]:hidden" 
-            style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
-            onScroll={handleMediaScroll}
-          >
-            {post.mediaUrls.map((url, idx) => (
-              <div key={idx} className="min-w-full h-full snap-center shrink-0 relative">
-                <img
-                  src={url}
-                  className={`w-full h-full object-contain transition-all duration-500 ${
-                    post.status === "pending" || post.status === "processing" ? "blur-xl scale-110 opacity-50" : ""
-                  }`}
-                  alt=""
-                />
-                {/* Video Icon for processed videos */}
-                {post.mediaType === "video" && post.status === "ready" && (
-                  <div className="absolute top-4 right-4 p-1.5 bg-black/60 backdrop-blur-md rounded z-10">
-                    <Video size={14} className="text-white" />
-                  </div>
-                )}
-              </div>
-            ))}
-          </div>
-
-          {/* Progress Overlay for Pending/Processing Posts */}
-          {(post.status === "pending" || post.status === "processing") && (
-            <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/20 backdrop-blur-sm z-20">
-              <div className="w-24 h-24 relative flex items-center justify-center">
-                <svg className="w-full h-full transform -rotate-90">
-                  <circle cx="48" cy="48" r="40" stroke="currentColor" strokeWidth="6" fill="transparent" className="text-white/10" />
-                  <circle
-                    cx="48"
-                    cy="48"
-                    r="40"
-                    stroke="#BFF367"
-                    strokeWidth="6"
-                    fill="transparent"
-                    strokeDasharray={2 * Math.PI * 40}
-                    strokeDashoffset={2 * Math.PI * 40 * (1 - (post.processingProgress || 0) / 100)}
-                    className="transition-all duration-300"
-                  />
-                </svg>
-                <div className="absolute inset-0 flex flex-col items-center justify-center">
-                  <span className="text-[14px] font-black text-white">{post.processingProgress || 0}%</span>
-                </div>
-              </div>
-              <div className="mt-4 flex flex-col items-center gap-1">
-                <span className="text-[10px] font-black uppercase tracking-[0.2em] text-[#BFF367] animate-pulse">
-                  {post.status === "processing" ? "Optimizing Media" : "Preparing Upload"}
-                </span>
-                <div className="flex gap-1">
-                  <span className="w-1 h-1 bg-gradient-to-r from-[#BFF367] to-[#BFF367] rounded-full animate-bounce [animation-delay:-0.3s]"></span>
-                  <span className="w-1 h-1 bg-gradient-to-r from-[#BFF367] to-[#BFF367] rounded-full animate-bounce [animation-delay:-0.15s]"></span>
-                  <span className="w-1 h-1 bg-gradient-to-r from-[#BFF367] to-[#BFF367] rounded-full animate-bounce"></span>
-                </div>
-              </div>
-            </div>
-          )}
-          
-          {/* Multiple Image Indicator Dots */}
-          {post.mediaUrls.length > 1 && (
-            <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex items-center justify-center gap-1.5 z-10 bg-black/40 backdrop-blur-md px-3 py-1.5 rounded-full pointer-events-none shadow-lg">
-              {post.mediaUrls.map((_, i) => (
-                <div 
-                  key={i} 
-                  className={`rounded-full transition-all duration-300 ${
-                    i === activeMediaIndex 
-                      ? "w-2 h-2 bg-[#BFF367]" 
-                      : "w-1.5 h-1.5 bg-white/50"
-                  }`} 
-                />
-              ))}
-            </div>
-          )}
-        </div>
-      ) : (post.image || post.imageUrl || post.mediaUrl) ? (
-        <div className="relative w-full aspect-[4/5] bg-[#050505] group overflow-hidden">
+      {(post.image || post.imageUrl || post.mediaUrl) && (
+        <div className="relative aspect-square rounded-[8px] overflow-hidden group border border-white/5 bg-[#111]">
           <img
             src={post.image || post.imageUrl || post.thumbnailUrl || post.mediaUrl}
-            className={`w-full h-full object-contain transition-all duration-500 ${
+            className={`w-full h-full object-cover transition-all duration-500 ${
               post.status === "pending" || post.status === "processing" ? "blur-xl scale-110 opacity-50" : ""
             }`}
             alt=""
@@ -370,11 +282,46 @@ const PostItem = React.memo(({ post, user, isAdmin, gateInteraction, onUpdatePos
             </div>
           )}
         </div>
-      ) : null}
+      )}
+
+      {/* Action Bar */}
+      <div className="flex items-center justify-between pt-1">
+        <div className="flex items-center gap-5">
+          <button onClick={handleLike} className="flex items-center gap-2 group">
+            <ThumbsUp
+              size={20}
+              className={`transition-colors ${
+                post.likes?.some((l) => (l.id || l._id || l) === currentUserId)
+                  ? "fill-[#BFF367] text-[#BFF367]"
+                  : "text-white/70 group-hover:text-[#BFF367]"
+              }`}
+            />
+            <span className="text-[12px] font-bold text-white">{post.likes?.length || 0}</span>
+          </button>
+          <button onClick={() => setExpandedComments(!expandedComments)} className="flex items-center gap-2 group">
+            <MessageCircle
+              size={20}
+              className={`transition-colors ${expandedComments ? "text-[#BFF367]" : "text-white/70 group-hover:text-[#BFF367]"}`}
+            />
+            <span className="text-[12px] font-bold text-white">{post.comments?.length || 0}</span>
+          </button>
+          <button
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation();
+              onSharePost(postId);
+            }}
+            className="flex items-center gap-2 group"
+          >
+            <Send size={18} className="text-white/70 group-hover:text-[#BFF367] transition-colors" />
+            <span className="text-[12px] font-bold text-white">Share</span>
+          </button>
+        </div>
+      </div>
 
       {/* Likes Summary */}
       {post.likes?.length > 0 && (
-        <div className="flex items-center gap-2 text-[11px] font-medium text-white/50 px-4 py-3">
+        <div className="flex items-center gap-2 text-[11px] font-medium text-white/50 pt-1">
           <div className="flex -space-x-1.5 shrink-0">
             {post.likes.slice(0, 3).map((likeUser, i) => (
               <div
@@ -416,52 +363,6 @@ const PostItem = React.memo(({ post, user, isAdmin, gateInteraction, onUpdatePos
         </div>
       )}
 
-      {/* Action Bar */}
-      <div className="flex items-center justify-between border-t border-white/10 bg-[#0A0A0A] px-2 py-1">
-        <button onClick={handleLike} className="flex-1 flex items-center justify-center gap-2 py-2 transition-colors group">
-          <svg 
-            xmlns="http://www.w3.org/2000/svg" 
-            viewBox="0 0 24 24"
-            className={`w-[18px] h-[18px] transition-all duration-200 ${post.likes?.some((l) => (l.id || l._id || l) === currentUserId) ? "" : "text-white/70 group-hover:text-white"}`}
-          >
-            <defs>
-              <linearGradient id={`like-gradient-${postId}`} x1="0%" y1="0%" x2="100%" y2="100%">
-                <stop offset="0%" stopColor="#BFF367" />
-                <stop offset="100%" stopColor="#55dee8" />
-              </linearGradient>
-            </defs>
-            <path 
-              fill={post.likes?.some((l) => (l.id || l._id || l) === currentUserId) ? `url(#like-gradient-${postId})` : "currentColor"} 
-              d="M4 21h1V8H4c-1.1 0-2 .9-2 2v9c0 1.1.9 2 2 2M20 8h-6.61l1.12-3.37c.2-.61.1-1.28-.27-1.8c-.38-.52-.98-.83-1.62-.83h-.61c-.3 0-.58.13-.77.36L7.01 7.44V21h10.31a2 2 0 0 0 1.87-1.3l2.76-7.35c.04-.11.06-.23.06-.35v-2c0-1.1-.9-2-2-2Z" 
-            />
-          </svg>
-          {post.likes?.length > 0 && (
-            <span className="text-[13px] font-bold text-white/80 group-hover:text-white transition-colors">
-              {post.likes.length}
-            </span>
-          )}
-        </button>
-        <button onClick={() => setExpandedComments(!expandedComments)} className="flex-1 flex items-center justify-center gap-2 py-2 transition-colors group">
-          <img 
-            src={CommentIcon} 
-            alt="Comment" 
-            className="w-[18px] h-[18px] object-contain transition-all duration-200 opacity-70 group-hover:opacity-100 brightness-0 invert"
-          />
-          {(post.totalComments > 0 || post.comments?.length > 0) && (
-            <span className="text-[13px] font-bold text-white/80 group-hover:text-white transition-colors">
-              {post.totalComments || post.comments.length}
-            </span>
-          )}
-        </button>
-        <button onClick={(e) => { e.stopPropagation(); onSharePost(postId); }} className="flex-1 flex items-center justify-center py-2 transition-colors group">
-          <img 
-            src={ShareIcon} 
-            alt="Share" 
-            className="w-[18px] h-[18px] object-contain transition-all duration-200 opacity-70 group-hover:opacity-100 brightness-0 invert"
-          />
-        </button>
-      </div>
-
       {/* Expandable Comments Section */}
       <AnimatePresence>
         {expandedComments && (
@@ -470,9 +371,9 @@ const PostItem = React.memo(({ post, user, isAdmin, gateInteraction, onUpdatePos
             animate={{ height: "auto", opacity: 1 }}
             exit={{ height: 0, opacity: 0 }}
             transition={{ duration: 0.25 }}
-            className="overflow-hidden bg-[#0A0A0A]"
+            className="overflow-hidden"
           >
-            <div className="space-y-3 pt-3 px-4 pb-4 border-t border-white/5">
+            <div className="space-y-3 pt-2 border-t border-white/5">
               {post.comments && post.comments.length > 0 && (
                 <div className="max-h-[200px] overflow-y-auto space-y-2.5 pr-1 scrollbar-thin scrollbar-thumb-white/10 scrollbar-track-transparent">
                   {post.comments.slice(0, 4).map((comment) => {

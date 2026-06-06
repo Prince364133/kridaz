@@ -1,3 +1,4 @@
+import * as Sentry from "@sentry/react";
 import { useState, useEffect, useRef } from "react";
 import { ChevronDown, MapPin, RotateCcw, Building2, Trophy, Loader2 } from "lucide-react";
 import { fetchStates, fetchCities } from "../../utils/locationService";
@@ -38,7 +39,7 @@ const SearchTurf = ({ onSearch }) => {
         const stateList = await fetchStates();
         setStates(stateList || []);
       } catch (err) {
-        console.error("Failed to fetch states:", err);
+        Sentry.captureException(err);
       } finally {
         setLoadingStates(false);
       }
@@ -55,7 +56,7 @@ const SearchTurf = ({ onSearch }) => {
           const cityList = await fetchCities(selectedState);
           setCities(cityList || []);
         } catch (err) {
-          console.error(`Failed to fetch cities for ${selectedState}:`, err);
+          Sentry.captureException(err);
         } finally {
           setLoadingCities(false);
         }

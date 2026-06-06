@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from 'react';
-import { Shield } from 'lucide-react';
+import { Filter, User, Circle, Shield } from 'lucide-react';
 
 const ballColor = (ball) => {
   if (ball.isWicket) return 'bg-red-600 text-white';

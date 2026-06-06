@@ -1,6 +1,6 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { Trophy, Clock, Tv, Activity, Play, Eye } from 'lucide-react';
+import { Trophy, Clock, Tv, ExternalLink, Activity, Play, Star, Eye } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
 const ScoringMatchCard = ({ match }) => {

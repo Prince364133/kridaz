@@ -2,7 +2,7 @@ import { createBrowserRouter, Navigate, useParams } from "react-router-dom";
 import { lazy, Suspense } from "react";
 
 // Î“Ã¶Ã‡Î“Ã¶Ã‡ Eager: Layouts (used on nearly every route Î“Ã‡Ã¶ small files, no split benefit) Î“Ã¶Ã‡Î“Ã¶Ã‡
-import { PartnerLayout, ProfessionalLayout } from "@layouts";
+import { PartnerLayout, GuestLayout, CoachLayout, UmpireLayout, StreamerLayout, ScorerLayout, ProfessionalLayout } from "@layouts";
 import UserRoot from "@user/layouts/Root";
 
 // Î“Ã¶Ã‡Î“Ã¶Ã‡ Eager: Route guards & error utilities (must be synchronous) Î“Ã¶Ã‡Î“Ã¶Ã‡
@@ -65,9 +65,6 @@ const UploadReel             = lazy(() => import("@features/reels").then(m => ({
 const ReelAnalytics          = lazy(() => import("@features/reels").then(m => ({ default: m.ReelAnalytics })));
 const NotificationsPage      = lazy(() => import("@features/notifications").then(m => ({ default: m.NotificationsPage })));
 const SavedPage              = lazy(() => import("@features/saved/pages/SavedPage"));
-const NewPostLanding         = lazy(() => import("@user/pages/NewPost/NewPostLanding"));
-const CreatePostPage         = lazy(() => import("@features/networking/pages/CreatePostPage"));
-const CreateStoryPage        = lazy(() => import("@features/networking/pages/CreateStoryPage"));
 
 
 // â”€â”€ Lazy: Business Landing Pages â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
@@ -242,9 +239,6 @@ const router = createBrowserRouter([
       { path: "notifications",      element: <ProtectedRoute><S><NotificationsPage /></S></ProtectedRoute> },
       { path: "my-teams",           element: <ProtectedRoute><S><MyTeams /></S></ProtectedRoute> },
       { path: "saved",              element: <ProtectedRoute><S><SavedPage /></S></ProtectedRoute> },
-      { path: "new-post",           element: <ProtectedRoute><S><NewPostLanding /></S></ProtectedRoute> },
-      { path: "create-post",        element: <ProtectedRoute><S><CreatePostPage /></S></ProtectedRoute> },
-      { path: "create-story",       element: <ProtectedRoute><S><CreateStoryPage /></S></ProtectedRoute> },
 
       // Business Landings
       { path: "business/venue",     element: <S><UserVenueOwnerLanding /></S> },
