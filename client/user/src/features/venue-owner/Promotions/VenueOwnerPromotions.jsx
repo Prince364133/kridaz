@@ -5,9 +5,9 @@ import {
 } from "lucide-react";
 import axiosInstance from "@hooks/useAxiosInstance";
 import toast from "react-hot-toast";
-import useTurfManagement from "@hooks/owner/useTurfManagement";
+import useTurfManagement from "@hooks/venue-owner/useTurfManagement";
 
-export default function OwnerPromotions() {
+export default function VenueOwnerPromotions() {
   const [promotions, setPromotions] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const { turfs, fetchTurfs } = useTurfManagement();
@@ -98,13 +98,13 @@ export default function OwnerPromotions() {
 
   return (
     <div className="h-full custom-scrollbar bg-[#000000] text-white">
-      <div className="p-4 lg:px-10 lg:pt-8 lg:pb-12 space-y-8 animate-fade-in pt-0 pb-24 h-full relative">
+      <div className="px-1 lg:px-3 lg:pt-2 lg:pb-3 space-y-8 animate-fade-in pt-0 pb-4 h-full relative">
       
       {/* Header */}
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 relative z-10 border-b border-[#2D2D2D] pb-6">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 relative z-10 border-b border-white/5 pb-6">
         <div>
           <div className="flex items-center gap-3">
-             <h1 className="text-[28px] lg:text-[32px] font-bold font-['Open_Sans'] tracking-tight uppercase">Promotion Engine</h1>
+             <h2 className="text-[20px] sm:text-[24px] lg:text-[32px] mt-2 sm:mt-0 font-bold font-['Open_Sans'] tracking-tight uppercase whitespace-nowrap">Promotion Engine</h2>
           </div>
           <p className="text-[#878C9F] font-inter text-[20px] mt-1">Generate and monitor discount campaigns</p>
         </div>
@@ -119,7 +119,7 @@ export default function OwnerPromotions() {
 
       {/* Top Metrics */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 lg:gap-5">
-        <div className="bg-[#000000] border border-[#2D2D2D] rounded-[8px] p-5 flex flex-col relative overflow-hidden shadow-[var(--shadow-2)] hover:border-[#BFF367]/30 transition-all duration-500">
+        <div className="bg-[#121212] border border-white/5 rounded-[8px] p-5 flex flex-col relative overflow-hidden shadow-[var(--shadow-2)] hover:border-[#BFF367]/30 transition-all duration-500">
           <div className="w-10 h-10 bg-[#2D2D2D]/50 rounded-full flex items-center justify-center mb-4 text-[#878C9F] group-hover:text-white transition-colors">
              <CheckCircle2 size={20} />
           </div>
@@ -128,7 +128,7 @@ export default function OwnerPromotions() {
              {isLoading ? "..." : activeCount}
           </h3>
         </div>
-        <div className="bg-[#000000] border border-[#2D2D2D] rounded-[8px] p-5 flex flex-col relative overflow-hidden shadow-[var(--shadow-2)] hover:border-[#BFF367]/30 transition-all duration-500">
+        <div className="bg-[#121212] border border-white/5 rounded-[8px] p-5 flex flex-col relative overflow-hidden shadow-[var(--shadow-2)] hover:border-[#BFF367]/30 transition-all duration-500">
           <div className="w-10 h-10 bg-[#2D2D2D]/50 rounded-full flex items-center justify-center mb-4 text-[#878C9F] group-hover:text-white transition-colors">
              <Tag size={20} />
           </div>
@@ -137,7 +137,7 @@ export default function OwnerPromotions() {
              {isLoading ? "..." : promotions.length}
           </h3>
         </div>
-        <div className="bg-[#000000] border border-[#2D2D2D] rounded-[8px] p-5 flex flex-col relative overflow-hidden shadow-[var(--shadow-2)] hover:border-[#BFF367]/30 transition-all duration-500">
+        <div className="bg-[#121212] border border-white/5 rounded-[8px] p-5 flex flex-col relative overflow-hidden shadow-[var(--shadow-2)] hover:border-[#BFF367]/30 transition-all duration-500">
           <div className="w-10 h-10 bg-[#2D2D2D]/50 rounded-full flex items-center justify-center mb-4 text-[#878C9F] group-hover:text-white transition-colors">
              <Clock size={20} />
           </div>
@@ -149,14 +149,14 @@ export default function OwnerPromotions() {
       </div>
 
       {/* Promotions Table */}
-      <div className="bg-[#000000] border border-[#2D2D2D] rounded-[8px] overflow-hidden shadow-[var(--shadow-2)]">
-        <div className="p-4 border-b border-[#2D2D2D] flex items-center gap-4">
+      <div className="bg-[#121212] border border-white/5 rounded-[8px] overflow-hidden shadow-[var(--shadow-2)]">
+        <div className="p-4 border-b border-white/5 flex items-center gap-4">
           <div className="relative flex-1 max-w-md">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-[#878C9F]" size={16} />
             <input
               type="text"
               placeholder="Search campaigns..."
-              className="w-full bg-[#1A1A1A] border border-[#2D2D2D] text-white pl-10 pr-4 py-2 rounded-[8px] text-[13px] focus:outline-none focus:border-[#BFF367]/50 transition-colors font-inter"
+              className="w-full bg-[#1A1A1A] border border-white/5 text-white pl-10 pr-4 py-2 rounded-[8px] text-[13px] focus:outline-none focus:border-[#BFF367]/50 transition-colors font-inter"
             />
           </div>
         </div>
@@ -164,7 +164,7 @@ export default function OwnerPromotions() {
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse">
             <thead>
-              <tr className="bg-[#1A1A1A] border-b border-[#2D2D2D]">
+              <tr className="bg-[#1A1A1A] border-b border-white/5">
                 <th className="px-6 py-4 text-[10px] font-bold text-[#878C9F] uppercase tracking-widest">Code</th>
                 <th className="px-6 py-4 text-[10px] font-bold text-[#878C9F] uppercase tracking-widest">Ground</th>
                 <th className="px-6 py-4 text-[10px] font-bold text-[#878C9F] uppercase tracking-widest">Discount</th>
@@ -178,7 +178,7 @@ export default function OwnerPromotions() {
               {isLoading ? (
                  <tr><td colSpan="7" className="text-center py-8 text-[#878C9F]">Loading campaigns...</td></tr>
               ) : promotions.map((promo) => (
-                <tr key={promo._id} className="border-b border-[#2D2D2D] hover:bg-[#1A1A1A]/50 transition-colors">
+                <tr key={promo._id} className="border-b border-white/5 hover:bg-[#1A1A1A]/50 transition-colors">
                   <td className="px-6 py-4">
                     <span className="inline-flex items-center gap-2 px-3 py-1 bg-[#2D2D2D] rounded-[4px] text-sm font-bold tracking-wider text-white">
                       {promo.code}
@@ -215,7 +215,7 @@ export default function OwnerPromotions() {
                   <td className="px-6 py-4">
                     <button 
                       onClick={() => toggleStatus(promo._id)}
-                      className={`px-2.5 py-1 text-[9px] font-bold uppercase tracking-wider rounded-[4px] border transition-colors ${ promo.isActive ? "bg-emerald-500/10 text-emerald-500 border-emerald-500/20 hover:bg-emerald-500/20" : "bg-red-500/10 text-red-500 border-red-500/20 hover:bg-red-500/20" }`}
+                      className={`px-2.5 py-1 text-[9px] font-bold uppercase tracking-wider rounded-[4px] border transition-colors ${ promo.isActive ? "bg-[#BFF367]/10 text-[#BFF367] border-[#BFF367]/20 hover:bg-[#BFF367]/20" : "bg-red-500/10 text-red-500 border-red-500/20 hover:bg-red-500/20" }`}
                     >
                       {promo.isActive ? 'ACTIVE' : 'INACTIVE'}
                     </button>
@@ -249,8 +249,8 @@ export default function OwnerPromotions() {
       {/* Create Promotion Modal */}
       {isModalOpen && (
         <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-fade-in">
-          <div className="bg-[#000000] border border-[#2D2D2D] rounded-[8px] w-full max-w-md overflow-hidden shadow-[var(--shadow-2)]">
-            <div className="p-6 border-b border-[#2D2D2D] flex justify-between items-center bg-[#1A1A1A]">
+          <div className="bg-[#121212] border border-white/5 rounded-[8px] w-full max-w-md overflow-hidden shadow-[var(--shadow-2)]">
+            <div className="p-6 border-b border-white/5 flex justify-between items-center bg-[#1A1A1A]">
               <h2 className="text-lg font-bold font-['Open_Sans'] uppercase tracking-tight text-white flex items-center gap-2">
                 <Tag size={18} className="text-[#BFF367]" />
                 Initialize Campaign
@@ -271,7 +271,7 @@ export default function OwnerPromotions() {
                   required
                   value={newPromo.code}
                   onChange={(e) => setNewPromo({...newPromo, code: e.target.value.toUpperCase()})}
-                  className="w-full bg-[#1A1A1A] border border-[#2D2D2D] text-white px-4 py-2.5 rounded-[6px] text-sm focus:outline-none focus:border-[#BFF367]/50 uppercase"
+                  className="w-full bg-[#1A1A1A] border border-white/5 text-white px-4 py-2.5 rounded-[6px] text-sm focus:outline-none focus:border-[#BFF367]/50 uppercase"
                   placeholder="e.g. SUMMER25"
                 />
               </div>
@@ -281,7 +281,7 @@ export default function OwnerPromotions() {
                 <select 
                   value={newPromo.turfId}
                   onChange={(e) => setNewPromo({...newPromo, turfId: e.target.value})}
-                  className="w-full bg-[#1A1A1A] border border-[#2D2D2D] text-white px-4 py-2.5 rounded-[6px] text-sm focus:outline-none focus:border-[#BFF367]/50"
+                  className="w-full bg-[#1A1A1A] border border-white/5 text-white px-4 py-2.5 rounded-[6px] text-sm focus:outline-none focus:border-[#BFF367]/50"
                 >
                   <option value="all">Universal (All My Grounds)</option>
                   {turfs.map(t => (
@@ -296,7 +296,7 @@ export default function OwnerPromotions() {
                   <select 
                     value={newPromo.type}
                     onChange={(e) => setNewPromo({...newPromo, type: e.target.value})}
-                    className="w-full bg-[#1A1A1A] border border-[#2D2D2D] text-white px-4 py-2.5 rounded-[6px] text-sm focus:outline-none focus:border-[#BFF367]/50"
+                    className="w-full bg-[#1A1A1A] border border-white/5 text-white px-4 py-2.5 rounded-[6px] text-sm focus:outline-none focus:border-[#BFF367]/50"
                   >
                     <option value="PERCENTAGE">Percentage (%)</option>
                     <option value="FLAT">Flat Amount (Rs)</option>
@@ -310,7 +310,7 @@ export default function OwnerPromotions() {
                     min="1"
                     value={newPromo.value}
                     onChange={(e) => setNewPromo({...newPromo, value: e.target.value})}
-                    className="w-full bg-[#1A1A1A] border border-[#2D2D2D] text-white px-4 py-2.5 rounded-[6px] text-sm focus:outline-none focus:border-[#BFF367]/50"
+                    className="w-full bg-[#1A1A1A] border border-white/5 text-white px-4 py-2.5 rounded-[6px] text-sm focus:outline-none focus:border-[#BFF367]/50"
                     placeholder="e.g. 25"
                   />
                 </div>
@@ -325,7 +325,7 @@ export default function OwnerPromotions() {
                     min={new Date().toISOString().split('T')[0]}
                     value={newPromo.validUntil}
                     onChange={(e) => setNewPromo({...newPromo, validUntil: e.target.value})}
-                    className="w-full bg-[#1A1A1A] border border-[#2D2D2D] text-[#878C9F] px-4 py-2.5 rounded-[6px] text-sm focus:outline-none focus:border-[#BFF367]/50 [color-scheme:dark]"
+                    className="w-full bg-[#1A1A1A] border border-white/5 text-[#878C9F] px-4 py-2.5 rounded-[6px] text-sm focus:outline-none focus:border-[#BFF367]/50 [color-scheme:dark]"
                   />
                 </div>
                 <div>
@@ -335,18 +335,18 @@ export default function OwnerPromotions() {
                     min="1"
                     value={newPromo.usageLimit}
                     onChange={(e) => setNewPromo({...newPromo, usageLimit: e.target.value})}
-                    className="w-full bg-[#1A1A1A] border border-[#2D2D2D] text-white px-4 py-2.5 rounded-[6px] text-sm focus:outline-none focus:border-[#BFF367]/50"
+                    className="w-full bg-[#1A1A1A] border border-white/5 text-white px-4 py-2.5 rounded-[6px] text-sm focus:outline-none focus:border-[#BFF367]/50"
                     placeholder="Unlimited"
                   />
                 </div>
               </div>
 
-              <div className="pt-4 border-t border-[#2D2D2D] flex gap-3">
+              <div className="pt-4 border-t border-white/5 flex gap-3">
                 <button 
                   type="button"
                   onClick={() => setIsModalOpen(false)}
                   disabled={isSubmitting}
-                  className="flex-1 px-4 py-2.5 bg-[#1A1A1A] border border-[#2D2D2D] text-white rounded-[8px] text-[13px] uppercase tracking-widest font-bold hover:bg-[#2D2D2D] transition-colors"
+                  className="flex-1 px-4 py-2.5 bg-[#1A1A1A] border border-white/5 text-white rounded-[8px] text-[13px] uppercase tracking-widest font-bold hover:bg-[#2D2D2D] transition-colors"
                 >
                   Cancel
                 </button>

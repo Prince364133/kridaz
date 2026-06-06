@@ -61,9 +61,9 @@ const PeakHoursChart = () => {
   const CustomTooltip = ({ active, payload, label }) => {
     if (active && payload && payload.length) {
       return (
-        <div className="bg-[#151617] border border-[#2D2D2D] p-3 rounded-[6px] shadow-2xl">
-          <p className="text-[10px] text-[#878C9F] uppercase tracking-widest font-bold mb-1">{payload[0].payload.time}</p>
-          <p className="text-white font-black flex items-center gap-2">
+        <div className="bg-[#1B1B1B] border border-white/10 p-3 rounded-[8px] shadow-[0px_4px_16px_rgba(0,0,0,0.4)]">
+          <p className="text-[12px] text-white/70 tracking-widest font-bold mb-1 font-inter">{payload[0].payload.time}</p>
+          <p className="text-white font-bold flex items-center gap-2 font-inter">
             <span className="w-2 h-2 rounded-full bg-[#BFF367]" />
             {payload[0].value} Bookings
           </p>
@@ -74,21 +74,21 @@ const PeakHoursChart = () => {
   };
 
   return (
-    <div className="bg-[#000000] p-6 rounded-[8px] border border-[#2D2D2D] shadow-[var(--shadow-2)] h-full flex flex-col">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
-        <div>
+    <div className="bg-[#121212] p-6 rounded-[8px] border border-white/10 hover:shadow-[0px_8px_24px_rgba(85,222,232,0.10)] transition-shadow h-full flex flex-col">
+      <div className="flex flex-col xl:flex-row xl:items-start justify-between gap-4 mb-8">
+        <div className="min-w-0">
           <div className="flex items-center gap-2 mb-1">
-             <h2 className="text-[14px] font-black text-white uppercase tracking-tighter whitespace-nowrap" style={{ fontFamily: "'Open Sans', sans-serif" }}>Peak Booking Hours</h2>
-             <div className="px-1.5 py-0.5 bg-[#BFF367]/10 text-[#BFF367] rounded text-[8px] font-black uppercase tracking-widest border border-[#BFF367]/20">Live</div>
+             <h2 className="text-[16px] font-bold text-white tracking-tighter whitespace-nowrap font-inter truncate">Peak Booking Hours</h2>
+             <div className="px-1.5 py-0.5 bg-[#BFF367]/10 text-[#BFF367] rounded-[4px] text-[10px] font-bold tracking-widest border border-white/10 shrink-0">Live</div>
           </div>
-          <p className="text-[10px] font-normal text-[#878C9F] uppercase tracking-widest">Time distribution analysis</p>
+          <p className="text-[12px] font-normal text-white/70 tracking-widest font-inter truncate">Time distribution analysis</p>
         </div>
 
-        <div className="flex flex-nowrap shrink-0 items-center gap-1 mt-3 sm:mt-0">
+        <div className="flex flex-wrap items-center gap-2 mt-2 xl:mt-0">
           <select 
             value={selectedTurf} 
             onChange={(e) => setSelectedTurf(e.target.value)}
-            className="bg-[#151617] border border-[#2D2D2D] text-white text-[7px] font-black uppercase tracking-widest rounded-[4px] px-1.5 py-0.5 focus:outline-none focus:border-[#BFF367]/50 transition-all cursor-pointer hover:border-[#BFF367]/30"
+            className="bg-[#121212] border border-white/10 text-white text-[10px] sm:text-[12px] font-bold tracking-widest rounded-[8px] px-2 py-1 focus:outline-none focus:border-[#55DEE8] transition-all cursor-pointer hover:border-[#55DEE8]/50 max-w-[140px] sm:max-w-[180px] truncate"
           >
             <option value="" disabled>Select Facility</option>
             {turfs.map(turf => (
@@ -99,7 +99,7 @@ const PeakHoursChart = () => {
           <select 
             value={filter} 
             onChange={(e) => setFilter(e.target.value)}
-            className="bg-[#151617] border border-[#2D2D2D] text-white text-[7px] font-black uppercase tracking-widest rounded-[4px] px-1.5 py-0.5 focus:outline-none focus:border-[#BFF367]/50 transition-all cursor-pointer hover:border-[#BFF367]/30"
+            className="bg-[#121212] border border-white/10 text-white text-[10px] sm:text-[12px] font-bold tracking-widest rounded-[8px] px-2 py-1 focus:outline-none focus:border-[#55DEE8] transition-all cursor-pointer hover:border-[#55DEE8]/50"
           >
             <option value="day">Day</option>
             <option value="week">Week</option>
@@ -146,22 +146,22 @@ const PeakHoursChart = () => {
       </div>
 
       <div className="mt-4 grid grid-cols-2 gap-2">
-         <div className="bg-[#151617] p-2.5 rounded-[6px] border border-[#2D2D2D] flex items-center gap-2.5 group hover:border-[#BFF367]/30 transition-all">
-            <div className="p-1.5 bg-[#BFF367]/10 text-[#BFF367] rounded-[4px] group-hover:scale-110 transition-transform">
-               <TrendingUp size={14} />
+         <div className="bg-[#1B1B1B] p-2.5 sm:p-4 rounded-[8px] sm:rounded-[8px] border border-white/10 flex items-center gap-2 sm:gap-3 group hover:border-[#55DEE8]/50 transition-all overflow-hidden">
+            <div className="shrink-0 p-1.5 sm:p-2 bg-[#BFF367]/10 text-[#BFF367] rounded-[6px] sm:rounded-[8px] group-hover:scale-110 transition-transform">
+               <TrendingUp className="w-3 h-3 sm:w-4 sm:h-4" />
             </div>
-            <div>
-               <p className="text-[8px] text-[#878C9F] uppercase font-black tracking-widest mb-0.5">Peak Time</p>
-               <p className="text-white font-black text-sm uppercase tracking-tight">{summary.peakTime}</p>
+            <div className="min-w-0">
+               <p className="text-[9px] sm:text-[12px] text-white/70 font-bold tracking-widest mb-0.5 font-inter whitespace-nowrap overflow-hidden text-ellipsis">Peak Time</p>
+               <p className="text-white font-bold text-xs sm:text-sm tracking-tight font-inter whitespace-nowrap overflow-hidden text-ellipsis">{summary.peakTime}</p>
             </div>
          </div>
-         <div className="bg-[#151617] p-2.5 rounded-[6px] border border-[#2D2D2D] flex items-center gap-2.5 group hover:border-[#BFF367]/30 transition-all">
-            <div className="p-1.5 bg-[#BFF367]/10 text-[#BFF367] rounded-[4px] group-hover:scale-110 transition-transform">
-               <Calendar size={14} />
+         <div className="bg-[#1B1B1B] p-2.5 sm:p-4 rounded-[8px] sm:rounded-[8px] border border-white/10 flex items-center gap-2 sm:gap-3 group hover:border-[#55DEE8]/50 transition-all overflow-hidden">
+            <div className="shrink-0 p-1.5 sm:p-2 bg-[#BFF367]/10 text-[#BFF367] rounded-[6px] sm:rounded-[8px] group-hover:scale-110 transition-transform">
+               <Calendar className="w-3 h-3 sm:w-4 sm:h-4" />
             </div>
-            <div>
-               <p className="text-[8px] text-[#878C9F] uppercase font-black tracking-widest mb-0.5">Total Vol.</p>
-               <p className="text-white font-black text-sm uppercase tracking-tight">{data.reduce((acc, curr) => acc + curr.count, 0)}</p>
+            <div className="min-w-0">
+               <p className="text-[9px] sm:text-[12px] text-white/70 font-bold tracking-widest mb-0.5 font-inter whitespace-nowrap overflow-hidden text-ellipsis">Total Vol.</p>
+               <p className="text-white font-bold text-xs sm:text-sm tracking-tight font-inter whitespace-nowrap overflow-hidden text-ellipsis">{data.reduce((acc, curr) => acc + curr.count, 0)}</p>
             </div>
          </div>
       </div>

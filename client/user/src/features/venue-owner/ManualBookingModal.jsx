@@ -133,9 +133,9 @@ const ManualBookingModal = ({ isOpen, onClose }) => {
 
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/95 backdrop-blur-sm animate-fade-in">
-      <div className="w-full max-w-2xl bg-[#000000] border border-[#2D2D2D] rounded-[8px] overflow-hidden shadow-[var(--shadow-2)] relative">
+      <div className="w-full max-w-2xl bg-[#121212] border border-white/5 rounded-[8px] overflow-hidden shadow-[var(--shadow-2)] relative">
         {/* Header */}
-        <div className="px-6 py-5 border-b border-[#2D2D2D] flex items-center justify-between bg-[#000000]">
+        <div className="px-6 py-5 border-b border-white/5 flex items-center justify-between bg-[#000000]">
           <div className="flex items-center gap-3">
              <div className="w-1 h-6 bg-[#BFF367] rounded-full" />
              <div>
@@ -143,7 +143,7 @@ const ManualBookingModal = ({ isOpen, onClose }) => {
                <p className="text-[10px] font-medium text-[#878C9F] uppercase tracking-[0.2em] mt-0.5 font-inter">Console Step {step} of 3</p>
              </div>
           </div>
-          <button onClick={onClose} className="p-2 hover:bg-[#1A1A1A] rounded-[4px] transition-all text-[#878C9F] hover:text-white border border-transparent hover:border-[#2D2D2D]">
+          <button onClick={onClose} className="p-2 hover:bg-[#1A1A1A] rounded-[4px] transition-all text-[#878C9F] hover:text-white border border-transparent hover:border-white/5">
             <X size={20} />
           </button>
         </div>
@@ -156,9 +156,9 @@ const ManualBookingModal = ({ isOpen, onClose }) => {
                 <button 
                   key={turf._id}
                   onClick={() => { setSelectedTurf(turf); setStep(2); }}
-                  className={`flex items-start gap-4 p-4 rounded-[6px] border transition-all text-left group ${selectedTurf?._id === turf._id ? 'bg-[#BFF367]/5 border-[#BFF367]' : 'bg-[#000000] border-[#2D2D2D] hover:border-[#BFF367]/30'}`}
+                  className={`flex items-start gap-4 p-4 rounded-[6px] border transition-all text-left group ${selectedTurf?._id === turf._id ? 'bg-[#BFF367]/5 border-[#BFF367]' : 'bg-[#000000] border-white/5 hover:border-[#BFF367]/30'}`}
                 >
-                  <div className="w-14 h-14 rounded-[4px] bg-[#1A1A1A] overflow-hidden flex-shrink-0 border border-[#2D2D2D]">
+                  <div className="w-14 h-14 rounded-[4px] bg-[#1A1A1A] overflow-hidden flex-shrink-0 border border-white/5">
                     <img src={turf.images[0]} alt={turf.name} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
                   </div>
                   <div>
@@ -181,7 +181,7 @@ const ManualBookingModal = ({ isOpen, onClose }) => {
                        <input 
                          type="date" 
                          min={format(new Date(), "yyyy-MM-dd")}
-                         className="w-full bg-[#1A1A1A] border border-[#2D2D2D] rounded-[6px] py-3 pl-11 pr-4 text-[13px] focus:outline-none focus:border-[#BFF367] font-bold text-white font-inter appearance-none"
+                         className="w-full bg-[#1A1A1A] border border-white/5 rounded-[6px] py-3 pl-11 pr-4 text-[13px] focus:outline-none focus:border-[#BFF367] font-bold text-white font-inter appearance-none"
                          value={selectedDate}
                          onChange={e => setSelectedDate(e.target.value)}
                        />
@@ -189,7 +189,7 @@ const ManualBookingModal = ({ isOpen, onClose }) => {
                  </div>
                  <div className="space-y-2">
                     <label className="text-[11px] font-bold text-[#878C9F] uppercase tracking-[0.15em] ml-1 font-inter">Active Facility</label>
-                    <div className="w-full bg-[#1A1A1A] border border-[#2D2D2D] rounded-[6px] py-3 px-4 text-[13px] font-bold flex justify-between items-center text-white font-inter">
+                    <div className="w-full bg-[#1A1A1A] border border-white/5 rounded-[6px] py-3 px-4 text-[13px] font-bold flex justify-between items-center text-white font-inter">
                        <span className="uppercase truncate max-w-[120px]">{selectedTurf?.name}</span>
                        <button onClick={() => setStep(1)} className="text-[#BFF367] text-[10px] hover:underline font-black tracking-widest">SWITCH</button>
                     </div>
@@ -207,9 +207,12 @@ const ManualBookingModal = ({ isOpen, onClose }) => {
                             key={i}
                             disabled={slot.isBooked}
                             onClick={() => setSelectedSlot(slot)}
-                            className={`py-2.5 rounded-[4px] border text-[10px] font-black tracking-tighter transition-all font-inter ${ selectedSlot === slot ? 'bg-[#BFF367] text-black border-[#BFF367]' : slot.isBooked ? 'bg-red-500/10 border-red-500/20 text-red-500 cursor-not-allowed opacity-50' : 'bg-[#1A1A1A] border-[#2D2D2D] hover:border-[#BFF367]/50 text-[#878C9F] hover:text-white' }`}
+                            className={`flex flex-col items-center justify-center min-h-[38px] rounded-[4px] border transition-all font-inter ${ selectedSlot === slot ? 'bg-[#BFF367] text-black border-[#BFF367]' : slot.isBooked ? 'bg-red-500/10 border-red-500/20 text-red-500 cursor-not-allowed opacity-50' : 'bg-[#1A1A1A] border-white/5 hover:border-[#BFF367]/50 text-[#878C9F] hover:text-white' }`}
                           >
-                             {slot.startTime}
+                             <span className="text-[10px] font-black tracking-tighter">{slot.startTime}</span>
+                             {selectedSlot === slot && (
+                               <span className="text-[8px] font-bold opacity-80">Rs {selectedTurf?.pricePerHour}</span>
+                             )}
                           </button>
                        ))}
                     </div>
@@ -220,14 +223,14 @@ const ManualBookingModal = ({ isOpen, onClose }) => {
 
           {step === 3 && (
             <div className="space-y-6">
-               <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-5">
                   <div className="space-y-2">
                      <label className="text-[11px] font-bold text-[#878C9F] uppercase tracking-[0.15em] ml-1 font-inter">Player Name</label>
                      <div className="relative">
                         <User className="absolute left-4 top-1/2 -translate-y-1/2 text-[#878C9F]" size={16} />
                         <input 
                           type="text" 
-                          className="w-full bg-[#1A1A1A] border border-[#2D2D2D] rounded-[6px] py-3 pl-11 pr-4 text-[13px] focus:outline-none focus:border-[#BFF367] font-bold text-white font-inter"
+                          className="w-full bg-[#1A1A1A] border border-white/5 rounded-[6px] py-3 pl-11 pr-4 text-[13px] focus:outline-none focus:border-[#BFF367] font-bold text-white font-inter"
                           placeholder="ENTER FULL NAME"
                           value={customerData.name}
                           onChange={e => setCustomerData({...customerData, name: e.target.value})}
@@ -240,20 +243,20 @@ const ManualBookingModal = ({ isOpen, onClose }) => {
                         <Phone className="absolute left-4 top-1/2 -translate-y-1/2 text-[#878C9F]" size={16} />
                         <input 
                           type="tel" 
-                          className="w-full bg-[#1A1A1A] border border-[#2D2D2D] rounded-[6px] py-3 pl-11 pr-4 text-[13px] focus:outline-none focus:border-[#BFF367] font-bold text-white font-inter"
+                          className="w-full bg-[#1A1A1A] border border-white/5 rounded-[6px] py-3 pl-11 pr-4 text-[13px] focus:outline-none focus:border-[#BFF367] font-bold text-white font-inter"
                           placeholder="+91 XXXXX XXXXX"
                           value={customerData.phone}
                           onChange={e => setCustomerData({...customerData, phone: e.target.value})}
                         />
                      </div>
                   </div>
-                  <div className="space-y-2 col-span-2">
+                  <div className="space-y-2 md:col-span-2">
                      <label className="text-[11px] font-bold text-[#878C9F] uppercase tracking-[0.15em] ml-1 font-inter">Email Address</label>
                      <div className="relative">
                         <Mail className="absolute left-4 top-1/2 -translate-y-1/2 text-[#878C9F]" size={16} />
                         <input 
                           type="email" 
-                          className="w-full bg-[#1A1A1A] border border-[#2D2D2D] rounded-[6px] py-3 pl-11 pr-4 text-[13px] focus:outline-none focus:border-[#BFF367] font-bold text-white font-inter"
+                          className="w-full bg-[#1A1A1A] border border-white/5 rounded-[6px] py-3 pl-11 pr-4 text-[13px] focus:outline-none focus:border-[#BFF367] font-bold text-white font-inter"
                           placeholder="PLAYER@EXAMPLE.COM"
                           value={customerData.email}
                           onChange={e => setCustomerData({...customerData, email: e.target.value})}
@@ -267,7 +270,7 @@ const ManualBookingModal = ({ isOpen, onClose }) => {
                   <div className="grid grid-cols-2 gap-3">
                      <button 
                        onClick={() => setCustomerData({...customerData, paymentMethod: "CASH"})}
-                       className={`flex items-center gap-3 p-3 rounded-[6px] border transition-all ${customerData.paymentMethod === "CASH" ? 'bg-[#BFF367]/5 border-[#BFF367]' : 'bg-[#1A1A1A] border-[#2D2D2D] hover:border-[#BFF367]/30'}`}
+                       className={`flex items-center gap-3 p-3 rounded-[6px] border transition-all ${customerData.paymentMethod === "CASH" ? 'bg-[#BFF367]/5 border-[#BFF367]' : 'bg-[#1A1A1A] border-white/5 hover:border-[#BFF367]/30'}`}
                      >
                         <Banknote size={18} className={customerData.paymentMethod === "CASH" ? 'text-[#BFF367]' : 'text-[#878C9F]'} />
                         <div className="text-left">
@@ -276,7 +279,7 @@ const ManualBookingModal = ({ isOpen, onClose }) => {
                      </button>
                      <button 
                        onClick={() => setCustomerData({...customerData, paymentMethod: "ONLINE"})}
-                       className={`flex items-center gap-3 p-3 rounded-[6px] border transition-all ${customerData.paymentMethod === "ONLINE" ? 'bg-[#BFF367]/5 border-[#BFF367]' : 'bg-[#1A1A1A] border-[#2D2D2D] hover:border-[#BFF367]/30'}`}
+                       className={`flex items-center gap-3 p-3 rounded-[6px] border transition-all ${customerData.paymentMethod === "ONLINE" ? 'bg-[#BFF367]/5 border-[#BFF367]' : 'bg-[#1A1A1A] border-white/5 hover:border-[#BFF367]/30'}`}
                      >
                         <CreditCard size={18} className={customerData.paymentMethod === "ONLINE" ? 'text-[#BFF367]' : 'text-[#878C9F]'} />
                         <div className="text-left">
@@ -290,7 +293,7 @@ const ManualBookingModal = ({ isOpen, onClose }) => {
         </div>
 
         {/* Footer */}
-        <div className="px-6 py-5 border-t border-[#2D2D2D] bg-[#000000] flex items-center justify-between">
+        <div className="px-6 py-5 border-t border-white/5 bg-[#000000] flex items-center justify-between">
            <div className="hidden sm:block">
               {selectedTurf && (
                  <div className="space-y-0.5">
@@ -304,7 +307,7 @@ const ManualBookingModal = ({ isOpen, onClose }) => {
               {step > 1 && (
                  <button 
                    onClick={() => setStep(step - 1)}
-                   className="flex-1 sm:flex-none px-6 py-2.5 rounded-[6px] bg-[#1A1A1A] text-white font-bold uppercase tracking-widest text-[11px] hover:bg-[#2D2D2D] transition-all border border-[#2D2D2D] font-inter"
+                   className="flex-1 sm:flex-none px-6 py-2.5 rounded-[6px] bg-[#1A1A1A] text-white font-bold uppercase tracking-widest text-[11px] hover:bg-[#2D2D2D] transition-all border border-white/5 font-inter"
                  >
                     Back
                  </button>

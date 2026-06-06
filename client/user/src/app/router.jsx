@@ -105,13 +105,13 @@ const AddTurf            = lazy(() => import("@features/venue-owner").then(m => 
 const EditTurf           = lazy(() => import("@features/venue-owner").then(m => ({ default: m.EditTurf })));
 const TurfManagement     = lazy(() => import("@features/venue-owner").then(m => ({ default: m.TurfManagement })));
 const TurfDetails        = lazy(() => import("@features/venue-owner").then(m => ({ default: m.TurfDetails })));
-const OwnerDashboard     = lazy(() => import("@features/venue-owner").then(m => ({ default: m.OwnerDashboard })));
+const VenueOwnerDashboard     = lazy(() => import("@features/venue-owner").then(m => ({ default: m.VenueOwnerDashboard })));
 const PartnerReviews     = lazy(() => import("@features/venue-owner").then(m => ({ default: m.PartnerReviews })));
 const PartnerBookings    = lazy(() => import("@features/venue-owner").then(m => ({ default: m.PartnerBookings })));
 const CustomerDirectory  = lazy(() => import("@features/venue-owner").then(m => ({ default: m.CustomerDirectory })));
 const VenueIntelligence  = lazy(() => import("@features/venue-owner").then(m => ({ default: m.VenueIntelligence })));
-const OwnerRevenue       = lazy(() => import("@features/venue-owner").then(m => ({ default: m.OwnerRevenue })));
-const OwnerPromotions    = lazy(() => import("@features/venue-owner").then(m => ({ default: m.OwnerPromotions })));
+const VenueOwnerRevenue       = lazy(() => import("@features/venue-owner").then(m => ({ default: m.VenueOwnerRevenue })));
+const VenueOwnerPromotions    = lazy(() => import("@features/venue-owner").then(m => ({ default: m.VenueOwnerPromotions })));
 const VenueBanking       = lazy(() => import("@features/venue-owner").then(m => ({ default: m.VenueBanking })));
 const PartnerSupport     = lazy(() => import("@features/venue-owner").then(m => ({ default: m.PartnerSupport })));
 
@@ -147,7 +147,7 @@ const router = createBrowserRouter([
       </ProtectedRoute>
     ),
     children: [
-      { index: true,           element: <S><OwnerDashboard /></S> },
+      { index: true,           element: <S><VenueOwnerDashboard /></S> },
       { path: "add-turf",      element: <S><AddTurf /></S> },
       { path: "turfs",         element: <S><TurfManagement /></S> },
       { path: "turf/:id",      element: <S><TurfDetails /></S> },
@@ -156,8 +156,8 @@ const router = createBrowserRouter([
       { path: "bookings",      element: <S><PartnerBookings /></S> },
       { path: "customers",     element: <S><CustomerDirectory /></S> },
       { path: "intelligence",  element: <S><VenueIntelligence /></S> },
-      { path: "revenue",       element: <S><OwnerRevenue /></S> },
-      { path: "promotions",    element: <S><OwnerPromotions /></S> },
+      { path: "revenue",       element: <S><VenueOwnerRevenue /></S> },
+      { path: "promotions",    element: <S><VenueOwnerPromotions /></S> },
       { path: "support",       element: <S><PartnerSupport /></S> },
       { path: "banking",       element: <S><VenueBanking /></S> },
       { path: "profile",       element: <S><DashboardProfile /></S> },

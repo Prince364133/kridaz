@@ -131,23 +131,23 @@ const PartnerSupport = () => {
 
   return (
     <div className="h-full custom-scrollbar bg-[#000000] text-white font-inter">
-      <div className="p-4 lg:px-10 lg:pt-8 lg:pb-12 space-y-8 animate-fade-in pt-0 pb-24 h-full relative">
+      <div className="px-1 lg:px-3 lg:pt-2 lg:pb-3 space-y-2 md:space-y-8 animate-fade-in pt-0 pb-4 h-full relative">
 
         {/* Header Section */}
-        <header className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 relative z-10 border-b border-white/5 pb-6">
+        <header className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 md:gap-6 relative z-10 border-b border-white/5 pb-2 md:pb-6 mt-2 md:mt-0">
           <div className="space-y-1">
             <div className="flex items-center gap-3">
               
-              <h1 className="text-[28px] lg:text-[32px] font-bold font-['Open_Sans'] text-white tracking-tight leading-none uppercase">
+              <h2 className="text-[20px] sm:text-[24px] lg:text-[32px] mt-2 sm:mt-0 font-bold font-['Open_Sans'] text-white tracking-tight leading-none uppercase whitespace-nowrap">
                 {portalTitle.split(' ')[0]} {portalTitle.split(' ')[1]} <span style={{ color: themeColor }}>{portalTitle.split(' ').slice(2).join(' ')}</span>
-              </h1>
+              </h2>
             </div>
-            <p className="text-[#878C9F] font-inter text-[14px] mt-2 ml-4 uppercase tracking-widest font-semibold">
+            <p className="text-[#878C9F] font-inter text-[12px] md:text-[14px] mt-1 md:mt-2 ml-1 md:ml-4 font-light">
               Get assistance from the Kridaz Admin Team
             </p>
           </div>
 
-          <div className="flex items-center gap-3">
+          <div className="hidden md:flex items-center gap-3">
             <div className="bg-[#000000] px-5 py-2.5 rounded-[4px] border border-white/5 flex items-center gap-3 shadow-2xl">
               <div className="w-2 h-2 rounded-full animate-pulse" style={{ backgroundColor: themeColor }} />
               <span className="text-[10px] font-bold text-white uppercase tracking-widest">Support Line Active</span>
@@ -155,9 +155,9 @@ const PartnerSupport = () => {
           </div>
         </header>
 
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 md:gap-8">
           {/* New Ticket Form / Chat Box */}
-          <div className="lg:col-span-5 bg-[#000000] border border-white/5 rounded-[8px] p-8 shadow-2xl relative overflow-hidden h-fit">
+          <div className="lg:col-span-5 bg-[#121212] border-none md:border md:border-white/5 rounded-[8px] px-2 py-0 md:p-8 md:shadow-2xl relative overflow-hidden h-fit">
             <div className="absolute top-0 right-0 w-32 h-32 blur-[60px] pointer-events-none" style={{ backgroundColor: `${themeColor}0D` }} />
 
             {selectedTicket ? (
@@ -208,7 +208,7 @@ const PartnerSupport = () => {
                   ))}
                 </div>
 
-                <div className="mt-6 border-t border-[#2D2D2D] pt-6">
+                <div className="mt-6 border-t border-white/5 pt-6">
                   {selectedTicket.status === 'CLOSED' ? (
                     <div className="p-4 text-center bg-red-500/10 border border-red-500/20 rounded-[8px]">
                       <p className="text-[10px] font-bold uppercase tracking-widest text-red-500">This ticket has been closed</p>
@@ -247,45 +247,47 @@ const PartnerSupport = () => {
               </div>
             ) : (
               <>
-                <h2 className="text-[13px] font-bold border-b border-white/5 pb-4 mb-8 uppercase tracking-[3px] flex items-center gap-2 font-inter" style={{ color: themeColor }}>
+                <h2 className="text-[13px] font-bold border-b border-white/5 pb-2 md:pb-4 mb-3 md:mb-8 uppercase tracking-[3px] flex items-center gap-2 font-inter" style={{ color: themeColor }}>
                   <MessageSquare size={18} />
                   Raise a New Ticket
                 </h2>
 
-                <form onSubmit={handleSubmitTicket} className="space-y-6 relative z-10">
-                  <div className="space-y-2">
-                    <label className="text-[11px] font-bold text-[#878C9F] uppercase tracking-widest ml-1">Category</label>
-                    <select
-                      className="w-full bg-[#111111] border border-[#2D2D2D] rounded-[8px] px-4 py-3 text-white focus:outline-none transition-all appearance-none text-sm"
-                      style={{ borderColor: themeColor }}
-                      value={formData.category}
-                      onChange={(e) => setFormData({ ...formData, category: e.target.value })}
-                    >
-                      <option value="BILLING">Billing / Payouts</option>
-                      <option value="TECHNICAL">Technical Issues</option>
-                      <option value="BOOKING">Booking Related</option>
-                      <option value="ACCOUNT">Account Management</option>
-                      <option value="OTHER">Other</option>
-                    </select>
-                  </div>
+                <form onSubmit={handleSubmitTicket} className="space-y-4 md:space-y-6 relative z-10">
+                  <div className="grid grid-cols-2 gap-3 md:gap-6">
+                    <div className="space-y-2">
+                      <label className="text-[11px] font-bold text-[#878C9F] uppercase tracking-widest ml-1">Category</label>
+                      <select
+                        className="w-full bg-[#121212] border border-white/5 rounded-[8px] px-2 md:px-4 py-2 md:py-3 text-white focus:outline-none transition-all appearance-none text-[10px] md:text-sm"
+                        style={{ borderColor: themeColor }}
+                        value={formData.category}
+                        onChange={(e) => setFormData({ ...formData, category: e.target.value })}
+                      >
+                        <option value="BILLING">Billing / Payouts</option>
+                        <option value="TECHNICAL">Technical Issues</option>
+                        <option value="BOOKING">Booking Related</option>
+                        <option value="ACCOUNT">Account Management</option>
+                        <option value="OTHER">Other</option>
+                      </select>
+                    </div>
 
-                  <div className="space-y-2">
-                    <label className="text-[11px] font-bold text-[#878C9F] uppercase tracking-widest ml-1">Subject</label>
-                    <input
-                      type="text" required
-                      className="w-full bg-[#111111] border border-[#2D2D2D] rounded-[8px] px-4 py-3 text-white focus:outline-none transition-all text-sm"
-                      style={{ focusBorderColor: themeColor }}
-                      value={formData.subject}
-                      onChange={(e) => setFormData({ ...formData, subject: e.target.value })}
-                      placeholder="Brief summary of the issue"
-                    />
+                    <div className="space-y-2">
+                      <label className="text-[11px] font-bold text-[#878C9F] uppercase tracking-widest ml-1">Subject</label>
+                      <input
+                        type="text" required
+                        className="w-full bg-[#121212] border border-white/5 rounded-[8px] px-2 md:px-4 py-2 md:py-3 text-white focus:outline-none transition-all text-[10px] md:text-sm"
+                        style={{ focusBorderColor: themeColor }}
+                        value={formData.subject}
+                        onChange={(e) => setFormData({ ...formData, subject: e.target.value })}
+                        placeholder="Brief summary..."
+                      />
+                    </div>
                   </div>
 
                   <div className="space-y-2">
                     <label className="text-[11px] font-bold text-[#878C9F] uppercase tracking-widest ml-1">Message</label>
                     <textarea
                       required rows="5"
-                      className="w-full bg-[#111111] border border-[#2D2D2D] rounded-[8px] px-4 py-3 text-white focus:outline-none transition-all text-sm custom-scrollbar"
+                      className="w-full bg-[#121212] border border-white/5 rounded-[8px] px-4 py-3 text-white focus:outline-none transition-all text-sm custom-scrollbar"
                       style={{ focusBorderColor: themeColor }}
                       value={formData.message}
                       onChange={(e) => setFormData({ ...formData, message: e.target.value })}
@@ -297,7 +299,7 @@ const PartnerSupport = () => {
                     <label className="text-[11px] font-bold text-[#878C9F] uppercase tracking-widest ml-1">Attachments (Max 5)</label>
                     <div className="grid grid-cols-5 gap-2">
                       {formData.images.map((img, i) => (
-                        <div key={i} className="relative aspect-square rounded-[4px] overflow-hidden border border-[#2D2D2D]">
+                        <div key={i} className="relative aspect-square rounded-[4px] overflow-hidden border border-white/5">
                           <img src={img} alt="support" className="w-full h-full object-cover" />
                           <button
                             type="button"
@@ -310,7 +312,7 @@ const PartnerSupport = () => {
                       ))}
                       {formData.images.length < 5 && (
                         <label 
-                          className="aspect-square rounded-[4px] border border-dashed border-[#2D2D2D] flex items-center justify-center cursor-pointer hover:bg-white/[0.02] transition-all"
+                          className="aspect-square rounded-[4px] border border-dashed border-white/5 flex items-center justify-center cursor-pointer hover:bg-[#121212] transition-all"
                           style={{ borderColor: uploading ? themeColor : '#2D2D2D' }}
                         >
                           {uploading ? <div className="w-4 h-4 border-2 border-t-transparent rounded-full animate-spin" style={{ borderColor: themeColor }} /> : <Plus size={18} className="text-[#555]" />}
@@ -323,7 +325,7 @@ const PartnerSupport = () => {
                   <button
                     type="submit"
                     disabled={loading || uploading}
-                    className="w-full py-4 text-black rounded-[4px] font-bold uppercase tracking-[2px] transition-all transform hover:scale-[1.01] active:scale-[0.99] shadow-lg disabled:opacity-50 mt-4 font-inter"
+                    className="w-full py-2.5 md:py-4 text-[11px] md:text-sm text-black rounded-[4px] font-bold uppercase tracking-[2px] transition-all transform hover:scale-[1.01] active:scale-[0.99] shadow-lg disabled:opacity-50 mt-4 font-inter"
                     style={{ backgroundColor: themeColor, boxShadow: `0 10px 30px ${themeColor}33` }}
                   >
                     {loading ? 'SYNCHRONIZING...' : 'Initialize Ticket'}
@@ -334,10 +336,10 @@ const PartnerSupport = () => {
           </div>
 
           {/* Ticket History */}
-          <div className="lg:col-span-7 bg-[#000000] border border-white/5 rounded-[8px] p-8 shadow-2xl relative overflow-hidden">
+          <div className="lg:col-span-7 bg-[#121212] border-none md:border md:border-white/5 rounded-[8px] px-2 py-2 md:p-8 md:shadow-2xl relative overflow-hidden mt-2 md:mt-0">
             <div className="absolute top-0 left-0 w-32 h-32 blur-[60px] pointer-events-none" style={{ backgroundColor: `${themeColor}0D` }} />
 
-            <h2 className="text-[13px] font-bold border-b border-white/5 pb-4 mb-8 uppercase tracking-[3px] flex items-center gap-2 font-inter" style={{ color: themeColor }}>
+            <h2 className="text-[13px] font-bold border-b border-white/5 pb-2 md:pb-4 mb-3 md:mb-8 uppercase tracking-[3px] flex items-center gap-2 font-inter" style={{ color: themeColor }}>
               <Clock size={18} />
               Ticket History
             </h2>
@@ -349,7 +351,7 @@ const PartnerSupport = () => {
                   <p className="text-[10px] font-bold text-[#444] uppercase tracking-widest">Decrypting Records...</p>
                 </div>
               ) : tickets.length === 0 ? (
-                <div className="text-center py-20 border border-dashed border-[#2D2D2D] rounded-[8px] bg-black/40">
+                <div className="text-center py-20 border border-dashed border-white/5 rounded-[8px] bg-black/40">
                   <AlertCircle className="mx-auto text-[#222] mb-4" size={32} />
                   <p className="text-[12px] font-normal text-[#878C9F] uppercase tracking-[0.5px]">No active telemetry records.</p>
                   <p className="text-[11px] text-[#333] mt-2 font-medium tracking-wide uppercase italic">Initialize a ticket to begin data stream.</p>
@@ -359,12 +361,12 @@ const PartnerSupport = () => {
                   <div 
                     key={ticket.id} 
                     onClick={() => setSelectedTicket(ticket)}
-                    className="p-5 bg-[#111111] border border-[#2D2D2D] rounded-[8px] transition-all group cursor-pointer"
+                    className="p-5 bg-[#121212] border border-white/5 rounded-[8px] transition-all group cursor-pointer"
                     style={{ '--hover-border': themeColor }}
                   >
                     <div className="flex justify-between items-start mb-4">
                       <div className="flex items-center gap-3">
-                        <span className={`text-[10px] font-bold px-3 py-1 rounded-[4px] uppercase tracking-widest border ${ticket.status === 'RESOLVED' ? 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20' : ticket.status === 'IN_PROGRESS' || ticket.status === 'OPEN' ? 'bg-blue-500/10 text-blue-500 border-blue-500/20' : 'bg-amber-500/10 text-amber-500 border-amber-500/20' }`}>
+                        <span className={`text-[10px] font-bold px-3 py-1 rounded-[4px] uppercase tracking-widest border ${ticket.status === 'RESOLVED' ? 'bg-[#BFF367]/10 text-[#BFF367] border-[#BFF367]/20' : ticket.status === 'IN_PROGRESS' || ticket.status === 'OPEN' ? 'bg-[#BFF367]/10 text-[#BFF367] border-[#BFF367]/20' : 'bg-amber-500/10 text-amber-500 border-amber-500/20' }`}>
                           {ticket.status}
                         </span>
                         {ticket.isAgentOnline ? (
@@ -384,7 +386,7 @@ const PartnerSupport = () => {
                     <h3 className="font-bold text-white text-[15px] mb-2 uppercase tracking-tight transition-colors" style={{ color: selectedTicket?.id === ticket.id ? themeColor : 'white' }}>{ticket.subject}</h3>
                     <p className="text-[13px] text-[#878C9F] leading-relaxed line-clamp-1">{ticket.message}</p>
 
-                    <div className="mt-4 pt-4 border-t border-[#2D2D2D] flex items-center justify-between">
+                    <div className="mt-4 pt-4 border-t border-white/5 flex items-center justify-between">
                       <div className="flex items-center gap-4 text-[9px] font-bold text-[#555] uppercase tracking-widest">
                         <span className="flex items-center gap-1"><MessageSquare size={12} /> {ticket.replies?.length || 0} Replies</span>
                         {ticket.images?.length > 0 && <span className="flex items-center gap-1"><Shield size={12} /> {ticket.images.length} Attachments</span>}
@@ -399,7 +401,7 @@ const PartnerSupport = () => {
         </div>
 
         {/* Footer Metrics */}
-        <div className="pt-8 border-t border-[#2D2D2D] flex justify-between items-center opacity-40">
+        <div className="pt-8 border-t border-white/5 flex justify-between items-center opacity-40">
           <p className="text-[10px] font-medium uppercase tracking-[0.2em] text-[#999999]">
             Secure Communication Tunnel | End-to-End Encrypted
           </p>

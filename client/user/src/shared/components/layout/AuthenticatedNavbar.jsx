@@ -34,9 +34,11 @@ const AuthenticatedNavbar = ({ toggleSidebar }) => {
   const navigate = useNavigate();
   const [showNotifications, setShowNotifications] = useState(false);
   const [showProfileMenu, setShowProfileMenu] = useState(false);
+  const [showMobileMenu, setShowMobileMenu] = useState(false);
   const [isManualBookingOpen, setIsManualBookingOpen] = useState(false);
   const notificationRef = useRef(null);
   const profileRef = useRef(null);
+  const mobileMenuRef = useRef(null);
   const location = useLocation();
   const isProfessionalDashboard = location.pathname.startsWith('/professional');
   
@@ -57,9 +59,11 @@ const AuthenticatedNavbar = ({ toggleSidebar }) => {
     if (r === "venu_owners" || r?.includes("venu_owners") || r === "owner" || r === "bmsp_owner" || r === "verified_venue_owner" || r === "venue_owner") return "/venue-owner";
     if (r === "coach" || r === "bmsp_coach") return "/professional/coach";
     if (r?.includes("umpire")) return "/umpire";
-    if (r?.includes("scorer")) return "/scorer";
+    if (r === "scorer" || r?.includes("scorer")) return "/scorer";
     return "";
   };
+
+  const isVenueOwner = ["venu_owners", "owner", "venue_owner", "verified_venue_owner", "bmsp_owner"].some(r => role?.toLowerCase()?.includes(r));
 
   const handleProfileClick = () => {
     navigate(getDynamicProfileRoute(user, role));
@@ -72,6 +76,9 @@ const AuthenticatedNavbar = ({ toggleSidebar }) => {
       }
       if (profileRef.current && !profileRef.current.contains(event.target)) {
         setShowProfileMenu(false);
+      }
+      if (mobileMenuRef.current && !mobileMenuRef.current.contains(event.target)) {
+        setShowMobileMenu(false);
       }
     };
     document.addEventListener("mousedown", handleClickOutside);
@@ -177,11 +184,12 @@ const AuthenticatedNavbar = ({ toggleSidebar }) => {
 
         
         <div className="flex items-center gap-4 lg:min-w-[200px]">
-          {!isProfessionalDashboard ? (
+          {!isProfessionalDashboard && !isVenueOwner && (
             <button className="p-2 text-white hover:opacity-80 transition-opacity lg:hidden" style={{ color: themeColor }} onClick={toggleSidebar}>
               <Menu size={24} />
             </button>
-          ) : (
+          )}
+          {isProfessionalDashboard && (
             <Link to="/" className="p-2 text-white hover:opacity-80 transition-opacity" style={{ color: themeColor }}>
               <ArrowLeft size={24} />
             </Link>
@@ -201,17 +209,12 @@ const AuthenticatedNavbar = ({ toggleSidebar }) => {
           
           {["venu_owners", "owner", "venue_owner", "verified_venue_owner", "bmsp_owner"].some(r => role?.toLowerCase()?.includes(r)) && (
             <>
-              <button 
-                onClick={handleCheckVenue}
-                className="hidden md:flex items-center gap-2 px-6 py-2.5 rounded-lg font-black text-[10px] uppercase tracking-widest transition-all shadow-xl active:scale-95 border border-[#BFF367] text-[#BFF367] hover:bg-[#BFF367]/10"
-              >
-                <ExternalLink size={14} strokeWidth={3} />
-                <span>Check Venue</span>
-              </button>
+
               <button 
                 onClick={() => setIsManualBookingOpen(true)}
-                className="hidden md:flex items-center gap-2 px-6 py-2.5 rounded-lg font-black text-[10px] uppercase tracking-widest transition-all shadow-xl active:scale-95"
+                className="hidden md:flex items-center justify-center gap-2 px-6 py-2.5 rounded-lg font-black text-[10px] uppercase tracking-widest transition-all shadow-xl active:scale-95"
                 style={{ background: 'linear-gradient(90deg, #BFF367 0%, #BFF367 100%)', color: '#000', boxShadow: `0 5px 15px ${themeColor}33` }}
+                title="Manual Booking"
               >
                 <Plus size={14} strokeWidth={3} />
                 <span>Manual Booking</span>
@@ -224,7 +227,16 @@ const AuthenticatedNavbar = ({ toggleSidebar }) => {
           )}
 
 
-          
+          {["venu_owners", "owner", "venue_owner", "verified_venue_owner", "bmsp_owner"].some(r => role?.toLowerCase()?.includes(r)) && (
+            <Link 
+              to="/venue-owner/support"
+              className="hidden md:flex p-2.5 rounded-[8px] bg-[#0d0d0d] text-[#999999] border border-white/5 hover:border-white/10 hover:text-white transition-all duration-300"
+              title="Docs & Support"
+            >
+              <HelpCircle size={20} />
+            </Link>
+          )}
+
           <div className="relative" ref={notificationRef}>
             <button 
               onClick={() => setShowNotifications(!showNotifications)}
@@ -307,7 +319,7 @@ const AuthenticatedNavbar = ({ toggleSidebar }) => {
           )}
 
           {!isProfessionalDashboard && (
-            <div className="relative">
+            <div className="hidden md:block relative">
               <button 
                 onClick={handleLogout}
                 className="flex items-center justify-center p-2.5 bg-[#0d0d0d] border border-white/5 hover:border-red-500/30 rounded-[8px] hover:bg-red-500/10 hover:text-red-500 text-[#999999] transition-all duration-300"
@@ -317,6 +329,61 @@ const AuthenticatedNavbar = ({ toggleSidebar }) => {
               </button>
             </div>
           )}
+
+          {/* Mobile Menu Toggle */}
+          <div className="md:hidden relative" ref={mobileMenuRef}>
+            <button 
+              onClick={() => setShowMobileMenu(!showMobileMenu)}
+              className={`p-2.5 rounded-[8px] transition-all duration-300 border ${ showMobileMenu ? "" : "bg-[#0d0d0d] text-[#999999] border-white/5 hover:border-white/10" }`}
+              style={{ 
+                backgroundColor: showMobileMenu ? themeColor : undefined, 
+                color: showMobileMenu ? '#000' : undefined,
+                borderColor: showMobileMenu ? themeColor : undefined 
+              }}
+            >
+              <Menu size={20} />
+            </button>
+
+            {showMobileMenu && (
+              <div className="absolute right-0 mt-4 w-56 bg-[#111111] border border-[#2D2D2D] rounded-xl shadow-2xl overflow-hidden z-50 animate-in fade-in zoom-in-95 duration-200">
+                <div className="flex flex-col p-2 gap-1">
+                  {isVenueOwner && (
+                    <>
+
+                      <button 
+                        onClick={() => { setShowMobileMenu(false); setIsManualBookingOpen(true); }}
+                        className="flex items-center gap-3 px-3 py-3 rounded-lg text-xs font-bold text-black transition-colors"
+                        style={{ backgroundColor: themeColor }}
+                      >
+                        <Plus size={16} />
+                        Manual Booking
+                      </button>
+                      <Link 
+                        to="/venue-owner/support"
+                        onClick={() => setShowMobileMenu(false)}
+                        className="flex items-center gap-3 px-3 py-3 rounded-lg text-xs font-bold text-white hover:bg-white/5 transition-colors"
+                      >
+                        <HelpCircle size={16} />
+                        Docs & Support
+                      </Link>
+                    </>
+                  )}
+                  
+                  <div className="h-[1px] bg-white/10 my-1"></div>
+
+                  {!isProfessionalDashboard && (
+                    <button 
+                      onClick={() => { setShowMobileMenu(false); handleLogout(); }}
+                      className="flex items-center gap-3 px-3 py-3 rounded-lg text-xs font-bold text-red-500 hover:bg-red-500/10 transition-colors"
+                    >
+                      <LogOut size={16} />
+                      Logout
+                    </button>
+                  )}
+                </div>
+              </div>
+            )}
+          </div>
         </div>
       </nav>
 

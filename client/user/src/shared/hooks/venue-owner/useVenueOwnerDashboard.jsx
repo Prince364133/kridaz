@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import axiosInstance from "@hooks/useAxiosInstance";
 
-const useOwnerDashboard = () => {
+const useVenueOwnerDashboard = () => {
   const [dashboardData, setDashboardData] = useState({
     totalBookings: 0,
     totalReviews: 0,
@@ -36,4 +36,4 @@ const useOwnerDashboard = () => {
   return { dashboardData, loading, error };
 };
 
-export default useOwnerDashboard;
+export default useVenueOwnerDashboard;

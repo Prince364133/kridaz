@@ -13,7 +13,7 @@ import {
 import useAxiosInstance from "@hooks/useAxiosInstance";
 import { format, addDays, subDays } from "date-fns";
 
-const OwnerCalendar = () => {
+const VenueOwnerCalendar = () => {
   const axiosInstance = useAxiosInstance;
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [data, setData] = useState(null);
@@ -64,13 +64,13 @@ const OwnerCalendar = () => {
               </div>
 
               <div className="flex items-center gap-2">
-                 <button onClick={handlePrevDay} className="w-10 h-10 flex items-center justify-center bg-[#1A1A1A] hover:bg-[#252525] rounded-[8px] border border-[#2D2D2D] transition-all">
+                 <button onClick={handlePrevDay} className="w-10 h-10 flex items-center justify-center bg-[#1A1A1A] hover:bg-[#252525] rounded-[8px] border border-white/5 transition-all">
                     <ChevronLeft size={20} className="text-[#888]" />
                  </button>
-                 <button onClick={handleNextDay} className="w-10 h-10 flex items-center justify-center bg-[#1A1A1A] hover:bg-[#252525] rounded-[8px] border border-[#2D2D2D] transition-all">
+                 <button onClick={handleNextDay} className="w-10 h-10 flex items-center justify-center bg-[#1A1A1A] hover:bg-[#252525] rounded-[8px] border border-white/5 transition-all">
                     <ChevronRight size={20} className="text-[#888]" />
                  </button>
-                 <button onClick={handleToday} className="ml-4 px-6 py-2 bg-[#1A1A1A] border border-[#2D2D2D] rounded-[8px] text-[12px] font-black uppercase tracking-[3px] hover:text-[#BFF367] transition-all">
+                 <button onClick={handleToday} className="ml-4 px-6 py-2 bg-[#121212] border border-white/5 rounded-[8px] text-[12px] font-black uppercase tracking-[3px] hover:text-[#BFF367] transition-all">
                     Today
                  </button>
               </div>
@@ -92,7 +92,7 @@ const OwnerCalendar = () => {
                  </div>
               </div>
 
-              <div className="px-5 py-2 bg-[#1A1A1A] border border-[#2D2D2D] rounded-[6px] flex items-center gap-3">
+              <div className="px-5 py-2 bg-[#1A1A1A] border border-white/5 rounded-[6px] flex items-center gap-3">
                  <div className="w-2 h-2 rounded-full bg-[#BFF367] animate-pulse" />
                  <span className="text-[11px] font-black text-white uppercase tracking-[2px]">{data?.stats?.averageLoad || 0}% Load</span>
               </div>
@@ -100,7 +100,7 @@ const OwnerCalendar = () => {
         </div>
 
         {/* Matrix Container */}
-        <div className="bg-[#111] border border-[#2D2D2D] rounded-[12px] overflow-hidden flex flex-col shadow-2xl relative min-h-[600px]">
+        <div className="bg-[#121212] border border-white/5 rounded-[8px] overflow-hidden flex flex-col shadow-2xl relative min-h-[600px]">
           {loading && (
             <div className="absolute inset-0 bg-black/40 backdrop-blur-sm z-50 flex items-center justify-center">
                <Loader2 className="w-8 h-8 text-[#BFF367] animate-spin" />
@@ -108,8 +108,8 @@ const OwnerCalendar = () => {
           )}
 
           {/* Grid Header */}
-          <div className="flex border-b border-[#2D2D2D] bg-[#0A0A0A]">
-            <div className="w-[320px] p-8 border-r border-[#2D2D2D] shrink-0">
+          <div className="flex border-b border-white/5 bg-[#0A0A0A]">
+            <div className="w-[320px] p-8 border-r border-white/5 shrink-0">
                <div className="flex items-center justify-between">
                   <span className="text-[11px] font-black text-[#555] uppercase tracking-[3px]">Facilities</span>
                   <Filter size={14} className="text-[#555]" />
@@ -117,7 +117,7 @@ const OwnerCalendar = () => {
             </div>
             <div className="flex-1 flex overflow-x-auto no-scrollbar">
                {hours.map((time) => (
-                 <div key={time} className="min-w-[150px] py-6 text-center border-r border-[#2D2D2D]/50 text-[11px] font-bold text-[#555] tracking-widest">
+                 <div key={time} className="min-w-[150px] py-6 text-center border-r border-white/5/50 text-[11px] font-bold text-[#555] tracking-widest">
                     {time}
                  </div>
                ))}
@@ -127,9 +127,9 @@ const OwnerCalendar = () => {
           {/* Grid Rows */}
           <div className="flex-1 flex flex-col overflow-y-auto no-scrollbar">
             {data?.facilities?.map((facility) => (
-              <div key={facility.id} className="flex border-b border-[#2D2D2D]/50 last:border-b-0 min-h-[180px] hover:bg-white/[0.01] transition-colors">
+              <div key={facility.id} className="flex border-b border-white/5/50 last:border-b-0 min-h-[180px] hover:bg-white/[0.01] transition-colors">
                  {/* Facility Column */}
-                 <div className="w-[320px] p-8 border-r border-[#2D2D2D] shrink-0 flex flex-col justify-center">
+                 <div className="w-[320px] p-8 border-r border-white/5 shrink-0 flex flex-col justify-center">
                     <div className="flex items-center gap-3 mb-2">
                        <h3 className="text-lg font-black text-white tracking-tight uppercase">{facility.name}</h3>
                        <div className="w-2 h-2 rounded-full bg-[#BFF367]" />
@@ -153,7 +153,7 @@ const OwnerCalendar = () => {
                       };
 
                       return (
-                        <div key={time} className="min-w-[150px] border-r border-[#2D2D2D]/30 flex items-center justify-center p-4">
+                        <div key={time} className="min-w-[150px] border-r border-white/5/30 flex items-center justify-center p-4">
                            {isBooked ? (
                              <div className={`w-full h-full bg-[#1A1A1A] border-l-4 ${getStatusColor()} rounded-r-[12px] p-4 flex flex-col justify-between group cursor-pointer hover:bg-[#222] transition-all`}>
                                 <div className="space-y-1">
@@ -170,7 +170,7 @@ const OwnerCalendar = () => {
                                 </div>
                              </div>
                            ) : (
-                             <div className="w-full h-full rounded-[12px] border border-dashed border-[#2D2D2D]/50 flex items-center justify-center group cursor-pointer hover:border-[#BFF367]/30 transition-all">
+                             <div className="w-full h-full rounded-[8px] border border-dashed border-white/5/50 flex items-center justify-center group cursor-pointer hover:border-[#BFF367]/30 transition-all">
                                 <div className="w-2 h-2 rounded-full bg-[#1A1A1A] group-hover:bg-[#BFF367]/20" />
                              </div>
                            )}
@@ -197,13 +197,13 @@ const OwnerCalendar = () => {
              { label: 'Utilized Revenue', value: `Rs ${(data?.stats?.totalRevenue || 0).toLocaleString()}`, trend: '+Rs 1.2k', icon: Zap, color: '#3B82F6' },
              { label: 'Average Load', value: `${data?.stats?.averageLoad || 0}%`, trend: 'Stable', icon: Clock, color: '#BFF367' },
            ].map((stat, i) => (
-             <div key={i} className="bg-[#111] border border-[#2D2D2D] p-8 rounded-[12px] flex flex-col justify-between relative overflow-hidden group hover:border-[#BFF367]/30 transition-all">
+             <div key={i} className="bg-[#111] border border-white/5 p-8 rounded-[8px] flex flex-col justify-between relative overflow-hidden group hover:border-[#BFF367]/30 transition-all">
                 <div className="relative z-10">
                    <p className="text-[11px] font-black text-[#555] uppercase tracking-[3px] mb-4">{stat.label}</p>
                    <h3 className="text-4xl font-black text-white tracking-tighter">{stat.value}</h3>
                 </div>
                 <div className="mt-8 flex items-center justify-between relative z-10">
-                   <div className={`px-3 py-1 bg-white/[0.03] border border-white/5 rounded-full text-[10px] font-black uppercase tracking-widest text-[${stat.color}]`}>
+                   <div className={`px-3 py-1 bg-[#121212] border border-white/5 rounded-full text-[10px] font-black uppercase tracking-widest text-[${stat.color}]`}>
                       {stat.trend}
                    </div>
                    <stat.icon className="text-[#222] group-hover:text-[#BFF367]/20 transition-colors" size={32} />
@@ -217,4 +217,4 @@ const OwnerCalendar = () => {
   );
 };
 
-export default OwnerCalendar;
+export default VenueOwnerCalendar;

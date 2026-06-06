@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from "react";
 import { Controller } from "react-hook-form";
 import { FormField } from "@components/common";
-import useAddTurf from "@hooks/owner/useAddTurf";
+import useAddTurf from "@hooks/venue-owner/useAddTurf";
 import { fetchStates, fetchCities, searchLocations } from "@utils/locationService";
 import { Search, Plus } from "lucide-react";
 import ClockPicker from "@components/common/ClockPicker";
+import toast from "react-hot-toast";
 
 const AddTurf = () => {
   const {
@@ -111,8 +112,8 @@ const AddTurf = () => {
 
   const handleLocationSelect = (loc) => {
     setValue("location", loc.display_name, { shouldValidate: true, shouldDirty: true });
-    setValue("city", loc.city || loc.suburb || "", { shouldValidate: true, shouldDirty: true });
-    setValue("state", loc.state || "", { shouldValidate: true, shouldDirty: true });
+    setValue("city", loc.city || loc.suburb || loc.display_name, { shouldValidate: true, shouldDirty: true });
+    setValue("state", loc.state || loc.display_name, { shouldValidate: true, shouldDirty: true });
     setValue("latitude", loc.lat, { shouldValidate: true, shouldDirty: true });
     setValue("longitude", loc.lon, { shouldValidate: true, shouldDirty: true });
     setLocationSearchQuery(loc.display_name);
@@ -166,15 +167,15 @@ const AddTurf = () => {
 
   return (
     <div className="h-full custom-scrollbar bg-[#000000] text-white" onClick={() => setShowLocationSuggestions(false)}>
-      <div className="p-4 lg:px-10 lg:pt-8 lg:pb-12 space-y-8 animate-fade-in pt-0 pb-24 h-full relative">
+      <div className="px-1 lg:px-3 lg:pt-2 lg:pb-3 space-y-4 md:space-y-8 animate-fade-in pt-0 pb-4 h-full relative">
         <header className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 relative z-10">
           <div className="space-y-1">
             <div className="flex items-center gap-3">
-              <h1 className="text-3xl lg:text-4xl font-black font-['Open_Sans'] tracking-tight text-white uppercase">
+              <h2 className="text-[20px] sm:text-[24px] lg:text-[32px] mt-2 sm:mt-0 font-black font-['Open_Sans'] tracking-tight text-white uppercase whitespace-nowrap">
                 ADD NEW <span className="text-[#BFF367]">{watchedFacilityCategory.toUpperCase()}</span>
-              </h1>
+              </h2>
             </div>
-            <p className="text-[#878C9F] font-inter text-[20px] mt-2 ml-4">
+            <p className="text-[#878C9F] font-inter text-[12px] md:text-[20px] mt-1 md:mt-2 ml-1 md:ml-4 font-light">
               Register a New Facility | Kridaz
             </p>
           </div>
@@ -184,7 +185,7 @@ const AddTurf = () => {
         <div className="flex items-center justify-between relative z-10 mb-8">
           {[1, 2, 3].map((step) => (
             <div key={step} className={`flex-1 flex flex-col items-center gap-2 relative ${currentStep === step ? 'opacity-100' : 'opacity-50'}`}>
-              <div className={`w-10 h-10 rounded-full flex items-center justify-center font-bold text-sm z-10 ${currentStep === step ? 'bg-[#BFF367] text-black shadow-[0_0_15px_rgba(204,255,0,0.5)]' : 'bg-[#111111] border border-[#2D2D2D] text-white'}`}>
+              <div className={`w-10 h-10 rounded-full flex items-center justify-center font-bold text-sm z-10 ${currentStep === step ? 'bg-[#BFF367] text-black shadow-[0_0_15px_rgba(204,255,0,0.5)]' : 'bg-[#111111] border border-white/5 text-white'}`}>
                 {step}
               </div>
               <span className="text-[10px] font-bold uppercase tracking-widest text-center">
@@ -198,8 +199,23 @@ const AddTurf = () => {
         </div>
 
         <form
-          onSubmit={handleSubmit(onSubmit)}
-          className="grid grid-cols-1 gap-12 bg-[#000000] p-8 md:p-12 rounded-[8px] border border-[#2D2D2D] shadow-[var(--shadow-2)] relative overflow-hidden"
+          onSubmit={handleSubmit(onSubmit, (errors) => {
+            const firstErrorKey = Object.keys(errors)[0];
+            if (firstErrorKey) {
+              const errorMessage = errors[firstErrorKey]?.message || `Please check the ${firstErrorKey} field`;
+              // Try to find which step the error is in to help the user navigate
+              let stepError = 1;
+              const step2Fields = ['saleDeed', 'electricityBill', 'gstRegistration', 'rentalAgreement', 'ownershipAgreement', 'policies'];
+              const step3Fields = ['pricePerHour', 'openTime', 'closeTime', 'slotDuration'];
+              if (step2Fields.includes(firstErrorKey)) stepError = 2;
+              if (step3Fields.includes(firstErrorKey)) stepError = 3;
+              
+              toast.error(`Step ${stepError}: ${errorMessage}`);
+            } else {
+              toast.error("Please fill all required fields correctly.");
+            }
+          })}
+          className="grid grid-cols-1 gap-6 md:gap-12 bg-[#000000] px-2 py-4 md:p-12 rounded-[8px] border-none md:border md:border-white/5 md:shadow-[var(--shadow-2)] relative overflow-hidden"
         >
           <div className="absolute top-0 right-0 w-64 h-64 bg-[#BFF367]/5 blur-[100px] pointer-events-none" />
 
@@ -211,32 +227,31 @@ const AddTurf = () => {
 
           {/* STEP 1: General Information */}
           {currentStep === 1 && (
-            <div className="col-span-1 grid grid-cols-1 md:grid-cols-2 gap-12 relative z-10 animate-fade-in">
-              <div className="space-y-8">
-                <FormField label={`${watchedFacilityCategory} Name`} name="name" type="text" register={register} error={errors.name} className="bg-[#111111] border-[#2D2D2D] text-white focus:border-[#BFF367]/60" />
+            <div className="col-span-1 grid grid-cols-2 gap-x-3 gap-y-4 md:gap-x-12 md:gap-y-8 relative z-10 animate-fade-in">
+                <div className="form-control col-span-1">
+                  <label className="label mb-2"><span className="text-[8px] md:text-[11px] font-bold text-[#878C9F] uppercase tracking-widest ml-1">{watchedFacilityCategory} Name</span></label>
+                  <input type="text" placeholder={`${watchedFacilityCategory} Name`} {...register("name")} className="w-full bg-[#111111] border border-white/5 text-white focus:border-[#BFF367]/60 focus:outline-none text-[10px] md:text-sm h-9 md:h-12 rounded-[6px] md:rounded-[8px] px-3 md:px-4 transition-all" />
+                  {errors.name && <span className="text-[#BFF367] text-[8px] md:text-[10px] font-bold uppercase mt-1 md:mt-2 block ml-1">{errors.name.message}</span>}
+                </div>
                 
-                <div className="form-control">
-                  <label className="label mb-2">
-                    <span className="text-[11px] font-bold text-[#878C9F] uppercase tracking-widest ml-1">Facility Images (Up to 10)</span>
-                  </label>
-                  <input type="file" multiple accept="image/*" className="w-full bg-[#111111] border border-[#2D2D2D] text-[#878C9F] file:bg-[#2D2D2D] file:text-white file:border-none file:px-6 file:h-12 file:mr-4 file:font-bold file:uppercase file:text-[10px] file:tracking-widest rounded-[8px] h-12 flex items-center focus:outline-none transition-all cursor-pointer" onChange={(e) => setValue("images", e.target.files)} />
-                  {errors.images && <span className="text-[#BFF367] text-[10px] font-bold uppercase mt-2 block ml-1">{errors.images.message}</span>}
-                  
-                  {/* Image Previews */}
-                  {imagePreviews.length > 0 && (
-                    <div className="flex gap-4 mt-4 overflow-x-auto pb-2 custom-scrollbar">
-                        {imagePreviews.map((src, i) => (
-                            <img key={i} src={src} alt={`preview ${i}`} className="w-20 h-20 object-cover rounded-[8px] border border-[#2D2D2D]" />
-                        ))}
-                    </div>
-                  )}
+                <div className="form-control col-span-1">
+                  <label className="label mb-2"><span className="text-[8px] md:text-[11px] font-bold text-[#878C9F] uppercase tracking-widest ml-1">Sport Arsenal</span></label>
+                  <select className="w-full bg-[#111111] border border-white/5 text-white focus:border-[#BFF367]/60 focus:outline-none text-[10px] md:text-sm h-9 md:h-12 rounded-[6px] md:rounded-[8px] px-3 md:px-4 transition-all appearance-none" onChange={(e) => addSportType(e.target.value)} value="">
+                    <option value="" disabled>Select Sports</option>
+                    {sportsOptions.map(o => <option key={o} value={o} disabled={sportTypes.includes(o)}>{o}</option>)}
+                  </select>
+                  <div className="mt-4 flex flex-wrap gap-2">
+                    {sportTypes.map((type, index) => (
+                      <span key={index} className="px-2 md:px-3 py-1 md:py-1.5 bg-[#BFF367] text-black font-bold rounded-[3px] md:rounded-[4px] text-[8px] md:text-[10px] flex items-center gap-2 uppercase tracking-widest">
+                        {type} <button type="button" onClick={() => removeSportType(type)} className="hover:text-white transition-colors"><Plus size={12} className="rotate-45" /></button>
+                      </span>
+                    ))}
+                  </div>
                 </div>
 
-                <FormField label="YouTube Video URL" name="youtubeUrl" type="text" placeholder="https://www.youtube.com/watch?v=..." register={register} error={errors.youtubeUrl} className="bg-[#111111] border-[#2D2D2D] text-white focus:border-[#BFF367]/60" />
-
-                <div className="form-control">
-                  <label className="label mb-2"><span className="text-[11px] font-bold text-[#878C9F] uppercase tracking-widest ml-1">Facility Category</span></label>
-                  <select {...register("facilityCategory", { required: "Please select a category" })} className="w-full bg-[#111111] border border-[#2D2D2D] text-white focus:border-[#BFF367]/60 focus:outline-none text-sm h-12 rounded-[8px] px-4 transition-all appearance-none">
+                <div className="form-control col-span-1">
+                  <label className="label mb-2"><span className="text-[8px] md:text-[11px] font-bold text-[#878C9F] uppercase tracking-widest ml-1">Facility Category</span></label>
+                  <select {...register("facilityCategory", { required: "Please select a category" })} className="w-full bg-[#111111] border border-white/5 text-white focus:border-[#BFF367]/60 focus:outline-none text-[10px] md:text-sm h-9 md:h-12 rounded-[6px] md:rounded-[8px] px-3 md:px-4 transition-all appearance-none">
                     <option value="">Select Category</option>
                     <option value="Turf">Venue</option>
                     <option value="Ground">Ground</option>
@@ -245,83 +260,84 @@ const AddTurf = () => {
                   </select>
                 </div>
 
-                <div className="form-control">
-                  <label className="label mb-2"><span className="text-[11px] font-bold text-[#878C9F] uppercase tracking-widest ml-1">Sport Arsenal</span></label>
-                  <select className="w-full bg-[#111111] border border-[#2D2D2D] text-white focus:border-[#BFF367]/60 focus:outline-none text-sm h-12 rounded-[8px] px-4 transition-all appearance-none" onChange={(e) => addSportType(e.target.value)} value="">
-                    <option value="" disabled>Select Sports</option>
-                    {sportsOptions.map(o => <option key={o} value={o} disabled={sportTypes.includes(o)}>{o}</option>)}
-                  </select>
-                  <div className="mt-4 flex flex-wrap gap-2">
-                    {sportTypes.map((type, index) => (
-                      <span key={index} className="px-3 py-1.5 bg-[#BFF367] text-black font-bold rounded-[4px] text-[10px] flex items-center gap-2 uppercase tracking-widest">
-                        {type} <button type="button" onClick={() => removeSportType(type)} className="hover:text-white transition-colors"><Plus size={12} className="rotate-45" /></button>
-                      </span>
-                    ))}
-                  </div>
-                </div>
-
-                <div className="form-control">
-                  <label className="label mb-2"><span className="text-[11px] font-bold text-[#878C9F] uppercase tracking-widest ml-1">Ground Composition</span></label>
-                  <select className="w-full bg-[#111111] border border-[#2D2D2D] text-white focus:border-[#BFF367]/60 focus:outline-none text-sm h-12 rounded-[8px] px-4 transition-all appearance-none" onChange={(e) => addGroundType(e.target.value)} value="">
+                <div className="form-control col-span-1">
+                  <label className="label mb-2"><span className="text-[8px] md:text-[11px] font-bold text-[#878C9F] uppercase tracking-widest ml-1">Ground Composition</span></label>
+                  <select className="w-full bg-[#111111] border border-white/5 text-white focus:border-[#BFF367]/60 focus:outline-none text-[10px] md:text-sm h-9 md:h-12 rounded-[6px] md:rounded-[8px] px-3 md:px-4 transition-all appearance-none" onChange={(e) => addGroundType(e.target.value)} value="">
                     <option value="" disabled>Select Ground Types</option>
                     {groundTypeOptions.map(o => <option key={o} value={o} disabled={groundTypes.includes(o)}>{o}</option>)}
                   </select>
                   <div className="mt-4 flex flex-wrap gap-2">
                     {groundTypes.map((type, index) => (
-                      <span key={index} className="px-3 py-1.5 bg-[#1A1A1A] border border-[#2D2D2D] text-white font-bold rounded-[4px] text-[10px] flex items-center gap-2 uppercase tracking-widest">
+                      <span key={index} className="px-2 md:px-3 py-1 md:py-1.5 bg-[#1A1A1A] border border-white/5 text-white font-bold rounded-[3px] md:rounded-[4px] text-[8px] md:text-[10px] flex items-center gap-2 uppercase tracking-widest">
                         {type} <button type="button" onClick={() => removeGroundType(type)} className="hover:text-[#BFF367] transition-colors"><Plus size={12} className="rotate-45" /></button>
                       </span>
                     ))}
                   </div>
                 </div>
 
-                <div className="form-control">
-                  <label className="label mb-2"><span className="text-[11px] font-bold text-[#878C9F] uppercase tracking-widest ml-1">Facilities</span></label>
-                  <select className="w-full bg-[#111111] border border-[#2D2D2D] text-white focus:border-[#BFF367]/60 focus:outline-none text-sm h-12 rounded-[8px] px-4 transition-all appearance-none" onChange={(e) => addFacility(e.target.value)} value="">
+                <div className="form-control col-span-2">
+                  <label className="label mb-2"><span className="text-[8px] md:text-[11px] font-bold text-[#878C9F] uppercase tracking-widest ml-1">Facility Description</span></label>
+                  <textarea {...register("description")} className="w-full bg-[#111111] border border-white/5 text-white focus:border-[#BFF367]/60 focus:outline-none text-[10px] md:text-sm h-24 md:h-32 rounded-[6px] md:rounded-[8px] p-3 md:p-4 transition-all"></textarea>
+                </div>
+
+                <div className="form-control col-span-2">
+                  <label className="label mb-2">
+                    <span className="text-[8px] md:text-[11px] font-bold text-[#878C9F] uppercase tracking-widest ml-1">Facility Images (Up to 10)</span>
+                  </label>
+                  <input type="file" multiple accept="image/*" className="w-full bg-[#111111] border border-white/5 text-[#878C9F] text-[6px] md:text-sm file:bg-[#2D2D2D] file:text-white file:border-none file:px-2 md:file:px-6 file:h-7 md:file:h-12 file:mr-1 md:file:mr-4 file:font-bold file:uppercase file:text-[6px] md:file:text-[10px] file:tracking-widest rounded-[4px] md:rounded-[8px] h-7 md:h-12 flex items-center focus:outline-none transition-all cursor-pointer" onChange={(e) => setValue("images", e.target.files)} />
+                  {errors.images && <span className="text-[#BFF367] text-[8px] md:text-[10px] font-bold uppercase mt-1 md:mt-2 block ml-1">{errors.images.message}</span>}
+                  
+                  {imagePreviews.length > 0 && (
+                    <div className="flex gap-4 mt-4 overflow-x-auto pb-2 custom-scrollbar">
+                        {imagePreviews.map((src, i) => (
+                            <img key={i} src={src} alt={`preview ${i}`} className="w-20 h-20 object-cover rounded-[8px] border border-white/5" />
+                        ))}
+                    </div>
+                  )}
+                </div>
+
+                <div className="form-control col-span-1">
+                  <label className="label mb-2"><span className="text-[8px] md:text-[11px] font-bold text-[#878C9F] uppercase tracking-widest ml-1">Facilities</span></label>
+                  <select className="w-full bg-[#111111] border border-white/5 text-white focus:border-[#BFF367]/60 focus:outline-none text-[10px] md:text-sm h-9 md:h-12 rounded-[6px] md:rounded-[8px] px-3 md:px-4 transition-all appearance-none" onChange={(e) => addFacility(e.target.value)} value="">
                     <option value="" disabled>Select Facilities</option>
                     {facilitiesOptions.map(o => <option key={o} value={o} disabled={facilities.includes(o)}>{o}</option>)}
                   </select>
                   <div className="mt-4 flex flex-wrap gap-2">
                     {facilities.map((type, index) => (
-                      <span key={index} className="px-3 py-1.5 bg-[#1A1A1A] border border-[#2D2D2D] text-[#BFF367] font-bold rounded-[4px] text-[10px] flex items-center gap-2 uppercase tracking-widest">
+                      <span key={index} className="px-2 md:px-3 py-1 md:py-1.5 bg-[#1A1A1A] border border-white/5 text-[#BFF367] font-bold rounded-[3px] md:rounded-[4px] text-[8px] md:text-[10px] flex items-center gap-2 uppercase tracking-widest">
                         {type} <button type="button" onClick={() => removeFacility(type)} className="hover:text-white transition-colors"><Plus size={12} className="rotate-45" /></button>
                       </span>
                     ))}
                   </div>
                 </div>
 
-                <div className="form-control">
-                  <label className="label mb-2"><span className="text-[11px] font-bold text-[#878C9F] uppercase tracking-widest ml-1">Facility Description</span></label>
-                  <textarea {...register("description")} className="w-full bg-[#111111] border border-[#2D2D2D] text-white focus:border-[#BFF367]/60 focus:outline-none text-sm h-32 rounded-[8px] p-4 transition-all"></textarea>
-                </div>
-              </div>
-
-              <div className="space-y-8">
-                {/* Searchable Location Input */}
-                <div className="form-control relative">
-                  <label className="label mb-2"><span className="text-[11px] font-bold text-[#878C9F] uppercase tracking-widest ml-1">Search Location</span></label>
+                <div className="form-control col-span-1 relative">
+                  <label className="label mb-2"><span className="text-[8px] md:text-[11px] font-bold text-[#878C9F] uppercase tracking-widest ml-1">Search Location</span></label>
                   <div className="relative" onClick={(e) => e.stopPropagation()}>
                     <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-[#878C9F]" size={16} />
                     <input 
                       type="text" 
                       placeholder="Type to search location..." 
-                      className="w-full bg-[#111111] border border-[#2D2D2D] text-white focus:border-[#BFF367]/60 focus:outline-none text-sm h-12 rounded-[8px] pl-12 pr-4 transition-all"
+                      className="w-full bg-[#111111] border border-white/5 text-white focus:border-[#BFF367]/60 focus:outline-none text-[10px] md:text-sm h-9 md:h-12 rounded-[6px] md:rounded-[8px] pl-[30px] md:pl-12 pr-4 transition-all"
                       value={locationSearchQuery}
                       onChange={(e) => {
-                        setLocationSearchQuery(e.target.value);
+                        const val = e.target.value;
+                        setLocationSearchQuery(val);
                         setShowLocationSuggestions(true);
-                        setValue("location", e.target.value);
+                        setValue("location", val, { shouldValidate: true, shouldDirty: true });
+                        setValue("city", val, { shouldValidate: true, shouldDirty: true });
+                        setValue("state", val, { shouldValidate: true, shouldDirty: true });
                       }}
                       onFocus={() => setShowLocationSuggestions(true)}
                     />
                     
                     {/* Autocomplete dropdown */}
                     {showLocationSuggestions && locationSuggestions.length > 0 && (
-                      <div className="absolute z-50 top-[52px] left-0 right-0 bg-[#1A1A1A] border border-[#2D2D2D] rounded-[8px] shadow-2xl overflow-hidden max-h-[300px] overflow-y-auto custom-scrollbar">
+                      <div className="absolute z-50 top-[52px] left-0 right-0 bg-[#121212] border border-white/5 rounded-[8px] shadow-2xl overflow-hidden max-h-[300px] overflow-y-auto custom-scrollbar">
                         {locationSuggestions.map((loc, i) => (
                           <div 
                             key={i} 
-                            className="p-4 border-b border-[#2D2D2D] last:border-b-0 hover:bg-[#2D2D2D] cursor-pointer transition-colors"
+                            className="p-4 border-b border-white/5 last:border-b-0 hover:bg-[#2D2D2D] cursor-pointer transition-colors"
                             onClick={() => handleLocationSelect(loc)}
                           >
                             <p className="text-sm text-white font-medium truncate">{loc.display_name}</p>
@@ -333,56 +349,77 @@ const AddTurf = () => {
                       </div>
                     )}
                   </div>
-                  {errors.location && <span className="text-[#BFF367] text-[10px] font-bold uppercase mt-2 block ml-1">{errors.location.message}</span>}
+                  {errors.location && <span className="text-[#BFF367] text-[8px] md:text-[10px] font-bold uppercase mt-1 md:mt-2 block ml-1">{errors.location.message}</span>}
                 </div>
 
-                <FormField label="Direct Google Maps URL" name="mapUrl" type="text" placeholder="https://maps.app.goo.gl/..." register={register} error={errors.mapUrl} className="bg-[#111111] border-[#2D2D2D] text-white focus:border-[#BFF367]/60" />
+                <div className="form-control col-span-1">
+                  <label className="label mb-2"><span className="text-[8px] md:text-[11px] font-bold text-[#878C9F] uppercase tracking-widest ml-1">YouTube Video URL</span></label>
+                  <input type="text" placeholder="https://www.youtube.com/watch?v=..." {...register("youtubeUrl")} className="w-full bg-[#111111] border border-white/5 text-white focus:border-[#BFF367]/60 focus:outline-none text-[10px] md:text-sm h-9 md:h-12 rounded-[6px] md:rounded-[8px] px-3 md:px-4 transition-all" />
+                  {errors.youtubeUrl && <span className="text-[#BFF367] text-[8px] md:text-[10px] font-bold uppercase mt-1 md:mt-2 block ml-1">{errors.youtubeUrl.message}</span>}
+                </div>
+
+                <div className="form-control col-span-1">
+                  <label className="label mb-2"><span className="text-[8px] md:text-[11px] font-bold text-[#878C9F] uppercase tracking-widest ml-1">Google Maps URL</span></label>
+                  <input type="text" placeholder="https://maps.app.goo.gl/..." {...register("mapUrl")} className="w-full bg-[#111111] border border-white/5 text-white focus:border-[#BFF367]/60 focus:outline-none text-[10px] md:text-sm h-9 md:h-12 rounded-[6px] md:rounded-[8px] px-3 md:px-4 transition-all" />
+                  {errors.mapUrl && <span className="text-[#BFF367] text-[8px] md:text-[10px] font-bold uppercase mt-1 md:mt-2 block ml-1">{errors.mapUrl.message}</span>}
+                </div>
 
                 {mapPreviewUrl && (
-                  <div className="form-control">
-                    <label className="label mb-4"><span className="text-[11px] font-bold text-[#878C9F] uppercase tracking-widest ml-1 flex items-center gap-2">📍 Map Preview</span></label>
-                    <div className="relative w-full rounded-[8px] overflow-hidden border border-[#2D2D2D] shadow-[var(--shadow-1)]" style={{ height: 220 }}>
+                  <div className="form-control col-span-2">
+                    <label className="label mb-4"><span className="text-[8px] md:text-[11px] font-bold text-[#878C9F] uppercase tracking-widest ml-1 flex items-center gap-2">📍 Map Preview</span></label>
+                    <div className="relative w-full rounded-[8px] overflow-hidden border border-white/5 shadow-[var(--shadow-1)]" style={{ height: 220 }}>
                       <iframe title="Location Preview" src={mapPreviewUrl} width="100%" height="100%" style={{ border: 0, filter: "invert(90%) hue-rotate(180deg) saturate(0.7) brightness(0.9)" }} loading="lazy" />
                     </div>
                   </div>
                 )}
-              </div>
             </div>
           )}
 
           {/* STEP 2: Legalities & Management */}
           {currentStep === 2 && (
-            <div className="col-span-1 grid grid-cols-1 md:grid-cols-2 gap-12 relative z-10 animate-fade-in">
-              <div className="space-y-8">
-                <h3 className="text-[14px] font-bold text-[#BFF367] border-b border-[#2D2D2D] pb-3 mb-8 uppercase tracking-[3px]">Legal Documents</h3>
+            <div className="col-span-1 grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-12 relative z-10 animate-fade-in">
+              <div className="space-y-4 md:space-y-8">
+                <h3 className="text-[14px] font-bold text-[#BFF367] border-b border-white/5 pb-3 mb-8 uppercase tracking-[3px]">Legal Documents</h3>
                 
-                {[
-                  { name: "gstDoc", label: "GST Registration" },
-                  { name: "saleDeedDoc", label: "Sale Deed (Mandatory)*" },
-                  { name: "electricityBillDoc", label: "Electricity Bill (Mandatory)*" },
-                  { name: "rentalAgreementDoc", label: "Rental Agreement" },
-                  { name: "ownershipAgreementDoc", label: "Ownership Agreement" },
-                  { name: "googleProfileScreenshot", label: "Google Profile Screenshot" }
-                ].map(doc => (
-                  <div className="form-control" key={doc.name}>
-                    <label className="label mb-2"><span className="text-[11px] font-bold text-[#878C9F] uppercase tracking-widest ml-1">{doc.label}</span></label>
-                    <input type="file" accept=".pdf,image/*" className="w-full bg-[#111111] border border-[#2D2D2D] text-[#878C9F] file:bg-[#2D2D2D] file:text-white file:border-none file:px-6 file:h-12 file:mr-4 file:font-bold file:uppercase file:text-[10px] file:tracking-widest rounded-[8px] h-12 flex items-center focus:outline-none transition-all cursor-pointer" onChange={(e) => setValue(doc.name, e.target.files)} />
-                  </div>
-                ))}
+                <div className="grid grid-cols-2 gap-x-3 gap-y-4 md:gap-x-8 md:gap-y-6">
+                  {[
+                    { name: "gstRegistration", label: "GST Registration" },
+                    { name: "saleDeed", label: <>Sale Deed <span className="text-red-500">*</span></> },
+                    { name: "electricityBill", label: <>Electricity Bill <span className="text-red-500">*</span></> },
+                    { name: "rentalAgreement", label: "Rental Agreement" },
+                    { name: "ownershipAgreement", label: "Ownership Agreement" },
+                    { name: "googleProfileScreenshot", label: "Google Profile Screenshot" }
+                  ].map(doc => {
+                    const selectedFiles = watch(doc.name);
+                    const hasFile = selectedFiles && selectedFiles.length > 0;
+                    return (
+                      <div className="form-control" key={doc.name}>
+                        <label className="label mb-2"><span className="text-[8px] md:text-[11px] font-bold text-[#878C9F] uppercase tracking-widest ml-1">{doc.label}</span></label>
+                        <input type="file" accept=".pdf,image/*" className="w-full bg-[#111111] border border-white/5 text-[#878C9F] text-[6px] md:text-sm file:bg-[#2D2D2D] file:text-white file:border-none file:px-2 md:file:px-6 file:h-7 md:file:h-12 file:mr-1 md:file:mr-4 file:font-bold file:uppercase file:text-[6px] md:file:text-[10px] file:tracking-widest rounded-[4px] md:rounded-[8px] h-7 md:h-12 flex items-center focus:outline-none transition-all cursor-pointer" onChange={(e) => setValue(doc.name, e.target.files, { shouldValidate: true })} />
+                        {hasFile && (
+                          <span className="text-[#BFF367] text-[8px] md:text-[10px] font-bold mt-2 block ml-1 truncate">
+                            ✅ Selected: {selectedFiles[0].name}
+                          </span>
+                        )}
+                        {errors[doc.name] && <span className="text-red-500 text-[8px] md:text-[10px] font-bold uppercase mt-1 md:mt-2 block ml-1">{errors[doc.name].message}</span>}
+                      </div>
+                    );
+                  })}
+                </div>
               </div>
-              <div className="space-y-8">
-                <h3 className="text-[14px] font-bold text-[#BFF367] border-b border-[#2D2D2D] pb-3 mb-8 uppercase tracking-[3px]">Management & Policies</h3>
+              <div className="space-y-4 md:space-y-8">
+                <h3 className="text-[14px] font-bold text-[#BFF367] border-b border-white/5 pb-3 mb-8 uppercase tracking-[3px]">Management & Policies</h3>
 
                 <div className="form-control space-y-4">
-                  <label className="label"><span className="text-[11px] font-bold text-[#878C9F] uppercase tracking-widest ml-1">Venue Managers (Contacts)</span></label>
-                  <div className="flex flex-col md:flex-row gap-4">
-                    <input type="text" placeholder="Manager Name" value={newManagerName} onChange={(e) => setNewManagerName(e.target.value)} className="w-full bg-[#111111] border border-[#2D2D2D] text-white text-sm h-12 rounded-[8px] px-4 focus:outline-none focus:border-[#BFF367]/60" />
-                    <input type="text" placeholder="Phone" value={newManagerPhone} onChange={(e) => setNewManagerPhone(e.target.value)} className="w-full bg-[#111111] border border-[#2D2D2D] text-white text-sm h-12 rounded-[8px] px-4 focus:outline-none focus:border-[#BFF367]/60" />
-                    <button type="button" onClick={addManagerContact} className="shrink-0 px-8 rounded-[8px] bg-white text-black hover:bg-[#BFF367] transition-all text-[11px] font-bold uppercase tracking-widest">Add</button>
+                  <label className="label"><span className="text-[8px] md:text-[11px] font-bold text-[#878C9F] uppercase tracking-widest ml-1">Venue Managers (Contacts)</span></label>
+                  <div className="grid grid-cols-1 md:grid-cols-[1fr_1fr_auto] gap-4">
+                    <input type="text" placeholder="Manager Name" value={newManagerName} onChange={(e) => setNewManagerName(e.target.value)} className="w-full bg-[#111111] border border-white/5 text-white text-[10px] md:text-sm h-9 md:h-12 rounded-[6px] md:rounded-[8px] px-3 md:px-4 focus:outline-none focus:border-[#BFF367]/60" />
+                    <input type="text" placeholder="Phone" value={newManagerPhone} onChange={(e) => setNewManagerPhone(e.target.value)} className="w-full bg-[#111111] border border-white/5 text-white text-[10px] md:text-sm h-9 md:h-12 rounded-[6px] md:rounded-[8px] px-3 md:px-4 focus:outline-none focus:border-[#BFF367]/60" />
+                    <button type="button" onClick={addManagerContact} className="w-full md:w-auto px-8 h-12 rounded-[8px] bg-[#2D2D2D] text-white hover:bg-[#BFF367] hover:text-black transition-all text-[11px] font-bold uppercase tracking-widest">Add</button>
                   </div>
                   <div className="space-y-3 max-h-[150px] overflow-y-auto custom-scrollbar pr-2">
                     {managerContacts.map((manager, index) => (
-                      <div key={index} className="flex items-center justify-between bg-[#111111] p-4 rounded-[8px] border border-[#2D2D2D]">
+                      <div key={index} className="flex items-center justify-between bg-[#111111] p-4 rounded-[8px] border border-white/5">
                         <div className="flex flex-col">
                           <span className="text-white text-[13px] font-bold uppercase tracking-tight">{manager.name}</span>
                           <span className="text-[#878C9F] text-[11px] font-mono mt-0.5">{manager.phone}</span>
@@ -394,8 +431,8 @@ const AddTurf = () => {
                 </div>
 
                 <div className="form-control">
-                  <label className="label mb-2"><span className="text-[11px] font-bold text-[#878C9F] uppercase tracking-widest ml-1">Venue Policies and Rules</span></label>
-                  <textarea {...register("policies")} maxLength={1000} className="w-full bg-[#111111] border border-[#2D2D2D] text-white focus:border-[#BFF367]/60 focus:outline-none text-sm h-48 rounded-[8px] p-4 transition-all"></textarea>
+                  <label className="label mb-2"><span className="text-[8px] md:text-[11px] font-bold text-[#878C9F] uppercase tracking-widest ml-1">Venue Policies and Rules</span></label>
+                  <textarea {...register("policies")} maxLength={1000} className="w-full bg-[#111111] border border-white/5 text-white focus:border-[#BFF367]/60 focus:outline-none text-[10px] md:text-sm h-32 md:h-48 rounded-[6px] md:rounded-[8px] p-3 md:p-4 transition-all"></textarea>
                 </div>
               </div>
             </div>
@@ -403,12 +440,12 @@ const AddTurf = () => {
 
           {/* STEP 3: Slot Management */}
           {currentStep === 3 && (
-            <div className="col-span-1 grid grid-cols-1 md:grid-cols-2 gap-12 relative z-10 animate-fade-in">
-              <div className="space-y-8">
+            <div className="col-span-1 grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-12 relative z-10 animate-fade-in">
+              <div className="space-y-4 md:space-y-8">
                 <div className="grid grid-cols-2 gap-6">
                   <div className="form-control">
-                    <label className="label mb-2"><span className="text-[11px] font-bold text-[#878C9F] uppercase tracking-widest ml-1">Slot Duration</span></label>
-                    <select {...register("slotDuration")} className="w-full bg-[#111111] border border-[#2D2D2D] text-white focus:border-[#BFF367]/60 focus:outline-none text-sm h-12 rounded-[8px] px-4 transition-all appearance-none">
+                    <label className="label mb-2"><span className="text-[8px] md:text-[11px] font-bold text-[#878C9F] uppercase tracking-widest ml-1">Slot Duration</span></label>
+                    <select {...register("slotDuration")} className="w-full bg-[#111111] border border-white/5 text-white focus:border-[#BFF367]/60 focus:outline-none text-[10px] md:text-sm h-9 md:h-12 rounded-[6px] md:rounded-[8px] px-3 md:px-4 transition-all appearance-none">
                       <option value={30}>30 Minutes</option>
                       <option value={60}>60 Minutes</option>
                       <option value={90}>90 Minutes</option>
@@ -416,8 +453,8 @@ const AddTurf = () => {
                     </select>
                   </div>
                   <div className="form-control">
-                    <label className="label mb-2"><span className="text-[11px] font-bold text-[#878C9F] uppercase tracking-widest ml-1">Break Time</span></label>
-                    <select {...register("breakTime")} className="w-full bg-[#111111] border border-[#2D2D2D] text-white focus:border-[#BFF367]/60 focus:outline-none text-sm h-12 rounded-[8px] px-4 transition-all appearance-none">
+                    <label className="label mb-2"><span className="text-[8px] md:text-[11px] font-bold text-[#878C9F] uppercase tracking-widest ml-1">Break Time</span></label>
+                    <select {...register("breakTime")} className="w-full bg-[#111111] border border-white/5 text-white focus:border-[#BFF367]/60 focus:outline-none text-[10px] md:text-sm h-9 md:h-12 rounded-[6px] md:rounded-[8px] px-3 md:px-4 transition-all appearance-none">
                       <option value={0}>No Break</option>
                       <option value={10}>10 Minutes</option>
                       <option value={15}>15 Minutes</option>
@@ -425,24 +462,28 @@ const AddTurf = () => {
                     </select>
                   </div>
                   <div className="form-control">
-                    <label className="label mb-2"><span className="text-[11px] font-bold text-[#878C9F] uppercase tracking-widest ml-1">Opening Time</span></label>
+                    <label className="label mb-2"><span className="text-[8px] md:text-[11px] font-bold text-[#878C9F] uppercase tracking-widest ml-1">Opening Time</span></label>
                     <Controller name="openTime" control={control} rules={{ required: "Required" }} render={({ field }) => ( <ClockPicker value={field.value} onChange={field.onChange} placeholder="12:00 AM" /> )} />
                   </div>
                   <div className="form-control">
-                    <label className="label mb-2"><span className="text-[11px] font-bold text-[#878C9F] uppercase tracking-widest ml-1">Closing Time</span></label>
+                    <label className="label mb-2"><span className="text-[8px] md:text-[11px] font-bold text-[#878C9F] uppercase tracking-widest ml-1">Closing Time</span></label>
                     <Controller name="closeTime" control={control} rules={{ required: "Required" }} render={({ field }) => ( <ClockPicker value={field.value} onChange={field.onChange} placeholder="12:00 AM" disabled={!openTime} /> )} />
                   </div>
                 </div>
 
-                <FormField label="Hourly Rate (INR)" name="pricePerHour" type="number" register={register} error={errors.pricePerHour} className="bg-[#111111] border-[#2D2D2D] text-white focus:border-[#BFF367]/60" />
+                <div className="form-control">
+                  <label className="label mb-2"><span className="text-[8px] md:text-[11px] font-bold text-[#878C9F] uppercase tracking-widest ml-1">Hourly Rate (INR)</span></label>
+                  <input type="number" placeholder="Hourly Rate (INR)" {...register("pricePerHour")} className="w-full bg-[#111111] border border-white/5 text-white focus:border-[#BFF367]/60 focus:outline-none text-[10px] md:text-sm h-9 md:h-12 rounded-[6px] md:rounded-[8px] px-3 md:px-4 transition-all" />
+                  {errors.pricePerHour && <span className="text-[#BFF367] text-[8px] md:text-[10px] font-bold uppercase mt-1 md:mt-2 block ml-1">{errors.pricePerHour.message}</span>}
+                </div>
 
                 <div className="space-y-6">
-                  <label className="label"><span className="text-[11px] font-bold text-[#878C9F] uppercase tracking-widest ml-1">Weekly Operational Sequence</span></label>
+                  <label className="label"><span className="text-[8px] md:text-[11px] font-bold text-[#878C9F] uppercase tracking-widest ml-1">Weekly Operational Sequence</span></label>
                   <div className="flex flex-wrap gap-3">
                     {["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"].map(day => {
                       const isActive = availableDays.includes(day);
                       return (
-                        <button key={day} type="button" onClick={() => toggleDay(day)} className={`px-5 py-3 rounded-[8px] text-[11px] font-black uppercase tracking-widest transition-all border ${ isActive ? "bg-[#BFF367] text-black border-[#BFF367] shadow-[0_5px_15px_rgba(204,255,0,0.2)]" : "bg-[#111111] text-[#444] border-[#2D2D2D] hover:border-[#BFF367]/40" }`}>
+                        <button key={day} type="button" onClick={() => toggleDay(day)} className={`px-5 py-3 rounded-[8px] text-[11px] font-black uppercase tracking-widest transition-all border ${ isActive ? "bg-[#BFF367] text-black border-[#BFF367] shadow-[0_5px_15px_rgba(204,255,0,0.2)]" : "bg-[#111111] text-[#444] border-white/5 hover:border-[#BFF367]/40" }`}>
                           {day.substring(0, 3)}
                         </button>
                       );
@@ -451,12 +492,12 @@ const AddTurf = () => {
                 </div>
               </div>
 
-              <div className="space-y-8">
-                  <h3 className="text-[14px] font-bold text-[#BFF367] border-b border-[#2D2D2D] pb-3 mb-6 uppercase tracking-[3px]">Slot Review</h3>
+              <div className="space-y-4 md:space-y-8">
+                  <h3 className="text-[14px] font-bold text-[#BFF367] border-b border-white/5 pb-3 mb-6 uppercase tracking-[3px]">Slot Review</h3>
                   {generatedSlots.length > 0 ? (
                       <div className="grid grid-cols-2 md:grid-cols-3 gap-3 max-h-[400px] overflow-y-auto pr-2 custom-scrollbar">
                         {generatedSlots.map((slot, index) => (
-                          <div key={index} className={`p-4 rounded-[8px] border transition-all ${ slot.isActive ? "bg-[#1A1A1A] border-[#BFF367]/30" : "bg-[#0A0A0A] border-[#2D2D2D] opacity-50" }`}>
+                          <div key={index} className={`p-4 rounded-[8px] border transition-all ${ slot.isActive ? "bg-[#1A1A1A] border-[#BFF367]/30" : "bg-[#0A0A0A] border-white/5 opacity-50" }`}>
                             <div className="flex justify-between items-center mb-3">
                               <span className={`text-[12px] font-bold font-mono tracking-tight ${slot.isActive ? 'text-white' : 'text-[#878C9F]'}`}>
                                 {slot.startTime} - {slot.endTime}
@@ -471,7 +512,7 @@ const AddTurf = () => {
                         ))}
                       </div>
                     ) : (
-                      <div className="text-center py-12 border border-dashed border-[#2D2D2D] rounded-[8px] bg-[#0A0A0A]">
+                      <div className="text-center py-12 border border-dashed border-white/5 rounded-[8px] bg-[#0A0A0A]">
                         <span className="text-[#444] text-[11px] font-bold uppercase tracking-[4px]">Set times to generate slots</span>
                       </div>
                     )}
@@ -480,11 +521,11 @@ const AddTurf = () => {
           )}
 
           {/* Navigation Buttons */}
-          <div className="col-span-1 flex justify-between mt-12 pt-8 border-t border-[#2D2D2D] relative z-10">
+          <div className="col-span-1 flex justify-between mt-6 md:mt-8 pt-4 md:pt-6 border-t border-white/5 relative z-10">
             <button
               type="button"
               onClick={(e) => { e.preventDefault(); setCurrentStep(prev => Math.max(1, prev - 1)); }}
-              className={`px-8 py-3 rounded-[8px] font-bold text-sm uppercase tracking-wider transition-all duration-300 ${ currentStep === 1 ? "opacity-0 pointer-events-none" : "bg-[#2D2D2D] text-white hover:bg-[#3D3D3D]" }`}
+              className={`px-6 md:px-8 py-2 md:py-3 rounded-[6px] md:rounded-[8px] font-bold text-xs md:text-sm uppercase tracking-wider transition-all duration-300 ${ currentStep === 1 ? "opacity-0 pointer-events-none" : "bg-[#2D2D2D] text-white hover:bg-[#3D3D3D]" }`}
             >
               Back
             </button>
@@ -493,7 +534,7 @@ const AddTurf = () => {
               <button
                 type="button"
                 onClick={(e) => { e.preventDefault(); setCurrentStep(prev => Math.min(3, prev + 1)); }}
-                className="px-10 py-3 rounded-[8px] bg-[#BFF367] text-black font-bold text-sm uppercase tracking-wider hover:bg-[#a6d953] transition-all duration-300"
+                className="px-8 md:px-10 py-2 md:py-3 rounded-[6px] md:rounded-[8px] bg-[#BFF367] text-black font-bold text-xs md:text-sm uppercase tracking-wider hover:bg-[#a6d953] transition-all duration-300"
               >
                 Next Step
               </button>
@@ -501,7 +542,7 @@ const AddTurf = () => {
               <button
                 type="submit"
                 disabled={loading}
-                className={`px-12 py-3 rounded-[8px] bg-[#BFF367] text-black font-bold text-sm uppercase tracking-wider transition-all duration-300 flex items-center gap-2 ${ loading ? "opacity-70 cursor-not-allowed" : "hover:bg-[#a6d953]" }`}
+                className={`px-8 md:px-12 py-2 md:py-3 rounded-[6px] md:rounded-[8px] bg-[#BFF367] text-black font-bold text-xs md:text-sm uppercase tracking-wider transition-all duration-300 flex items-center gap-2 ${ loading ? "opacity-70 cursor-not-allowed" : "hover:bg-[#a6d953]" }`}
               >
                 {loading ? "Submitting..." : "Submit Venue"}
               </button>

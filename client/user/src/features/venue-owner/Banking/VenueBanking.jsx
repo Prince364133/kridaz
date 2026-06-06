@@ -1,11 +1,11 @@
 import React, { useState, useMemo } from "react";
 import { Landmark, ArrowUpRight, TrendingUp, 
   History, ShieldCheck, Download, Plus, 
-  FileText, CheckCircle, AlertCircle, Lock
+  FileText, CheckCircle, AlertCircle, Lock, IndianRupee, Wallet, X
 } from "lucide-react";
-import useBanking from "@hooks/owner/useBanking";
-import useOwnerDashboard from "@hooks/owner/useOwnerDashboard";
-import useOwnerWallet from "@hooks/owner/useOwnerWallet";
+import useBanking from "@hooks/venue-owner/useBanking";
+import useVenueOwnerDashboard from "@hooks/venue-owner/useVenueOwnerDashboard";
+import useOwnerWallet from "@hooks/venue-owner/useOwnerWallet";
 import toast from "react-hot-toast";
 import { useSelector } from "react-redux";
 
@@ -21,11 +21,12 @@ const VenueBanking = () => {
   const vaultTitle = isScorer ? "Payout & Settlement" : "Marketplace Vault";
 
   const { bankingDetails, walletBalance, payoutSettings, loading: bankingLoading, isPayoutDay, updateBanking, requestPayout, verifyPassword } = useBanking();
-  const { dashboardData, loading: dashboardLoading } = useOwnerDashboard();
-  const { walletData, withdrawals, loading: walletLoading, refresh: refreshWallet } = useOwnerWallet();
+  const { dashboardData, loading: dashboardLoading } = useVenueOwnerDashboard();
+  const { walletData, withdrawals, loading: walletLoading, refresh: refreshWallet, requestWithdrawal, submitting } = useOwnerWallet();
   
   const [isEditingBank, setIsEditingBank] = useState(false);
   const [showVerifyModal, setShowVerifyModal] = useState(false);
+  const [showBankModal, setShowBankModal] = useState(false);
   const [withdrawStep, setWithdrawStep] = useState(0); 
   const [isVerified, setIsVerified] = useState(false);
   const [verifying, setVerifying] = useState(false);
@@ -112,131 +113,122 @@ const VenueBanking = () => {
     setWithdrawStep(2);
   };
 
-  const handlePayoutRequest = async () => {
-    if (numericWithdrawAmount < 500) {
-      toast.error("Minimum Rs 500 required", {
-        style: { background: "#000", color: "#fff", border: "1px solid #ff4d4d", fontSize: "10px", fontWeight: "black" }
+  const handleWithdrawSubmit = async (e) => {
+    e.preventDefault();
+    if (!withdrawAmount || parseFloat(withdrawAmount) < 500) {
+      toast.error("Minimum withdrawal threshold is Rs 500", {
+        style: { background: "#000", color: "#fff", border: `1px solid ${themeColor}`, fontSize: "10px", fontWeight: "black" }
       });
       return;
     }
-    if (numericWithdrawAmount > numericTotalCoins) {
-      toast.error("Insufficient liquidity", {
-        style: { background: "#000", color: "#fff", border: "1px solid #ff4d4d", fontSize: "10px", fontWeight: "black" }
-      });
-      return;
-    }
-
-    const success = await requestPayout(numericWithdrawAmount, password);
+    const success = await requestWithdrawal(parseFloat(withdrawAmount), bankForm);
     if (success) {
-       setShowVerifyModal(false);
-       setPassword("");
-       setIsVerified(false);
-       refreshWallet();
+      setShowVerifyModal(false);
+      setWithdrawAmount(0);
+      toast.success("Withdrawal request dispatched", {
+        style: { background: "#000", color: "#fff", border: `1px solid ${themeColor}`, fontSize: "10px", fontWeight: "black" }
+      });
+      refreshWallet();
     }
   };
 
   if (bankingLoading || dashboardLoading || walletLoading) return <div className="p-10 text-center text-gray-500 font-inter font-black uppercase tracking-widest animate-pulse">Initializing Secure Banking...</div>;
 
   return (
-    <div className="h-full custom-scrollbar bg-[#000000] text-white font-inter pb-24">
-      <div className="p-4 lg:px-10 lg:pt-10 lg:pb-12 space-y-12 animate-fade-in relative">
+    <div className="h-full custom-scrollbar bg-[#000000] text-white font-inter pb-4">
+      <div className="px-1 lg:px-3 pt-1 lg:pt-3 lg:pb-3 flex flex-col gap-4 md:gap-12 animate-fade-in relative">
         
         {/* Header Section */}
         <div className="flex flex-col xl:flex-row justify-between items-start xl:items-center gap-8 relative z-10 pb-6 border-b border-white/5">
           <div className="flex items-center gap-4">
             <div>
-              <h1 className="text-3xl lg:text-4xl font-bold tracking-tight font-['Open_Sans'] uppercase leading-none">
-                <span className="text-white">{vaultTitle.split(" ")[0]}</span>{" "}
-                <span style={{ color: themeColor }}>{vaultTitle.split(" ").slice(1).join(" ")}</span>
-              </h1>
-              <p className="text-[#878C9F] text-[10px] font-black uppercase tracking-[0.2em] font-inter mt-1.5">Banking & Secure Settlement Console</p>
+              <div className="flex flex-wrap items-center gap-3 sm:gap-4">
+
+                <button 
+                  onClick={() => setShowBankModal(true)} 
+                  className="px-3 py-1.5 md:px-4 md:py-2 bg-[#121212] border border-white/10 hover:border-[#BFF367]/30 rounded-lg text-[10px] md:text-[11px] font-black uppercase tracking-widest transition-all flex items-center gap-2 mt-2 sm:mt-0"
+                >
+                  <Landmark size={14} className="shrink-0" /> Bank Details
+                </button>
+              </div>
+              <p className="text-[#878C9F] font-inter font-light text-[14px] md:text-[20px] mt-2">Banking & Secure Settlement Console</p>
             </div>
           </div>
           
-          <div className="flex flex-wrap items-center gap-4 w-full xl:w-auto">
-             <div className="flex flex-wrap gap-3">
-                <div className="bg-white/[0.02] border border-white/5 px-5 py-2.5 rounded-lg flex flex-col justify-center min-w-[140px]">
-                   <p className="text-[7px] font-black text-neutral-600 uppercase tracking-widest mb-1">Confirmed Revenue</p>
-                   <p className="text-[16px] font-black text-white leading-none tracking-tight">Rs {numericTotalCoins.toLocaleString()}</p>
+          <div className="flex items-center w-full xl:w-auto mt-4 xl:mt-0">
+             <div className="flex justify-between md:justify-end divide-x divide-white/10 w-full xl:w-auto">
+                <div className="pr-4 md:px-6 py-1 flex flex-col justify-center">
+                   <p className="text-[7px] md:text-[9px] font-black text-neutral-500 uppercase tracking-widest mb-1 md:mb-1.5">Confirmed</p>
+                   <p className="text-[14px] md:text-[20px] font-black text-white leading-none tracking-tighter truncate">Rs {numericTotalCoins.toLocaleString()}</p>
                 </div>
-                <div className="bg-white/[0.02] border border-white/5 px-5 py-2.5 rounded-lg flex flex-col justify-center min-w-[140px]">
-                   <p className="text-[7px] font-black text-neutral-600 uppercase tracking-widest mb-1">Pending Revenue</p>
-                   <p className="text-[16px] font-black text-white leading-none tracking-tight opacity-40">Rs {numericPendingCoins.toLocaleString()}</p>
+                <div className="px-4 md:px-6 py-1 flex flex-col justify-center">
+                   <p className="text-[7px] md:text-[9px] font-black text-neutral-500 uppercase tracking-widest mb-1 md:mb-1.5">Pending</p>
+                   <p className="text-[14px] md:text-[20px] font-black text-white/50 leading-none tracking-tighter truncate">Rs {numericPendingCoins.toLocaleString()}</p>
                 </div>
-                <div className="bg-white/[0.02] border border-white/5 px-5 py-2.5 rounded-lg flex flex-col justify-center min-w-[140px]">
-                   <p className="text-[7px] font-black text-neutral-600 uppercase tracking-widest mb-1">Lifetime Earnings</p>
-                   <p className="text-[16px] font-black text-white leading-none tracking-tight">Rs {(dashboardData?.totalRevenue || 0).toLocaleString()}</p>
+                <div className="pl-4 md:px-6 py-1 flex flex-col justify-center">
+                   <p className="text-[7px] md:text-[9px] font-black text-neutral-500 uppercase tracking-widest mb-1 md:mb-1.5">Lifetime</p>
+                   <p className="text-[14px] md:text-[20px] font-black text-white leading-none tracking-tighter truncate">Rs {(dashboardData?.totalRevenue || 0).toLocaleString()}</p>
                 </div>
              </div>
           </div>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-10">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-10">
           
-          <div className="lg:col-span-8 space-y-10">
+          <div className="lg:col-span-8 space-y-6 md:space-y-10">
              
-             {/* Payout Trigger Card */}
-             <div className="bg-white/[0.03] backdrop-blur-xl border border-white/5 rounded-[8px] p-8 shadow-2xl relative overflow-hidden group">
-                <div className="absolute top-0 right-0 w-64 h-64 bg-[#BFF367]/5 blur-[100px] pointer-events-none" />
-                <div className="flex flex-col md:flex-row justify-between items-center gap-8 relative z-10">
-                   <div className="space-y-4 text-center md:text-left">
-                      <div className="flex items-center justify-center md:justify-start gap-2">
-                         <ShieldCheck style={{ color: themeColor }} size={16} />
-                         <span className="text-[10px] font-bold font-['Open_Sans'] uppercase tracking-[0.4em]" style={{ color: themeColor }}>Settlement Node Active</span>
-                      </div>
-                      <h3 className="text-[18px] lg:text-2xl font-black uppercase tracking-[0.15em] font-inter whitespace-nowrap">
-                        <span className="text-white/40">Balance</span> <span className="text-white">Available:</span> <span style={{ color: themeColor }}>Rs {numericTotalCoins.toLocaleString()}</span>
-                      </h3>
-                      <p className="text-[9px] text-neutral-500 font-black uppercase tracking-widest">Next Automated Settlement: Every Friday</p>
-                   </div>
-                   <button 
-                     onClick={handleOpenPayoutModal}
-                     className="px-10 py-5 text-black rounded-lg font-black uppercase tracking-[0.2em] text-[11px] transition-all transform active:scale-95 shadow-2xl w-full md:w-auto"
-                     style={{ backgroundColor: themeColor }}
-                   >
-                      Request Settlement
-                   </button>
+             {/* Simple Balance Card */}
+             <div className="bg-[#121212] border border-white/5 rounded-[8px] p-4 md:p-6 shadow-2xl flex flex-row items-center justify-between gap-4">
+                <div className="flex flex-col md:flex-row md:items-baseline gap-0.5 md:gap-3">
+                   <span className="text-[10px] md:text-[12px] font-bold uppercase tracking-widest text-[#878C9F]">Balance:</span>
+                   <span className="text-[16px] md:text-[24px] font-black tracking-tight" style={{ color: themeColor }}>Rs {numericTotalCoins.toLocaleString()}</span>
                 </div>
+                <button 
+                  onClick={handleOpenPayoutModal}
+                  className="px-3 py-2 md:px-6 md:py-3 text-black rounded-[6px] font-bold uppercase tracking-widest text-[9px] md:text-[11px] transition-all transform active:scale-95 whitespace-nowrap"
+                  style={{ backgroundColor: themeColor }}
+                >
+                   Request Settlement
+                </button>
              </div>
 
              {/* Financial Ledger */}
-             <div className="bg-white/[0.03] backdrop-blur-xl border border-white/5 rounded-[8px] overflow-hidden shadow-2xl">
-                <div className="p-8 border-b border-white/5 flex justify-between items-center">
-                   <div className="flex items-center gap-4">
-                      <h3 className="text-[12px] font-bold font-['Open_Sans'] uppercase tracking-[0.2em]">Financial Ledger</h3>
+             <div className="bg-[#121212] border border-white/5 rounded-[8px] overflow-hidden shadow-2xl">
+                <div className="p-4 md:p-8 border-b border-white/5 flex justify-between items-center gap-2">
+                   <div className="flex items-center gap-2 md:gap-4">
+                      <h3 className="text-[10px] md:text-[12px] font-bold font-['Open_Sans'] uppercase tracking-[0.1em] md:tracking-[0.2em] whitespace-nowrap">Financial Ledger</h3>
                    </div>
-                   <button className="text-[9px] font-black uppercase tracking-widest flex items-center gap-2 text-neutral-500 hover:text-white transition-all">
-                      <Download size={14} /> Download Audit CSV
+                   <button className="text-[7px] md:text-[9px] font-black uppercase tracking-widest flex items-center gap-1.5 md:gap-2 text-neutral-500 hover:text-white transition-all text-right md:text-left">
+                      <Download className="w-3 h-3 md:w-3.5 md:h-3.5 flex-shrink-0" /> Download Audit CSV
                    </button>
                 </div>
-                <div className="overflow-x-auto no-scrollbar">
-                   <table className="w-full text-left">
+                <div className="overflow-x-auto no-scrollbar w-full">
+                   <table className="w-full text-left table-fixed sm:table-auto">
                       <thead>
-                         <tr className="bg-white/[0.02]">
-                            <th className="px-8 py-5 text-[9px] font-black text-neutral-600 uppercase tracking-widest">Transaction Origin</th>
-                            <th className="px-8 py-5 text-[9px] font-black text-neutral-600 uppercase tracking-widest">Temporal Log</th>
-                            <th className="px-8 py-5 text-[9px] font-black text-neutral-600 uppercase tracking-widest text-right">Quantum</th>
+                         <tr className="bg-[#121212]">
+                            <th className="px-3 md:px-8 py-3 md:py-5 text-[6px] md:text-[9px] font-black text-neutral-600 uppercase tracking-widest w-1/2 sm:w-auto">Transaction Origin</th>
+                            <th className="px-2 md:px-8 py-3 md:py-5 text-[6px] md:text-[9px] font-black text-neutral-600 uppercase tracking-widest w-1/4 sm:w-auto">Temporal Log</th>
+                            <th className="px-3 md:px-8 py-3 md:py-5 text-[6px] md:text-[9px] font-black text-neutral-600 uppercase tracking-widest text-right w-1/4 sm:w-auto">Quantum</th>
                          </tr>
                       </thead>
                       <tbody className="divide-y divide-white/5">
                          {walletData.transactions && walletData.transactions.length > 0 ? (
                             walletData.transactions.map((tx, idx) => (
-                               <tr key={tx._id || idx} className="hover:bg-white/[0.02] transition-colors group">
-                                  <td className="px-8 py-6">
-                                     <div className="flex items-center gap-4">
-                                        <div className="w-10 h-10 rounded-lg bg-white/[0.02] flex items-center justify-center border border-white/5 transition-all" style={{ color: ['DEBIT', 'WITHDRAWAL', 'DISPUTE_FREEZE', 'HOST_GAME', 'JOIN_GAME'].includes(tx.type) ? '#ef4444' : themeColor, borderColor: ['DEBIT', 'WITHDRAWAL', 'DISPUTE_FREEZE', 'HOST_GAME', 'JOIN_GAME'].includes(tx.type) ? '#ef444433' : `${themeColor}33` }}>
-                                           {['DEBIT', 'WITHDRAWAL', 'DISPUTE_FREEZE', 'HOST_GAME', 'JOIN_GAME'].includes(tx.type) ? <ArrowUpRight size={16} /> : <TrendingUp size={16} />}
+                               <tr key={tx._id || idx} className="hover:bg-[#121212] transition-colors group">                                  <td className="px-3 md:px-8 py-4 md:py-6 overflow-hidden">
+                                     <div className="flex items-center gap-2 md:gap-4">
+                                        <div className="w-6 h-6 md:w-10 md:h-10 rounded-md md:rounded-lg bg-[#121212] flex items-center justify-center border border-white/5 transition-all flex-shrink-0" style={{ color: ['DEBIT', 'WITHDRAWAL', 'DISPUTE_FREEZE', 'HOST_GAME', 'JOIN_GAME'].includes(tx.type) ? '#ef4444' : themeColor, borderColor: ['DEBIT', 'WITHDRAWAL', 'DISPUTE_FREEZE', 'HOST_GAME', 'JOIN_GAME'].includes(tx.type) ? '#ef444433' : `${themeColor}33` }}>
+                                           {['DEBIT', 'WITHDRAWAL', 'DISPUTE_FREEZE', 'HOST_GAME', 'JOIN_GAME'].includes(tx.type) ? <ArrowUpRight className="w-3 h-3 md:w-4 md:h-4" /> : <TrendingUp className="w-3 h-3 md:w-4 md:h-4" />}
                                         </div>
-                                        <div>
-                                           <p className="text-sm font-black uppercase tracking-tight text-white">{tx.description || `Log #${tx._id?.slice(-6).toUpperCase()}`}</p>
-                                           <p className="text-[9px] text-neutral-500 font-bold uppercase tracking-widest mt-1">{tx.type} Rs � {tx.status}</p>
+                                        <div className="min-w-0">
+                                           <p className="text-[9px] md:text-sm font-black uppercase tracking-tight text-white truncate">{tx.description || `Log #${tx._id?.slice(-6).toUpperCase()}`}</p>
+                                           <p className="text-[6px] md:text-[9px] text-neutral-500 font-bold uppercase tracking-widest mt-0.5 md:mt-1 truncate">{tx.type} Rs • {tx.status}</p>
                                         </div>
                                      </div>
                                   </td>
-                                  <td className="px-8 py-6 text-[10px] text-neutral-500 font-black uppercase tracking-widest">
-                                     {new Date(tx.createdAt).toLocaleDateString('en-US', { month: 'short', day: '2-digit', year: 'numeric' })}
+                                  <td className="px-2 md:px-8 py-4 md:py-6 text-[7px] md:text-[10px] text-neutral-500 font-black uppercase tracking-widest">
+                                     {new Date(tx.createdAt).toLocaleDateString('en-US', { month: 'short', day: '2-digit', year: '2-digit' })}
                                   </td>
-                                  <td className={`px-8 py-6 text-right font-black tracking-tighter text-lg`} style={{ color: ['DEBIT', 'WITHDRAWAL', 'DISPUTE_FREEZE', 'HOST_GAME', 'JOIN_GAME'].includes(tx.type) ? '#ef4444' : themeColor }}>
+                                  <td className={`px-3 md:px-8 py-4 md:py-6 text-right font-black tracking-tighter text-[10px] md:text-lg`} style={{ color: ['DEBIT', 'WITHDRAWAL', 'DISPUTE_FREEZE', 'HOST_GAME', 'JOIN_GAME'].includes(tx.type) ? '#ef4444' : themeColor }}>
                                      {['DEBIT', 'WITHDRAWAL', 'DISPUTE_FREEZE', 'HOST_GAME', 'JOIN_GAME'].includes(tx.type) ? '-' : '+'} Rs {Number(tx.amount).toLocaleString()}
                                   </td>
                                </tr>
@@ -257,145 +249,19 @@ const VenueBanking = () => {
              </div>
           </div>
 
-          {/* Right Sidebar: Banking & Records */}
+          {/* Right Sidebar: Records */}
           <div className="lg:col-span-4 space-y-10">
-             
-             {/* Banking Hub */}
-             <div className="bg-white/[0.03] backdrop-blur-xl border border-white/5 rounded-[8px] p-8 space-y-8 shadow-2xl relative overflow-hidden">
-                <div className="flex justify-between items-center">
-                   <div className="flex items-center gap-3">
-                      <h3 className="text-[12px] font-bold font-['Open_Sans'] uppercase tracking-[0.2em]">Banking Info</h3>
-                   </div>
-                   <button 
-                     onClick={() => setIsEditingBank(!isEditingBank)}
-                     className="w-8 h-8 flex items-center justify-center bg-white/5 rounded-lg border border-white/5 hover:bg-white/10 transition-all text-neutral-400 hover:text-white"
-                   >
-                      <Plus size={16} />
-                   </button>
-                </div>
-
-                {isEditingBank ? (
-                  <form onSubmit={handleBankSubmit} className="space-y-5 animate-scale-in">
-                     <div className="space-y-2">
-                        <label className="text-[9px] font-black text-neutral-500 uppercase tracking-widest ml-1">Account Holder</label>
-                        <input 
-                          type="text" required
-                          className="w-full bg-black border border-white/5 rounded-lg px-5 py-4 text-[13px] text-white focus:outline-none focus:border-[#BFF367]/30 transition-all font-black placeholder-neutral-800"
-                          value={bankForm.accountName}
-                          onChange={e => setBankForm({...bankForm, accountName: e.target.value})}
-                          placeholder="Full Legal Name"
-                        />
-                     </div>
-                     {bankForm.payoutMode === "BANK" ? (
-                        <div className="grid grid-cols-1 gap-5">
-                           <div className="space-y-2">
-                              <label className="text-[9px] font-black text-neutral-500 uppercase tracking-widest ml-1">Account Number</label>
-                              <input 
-                                type="text" required
-                                className="w-full bg-black border border-white/5 rounded-lg px-5 py-4 text-[13px] text-white focus:outline-none focus:border-[#BFF367]/30 transition-all font-black placeholder-neutral-800"
-                                value={bankForm.accountNumber}
-                                onChange={e => setBankForm({...bankForm, accountNumber: e.target.value})}
-                                placeholder="Account Number"
-                              />
-                           </div>
-                           <div className="space-y-2">
-                              <label className="text-[9px] font-black text-neutral-500 uppercase tracking-widest ml-1">IFSC Code</label>
-                              <input 
-                                type="text" required
-                                className="w-full bg-black border border-white/5 rounded-lg px-5 py-4 text-[13px] text-white focus:outline-none focus:border-[#BFF367]/30 transition-all font-black uppercase placeholder-neutral-800"
-                                value={bankForm.ifscCode}
-                                onChange={e => setBankForm({...bankForm, ifscCode: e.target.value})}
-                                placeholder="IFSC CODE"
-                              />
-                           </div>
-                        </div>
-                     ) : (
-                        <div className="space-y-2">
-                           <label className="text-[9px] font-black text-neutral-500 uppercase tracking-widest ml-1">UPI ID</label>
-                           <input 
-                             type="text" required
-                             placeholder="username@bank"
-                             className="w-full bg-black border border-white/5 rounded-lg px-5 py-4 text-[13px] text-white focus:outline-none focus:border-[#BFF367]/30 transition-all font-black"
-                             value={bankForm.upiId}
-                             onChange={e => setBankForm({...bankForm, upiId: e.target.value})}
-                           />
-                        </div>
-                     )}
-                     <div className="space-y-2">
-                        <label className="text-[9px] font-black text-neutral-500 uppercase tracking-widest ml-1">Payout Channel</label>
-                        <select 
-                          className="w-full bg-black border border-white/5 rounded-lg px-5 py-4 text-[13px] text-white focus:outline-none font-black appearance-none cursor-pointer uppercase tracking-widest"
-                          value={bankForm.payoutMode}
-                          onChange={e => setBankForm({...bankForm, payoutMode: e.target.value})}
-                        >
-                           <option value="BANK">Bank Transfer</option>
-                           <option value="UPI">UPI Gateway</option>
-                        </select>
-                     </div>
-                     <button type="submit" className="w-full py-5 text-black font-black uppercase text-[11px] tracking-[0.2em] rounded-lg mt-4 shadow-2xl transition-all" style={{ backgroundColor: themeColor }}>Synchronize Credentials</button>
-                  </form>
-                ) : (
-                  <div className="space-y-8 animate-fade-in">
-                       <div className="flex items-center gap-5 bg-white/[0.02] p-6 rounded-[8px] border border-white/5">
-                          <div className="w-14 h-14 rounded-lg flex items-center justify-center border" style={{ backgroundColor: `${themeColor}1A`, color: themeColor, borderColor: `${themeColor}33` }}>
-                             <Landmark size={28} />
-                          </div>
-                          <div>
-                             <p className="text-[15px] font-black text-white uppercase tracking-tight">{bankingDetails?.bankName || "HDFC Bank"}</p>
-                             <p className="text-[10px] text-neutral-500 font-bold uppercase tracking-widest mt-1">Ending in Rs �Rs �Rs �Rs � {bankingDetails?.accountNumber?.slice(-4) || "4920"}</p>
-                          </div>
-                       </div>
-
-                       <div className="space-y-4">
-                          <div className="flex justify-between items-center text-[10px] font-black border-b border-white/5 pb-4">
-                             <span className="text-neutral-600 uppercase tracking-widest">Account Holder</span>
-                             <span className="text-white uppercase tracking-widest">{bankingDetails?.accountName || "MANISH GOUD KATTA"}</span>
-                          </div>
-                          
-                          <div className="flex justify-between items-center text-[10px] font-black border-b border-white/5 pb-4">
-                             <span className="text-neutral-600 uppercase tracking-widest">{bankingDetails?.payoutMode === "UPI" ? "UPI ID" : "IFSC Code"}</span>
-                             <span className="text-white uppercase tracking-widest">{bankingDetails?.payoutMode === "UPI" ? (bankingDetails?.upiId || "manish.goud@okaxis") : (bankingDetails?.ifscCode || "HDFC0001234")}</span>
-                          </div>
-
-                          <div className="flex justify-between items-center text-[10px] font-black">
-                             <span className="text-neutral-600 uppercase tracking-widest">Channel</span>
-                             <span className="uppercase tracking-widest px-3 py-1 rounded-md text-[8px] font-black border" style={{ color: themeColor, backgroundColor: `${themeColor}1A`, borderColor: `${themeColor}33` }}>
-                                {bankingDetails?.payoutMode === "UPI" ? "UPI Node" : "Bank Swift"}
-                             </span>
-                          </div>
-                       </div>
-
-                       {!isBankingInfoComplete && (
-                         <div className="p-6 bg-red-500/5 border border-red-500/10 rounded-[8px] space-y-4 mt-6">
-                           <div className="flex items-center gap-3">
-                              <AlertCircle className="text-red-500" size={16} />
-                              <span className="text-[9px] font-black text-red-500 uppercase tracking-widest">KYC REQUIRED</span>
-                           </div>
-                           <p className="text-[9px] text-neutral-500 font-bold uppercase tracking-widest leading-relaxed">Financial identity verification is pending. Settlement nodes are currently frozen.</p>
-                           <button 
-                             onClick={() => setIsEditingBank(true)}
-                             className="w-full py-4 text-[10px] font-black uppercase tracking-[0.2em] rounded-lg border transition-all flex items-center justify-center gap-2"
-                             style={{ backgroundColor: `${themeColor}1A`, color: themeColor, borderColor: `${themeColor}33` }}
-                           >
-                              <ShieldCheck size={14} /> INITIALIZE KYC
-                           </button>
-                         </div>
-                       )}
-                  </div>
-                )}
-             </div>
-
              {/* Recent Settlements */}
-             <div className="bg-white/[0.03] backdrop-blur-xl border border-white/5 rounded-[8px] p-8 shadow-2xl">
+             <div className="bg-[#121212] border border-white/5 rounded-[8px] p-8 shadow-2xl">
                 <div className="flex items-center gap-3 mb-8">
                    <h3 className="text-[12px] font-bold font-['Open_Sans'] uppercase tracking-[0.2em]">Recent Records</h3>
                 </div>
                  <div className="space-y-4">
                    {withdrawals && withdrawals.length > 0 ? (
                       withdrawals.slice(0, 3).map((withdrawal, i) => (
-                         <div key={withdrawal._id || i} className="flex justify-between items-center p-5 bg-white/[0.02] rounded-[8px] border border-white/5 hover:border-white/10 transition-all group">
+                         <div key={withdrawal._id || i} className="flex justify-between items-center p-5 bg-[#121212] rounded-[8px] border border-white/5 hover:border-white/10 transition-all group">
                             <div className="flex items-center gap-4">
-                               <div className={`w-10 h-10 rounded-lg flex items-center justify-center border transition-all ${ withdrawal.status === 'SUCCESS' ? 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20' : withdrawal.status === 'PENDING' ? 'bg-orange-500/10 text-orange-500 border-orange-500/20' : 'bg-red-500/10 text-red-500 border-red-500/20' }`}>
+                               <div className={`w-10 h-10 rounded-lg flex items-center justify-center border transition-all ${ withdrawal.status === 'SUCCESS' ? 'bg-[#BFF367]/10 text-[#BFF367] border-[#BFF367]/20' : withdrawal.status === 'PENDING' ? 'bg-orange-500/10 text-orange-500 border-orange-500/20' : 'bg-red-500/10 text-red-500 border-red-500/20' }`}>
                                   {withdrawal.status === 'SUCCESS' ? <CheckCircle size={16} /> : <History size={16} />}
                                </div>
                                <div>
@@ -405,13 +271,13 @@ const VenueBanking = () => {
                                   </p>
                                </div>
                             </div>
-                            <span className={`text-[9px] font-black uppercase tracking-widest ${ withdrawal.status === 'SUCCESS' ? 'text-emerald-500' : withdrawal.status === 'PENDING' ? 'text-orange-500' : 'text-red-500' }`}>
+                            <span className={`text-[9px] font-black uppercase tracking-widest ${ withdrawal.status === 'SUCCESS' ? 'text-[#BFF367]' : withdrawal.status === 'PENDING' ? 'text-orange-500' : 'text-red-500' }`}>
                                {withdrawal.status}
                             </span>
                          </div>
                       ))
                    ) : (
-                      <div className="py-16 text-center bg-white/[0.02] rounded-lg border border-dashed border-white/10">
+                      <div className="py-16 text-center bg-[#121212] rounded-lg border border-dashed border-white/10">
                          <p className="text-[10px] text-neutral-700 font-black uppercase tracking-[0.2em]">No Records Found</p>
                       </div>
                    )}
@@ -422,113 +288,206 @@ const VenueBanking = () => {
 
         {/* Verification Modal */}
         {showVerifyModal && (
-          <div className="fixed inset-0 z-[100] flex items-center justify-center p-6 bg-black/90 backdrop-blur-xl animate-fade-in">
-             <div className="bg-[#0A0A0A] border border-white/10 w-full max-w-md rounded-lg overflow-hidden shadow-2xl animate-scale-in relative">
-                <div className="p-8 border-b border-white/5 flex justify-between items-center relative z-10">
-                   <div className="flex items-center gap-4">
-                     <div className="w-1.5 h-8 rounded-full shadow-[0_0_10px_rgba(0,193,135,0.3)]" style={{ backgroundColor: themeColor }} />
-                     <h3 className="text-xl font-black font-inter uppercase tracking-tight text-white">Vault Access</h3>
-                   </div>
-                  <button onClick={() => setShowVerifyModal(false)} className="w-10 h-10 flex items-center justify-center bg-white/5 border border-white/5 rounded-lg text-neutral-500 hover:text-white transition-all">
-                     <X size={20} />
-                  </button>
-               </div>
+          <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 md:p-6 bg-black/90 backdrop-blur-xl animate-fade-in">
+             <div className="bg-[#0A0A0A] border border-white/10 rounded-lg w-full max-w-lg overflow-hidden shadow-2xl animate-scale-in relative">
+                 <div className="p-4 md:p-8 border-b border-white/5 flex justify-between items-center relative z-10">
+                    <div className="flex items-center gap-3 md:gap-4">
+                      <div className="w-1 md:w-1.5 h-6 md:h-8 rounded-full shadow-[0_0_10px_rgba(0,193,135,0.3)]" style={{ backgroundColor: themeColor }} />
+                      <h3 className="text-lg md:text-xl font-black font-inter uppercase tracking-tight text-white">Fund Withdrawal</h3>
+                    </div>
+                   <button onClick={() => setShowVerifyModal(false)} className="w-8 h-8 md:w-10 md:h-10 flex items-center justify-center bg-white/5 border border-white/5 rounded-lg text-neutral-500 hover:text-white transition-all">
+                      <X className="w-4 h-4 md:w-5 md:h-5" />
+                   </button>
+                </div>
+                
+                <form onSubmit={handleWithdrawSubmit} className="p-4 md:p-8 space-y-3 md:space-y-8 relative z-10 h-auto max-h-[90vh] md:h-[500px] overflow-y-auto no-scrollbar pb-4 md:pb-10">
+                    <div className="rounded-[8px] p-3 md:p-6 flex items-center gap-3 md:gap-5 border border-white/5 bg-[#121212]" style={{ borderColor: `${themeColor}20` }}>
+                      <div className="w-8 h-8 md:w-12 md:h-12 rounded-lg flex items-center justify-center shrink-0" style={{ backgroundColor: `${themeColor}1A`, color: themeColor }}>
+                         <Wallet className="w-4 h-4 md:w-6 md:h-6" />
+                      </div>
+                      <div className="space-y-0.5 md:space-y-1 flex-1 flex flex-col justify-center">
+                         <div className="flex justify-between items-center w-full">
+                            <p className="text-[8px] md:text-[9px] font-black uppercase tracking-widest" style={{ color: themeColor }}>Available Capital</p>
+                            <div className="flex items-center gap-1 md:gap-2 text-[7px] md:text-[8px] text-neutral-500 font-black uppercase tracking-widest font-inter">
+                              <ShieldCheck className="w-3 h-3 md:w-3.5 md:h-3.5" style={{ color: themeColor }} />
+                              Min: Rs 500
+                            </div>
+                         </div>
+                         <p className="text-xl md:text-4xl font-black tracking-tighter text-white font-inter leading-none">Rs {numericTotalCoins.toLocaleString()}</p>
+                      </div>
+                    </div>
+  
+                   <div className="space-y-3 md:space-y-6 pb-2 md:pb-4">
+                      <div className="space-y-1 md:space-y-3">
+                         <label className="text-[8px] md:text-[9px] font-black text-neutral-500 uppercase tracking-widest ml-1">Withdrawal Quantum</label>
+                         <div className="relative group">
+                            <IndianRupee className="absolute left-4 md:left-5 top-1/2 -translate-y-1/2 text-neutral-700 group-focus-within:text-[#BFF367] transition-colors w-4 h-4 md:w-5 md:h-5" />
+                            <input 
+                              type="number"
+                              required
+                              min="500"
+                              max={numericTotalCoins}
+                              value={withdrawAmount === 0 ? "" : withdrawAmount}
+                              onChange={(e) => setWithdrawAmount(e.target.value === "" ? 0 : Number(e.target.value))}
+                              className="w-full bg-[#121212] border border-white/5 rounded-lg pl-10 md:pl-14 pr-4 md:pr-6 py-2 md:py-5 text-white focus:outline-none focus:border-[#BFF367]/30 transition-all font-black text-lg md:text-3xl placeholder-neutral-800 shadow-inner"
+                              placeholder="0.00"
+                            />
+                         </div>
+                      </div>
+  
 
-               <div className="p-8 space-y-8 relative z-10">
-                  {withdrawStep === 0 ? (
-                    <div className="space-y-6">
-                       <div className="text-center space-y-4 mb-8">
-                          <div className="w-20 h-20 rounded-lg flex items-center justify-center mx-auto border transition-all"
-                                style={{ backgroundColor: `${themeColor}1A`, color: themeColor, borderColor: `${themeColor}33`, boxShadow: `0 0 40px ${themeColor}1A` }}>
-                             <Lock size={36} />
-                          </div>
-                          <p className="text-[11px] text-neutral-500 font-black uppercase tracking-[0.2em]">Authenticating Secure Node</p>
-                       </div>
+                   </div>
+  
+                    <div className="sticky bottom-0 left-0 right-0 pt-2 md:pt-6 bg-[#0A0A0A]">
+                      <button 
+                          type="submit"
+                          disabled={submitting || !withdrawAmount || parseFloat(withdrawAmount) > numericTotalCoins}
+                          className="w-full py-3 md:py-5 text-black rounded-lg font-black uppercase tracking-[0.2em] transition-all disabled:opacity-30 disabled:grayscale disabled:cursor-not-allowed shadow-2xl active:scale-95 font-inter text-[10px] md:text-[11px]"
+                          style={{ backgroundColor: themeColor, boxShadow: `0 10px 30px ${themeColor}4d` }}
+                      >
+                          {submitting ? 'Authenticating Audit...' : 'Execute Settlement'}
+                      </button>
+                    </div>
+                </form>
+             </div>
+          </div>
+        )}
+        {showBankModal && (
+          <div className="fixed inset-0 z-[110] flex items-center justify-center p-4 md:p-6 bg-black/90 backdrop-blur-xl animate-fade-in">
+             <div className="bg-[#0A0A0A] border border-white/10 rounded-lg w-full max-w-lg overflow-hidden shadow-2xl animate-scale-in relative flex flex-col max-h-full">
+                 <div className="p-4 md:p-6 border-b border-white/5 flex justify-between items-center relative z-10 shrink-0">
+                    <div className="flex items-center gap-3">
+                      <div className="w-1 h-6 rounded-full shadow-[0_0_10px_rgba(0,193,135,0.3)]" style={{ backgroundColor: themeColor }} />
+                      <h3 className="text-lg font-black font-inter uppercase tracking-tight text-white">Banking Details</h3>
+                    </div>
+                   <button onClick={() => setShowBankModal(false)} className="w-8 h-8 flex items-center justify-center bg-white/5 border border-white/5 rounded-lg text-neutral-500 hover:text-white transition-all">
+                      <X className="w-4 h-4" />
+                   </button>
+                </div>
+                <div className="p-4 md:p-6 relative z-10 overflow-y-auto no-scrollbar flex-1">
+                  <div className="flex justify-end mb-6">
+                     <button 
+                       onClick={() => setIsEditingBank(!isEditingBank)}
+                       className="px-3 py-1.5 flex items-center gap-2 bg-white/5 rounded-lg border border-white/5 hover:bg-white/10 transition-all text-neutral-400 hover:text-white text-[10px] uppercase font-bold tracking-widest"
+                     >
+                        {isEditingBank ? "View Details" : <><Plus size={12} /> Edit Details</>}
+                     </button>
+                  </div>
+
+                  {isEditingBank ? (
+                    <form onSubmit={handleBankSubmit} className="space-y-5 animate-scale-in">
                        <div className="space-y-2">
-                          <label className="text-[10px] font-black text-neutral-500 uppercase tracking-widest ml-1">Confirm Identity Password</label>
+                          <label className="text-[9px] font-black text-neutral-500 uppercase tracking-widest ml-1">Account Holder</label>
                           <input 
-                            type="password"
-                            className="w-full bg-black border border-white/5 rounded-lg px-6 py-5 text-lg focus:outline-none focus:border-[#BFF367]/30 text-white font-black"
-                            placeholder="Rs �Rs �Rs �Rs �Rs �Rs �Rs �Rs �"
-                            value={password}
-                            onChange={e => setPassword(e.target.value)}
+                            type="text" required
+                            className="w-full bg-black border border-white/5 rounded-lg px-5 py-4 text-[13px] text-white focus:outline-none focus:border-[#BFF367]/30 transition-all font-black placeholder-neutral-800"
+                            value={bankForm.accountName}
+                            onChange={e => setBankForm({...bankForm, accountName: e.target.value})}
+                            placeholder="Full Legal Name"
                           />
                        </div>
-                        <button 
-                          onClick={handleVerify}
-                          disabled={verifying}
-                          className="w-full py-5 text-black rounded-lg font-black uppercase tracking-[0.2em] text-[12px] transition-all transform active:scale-95 shadow-2xl"
-                          style={{ backgroundColor: themeColor, boxShadow: `0 10px 40px ${themeColor}33` }}
-                        >
-                           {verifying ? "Authenticating..." : "Open Vault"}
-                        </button>
-                    </div>
-                  ) : withdrawStep === 1 ? (
-                    <div className="space-y-8 animate-scale-in">
-                       <div className="bg-white/[0.02] p-8 rounded-[8px] border border-white/5 relative overflow-hidden group">
-                          <p className="text-[10px] text-neutral-500 font-black uppercase tracking-[0.2em] mb-4 relative z-10">Confirmed Liquidity</p>
-                          <div className="flex items-center gap-3 relative z-10">
-                             <span className="text-4xl font-black" style={{ color: themeColor }}>Rs</span>
-                             <span className="text-4xl font-black text-white">{numericTotalCoins.toLocaleString()}</span>
-                          </div>
-                       </div>
-                        <button 
-                          onClick={handleProceedToAmount}
-                          className="w-full py-5 text-black rounded-lg font-black uppercase tracking-[0.2em] text-[12px] transition-all transform active:scale-95 shadow-2xl"
-                          style={{ backgroundColor: themeColor, boxShadow: `0 10px 40px ${themeColor}33` }}
-                        >
-                           Initialize Transfer
-                        </button>
-                    </div>
-                  ) : (
-                    <div className="space-y-8 animate-scale-in">
-                       <div className="space-y-8">
-                          <div className="space-y-2">
-                             <p className="text-[10px] text-neutral-500 font-black uppercase tracking-[0.2em] ml-1">Total Pot Available</p>
-                             <div className="flex items-center gap-2">
-                                <span className="text-2xl font-black" style={{ color: themeColor }}>Rs</span>
-                                <span className="text-2xl font-black text-white/30">{numericTotalCoins.toLocaleString()}</span>
-                             </div>
-                          </div>
-
-                          <div className="space-y-3 p-6 bg-white/[0.03] rounded-[8px] border border-white/5">
-                             <p className="text-[10px] font-black uppercase tracking-[0.2em] ml-1" style={{ color: themeColor }}>Release Volume</p>
-                             <div className="flex items-center gap-3">
-                                <span className="text-4xl font-black" style={{ color: themeColor }}>Rs</span>
+                       {bankForm.payoutMode === "BANK" ? (
+                          <div className="grid grid-cols-1 gap-5">
+                             <div className="space-y-2">
+                                <label className="text-[9px] font-black text-neutral-500 uppercase tracking-widest ml-1">Account Number</label>
                                 <input 
-                                  type="number"
-                                  className="w-full bg-transparent border-none text-4xl font-black text-white focus:outline-none p-0 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
-                                  value={withdrawAmount === 0 ? "" : withdrawAmount}
-                                  onChange={(e) => setWithdrawAmount(e.target.value === "" ? 0 : Number(e.target.value))}
-                                  placeholder="0"
-                                  autoFocus
+                                  type="text" required
+                                  className="w-full bg-black border border-white/5 rounded-lg px-5 py-4 text-[13px] text-white focus:outline-none focus:border-[#BFF367]/30 transition-all font-black placeholder-neutral-800"
+                                  value={bankForm.accountNumber}
+                                  onChange={e => setBankForm({...bankForm, accountNumber: e.target.value})}
+                                  placeholder="Account Number"
+                                />
+                             </div>
+                             <div className="space-y-2">
+                                <label className="text-[9px] font-black text-neutral-500 uppercase tracking-widest ml-1">IFSC Code</label>
+                                <input 
+                                  type="text" required
+                                  className="w-full bg-black border border-white/5 rounded-lg px-5 py-4 text-[13px] text-white focus:outline-none focus:border-[#BFF367]/30 transition-all font-black uppercase placeholder-neutral-800"
+                                  value={bankForm.ifscCode}
+                                  onChange={e => setBankForm({...bankForm, ifscCode: e.target.value})}
+                                  placeholder="IFSC CODE"
                                 />
                              </div>
                           </div>
-
-                          <div className="pt-6 border-t border-white/5 flex justify-between items-center">
-                             <div className="space-y-1">
-                                <p className="text-[9px] text-neutral-600 font-black uppercase tracking-widest">Post-Release</p>
-                                <p className="text-lg font-black transition-colors" style={{ color: numericTotalCoins - withdrawAmount < 0 ? '#ef4444' : themeColor }}>
-                                   Rs {(numericTotalCoins - withdrawAmount).toLocaleString()}
-                                </p>
-                             </div>
-                             <span className="text-[8px] text-neutral-700 font-black uppercase tracking-widest bg-white/5 px-3 py-1 rounded-md border border-white/5">NODE LIMIT: 3L</span>
+                       ) : (
+                          <div className="space-y-2">
+                             <label className="text-[9px] font-black text-neutral-500 uppercase tracking-widest ml-1">UPI ID</label>
+                             <input 
+                               type="text" required
+                               placeholder="username@bank"
+                               className="w-full bg-black border border-white/5 rounded-lg px-5 py-4 text-[13px] text-white focus:outline-none focus:border-[#BFF367]/30 transition-all font-black"
+                               value={bankForm.upiId}
+                               onChange={e => setBankForm({...bankForm, upiId: e.target.value})}
+                             />
                           </div>
+                       )}
+                       <div className="space-y-2">
+                          <label className="text-[9px] font-black text-neutral-500 uppercase tracking-widest ml-1">Payout Channel</label>
+                          <select 
+                            className="w-full bg-black border border-white/5 rounded-lg px-5 py-4 text-[13px] text-white focus:outline-none font-black appearance-none cursor-pointer uppercase tracking-widest"
+                            value={bankForm.payoutMode}
+                            onChange={e => setBankForm({...bankForm, payoutMode: e.target.value})}
+                          >
+                             <option value="BANK">Bank Transfer</option>
+                             <option value="UPI">UPI Gateway</option>
+                          </select>
                        </div>
-                        <button 
-                          onClick={handlePayoutRequest}
-                          className="w-full py-5 text-black rounded-lg font-black uppercase tracking-[0.2em] text-[12px] transition-all transform active:scale-95 shadow-2xl"
-                          style={{ backgroundColor: themeColor, boxShadow: `0 10px 40px ${themeColor}33` }}
-                        >
-                           Release Funds
-                        </button>
+                       <button type="submit" className="w-full py-5 text-black font-black uppercase text-[11px] tracking-[0.2em] rounded-lg mt-4 shadow-2xl transition-all" style={{ backgroundColor: themeColor }}>Synchronize Credentials</button>
+                    </form>
+                  ) : (
+                    <div className="space-y-6 md:space-y-8 animate-fade-in">
+                         <div className="flex items-center gap-3 md:gap-5 bg-[#121212] p-4 md:p-6 rounded-[8px] border border-white/5">
+                            <div className="w-10 h-10 md:w-14 md:h-14 rounded-lg flex items-center justify-center border shrink-0" style={{ backgroundColor: `${themeColor}1A`, color: themeColor, borderColor: `${themeColor}33` }}>
+                               <Landmark className="w-5 h-5 md:w-7 md:h-7" />
+                            </div>
+                            <div className="min-w-0">
+                               <p className="text-[12px] md:text-[15px] font-black text-white uppercase tracking-tight truncate">{bankingDetails?.bankName || "HDFC Bank"}</p>
+                               <p className="text-[10px] text-neutral-500 font-bold uppercase tracking-widest mt-1">Ending in •••• {bankingDetails?.accountNumber?.slice(-4) || "4920"}</p>
+                            </div>
+                         </div>
+  
+                         <div className="space-y-4">
+                            <div className="flex justify-between items-center text-[10px] font-black border-b border-white/5 pb-4">
+                               <span className="text-neutral-600 uppercase tracking-widest">Account Holder</span>
+                               <span className="text-white uppercase tracking-widest">{bankingDetails?.accountName || "MANISH GOUD KATTA"}</span>
+                            </div>
+                            
+                            <div className="flex justify-between items-center text-[10px] font-black border-b border-white/5 pb-4">
+                               <span className="text-neutral-600 uppercase tracking-widest">{bankingDetails?.payoutMode === "UPI" ? "UPI ID" : "IFSC Code"}</span>
+                               <span className="text-white uppercase tracking-widest">{bankingDetails?.payoutMode === "UPI" ? (bankingDetails?.upiId || "manish.goud@okaxis") : (bankingDetails?.ifscCode || "HDFC0001234")}</span>
+                            </div>
+  
+                            <div className="flex justify-between items-center text-[10px] font-black">
+                               <span className="text-neutral-600 uppercase tracking-widest">Channel</span>
+                               <span className="uppercase tracking-widest px-3 py-1 rounded-md text-[8px] font-black border" style={{ color: themeColor, backgroundColor: `${themeColor}1A`, borderColor: `${themeColor}33` }}>
+                                  {bankingDetails?.payoutMode === "UPI" ? "UPI Node" : "Bank Swift"}
+                               </span>
+                            </div>
+                         </div>
+  
+                         {!isBankingInfoComplete && (
+                           <div className="p-4 md:p-6 bg-red-500/5 border border-red-500/10 rounded-[8px] space-y-3 md:space-y-4 mt-4 md:mt-6">
+                             <div className="flex items-center gap-3">
+                                <AlertCircle className="text-red-500" size={16} />
+                                <span className="text-[9px] font-black text-red-500 uppercase tracking-widest">KYC REQUIRED</span>
+                             </div>
+                             <p className="text-[9px] text-neutral-500 font-bold uppercase tracking-widest leading-relaxed">Financial identity verification is pending. Settlement nodes are currently frozen.</p>
+                             <button 
+                               onClick={() => setIsEditingBank(true)}
+                               className="w-full py-4 text-[10px] font-black uppercase tracking-[0.2em] rounded-lg border transition-all flex items-center justify-center gap-2"
+                               style={{ backgroundColor: `${themeColor}1A`, color: themeColor, borderColor: `${themeColor}33` }}
+                             >
+                                <ShieldCheck size={14} /> INITIALIZE KYC
+                             </button>
+                           </div>
+                         )}
                     </div>
                   )}
-               </div>
-            </div>
+                </div>
+             </div>
           </div>
         )}
+
       </div>
     </div>
   );

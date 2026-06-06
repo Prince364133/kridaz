@@ -1,17 +1,17 @@
-﻿import React, { useState } from "react";
+import React, { useState } from "react";
 import { XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer,
-  Radar, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Area, AreaChart
+  Area, AreaChart
 } from "recharts";
 import { 
   TrendingUp, Zap, Target, AlertCircle, Percent
 } from "lucide-react";
-import useOwnerDashboard from "@hooks/owner/useOwnerDashboard";
-import useOwnerBookings from "@hooks/owner/useOwnerBookings";
+import useVenueOwnerDashboard from "@hooks/venue-owner/useVenueOwnerDashboard";
+import useVenueOwnerBookings from "@hooks/venue-owner/useVenueOwnerBookings";
 import DashboardSkeleton from "../Dashboard/DashboardSkeleton";
 
 export default function VenueIntelligence() {
-  const { dashboardData, loading: dashboardLoading } = useOwnerDashboard();
-  const { bookings, loading: bookingsLoading } = useOwnerBookings();
+  const { dashboardData, loading: dashboardLoading } = useVenueOwnerDashboard();
+  const { bookings, loading: bookingsLoading } = useVenueOwnerBookings();
   const [hoveredHeatmap, setHoveredHeatmap] = useState(null);
 
   if (dashboardLoading || bookingsLoading) return <DashboardSkeleton />;
@@ -19,17 +19,6 @@ export default function VenueIntelligence() {
   // 1. Top Level Metrics
   const grossRevenue = dashboardData?.totalRevenue || 0;
   const totalBookings = dashboardData?.totalBookings || 0;
-  
-  // Calculate Avg Session Time
-  let totalMinutes = 0;
-  let validSessions = 0;
-  bookings.forEach(b => {
-    if (b.bookingDetails?.startTime && b.bookingDetails?.endTime) {
-       totalMinutes += 60; // Simplified calculation
-       validSessions += 1;
-    }
-  });
-  const avgSessionTime = validSessions > 0 ? Math.round(totalMinutes / validSessions) : 60;
 
   // Calculate Conversion Rate (Bookings / Active Users)
   const activeUsers = dashboardData?.activeUsers || 1;
@@ -54,7 +43,7 @@ export default function VenueIntelligence() {
   // 3. Sport & Venue Distribution
   const revenueByCategory = dashboardData?.revenueByCategory || [];
   const revenueByVenue = dashboardData?.revenueByVenue || [];
-  const colors = ["bg-[#BFF367]", "bg-blue-500", "bg-orange-500", "bg-red-500", "bg-purple-500"];
+  const colors = ["bg-[#BFF367]", "bg-[#BFF367]", "bg-orange-500", "bg-red-500", "bg-[#BFF367]"];
   
   const sportDist = revenueByCategory.length > 0 
     ? revenueByCategory.map((cat, i) => ({
@@ -72,92 +61,62 @@ export default function VenueIntelligence() {
       }))
     : [];
 
-  // 4. Venue DNA
-  const venueHealth = dashboardData?.venueHealth || {};
-  const averageRating = dashboardData?.averageRating || 0;
-  const utilization = dashboardData?.utilization || 0;
-
-  const dnaData = [
-    { subject: "Utilization", A: utilization, fullMark: 100 },
-    { subject: "Profile", A: venueHealth.profileComp || 0, fullMark: 100 },
-    { subject: "Response", A: venueHealth.responseRate || 0, fullMark: 100 },
-    { subject: "Rating", A: (averageRating / 5) * 100, fullMark: 100 },
-    { subject: "Score", A: venueHealth.score || 0, fullMark: 100 },
-  ];
-
   // 5. Heatmap
   const occupancyHeatmap = dashboardData?.occupancyHeatmap || [];
 
   // Data Insufficiency Flags
   const isRevenueDataSufficient = demandData.length > 0;
-  const isDNASufficient = dnaData.some(d => d.A > 0);
   const isHeatmapSufficient = occupancyHeatmap.length > 0;
 
   return (
     <div className="h-full custom-scrollbar bg-[#000000] text-white">
-      <div className="p-4 lg:px-10 lg:pt-8 lg:pb-12 space-y-8 animate-fade-in pt-0 pb-24 h-full relative">
+      <div className="space-y-3 animate-fade-in pb-4 h-full relative">
       
       {/* Header */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 relative z-10">
         <div>
           <div className="flex items-center gap-3">
-             <h1 className="text-[28px] lg:text-[32px] font-bold font-['Open_Sans'] tracking-tight uppercase leading-none whitespace-nowrap">Venue Intelligence</h1>
+             <h2 className="text-[20px] sm:text-[24px] lg:text-[32px] mt-2 sm:mt-0 font-bold font-['Open_Sans'] tracking-tight uppercase leading-none whitespace-nowrap">Venue Intelligence</h2>
           </div>
-          <p className="text-[#878C9F] font-inter font-light text-[20px] mt-2">Deep dive into your facility's operational and financial metrics.</p>
+          <p className="text-[#878C9F] font-inter font-light text-[14px] md:text-[20px] mt-2">Deep dive into your facility's operational and financial metrics.</p>
         </div>
       </div>
 
       {/* Top Stat Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-5">
-        <div className="bg-[#000000] border border-[#2D2D2D] rounded-[8px] p-5 flex flex-col relative overflow-hidden shadow-[var(--shadow-2)] hover:border-[#BFF367]/30 transition-all duration-500">
-          <div className="w-10 h-10 bg-[#BFF367]/10 rounded-[8px] flex items-center justify-center mb-4 text-[#BFF367] transition-colors border border-[#BFF367]/20">
-             <TrendingUp size={20} />
+      <div className="grid grid-cols-2 gap-2 sm:gap-3">
+        <div className="bg-[#121212] border border-white/5 rounded-[8px] md:rounded-[8px] p-2 md:p-5 flex flex-col relative overflow-hidden shadow-[var(--shadow-2)] hover:border-[#BFF367]/30 transition-all duration-500">
+          <div className="w-6 h-6 md:w-10 md:h-10 bg-[#BFF367]/10 rounded-[8px] md:rounded-[8px] flex items-center justify-center mb-1.5 md:mb-4 text-[#BFF367] transition-colors border border-[#BFF367]/20">
+             <Zap className="w-3 h-3 md:w-5 md:h-5" />
           </div>
-          <p className="text-[12px] font-normal text-[#878C9F] uppercase tracking-[0.5px] mb-1">Gross Revenue</p>
-          <h3 className="text-2xl font-semibold text-white tracking-tight font-inter">Rs {(grossRevenue).toLocaleString()}</h3>
+          <p className="text-[7.5px] md:text-[12px] font-normal text-[#878C9F] uppercase tracking-[0.5px] mb-0.5 md:mb-1 truncate">Total Bookings</p>
+          <h3 className="text-[12px] md:text-2xl font-semibold text-white tracking-tight font-inter truncate">{totalBookings}</h3>
         </div>
 
-        <div className="bg-[#000000] border border-[#2D2D2D] rounded-[8px] p-5 flex flex-col relative overflow-hidden shadow-[var(--shadow-2)] hover:border-[#BFF367]/30 transition-all duration-500">
-          <div className="w-10 h-10 bg-[#BFF367]/10 rounded-[8px] flex items-center justify-center mb-4 text-[#BFF367] transition-colors border border-[#BFF367]/20">
-             <Zap size={20} />
+        <div className="bg-[#121212] border border-white/5 rounded-[8px] md:rounded-[8px] p-2 md:p-5 flex flex-col relative overflow-hidden shadow-[var(--shadow-2)] hover:border-[#BFF367]/30 transition-all duration-500">
+          <div className="w-6 h-6 md:w-10 md:h-10 bg-[#BFF367]/10 rounded-[8px] md:rounded-[8px] flex items-center justify-center mb-1.5 md:mb-4 text-[#BFF367] transition-colors border border-[#BFF367]/20">
+             <Percent className="w-3 h-3 md:w-5 md:h-5" />
           </div>
-          <p className="text-[12px] font-normal text-[#878C9F] uppercase tracking-[0.5px] mb-1">Total Bookings</p>
-          <h3 className="text-2xl font-semibold text-white tracking-tight font-inter">{totalBookings}</h3>
-        </div>
-
-        <div className="bg-[#000000] border border-[#2D2D2D] rounded-[8px] p-5 flex flex-col relative overflow-hidden shadow-[var(--shadow-2)] hover:border-[#BFF367]/30 transition-all duration-500">
-          <div className="w-10 h-10 bg-[#BFF367]/10 rounded-[8px] flex items-center justify-center mb-4 text-[#BFF367] transition-colors border border-[#BFF367]/20">
-             <Target size={20} />
-          </div>
-          <p className="text-[12px] font-normal text-[#878C9F] uppercase tracking-[0.5px] mb-1">Avg. Session Time</p>
-          <h3 className="text-2xl font-semibold text-white tracking-tight font-inter">{avgSessionTime} min</h3>
-        </div>
-
-        <div className="bg-[#000000] border border-[#2D2D2D] rounded-[8px] p-5 flex flex-col relative overflow-hidden shadow-[var(--shadow-2)] hover:border-[#BFF367]/30 transition-all duration-500">
-          <div className="w-10 h-10 bg-[#BFF367]/10 rounded-[8px] flex items-center justify-center mb-4 text-[#BFF367] transition-colors border border-[#BFF367]/20">
-             <Percent size={20} />
-          </div>
-          <p className="text-[12px] font-normal text-[#878C9F] uppercase tracking-[0.5px] mb-1">Conversion Rate</p>
-          <h3 className="text-2xl font-semibold text-white tracking-tight font-inter">{conversionRate}%</h3>
+          <p className="text-[7.5px] md:text-[12px] font-normal text-[#878C9F] uppercase tracking-[0.5px] mb-0.5 md:mb-1 truncate">Conversion Rate</p>
+          <h3 className="text-[12px] md:text-2xl font-semibold text-white tracking-tight font-inter truncate">{conversionRate}%</h3>
         </div>
       </div>
 
       {/* Main Charts Row */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8 mt-8">
+      <div className="grid grid-cols-1 gap-3 mt-3">
         
         {/* Revenue & Demand Forecasting */}
-        <div className="lg:col-span-2 bg-[#000000] border border-[#2D2D2D] rounded-[8px] p-6 shadow-[var(--shadow-2)] hover:border-[#BFF367]/30 transition-all duration-500">
-           <div className="flex justify-between items-start mb-6">
+        <div className="bg-[#121212] border border-white/5 rounded-[8px] md:rounded-[8px] p-4 md:p-6 shadow-[var(--shadow-2)] hover:border-[#BFF367]/30 transition-all duration-500">
+           <div className="flex justify-between items-start mb-4 md:mb-6">
               <div>
-                 <h2 className="text-xl font-bold font-['Open_Sans'] text-white uppercase tracking-tight">Revenue & Demand Forecasting</h2>
-                 <p className="text-[#878C9F] font-inter text-[20px] mt-1">Real-time revenue tracking across current period</p>
+                 <h2 className="text-[12px] md:text-xl font-bold font-['Open_Sans'] text-white uppercase tracking-tight">Revenue & Demand Forecasting</h2>
+                 <p className="hidden md:block text-[#878C9F] font-inter text-[14px] md:text-[16px] mt-1">Real-time revenue tracking across current period</p>
               </div>
            </div>
            
-           <div className="h-[250px] w-full relative">
+           <div className="h-[180px] md:h-[250px] w-full relative">
              {isRevenueDataSufficient ? (
                <ResponsiveContainer width="100%" height="100%">
-                 <AreaChart data={demandData}>
+                 <AreaChart data={demandData} margin={{ top: 5, right: 5, left: -25, bottom: 0 }}>
                    <defs>
                      <linearGradient id="colorRevenue" x1="0" y1="0" x2="0" y2="1">
                        <stop offset="5%" stopColor="#BFF367" stopOpacity={0.3}/>
@@ -175,55 +134,24 @@ export default function VenueIntelligence() {
                  </AreaChart>
                </ResponsiveContainer>
              ) : (
-               <div className="absolute inset-0 flex flex-col items-center justify-center bg-[#050505]/50 rounded-[8px] border border-dashed border-[#2D2D2D]">
-                 <AlertCircle size={32} className="text-[#444] mb-2" />
-                 <p className="text-[10px] font-bold text-[#878C9F] uppercase tracking-widest">Insufficient Historical Data</p>
+               <div className="absolute inset-0 flex flex-col items-center justify-center bg-[#050505]/50 rounded-[8px] md:rounded-[8px] border border-dashed border-white/5">
+                 <AlertCircle className="w-6 h-6 md:w-8 md:h-8 text-[#444] mb-2" />
+                 <p className="text-[8px] md:text-[10px] font-bold text-[#878C9F] uppercase tracking-widest">Insufficient Historical Data</p>
                </div>
              )}
            </div>
         </div>
 
-        {/* Venue DNA */}
-        <div className="bg-[#000000] border border-[#2D2D2D] rounded-[8px] p-6 flex flex-col items-center relative shadow-[var(--shadow-2)] hover:border-[#BFF367]/30 transition-all duration-500">
-           <h2 className="text-xl font-bold font-['Open_Sans'] text-white text-center uppercase tracking-tight">Venue DNA</h2>
-           <p className="text-[#878C9F] font-inter text-[20px] text-center mb-4 mt-1">Strategic balance across 5 vectors</p>
-           
-           <div className={`h-[250px] w-full mt-auto ${!isDNASufficient ? 'opacity-30' : ''}`}>
-             <ResponsiveContainer width="100%" height="100%">
-               <RadarChart cx="50%" cy="50%" outerRadius="70%" data={dnaData}>
-                 <PolarGrid stroke="#2D2D2D" />
-                 <PolarAngleAxis dataKey="subject" tick={{ fill: '#878C9F', fontSize: 10 }} />
-                 <PolarRadiusAxis angle={30} domain={[0, 100]} tick={false} axisLine={false} />
-                 <Radar name="Venue" dataKey="A" stroke="#BFF367" fill="#BFF367" fillOpacity={0.4} strokeWidth={2} />
-                 <RechartsTooltip 
-                   contentStyle={{ backgroundColor: '#111', borderColor: '#2D2D2D', borderRadius: '8px' }}
-                   itemStyle={{ color: '#BFF367' }}
-                 />
-               </RadarChart>
-             </ResponsiveContainer>
-           </div>
-           
-           {!isDNASufficient && (
-             <div className="absolute inset-0 flex flex-col items-center justify-center z-10">
-                 <div className="bg-[#111] border border-[#2D2D2D] p-4 rounded-[8px] text-center shadow-2xl">
-                    <AlertCircle size={24} className="text-amber-500 mx-auto mb-2" />
-                    <p className="text-[10px] font-bold text-white uppercase tracking-widest">Vector Calculation Pending</p>
-                    <p className="text-[9px] text-[#878C9F] mt-1 max-w-[150px]">More operational data required to map venue DNA.</p>
-                 </div>
-             </div>
-           )}
-        </div>
-
       </div>
 
-      <div className="grid grid-cols-1 gap-6 lg:gap-8 mt-8">
+      <div className="grid grid-cols-1 gap-3 mt-3">
         
         {/* Venue Comparison & Sport Distribution */}
-        <div className="bg-[#000000] border border-[#2D2D2D] rounded-[8px] p-6 flex flex-col relative shadow-[var(--shadow-2)] hover:border-[#BFF367]/30 transition-all duration-500">
+        <div className="bg-[#121212] border border-white/5 rounded-[8px] p-6 flex flex-col relative shadow-[var(--shadow-2)] hover:border-[#BFF367]/30 transition-all duration-500">
            <div className="flex justify-between items-center mb-1">
-              <h2 className="text-xl font-bold font-['Open_Sans'] text-white uppercase tracking-tight">Revenue Comparison</h2>
+              <h2 className="text-lg md:text-xl font-bold font-['Open_Sans'] text-white uppercase tracking-tight">Revenue Comparison</h2>
            </div>
-           <p className="text-[#878C9F] font-inter text-[20px] mb-6 mt-1">Cross-venue performance benchmark</p>
+           <p className="hidden md:block text-[#878C9F] font-inter text-[14px] md:text-[16px] mb-6 mt-1">Cross-venue performance benchmark</p>
            
            {venueCompare.length > 0 ? (
              <div className="space-y-6 flex-1">
@@ -247,11 +175,11 @@ export default function VenueIntelligence() {
                </div>
 
                {/* Sport Distribution */}
-               <div className="space-y-4 pt-4 border-t border-[#2D2D2D]">
+               <div className="space-y-4 pt-4 border-t border-white/5">
                   <p className="text-[10px] font-bold text-[#444] uppercase tracking-[2px] mb-2">Category Contribution</p>
                   <div className="flex flex-wrap gap-2">
                     {sportDist.map((sport) => (
-                      <div key={sport.name} className="px-3 py-2 bg-[#1A1A1A] border border-[#2D2D2D] rounded-[6px] flex-1 min-w-[100px]">
+                      <div key={sport.name} className="px-3 py-2 bg-[#1A1A1A] border border-white/5 rounded-[6px] flex-1 min-w-[100px]">
                         <p className="text-[9px] font-bold text-[#878C9F] uppercase tracking-wider">{sport.name}</p>
                         <p className="text-lg font-bold text-white mt-0.5">{sport.value}%</p>
                       </div>
@@ -260,7 +188,7 @@ export default function VenueIntelligence() {
                </div>
              </div>
            ) : (
-             <div className="flex-1 flex flex-col items-center justify-center border border-dashed border-[#2D2D2D] rounded-[8px] bg-[#050505]/50 min-h-[200px]">
+             <div className="flex-1 flex flex-col items-center justify-center border border-dashed border-white/5 rounded-[8px] bg-[#050505]/50 min-h-[200px]">
                 <AlertCircle size={24} className="text-[#444] mb-2" />
                 <p className="text-[10px] font-bold text-[#878C9F] uppercase tracking-widest">No Comparison Data</p>
              </div>
