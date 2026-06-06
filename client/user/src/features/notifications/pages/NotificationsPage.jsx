@@ -9,6 +9,7 @@ import {
 import axiosInstance from "@hooks/useAxiosInstance";
 import { useSocket } from "@context/SocketContext";
 import { formatDistanceToNow } from "date-fns";
+import useNotifications from "@hooks/shared/useNotifications";
 
 const PRI = "#84CC16";
 const HEADING_STYLE = { fontFamily: "'Open Sans', sans-serif" };
@@ -18,123 +19,6 @@ const SUBHEADING_STYLE = { fontFamily: "'Inter 28pt Light', sans-serif", fontWei
  * Notification type → visual configuration map.
  * Each type has an icon, color, and route resolution strategy.
  */
-const NOTIF_CONFIG = {
-  FOLLOW: {
-    icon: Users,
-    color: "#84CC16",
-    bgColor: "rgba(132,204,22,0.08)",
-    getRoute: (notif) => `/profile/${notif.metadata?.senderId || ""}`,
-  },
-  MESSAGE: {
-    icon: MessageCircle,
-    color: "#60A5FA",
-    bgColor: "rgba(96,165,250,0.08)",
-    getRoute: () => "/messages",
-  },
-  BOOKING: {
-    icon: Calendar,
-    color: "#BFF367",
-    bgColor: "rgba(85,222,232,0.08)",
-    getRoute: (notif) => notif.link || `/booking-pass/${notif.metadata?.bookingId || ""}`,
-  },
-  LIKE: {
-    icon: Heart,
-    color: "#EF4444",
-    bgColor: "rgba(239,68,68,0.08)",
-    getRoute: (notif) => notif.link || "/community",
-  },
-  COMMENT: {
-    icon: MessageCircle,
-    color: "#8B5CF6",
-    bgColor: "rgba(139,92,246,0.08)",
-    getRoute: (notif) => notif.link || "/community",
-  },
-  PAYMENT: {
-    icon: CreditCard,
-    color: "#10B981",
-    bgColor: "rgba(16,185,129,0.08)",
-    getRoute: (notif) => notif.link || "/wallet",
-  },
-  REVIEW: {
-    icon: Star,
-    color: "#BFF367",
-    bgColor: "rgba(251,191,36,0.08)",
-    getRoute: (notif) => notif.link || "/profile",
-  },
-  SUPPORT: {
-    icon: ShieldCheck,
-    color: "#06B6D4",
-    bgColor: "rgba(6,182,212,0.08)",
-    getRoute: (notif) => notif.link || "/profile",
-  },
-  WITHDRAWAL: {
-    icon: AlertTriangle,
-    color: "#F97316",
-    bgColor: "rgba(249,115,22,0.08)",
-    getRoute: (notif) => notif.link || "/wallet",
-  },
-  GAME_JOIN_REQUEST: {
-    icon: Zap,
-    color: "#BFF367",
-    bgColor: "rgba(191,243,103,0.08)",
-    getRoute: (notif) => notif.link || "/booking-history?subTab=games",
-  },
-  TEAM_INVITE: {
-    icon: Users,
-    color: "#BFF367",
-    bgColor: "rgba(85,222,232,0.08)",
-    getRoute: (notif) => notif.link || "/profile?tab=connections",
-  },
-  TEAM_JOIN_REQUEST: {
-    icon: Users,
-    color: "#BFF367",
-    bgColor: "rgba(85,222,232,0.08)",
-    getRoute: (notif) => notif.link || "/profile?tab=connections",
-  },
-  TEAM_JOIN_ACCEPTED: {
-    icon: ShieldCheck,
-    color: "#BFF367",
-    bgColor: "rgba(191,243,103,0.08)",
-    getRoute: (notif) => notif.link || "/profile?tab=connections",
-  },
-  TEAM_JOIN_REJECTED: {
-    icon: X,
-    color: "#EF4444",
-    bgColor: "rgba(239,68,68,0.08)",
-    getRoute: (notif) => notif.link || "/profile?tab=connections",
-  },
-  OPPONENT_REQUEST: {
-    icon: Trophy,
-    color: "#F59E0B",
-    bgColor: "rgba(245,158,11,0.08)",
-    getRoute: (notif) => notif.link || "/profile?tab=connections",
-  },
-  OPPONENT_ACCEPTED: {
-    icon: Trophy,
-    color: "#BFF367",
-    bgColor: "rgba(191,243,103,0.08)",
-    getRoute: (notif) => notif.link || "/profile?tab=connections",
-  },
-  SYSTEM: {
-    icon: Zap,
-    color: "#A78BFA",
-    bgColor: "rgba(167,139,250,0.08)",
-    getRoute: (notif) => notif.link || "/",
-  },
-};
-
-const DEFAULT_CONFIG = {
-  icon: Bell,
-  color: "#84CC16",
-  bgColor: "rgba(132,204,22,0.08)",
-  getRoute: (notif) => notif.link || "/",
-};
-
-/**
- * Resolves the correct API base URL based on user role.
- */
-import useNotifications from "@hooks/shared/useNotifications";
-
 const NOTIF_CONFIG = {
   FOLLOW: {
     icon: Users,
