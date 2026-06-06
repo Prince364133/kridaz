@@ -76,6 +76,33 @@ const LiveOverlay = () => {
   const [connected, setConnected] = useState(false);
   const commentaryTimer = useRef(null);
   const socketRef = useRef(null);
+  // Silent global audio unlocker on first user interaction
+  useEffect(() => {
+    const unlock = () => {
+      if (window.speechSynthesis) {
+        const u = new SpeechSynthesisUtterance('');
+        u.volume = 0;
+        window.speechSynthesis.speak(u);
+      }
+      const a = new Audio();
+      a.volume = 0;
+      a.play().catch(() => {});
+
+      window.removeEventListener('click', unlock);
+      window.removeEventListener('touchstart', unlock);
+      window.removeEventListener('keydown', unlock);
+    };
+
+    window.addEventListener('click', unlock);
+    window.addEventListener('touchstart', unlock);
+    window.addEventListener('keydown', unlock);
+
+    return () => {
+      window.removeEventListener('click', unlock);
+      window.removeEventListener('touchstart', unlock);
+      window.removeEventListener('keydown', unlock);
+    };
+  }, []);
 
   // ── Queue Manager ────────────────────────────────────────────────────────────
   const [eventQueue, setEventQueue] = useState([]);
@@ -250,6 +277,25 @@ const LiveOverlay = () => {
       }
     });
 
+    const speakBrowserTTS = (text, lang) => {
+      if (window.speechSynthesis) {
+        window.speechSynthesis.cancel();
+        const utterance = new SpeechSynthesisUtterance(text);
+        const langMap = {
+          'hi': 'hi-IN',
+          'en': 'en-US',
+          'pa': 'pa-IN',
+          'bn': 'bn-IN',
+          'mr': 'mr-IN',
+          'ta': 'ta-IN',
+          'te': 'te-IN',
+          'gu': 'gu-IN'
+        };
+        utterance.lang = langMap[lang] || 'en-US';
+        window.speechSynthesis.speak(utterance);
+      }
+    };
+
     // Handle Audio Readiness (arrives a few seconds after text stream finishes)
     socket.on('COMMENTARY_AUDIO_READY', (data) => {
       clearTimeout(commentaryTimer.current);
@@ -262,24 +308,12 @@ const LiveOverlay = () => {
       if (data.audioUrl) {
         const audio = new Audio(`${API_BASE}${data.audioUrl}`);
         audio.play().catch(e => {
-          console.warn('Overlay audio autoplay blocked or failed:', e);
-          // Do NOT emit audio played here, backend auto-deletes after 30s
+          console.warn('Overlay audio autoplay blocked or failed, falling back to Browser TTS:', e);
+          speakBrowserTTS(data.text, data.language);
         });
       } else {
         // Fallback to BROWSER_TTS
-        const utterance = new SpeechSynthesisUtterance(data.text);
-        const langMap = {
-          'hi': 'hi-IN',
-          'en': 'en-US',
-          'pa': 'pa-IN',
-          'bn': 'bn-IN',
-          'mr': 'mr-IN',
-          'ta': 'ta-IN',
-          'te': 'te-IN',
-          'gu': 'gu-IN'
-        };
-        utterance.lang = langMap[data.language] || 'en-US';
-        window.speechSynthesis.speak(utterance);
+        speakBrowserTTS(data.text, data.language);
       }
     });
 
@@ -343,10 +377,14 @@ const LiveOverlay = () => {
         // Unlock browser autoplay policy
         const unlockAudio = new Audio('data:audio/wav;base64,UklGRigAAABXQVZFZm10IBIAAAABAAEARKwAAIhYAQACABAAAABkYXRhAgAAAAEA');
         unlockAudio.play().catch(() => { });
+        
+        // Unlock SpeechSynthesis
+        if (window.speechSynthesis) {
+           const silent = new SpeechSynthesisUtterance('');
+           window.speechSynthesis.speak(silent);
+        }
       }}
     >
-
-
 
       {/* Dynamic Animated Ticker Component */}
       <ActiveTicker score={score} connected={connected} badge={badge} />

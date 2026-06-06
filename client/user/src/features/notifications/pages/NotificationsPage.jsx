@@ -133,13 +133,118 @@ const DEFAULT_CONFIG = {
 /**
  * Resolves the correct API base URL based on user role.
  */
-const getBaseUrl = (user) => {
-  if (!user) return "/api/user/notifications";
-  const role = user.role?.toLowerCase() || "";
-  if (role === "admin" || role.includes("bmsp_admin")) return "/api/admin/notifications";
-  if (["venu_owners", "owner", "verified_venue_owner", "bmsp_owner", "coach", "umpire", "scorer", "streamer"]
-    .some((r) => role.includes(r))) return "/api/owner/notifications";
-  return "/api/user/notifications";
+import useNotifications from "@hooks/shared/useNotifications";
+
+const NOTIF_CONFIG = {
+  FOLLOW: {
+    icon: Users,
+    color: "#84CC16",
+    bgColor: "rgba(132,204,22,0.08)",
+    getRoute: (notif) => `/profile/${notif.metadata?.senderId || ""}`,
+  },
+  MESSAGE: {
+    icon: MessageCircle,
+    color: "#60A5FA",
+    bgColor: "rgba(96,165,250,0.08)",
+    getRoute: () => "/messages",
+  },
+  BOOKING: {
+    icon: Calendar,
+    color: "#BFF367",
+    bgColor: "rgba(85,222,232,0.08)",
+    getRoute: (notif) => notif.link || `/booking-pass/${notif.metadata?.bookingId || ""}`,
+  },
+  LIKE: {
+    icon: Heart,
+    color: "#EF4444",
+    bgColor: "rgba(239,68,68,0.08)",
+    getRoute: (notif) => notif.link || "/community",
+  },
+  COMMENT: {
+    icon: MessageCircle,
+    color: "#8B5CF6",
+    bgColor: "rgba(139,92,246,0.08)",
+    getRoute: (notif) => notif.link || "/community",
+  },
+  PAYMENT: {
+    icon: CreditCard,
+    color: "#10B981",
+    bgColor: "rgba(16,185,129,0.08)",
+    getRoute: (notif) => notif.link || "/wallet",
+  },
+  REVIEW: {
+    icon: Star,
+    color: "#BFF367",
+    bgColor: "rgba(251,191,36,0.08)",
+    getRoute: (notif) => notif.link || "/profile",
+  },
+  SUPPORT: {
+    icon: ShieldCheck,
+    color: "#06B6D4",
+    bgColor: "rgba(6,182,212,0.08)",
+    getRoute: (notif) => notif.link || "/profile",
+  },
+  WITHDRAWAL: {
+    icon: AlertTriangle,
+    color: "#F97316",
+    bgColor: "rgba(249,115,22,0.08)",
+    getRoute: (notif) => notif.link || "/wallet",
+  },
+  GAME_JOIN_REQUEST: {
+    icon: Zap,
+    color: "#BFF367",
+    bgColor: "rgba(191,243,103,0.08)",
+    getRoute: (notif) => notif.link || "/booking-history?subTab=games",
+  },
+  TEAM_INVITE: {
+    icon: Users,
+    color: "#BFF367",
+    bgColor: "rgba(85,222,232,0.08)",
+    getRoute: (notif) => notif.link || "/profile?tab=connections",
+  },
+  TEAM_JOIN_REQUEST: {
+    icon: Users,
+    color: "#BFF367",
+    bgColor: "rgba(85,222,232,0.08)",
+    getRoute: (notif) => notif.link || "/profile?tab=connections",
+  },
+  TEAM_JOIN_ACCEPTED: {
+    icon: ShieldCheck,
+    color: "#BFF367",
+    bgColor: "rgba(191,243,103,0.08)",
+    getRoute: (notif) => notif.link || "/profile?tab=connections",
+  },
+  TEAM_JOIN_REJECTED: {
+    icon: X,
+    color: "#EF4444",
+    bgColor: "rgba(239,68,68,0.08)",
+    getRoute: (notif) => notif.link || "/profile?tab=connections",
+  },
+  OPPONENT_REQUEST: {
+    icon: Trophy,
+    color: "#F59E0B",
+    bgColor: "rgba(245,158,11,0.08)",
+    getRoute: (notif) => notif.link || "/profile?tab=connections",
+  },
+  OPPONENT_ACCEPTED: {
+    icon: Trophy,
+    color: "#BFF367",
+    bgColor: "rgba(191,243,103,0.08)",
+    getRoute: (notif) => notif.link || "/profile?tab=connections",
+  },
+  SYSTEM: {
+    icon: Zap,
+    color: "#A78BFA",
+    bgColor: "rgba(167,139,250,0.08)",
+    getRoute: (notif) => notif.link || "/",
+  },
+};
+
+const DEFAULT_CONFIG = {
+  icon: Bell,
+  color: "#84CC16",
+  bgColor: "rgba(132,204,22,0.08)",
+  getRoute: (notif) => notif.link || "/",
 };
 
 /**
@@ -147,86 +252,22 @@ const getBaseUrl = (user) => {
  *
  * Architecture:
  *  - UI Layer: Pure rendering of notification cards, filters, and empty states.
- *  - Behavior Layer: Manages fetch, mark-read, clear, real-time socket listeners.
- *  - Service Layer: Axios calls to notification API endpoints.
+ *  - Behavior Layer: Manages filter and route resolution.
+ *  - Service Layer: RTK Query hook useNotifications.
  */
 const NotificationsPage = () => {
   const navigate = useNavigate();
-  const { user } = useSelector((state) => state.auth);
-  const { socket } = useSocket();
-
-  // ── State ────────────────────────────────────────────────────────────────
-  const [notifications, setNotifications] = useState([]);
-  const [loading, setLoading] = useState(true);
   const [activeFilter, setActiveFilter] = useState("all"); // all | unread
 
-  // ── Service Layer: API calls ─────────────────────────────────────────────
-  const baseUrl = getBaseUrl(user);
+  const {
+    notifications,
+    loading,
+    unreadCount,
+    markRead,
+    markAllRead,
+    clearAll,
+  } = useNotifications();
 
-  const fetchNotifications = useCallback(async () => {
-    try {
-      setLoading(true);
-      const response = await axiosInstance.get(baseUrl);
-      if (response.data.success) {
-        setNotifications(response.data.notifications || []);
-      }
-    } catch (error) {
-      console.error("[NotificationsPage] Fetch error:", error);
-    } finally {
-      setLoading(false);
-    }
-  }, [baseUrl]);
-
-  const markAsRead = async (id) => {
-    try {
-      await axiosInstance.put(`${baseUrl}/${id}/mark-read`);
-      setNotifications((prev) =>
-        prev.map((n) => (n.id === id || n._id === id ? { ...n, isRead: true } : n))
-      );
-    } catch (error) {
-      console.error("[NotificationsPage] Mark read error:", error);
-    }
-  };
-
-  const markAllAsRead = async () => {
-    try {
-      await axiosInstance.put(`${baseUrl}/mark-all-read`);
-      setNotifications((prev) => prev.map((n) => ({ ...n, isRead: true })));
-    } catch (error) {
-      console.error("[NotificationsPage] Mark all read error:", error);
-    }
-  };
-
-  const clearAll = async () => {
-    try {
-      await axiosInstance.delete(`${baseUrl}/clear`);
-      setNotifications([]);
-    } catch (error) {
-      console.error("[NotificationsPage] Clear all error:", error);
-    }
-  };
-
-  // ── Behavior Layer: Effects ──────────────────────────────────────────────
-  useEffect(() => {
-    fetchNotifications();
-  }, [fetchNotifications]);
-
-  // Real-time: listen for new notifications via socket
-  useEffect(() => {
-    if (!socket) return;
-
-    const handleNewNotification = (notification) => {
-      setNotifications((prev) => [notification, ...prev]);
-    };
-
-    socket.on("new_notification", handleNewNotification);
-    return () => {
-      socket.off("new_notification", handleNewNotification);
-    };
-  }, [socket]);
-
-  // ── Derived data ─────────────────────────────────────────────────────────
-  const unreadCount = notifications.filter((n) => !n.isRead).length;
   const filtered =
     activeFilter === "unread"
       ? notifications.filter((n) => !n.isRead)
@@ -235,7 +276,7 @@ const NotificationsPage = () => {
   // ── Handlers ─────────────────────────────────────────────────────────────
   const handleNotificationClick = (notif) => {
     const id = notif.id || notif._id;
-    if (!notif.isRead) markAsRead(id);
+    if (!notif.isRead) markRead(id);
 
     const type = notif.type?.toUpperCase() || "SYSTEM";
     const config = NOTIF_CONFIG[type] || DEFAULT_CONFIG;

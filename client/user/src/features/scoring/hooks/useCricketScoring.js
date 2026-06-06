@@ -12,6 +12,7 @@ const useCricketScoring = (matchId) => {
   const [error, setError] = useState(null);
   const [isMutating, setIsMutatingState] = useState(false);
   const isMutatingRef = useRef(false);
+  const historyRef = useRef([]);
   const axiosInstance = useAxiosInstance;
 
   const wrapMutation = (asyncFn) => async (...args) => {
@@ -87,14 +88,15 @@ const useCricketScoring = (matchId) => {
   }, [matchId, fetchMatchStatus]);
 
   // ── Analytics ────────────────────────────────────────────────────────────────
-  const fetchAnalytics = async () => {
+  const fetchAnalytics = useCallback(async () => {
     try {
       const response = await axiosInstance.get(`/api/scoring/analytics/${matchId}`, { headers: getHeaders() });
       return response.data;
     } catch (err) {
       return { success: false, error: err.message };
     }
-  };
+  }, [matchId, axiosInstance]);
+
 
   // ── Record ball (P1.3, P1.4, P1.5 aware) ────────────────────────────────────
   /**
@@ -115,6 +117,8 @@ const useCricketScoring = (matchId) => {
     if (!matchData) return { success: false, error: "No match data loaded" };
 
     const previousData = matchData;
+    historyRef.current.push(JSON.parse(JSON.stringify(previousData)));
+    if (historyRef.current.length > 20) historyRef.current.shift();
 
     // 1. Create optimistic clone of matchData
     try {
@@ -297,6 +301,15 @@ const useCricketScoring = (matchId) => {
 
   // ── Undo last ball (P1.6) ────────────────────────────────────────────────────
   const undoBall = async () => {
+    const previousData = matchData;
+    let optimisticRestored = false;
+
+    if (historyRef.current.length > 0) {
+      const revertedState = historyRef.current.pop();
+      setMatchData(revertedState);
+      optimisticRestored = true;
+    }
+
     try {
       const response = await axiosInstance.post('/api/scoring/undo', {
         scoringId: matchData?.cricketMatch?.id || matchData?.id || matchData?._id
@@ -306,6 +319,9 @@ const useCricketScoring = (matchId) => {
       updateMatchData(response.data.scoring);
       return { success: true };
     } catch (err) {
+      if (optimisticRestored) {
+        setMatchData(previousData);
+      }
       return { success: false, error: err.response?.data?.message || err.message };
     }
   };

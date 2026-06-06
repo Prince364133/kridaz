@@ -1,20 +1,23 @@
+import { lazy, Suspense, useState, useEffect } from "react";
 import { Outlet, useLocation } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
-import { useState, useEffect } from "react";
 import Navbar from "@components/layout/Navbar";
 import MobileBottomNav from "@components/layout/MobileBottomNav";
 import UserFooter from "@components/layout/UserFooter";
 import ScrollToTop from "@components/common/ScrollToTop";
 import BackgroundUploadManager from "@components/BackgroundUploadManager";
-import OnboardingModal from "@components/modals/OnboardingModal";
-import LoginModal from "@components/modals/LoginModal";
 import { closeLoginModal } from "@redux/slices/uiSlice";
-import AuthModal from "../../features/auth/components/AuthModal";
 import DesktopRightSidebar from "@components/layout/DesktopRightSidebar";
+import { useAuthModal } from "../../context/AuthModalContext";
+
+const OnboardingModal = lazy(() => import("@components/modals/OnboardingModal"));
+const LoginModal = lazy(() => import("@components/modals/LoginModal"));
+const AuthModal = lazy(() => import("../../features/auth/components/AuthModal"));
 
 const Root = () => {
   const location = useLocation();
   const dispatch = useDispatch();
+  const { isOpen: isAuthModalOpen } = useAuthModal();
   const { user, isAuthenticated } = useSelector((/** @type {any} */ state) => state.auth);
   const { loginModal } = useSelector((/** @type {any} */ state) => state.ui);
   const [showOnboarding, setShowOnboarding] = useState(false);
@@ -41,7 +44,8 @@ const Root = () => {
   const isTeamsPage = location.pathname.startsWith('/my-teams');
   const hideNav = isReelsPage || location.pathname.startsWith('/messages') || isNewPostPage;
   const isHome = location.pathname === "/" || location.pathname === "/community";
-  const isVenue = location.pathname.startsWith("/venue") || location.pathname === "/venues";
+  const isSingleVenue = location.pathname.startsWith("/venue/");
+  const isVenue = (location.pathname.startsWith("/venue") || location.pathname === "/venues") && !isSingleVenue;
   const isPlayer = location.pathname.startsWith("/players");
   const isProfessional = location.pathname.startsWith("/professionals");
   const isJoinGames = location.pathname.startsWith("/join-games");
@@ -53,23 +57,35 @@ const Root = () => {
   return (
     <div className="min-h-screen bg-[#050505] text-white overflow-x-clip font-sans">
       {/* Global Login-on-Demand Modal — rendered here so useNavigate() works inside router context */}
-      <LoginModal
-        isOpen={loginModal.isOpen}
-        onClose={() => dispatch(closeLoginModal())}
-        title={loginModal.title}
-        message={loginModal.message}
-      />
-      <AuthModal />
-      <OnboardingModal 
-        isOpen={showOnboarding} 
-        onClose={() => {
-          setShowOnboarding(false);
-        }} 
-        onComplete={() => {
-          setShowOnboarding(false);
-        }}
-        initialData={{ authMethod: 'google', user: user || {} }}
-      />
+      {loginModal.isOpen && (
+        <Suspense fallback={null}>
+          <LoginModal
+            isOpen={loginModal.isOpen}
+            onClose={() => dispatch(closeLoginModal())}
+            title={loginModal.title}
+            message={loginModal.message}
+          />
+        </Suspense>
+      )}
+      {isAuthModalOpen && (
+        <Suspense fallback={null}>
+          <AuthModal />
+        </Suspense>
+      )}
+      {showOnboarding && (
+        <Suspense fallback={null}>
+          <OnboardingModal 
+            isOpen={showOnboarding} 
+            onClose={() => {
+              setShowOnboarding(false);
+            }} 
+            onComplete={() => {
+              setShowOnboarding(false);
+            }}
+            initialData={{ authMethod: 'google', user: user || {} }}
+          />
+        </Suspense>
+      )}
       <ScrollToTop />
       <BackgroundUploadManager />
 

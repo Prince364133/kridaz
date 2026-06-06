@@ -12,6 +12,15 @@ import { followUser, unfollowUser } from "@redux/slices/authSlice";
 import useLoginOnDemand from "@hooks/useLoginOnDemand";
 import { Liquid } from "../ui/button-1";
 import SearchTurf from "@components/search/SearchTurf.jsx";
+import { 
+  useGetSuggestedPlayersQuery, 
+  useGetUserBookingsQuery, 
+  useGetUserWalletQuery,
+  useGetPlayerDetailsQuery,
+  useFollowPlayerMutation,
+  useUnfollowPlayerMutation
+} from "@redux/api/userApi";
+import { useGetTurfsQuery, useGetTurfDetailsQuery } from "@redux/api/turfApi";
 
 const LIQUID_COLORS = {
   color1: '#FFFFFF',
@@ -116,23 +125,10 @@ export default function DesktopRightSidebar({ isRightDrawerOpen, setIsRightDrawe
 
   const showHomeWidgets = isHome;
 
-  // Local states for real-time fetched data
-  const [bookings, setBookings] = useState([]);
-  const [isInviteHovered, setIsInviteHovered] = useState(false);
-  const [loadingBookings, setLoadingBookings] = useState(false);
-  const [suggestedPlayers, setSuggestedPlayers] = useState([]);
-  const [loadingPlayers, setLoadingPlayers] = useState(false);
-  const [nearbyVenues, setNearbyVenues] = useState([]);
-  const [loadingVenues, setLoadingVenues] = useState(false);
-  const [walletBalance, setWalletBalance] = useState(0);
-  const [loadingWallet, setLoadingWallet] = useState(false);
-  const [currentLiveMatchIndex, setCurrentLiveMatchIndex] = useState(0);
   // Dynamic greetings
   const [greeting, setGreeting] = useState("Welcome");
-
-  // Page Specific Details
-  const [activeTurf, setActiveTurf] = useState(null);
-  const [activePlayer, setActivePlayer] = useState(null);
+  const [isInviteHovered, setIsInviteHovered] = useState(false);
+  const [currentLiveMatchIndex, setCurrentLiveMatchIndex] = useState(0);
 
   const turfId = location.pathname.startsWith("/venue/") ? location.pathname.split("/venue/")[1] : null;
   const profileId = location.pathname.startsWith("/profile") ? location.pathname.split("/profile/")[1] : null;
@@ -145,66 +141,50 @@ export default function DesktopRightSidebar({ isRightDrawerOpen, setIsRightDrawe
     else setGreeting("Good Evening");
   }, []);
 
-  // Fetch Core/Home Widgets Data
-  useEffect(() => {
-    if (showHomeWidgets) {
-      // 1. Fetch suggested players (publicly available)
-      setLoadingPlayers(true);
-      axiosInstance.get("/api/user/players", { params: { limit: 3, sortBy: "newest" } })
-        .then(res => setSuggestedPlayers(res.data.players || []))
-        .catch(console.error)
-        .finally(() => setLoadingPlayers(false));
+  // 1. Suggested Players (RTK Query)
+  const { data: playersData, isLoading: loadingPlayers } = useGetSuggestedPlayersQuery(
+    { limit: 3, sortBy: "newest" },
+    { skip: !showHomeWidgets }
+  );
+  const suggestedPlayers = playersData?.players || [];
 
-      // 2. Fetch venues (publicly available)
-      setLoadingVenues(true);
-      axiosInstance.get("/api/user/turf/all", { params: { limit: 3 } })
-        .then(res => setNearbyVenues(res.data.turfs || []))
-        .catch(console.error)
-        .finally(() => setLoadingVenues(false));
+  // 2. Nearby Venues (RTK Query)
+  const { data: turfsData, isLoading: loadingVenues } = useGetTurfsQuery(
+    { limit: 3 },
+    { skip: !showHomeWidgets }
+  );
+  const nearbyVenues = turfsData?.turfs || [];
 
-      if (isLoggedIn) {
-        // 3. Fetch bookings (requires auth)
-        setLoadingBookings(true);
-        axiosInstance.get("/api/user/booking/get-bookings")
-          .then(res => setBookings(res.data || []))
-          .catch(console.error)
-          .finally(() => setLoadingBookings(false));
+  // 3. User Bookings (RTK Query)
+  const { data: bookingsData, isLoading: loadingBookings } = useGetUserBookingsQuery(
+    undefined,
+    { skip: !showHomeWidgets || !isLoggedIn }
+  );
+  const bookings = bookingsData || [];
 
-        // 4. Fetch Wallet Balance (requires auth)
-        setLoadingWallet(true);
-        axiosInstance.get("/api/user/wallet/get")
-          .then(res => {
-            if (res.data?.success) {
-              setWalletBalance(res.data.wallet?.balance || 0);
-            }
-          })
-          .catch(console.error)
-          .finally(() => setLoadingWallet(false));
-      }
-    }
-  }, [showHomeWidgets, isLoggedIn]);
+  // 4. Wallet Balance (RTK Query)
+  const { data: walletData, isLoading: loadingWallet } = useGetUserWalletQuery(
+    undefined,
+    { skip: !showHomeWidgets || !isLoggedIn }
+  );
+  const walletBalance = walletData?.balance || 0;
 
-  // Fetch Venue Context Details
-  useEffect(() => {
-    if (turfId) {
-      axiosInstance.get(`/api/user/turf/details/${turfId}`)
-        .then(res => setActiveTurf(res.data.turf))
-        .catch(console.error);
-    } else {
-      setActiveTurf(null);
-    }
-  }, [turfId]);
+  // 5. Active Venue Detail (RTK Query)
+  const { data: activeTurfData } = useGetTurfDetailsQuery(
+    turfId,
+    { skip: !turfId }
+  );
+  const activeTurf = activeTurfData?.turf || null;
 
-  // Fetch Player Context Details
-  useEffect(() => {
-    if (profileId && profileId !== "undefined") {
-      axiosInstance.get(`/api/user/players/${profileId}`)
-        .then(res => setActivePlayer(res.data.player))
-        .catch(console.error);
-    } else {
-      setActivePlayer(null);
-    }
-  }, [profileId]);
+  // 6. Active Player Detail (RTK Query)
+  const { data: activePlayerData } = useGetPlayerDetailsQuery(
+    profileId,
+    { skip: !profileId || profileId === "undefined" }
+  );
+  const activePlayer = activePlayerData?.player || null;
+
+  const [followPlayerMutation] = useFollowPlayerMutation();
+  const [unfollowPlayerMutation] = useUnfollowPlayerMutation();
 
   // Handle Follow Toggle with Redux & Kridaz Login Gate
   const handleFollowToggleLocal = async (player) => {
@@ -217,10 +197,10 @@ export default function DesktopRightSidebar({ isRightDrawerOpen, setIsRightDrawe
 
       try {
         if (isFollowing) {
-          await axiosInstance.post(`/api/user/players/${playerId}/unfollow`);
+          await unfollowPlayerMutation(playerId).unwrap();
           toast.success("Unfollowed player");
         } else {
-          await axiosInstance.post(`/api/user/players/${playerId}/follow`);
+          await followPlayerMutation(playerId).unwrap();
           toast.success("Following player");
         }
       } catch (err) {

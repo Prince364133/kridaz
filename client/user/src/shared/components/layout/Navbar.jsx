@@ -162,7 +162,8 @@ const Navbar = () => {
 
   const searchParams = new URLSearchParams(location.search);
   const isHome = location.pathname === "/" || location.pathname === "/community";
-  const isVenue = location.pathname.startsWith("/venue") || location.pathname === "/venues";
+  const isSingleVenue = location.pathname.startsWith("/venue/");
+  const isVenue = (location.pathname.startsWith("/venue") || location.pathname === "/venues") && !isSingleVenue;
   const isPlayer = location.pathname.startsWith("/players");
   const isProfessional = location.pathname.startsWith("/professionals");
   const isJoinGames = location.pathname.startsWith("/join-games");

@@ -132,6 +132,33 @@ const MatchAnalytics = () => {
   const [hoveredShot, setHoveredShot] = useState(null);
   const captureRef = React.useRef(null);
 
+  useEffect(() => {
+    const unlock = () => {
+      if (window.speechSynthesis) {
+        const u = new SpeechSynthesisUtterance('');
+        u.volume = 0;
+        window.speechSynthesis.speak(u);
+      }
+      const a = new Audio();
+      a.volume = 0;
+      a.play().catch(() => {});
+
+      window.removeEventListener('click', unlock);
+      window.removeEventListener('touchstart', unlock);
+      window.removeEventListener('keydown', unlock);
+    };
+
+    window.addEventListener('click', unlock);
+    window.addEventListener('touchstart', unlock);
+    window.addEventListener('keydown', unlock);
+
+    return () => {
+      window.removeEventListener('click', unlock);
+      window.removeEventListener('touchstart', unlock);
+      window.removeEventListener('keydown', unlock);
+    };
+  }, []);
+
   const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:6001';
 
   const getBallCls = (ball) => {
@@ -424,7 +451,11 @@ const MatchAnalytics = () => {
     loadAnalytics();
     setLoading(false);
 
-    const socket = io(API_BASE, { reconnection: true });
+    const token = localStorage.getItem('token') || localStorage.getItem(`scorer_token_${matchId}`);
+    const socket = io(API_BASE, { 
+      reconnection: true,
+      auth: { token }
+    });
 
     socket.on('connect', () => {
       setConnected(true);
@@ -438,8 +469,31 @@ const MatchAnalytics = () => {
       loadAnalytics(); // Auto-refresh details
     });
 
+    const speakBrowserTTS = (text, lang) => {
+      if (window.speechSynthesis) {
+        window.speechSynthesis.cancel();
+        const utterance = new SpeechSynthesisUtterance(text);
+        const langMap = { 'hi': 'hi-IN', 'en': 'en-US', 'pa': 'pa-IN', 'bn': 'bn-IN', 'mr': 'mr-IN', 'ta': 'ta-IN', 'te': 'te-IN', 'gu': 'gu-IN' };
+        utterance.lang = langMap[lang] || 'en-US';
+        window.speechSynthesis.speak(utterance);
+      }
+    };
+
+    socket.on('COMMENTARY_AUDIO_READY', (data) => {
+      if (data.audioUrl) {
+        const audio = new Audio(`${API_BASE}${data.audioUrl}`);
+        audio.play().catch(e => {
+          console.warn('MatchAnalytics audio play failed, falling back to Browser TTS', e);
+          speakBrowserTTS(data.text, data.language);
+        });
+      } else {
+        speakBrowserTTS(data.text, data.language);
+      }
+    });
+
     return () => {
       socket.off(SOCKET.SCORE_UPDATED);
+      socket.off('COMMENTARY_AUDIO_READY');
       socket.disconnect();
     };
   }, [matchId]);

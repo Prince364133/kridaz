@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState, useRef, lazy, Suspense } from "react";
 import { RouterProvider } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import router from "./router";
@@ -42,12 +42,13 @@ import { useWebPushNotifications } from "@hooks/useWebPushNotifications";
 import { useOTAUpdate } from "@hooks/useOTAUpdate";
 
 import { ObservabilityProvider } from "./ObservabilityProvider";
-import LocationSidebar from "../shared/components/modals/LocationSidebar";
+const LocationSidebar = lazy(() => import("../shared/components/modals/LocationSidebar"));
 
 export default function App() {
   const dispatch = useDispatch();
   const theme = useSelector((state) => state.theme.current);
   const authState = useSelector((state) => state.auth);
+  const locationSidebarOpen = useSelector((state) => state.ui.locationSidebar?.isOpen);
   const lastAuthCheckTime = useRef(0);
   
   // Initialize OTA Updates
@@ -59,6 +60,9 @@ export default function App() {
 
   // Geolocation detection
   useEffect(() => {
+    let isMounted = true;
+    const controller = new AbortController();
+
     dispatch(setLocationStatus("detecting"));
     if (!navigator.geolocation) {
       fallbackToIPLocation();
@@ -71,37 +75,52 @@ export default function App() {
         let city = "";
         let state = "";
         try {
-          const res = await fetch(`https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${lat}&longitude=${lng}&localityLanguage=en`);
+          const res = await fetch(`https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${lat}&longitude=${lng}&localityLanguage=en`, { signal: controller.signal });
           const data = await res.json();
           city = data.city || data.locality || "";
           state = data.principalSubdivision || "";
         } catch (error) {
-          console.warn("Reverse geocoding failed:", error);
+          if (error.name !== "AbortError") {
+            console.warn("Reverse geocoding failed:", error);
+          }
         }
-        dispatch(setUserLocation({ lat, lng, city, state }));
-        dispatch(setLocationStatus("granted"));
+        if (isMounted) {
+          dispatch(setUserLocation({ lat, lng, city, state }));
+          dispatch(setLocationStatus("granted"));
+        }
       },
       (err) => {
         console.warn("Geolocation failed:", err.message);
-        fallbackToIPLocation();
+        if (isMounted) {
+          fallbackToIPLocation();
+        }
       },
       { timeout: 8000, maximumAge: 60000 }
     );
 
     async function fallbackToIPLocation() {
       try {
-        const res = await fetch("https://ipapi.co/json/");
+        const res = await fetch("https://ipapi.co/json/", { signal: controller.signal });
         const data = await res.json();
-        if (data.latitude && data.longitude) {
-          dispatch(setUserLocation({ lat: data.latitude, lng: data.longitude, city: data.city, state: data.region }));
-          dispatch(setLocationStatus("granted"));
-        } else {
-          dispatch(setLocationStatus("denied"));
+        if (isMounted) {
+          if (data.latitude && data.longitude) {
+            dispatch(setUserLocation({ lat: data.latitude, lng: data.longitude, city: data.city, state: data.region }));
+            dispatch(setLocationStatus("granted"));
+          } else {
+            dispatch(setLocationStatus("denied"));
+          }
         }
       } catch (error) {
-        dispatch(setLocationStatus("denied"));
+        if (isMounted && error.name !== "AbortError") {
+          dispatch(setLocationStatus("denied"));
+        }
       }
     }
+
+    return () => {
+      isMounted = false;
+      controller.abort();
+    };
   }, [dispatch]);
 
 
@@ -221,7 +240,11 @@ export default function App() {
                 },
               }}
             />
-            <LocationSidebar />
+            {locationSidebarOpen && (
+              <Suspense fallback={null}>
+                <LocationSidebar />
+              </Suspense>
+            )}
           </SocketProvider>
         </GoogleOAuthProvider>
       </ObservabilityProvider>

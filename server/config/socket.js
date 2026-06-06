@@ -22,18 +22,43 @@ const socketConfig = (server) => {
 
   io.use((socket, next) => {
     const token = socket.handshake.auth?.token;
+    
+    // Allow anonymous connections for public live scoring
     if (!token) {
-      return next(new Error("AUTH"));
+      return next();
     }
+
     try {
-      const decoded = jwt.verify(token, getAccessSecret());
-      if (!decoded) {
-        return next(new Error("AUTH"));
+      let decoded = null;
+      
+      // Try standard access token first
+      try {
+        decoded = jwt.verify(token, getAccessSecret());
+      } catch (err) {
+        // Try overlay token
+        if (!decoded && process.env.OVERLAY_TOKEN_SECRET) {
+          try {
+            decoded = jwt.verify(token, process.env.OVERLAY_TOKEN_SECRET);
+          } catch (e) {}
+        }
+        // Try scoring token
+        if (!decoded && process.env.JWT_SCORING_SECRET) {
+          try {
+            decoded = jwt.verify(token, process.env.JWT_SCORING_SECRET);
+          } catch (e) {}
+        }
+        
+        // If all verifications fail, throw
+        if (!decoded) {
+          throw new Error("Invalid token signatures");
+        }
       }
+
       socket.user = decoded;
-      socket.userId = decoded.id || decoded.user?.id;
+      socket.userId = decoded.id || decoded.user?.id || null;
       next();
     } catch (err) {
+      // Return AUTH error so client knows token is invalid
       return next(new Error("AUTH"));
     }
   });

@@ -5,13 +5,21 @@ import { lazy, Suspense } from "react";
 import { PartnerLayout, ProfessionalLayout } from "@layouts";
 import UserRoot from "@user/layouts/Root";
 
-// Î“Ã¶Ã‡Î“Ã¶Ã‡ Eager: Route guards & error utilities (must be synchronous) Î“Ã¶Ã‡Î“Ã¶Ã‡
+// ── Eager: Route guards & error utilities (must be synchronous) ──────────────────
 import ProtectedRoute from "@components/ProtectedRoute/ProtectedRoute";
 import PublicRoute from "@components/ProtectedRoute/PublicRoute";
-import { NotFound, RootRedirect, ErrorBoundary } from "@components/common";
+import NotFound from "@components/common/NotFound";
+import RootRedirect from "@components/common/RootRedirect";
+import ErrorBoundary from "@components/common/ErrorBoundary";
+import cricketLoadingGif from "../assets/cricket-loading.gif";
 
-// Î“Ã¶Ã‡Î“Ã¶Ã‡ Spinner shown while any lazy chunk loads Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡
-const PageLoader = () => null;
+// ── Spinner shown while any lazy chunk loads ──────────────────
+const PageLoader = () => (
+  <div className="fixed inset-0 z-[9999] bg-[#050505] flex flex-col items-center justify-center font-sans">
+    <img src={cricketLoadingGif} alt="Loading..." className="w-24 h-24 object-contain" />
+    <p className="text-[10px] font-black uppercase tracking-[0.2em] text-[#00C187] mt-3">Loading page...</p>
+  </div>
+);
 
 const RedirectToAnalytics = () => {
   const { matchId } = useParams();

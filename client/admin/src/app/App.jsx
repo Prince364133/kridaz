@@ -5,6 +5,7 @@ import router from "./router";
 import { logout, restoreAuth } from "../redux/slices/authSlice";
 import axiosInstance from "@hooks/useAxiosInstance";
 import { Toaster } from "react-hot-toast";
+import { SocketProvider } from "@context/SocketContext";
 
 export default function App() {
   const dispatch = useDispatch();
@@ -63,7 +64,7 @@ export default function App() {
   }
 
   return (
-    <>
+    <SocketProvider>
       <RouterProvider router={router} />
       <Toaster 
         position="top-center"
@@ -76,6 +77,6 @@ export default function App() {
           },
         }}
       />
-    </>
+    </SocketProvider>
   );
 }

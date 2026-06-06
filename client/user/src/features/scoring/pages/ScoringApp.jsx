@@ -200,6 +200,7 @@ const ScoringApp = () => {
   const [showExitModal, setShowExitModal] = useState(false);
   const [wagonWheelData, setWagonWheelData] = useState(null);
   const [showMatchActions, setShowMatchActions] = useState(false);
+  const [isUndoing, setIsUndoing] = useState(false);
 
   const [isAiCommentaryEnabled, setIsAiCommentaryEnabled] = useState(false);
   const [commentaryVoice, setCommentaryVoice] = useState('alloy');
@@ -247,7 +248,30 @@ const ScoringApp = () => {
       socket.emit('scoring:acquire_lock', { matchId });
     });
 
+    const speakBrowserTTS = (text, lang) => {
+      if (window.speechSynthesis) {
+        window.speechSynthesis.cancel();
+        const utterance = new SpeechSynthesisUtterance(text);
+        const langMap = { 'hi': 'hi-IN', 'en': 'en-US', 'pa': 'pa-IN', 'bn': 'bn-IN', 'mr': 'mr-IN', 'ta': 'ta-IN', 'te': 'te-IN', 'gu': 'gu-IN' };
+        utterance.lang = langMap[lang] || 'en-US';
+        window.speechSynthesis.speak(utterance);
+      }
+    };
+
+    socket.on('COMMENTARY_AUDIO_READY', (data) => {
+      if (data.audioUrl) {
+        const audio = new Audio(`${API_BASE}${data.audioUrl}`);
+        audio.play().catch(e => {
+          console.warn('ScoringApp audio play failed, falling back to Browser TTS', e);
+          speakBrowserTTS(data.text, data.language);
+        });
+      } else {
+        speakBrowserTTS(data.text, data.language);
+      }
+    });
+
     return () => {
+      socket.off('COMMENTARY_AUDIO_READY');
       socket.emit('scoring:release_lock', { matchId });
       socket.disconnect();
     };
@@ -257,7 +281,6 @@ const ScoringApp = () => {
     if (!passwordVerified || !matchId) return;
     const hostedGame = matchData?.hostedGameId;
     if (!hostedGame) return;
-
     if (hostedGame.isLive) {
       if (!liveEnabled) {
         setLiveEnabled(true);
@@ -268,6 +291,8 @@ const ScoringApp = () => {
         });
       }
     } else {
+      if (liveEnabled || window.autoGoLiveAttempted) return;
+      window.autoGoLiveAttempted = true;
       const autoGoLive = async () => {
         try {
           const apiBase = import.meta.env.VITE_API_URL || 'http://localhost:6001';
@@ -646,13 +671,20 @@ const ScoringApp = () => {
               {/* Col 4 */}
               <div className="flex flex-col gap-0 w-[25%]">
                 <button
+                  disabled={isMutating}
                   onClick={() => handleScoringClick(async () => {
+                    setIsUndoing(true);
                     const result = await undoBall();
+                    setIsUndoing(false);
                     if (result.success) toast.success('Last ball undone!');
                     else toast.error('Unable to undo. Please try again.');
                   })}
-                  className="flex-[3] bg-white/[0.05] border border-white/10 rounded-none flex items-center justify-center hover:bg-white/10 transition-all transform active:scale-95">
-                  <span className="text-white font-inter font-semibold uppercase tracking-widest text-[16px]">UNDO</span>
+                  className="flex-[3] bg-white/[0.05] border border-white/10 rounded-none flex items-center justify-center hover:bg-white/10 transition-all transform active:scale-95 disabled:opacity-50">
+                  {isUndoing ? (
+                    <div className="w-5 h-5 border-2 border-white/20 border-t-[#00C187] rounded-full animate-spin" />
+                  ) : (
+                    <span className="text-white font-inter font-semibold uppercase tracking-widest text-[16px]">UNDO</span>
+                  )}
                 </button>
                 <button onClick={() => handleScoringClick(() => setShowWicketModal(true))}
                   className="flex-[2] bg-white/[0.05] border border-white/10 rounded-none flex items-center justify-center hover:bg-white/10 transition-all transform active:scale-95">

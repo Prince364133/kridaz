@@ -222,10 +222,7 @@ const worker = new Worker('commentary-generation', async (job) => {
     let spokenText = text;
 
     // 3. Generate Audio with OpenAI TTS using the regional spokenText
-    let audioUrl = null;
-    if (hostedGame.commentaryVoice !== 'BROWSER_TTS') {
-      audioUrl = await generateOpenAIAudio(spokenText, hostedGame.commentaryVoice);
-    }
+    let audioUrl = await generateOpenAIAudio(spokenText, hostedGame.commentaryVoice);
 
     // 4. Broadcast final audio readiness
     if (io) {

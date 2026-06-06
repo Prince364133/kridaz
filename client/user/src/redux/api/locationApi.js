@@ -10,10 +10,15 @@ export const locationApi = baseApi.injectEndpoints({
       query: (stateName) => `/api/location/cities?state=${stateName}`,
       providesTags: ["User"],
     }),
+    reverseGeocode: builder.query({
+      query: ({ lat, lng }) => `https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${lat}&longitude=${lng}&localityLanguage=en`,
+      providesTags: ["User"],
+    }),
   }),
 });
 
 export const {
   useGetStatesListQuery,
   useGetCitiesListQuery,
+  useReverseGeocodeQuery,
 } = locationApi;

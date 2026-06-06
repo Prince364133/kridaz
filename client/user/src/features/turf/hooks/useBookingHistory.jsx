@@ -1,14 +1,15 @@
-import { useEffect, useState } from "react";
+import { useMemo } from "react";
+import { useGetUserBookingsQuery } from "@redux/api/userApi";
 import axiosInstance from "@hooks/useAxiosInstance";
 import toast from "react-hot-toast";
 import { format, parseISO } from "date-fns";
 
 export default function useBookingHistory() {
-  const [bookings, setBookings] = useState([]);
-  const [loading, setLoading] = useState(false);
+  const { data: bookingsRaw = [], isLoading: loading, refetch } = useGetUserBookingsQuery();
 
   const formatBookingsData = (bookings) => {
     return bookings.map((booking) => {
+      if (!booking?.timeSlot?.startTime) return booking;
       const adjustedStartTime = parseISO(booking.timeSlot.startTime);
       const adjustedEndTime = parseISO(booking.timeSlot.endTime);
 
@@ -24,22 +25,9 @@ export default function useBookingHistory() {
     });
   };
 
-  const fetchBookings = async () => {
-    setLoading(true);
-    try {
-      const response = await axiosInstance.get(
-        "/api/user/booking/get-bookings"
-      );
-      const result = response.data;
-      const formattedBookings = formatBookingsData(result);
-      setBookings(formattedBookings);
-    } catch (error) {
-      console.error(error, "error");
-      toast.error(error.response?.data?.message);
-    } finally {
-      setLoading(false);
-    }
-  };
+  const bookings = useMemo(() => {
+    return formatBookingsData(bookingsRaw);
+  }, [bookingsRaw]);
 
   const cancelBooking = async (booking) => {
     const playTime = new Date(booking.playStartTime);
@@ -51,13 +39,13 @@ export default function useBookingHistory() {
       confirmMsg = "Are you sure you want to cancel? Since you are cancelling more than 24 hours before the slot, you will receive a 30% refund in your wallet. The remaining 70% is non-refundable.";
     }
 
-    if (!window.confirm(confirmMsg)) return;
+    if (!window.confirm(confirmMsg)) return false;
     
     try {
       const response = await axiosInstance.post(`/api/booking/user/cancel/${booking.id || booking._id}`);
       if (response.data.success) {
         toast.success(response.data.message || "Booking cancelled successfully.");
-        fetchBookings();
+        refetch();
         return true;
       }
     } catch (error) {
@@ -66,10 +54,6 @@ export default function useBookingHistory() {
     }
     return false;
   };
-
-  useEffect(() => {
-    fetchBookings();
-  }, []);
 
   return { bookings, loading, cancelBooking };
 }
