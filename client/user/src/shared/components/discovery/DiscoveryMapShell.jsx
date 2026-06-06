@@ -1,6 +1,6 @@
 ﻿import React from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { ChevronUp, ChevronDown, Map as MapIcon, Maximize2, Minimize2 } from 'lucide-react';
+import { motion } from 'framer-motion';
+import { ChevronDown, Map as MapIcon, Maximize2 } from 'lucide-react';
 
 const DiscoveryMapShell = ({ children, isExpanded, onToggle, height = "35vh" }) => {
   return (

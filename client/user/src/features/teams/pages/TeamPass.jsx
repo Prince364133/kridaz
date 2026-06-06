@@ -2,14 +2,13 @@ import React, { useEffect, useState } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import axiosInstance from "@hooks/useAxiosInstance";
 import {
-  Users, Trophy, MapPin, User, Calendar, ChevronLeft, Download,
-  ShieldCheck, Share2, Zap, Copy, UserPlus, AlertOctagon,
-  QrCode as QrIcon, Mail, Info, Star, Swords, Target, Crown, X, Link as LinkIcon
+  Users, Trophy, MapPin, User, Calendar, Download,
+  ShieldCheck, Share2, Zap, UserPlus, AlertOctagon,
+  QrCode as QrIcon, Mail, Info, Target
 } from "lucide-react";
 import { format, parseISO } from "date-fns";
 import toast from "react-hot-toast";
 import { useSelector } from "react-redux";
-import { motion, AnimatePresence } from "framer-motion";
 
 const PRI = "#BFF367";
 const HEADING_STYLE = { fontFamily: "'Open Sans', sans-serif" };

@@ -1,4 +1,4 @@
-import { parse, addHours, format, isBefore, isEqual, startOfDay } from "date-fns";
+import { parse, addHours, format, isBefore, isEqual } from "date-fns";
 
 /**
  * Generates hourly slots between openTime and closeTime

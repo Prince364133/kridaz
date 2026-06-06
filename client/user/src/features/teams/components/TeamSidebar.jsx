@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useGetMyTeamsQuery, useGetOpponentTeamsQuery } from '@redux/api/teamApi';
 import { useGetMyScoringGamesQuery } from '@redux/api/scoringApi';
-import { Plus, Users, Search, ChevronRight, Trophy } from 'lucide-react';
+import { Plus, Users, Search, ChevronRight } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import AddOpponentModal from './AddOpponentModal';
 import StartScoringModal from '@features/scoring/components/StartScoringModal';

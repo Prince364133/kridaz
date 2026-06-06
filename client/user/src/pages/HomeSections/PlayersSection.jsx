@@ -1,7 +1,7 @@
 /* eslint-disable react/prop-types */
 import React from "react";
 import { Link } from "react-router-dom";
-import { Users, MapPin, Check, ChevronRight } from "lucide-react";
+import { Users, MapPin, Check } from "lucide-react";
 
 const GRAD = "linear-gradient(90deg, #BFF367 0%, #BFF367 100%)";
 const BDR = "#2A2A2A";
@@ -13,17 +13,13 @@ export default function PlayersSection({
   handleFollowToggle,
 }) {
   return (
-    <section className="py-6 mb-6 w-full">
+    <section className="mb-8 w-full">
       <div className="w-full">
         {/* Refined Section Header */}
-        <div className="relative flex flex-col md:flex-row md:items-center justify-between gap-8 mb-6 border-b border-white/5 pb-4">
+        <div className="relative flex flex-row items-center justify-between gap-4 mb-6">
           <div className="relative">
-            <div
-              className="absolute -left-6 top-1/2 -translate-y-1/2 w-1.5 h-12 rounded-full shadow-[0_0_20px_rgba(85,222,232,0.4)] hidden md:block"
-              style={{ background: GRAD }}
-            ></div>
             <h2
-              className="text-2xl md:text-4xl font-black text-white uppercase tracking-tighter leading-none"
+              className="text-[18px] md:text-[25px] font-black text-white tracking-tighter leading-none"
               style={{ fontFamily: "'Open Sans', sans-serif" }}
             >
               Find Players{" "}
@@ -37,22 +33,22 @@ export default function PlayersSection({
                 Near You
               </span>
             </h2>
-            <p
-              className="text-xs md:text-sm font-bold text-white/40 uppercase tracking-[0.3em] mt-3"
-              style={{ fontFamily: "'Inter 28pt Light', sans-serif" }}
-            >
-              Global Talent Network • Skill-Matched Athletes
-            </p>
           </div>
+          <Link
+            to="/players"
+            className="flex items-center gap-1 font-semibold text-[10px] md:text-[15px] transition-all hover:text-[#BFF367] text-[#888] whitespace-nowrap"
+          >
+            View More <span className="hidden md:inline">Players</span>
+          </Link>
         </div>
 
         {/* Player cards — 10 in one scrollable row */}
         {loading ? (
-          <div className="flex gap-3 overflow-x-auto no-scrollbar pb-2">
+          <div className="flex gap-3 overflow-x-auto snap-x snap-mandatory no-scrollbar pb-2">
             {[...Array(10)].map((_, i) => (
               <div
                 key={i}
-                className="shrink-0 w-[200px] md:w-[240px] rounded-[8px] border border-white/5 animate-pulse bg-white/5"
+                className="shrink-0 w-[38%] snap-start rounded-[8px] border border-white/5 animate-pulse bg-white/5"
                 style={{ height: 300 }}
               />
             ))}
@@ -73,7 +69,7 @@ export default function PlayersSection({
             </Link>
           </div>
         ) : (
-          <div className="flex gap-3 overflow-x-auto no-scrollbar pb-2">
+          <div className="flex gap-3 overflow-x-auto snap-x snap-mandatory no-scrollbar pb-2">
             {players.slice(0, 10).map((p) => {
               const initials =
                 p.name
@@ -94,7 +90,7 @@ export default function PlayersSection({
               return (
                 <div
                   key={p.id || p._id}
-                  className="shrink-0 w-[200px] md:w-[240px] group"
+                  className="shrink-0 w-[38%] snap-start group"
                 >
                   <div className="relative rounded-[8px] p-[1px] bg-white/5 transition-all duration-500 group-hover:bg-gradient-to-r group-hover:from-[#BFF367] group-hover:to-[#BFF367] group-hover:shadow-[0_15px_30px_rgba(0,0,0,0.4)]">
                     {/* Profile Image */}
@@ -183,16 +179,7 @@ export default function PlayersSection({
           </div>
         )}
 
-        {/* View More Players btn */}
-        <div className="text-center mt-6 lg:mt-10">
-          <Link
-            to="/players"
-            className="inline-flex items-center gap-2 font-semibold text-sm py-3 px-10 rounded-[6px] border transition-all hover:border-[#BFF367] hover:text-[#BFF367]"
-            style={{ borderColor: BDR, color: "#888" }}
-          >
-            View More Players <ChevronRight size={16} />
-          </Link>
-        </div>
+
       </div>
     </section>
   );

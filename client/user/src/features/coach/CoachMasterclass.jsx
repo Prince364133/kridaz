@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Video, PlayCircle, Plus, Layout, Calendar, Clock, Zap } from "lucide-react";
+import { PlayCircle, Plus, Layout, Calendar } from "lucide-react";
 import useCoachDashboard from "@hooks/owner/useCoachDashboard";
 import DashboardSkeleton from "@features/venue-owner/Dashboard/DashboardSkeleton";
 

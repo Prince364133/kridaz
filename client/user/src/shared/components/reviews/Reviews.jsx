@@ -1,9 +1,8 @@
-import { useState } from "react";
 import useReviews from "@hooks/useReviews";
 import { format } from "date-fns";
 import ReviewSkeleton from "../ui/ReviewSkeleton";
 import { Link } from "react-router-dom";
-import { ChevronDown, Star, Quote } from "lucide-react";
+import { Star, Quote } from "lucide-react";
 
 const Reviews = ({ turfId }) => {
  const { reviews, loading } = useReviews(turfId);

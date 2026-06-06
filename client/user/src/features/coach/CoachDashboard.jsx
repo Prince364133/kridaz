@@ -5,13 +5,9 @@ import {
   Wallet,
   IndianRupee,
   Activity,
-  Calendar,
   Download,
-  User,
-  ChevronDown,
   Star,
-  ArrowRight,
-  TrendingUp
+  ArrowRight
 } from "lucide-react";
 import {
   AreaChart,

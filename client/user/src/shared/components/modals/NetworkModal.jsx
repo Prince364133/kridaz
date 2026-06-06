@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-import { X, Search, UserPlus, UserMinus, Loader2, MapPin, Users } from "lucide-react";
+import { X, Search, Loader2, Users } from "lucide-react";
 import axiosInstance from "@hooks/useAxiosInstance";
 import { useSelector, useDispatch } from "react-redux";
 import { followUser, unfollowUser } from "@redux/slices/authSlice";

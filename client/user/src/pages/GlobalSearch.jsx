@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { Search, Loader2, ArrowLeft, X, SlidersHorizontal, Star, MapPin, Check, ShieldCheck, MoreVertical, ThumbsUp, MessageCircle, Send } from "lucide-react";
+import { Search, Loader2, X, SlidersHorizontal, Check, ShieldCheck, MoreVertical, ThumbsUp, MessageCircle, Send } from "lucide-react";
 import { useLazySearchPlayersQuery } from "@redux/api/teamApi";
 import { useLazyGetCommunityFeedQuery, useGetCommunityFeedQuery } from "@redux/api/communityApi";
 import { useGetGroundsQuery } from "@redux/api/gamesApi";

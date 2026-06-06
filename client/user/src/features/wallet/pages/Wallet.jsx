@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import axiosInstance from "@hooks/useAxiosInstance";
-import { Wallet, Plus, ArrowUpRight, ArrowDownLeft, History, IndianRupee, Loader2, ShieldCheck, Zap } from "lucide-react";
+import { Wallet, Plus, ArrowUpRight, ArrowDownLeft, History, IndianRupee, Loader2, Zap } from "lucide-react";
 import toast from "react-hot-toast";
 import { updateUser } from "@redux/slices/authSlice";
 import { loadRazorpay } from "@infrastructure/razorpay";

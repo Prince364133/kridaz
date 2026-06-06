@@ -1,5 +1,5 @@
 import React from "react";
-import { Video, Calendar, MapPin, Users, CheckCircle2, Zap, Search, Loader2, Hand, Clock, Shield, Activity, MonitorPlay, Settings } from "lucide-react";
+import { Video, MapPin, Users, CheckCircle2, Loader2, Hand, Clock, Shield, MonitorPlay, Settings } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useSelector } from "react-redux";
 import useStreamerDashboard from "@hooks/owner/useStreamerDashboard";

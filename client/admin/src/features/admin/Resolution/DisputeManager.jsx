@@ -1,9 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { 
-  ShieldAlert, Info, CheckCircle, XCircle, Search, Filter, 
-  ArrowUpRight, User, Building, MessageSquare, Send, 
-  ChevronRight, ExternalLink, Image as ImageIcon, AlertCircle,
-  CreditCard, Calendar, Clock, Phone
+  ShieldAlert, Info, CheckCircle, XCircle, Search, User, Building, MessageSquare, Send, 
+  ChevronRight, ExternalLink, Image as ImageIcon, AlertCircle, Clock, Phone
 } from "lucide-react";
 import useDisputes from "@hooks/admin/useDisputes";
 

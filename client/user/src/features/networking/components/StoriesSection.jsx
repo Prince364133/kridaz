@@ -1,12 +1,21 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useSelector } from "react-redux";
-import { Plus } from "lucide-react";
+import { Plus, User, Video } from "lucide-react";
 import { useGetStoriesFeedQuery, useDeleteStoryMutation } from "@redux/api/communityApi";
+import { useNavigate } from "react-router-dom";
 import StoryViewer from "./StoryViewer";
-import CreateStoryModal from "./CreateStoryModal";
 import toast from "react-hot-toast";
 
+/** Returns a renderable image URL for a story thumbnail, or null if only HLS video. */
+const getStoryThumb = (story) => {
+  if (!story) return null;
+  if (story.thumbnailUrl) return story.thumbnailUrl;
+  if (story.mediaUrl && !story.mediaUrl.includes('.m3u8')) return story.mediaUrl;
+  return null; // HLS-only video — no image to render
+};
+
 const StoriesSection = ({ user, isLoggedIn, isAdmin, gateInteraction }) => {
+  const navigate = useNavigate();
   const userLocation = useSelector((state) => state.ui.userLocation);
   const currentUserId = user?._id || user?.id;
 
@@ -17,8 +26,15 @@ const StoriesSection = ({ user, isLoggedIn, isAdmin, gateInteraction }) => {
 
   const [deleteStory] = useDeleteStoryMutation();
 
-  const [showStoryModal, setShowStoryModal] = useState(false);
   const [selectedStoryGroup, setSelectedStoryGroup] = useState(null);
+
+  useEffect(() => {
+    const handleOpenCreateStory = () => {
+      gateInteraction(() => navigate('/create-story'));
+    };
+    window.addEventListener('openCreateStory', handleOpenCreateStory);
+    return () => window.removeEventListener('openCreateStory', handleOpenCreateStory);
+  }, [gateInteraction]);
 
   const hasSeenGroup = (group) => {
     if (!currentUserId) return false;
@@ -72,13 +88,13 @@ const StoriesSection = ({ user, isLoggedIn, isAdmin, gateInteraction }) => {
   };
 
   return (
-    <div className="pt-3 pb-2 px-1">
+    <div className="py-1 px-2">
       <div className="flex gap-4 overflow-x-auto no-scrollbar scroll-smooth items-center pb-2">
         {/* Add/View Your Story */}
         <div className="flex flex-col items-center gap-2.5 shrink-0 group relative">
           <div
-            className={`w-[68px] h-[68px] rounded-full relative transition-transform ${
-              myStoryGroup ? (hasSeenGroup(myStoryGroup) ? "bg-white/20 p-[2px]" : "p-[2px] bg-gradient-to-r from-[#BFF367] to-[#BFF367]") : "border border-dashed border-white/30 group-hover:border-[#BFF367]/50 p-0.5"
+            className={`w-[72px] h-[72px] rounded-full p-[2px] relative ${
+              myStoryGroup && hasSeenGroup(myStoryGroup) ? "bg-white/20" : "bg-gradient-to-r from-[#BFF367] to-[#BFF367]"
             }`}
           >
             <div
@@ -86,54 +102,63 @@ const StoriesSection = ({ user, isLoggedIn, isAdmin, gateInteraction }) => {
                 if (myStoryGroup) {
                   setSelectedStoryGroup(myStoryGroup);
                 } else {
-                  gateInteraction(() => setShowStoryModal(true));
+                  gateInteraction(() => navigate('/create-story'));
                 }
               }}
-              className={`w-full h-full rounded-full flex items-center justify-center overflow-hidden bg-[#111] cursor-pointer ${
-                myStoryGroup ? "border-2 border-[#0A0A0A]" : "border border-white/10"
-              }`}
+              className="w-full h-full rounded-full bg-[#0A0A0A] p-[2px] cursor-pointer"
             >
-              {myStoryGroup && myStoryGroup.stories[0].mediaUrl ? (
+              <div className="w-full h-full rounded-full flex items-center justify-center overflow-hidden bg-[#111]">
+              {myStoryGroup && getStoryThumb(myStoryGroup.stories[0]) ? (
                 <img
-                  src={myStoryGroup.stories[0].thumbnailUrl || myStoryGroup.stories[0].mediaUrl}
+                  src={getStoryThumb(myStoryGroup.stories[0])}
                   className={`w-full h-full object-cover ${
                     myStoryGroup.stories.some((s) => s.status === "pending" || s.status === "processing") ? "blur-sm opacity-50" : ""
                   }`}
                   alt="Your story"
                 />
+              ) : myStoryGroup && myStoryGroup.stories[0].mediaType === 'video' ? (
+                <div className="w-full h-full flex flex-col items-center justify-center bg-gradient-to-br from-[#111] to-[#1a1a1a]">
+                  <Video size={24} className="text-[#BFF367] mb-1" />
+                  <span className="text-[7px] font-bold text-white/40 uppercase tracking-wider">Video</span>
+                </div>
               ) : myStoryGroup && myStoryGroup.stories[0].content ? (
                 <div className="w-full h-full flex items-center justify-center text-[7px] p-2 text-center text-[#BFF367] font-bold bg-[#111]">
                   {myStoryGroup.stories[0].content?.slice(0, 15)}
                 </div>
+              ) : user?.profilePicture || user?.profileImage ? (
+                <>
+                  <img
+                    src={user.profilePicture || user.profileImage}
+                    className="w-full h-full object-cover opacity-60"
+                    alt="Profile"
+                    onError={(e) => {
+                      e.currentTarget.style.display = 'none';
+                      e.currentTarget.nextElementSibling.style.display = 'flex';
+                    }}
+                  />
+                  <div className="hidden w-full h-full items-center justify-center bg-[#111]">
+                    <User size={32} className="text-gray-600" />
+                  </div>
+                </>
               ) : (
-                <img
-                  src={user?.profilePicture || user?.profileImage || "/default-avatar.png"}
-                  className="w-full h-full object-cover opacity-60"
-                  alt="Profile"
-                />
+                <div className="w-full h-full flex items-center justify-center bg-[#111]">
+                  <User size={32} className="text-gray-600" />
+                </div>
               )}
+              </div>
             </div>
             <div
               onClick={(e) => {
                 e.stopPropagation();
-                gateInteraction(() => setShowStoryModal(true));
+                gateInteraction(() => navigate('/create-story'));
               }}
-              className="absolute bottom-0 right-0 w-[22px] h-[22px] bg-gradient-to-r from-[#BFF367] to-[#BFF367] rounded-full flex items-center justify-center border-2 border-[#0A0A0A] cursor-pointer hover:scale-110 transition-transform z-10"
+              className="absolute bottom-0 right-0 w-[24px] h-[24px] bg-gradient-to-r from-[#BFF367] to-[#BFF367] rounded-full flex items-center justify-center border-2 border-[#0A0A0A] cursor-pointer hover:scale-110 transition-transform z-10 shadow-lg"
             >
-              <Plus size={12} strokeWidth={4} className="text-black" />
+              <Plus size={14} strokeWidth={3} className="text-black" />
             </div>
           </div>
-          <span
-            onClick={() => {
-              if (myStoryGroup) {
-                setSelectedStoryGroup(myStoryGroup);
-              } else {
-                gateInteraction(() => setShowStoryModal(true));
-              }
-            }}
-            className="text-[10px] font-bold text-white/60 group-hover:text-white transition-colors cursor-pointer"
-          >
-            Your story
+          <span className="text-[10px] font-bold text-white/80 group-hover:text-[#BFF367] transition-colors truncate max-w-[68px]">
+            Your Story
           </span>
         </div>
 
@@ -144,17 +169,22 @@ const StoriesSection = ({ user, isLoggedIn, isAdmin, gateInteraction }) => {
             onClick={() => setSelectedStoryGroup(group)}
             className="flex flex-col items-center gap-2.5 shrink-0 cursor-pointer group"
           >
-            <div className={`w-[68px] h-[68px] rounded-full p-[2px] relative hover:scale-105 transition-transform ${hasSeenGroup(group) ? "bg-white/20" : "bg-gradient-to-r from-[#BFF367] to-[#BFF367]"}`}>
+            <div className={`w-[72px] h-[72px] rounded-full p-[2px] relative ${hasSeenGroup(group) ? "bg-white/20" : "bg-gradient-to-r from-[#BFF367] to-[#BFF367]"}`}>
               <div className="w-full h-full rounded-full bg-[#0A0A0A] p-[2px]">
                 <div className="w-full h-full rounded-full overflow-hidden bg-[#111]">
-                  {group.stories[0].mediaUrl ? (
+                  {getStoryThumb(group.stories[0]) ? (
                     <img
-                      src={group.stories[0].thumbnailUrl || group.stories[0].mediaUrl}
+                      src={getStoryThumb(group.stories[0])}
                       alt=""
                       className={`w-full h-full object-cover ${
                         group.stories.some((s) => s.status === "pending" || s.status === "processing") ? "blur-sm opacity-50" : ""
                       }`}
                     />
+                  ) : group.stories[0].mediaType === 'video' ? (
+                    <div className="w-full h-full flex flex-col items-center justify-center bg-gradient-to-br from-[#111] to-[#1a1a1a]">
+                      <Video size={24} className="text-[#BFF367] mb-1" />
+                      <span className="text-[7px] font-bold text-white/40 uppercase tracking-wider">Video</span>
+                    </div>
                   ) : (
                     <div className="w-full h-full flex items-center justify-center text-[7px] p-2 text-center text-[#BFF367] font-bold bg-[#111]">
                       {group.stories[0].content?.slice(0, 15)}
@@ -170,11 +200,6 @@ const StoriesSection = ({ user, isLoggedIn, isAdmin, gateInteraction }) => {
         ))}
       </div>
 
-      <CreateStoryModal
-        isOpen={showStoryModal}
-        onClose={() => setShowStoryModal(false)}
-        user={user}
-      />
 
       {selectedStoryGroup && (
         <StoryViewer

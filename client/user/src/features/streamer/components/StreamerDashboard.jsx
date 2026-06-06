@@ -5,12 +5,10 @@ import {
   Star,
   DollarSign,
   MonitorPlay,
-  MapPin,
   BarChart as BarChartIcon,
   CheckCircle2,
   Youtube,
   Facebook,
-  ExternalLink,
   PlusCircle,
   Users,
   Eye,
@@ -18,7 +16,6 @@ import {
   Palette
 } from "lucide-react";
 import StatCard from "@features/admin/Dashboard/StatCard";
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
 import useStreamerDashboard from "@hooks/owner/useStreamerDashboard";
 import DashboardSkeleton from "@features/venue-owner/Dashboard/DashboardSkeleton";
 import { useNavigate } from "react-router-dom";

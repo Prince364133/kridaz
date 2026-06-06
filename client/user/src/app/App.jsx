@@ -2,7 +2,7 @@ import { useEffect, useState, useRef } from "react";
 import { RouterProvider } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import router from "./router";
-import { login, logout, restoreAuth, setFollowingIds } from "@redux/slices/authSlice";
+import { logout, restoreAuth } from "@redux/slices/authSlice";
 import { setUserLocation, setLocationStatus } from "@redux/slices/uiSlice";
 import axiosInstance from "@hooks/useAxiosInstance";
 

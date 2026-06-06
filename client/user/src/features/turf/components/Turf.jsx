@@ -3,7 +3,7 @@ import TurfCardMobile from "./TurfCardMobile.jsx";
 import TurfCardSkeleton from "@components/ui/TurfCardSkeleton.jsx";
 import useTurfData from "../hooks/useTurfData.jsx";
 import SearchTurf from "@components/search/SearchTurf.jsx";
-import { Trophy, MapPin, Loader2, Sparkles } from "lucide-react";
+import { Trophy, MapPin, Loader2, Sparkles, Search, Filter, Dribbble, X, ChevronRight } from "lucide-react";
 import useRecommendations from "@hooks/useRecommendations";
 
 /**
@@ -21,6 +21,12 @@ const Turf = () => {
   const [searchFilters, setSearchFilters] = useState({});
   const [userLocation, setUserLocation] = useState(null);
   const [locationStatus, setLocationStatus] = useState("detecting"); // 'detecting' | 'granted' | 'denied'
+
+  // Mobile Drawers
+  const [isMobileFilterOpen, setIsMobileFilterOpen] = useState(false);
+  const [isMobileSportsOpen, setIsMobileSportsOpen] = useState(false);
+  const [minRating, setMinRating] = useState(0.0);
+  const [maxRating, setMaxRating] = useState(5.0);
 
   const { turfs, loading } = useTurfData(searchFilters);
 
@@ -113,37 +119,49 @@ const Turf = () => {
   };
 
   return (
-    <div className="min-h-screen bg-black text-white pb-20 overflow-x-hidden">
-      <div className="max-w-screen-2xl mx-auto px-6 pt-0 relative z-10">
+    <div className="min-h-screen bg-transparent text-white pb-20 overflow-x-hidden">
+      <div className="max-w-screen-2xl mx-auto px-0 md:px-6 pt-0 relative z-10">
 
-        {/* ── Search Bar (Non-Sticky) ──────────────────────── */}
-        <div className="pt-3 pb-4 mb-4">
-          <SearchTurf onSearch={handleSearch} userLocation={userLocation} />
-        </div>
-
-        {/* ── Venue Counts (Non-Sticky) ──────────────────────── */}
-        <div className="flex flex-col md:flex-row md:items-center justify-between mb-6 gap-4">
-          <div className="flex flex-col gap-1">
-            <h2 className="text-base md:text-lg font-bold uppercase tracking-[0.05em] text-white flex items-center gap-3 font-sans">
-              <MapPin size={18} className="text-[#BFF367]" />
-              {locationStatus === "granted" ? (
-                `NEAREST TO YOU — ${turfs.length} VENUE${turfs.length !== 1 ? "S" : ""}`
-              ) : (
-                `AVAILABLE VENUES — ${turfs.length}`
-              )}
-            </h2>
+        {/* ── Mobile Search & Filters ── */}
+        <div className="block lg:hidden mb-6 mt-6 space-y-3 px-4 md:px-0">
+          {/* Mobile Search Bar */}
+          <div className="relative">
+            <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-white/40" size={18} />
+            <input 
+              type="text" 
+              placeholder="Search arenas..." 
+              className="w-full bg-[#111] border border-white/10 rounded-xl py-3.5 pl-11 pr-4 text-sm text-white placeholder:text-white/40 focus:outline-none focus:border-[#BFF367]/50 focus:ring-1 focus:ring-[#BFF367]/50 transition-all shadow-md"
+            />
+          </div>
+          
+          {/* Mobile Filter & Sports Buttons */}
+          <div className="flex items-center gap-3">
+            <button 
+              onClick={() => setIsMobileFilterOpen(true)}
+              className="flex-1 bg-[#111] border border-white/10 rounded-xl py-3 flex items-center justify-center gap-2 text-[11px] font-black uppercase text-white hover:bg-white/5 transition-colors shadow-md"
+            >
+              <Filter size={14} className="text-[#BFF367]" />
+              Filters
+            </button>
+            <button 
+              onClick={() => setIsMobileSportsOpen(true)}
+              className="flex-1 bg-[#111] border border-white/10 rounded-xl py-3 flex items-center justify-center gap-2 text-[11px] font-black uppercase text-white hover:bg-white/5 transition-colors shadow-md"
+            >
+              <Dribbble size={14} className="text-[#BFF367]" />
+              Sports
+            </button>
           </div>
         </div>
 
         {/* ── Cards Grid ───────────────────────────────────────────── */}
         {loading ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-8">
+          <div className="grid grid-cols-1 gap-6 md:gap-8 max-w-md mx-auto lg:mt-[15px]">
             {Array.from({ length: 6 }).map((_, i) => (
               <TurfCardSkeleton key={`skeleton-${i}`} />
             ))}
           </div>
         ) : turfs.length > 0 ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-8">
+          <div className="grid grid-cols-1 gap-6 md:gap-8 max-w-md mx-auto lg:mt-[15px]">
             {turfs.map((turf, idx) => (
               <div
                 key={turf._id}
@@ -195,13 +213,13 @@ const Turf = () => {
                 </div>
 
                 {recsLoading ? (
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-8">
-                    {Array.from({ length: 4 }).map((_, i) => (
+                  <div className="grid grid-cols-1 gap-6 md:gap-8 max-w-md mx-auto">
+                    {Array.from({ length: 3 }).map((_, i) => (
                       <TurfCardSkeleton key={`recs-skeleton-${i}`} />
                     ))}
                   </div>
                 ) : (
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-8">
+                  <div className="grid grid-cols-1 gap-6 md:gap-8 max-w-md mx-auto">
                     {recommendations.map((t) => (
                       <TurfCardMobile 
                         key={t.id || t._id} 
@@ -216,6 +234,145 @@ const Turf = () => {
           </div>
         )}
       </div>
+
+      {/* ── Mobile Overlays ── */}
+      {/* Backdrop */}
+      {(isMobileFilterOpen || isMobileSportsOpen) && (
+        <div 
+          className="fixed inset-0 bg-black/80 z-[100] lg:hidden backdrop-blur-sm transition-opacity" 
+          onClick={() => { setIsMobileFilterOpen(false); setIsMobileSportsOpen(false); }}
+        />
+      )}
+
+      {/* Filter Drawer */}
+      <div className={`fixed top-0 bottom-0 right-0 w-[85%] max-w-[360px] bg-[#0A0A0A] border-l border-white/10 z-[101] transform transition-transform duration-300 ease-in-out ${isMobileFilterOpen ? "translate-x-0" : "translate-x-full"} overflow-y-auto no-scrollbar pb-24`}>
+        <div className="sticky top-0 bg-[#0A0A0A]/95 backdrop-blur-md p-5 border-b border-white/10 flex items-center justify-between z-10">
+          <h3 className="text-[15px] font-black uppercase tracking-wider text-white flex items-center gap-2">
+            <Filter size={16} className="text-[#BFF367]" />
+            Filters
+          </h3>
+          <button onClick={() => setIsMobileFilterOpen(false)} className="p-2 rounded-full hover:bg-white/10 transition-colors">
+            <X size={18} className="text-white/60 hover:text-white" />
+          </button>
+        </div>
+
+        <div className="p-6 space-y-8">
+          {/* Slot Availability */}
+          <div className="space-y-4">
+            <h5 className="text-[13px] font-black uppercase text-white tracking-wider">Slot Availability</h5>
+            <div className="space-y-3">
+              <label className="flex items-center gap-3 cursor-pointer group">
+                <input type="checkbox" className="accent-[#BFF367] w-4 h-4 rounded border-[#333] bg-transparent cursor-pointer" />
+                <span className="text-[13px] font-medium text-gray-400 group-hover:text-white transition-colors">Show Only Available Venues</span>
+              </label>
+              <label className="flex items-center gap-3 cursor-pointer group">
+                <input type="checkbox" className="accent-[#BFF367] w-4 h-4 rounded border-[#333] bg-transparent cursor-pointer" />
+                <span className="text-[13px] font-medium text-gray-400 group-hover:text-white transition-colors">Show Only Favorites</span>
+              </label>
+            </div>
+          </div>
+
+          {/* Slot Timings */}
+          <div className="space-y-4">
+            <h5 className="text-[13px] font-black uppercase text-white tracking-wider">Slot Timings</h5>
+            <div className="space-y-3">
+              <label className="flex items-center gap-3 cursor-pointer group">
+                <input type="checkbox" className="accent-[#BFF367] w-4 h-4 rounded border-[#333] bg-transparent cursor-pointer" />
+                <span className="text-[13px] font-medium text-gray-400 group-hover:text-white transition-colors">Morning (6:00 AM - 11:00 AM)</span>
+              </label>
+              <label className="flex items-center gap-3 cursor-pointer group">
+                <input type="checkbox" className="accent-[#BFF367] w-4 h-4 rounded border-[#333] bg-transparent cursor-pointer" />
+                <span className="text-[13px] font-medium text-gray-400 group-hover:text-white transition-colors">Afternoon (11:00 AM - 5:00 PM)</span>
+              </label>
+              <label className="flex items-center gap-3 cursor-pointer group">
+                <input type="checkbox" className="accent-[#BFF367] w-4 h-4 rounded border-[#333] bg-transparent cursor-pointer" />
+                <span className="text-[13px] font-medium text-gray-400 group-hover:text-white transition-colors">Evening (5:00 PM - 10:00 PM)</span>
+              </label>
+              <label className="flex items-center gap-3 cursor-pointer group">
+                <input type="checkbox" className="accent-[#BFF367] w-4 h-4 rounded border-[#333] bg-transparent cursor-pointer" />
+                <span className="text-[13px] font-medium text-gray-400 group-hover:text-white transition-colors">Late Night (After 10 PM)</span>
+              </label>
+            </div>
+          </div>
+
+          {/* Star Rating */}
+          <div className="space-y-4">
+            <h5 className="text-[13px] font-black uppercase text-white tracking-wider">Star Rating: {minRating.toFixed(1)} - {maxRating.toFixed(1)}</h5>
+            <div className="space-y-5 px-1 pt-1">
+              <div className="flex flex-col gap-2">
+                <div className="flex justify-between text-[11px] font-bold uppercase tracking-wider text-gray-400">
+                  <span>Min Rating: {minRating.toFixed(1)}</span>
+                </div>
+                <input 
+                  type="range" min="0" max="5" step="0.5" 
+                  value={minRating}
+                  onChange={(e) => setMinRating(parseFloat(e.target.value))}
+                  style={{ background: `linear-gradient(to right, #BFF367 ${(minRating / 5) * 100}%, #1F1F1F ${(minRating / 5) * 100}%)` }}
+                  className="w-full h-1.5 rounded-lg appearance-none cursor-pointer [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-4 [&::-webkit-slider-thumb]:h-4 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-[#BFF367]" 
+                />
+              </div>
+              <div className="flex flex-col gap-2">
+                <div className="flex justify-between text-[11px] font-bold uppercase tracking-wider text-gray-400">
+                  <span>Max Rating: {maxRating.toFixed(1)}</span>
+                </div>
+                <input 
+                  type="range" min="0" max="5" step="0.5" 
+                  value={maxRating}
+                  onChange={(e) => setMaxRating(parseFloat(e.target.value))}
+                  style={{ background: `linear-gradient(to right, #BFF367 ${(maxRating / 5) * 100}%, #1F1F1F ${(maxRating / 5) * 100}%)` }}
+                  className="w-full h-1.5 rounded-lg appearance-none cursor-pointer [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-4 [&::-webkit-slider-thumb]:h-4 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-[#BFF367]" 
+                />
+              </div>
+            </div>
+          </div>
+
+          {/* Price */}
+          <div className="space-y-4">
+            <h5 className="text-[13px] font-black uppercase text-white tracking-wider">Price</h5>
+            <div className="space-y-3">
+              <label className="flex items-center gap-3 cursor-pointer group">
+                <input type="checkbox" className="accent-[#BFF367] w-4 h-4 rounded border-[#333] bg-transparent cursor-pointer" />
+                <span className="text-[13px] font-medium text-gray-400 group-hover:text-white transition-colors">Less than ₹5000</span>
+              </label>
+              <label className="flex items-center gap-3 cursor-pointer group">
+                <input type="checkbox" defaultChecked className="accent-[#BFF367] w-4 h-4 rounded border-[#333] bg-transparent cursor-pointer" />
+                <span className="text-[13px] font-medium text-gray-400 group-hover:text-white transition-colors">₹5000 and above</span>
+              </label>
+            </div>
+          </div>
+
+          <button onClick={() => setIsMobileFilterOpen(false)} className="w-full mt-6 py-4 bg-[#BFF367] text-black font-black uppercase tracking-wider rounded-xl hover:bg-white transition-colors">
+            Apply Filters
+          </button>
+        </div>
+      </div>
+
+      {/* Sports Drawer */}
+      <div className={`fixed top-0 bottom-0 right-0 w-[85%] max-w-[360px] bg-[#0A0A0A] border-l border-white/10 z-[101] transform transition-transform duration-300 ease-in-out ${isMobileSportsOpen ? "translate-x-0" : "translate-x-full"} overflow-y-auto no-scrollbar pb-24`}>
+        <div className="sticky top-0 bg-[#0A0A0A]/95 backdrop-blur-md p-5 border-b border-white/10 flex items-center justify-between z-10">
+          <h3 className="text-[15px] font-black uppercase tracking-wider text-white flex items-center gap-2">
+            <Dribbble size={16} className="text-[#BFF367]" />
+            Select Sport
+          </h3>
+          <button onClick={() => setIsMobileSportsOpen(false)} className="p-2 rounded-full hover:bg-white/10 transition-colors">
+            <X size={18} className="text-white/60 hover:text-white" />
+          </button>
+        </div>
+
+        <div className="p-4 space-y-1">
+          {["Football", "Cricket", "Badminton", "Tennis", "Basketball", "Swimming", "Volleyball", "Table Tennis", "Squash", "Hockey"].map((sport) => (
+            <button 
+              key={sport}
+              onClick={() => setIsMobileSportsOpen(false)}
+              className="w-full flex items-center justify-between p-4 rounded-xl hover:bg-[#111] transition-colors group"
+            >
+              <span className="text-[14px] font-bold text-gray-300 group-hover:text-[#BFF367] transition-colors">{sport}</span>
+              <ChevronRight size={16} className="text-white/20 group-hover:text-[#BFF367]" />
+            </button>
+          ))}
+        </div>
+      </div>
+
     </div>
   );
 };

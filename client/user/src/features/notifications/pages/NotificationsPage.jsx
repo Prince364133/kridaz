@@ -3,9 +3,8 @@ import { useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import {
-  Bell, Check, CheckCheck, Trash2, Users, MessageCircle, Calendar,
-  Heart, Trophy, Loader2, ShieldCheck, Zap, X, ChevronRight,
-  Bookmark, CreditCard, AlertTriangle, Star, ArrowLeft
+  Bell, CheckCheck, Trash2, Users, MessageCircle, Calendar,
+  Heart, Trophy, Loader2, ShieldCheck, Zap, X, ChevronRight, CreditCard, AlertTriangle, Star, ArrowLeft
 } from "lucide-react";
 import axiosInstance from "@hooks/useAxiosInstance";
 import { useSocket } from "@context/SocketContext";

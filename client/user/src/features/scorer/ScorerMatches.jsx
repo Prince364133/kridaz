@@ -1,19 +1,15 @@
 import React from "react";
 import { 
   Trophy, 
-  Calendar, 
   MapPin, 
-  Users, 
   CheckCircle2, 
   Zap, 
   Search, 
   Loader2, 
-  Hand, 
   Clock, 
   Shield, 
   Activity,
-  ArrowRight,
-  Plus
+  ArrowRight
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useSelector } from "react-redux";

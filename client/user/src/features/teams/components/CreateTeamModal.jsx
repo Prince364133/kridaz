@@ -1,7 +1,7 @@
 import React, { useState, useRef } from 'react';
 import { useCreateTeamMutation } from '@redux/api/teamApi';
 import { useUploadFileMutation } from '@redux/api/uploadApi';
-import { X, Camera, Loader2, Users, Upload, Trash2, MapPin, Map, Shield, Phone, MessageSquare, Sparkles } from 'lucide-react';
+import { X, Loader2, Users, Upload, Trash2, MapPin, Map, Sparkles } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { toast } from 'react-hot-toast';
 
@@ -21,12 +21,9 @@ const CreateTeamModal = ({ isOpen, onClose, onSuccess }) => {
 
   const [formData, setFormData] = useState({
     name: '',
-    description: '',
     sport: 'CRICKET',
     state: '',
     city: '',
-    captainName: '',
-    captainPhone: '',
     image: ''
   });
 
@@ -50,13 +47,7 @@ const CreateTeamModal = ({ isOpen, onClose, onSuccess }) => {
     }));
   };
 
-  const handleTextareaChange = (e) => {
-    handleChange(e);
-    if (textareaRef.current) {
-      textareaRef.current.style.height = 'auto';
-      textareaRef.current.style.height = `${textareaRef.current.scrollHeight}px`;
-    }
-  };
+  
 
   const uploadFileHelper = async (file) => {
     if (!file) return;
@@ -262,12 +253,9 @@ const CreateTeamModal = ({ isOpen, onClose, onSuccess }) => {
       onClose();
       setFormData({
         name: '',
-        description: '',
         sport: 'CRICKET',
         state: '',
         city: '',
-        captainName: '',
-        captainPhone: '',
         image: ''
       });
       setPreview(null);
@@ -503,70 +491,7 @@ const CreateTeamModal = ({ isOpen, onClose, onSuccess }) => {
                 </div>
               </div>
 
-              {/* ROW 3: Description */}
-              <div className="space-y-1.5">
-                <div className="flex justify-between items-center px-1">
-                  <label className="text-[9px] font-black text-white/40 uppercase tracking-widest" style={{ fontFamily: "'Inter', sans-serif" }}>
-                    Description
-                  </label>
-                  <span className="text-[8px] font-bold text-white/30 tracking-wider">
-                    {formData.description.length} / 200
-                  </span>
-                </div>
-                <div className="relative group">
-                  <MessageSquare className="absolute left-4 top-3 text-white/20 group-focus-within:text-[#BFF367] transition-colors duration-300" size={15} />
-                  <textarea 
-                    name="description"
-                    ref={textareaRef}
-                    placeholder="Tell something about your team, playstyle, achievements, or goals..."
-                    maxLength={200}
-                    rows={2}
-                    style={{ fontFamily: "'Inter', sans-serif" }}
-                    className="w-full bg-white/[0.02] border border-white/10 rounded-[8px] py-2.5 pl-11 pr-4 text-white text-xs focus:outline-none focus:border-[#BFF367]/40 focus:shadow-[0_0_15px_rgba(85,222,232,0.1)] transition-all duration-300 resize-none min-h-[64px] leading-relaxed"
-                    value={formData.description}
-                    onChange={handleTextareaChange}
-                  />
-                </div>
-              </div>
 
-              {/* ROW 4: Captain Row */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-1">
-                <div className="space-y-1.5">
-                  <label className="text-[9px] font-black text-white/40 uppercase tracking-widest px-1" style={{ fontFamily: "'Inter', sans-serif" }}>
-                    Captain Name
-                  </label>
-                  <div className="relative group">
-                    <Shield className="absolute left-4 top-1/2 -translate-y-1/2 text-white/20 group-focus-within:text-[#BFF367] transition-colors duration-300" size={15} />
-                    <input 
-                      type="text" 
-                      name="captainName"
-                      placeholder="Name"
-                      style={{ fontFamily: "'Inter', sans-serif" }}
-                      className="w-full bg-white/[0.02] border border-white/10 rounded-[8px] py-2.5 pl-11 pr-4 text-white text-xs focus:outline-none focus:border-[#BFF367]/40 focus:shadow-[0_0_15px_rgba(85,222,232,0.1)] transition-all duration-300"
-                      value={formData.captainName}
-                      onChange={handleChange}
-                    />
-                  </div>
-                </div>
-
-                <div className="space-y-1.5">
-                  <label className="text-[9px] font-black text-white/40 uppercase tracking-widest px-1" style={{ fontFamily: "'Inter', sans-serif" }}>
-                    Captain Phone (Optional)
-                  </label>
-                  <div className="relative group">
-                    <Phone className="absolute left-4 top-1/2 -translate-y-1/2 text-white/20 group-focus-within:text-[#BFF367] transition-colors duration-300" size={15} />
-                    <input 
-                      type="text" 
-                      name="captainPhone"
-                      placeholder="Phone number"
-                      style={{ fontFamily: "'Inter', sans-serif" }}
-                      className="w-full bg-white/[0.02] border border-white/10 rounded-[8px] py-2.5 pl-11 pr-4 text-white text-xs focus:outline-none focus:border-[#BFF367]/40 focus:shadow-[0_0_15px_rgba(85,222,232,0.1)] transition-all duration-300"
-                      value={formData.captainPhone}
-                      onChange={handleChange}
-                    />
-                  </div>
-                </div>
-              </div>
 
               {/* Action Buttons */}
               <div className="flex items-center gap-3 pt-3 border-t border-white/5">
