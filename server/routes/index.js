@@ -29,6 +29,11 @@ import userRouter from "./user/user.routes.js";
 import ownerRouter from "./owner/owner.routes.js";
 import adminRouter from "./admin/admin.routes.js";
 import professionalRouter from "../modules/professional/professional.routes.js";
+// Mirror — Flutter calls /api/notification/* and /api/notifications/* directly
+// (without the /user/ persona prefix). Mounting the same user router at the
+// top level gives those calls a home while leaving /api/user/notification/*
+// fully intact.
+import userNotificationRouter from "../modules/notification/routes/user.routes.js";
 
 // ── Utility Routes ────────────────────────────────────────────────────────────
 // Public or cross-actor utilities. Not large enough for their own module.
@@ -59,6 +64,10 @@ rootRouter.use("/", domainRouter);
 rootRouter.use("/user", userRouter);
 rootRouter.use("/owner", ownerRouter);
 rootRouter.use("/admin", adminRouter);
+
+// Top-level notification mirrors (Flutter compat).
+rootRouter.use("/notification", userNotificationRouter);
+rootRouter.use("/notifications", userNotificationRouter);
 
 // ── Utilities ─────────────────────────────────────────────────────────────────
 rootRouter.use("/features", featureRouter);

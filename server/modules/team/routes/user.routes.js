@@ -11,6 +11,7 @@ import {
   requestOpponent,
   handleOpponentRequest,
   getOpponentTeams,
+  getOpponentRequestsForTeam,
   updateTeam,
   deleteTeam,
   handleJoinRequest
@@ -74,6 +75,8 @@ router.get("/find-by-code/:code", getTeamByCode);
  *         description: Team profile and squad
  */
 router.get("/opponents", authenticate, getOpponentTeams);
+// Specific paths MUST be registered before /:id to avoid being shadowed.
+router.get("/:id/opponent-requests", authenticate, getOpponentRequestsForTeam);
 router.get("/:id", getTeamById);
 
 // ── Authenticated Routes ────────────────────────────────────────────────────

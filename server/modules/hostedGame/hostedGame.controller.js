@@ -786,11 +786,19 @@ export const joinHostedGame = async (req, res) => {
       } else {
         const teamKey = team === "A" ? "teamA" : "teamB";
         const targetTeam = game.teams.find(t => t.teamKey === teamKey);
-        if (!targetTeam) throw new Error("Team not found");
+        if (!targetTeam) {
+          const e = new Error("Team not found");
+          e.status = 404;
+          throw e;
+        }
         targetSlot = targetTeam.slots[slotIndex];
       }
 
-      if (!targetSlot) throw new Error("Slot not found");
+      if (!targetSlot) {
+        const e = new Error("Slot not found");
+        e.status = 404;
+        throw e;
+      }
       if (targetSlot.status !== "OPEN") {
         const error = new Error("Slot already taken or pending.");
         error.status = 400;

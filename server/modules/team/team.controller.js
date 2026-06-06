@@ -1154,3 +1154,57 @@ export const getOpponentTeams = async (req, res) => {
     res.status(500).json({ success: false, message: error.message });
   }
 };
+
+
+/**
+ * GET /api/team/:id/opponent-requests
+ *
+ * Returns the PENDING opponent-challenge requests received by this team.
+ * Flutter calls this to render the "Requests" tab on the team page. The
+ * shape mirrors the `opponentRequests` array that getTeamById already
+ * surfaces, just isolated so the client can poll cheaply.
+ */
+export const getOpponentRequestsForTeam = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const viewerId = req.user?.id || null;
+
+    const team = await prisma.team.findUnique({
+      where: { id },
+      select: { id: true, ownerId: true }
+    });
+    if (!team) {
+      return res.status(404).json({ success: false, message: "Team not found" });
+    }
+    // Only owner sees the inbox.
+    if (viewerId && team.ownerId !== viewerId) {
+      return res.status(403).json({ success: false, code: "NOT_TEAM_OWNER", message: "Only the team owner can view opponent requests." });
+    }
+
+    const requests = await prisma.teamOpponentRequest.findMany({
+      where: { toId: id, status: "PENDING" },
+      orderBy: { createdAt: "desc" },
+      include: {
+        from: {
+          select: { id: true, name: true, image: true, logo: true, teamCode: true }
+        }
+      }
+    });
+
+    const formatted = requests.map(r => ({
+      id: r.id,
+      status: r.status,
+      createdAt: r.createdAt,
+      from: r.from
+    }));
+
+    return res.status(200).json({
+      success: true,
+      opponentRequests: formatted,
+      data: { opponentRequests: formatted }
+    });
+  } catch (error) {
+    logger.error("getOpponentRequestsForTeam error:", error);
+    return res.status(500).json({ success: false, message: error.message });
+  }
+};
