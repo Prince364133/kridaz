@@ -127,24 +127,24 @@ const LocationSidebar = () => {
   };
 
   const sidebarContent = (
-    <div className="fixed inset-0 z-[9999] flex flex-col justify-end sm:flex-row sm:justify-start">
+    <>
       {/* Backdrop */}
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
         transition={{ duration: 0.2 }}
-        className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+        className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[9999]"
         onClick={handleClose}
       />
 
       {/* Sidebar Panel */}
       <motion.div
-        initial={isMobile ? { y: "100%" } : { x: "-100%" }}
+        initial={isMobile ? { y: "100%" } : { x: "100%" }}
         animate={isMobile ? { y: 0 } : { x: 0 }}
-        exit={isMobile ? { y: "100%" } : { x: "-100%" }}
+        exit={isMobile ? { y: "100%" } : { x: "100%" }}
         transition={{ type: "spring", damping: 25, stiffness: 200 }}
-        className="relative w-full max-h-[90dvh] sm:max-h-none sm:h-full sm:w-[400px] bg-[#161616] flex flex-col shadow-2xl sm:border-r border-white/5 rounded-t-[24px] sm:rounded-none"
+        className="fixed bottom-0 left-0 right-0 sm:top-0 sm:bottom-0 sm:left-auto sm:right-0 w-full sm:w-[400px] max-h-[90dvh] sm:max-h-[100dvh] bg-[#161616] flex flex-col shadow-2xl sm:border-l border-white/5 rounded-t-[24px] sm:rounded-none z-[10000]"
       >
         {/* Header */}
         <div className="flex items-center gap-4 p-5 pb-4">
@@ -245,7 +245,7 @@ const LocationSidebar = () => {
           )}
         </div>
       </motion.div>
-    </div>
+    </>
   );
 
   return createPortal(

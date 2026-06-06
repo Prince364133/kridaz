@@ -52,10 +52,10 @@ const BookingInvoice = () => {
 
 
   return (
-    <div className="min-h-screen bg-[#000] py-8 sm:py-12 px-4 font-sans">
-      <div className="max-w-4xl mx-auto">
+    <div className="min-h-screen bg-[#000] py-6 flex flex-col font-sans">
+      <div className="w-full flex-1 flex flex-col">
         {/* Top Navigation */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6 mb-8 sm:mb-12">
+        <div className="flex items-center justify-between gap-4 mb-6 px-4">
           <Link to={`/booking-pass/${id}`} className="flex items-center gap-2 text-gray-400 hover:text-white transition-colors group">
             <ChevronLeft size={20} className="group-hover:-translate-x-1 transition-transform" />
             <span className="text-xs font-bold uppercase tracking-widest">Back to Pass</span>
@@ -65,20 +65,28 @@ const BookingInvoice = () => {
             href={invoiceDownloadUrl}
             target="_blank"
             rel="noopener noreferrer"
-            className="flex items-center justify-center gap-2 bg-[#BFF367] hover:bg-[#b8e600] rounded-[8px] px-6 py-3 text-black text-xs font-black uppercase tracking-widest transition-all shadow-[0_0_20px_rgba(204,255,0,0.1)]"
+            className="flex items-center justify-center gap-2 bg-[#BFF367] hover:bg-[#b8e600] rounded-[8px] px-4 py-2 text-black text-[10px] font-black uppercase tracking-widest transition-all shadow-[0_0_20px_rgba(204,255,0,0.1)]"
           >
-            <Download size={16} />
-            Download PDF
+            <Download size={14} />
+            Download
           </a>
         </div>
 
         {/* Invoice PDF Viewer */}
-        <div className="bg-white rounded-[8px] overflow-hidden shadow-2xl relative h-[75vh] w-full">
-          <iframe 
-            src={invoiceDownloadUrl} 
-            className="w-full h-full border-0" 
+        <div className="bg-white flex-1 w-full relative">
+          <object 
+            data={invoiceDownloadUrl} 
+            type="application/pdf"
+            className="w-full h-full border-0 absolute inset-0" 
             title={`Invoice ${id}`}
-          />
+          >
+            <div className="flex flex-col items-center justify-center h-full p-6 text-center bg-gray-100">
+              <p className="text-gray-600 mb-4 text-sm font-medium">Your browser doesn't support inline PDF viewing.</p>
+              <a href={invoiceDownloadUrl} target="_blank" rel="noopener noreferrer" className="bg-[#BFF367] text-black px-6 py-3 rounded-full font-bold text-xs uppercase tracking-widest">
+                Download PDF to View
+              </a>
+            </div>
+          </object>
         </div>
       </div>
     </div>

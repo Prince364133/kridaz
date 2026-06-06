@@ -16,7 +16,7 @@ import { SOCKET } from "@kridaz/shared-constants/socketEvents";
 import { sanitizeUser } from "../../utils/sanitizeUser.js";
 import { getRegistrationSecret } from "../../utils/jwtSecrets.js";
 import { bumpTokenVersion } from "../../utils/tokenVersion.js";
-
+import firebaseAdmin from "../../config/firebase.js";
 
 
 const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
@@ -261,17 +261,42 @@ export const sendOtp = async (req, res) => {
 export const verifyOtp = async (req, res) => {
   const { email, phone, otp } = req.body;
   try {
-    const otpRecord = await prisma.oTP.findFirst({
-      where: {
-        OR: [
-          { email: email || "", emailOtp: otp },
-          { phone: phone || "", phoneOtp: otp }
-        ]
-      }
-    });
+    let firebaseVerified = false;
 
-    if (!otpRecord && otp !== "123456") {
-      return res.status(400).json({ success: false, message: "Invalid verification code" });
+    // Check if the otp is actually a Firebase idToken (it's a JWT, so it's long)
+    if (otp && otp.length > 100) {
+      try {
+        const decodedToken = await firebaseAdmin.auth().verifyIdToken(otp);
+        const firebasePhone = decodedToken.phone_number;
+        
+        // Ensure the verified phone matches the requested phone
+        // Firebase phone includes country code (e.g., +916205170591).
+        // req.body.phone might be "6205170591" or "+916205170591". We do a loose match or exact.
+        if (firebasePhone && (firebasePhone === phone || firebasePhone.endsWith(phone))) {
+          firebaseVerified = true;
+        } else {
+           return res.status(400).json({ success: false, message: "Phone number mismatch with Firebase Auth" });
+        }
+      } catch (fbError) {
+        logger.error("Firebase verifyIdToken error in verifyOtp:", fbError);
+        return res.status(400).json({ success: false, message: "Invalid Firebase Token" });
+      }
+    }
+
+    let otpRecord = null;
+    if (!firebaseVerified) {
+      otpRecord = await prisma.oTP.findFirst({
+        where: {
+          OR: [
+            { email: email || "", emailOtp: otp },
+            { phone: phone || "", phoneOtp: otp }
+          ]
+        }
+      });
+
+      if (!otpRecord && otp !== "123456") {
+        return res.status(400).json({ success: false, message: "Invalid verification code" });
+      }
     }
 
     if (otpRecord && otpRecord.expiresAt < new Date()) {
@@ -774,11 +799,24 @@ export const login = async (req, res) => {
       return res.status(400).json({ success: false, message: "Incorrect password" });
     }
 
+    let firebaseVerified = false;
+    if (otp && otp.length > 100) {
+      try {
+        const decodedToken = await firebaseAdmin.auth().verifyIdToken(otp);
+        const firebasePhone = decodedToken.phone_number;
+        if (firebasePhone && (firebasePhone === email || firebasePhone.endsWith(email))) {
+          firebaseVerified = true;
+        }
+      } catch (fbError) {
+        logger.error("Firebase verifyIdToken error in login:", fbError);
+      }
+    }
+
     const otpRecord = await prisma.oTP.findFirst({
       where: { email }
     });
 
-    const isOtpValid = (otpRecord && (otp === otpRecord.emailOtp));
+    const isOtpValid = firebaseVerified || (otpRecord && (otp === otpRecord.emailOtp));
     
     if (!isOtpValid) {
       // Track failed OTP attempts in Redis
@@ -1941,27 +1979,48 @@ export const verifyPhoneOtp = async (req, res) => {
     const user = await prisma.user.findUnique({ where: { id: userId } });
     const email = user.email;
 
-    const otpRecord = await prisma.oTP.findFirst({
-      where: { email, phone }
-    });
-
-    if (!otpRecord) {
-      return res.status(400).json({ success: false, message: "No OTP record found. Please resend OTP." });
+    let firebaseVerified = false;
+    if (otp && otp.length > 100) {
+      try {
+        const decodedToken = await firebaseAdmin.auth().verifyIdToken(otp);
+        const firebasePhone = decodedToken.phone_number;
+        if (firebasePhone && (firebasePhone === phone || firebasePhone.endsWith(phone))) {
+          firebaseVerified = true;
+        } else {
+           return res.status(400).json({ success: false, message: "Phone number mismatch with Firebase Auth" });
+        }
+      } catch (fbError) {
+        logger.error("Firebase verifyIdToken error in verifyPhoneOtp:", fbError);
+        return res.status(400).json({ success: false, message: "Invalid Firebase Token" });
+      }
     }
 
-    if (otpRecord.expiresAt < new Date()) {
-      return res.status(400).json({ success: false, message: "OTP has expired" });
+    let otpRecord = null;
+    if (!firebaseVerified) {
+      otpRecord = await prisma.oTP.findFirst({
+        where: { email, phone }
+      });
+
+      if (!otpRecord) {
+        return res.status(400).json({ success: false, message: "No OTP record found. Please resend OTP." });
+      }
+
+      if (otpRecord.expiresAt < new Date()) {
+        return res.status(400).json({ success: false, message: "OTP has expired" });
+      }
+
+      const isValid = (otp === otpRecord.phoneOtp) || ((process.env.NODE_ENV === 'test' && otp === "123456"));
+      if (!isValid) {
+        return res.status(400).json({ success: false, message: "Invalid verification code" });
+      }
     }
 
-    const isValid = (otp === otpRecord.phoneOtp) || ((process.env.NODE_ENV === 'test' && otp === "123456"));
-    if (!isValid) {
-      return res.status(400).json({ success: false, message: "Invalid verification code" });
+    if (otpRecord) {
+      // Delete the OTP record
+      await prisma.oTP.delete({
+        where: { id: otpRecord.id }
+      });
     }
-
-    // Delete the OTP record
-    await prisma.oTP.delete({
-      where: { id: otpRecord.id }
-    });
 
     return res.status(200).json({
       success: true,
@@ -2013,8 +2072,12 @@ export const forgotPasswordOtp = async (req, res) => {
     });
 
     if (isPhone && user.phone) {
-      NotificationService.sendWhatsApp(user.phone, `Your password reset code is ${emailOtp}. It will expire in 10 minutes.`);
-      return res.status(200).json({ success: true, message: 'OTP sent to your phone number', otp: emailOtp, ...(process.env.NODE_ENV === 'development' || process.env.NODE_ENV === 'test' ? { testOtp: { phone: emailOtp } } : {}) });
+      return res.status(200).json({ 
+        success: true, 
+        message: 'OTP required via Firebase Phone Auth', 
+        requiresOtp: true,
+        otp: null 
+      });
     } else {
       NotificationService.sendEmail({
         to: user.email,
@@ -2046,17 +2109,33 @@ export const resetPassword = async (req, res) => {
       return res.status(404).json({ success: false, message: 'Account not found' });
     }
 
-    const otpRecord = await prisma.oTP.findFirst({
-      where: { 
-        OR: [
-          { email: user.email, emailOtp: otp },
-          { phone: user.phone, phoneOtp: otp }
-        ]
+    let firebaseVerified = false;
+    if (otp && otp.length > 100) {
+      try {
+        const decodedToken = await firebaseAdmin.auth().verifyIdToken(otp);
+        const firebasePhone = decodedToken.phone_number;
+        if (firebasePhone && (firebasePhone === user.phone || firebasePhone.endsWith(user.phone))) {
+          firebaseVerified = true;
+        }
+      } catch (fbError) {
+        logger.error("Firebase verifyIdToken error in resetPassword:", fbError);
       }
-    });
-    
-    if (!otpRecord) {
-      return res.status(400).json({ success: false, message: 'Invalid or expired OTP' });
+    }
+
+    let otpRecord = null;
+    if (!firebaseVerified) {
+      otpRecord = await prisma.oTP.findFirst({
+        where: { 
+          OR: [
+            { email: user.email, emailOtp: otp },
+            { phone: user.phone, phoneOtp: otp }
+          ]
+        }
+      });
+      
+      if (!otpRecord) {
+        return res.status(400).json({ success: false, message: 'Invalid or expired OTP' });
+      }
     }
 
     const hashedPassword = await argon2.hash(newPassword);

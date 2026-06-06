@@ -5,7 +5,7 @@ import { useLazySearchPlayersQuery } from "@redux/api/teamApi";
 import { useLazyGetCommunityFeedQuery, useGetCommunityFeedQuery } from "@redux/api/communityApi";
 import { useGetGroundsQuery } from "@redux/api/gamesApi";
 import axiosInstance from "@hooks/useAxiosInstance";
-import TurfCardMobile from "../features/turf/components/TurfCardMobile";
+import VenueCard from "../features/turf/components/VenueCard";
 import GameCard from "../features/games/components/GameCard";
 
 const HEADING_STYLE = { fontFamily: "'Open Sans', sans-serif" };
@@ -339,8 +339,12 @@ const GlobalSearch = () => {
                     No venues found
                   </div>
                 ) : (
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    {venues.map((t) => <TurfCardMobile key={t._id} turf={t} compact={true} />)}
+                  <div className="grid grid-cols-2 gap-4">
+                    {venues.map((t) => (
+                      <div key={t._id} className="aspect-[3/4]">
+                        <VenueCard t={t} onClick={() => navigate(`/venue/${t._id || t.id}`)} />
+                      </div>
+                    ))}
                   </div>
                 )}
               </div>
@@ -409,8 +413,8 @@ const GlobalSearch = () => {
               ) : popularGrounds.length > 0 ? (
                 <div className="flex gap-4 overflow-x-auto no-scrollbar pb-4 snap-x">
                   {popularGrounds.map(ground => (
-                    <div key={ground._id} className="min-w-[280px] w-[280px] shrink-0 snap-start">
-                      <TurfCardMobile turf={ground} compact={true} />
+                    <div key={ground._id} className="min-w-[160px] w-[160px] h-[220px] shrink-0 snap-start">
+                      <VenueCard t={ground} onClick={() => navigate(`/venue/${ground._id || ground.id}`)} />
                     </div>
                   ))}
                 </div>

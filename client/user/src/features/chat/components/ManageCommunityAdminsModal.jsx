@@ -91,8 +91,8 @@ const ManageCommunityAdminsModal = ({ isOpen, onClose, community, allChats }) =>
         {/* Header */}
         <div className="p-6 border-b border-white/5 flex justify-between items-center bg-white/[0.02] shrink-0">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-[8px] bg-[#BFF367]/10 flex items-center justify-center">
-              <Crown size={20} className="text-[#BFF367]" />
+            <div className="w-10 h-10 rounded-[8px] bg-[#B3DC26]/10 flex items-center justify-center">
+              <Crown size={20} className="text-[#B3DC26]" />
             </div>
             <div>
               <h2 className="text-lg font-black text-white italic uppercase tracking-tight">Manage Admins</h2>
@@ -105,15 +105,15 @@ const ManageCommunityAdminsModal = ({ isOpen, onClose, community, allChats }) =>
         </div>
 
         {/* Info Banner */}
-        <div className="mx-6 mt-4 p-3 bg-[#BFF367]/5 border border-[#BFF367]/20 rounded-[8px] shrink-0">
-          <p className="text-[11px] text-[#BFF367]/80 font-medium leading-relaxed">
+        <div className="mx-6 mt-4 p-3 bg-[#B3DC26]/5 border border-[#B3DC26]/20 rounded-[8px] shrink-0">
+          <p className="text-[11px] text-[#B3DC26]/80 font-medium leading-relaxed">
             Admins can post in Announcements, add groups, and manage community settings.
           </p>
         </div>
 
         {/* Search */}
         <div className="px-6 pt-4 shrink-0">
-          <div className="flex items-center gap-2 bg-white/[0.03] border border-white/10 rounded-[8px] px-4 py-2.5 focus-within:border-[#BFF367]/40 transition-all">
+          <div className="flex items-center gap-2 bg-white/[0.03] border border-white/10 rounded-[8px] px-4 py-2.5 focus-within:border-[#B3DC26]/40 transition-all">
             <Search size={14} className="text-white/30 shrink-0" />
             <input
               type="text"
@@ -141,7 +141,7 @@ const ManageCommunityAdminsModal = ({ isOpen, onClose, community, allChats }) =>
               return (
                 <div
                   key={memberId}
-                  className={`flex items-center gap-3 p-3 rounded-[8px] border transition-all ${ isAdmin ? 'bg-[#BFF367]/5 border-[#BFF367]/20' : 'bg-white/[0.02] border-transparent hover:border-white/10' }`}
+                  className={`flex items-center gap-3 p-3 rounded-[8px] border transition-all ${ isAdmin ? 'bg-[#B3DC26]/5 border-[#B3DC26]/20' : 'bg-white/[0.02] border-transparent hover:border-white/10' }`}
                 >
                   <img
                     src={member?.profilePicture || `https://ui-avatars.com/api/?name=${encodeURIComponent(member?.name || 'U')}&background=random`}
@@ -152,7 +152,7 @@ const ManageCommunityAdminsModal = ({ isOpen, onClose, community, allChats }) =>
                     <div className="flex items-center gap-2">
                       <p className="text-white font-bold text-sm truncate">{member?.name}</p>
                       {isAdmin && (
-                        <span className="shrink-0 text-[8px] bg-[#BFF367]/20 text-[#BFF367] px-1.5 py-0.5 rounded font-black uppercase tracking-wider">
+                        <span className="shrink-0 text-[8px] bg-[#B3DC26]/20 text-[#B3DC26] px-1.5 py-0.5 rounded font-black uppercase tracking-wider">
                           Admin
                         </span>
                       )}
@@ -164,7 +164,7 @@ const ManageCommunityAdminsModal = ({ isOpen, onClose, community, allChats }) =>
                     onClick={() => handleToggleAdmin(member, isAdmin)}
                     disabled={isLoading}
                     title={isAdmin ? 'Remove admin' : 'Make admin'}
-                    className={`shrink-0 p-2 rounded-[8px] transition-all flex items-center gap-1.5 text-[11px] font-black uppercase ${ isAdmin ? 'bg-red-500/10 text-red-400 hover:bg-red-500/20 hover:text-red-300' : 'bg-[#BFF367]/10 text-[#BFF367] hover:bg-[#BFF367] hover:text-black' } disabled:opacity-40`}
+                    className={`shrink-0 p-2 rounded-[8px] transition-all flex items-center gap-1.5 text-[11px] font-black uppercase ${ isAdmin ? 'bg-red-500/10 text-red-400 hover:bg-red-500/20 hover:text-red-300' : 'bg-[#B3DC26]/10 text-[#B3DC26] hover:bg-[#B3DC26] hover:text-black' } disabled:opacity-40`}
                   >
                     {isLoading ? (
                       <div className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin" />

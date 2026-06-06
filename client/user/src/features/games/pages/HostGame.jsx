@@ -626,7 +626,7 @@ const HostGame = () => {
   };
 
   return (
-    <div className="h-full bg-[#000] text-white pt-8 pb-4 px-6">
+    <div className="h-full bg-[#000] text-white pt-4 pb-4 px-3 sm:px-6">
       <div className={`max-w-4xl mx-auto transition-all duration-700 ${mounted ? 'translate-y-0 opacity-100' : 'translate-y-10 opacity-0'}`}>
         
         {/* Header */}
@@ -648,10 +648,7 @@ const HostGame = () => {
         {/* Step 1: Game Mode Selection */}
         {step === 1 && (
           <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} className="space-y-6 max-w-3xl mx-auto py-2">
-            <div className="text-center space-y-3">
-              <h2 className="text-[24px] sm:text-[30px] xl:text-[34px] font-black tracking-tight font-open-sans uppercase">SELECT GAME MODE</h2>
-              <p className="hidden sm:block text-[20px] text-neutral-500 font-medium font-inter">How do you want to organize your players?</p>
-            </div>
+
 
             <div className="grid grid-cols-2 gap-4">
               <button
@@ -739,29 +736,13 @@ const HostGame = () => {
               </button>
             </div>
 
-            <div className="flex gap-4">
-              <button
-                onClick={() => navigate(-1)}
-                className="flex-1 py-3 sm:py-3.5 bg-neutral-800 text-white font-black rounded-[8px] sm:rounded-[8px] hover:bg-neutral-700 transition-all duration-300 text-sm sm:text-base font-open-sans uppercase tracking-wider"
-              >
-                CANCEL
-              </button>
-              <button
-                onClick={() => setStep(2)}
-                disabled={!gameData.gameMode}
-                className="flex-[2] py-3 sm:py-3.5 bg-gradient-to-r from-[#BFF367] to-[#BFF367] text-black font-black rounded-[8px] sm:rounded-[8px] hover:scale-[1.01] active:scale-[0.99] transition-all duration-300 text-sm sm:text-base font-open-sans shadow-[0_10px_25px_rgba(85,222,232,0.25)] uppercase tracking-wider disabled:opacity-40 disabled:pointer-events-none disabled:shadow-none"
-              >
-                NEXT: SPORT & TIME
-              </button>
-            </div>
-          </motion.div>
-        )}
 
-﻿        {/* Step 2: Sport & Time */}
-        {step === 2 && (
-          <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} className="space-y-8">
+            {/* Step 2 integrated here */}
+            {gameData.gameMode && (
+              <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="space-y-8 pt-8 border-t border-white/10 mt-8">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <section>
-              <div className="flex items-center gap-2 mb-4">
+              <div className="flex items-center gap-2 mb-6">
                 <div className="w-[3px] h-[18px] bg-gradient-to-b from-cyan-400 to-lime-400 rounded-full" />
                 <label className="text-xs font-bold text-white uppercase tracking-widest block">Select Sport</label>
               </div>
@@ -848,7 +829,6 @@ const HostGame = () => {
               </AnimatePresence>
             </section>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <section className="space-y-6">
                 <div className="flex items-center gap-2 mb-6">
                   <div className="w-[3px] h-[18px] bg-gradient-to-b from-cyan-400 to-lime-400 rounded-full" />
@@ -880,6 +860,7 @@ const HostGame = () => {
                   />
                 </div>
               </section>
+            </div>
 
               <section className="space-y-6">
                 <div className="flex items-center gap-2 mb-6">
@@ -1008,25 +989,19 @@ const HostGame = () => {
                   </div>
                 </div>
               </section>
-            </div>
-
-            <div className="flex gap-4 pt-4">
-              <div className="flex-1 p-[1.5px] bg-gradient-to-r from-cyan-400 to-lime-400 rounded-[8px]">
-                <button 
-                  onClick={() => setStep(1)} 
-                  className="w-full h-full bg-[#000] hover:bg-[#0c1424] text-cyan-400 font-extrabold rounded-[6.5px] py-3.5 transition-all text-sm uppercase tracking-wider flex items-center justify-center"
-                >
-                  BACK
-                </button>
-              </div>
+            
+            <div className="flex pt-4 mt-4">
               <button
-                disabled={!gameData.gameType || !gameData.date || !gameData.time || !gameData.city || !gameData.state}
                 onClick={() => setStep(3)}
-                className="flex-[2] py-4 bg-gradient-to-r from-cyan-400 to-lime-400 text-black font-extrabold rounded-[8px] hover:opacity-95 active:scale-[0.99] transition-all disabled:opacity-50 disabled:pointer-events-none text-sm uppercase tracking-wider shadow-[0_4px_20px_rgba(6,182,212,0.15)]"
+                disabled={!gameData.gameMode || !gameData.gameType || !gameData.date || !gameData.time || !gameData.city || !gameData.state}
+                className="w-full py-3.5 sm:py-4 bg-gradient-to-r from-[#BFF367] to-[#BFF367] text-black font-black rounded-[8px] sm:rounded-[8px] hover:scale-[1.01] active:scale-[0.99] transition-all duration-300 text-sm sm:text-base font-open-sans shadow-[0_10px_25px_rgba(191,243,103,0.15)] uppercase tracking-wider disabled:opacity-40 disabled:pointer-events-none disabled:shadow-none"
               >
                 CONTINUE
               </button>
             </div>
+
+            </motion.div>
+            )}
           </motion.div>
         )}
 
@@ -1134,10 +1109,10 @@ const HostGame = () => {
 
         {/* Step 4: Setup (Quick vs Professional) */}
         {step === 4 && gameData.gameMode === 'QUICK' && (
-          <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} className="space-y-6 max-w-2xl mx-auto">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 bg-neutral-900/40 border border-neutral-800/80 rounded-[8px] p-5 sm:p-6 shadow-xl shadow-black/30">
+          <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} className="space-y-6 max-w-md mx-auto">
+            <div className="bg-neutral-900/40 border border-neutral-800/80 rounded-[8px] p-5 sm:p-6 shadow-xl shadow-black/30">
               
-              {/* Left Column: Settings (Total Players & Entry Fee) */}
+              {/* Settings (Total Players & Entry Fee) */}
               <div className="space-y-4 flex flex-col justify-between">
                 <div>
                   <div className="flex items-center gap-2 mb-4">
@@ -1200,90 +1175,15 @@ const HostGame = () => {
                   </span>
                 </div>
               </div>
-
-              {/* Right Column: Custom Background Cover Photo */}
-              <div className="space-y-3.5 border-t md:border-t-0 md:border-l border-neutral-800/80 pt-4 md:pt-0 md:pl-5">
-                <div className="flex items-center gap-2 mb-1">
-                  <div className="w-[3px] h-[16px] bg-gradient-to-b from-[#BFF367] to-[#BFF367] rounded-full" />
-                  <h3 className="text-xs font-black uppercase text-white tracking-wider">Match Background</h3>
-                </div>
-
-                {/* Image Preview */}
-                <div className="relative w-full aspect-video rounded-[8px] overflow-hidden border border-white/5 bg-neutral-950">
-                  <img
-                    src={gameData.teamA?.image || MOCK_TEAM_IMAGES[0].url}
-                    alt="Quick Match Background Cover"
-                    className="w-full h-full object-cover"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent" />
-                  <div className="absolute bottom-2 left-2">
-                    <span className="text-[8px] font-black text-black bg-[#BFF367] px-2 py-0.5 rounded uppercase tracking-wider shadow">
-                      Card Cover
-                    </span>
-                  </div>
-                </div>
-
-                {/* Upload Action */}
-                <label
-                  htmlFor="quick-cover-upload"
-                  className="flex flex-col items-center justify-center gap-1.5 p-3 border-2 border-dashed border-[#BFF367]/25 rounded-[8px] cursor-pointer hover:border-[#BFF367]/50 hover:bg-[#BFF367]/5 transition-all group"
-                >
-                  <div className="w-7 h-7 rounded-full bg-[#BFF367]/10 border border-[#BFF367]/20 flex items-center justify-center group-hover:bg-[#BFF367]/20 transition-all shrink-0">
-                    <ImageIcon size={14} className="text-[#BFF367]" />
-                  </div>
-                  <span className="text-[9px] font-black text-[#BFF367] uppercase tracking-wider text-center">
-                    {gameData.teamA?.imageName ? 'Change Cover Photo' : 'Upload Custom Image'}
-                  </span>
-                  {gameData.teamA?.imageName && (
-                    <span className="text-[8px] text-white/30 truncate max-w-[150px]">{gameData.teamA.imageName}</span>
-                  )}
-                  <input
-                    id="quick-cover-upload"
-                    type="file"
-                    accept="image/*"
-                    className="hidden"
-                    onChange={(e) => handleTeamImageUpload('teamA', e)}
-                  />
-                </label>
-
-                {/* Preset Cover Selector */}
-                <div className="space-y-1">
-                  <span className="text-[8px] font-black text-neutral-500 uppercase tracking-widest block">Preset Backdrops</span>
-                  <div className="flex gap-1.5 overflow-x-auto pb-1 no-scrollbar max-w-full">
-                    {MOCK_TEAM_IMAGES.map((img) => {
-                      const isSelected = (gameData.teamA?.image || MOCK_TEAM_IMAGES[0].url) === img.url;
-                      return (
-                        <button
-                          key={img.url}
-                          type="button"
-                          onClick={() => setGameData(prev => ({ 
-                            ...prev, 
-                            teamA: { ...prev.teamA, image: img.url, imageName: null } 
-                          }))}
-                          className={`relative rounded-[4px] overflow-hidden border transition-all shrink-0 w-12 aspect-video ${ 
-                            isSelected 
-                              ? 'border-[#BFF367] shadow-[0_0_8px_rgba(191,243,103,0.3)]' 
-                              : 'border-transparent hover:border-white/20' 
-                          }`}
-                        >
-                          <img src={img.url} alt={img.label} className="w-full h-full object-cover" />
-                          {isSelected && (
-                            <div className="absolute inset-0 bg-[#BFF367]/10 flex items-center justify-center">
-                              <CheckCircle2 size={10} className="text-[#BFF367]" />
-                            </div>
-                          )}
-                        </button>
-                      );
-                    })}
-                  </div>
-                </div>
-
-              </div>
-
             </div>
 
             <div className="flex gap-4 max-w-lg mx-auto w-full">
-              <button onClick={() => setStep(3)} className="flex-1 py-3 bg-neutral-900 hover:bg-neutral-850 text-neutral-400 font-bold rounded-[8px] border border-neutral-800 hover:border-neutral-700 transition-all text-sm uppercase tracking-wider font-open-sans">Back</button>
+              <button 
+                onClick={() => setStep(3)} 
+                className="flex-1 py-3 sm:py-3.5 bg-neutral-800 text-white font-black rounded-[8px] sm:rounded-[8px] hover:bg-neutral-700 transition-all duration-300 text-sm sm:text-base font-open-sans uppercase tracking-wider"
+              >
+                BACK
+              </button>
               <button
                 disabled={gameData.quickPlayerCount < 2}
                 onClick={initQuickSlots}

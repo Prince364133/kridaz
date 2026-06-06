@@ -171,7 +171,7 @@ const PostItem = React.memo(({ post, user, isAdmin, gateInteraction, onUpdatePos
     post.authorId === currentUserId;
 
   return (
-    <div className="bg-[#0A0A0A] border border-white/5 rounded-[12px] overflow-hidden flex flex-col">
+    <div className="bg-[#0A0A0A] border border-white/5 rounded-[12px] overflow-hidden flex flex-col max-w-[470px] mx-auto w-full">
       {/* Post Header */}
       <div className="flex items-center justify-between p-4 pb-2">
         <Link
@@ -242,17 +242,17 @@ const PostItem = React.memo(({ post, user, isAdmin, gateInteraction, onUpdatePos
 
       {/* Media Display */}
       {post.mediaUrls && post.mediaUrls.length > 0 ? (
-        <div className="relative w-full aspect-[4/5] bg-[#050505] group overflow-hidden">
+        <div className="relative w-full pb-[125%] bg-[#050505] group overflow-hidden">
           <div 
-            className="flex overflow-x-auto snap-x snap-mandatory h-full w-full [&::-webkit-scrollbar]:hidden" 
+            className="absolute inset-0 flex overflow-x-auto snap-x snap-mandatory [&::-webkit-scrollbar]:hidden" 
             style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
             onScroll={handleMediaScroll}
           >
             {post.mediaUrls.map((url, idx) => (
-              <div key={idx} className="min-w-full h-full snap-center shrink-0 relative">
+              <div key={idx} className="min-w-full w-full max-w-full h-full flex-none snap-center relative">
                 <img
                   src={url}
-                  className={`w-full h-full object-contain transition-all duration-500 ${
+                  className={`absolute inset-0 w-full h-full object-contain transition-all duration-500 ${
                     post.status === "pending" || post.status === "processing" ? "blur-xl scale-110 opacity-50" : ""
                   }`}
                   alt=""
@@ -319,10 +319,10 @@ const PostItem = React.memo(({ post, user, isAdmin, gateInteraction, onUpdatePos
           )}
         </div>
       ) : (post.image || post.imageUrl || post.mediaUrl) ? (
-        <div className="relative w-full aspect-[4/5] bg-[#050505] group overflow-hidden">
+        <div className="relative w-full pb-[125%] bg-[#050505] group overflow-hidden">
           <img
             src={post.image || post.imageUrl || post.thumbnailUrl || post.mediaUrl}
-            className={`w-full h-full object-contain transition-all duration-500 ${
+            className={`absolute inset-0 w-full h-full object-contain transition-all duration-500 ${
               post.status === "pending" || post.status === "processing" ? "blur-xl scale-110 opacity-50" : ""
             }`}
             alt=""

@@ -5,6 +5,8 @@ import toast from "react-hot-toast";
 import { useDispatch } from "react-redux";
 import { updateUser, login } from "@redux/slices/authSlice";
 import { searchLocations } from "@utils/locationService";
+import { auth } from "../../../config/firebase";
+import { RecaptchaVerifier, signInWithPhoneNumber } from "firebase/auth";
 
 const getNameFromEmail = (email) => {
   if (!email) return "";
@@ -177,27 +179,32 @@ const OnboardingModal = ({ isOpen, onClose, initialData, onComplete }) => {
     }
   }, [isOpen, initialData]);
 
+  useEffect(() => {
+    if (isOpen && needsPhoneVerification && !window.recaptchaVerifier) {
+      window.recaptchaVerifier = new RecaptchaVerifier(auth, 'recaptcha-container', {
+        'size': 'invisible'
+      });
+    }
+  }, [isOpen, needsPhoneVerification]);
+
   const handleSendPhoneOtp = async () => {
     if (!formData.phone || formData.phone.length < 10) {
       return toast.error("Please enter a valid 10-digit phone number");
     }
     setSendingPhoneOtp(true);
     try {
-      const endpoint = isGoogle 
-        ? "/api/user/auth/send-phone-verification-otp" 
-        : "/api/user/auth/send-otp";
-      
-      const payload = isGoogle 
-        ? { phone: formData.phone } 
-        : { email: formData.email, phone: formData.phone };
-
-      const res = await axiosInstance.post(endpoint, payload);
-      if (res.data.success) {
+      const formattedPhone = formData.phone.startsWith('+') ? formData.phone : `+91${formData.phone}`;
+      if (window.recaptchaVerifier) {
+        const confirmationResult = await signInWithPhoneNumber(auth, formattedPhone, window.recaptchaVerifier);
+        window.confirmationResult = confirmationResult;
         setPhoneOtpSent(true);
         toast.success("Verification OTP sent successfully!");
+      } else {
+        toast.error("Recaptcha not initialized");
       }
     } catch (error) {
-      toast.error(error.response?.data?.message || "Failed to send verification OTP");
+      console.error("Firebase send error:", error);
+      toast.error(error.message || "Failed to send verification OTP");
     } finally {
       setSendingPhoneOtp(false);
     }
@@ -208,14 +215,20 @@ const OnboardingModal = ({ isOpen, onClose, initialData, onComplete }) => {
       return toast.error("Please enter the 6-digit OTP");
     }
     setVerifyingPhoneOtp(true);
+    let firebaseIdToken = null;
     try {
+      if (window.confirmationResult) {
+        const result = await window.confirmationResult.confirm(phoneOtp);
+        firebaseIdToken = await result.user.getIdToken();
+      }
+
       const endpoint = isGoogle 
         ? "/api/user/auth/verify-phone-otp" 
         : "/api/user/auth/verify-otp";
 
       const payload = isGoogle 
-        ? { phone: formData.phone, otp: phoneOtp }
-        : { email: formData.email, phone: formData.phone, otp: phoneOtp };
+        ? { phone: formData.phone, otp: firebaseIdToken || phoneOtp }
+        : { email: formData.email, phone: formData.phone, otp: firebaseIdToken || phoneOtp };
 
       const res = await axiosInstance.post(endpoint, payload);
       if (res.data.success) {
@@ -226,7 +239,8 @@ const OnboardingModal = ({ isOpen, onClose, initialData, onComplete }) => {
         toast.success("Phone number verified successfully!");
       }
     } catch (error) {
-      toast.error(error.response?.data?.message || "Invalid OTP");
+      console.error("Firebase OTP confirmation error:", error);
+      toast.error(error.response?.data?.message || error.message || "Invalid OTP");
     } finally {
       setVerifyingPhoneOtp(false);
     }
@@ -809,6 +823,7 @@ const OnboardingModal = ({ isOpen, onClose, initialData, onComplete }) => {
           </div>
         </div>
       </div>
+      <div id="recaptcha-container"></div>
     </div>
   </div>
   );

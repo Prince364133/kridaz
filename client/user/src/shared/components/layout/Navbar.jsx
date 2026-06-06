@@ -1,7 +1,7 @@
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { getDynamicProfileRoute } from "@utils/routeUtils";
 import { useSelector, useDispatch } from "react-redux";
-import { User, Users, X, LogOut, Activity, ShieldCheck, Zap, ArrowRight, Clock, Trophy, Target, MessageCircle, MapPin, Bell, UserSearch, Search, Plus, Bookmark, FileText, Home, Briefcase, ChevronDown } from "lucide-react";
+import { User, Users, X, LogOut, Activity, ShieldCheck, Zap, ArrowRight, Clock, Trophy, Target, MessageCircle, MapPin, Bell, UserSearch, Search, Plus, Bookmark, FileText, Home, Briefcase, ChevronDown, Award } from "lucide-react";
 import { useState, useCallback } from "react";
 import { createPortal } from "react-dom";
 import { logout } from "@redux/slices/authSlice";
@@ -97,9 +97,9 @@ const Navbar = () => {
     { name: "Professionals", path: "/business/professional", icon: Briefcase },
   ] : [
     { name: "Home", path: "/", icon: Home },
-    { name: "Venues", path: "/venues", icon: MapPin },
-    { name: "Pros", path: "/professionals", icon: UserSearch },
-    { name: "Join Games", path: "/join-games", icon: Target },
+    { name: "My Teams", path: "/my-teams", icon: Users },
+    { name: "Pros", path: "/professionals", icon: Award },
+    { name: "Join Games", path: "/join-games", icon: Trophy },
     { name: "Players", path: "/players", icon: Users },
     { name: "Business", path: "#", icon: Briefcase },
   ];
@@ -131,7 +131,7 @@ const Navbar = () => {
       className: location.pathname === "/venues" ? "active-dock-item" : ""
     },
     { 
-      icon: <UserSearch size={22} className={location.pathname === "/professionals" ? "text-[#BFF367]" : ""} />, 
+      icon: <Award size={22} className={location.pathname === "/professionals" ? "text-[#BFF367]" : ""} />, 
       label: "Pros", 
       onClick: () => navigate("/professionals"),
       className: location.pathname === "/professionals" ? "active-dock-item" : ""
@@ -280,7 +280,7 @@ const Navbar = () => {
             {/* Search Icon */}
             <Link
               to="/search"
-              className="relative w-9 sm:w-11 h-9 sm:h-11 border border-white/10 flex items-center justify-center bg-white/5 hover:border-[#84CC16]/50 transition-all cursor-pointer rounded-full group"
+              className="hidden sm:flex relative w-9 sm:w-11 h-9 sm:h-11 border border-white/10 items-center justify-center bg-white/5 hover:border-[#84CC16]/50 transition-all cursor-pointer rounded-full group"
             >
               <Search size={18} className="text-white/40 group-hover:text-[#84CC16] transition-colors" />
             </Link>

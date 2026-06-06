@@ -156,11 +156,16 @@ export default function Home() {
 
 
 
-  const handleFollowToggle = async (e, p) => {
-    if (e && e.preventDefault) e.preventDefault();
-    if (e && e.stopPropagation) e.stopPropagation();
+  const handleFollowToggle = async (eOrId, p) => {
+    let playerId;
+    if (typeof eOrId === 'string') {
+      playerId = eOrId;
+    } else {
+      if (eOrId && eOrId.preventDefault) eOrId.preventDefault();
+      if (eOrId && eOrId.stopPropagation) eOrId.stopPropagation();
+      playerId = p?._id || p?.id;
+    }
     
-    const playerId = p?._id || p?.id;
     if (!playerId) return;
 
     if (!user) {
@@ -194,25 +199,31 @@ export default function Home() {
           <DashboardHero user={user} />
 
           {/* -- AD BANNERS -- */}
-          <AdBannerSection banners={marketingContent?.banners || []} />
+          <div className="!mt-0">
+            <AdBannerSection banners={marketingContent?.banners || []} />
+          </div>
 
           {/* -- FIND YOUR ARENA -- */}
-          <VenuesSection
-            userLocation={userLocation}
-            loading={loading}
-            turfLoading={turfLoading}
-            error={error}
-            displayTurfs={displayTurfs}
-            setTurfFilters={setTurfFilters}
-          />
+          <div className="!mt-0">
+            <VenuesSection
+              userLocation={userLocation}
+              loading={loading}
+              turfLoading={turfLoading}
+              error={error}
+              displayTurfs={displayTurfs}
+              setTurfFilters={setTurfFilters}
+            />
+          </div>
 
           {/* -- FIND PLAYERS NEAR YOU -- */}
-          <PlayersSection
-            loading={loading}
-            players={players}
-            followingIds={followingIds}
-            handleFollowToggle={handleFollowToggle}
-          />
+          <div className="!mt-2">
+            <PlayersSection
+              loading={loading}
+              players={players}
+              followingIds={followingIds}
+              handleFollowToggle={handleFollowToggle}
+            />
+          </div>
 
           {/* -- SOCIAL ARENA -- */}
           <SocialArenaSection reelsFeed={reelsFeed} />

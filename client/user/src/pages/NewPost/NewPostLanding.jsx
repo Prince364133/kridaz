@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState, useCallback } from "react";
-import { X, Image as ImageIcon, Video, Sparkles } from "lucide-react";
+import { X, Image as ImageIcon, Video, Sparkles, SwitchCamera } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
 const POST_TYPES = ["Post", "Reel", "Story"];
@@ -14,6 +14,7 @@ const NewPostLanding = () => {
   
   const [stream, setStream] = useState(null);
   const [activeTab, setActiveTab] = useState("Story");
+  const [facingMode, setFacingMode] = useState("environment");
   const [isRecording, setIsRecording] = useState(false);
   const [recordingDuration, setRecordingDuration] = useState(0);
   const recordingDurationRef = useRef(0);
@@ -26,7 +27,7 @@ const NewPostLanding = () => {
   const startCamera = useCallback(async () => {
     try {
       const mediaStream = await navigator.mediaDevices.getUserMedia({ 
-        video: { facingMode: "environment" },
+        video: { facingMode },
         audio: true 
       });
       setStream(mediaStream);
@@ -37,7 +38,7 @@ const NewPostLanding = () => {
       console.error("Error accessing camera:", err);
       try {
         const mediaStreamFallback = await navigator.mediaDevices.getUserMedia({ 
-          video: { facingMode: "environment" }
+          video: { facingMode }
         });
         setStream(mediaStreamFallback);
         if (videoRef.current) {
@@ -47,7 +48,11 @@ const NewPostLanding = () => {
         console.error("Error accessing camera fallback:", fallbackErr);
       }
     }
-  }, []);
+  }, [facingMode]);
+
+  const toggleCamera = () => {
+    setFacingMode(prev => prev === "environment" ? "user" : "environment");
+  };
 
   const stopCamera = useCallback(() => {
     if (videoRef.current && videoRef.current.srcObject) {
@@ -425,6 +430,14 @@ const NewPostLanding = () => {
             <div className={`w-16 h-16 rounded-full flex items-center justify-center shadow-[0_0_30px_rgba(255,255,255,0.3)] transition-all duration-300 ${isRecording ? 'bg-red-500 scale-75 rounded-[12px]' : 'bg-white'}`}>
               {!isRecording && <div className="w-14 h-14 border-[2px] border-black/10 rounded-full" />}
             </div>
+          </button>
+
+          {/* Flip Camera Button */}
+          <button 
+            onClick={toggleCamera}
+            className={`absolute transition-all duration-300 flex items-center justify-center w-12 h-12 hover:bg-white/10 bg-black/60 backdrop-blur-md border border-white/20 rounded-full shadow-xl right-6`}
+          >
+            <SwitchCamera size={22} className="text-white" />
           </button>
         </div>
       </div>

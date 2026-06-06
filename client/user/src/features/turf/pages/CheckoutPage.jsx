@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useLocation, useNavigate, useParams, Link } from "react-router-dom";
 import { useSelector } from "react-redux";
+import { useGetTurfDetailsQuery } from "@redux/api/turfApi";
 import { 
   IndianRupee, 
   ShieldCheck, 
@@ -47,6 +48,10 @@ const CheckoutPage = () => {
   const navigate = useNavigate();
   const { user } = useSelector((/** @type {any} */ state) => state.auth);
   
+  // Fetch real data
+  const { data: turfData } = useGetTurfDetailsQuery(turfId, { skip: !turfId });
+  const turf = turfData?.turf || turfData;
+
   // Extract booking data from location state or fallback
   const bookingData = location.state || {};
   const { 
@@ -99,7 +104,8 @@ const CheckoutPage = () => {
   }, [user]);
 
   // Calculations
-  const venueCharges = amount || 0;
+  const fetchedPrice = (turf?.pricePerHour || 0) * (duration || 1);
+  const venueCharges = amount || fetchedPrice;
   const serviceCharge = Math.round(venueCharges * 0.0125) || 25; 
   const gstAmount = 0;
   const discount = appliedCoupon ? appliedCoupon.discount : 0;
@@ -210,39 +216,39 @@ const CheckoutPage = () => {
 
   if (step === "SUCCESS") {
     return (
-      <div className="min-h-screen bg-[#000000] flex items-center justify-center p-4">
+      <div className="bg-[#000000] flex items-center justify-center px-1 pt-24 pb-12">
         <svg width="0" height="0" className="hidden">
           <defs>
             <linearGradient id="theme-gradient" x1="0%" y1="0%" x2="100%" y2="0%">
-              <stop offset="0%" stopColor="#BFF367" />
-              <stop offset="100%" stopColor="#BFF367" />
+              <stop offset="0%" stopColor="#55DEE8" />
+              <stop offset="100%" stopColor="#B3DC26" />
             </linearGradient>
           </defs>
         </svg>
         <motion.div 
           initial={{ opacity: 0, scale: 0.9 }}
           animate={{ opacity: 1, scale: 1 }}
-          className="bg-zinc-900 border border-zinc-800 p-12 rounded-[8px] text-center max-w-xl w-full relative overflow-hidden"
+          className="bg-[#121212] border border-[rgba(255,255,255,0.08)] p-3 rounded-[12px] text-center max-w-xl w-full relative overflow-hidden"
         >
-          <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-[#BFF367] to-[#BFF367]" />
-          <div className="w-24 h-24 bg-gradient-to-r from-[#BFF367] to-[#BFF367] rounded-full flex items-center justify-center mx-auto mb-8 shadow-[0_0_50px_rgba(85,222,232,0.3)]">
-            <Check size={48} className="text-black stroke-[3px]" />
+          <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-[#55DEE8] to-[#B3DC26]" />
+          <div className="w-10 h-10 bg-gradient-to-r from-[#55DEE8] to-[#B3DC26] rounded-full flex items-center justify-center mx-auto mb-3 shadow-[0px_8px_24px_rgba(191,243,103,0.15)]">
+            <Check size={20} className="text-[#000000] stroke-[3px]" />
           </div>
           
-          <h2 className="text-4xl font-black text-white uppercase tracking-tighter mb-4 font-open-sans">Slot Secured!</h2>
-          <p className="text-zinc-400 uppercase text-[20px] tracking-widest mb-10" style={SUBHEADING_STYLE}>Your booking at {turfName} is confirmed.</p>
+          <h2 className="text-[16px] font-[700] text-[#FFFFFF] uppercase tracking-tighter mb-1 font-inter">Slot Secured!</h2>
+          <p className="text-[rgba(255,255,255,0.70)] uppercase text-[10px] tracking-widest mb-4">Your booking at {turfName} is confirmed.</p>
           
-          <div className="grid grid-cols-1 gap-4">
+          <div className="grid grid-cols-1 gap-2">
             <Link 
               to={`/booking-pass/${bookingId}`}
-              className="bg-gradient-to-r from-[#BFF367] to-[#BFF367] text-black h-16 rounded-[8px] font-black uppercase text-sm tracking-widest flex items-center justify-center gap-3 hover:scale-[1.02] transition-all"
+              className="w-full h-[36px] bg-gradient-to-r from-[#55DEE8] to-[#B3DC26] text-[#000000] rounded-[8px] font-[700] text-[12px] flex items-center justify-center gap-2 shadow-[0px_8px_24px_rgba(191,243,103,0.15)] border-none"
             >
               Download Digital Pass
-              <ArrowRight size={20} />
+              <ArrowRight size={14} />
             </Link>
             <Link 
               to="/booking-history"
-              className="bg-zinc-800 text-white h-16 rounded-[8px] font-black uppercase text-sm tracking-widest flex items-center justify-center gap-3 hover:bg-zinc-700 transition-all"
+              className="w-full h-[36px] bg-[#1B1B1B] text-[#FFFFFF] border border-[rgba(255,255,255,0.08)] rounded-[8px] font-[700] text-[12px] flex items-center justify-center gap-2"
             >
               View Booking History
             </Link>
@@ -253,96 +259,87 @@ const CheckoutPage = () => {
   }
 
   return (
-    <div className="min-h-screen bg-[#000000] text-white py-10 px-4 md:px-8 font-inter">
+    <div className="bg-[#000000] text-white pt-1 pb-4 px-0 font-inter">
       {/* SVG Definitions for global gradient */}
       <svg width="0" height="0" className="hidden">
         <defs>
           <linearGradient id="theme-gradient" x1="0%" y1="0%" x2="100%" y2="0%">
-            <stop offset="0%" stopColor="#BFF367" />
-            <stop offset="100%" stopColor="#BFF367" />
+            <stop offset="0%" stopColor="#55DEE8" />
+            <stop offset="100%" stopColor="#B3DC26" />
           </linearGradient>
         </defs>
       </svg>
 
       <div className="max-w-6xl mx-auto">
         {/* Header */}
-        <div className="flex items-center gap-4 mb-10">
+        <div className="flex items-center gap-3 mb-2 px-0.5">
           <button 
             onClick={() => navigate(-1)}
-            className="flex items-center gap-2 px-4 py-2 rounded-[6px] bg-zinc-900 border border-zinc-700 hover:border-[#BFF367]/60 hover:bg-zinc-800 transition-all text-zinc-300 hover:text-[#BFF367] shrink-0"
+            className="flex items-center justify-center gap-2 px-3 h-[36px] rounded-[12px] bg-[#1B1B1B] border border-[rgba(255,255,255,0.08)] text-[#FFFFFF] shrink-0"
           >
-            <ChevronLeft size={18} />
-            <span className="text-xs font-black uppercase tracking-widest">Back</span>
+            <ChevronLeft size={16} />
+            <span className="text-[12px] font-[700] uppercase tracking-widest">Back</span>
           </button>
           <div>
-            <h1 className="text-3xl font-bold tracking-tight uppercase font-open-sans">Checkout</h1>
+            <h1 className="text-[20px] font-[700] tracking-tight uppercase font-inter text-[#FFFFFF]">Checkout</h1>
           </div>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-2 items-start px-0.5">
           {/* Left Column: Summary */}
-          <div className="lg:col-span-7 bg-[#121212] border border-zinc-800 rounded-[8px] overflow-hidden">
+          <div className="lg:col-span-7 bg-[#121212] border border-[rgba(255,255,255,0.08)] rounded-[12px] overflow-hidden">
             {/* Hero Image */}
-            <div className="h-[200px] w-full bg-zinc-900">
-              <img src="/banner-1.png" className="w-full h-full object-cover opacity-80" alt="Venue" />
+            <div className="h-[80px] w-full bg-[#1B1B1B]">
+              <img src={turf?.images?.[0] || "/banner-1.png"} className="w-full h-full object-cover" alt="Venue" />
             </div>
 
             {/* Turf Title & Time */}
-            <div className="p-6 border-b border-zinc-800/50">
+            <div className="px-1 py-2 border-b border-[rgba(255,255,255,0.08)]">
               <div>
-                <h2 className="text-xl font-bold text-white uppercase tracking-tight font-open-sans">{turfName || "Kridaz Venue"}</h2>
-                <div className="flex items-center gap-3 text-zinc-400 text-xs mt-1.5 font-bold uppercase tracking-wide">
-                  <Clock className="w-4 h-4" /> 
-                  <span>{startTime} ({duration} hr)</span> 
-                  <span className="text-zinc-700">|</span> 
-                  <Calendar className="w-4 h-4" /> 
+                <h2 className="text-[16px] font-[700] text-[#FFFFFF] uppercase tracking-tight font-inter">{turfName || turf?.name || "Kridaz Venue"}</h2>
+                <div className="flex items-center gap-3 text-[rgba(255,255,255,0.70)] text-[10px] mt-1 font-[600] uppercase tracking-wide">
+                  <Clock className="w-3.5 h-3.5" /> 
+                  <span>{startTime} ({duration || 1} hr)</span> 
+                  <span className="text-[rgba(255,255,255,0.08)]">|</span> 
+                  <Calendar className="w-3.5 h-3.5" /> 
                   <span>{selectedDate ? format(new Date(selectedDate), "MM/dd/yyyy") : "Select Date"}</span>
                 </div>
               </div>
             </div>
 
             {/* Payment Plan Section */}
-            <div className="p-6 border-b border-zinc-800/50">
-
-              <div className="grid grid-cols-3 gap-3">
+            <div className="px-1 py-2 border-b border-[rgba(255,255,255,0.08)] flex items-center justify-between">
+              <span className="text-[12px] font-[700] text-[#FFFFFF] uppercase tracking-widest font-inter">Payment Plan</span>
+              <div className="flex bg-[#1B1B1B] rounded-[8px] p-1 border border-[rgba(255,255,255,0.08)]">
                 {[30, 50, 100].map((pct) => (
                   <button
                     key={pct}
                     onClick={() => setPaymentPercentage(pct)}
-                    className={`relative p-4 rounded-[8px] border transition-all flex flex-col items-center gap-1.5 ${ paymentPercentage === pct ? "bg-[#1C1C1C] border-[#BFF367] shadow-[0_0_10px_rgba(191,243,103,0.1)]" : "bg-[#0A0A0A] border-zinc-800 hover:border-zinc-700" }`}
+                    className={`px-3 py-1.5 rounded-[6px] text-[10px] font-[700] uppercase tracking-wider transition-all ${
+                      paymentPercentage === pct 
+                        ? "bg-gradient-to-r from-[#55DEE8] to-[#B3DC26] text-[#000000] shadow-[0px_2px_8px_rgba(191,243,103,0.15)]" 
+                        : "text-[rgba(255,255,255,0.70)] hover:text-[#FFFFFF]"
+                    }`}
                   >
-                    <span className={`text-xl font-black ${paymentPercentage === pct ? "text-transparent bg-clip-text bg-gradient-to-r from-[#BFF367] to-[#BFF367]" : "text-zinc-500"}`}>
-                      {pct}%
-                    </span>
-                    <span className="text-[9px] font-bold uppercase tracking-widest text-zinc-400">
-                      {pct === 100 ? "Full Pay" : "Advance"}
-                    </span>
-                    {paymentPercentage === pct && (
-                      <motion.div 
-                        layoutId="active-plan"
-                        className="absolute -top-2 -right-2 w-5 h-5 rounded-full flex items-center justify-center text-black shadow-lg bg-gradient-to-r from-[#BFF367] to-[#BFF367]"
-                      >
-                        <Check size={12} strokeWidth={4} />
-                      </motion.div>
-                    )}
+                    {pct === 100 ? "FULL" : `${pct}%`}
                   </button>
                 ))}
               </div>
             </div>
 
             {/* Price Details */}
-            <div className="p-6 space-y-5 border-b border-zinc-800/50">
-              <h3 className="text-xs font-bold text-zinc-300 uppercase tracking-widest font-open-sans">Price Details</h3>
-              <div className="flex justify-between text-sm text-zinc-400 font-medium">
+            <div className="px-1 py-2 space-y-1.5 border-b border-[rgba(255,255,255,0.08)]">
+              <h3 className="text-[10px] font-[700] text-[#FFFFFF] uppercase tracking-widest font-inter">Price Details</h3>
+              <div className="flex justify-between text-[12px] text-[rgba(255,255,255,0.70)] font-[400]">
                 <span>Slot Price</span>
-                <span className="text-white">₹ {venueCharges}</span>
+                <span className="text-[#FFFFFF]">₹ {venueCharges}</span>
               </div>
-              <div className="flex justify-between text-sm text-zinc-400 font-medium">
-                <span className="flex items-center gap-2">Service Charge <Info className="w-4 h-4 text-zinc-500" /></span>
-                <span className="text-white">₹ {serviceCharge}</span>
+              <div className="flex justify-between text-[12px] text-[rgba(255,255,255,0.70)] font-[400]">
+                <span className="flex items-center gap-1.5">Service Charge <Info className="w-3.5 h-3.5 text-[rgba(255,255,255,0.70)]" /></span>
+                <span className="text-[#FFFFFF]">₹ {serviceCharge}</span>
               </div>
               {appliedCoupon && (
-                <div className="flex justify-between text-sm font-medium text-transparent bg-clip-text bg-gradient-to-r from-[#BFF367] to-[#BFF367]">
+                <div className="flex justify-between text-[12px] font-[600] text-[#B3DC26]">
                   <span>Discount ({appliedCoupon.code})</span>
                   <span>-₹ {discount}</span>
                 </div>
@@ -350,123 +347,124 @@ const CheckoutPage = () => {
             </div>
 
             {/* Total Amount */}
-            <div className="px-6 py-5 border-b border-zinc-800/50 flex justify-between items-center">
-              <span className="text-zinc-300 font-bold uppercase text-sm tracking-wide font-open-sans">Total Amount</span>
-              <span className="font-black text-2xl tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-[#BFF367] to-[#BFF367]">₹ {amountToPay}</span>
+            <div className="px-1 py-2 border-b border-[rgba(255,255,255,0.08)] flex justify-between items-center">
+              <span className="text-[#FFFFFF] font-[700] uppercase text-[12px] tracking-wide font-inter">Total Amount</span>
+              <span className="font-[700] text-[20px] tracking-tight text-[#B3DC26]">₹ {amountToPay}</span>
             </div>
             {paymentPercentage !== 100 && (
-              <div className="px-6 py-4 border-b border-zinc-800/50 flex justify-between items-center bg-orange-500/5">
-                <span className="text-orange-500/90 font-bold uppercase text-sm tracking-wide font-open-sans">Pay at Venue</span>
-                <span className="font-black text-xl tracking-tight text-orange-500">₹ {balanceAtVenue}</span>
+              <div className="px-1 py-2 border-b border-[rgba(255,255,255,0.08)] flex justify-between items-center bg-[#1B1B1B]">
+                <span className="text-[#FFFFFF] font-[600] uppercase text-[10px] tracking-wide font-inter">Pay at Venue</span>
+                <span className="font-[700] text-[16px] tracking-tight text-[#FFFFFF]">₹ {balanceAtVenue}</span>
               </div>
             )}
 
             {/* Coupon Box & Secure Label */}
-            <div className="p-6">
+            <div className="px-1 py-2">
               {/* Coupon Code */}
-              <div className="flex gap-3 mb-6">
+              <div className="flex gap-2">
                 <div className="relative flex-1">
-                  <Tag size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-500" />
+                  <Tag size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-[rgba(255,255,255,0.70)]" />
                   <input 
                     type="text" 
                     placeholder="ENTER COUPON CODE"
                     value={couponCode}
                     onChange={(e) => setCouponCode(e.target.value.toUpperCase())}
-                    className="w-full bg-[#0a0a0a] border border-zinc-800 rounded-[8px] py-3.5 pl-12 pr-4 text-xs uppercase tracking-widest font-bold text-white outline-none focus:border-[#BFF367]/50 transition-all placeholder:text-zinc-600"
+                    className="w-full bg-[#1B1B1B] border border-[rgba(255,255,255,0.08)] rounded-[12px] py-[10px] pl-[36px] pr-[12px] text-[12px] font-[400] text-[#FFFFFF] outline-none focus:border-[#55DEE8] transition-all placeholder:text-[rgba(255,255,255,0.70)]"
                   />
                 </div>
                 <button 
                   onClick={handleApplyCoupon}
                   disabled={isValidating || !couponCode}
-                  className="bg-zinc-800 text-zinc-300 px-8 rounded-[8px] text-xs font-black uppercase tracking-widest hover:bg-zinc-700 transition-all disabled:opacity-50"
+                  className="bg-[#1B1B1B] border border-[rgba(255,255,255,0.08)] text-[#FFFFFF] px-4 rounded-[12px] text-[12px] font-[700] uppercase tracking-widest disabled:opacity-40"
                 >
-                  {isValidating ? <Loader2 size={18} className="animate-spin" /> : "APPLY"}
+                  {isValidating ? <Loader2 size={14} className="animate-spin" /> : "APPLY"}
                 </button>
               </div>
             </div>
           </div>
 
           {/* Right Column: Payment Plan & Payment Method */}
-          <div className="lg:col-span-5 space-y-6">
+          <div className="lg:col-span-5 space-y-2 px-0.5 pb-2">
             
             {/* Payment Method */}
-            <div className="bg-[#121212] border border-zinc-800 rounded-[8px] p-6">
+            <div className="bg-[#121212] border border-[rgba(255,255,255,0.08)] rounded-[12px] px-1 py-3">
 
-              <div className="space-y-3">
+              <div className="grid grid-cols-2 gap-2">
                 {/* Wallet */}
                 <button 
                   onClick={() => setPaymentMode("WALLET")}
-                  className={`w-full flex items-center justify-between p-4 rounded-[8px] border transition-all ${ paymentMode === "WALLET" ? "bg-[#BFF367]/5 border-[#BFF367]" : "bg-[#0A0A0A] border-zinc-800 hover:border-zinc-700" }`}
+                  className={`relative p-2 rounded-[12px] border transition-all flex flex-col items-center justify-center gap-1 text-center ${ paymentMode === "WALLET" ? "bg-[#1B1B1B] border-[#B3DC26]" : "bg-[#1B1B1B] border-[rgba(255,255,255,0.08)]" }`}
                 >
-                  <div className="flex items-center gap-4">
-                    <div className={`w-12 h-12 rounded-[8px] flex items-center justify-center shrink-0 ${paymentMode === "WALLET" ? "bg-gradient-to-r from-[#BFF367] to-[#BFF367] text-black" : "bg-zinc-800 text-zinc-400"}`}>
-                      <Wallet className="w-6 h-6" />
+                  {paymentMode === "WALLET" && (
+                    <div className="absolute top-1.5 right-1.5">
+                      <Check className="w-3 h-3" style={{ stroke: 'url(#theme-gradient)' }} />
                     </div>
-                    <div className="text-left">
-                      <div className="flex items-center gap-2 mb-1">
-                        <span className={`text-sm font-bold uppercase tracking-wide ${paymentMode === "WALLET" ? "text-white" : "text-zinc-300"}`}>Kridaz Wallet</span>
-                        <span className="bg-[#BFF367]/20 text-[#BFF367] text-[8px] font-bold px-2 py-0.5 rounded uppercase">{settings?.cashbackPercentage || 5}% CASHBACK</span>
-                      </div>
-                      <div className="text-xs text-zinc-500 font-medium">Available Balance: ₹{currentBalance}</div>
-                    </div>
+                  )}
+                  <div className={`w-6 h-6 rounded-[6px] flex items-center justify-center ${paymentMode === "WALLET" ? "bg-gradient-to-r from-[#55DEE8] to-[#B3DC26] text-[#000000]" : "bg-[#121212] border border-[rgba(255,255,255,0.08)] text-[rgba(255,255,255,0.70)]"}`}>
+                    <Wallet className="w-3 h-3" />
                   </div>
-                  {paymentMode === "WALLET" && <Check className="w-5 h-5" style={{ stroke: 'url(#theme-gradient)' }} />}
+                  <div>
+                    <div className={`text-[10px] font-[700] uppercase tracking-wide ${paymentMode === "WALLET" ? "text-[#FFFFFF]" : "text-[rgba(255,255,255,0.70)]"}`}>Wallet</div>
+                    <div className="text-[8px] text-[rgba(255,255,255,0.70)] font-[500]">₹{currentBalance}</div>
+                  </div>
+                  <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-[#B3DC26] text-[#000000] text-[7px] font-[800] px-1 py-0.5 rounded-[4px] uppercase whitespace-nowrap">
+                    {settings?.cashbackPercentage || 5}% BACK
+                  </div>
                 </button>
 
                 {/* UPI */}
                 <button 
                   onClick={() => setPaymentMode("UPI")}
-                  className={`w-full flex items-center justify-between p-4 rounded-[8px] border transition-all cursor-pointer ${ paymentMode === "UPI" ? "bg-[#BFF367]/5 border-[#BFF367]" : "bg-[#0A0A0A] border-zinc-800 hover:border-zinc-700" }`}
+                  className={`relative p-2 rounded-[12px] border transition-all flex flex-col items-center justify-center gap-1 text-center ${ paymentMode === "UPI" ? "bg-[#1B1B1B] border-[#B3DC26]" : "bg-[#1B1B1B] border-[rgba(255,255,255,0.08)]" }`}
                 >
-                  <div className="flex items-center gap-4">
-                    <div className={`w-12 h-12 rounded-[8px] flex items-center justify-center shrink-0 ${paymentMode === "UPI" ? "bg-gradient-to-r from-[#BFF367] to-[#BFF367] text-black" : "bg-zinc-800 text-zinc-400"}`}>
-                      <Smartphone className="w-6 h-6" />
+                  {paymentMode === "UPI" && (
+                    <div className="absolute top-1.5 right-1.5">
+                      <Check className="w-3 h-3" style={{ stroke: 'url(#theme-gradient)' }} />
                     </div>
-                    <div className="text-left">
-                      <p className={`text-sm font-bold uppercase tracking-wide ${paymentMode === "UPI" ? "text-white" : "text-zinc-300"}`}>Instant UPI Payment</p>
-                      <p className="text-xs text-zinc-500 mt-1 font-medium">Google Pay, PhonePe, Paytm</p>
-                    </div>
+                  )}
+                  <div className={`w-6 h-6 rounded-[6px] flex items-center justify-center ${paymentMode === "UPI" ? "bg-gradient-to-r from-[#55DEE8] to-[#B3DC26] text-[#000000]" : "bg-[#121212] border border-[rgba(255,255,255,0.08)] text-[rgba(255,255,255,0.70)]"}`}>
+                    <Smartphone className="w-3 h-3" />
                   </div>
-                  {paymentMode === "UPI" && <Check className="w-5 h-5" style={{ stroke: 'url(#theme-gradient)' }} />}
+                  <div>
+                    <div className={`text-[10px] font-[700] uppercase tracking-wide ${paymentMode === "UPI" ? "text-[#FFFFFF]" : "text-[rgba(255,255,255,0.70)]"}`}>Instant UPI</div>
+                    <div className="text-[8px] text-[rgba(255,255,255,0.70)] font-[500]">GPay, PhonePe</div>
+                  </div>
                 </button>
               </div>
 
               {/* Error or Pay Now */}
-              <div className="pt-6">
+              <div className="pt-3">
                 {paymentMode === "WALLET" && currentBalance < amountToPay ? (
                   <>
-                    <div className="border border-red-500/20 bg-red-500/5 rounded-[8px] p-4 flex gap-3 items-center mb-4">
-                      <Info className="text-red-500 w-5 h-5 shrink-0" />
-                      <p className="text-xs text-red-500 font-medium">
+                    <div className="border border-[rgba(255,255,255,0.08)] bg-[#1B1B1B] rounded-[12px] p-3 flex gap-2 items-center mb-3">
+                      <Info className="text-[rgba(255,255,255,0.70)] w-4 h-4 shrink-0" />
+                      <p className="text-[10px] text-[rgba(255,255,255,0.70)] font-[400]">
                         Your wallet balance is insufficient for this booking.<br />
                         Required: ₹{amountToPay}
                       </p>
                     </div>
                     <button
                       onClick={() => navigate("/wallet")}
-                      className="w-full bg-gradient-to-r from-[#BFF367] to-[#BFF367] text-black py-4 rounded-[8px] flex items-center justify-center px-6 hover:brightness-110 font-bold transition-all gap-2 tracking-wide"
+                      className="w-full h-[42px] bg-gradient-to-r from-[#55DEE8] to-[#B3DC26] text-[#000000] rounded-[12px] flex items-center justify-center px-4 font-[700] text-[14px] transition-all gap-2 tracking-wide shadow-[0px_8px_24px_rgba(191,243,103,0.15)] border-none"
                     >
-                      <PlusCircle className="w-5 h-5" /> RECHARGE WALLET
+                      <PlusCircle className="w-4 h-4" /> RECHARGE WALLET
                     </button>
                   </>
                 ) : (
                   <button
                     onClick={handleConfirmPayment}
                     disabled={isProcessing}
-                    className="w-full bg-gradient-to-r from-[#BFF367] to-[#BFF367] text-black py-4 rounded-[8px] flex items-center justify-between px-6 hover:brightness-110 font-bold transition-all disabled:opacity-50"
+                    className="w-full h-[42px] bg-gradient-to-r from-[#55DEE8] to-[#B3DC26] text-[#000000] rounded-[12px] flex items-center justify-between px-4 font-[700] text-[14px] transition-all disabled:opacity-40 shadow-[0px_8px_24px_rgba(191,243,103,0.15)] border-none"
                   >
                     <div className="flex items-center gap-2 tracking-wide">
-                      {isProcessing ? <Loader2 className="w-5 h-5 animate-spin" /> : <Lock className="w-5 h-5" />} 
+                      {isProcessing ? <Loader2 className="w-4 h-4 animate-spin" /> : <Lock className="w-4 h-4" />} 
                       {isProcessing ? "PROCESSING..." : "PAY NOW"}
                     </div>
-                    <span className="text-lg">₹ {amountToPay}</span>
+                    <span>₹ {amountToPay}</span>
                   </button>
                 )}
                 
-                <div className="flex items-center justify-center gap-2 mt-5 text-[10px] text-zinc-500 font-medium">
-                  <ShieldCheck className="w-3.5 h-3.5" style={{ stroke: 'url(#theme-gradient)' }} />
-                  End-to-end encrypted • PCI DSS Compliant
-                </div>
+
               </div>
             </div>
 

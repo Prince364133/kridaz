@@ -8,6 +8,8 @@ import { useDispatch } from "react-redux";
 import {login} from "@redux/slices/authSlice";
 import { useNavigate } from "react-router-dom";
 import { Capacitor } from "@capacitor/core";
+import { auth } from "../../../config/firebase";
+import { signInWithPhoneNumber } from "firebase/auth";
 
 const loginSchema = z.object({
   email: z.string().min(1, "Enter your email or phone number").refine((value) => {
@@ -85,24 +87,48 @@ const useLoginForm = () => {
       }
 
       if (result.requiresOtp) {
+        // Handle Phone OTP with Firebase
+        const isPhone = /^[0-9]{10}$/.test(email) || email.startsWith('+');
+        if (isPhone) {
+          const phoneNum = email.startsWith('+') ? email : `+91${email}`;
+          if (window.recaptchaVerifier) {
+            try {
+              const confirmationResult = await signInWithPhoneNumber(auth, phoneNum, window.recaptchaVerifier);
+              window.confirmationResult = confirmationResult;
+              toast.success("OTP sent to your phone");
+            } catch (fbError) {
+              console.error("Firebase send error:", fbError);
+              toast.error(fbError.message || "Failed to send SMS via Firebase");
+              setLoading(false);
+              return;
+            }
+          } else {
+            toast.error("Recaptcha not initialized");
+            setLoading(false);
+            return;
+          }
+        } else {
+          // Email OTP
+          if (result.otp) {
+            setSentOtp(result.otp);
+            if (Capacitor.isNativePlatform()) {
+              toast((t) => (
+                <div className="flex flex-col gap-1 p-1">
+                  <div className="font-bold text-sm text-black flex items-center gap-1">
+                    🔔 Kridaz Notification
+                  </div>
+                  <div className="text-xs text-gray-600">
+                    Your verification code is: <strong className="text-black text-sm">{result.otp}</strong>
+                  </div>
+                </div>
+              ), { position: 'top-center', duration: 8000 });
+            }
+          }
+          toast.success("OTP sent to your email");
+        }
+
         setShowOtpInput(true);
         setLoading(false);
-        if (result.otp) {
-          setSentOtp(result.otp);
-          if (Capacitor.isNativePlatform()) {
-            toast((t) => (
-              <div className="flex flex-col gap-1 p-1">
-                <div className="font-bold text-sm text-black flex items-center gap-1">
-                  🔔 Kridaz Notification
-                </div>
-                <div className="text-xs text-gray-600">
-                  Your verification code is: <strong className="text-black text-sm">{result.otp}</strong>
-                </div>
-              </div>
-            ), { position: 'top-center', duration: 8000 });
-          }
-        }
-        toast.success("OTP sent to your email and WhatsApp");
         setTimeLeft(60);
         return;
       }
@@ -122,9 +148,30 @@ const useLoginForm = () => {
 
   const handleVerifyOtp = async (data) => {
     setLoading(true);
+    let firebaseIdToken = null;
     try {
       const { email } = getValues();
-      const response = await axiosInstance.post("/api/user/auth/login", { email, otp: data.otp, password: data.password });
+      const isPhone = /^[0-9]{10}$/.test(email) || email.startsWith('+');
+
+      if (isPhone && window.confirmationResult) {
+        try {
+          const result = await window.confirmationResult.confirm(data.otp);
+          firebaseIdToken = await result.user.getIdToken();
+        } catch (err) {
+          console.error("Firebase OTP confirmation error:", err);
+          toast.error("Invalid verification code");
+          setLoading(false);
+          return;
+        }
+      }
+
+      const payload = { 
+        email, 
+        otp: firebaseIdToken || data.otp, 
+        password: data.password 
+      };
+
+      const response = await axiosInstance.post("/api/user/auth/login", payload);
       const result = response.data;
       
       dispatch(login({ token: result.token, role: result.role, user: result.user }));

@@ -976,7 +976,7 @@ const StartScoringModal = ({ isOpen, onClose, onSuccess, initialData }) => {
           initial={{ opacity: 0, scale: 0.95, y: 20 }}
           animate={{ opacity: 1, scale: 1, y: 0 }}
           exit={{ opacity: 0, scale: 0.95, y: 20 }}
-          className="relative w-full max-w-[390px] h-screen bg-[#0a0a0a] border-x border-white/10 rounded-none shadow-2xl overflow-hidden flex flex-col flex-shrink-0"
+          className="relative w-full max-w-full h-screen bg-[#0a0a0a] shadow-2xl overflow-hidden flex flex-col flex-shrink-0"
         >
           <div className="flex-1 overflow-y-auto px-6 pb-6 pt-[35px] space-y-6 bg-[#0a0a0a] scrollbar-hide">
             {/* Search and Locate Me Row */}
@@ -1340,7 +1340,7 @@ const StartScoringModal = ({ isOpen, onClose, onSuccess, initialData }) => {
           initial={{ opacity: 0, scale: 0.95, y: 20 }}
           animate={{ opacity: 1, scale: 1, y: 0 }}
           exit={{ opacity: 0, scale: 0.95, y: 20 }}
-          className="relative w-full max-w-[390px] h-screen bg-[#0a0a0a] border-x border-white/10 rounded-none shadow-2xl overflow-hidden flex flex-col flex-shrink-0"
+          className="relative w-full max-w-full h-screen bg-[#0a0a0a] shadow-2xl overflow-hidden flex flex-col flex-shrink-0"
         >
           <div className="flex items-center justify-between px-6 pt-[35px] pb-5 border-b border-white/10 bg-black/40 flex-shrink-0">
             <div>
@@ -1526,7 +1526,7 @@ const StartScoringModal = ({ isOpen, onClose, onSuccess, initialData }) => {
           initial={{ opacity: 0, scale: 0.95, y: 20 }}
           animate={{ opacity: 1, scale: 1, y: 0 }}
           exit={{ opacity: 0, scale: 0.95, y: 20 }}
-          className="relative w-full max-w-[390px] h-screen bg-[#0a0a0a] border-x border-white/10 rounded-none shadow-2xl overflow-hidden flex flex-col flex-shrink-0"
+          className="relative w-full max-w-full h-screen bg-[#0a0a0a] shadow-2xl overflow-hidden flex flex-col flex-shrink-0"
         >
           <div className="flex items-center justify-between px-6 pt-[35px] pb-5 border-b border-white/10 bg-black/40 flex-shrink-0">
             <div>
@@ -1675,7 +1675,7 @@ const StartScoringModal = ({ isOpen, onClose, onSuccess, initialData }) => {
         <motion.div
           initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}
-          className="relative w-full max-w-[390px] h-screen bg-[#0F0F0F] border-x border-white/10 rounded-none shadow-2xl overflow-hidden flex flex-col flex-shrink-0"
+          className="relative w-full max-w-full h-screen bg-[#0F0F0F] shadow-2xl overflow-hidden flex flex-col flex-shrink-0"
         >
           <div className="flex items-center justify-between px-5 pt-[35px] pb-5 border-b border-white/10">
             <h3 className="text-lg font-black text-white uppercase tracking-wider">
@@ -1823,7 +1823,7 @@ const StartScoringModal = ({ isOpen, onClose, onSuccess, initialData }) => {
           animate={{ opacity: 1, x: 0 }}
           exit={{ opacity: 0, x: '-100%' }}
           transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-          className="relative w-full max-w-[390px] h-screen bg-[#0F0F0F] border-x border-white/10 rounded-none shadow-2xl overflow-hidden flex flex-col flex-shrink-0"
+          className="relative w-full max-w-full h-screen bg-[#0F0F0F] shadow-2xl overflow-hidden flex flex-col flex-shrink-0"
         >
           <div className="flex items-center justify-between px-5 pt-[35px] pb-5 border-b border-white/10 flex-shrink-0">
             <h3 className="text-lg font-black text-white uppercase tracking-wider">
@@ -2352,7 +2352,7 @@ const StartScoringModal = ({ isOpen, onClose, onSuccess, initialData }) => {
         initial={{ opacity: 0, scale: 0.95, y: 20 }}
         animate={{ opacity: 1, scale: 1, y: 0 }}
         exit={{ opacity: 0, scale: 0.95, y: 20 }}
-        className="relative w-full max-w-[390px] h-[100dvh] sm:h-screen bg-[#0a0a0a] border-x border-white/10 rounded-none shadow-2xl overflow-hidden flex flex-col flex-shrink-0"
+        className="relative w-full max-w-full h-[100dvh] sm:h-screen bg-[#0a0a0a] shadow-2xl overflow-hidden flex flex-col flex-shrink-0"
       >
         {/* Header */}
         <div className="flex items-center justify-between px-6 pt-[35px] pb-5 border-b border-white/10 bg-black/40 flex-shrink-0">

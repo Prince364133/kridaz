@@ -2,6 +2,7 @@ import { useState, useEffect, useRef, useCallback } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { useSelector } from "react-redux";
 import axiosInstance from "@hooks/useAxiosInstance";
+import { motion } from "framer-motion";
 import {
   Search, MapPin, Star, Users, Shield, Trophy,
   Activity, Filter, Loader2, Check, X,
@@ -346,7 +347,7 @@ export default function FindProfessionals() {
   };
 
   return (
-    <div className="min-h-screen bg-black text-white px-4 md:px-8 pt-6 pb-20 font-sans">
+    <div className="min-h-screen bg-black text-white px-1 md:px-2 pt-6 pb-20 font-sans">
 
       {/* Search & Filters */}
       <div className="max-w-7xl mx-auto mb-8">
@@ -451,76 +452,67 @@ export default function FindProfessionals() {
             <p className="text-white/40 text-xs">Try adjusting your filters or location parameters</p>
           </div>
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3">
             {professionals.map((pro) => (
-              <div
+              <motion.div
+                initial={{ opacity: 0, y: 10 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.25 }}
                 key={pro.id || pro._id}
-                className="group cursor-pointer"
+                className="relative rounded-[16px] border border-[rgba(255,255,255,0.08)] bg-[#1A1A1A] overflow-hidden transition-all duration-500 group hover:border-[#B3DC26]/50 hover:shadow-[0px_8px_24px_rgba(85,222,232,0.10)] h-56 cursor-pointer"
                 onClick={() => navigate(`/professionals/${pro.id || pro._id}`)}
               >
-                <div className="relative transition-all duration-300 hover:-translate-y-1">
-                  {/* Image Box */}
-                  <div className="relative aspect-[1.04/1] overflow-hidden bg-[#111]">
-                    {pro.profilePicture ? (
-                      <img
-                        src={pro.profilePicture}
-                        alt={pro.name}
-                        className="w-full h-full object-cover grayscale transition-all duration-500 group-hover:grayscale-0 group-hover:scale-105"
-                      />
-                    ) : (
-                      <div className="w-full h-full flex items-center justify-center bg-[radial-gradient(circle_at_50%_20%,rgba(191,243,103,0.12),transparent_34%),linear-gradient(135deg,#242424,#070707)]">
-                        <span className="text-white/18 font-black text-5xl tracking-tighter">
-                          {getInitials(pro.name)}
-                        </span>
-                      </div>
-                    )}
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/10 to-black/20" />
-
-                    {/* Rating Badges */}
-                    <div className="absolute top-3 right-3">
-                      <div className="flex px-2.5 py-1 rounded-[3px] bg-black/85 border border-white/10 items-center justify-center text-[#BFF367] text-[10px] font-black gap-1 shadow-lg">
-                        <Star size={10} className="fill-[#BFF367]" />
-                        {pro.rating?.toFixed(1) || "5.0"}
-                      </div>
-                    </div>
-
-                    {/* Role Badges */}
-                    <div className="absolute bottom-3 left-3">
-                      <div className="px-2.5 py-1 rounded-[3px] bg-[#BFF367]/95 flex items-center justify-center text-black text-[9px] font-black tracking-[0.12em] gap-1.5">
-                        {pro.role === 'umpire' ? <Shield size={10} /> :
-                          pro.role === 'streamer' ? <Video size={10} /> :
-                            pro.role === 'scorer' ? <Activity size={10} /> :
-                              <Trophy size={10} />}
-                        <span className="uppercase">{pro.role}</span>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Content */}
-                  <div className="pt-3">
-                    <div className="flex items-start justify-between gap-2">
-                      <h3 className="min-w-0 flex-1 truncate text-white font-black text-base uppercase tracking-wide">
-                        {pro.name?.toLowerCase()}
-                      </h3>
-                      <div className="shrink-0 text-right text-[#BFF367] font-black text-xs">
-                        ₹{pro.price || "500"}
-                        <span className="text-[9px] text-white/40 font-bold">/{pro.role === "coach" ? "hr" : "match"}</span>
-                      </div>
-                    </div>
-
-                    <p className="mt-2 line-clamp-2 min-h-[2.3em] text-white/40 text-[11px] font-medium leading-relaxed">
-                      {pro.businessDetails?.specialization || "Generalist"} • {pro.businessDetails?.experience || "3+ yrs"}
-                    </p>
-
-                    <div className="mt-3 border-t border-white/10 pt-3">
-                      <button className="flex w-full items-center justify-between border border-white/10 bg-black/30 px-3 py-2.5 text-[9px] font-black uppercase tracking-[0.18em] text-white transition-colors group-hover:border-[#BFF367]/40 group-hover:text-[#BFF367]">
-                        View Profile
-                        <span className="text-[#BFF367] transition-transform group-hover:translate-x-1">→</span>
-                      </button>
-                    </div>
-                  </div>
+                {/* Background Image or Initials */}
+                {(pro.image || pro.profilePicture) ? (
+                  <img
+                    src={pro.image || pro.profilePicture}
+                    alt={pro.name}
+                    className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-110 grayscale-[20%] group-hover:grayscale-0"
+                    onError={(e) => {
+                      e.target.style.display = "none";
+                      e.target.nextElementSibling.style.display = "flex";
+                    }}
+                  />
+                ) : null}
+                <div
+                  className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-[#1a1a1a] to-[#000000]"
+                  style={{
+                    display: (pro.image || pro.profilePicture) ? "none" : "flex",
+                  }}
+                >
+                  <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#55DEE8] to-[#B3DC26] font-inter font-[700] text-4xl opacity-50">
+                    {getInitials(pro.name)}
+                  </span>
                 </div>
-              </div>
+
+                {/* Gradient Overlay for text readability */}
+                <div className="absolute inset-0 bg-gradient-to-t from-[#000000] via-[#000000]/60 to-transparent" />
+
+                {/* Role Badge - Top Right */}
+                <div className="absolute top-2 right-2 px-1.5 py-0.5 rounded-full text-[9px] font-[700] font-inter text-[#000000] bg-gradient-to-r from-[#55DEE8] to-[#B3DC26] z-10 uppercase shadow-lg">
+                  {pro.role}
+                </div>
+
+                {/* Bottom Content */}
+                <div className="absolute bottom-0 left-0 right-0 p-3 flex flex-col z-10">
+                  {/* Player Name and Rating Row */}
+                  <div className="flex items-start justify-between gap-2 mb-0.5">
+                    <h3 className="text-[#FFFFFF] text-[14px] font-[600] leading-[20px] line-clamp-1 font-inter">
+                      {pro.name || "Anonymous"}
+                    </h3>
+                    <div className="flex items-center text-[#B3DC26] text-[9px] font-black gap-0.5 shadow-lg bg-[#1B1B1B]/80 backdrop-blur-md border border-[rgba(255,255,255,0.08)] px-1.5 py-0.5 rounded-full shrink-0">
+                      <Star size={8} className="fill-[#B3DC26]" />
+                      {pro.rating?.toFixed(1) || "5.0"}
+                    </div>
+                  </div>
+
+                  {/* Location */}
+                  <p className="text-[rgba(255,255,255,0.70)] text-[11px] font-[400] leading-[14px] line-clamp-1 mb-1 font-inter">
+                    {pro.city ? pro.city.split(",")[0].trim() : pro.location || "Local Provider"}
+                  </p>
+                </div>
+              </motion.div>
             ))}
           </div>
         )}
@@ -547,26 +539,33 @@ export default function FindProfessionals() {
 
       {/* ── Match Request Modal ──────────────────────────────────────── */}
       {showMatchModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+        <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4">
           {/* Backdrop */}
-          <div
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
             className="absolute inset-0 bg-black/80 backdrop-blur-sm"
             onClick={() => !isCreatingRequest && setShowMatchModal(false)}
           />
 
           {/* Modal Content */}
-          <div className="relative w-full max-w-lg max-h-[90vh] overflow-y-auto bg-[#0a0a0c] border border-white/10 rounded-2xl shadow-[0_24px_80px_rgba(191,243,103,0.1)] animate-in fade-in zoom-in-95 duration-300">
+          <motion.div 
+            initial={{ opacity: 0, y: "100%" }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ type: "spring", damping: 25, stiffness: 200 }}
+            className="relative w-full max-w-lg max-h-[90vh] overflow-y-auto bg-[#0a0a0c] border border-white/10 rounded-t-3xl sm:rounded-2xl shadow-[0_-8px_40px_rgba(191,243,103,0.1)] sm:shadow-[0_24px_80px_rgba(191,243,103,0.1)]"
+          >
             {/* Modal Header */}
-            <div className="sticky top-0 z-10 bg-[#0a0a0c]/95 backdrop-blur-xl border-b border-white/5 p-5 flex items-center justify-between rounded-t-2xl">
+            <div className="sticky top-0 z-10 bg-[#0a0a0c]/95 backdrop-blur-xl border-b border-white/5 p-5 flex items-center justify-between rounded-t-3xl sm:rounded-t-2xl">
               <div className="flex items-center gap-3">
                 <div>
-                  <h2 className="text-lg font-bold uppercase tracking-tight text-white" style={{ fontFamily: "'Open Sans', sans-serif" }}>Request Live Match</h2>
+                  <h2 className="text-lg font-bold uppercase tracking-tight text-white" style={{ fontFamily: "'Open Sans', sans-serif" }}>Find Professional</h2>
                   <p className="text-[10px] text-white/50" style={{ fontFamily: "'Inter 28pt Light', sans-serif" }}>On-demand matching for coaches, umpires & scorers.</p>
                 </div>
               </div>
               <button
                 onClick={() => !isCreatingRequest && setShowMatchModal(false)}
-                className="p-2 rounded-lg hover:bg-white/5 text-white/40 hover:text-white transition-colors"
+                className="p-2 rounded-lg hover:bg-white/5 text-white/40 hover:text-white transition-colors bg-white/5"
               >
                 <X size={18} />
               </button>
@@ -574,7 +573,7 @@ export default function FindProfessionals() {
 
             {/* Modal Body */}
             {isCreatingRequest ? (
-              <div className="p-10 sm:p-16 flex flex-col items-center justify-center space-y-8 animate-in fade-in zoom-in duration-300 min-h-[400px]">
+              <div className="p-10 sm:p-16 flex flex-col items-center justify-center space-y-8 min-h-[400px]">
                 <div className="relative flex items-center justify-center w-32 h-32">
                   <div className="absolute inset-0 border-[3px] border-[#BFF367] rounded-full animate-ping opacity-75"></div>
                   <div className="absolute inset-2 border-[3px] border-[#BFF367] rounded-full animate-ping opacity-60" style={{ animationDelay: '0.2s' }}></div>
@@ -590,10 +589,10 @@ export default function FindProfessionals() {
               </div>
             ) : (
               <form onSubmit={handleRequestMatch} className="p-5 sm:p-6 space-y-5">
-              {/* Roles Selection — Compact Inline Chips */}
+              {/* Roles Selection — Scrollable Inline Row */}
               <div>
                 <label className="text-[10px] font-black uppercase text-white/50 tracking-wider block mb-2">Roles</label>
-                <div className="flex flex-wrap gap-2">
+                <div className="flex overflow-x-auto gap-2 pb-2 [&::-webkit-scrollbar]:hidden" style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
                   {["COACH", "UMPIRE", "SCORER", "STREAMER", "CHEERLEADER"].map((roleVal) => {
                     const isSelected = selectedRoles.includes(roleVal);
                     return (
@@ -601,7 +600,7 @@ export default function FindProfessionals() {
                         key={roleVal}
                         type="button"
                         onClick={() => handleToggleRole(roleVal)}
-                        className={`px-3.5 py-1.5 rounded-full text-[10px] font-bold uppercase tracking-wider transition-all flex items-center gap-1.5 ${isSelected
+                        className={`px-4 py-2 shrink-0 rounded-[8px] text-[10px] font-bold uppercase tracking-wider transition-all flex items-center gap-1.5 ${isSelected
                             ? "bg-[#BFF367]/15 border border-[#BFF367] text-[#BFF367]"
                             : "bg-white/5 border border-white/10 text-white/50 hover:border-white/25 hover:text-white/70"
                           }`}
@@ -780,7 +779,7 @@ export default function FindProfessionals() {
               </p>
             </form>
             )}
-          </div>
+          </motion.div>
         </div>
       )}
 

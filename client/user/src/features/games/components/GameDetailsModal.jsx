@@ -96,9 +96,9 @@ const GameDetailsModal = ({ game, onClose, onJoinSlot, currentUserId }) => {
             <span className="text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded bg-violet-500/10 text-violet-400 border border-violet-500/20">
               {game.gameMode} Matchup
             </span>
-            <h2 className="text-xl font-bold text-slate-100 mt-1.5">
-              {game.ground?.name || 'Street Ground / Local Match'}
-            </h2>
+            <h3 className="text-xl md:text-2xl font-bold text-white mb-2 leading-tight">
+              {game.ground?.name || 'Venue TBD'}
+            </h3>
           </div>
           <button 
             onClick={onClose}
@@ -224,7 +224,7 @@ const GameDetailsModal = ({ game, onClose, onJoinSlot, currentUserId }) => {
               <div className="p-3 rounded-[8px] bg-slate-800/40 border border-white/5 text-xs">
                 <span className="text-slate-500 block">Assigned Pitch</span>
                 <span className="font-semibold text-slate-200 block mt-0.5 truncate">
-                  {game.ground?.name || 'Local Street Pitch'}
+                  {game.ground?.name || 'Venue TBD'}
                 </span>
               </div>
               <div className="p-3 rounded-[8px] bg-slate-800/40 border border-white/5 text-xs">
