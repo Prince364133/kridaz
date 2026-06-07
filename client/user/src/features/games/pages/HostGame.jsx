@@ -653,7 +653,7 @@ const HostGame = () => {
             <div className="grid grid-cols-2 gap-4">
               <button
                 onClick={() => setGameData({ ...gameData, gameMode: 'QUICK' })}
-                className={`px-3 py-4 sm:px-8 sm:py-5 rounded-[16px] border-[1.5px] transition-all text-center flex flex-col items-center justify-center relative overflow-hidden ${ gameData.gameMode === 'QUICK' ? 'border-transparent shadow-[0_0_30px_rgba(85,222,232,0.1)]' : 'border-white/10 bg-[#121212] hover:border-white/10' }`}
+                className={`px-2 py-3 sm:px-6 sm:py-4 rounded-[16px] border-[1.5px] transition-all text-center flex flex-col items-center justify-center relative overflow-hidden ${ gameData.gameMode === 'QUICK' ? 'border-transparent shadow-[0_0_30px_rgba(85,222,232,0.1)]' : 'border-white/10 bg-[#121212] hover:border-white/10' }`}
                 style={
                   gameData.gameMode === 'QUICK'
                   ? {
@@ -666,7 +666,7 @@ const HostGame = () => {
                 }
               >
                 <div className="flex flex-col items-center justify-center w-full">
-                  <div className={`w-12 h-12 sm:w-16 sm:h-16 rounded-full flex items-center justify-center mb-2 sm:mb-2.5 border transition-all duration-500 relative ${ gameData.gameMode === 'QUICK' ? 'border-transparent bg-[#121212] text-white' : 'border-white/10 bg-[#121212] text-white/70' }`}
+                  <div className={`w-10 h-10 sm:w-12 sm:h-12 rounded-full flex items-center justify-center mb-2 sm:mb-2.5 border transition-all duration-500 relative ${ gameData.gameMode === 'QUICK' ? 'border-transparent bg-[#121212] text-white' : 'border-white/10 bg-[#121212] text-white/70' }`}
                   style={
                     gameData.gameMode === 'QUICK'
                     ? {
@@ -680,7 +680,7 @@ const HostGame = () => {
                   >
                     <Zap className={`w-5 h-5 sm:w-6 sm:h-6 ${gameData.gameMode === 'QUICK' ? 'text-white animate-pulse' : 'text-white/70'}`} />
                   </div>
-                  <h3 className={`text-xs sm:text-xl font-black mb-0 font-open-sans tracking-wide uppercase ${gameData.gameMode === 'QUICK' ? 'text-white' : 'text-white/70'}`}>QUICK GAME</h3>
+                  <h3 className={`text-[10px] sm:text-lg font-black mb-0 font-open-sans tracking-wide uppercase ${gameData.gameMode === 'QUICK' ? 'text-white' : 'text-white/70'}`}>QUICK GAME</h3>
                   <div className="hidden sm:block w-8 h-[2px] bg-[#1B1B1B] my-2 rounded-full mx-auto" />
                   <p className="hidden sm:block text-[20px] text-white/70 leading-relaxed font-medium font-inter text-center">
                     One simple pool of players. No team split required. Best for casual matches or single-team practice.
@@ -695,7 +695,7 @@ const HostGame = () => {
 
               <button
                 onClick={() => setGameData({ ...gameData, gameMode: 'PROFESSIONAL' })}
-                className={`px-3 py-4 sm:px-8 sm:py-5 rounded-[16px] border-[1.5px] transition-all text-center flex flex-col items-center justify-center relative overflow-hidden ${ gameData.gameMode === 'PROFESSIONAL' ? 'border-transparent shadow-[0_0_30px_rgba(85,222,232,0.15)]' : 'border-white/10 bg-[#121212] hover:border-white/10' }`}
+                className={`px-2 py-3 sm:px-6 sm:py-4 rounded-[16px] border-[1.5px] transition-all text-center flex flex-col items-center justify-center relative overflow-hidden ${ gameData.gameMode === 'PROFESSIONAL' ? 'border-transparent shadow-[0_0_30px_rgba(85,222,232,0.15)]' : 'border-white/10 bg-[#121212] hover:border-white/10' }`}
                 style={
                   gameData.gameMode === 'PROFESSIONAL'
                   ? {
@@ -708,7 +708,7 @@ const HostGame = () => {
                 }
               >
                 <div className="flex flex-col items-center justify-center w-full">
-                  <div className={`w-12 h-12 sm:w-16 sm:h-16 rounded-full flex items-center justify-center mb-2 sm:mb-2.5 border transition-all duration-500 relative ${ gameData.gameMode === 'PROFESSIONAL' ? 'border-transparent bg-[#121212] text-white' : 'border-white/10 bg-[#121212] text-white/70' }`}
+                  <div className={`w-10 h-10 sm:w-12 sm:h-12 rounded-full flex items-center justify-center mb-2 sm:mb-2.5 border transition-all duration-500 relative ${ gameData.gameMode === 'PROFESSIONAL' ? 'border-transparent bg-[#121212] text-white' : 'border-white/10 bg-[#121212] text-white/70' }`}
                   style={
                     gameData.gameMode === 'PROFESSIONAL'
                     ? {
@@ -722,7 +722,7 @@ const HostGame = () => {
                   >
                     <ShieldCheck className={`w-5 h-5 sm:w-6 sm:h-6 ${gameData.gameMode === 'PROFESSIONAL' ? 'text-white animate-pulse' : 'text-white/70'}`} />
                   </div>
-                  <h3 className={`text-xs sm:text-xl font-black mb-0 font-open-sans tracking-wide uppercase ${gameData.gameMode === 'PROFESSIONAL' ? 'text-white' : 'text-white/70'}`}>PROFESSIONAL</h3>
+                  <h3 className={`text-[10px] sm:text-lg font-black mb-0 font-open-sans tracking-wide uppercase ${gameData.gameMode === 'PROFESSIONAL' ? 'text-white' : 'text-white/70'}`}>PROFESSIONAL</h3>
                   <div className="hidden sm:block w-8 h-[2px] bg-[#1B1B1B] my-2 rounded-full mx-auto" />
                   <p className="hidden sm:block text-[20px] text-white/70 leading-relaxed font-medium font-inter text-center">
                     Two balanced teams (A vs B). Assign specific roles and define unique team identities.
@@ -742,15 +742,15 @@ const HostGame = () => {
               <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="space-y-8 pt-8 border-t border-white/10 mt-8">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <section>
-              <div className="flex items-center gap-2 mb-6">
-                <div className="w-[3px] h-[18px] bg-gradient-to-b from-[#55DEE8] to-[#BFF367] rounded-full" />
-                <label className="text-xs font-bold text-white uppercase tracking-widest block">Select Sport</label>
+              <div className="flex items-center gap-2 mb-3">
+                <div className="w-[2.5px] h-[14px] bg-gradient-to-b from-[#55DEE8] to-[#BFF367] rounded-full" />
+                <label className="text-[10px] font-bold text-white uppercase tracking-widest block">Select Sport</label>
               </div>
 
               {/* Dropdown Toggle Button */}
               <button
                 onClick={() => setIsSportDropdownOpen(!isSportDropdownOpen)}
-                className="w-full flex items-center justify-between bg-[#000] border border-white/10 hover:border-cyan-400/60 rounded-[16px] py-4 px-4 text-sm font-bold transition-all text-white mb-3"
+                className="w-full flex items-center justify-between bg-[#000] border border-white/10 hover:border-cyan-400/60 rounded-[16px] py-3 px-4 text-xs font-bold transition-all text-white mb-3"
               >
                 <div className="flex items-center gap-3">
                   {gameData.gameType ? (
@@ -790,7 +790,7 @@ const HostGame = () => {
                               initSlots(sport);
                               setIsSportDropdownOpen(false);
                             }}
-                            className={`w-full bg-[#000] rounded-[16px] p-4 flex flex-col items-center justify-center gap-2 relative transition-all duration-300 group overflow-hidden ${ gameData.gameType === sport ? '' : 'hover:bg-[#121212]' }`}
+                            className={`w-full bg-[#000] rounded-[16px] p-3 flex flex-col items-center justify-center gap-1.5 relative transition-all duration-300 group overflow-hidden ${ gameData.gameType === sport ? '' : 'hover:bg-[#121212]' }`}
                           >
                       {/* Diagonal Corner Hover Glow Effects (Only when selected) */}
                       {gameData.gameType === sport && (
@@ -800,8 +800,8 @@ const HostGame = () => {
                         </>
                       )}
                       
-                      <div className="w-16 h-16 rounded-full border border-white/10 flex items-center justify-center transition-colors group-hover:border-neutral-750 bg-black/40 z-10">
-                        {SPORT_ICONS[sport] || <Trophy className="text-white/70 w-8 h-8" />}
+                      <div className="w-12 h-12 rounded-full border border-white/10 flex items-center justify-center transition-colors group-hover:border-neutral-750 bg-black/40 z-10">
+                        {SPORT_ICONS[sport] || <Trophy className="text-white/70 w-6 h-6" />}
                       </div>
                       
                       <div className="flex flex-col items-center z-10">
@@ -830,15 +830,15 @@ const HostGame = () => {
             </section>
 
               <section className="space-y-6">
-                <div className="flex items-center gap-2 mb-6">
-                  <div className="w-[3px] h-[18px] bg-gradient-to-b from-[#55DEE8] to-[#BFF367] rounded-full" />
-                  <label className="text-xs font-bold text-white uppercase tracking-widest block">Date & Time</label>
+                <div className="flex items-center gap-2 mb-3">
+                  <div className="w-[2.5px] h-[14px] bg-gradient-to-b from-[#55DEE8] to-[#BFF367] rounded-full" />
+                  <label className="text-[10px] font-bold text-white uppercase tracking-widest block">Date & Time</label>
                 </div>
                 <div className="relative">
                   <button
                     type="button"
                     onClick={() => setShowDateTimePicker(true)}
-                    className="w-full flex items-center justify-between bg-[#000] border border-white/10 hover:border-cyan-400/60 rounded-[16px] py-4 px-4 text-sm font-bold transition-all text-white"
+                    className="w-full flex items-center justify-between bg-[#000] border border-white/10 hover:border-cyan-400/60 rounded-[16px] py-3 px-4 text-xs font-bold transition-all text-white"
                   >
                     <div className="flex items-center gap-3">
                       <Calendar size={18} className="text-cyan-400" />
@@ -863,9 +863,9 @@ const HostGame = () => {
             </div>
 
               <section className="space-y-6">
-                <div className="flex items-center gap-2 mb-6">
-                  <div className="w-[3px] h-[18px] bg-gradient-to-b from-[#55DEE8] to-[#BFF367] rounded-full" />
-                  <label className="text-xs font-bold text-white uppercase tracking-widest block">Location (State & City)</label>
+                <div className="flex items-center gap-2 mb-3">
+                  <div className="w-[2.5px] h-[14px] bg-gradient-to-b from-[#55DEE8] to-[#BFF367] rounded-full" />
+                  <label className="text-[10px] font-bold text-white uppercase tracking-widest block">Location (State & City)</label>
                 </div>
                 <div className="grid grid-cols-2 gap-4">
                   {/* State Dropdown */}
@@ -1000,7 +1000,7 @@ const HostGame = () => {
               <button
                 onClick={() => setStep(3)}
                 disabled={!gameData.gameMode || !gameData.gameType || !gameData.date || !gameData.time || !gameData.city || !gameData.state}
-                className="flex-[2] h-[58px] sm:h-[58px] bg-gradient-to-r from-[#55DEE8] to-[#BFF367] text-[#000000] font-bold rounded-[16px] sm:rounded-[16px] hover:scale-[1.01] active:scale-[0.99] transition-all duration-300 text-[18px] sm:text-[18px] font-open-sans shadow-[0_8px_24px_rgba(191,243,103,0.15)] uppercase tracking-wider disabled:opacity-40 disabled:pointer-events-none disabled:shadow-none"
+                className="flex-[2] h-[46px] sm:h-[46px] bg-gradient-to-r from-[#55DEE8] to-[#BFF367] text-[#000000] font-bold rounded-[16px] sm:rounded-[16px] hover:scale-[1.01] active:scale-[0.99] transition-all duration-300 text-xs sm:text-xs font-open-sans shadow-[0_8px_24px_rgba(191,243,103,0.15)] uppercase tracking-wider disabled:opacity-40 disabled:pointer-events-none disabled:shadow-none"
               >
                 CONTINUE
               </button>
@@ -1079,7 +1079,7 @@ const HostGame = () => {
 
             {/* Pricing / Quick Settings Section */}
             {gameData.gameMode === 'QUICK' ? (
-              <div className="bg-[#121212] border border-white/10 rounded-[16px] p-5 sm:p-6 shadow-xl shadow-black/30 mb-6">
+              <div className="bg-[#121212] border border-white/10 rounded-[16px] p-5 sm:p-6 shadow-xl shadow-black/30 mb-3">
                 <div className="space-y-4 flex flex-col justify-between">
                   <div>
                     <div className="flex items-center gap-2 mb-4">
@@ -1096,7 +1096,7 @@ const HostGame = () => {
                           <button 
                             type="button"
                             onClick={() => setGameData(prev => ({ ...prev, quickPlayerCount: Math.max(2, prev.quickPlayerCount - 1) }))}
-                            className="w-8 h-8 rounded-full bg-[#121212] border border-[#BFF367]/20 text-[#BFF367] flex items-center justify-center hover:bg-[#BFF367]/10 transition-colors"
+                            className="w-6 h-6 rounded-full bg-[#121212] border border-[#BFF367]/20 text-[#BFF367] flex items-center justify-center hover:bg-[#BFF367]/10 transition-colors"
                           >
                             <Minus size={14} />
                           </button>
@@ -1106,7 +1106,7 @@ const HostGame = () => {
                           <button 
                             type="button"
                             onClick={() => setGameData(prev => ({ ...prev, quickPlayerCount: Math.min(22, prev.quickPlayerCount + 1) }))}
-                            className="w-8 h-8 rounded-full bg-[#121212] border border-[#BFF367]/20 text-[#BFF367] flex items-center justify-center hover:bg-[#BFF367]/10 transition-colors"
+                            className="w-6 h-6 rounded-full bg-[#121212] border border-[#BFF367]/20 text-[#BFF367] flex items-center justify-center hover:bg-[#BFF367]/10 transition-colors"
                           >
                             <Plus size={14} />
                           </button>
@@ -1138,7 +1138,7 @@ const HostGame = () => {
                 </div>
               </div>
             ) : (
-              <div className="bg-[#121212] p-8 rounded-[16px] border-2 border-white/10 flex flex-col md:flex-row items-center justify-between gap-6 mb-6">
+              <div className="bg-[#121212] p-8 rounded-[16px] border-2 border-white/10 flex flex-col md:flex-row items-center justify-between gap-6 mb-3">
                 <div className="space-y-1">
                   <span className="text-xs font-black text-white/70 uppercase tracking-widest">Entry Charge per Player</span>
                   <p className="text-[11px] text-white/70 font-medium italic">Recommended: Total Cost ({totalCost}) / Total Players</p>
@@ -1168,14 +1168,14 @@ const HostGame = () => {
                 <button
                   disabled={gameData.quickPlayerCount < 2}
                   onClick={initQuickSlots}
-                  className="flex-[2] h-[58px] sm:h-[58px] bg-gradient-to-r from-[#55DEE8] to-[#BFF367] text-[#000000] font-bold rounded-[16px] sm:rounded-[16px] hover:scale-[1.01] active:scale-[0.99] transition-all duration-300 text-[18px] sm:text-[18px] font-open-sans shadow-[0_8px_24px_rgba(191,243,103,0.15)] disabled:opacity-50 uppercase tracking-wider"
+                  className="flex-[2] h-[46px] sm:h-[46px] bg-gradient-to-r from-[#55DEE8] to-[#BFF367] text-[#000000] font-bold rounded-[16px] sm:rounded-[16px] hover:scale-[1.01] active:scale-[0.99] transition-all duration-300 text-xs sm:text-xs font-open-sans shadow-[0_8px_24px_rgba(191,243,103,0.15)] disabled:opacity-50 uppercase tracking-wider"
                 >
                   SETUP SLOTS
                 </button>
               ) : (
                 <button
                   onClick={() => setStep(4)}
-                  className="flex-[2] h-[58px] sm:h-[58px] bg-gradient-to-r from-[#55DEE8] to-[#BFF367] text-[#000000] font-bold rounded-[16px] sm:rounded-[16px] hover:scale-[1.01] active:scale-[0.99] transition-all duration-300 text-[18px] sm:text-[18px] font-open-sans shadow-[0_8px_24px_rgba(191,243,103,0.15)] uppercase tracking-wider"
+                  className="flex-[2] h-[46px] sm:h-[46px] bg-gradient-to-r from-[#55DEE8] to-[#BFF367] text-[#000000] font-bold rounded-[16px] sm:rounded-[16px] hover:scale-[1.01] active:scale-[0.99] transition-all duration-300 text-xs sm:text-xs font-open-sans shadow-[0_8px_24px_rgba(191,243,103,0.15)] uppercase tracking-wider"
                 >
                   Continue
                 </button>
@@ -1247,7 +1247,7 @@ const HostGame = () => {
                         newSlots[idx] = { role: 'Player', status: 'OPEN' };
                         setGameData({ ...gameData, quickSlotsData: newSlots });
                       }}
-                      className="absolute -top-2 -right-2 w-8 h-8 bg-red-500 text-white rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all shadow-lg hover:bg-red-600"
+                      className="absolute -top-2 -right-2 w-6 h-6 bg-red-500 text-white rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all shadow-lg hover:bg-red-600"
                     >
                       <Trash2 size={14} />
                     </button>
@@ -1272,7 +1272,7 @@ const HostGame = () => {
               <button onClick={() => setStep(3)} className="flex-1 py-3 sm:py-3.5 bg-[#121212] text-white/70 font-black rounded-[16px] border-2 border-white/10 hover:border-white/10 transition-all text-sm sm:text-base uppercase tracking-widest">BACK</button>
               <button
                 onClick={() => setStep(5)}
-                className="flex-[2] h-[58px] bg-gradient-to-r from-[#55DEE8] to-[#BFF367] text-[#000000] font-bold rounded-[16px] hover:scale-[1.01] active:scale-[0.99] transition-all duration-300 text-[18px] font-open-sans shadow-[0_8px_24px_rgba(191,243,103,0.15)] uppercase tracking-widest"
+                className="flex-[2] h-[46px] bg-gradient-to-r from-[#55DEE8] to-[#BFF367] text-[#000000] font-bold rounded-[16px] hover:scale-[1.01] active:scale-[0.99] transition-all duration-300 text-xs font-open-sans shadow-[0_8px_24px_rgba(191,243,103,0.15)] uppercase tracking-widest"
               >
                 PREVIEW MATCH
               </button>
@@ -1284,7 +1284,7 @@ const HostGame = () => {
         {step === 4 && gameData.gameMode === 'PROFESSIONAL' && (
           <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} className="space-y-10">
             {/* Team Selection Tabs */}
-            <div className="flex p-1 bg-[#121212] border border-white/10 rounded-[16px] max-w-sm mx-auto mb-6">
+            <div className="flex p-1 bg-[#121212] border border-white/10 rounded-[16px] max-w-sm mx-auto mb-3">
               {['teamA', 'teamB'].map((tab) => (
                 <button
                   key={tab}
@@ -1344,7 +1344,7 @@ const HostGame = () => {
                           setFillingTeamKey(teamKey);
                           setShowTeamFillModal(true);
                         }}
-                        className="px-4 h-[58px] bg-gradient-to-r from-[#55DEE8] to-[#BFF367] rounded-[16px] text-[#000000] font-bold uppercase tracking-widest text-[18px] hover:scale-105 transition-all shadow-lg"
+                        className="px-4 h-[46px] bg-gradient-to-r from-[#55DEE8] to-[#BFF367] rounded-[16px] text-[#000000] font-bold uppercase tracking-widest text-xs hover:scale-105 transition-all shadow-lg"
                         title="Add Team"
                       >
                         Add Team
@@ -1372,7 +1372,7 @@ const HostGame = () => {
                           htmlFor={`img-upload-${teamKey}`}
                           className="flex-1 flex flex-col items-center justify-center gap-2 p-4 border-2 border-dashed border-[#BFF367]/30 rounded-[16px] cursor-pointer hover:border-[#BFF367]/60 hover:bg-[#BFF367]/5 transition-all group"
                         >
-                          <div className="w-8 h-8 rounded-full bg-[#BFF367]/10 border border-[#BFF367]/20 flex items-center justify-center group-hover:bg-[#BFF367]/20 transition-all">
+                          <div className="w-6 h-6 rounded-full bg-[#BFF367]/10 border border-[#BFF367]/20 flex items-center justify-center group-hover:bg-[#BFF367]/20 transition-all">
                             <ImageIcon size={16} className="text-[#BFF367] group-hover:text-[#BFF367] transition-colors" />
                           </div>
                           <span className="text-[10px] font-bold bg-gradient-to-r from-[#55DEE8] to-[#BFF367] bg-clip-text text-transparent uppercase tracking-widest">
@@ -1469,7 +1469,7 @@ const HostGame = () => {
               <button onClick={() => setStep(3)} className="flex-1 py-5 bg-[#121212] text-white/70 font-black rounded-[16px] border-2 border-white/10 hover:border-white/10 transition-all text-lg uppercase tracking-widest">Back</button>
               <button
                 onClick={() => setStep(5)}
-                className="flex-[2] h-[58px] bg-gradient-to-r from-[#55DEE8] to-[#BFF367] text-[#000000] font-bold rounded-[16px] hover:scale-[1.01] active:scale-[0.99] transition-all text-[18px] shadow-[0_8px_24px_rgba(191,243,103,0.15)] font-open-sans uppercase tracking-wider"
+                className="flex-[2] h-[46px] bg-gradient-to-r from-[#55DEE8] to-[#BFF367] text-[#000000] font-bold rounded-[16px] hover:scale-[1.01] active:scale-[0.99] transition-all text-xs shadow-[0_8px_24px_rgba(191,243,103,0.15)] font-open-sans uppercase tracking-wider"
               >
                 PREVIEW MATCH
               </button>
@@ -1514,12 +1514,12 @@ const HostGame = () => {
                 </div>
                 <div className="flex items-center -space-x-2">
                   {Array.from({ length: Math.min(gameData.quickPlayerCount, 5) }).map((_, i) => (
-                    <div key={i} className="w-8 h-8 rounded-full border-2 border-neutral-900 bg-[#1B1B1B] flex items-center justify-center text-[#BFF367]">
+                    <div key={i} className="w-6 h-6 rounded-full border-2 border-neutral-900 bg-[#1B1B1B] flex items-center justify-center text-[#BFF367]">
                       <Users size={14} />
                     </div>
                   ))}
                   {gameData.quickPlayerCount > 5 && (
-                    <div className="w-8 h-8 rounded-full border-2 border-neutral-900 bg-[#BFF367] text-black flex items-center justify-center text-[10px] font-black font-inter">
+                    <div className="w-6 h-6 rounded-full border-2 border-neutral-900 bg-[#BFF367] text-black flex items-center justify-center text-[10px] font-black font-inter">
                       +{gameData.quickPlayerCount - 5}
                     </div>
                   )}
@@ -1640,7 +1640,7 @@ const HostGame = () => {
               </button>
               <button
                 onClick={() => setShowConfirm(true)}
-                className="flex-[2] h-[58px] bg-gradient-to-r from-[#55DEE8] to-[#BFF367] text-[#000000] font-bold rounded-[16px] hover:scale-[1.01] active:scale-[0.99] transition-all text-[18px] sm:text-[18px] font-open-sans uppercase tracking-widest shadow-[0_8px_24px_rgba(191,243,103,0.15)] flex justify-center items-center gap-3"
+                className="flex-[2] h-[46px] bg-gradient-to-r from-[#55DEE8] to-[#BFF367] text-[#000000] font-bold rounded-[16px] hover:scale-[1.01] active:scale-[0.99] transition-all text-xs sm:text-xs font-open-sans uppercase tracking-widest shadow-[0_8px_24px_rgba(191,243,103,0.15)] flex justify-center items-center gap-3"
               >
                 CONFIRM <ArrowRight size={20} />
               </button>
@@ -1679,7 +1679,7 @@ const HostGame = () => {
                         <img src={team.logo || `https://api.dicebear.com/7.x/initials/svg?seed=${team.name}`} alt={team.name} className="w-full h-full object-cover" />
                       </div>
                       <div>
-                        <h4 className="font-bold text-[18px] group-hover:text-transparent bg-clip-text bg-gradient-to-r from-[#55DEE8] to-[#BFF367] transition-colors">{team.name}</h4>
+                        <h4 className="font-bold text-xs group-hover:text-transparent bg-clip-text bg-gradient-to-r from-[#55DEE8] to-[#BFF367] transition-colors">{team.name}</h4>
                         <p className="text-[10px] text-white/70 font-black uppercase tracking-widest">{team.members?.length || 0} Members</p>
                       </div>
                     </div>
@@ -1831,7 +1831,7 @@ const HostGame = () => {
                     setShowConfirm(false);
                     handleCreateGame();
                   }}
-                  className="flex-1 h-[58px] bg-gradient-to-r from-[#55DEE8] to-[#BFF367] text-[#000000] font-bold rounded-[16px] shadow-[0_8px_24px_rgba(191,243,103,0.15)] text-[18px] uppercase tracking-widest hover:scale-[1.02] transition-all"
+                  className="flex-1 h-[46px] bg-gradient-to-r from-[#55DEE8] to-[#BFF367] text-[#000000] font-bold rounded-[16px] shadow-[0_8px_24px_rgba(191,243,103,0.15)] text-xs uppercase tracking-widest hover:scale-[1.02] transition-all"
                 >
                   Confirm
                 </button>
@@ -1858,7 +1858,7 @@ const HostGame = () => {
               <div className="absolute inset-0 border-4 border-[#BFF367]/20 rounded-full" />
               <div className="absolute inset-0 border-4 border-[#BFF367] border-t-transparent rounded-full animate-spin" />
             </div>
-            <p className="text-transparent bg-clip-text bg-gradient-to-r from-[#55DEE8] to-[#BFF367] font-bold uppercase tracking-[0.3em] text-[18px]">Reserving Coins...</p>
+            <p className="text-transparent bg-clip-text bg-gradient-to-r from-[#55DEE8] to-[#BFF367] font-bold uppercase tracking-[0.3em] text-xs">Reserving Coins...</p>
           </div>
         </div>
       )}
