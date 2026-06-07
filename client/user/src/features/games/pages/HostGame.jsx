@@ -1064,9 +1064,9 @@ const HostGame = () => {
                       sessionStorage.setItem('hostGameData', JSON.stringify(gameData));
                       navigate(`/venues?returnTo=${encodeURIComponent(`/host-game?step=3&city=${gameData.city}&state=${gameData.state}`)}`);
                     }}
-                    className="w-full py-6 rounded-[16px] border-2 border-dashed border-white/10 hover:border-cyan-400 bg-[#121212] hover:bg-cyan-400/5 flex flex-col items-center justify-center gap-3 transition-all group"
+                    className="w-full py-4 rounded-[16px] border-2 border-dashed border-white/10 hover:border-cyan-400 bg-[#121212] hover:bg-cyan-400/5 flex flex-col items-center justify-center gap-3 transition-all group"
                   >
-                    <div className="w-10 h-10 rounded-full bg-[#1B1B1B] group-hover:bg-cyan-400/20 flex items-center justify-center text-white/70 group-hover:text-cyan-400 transition-colors">
+                    <div className="w-8 h-8 rounded-full bg-[#1B1B1B] group-hover:bg-cyan-400/20 flex items-center justify-center text-white/70 group-hover:text-cyan-400 transition-colors">
                       <MapPin size={24} />
                     </div>
                     <span className="font-black text-sm uppercase tracking-widest text-white/70 group-hover:text-white">Book Venue</span>
@@ -1079,7 +1079,7 @@ const HostGame = () => {
 
             {/* Pricing / Quick Settings Section */}
             {gameData.gameMode === 'QUICK' ? (
-              <div className="bg-[#121212] border border-white/10 rounded-[16px] p-5 sm:p-6 shadow-xl shadow-black/30 mb-3">
+              <div className="bg-[#121212] border border-white/10 rounded-[16px] p-3 sm:p-4 shadow-xl shadow-black/30 mb-3">
                 <div className="space-y-4 flex flex-col justify-between">
                   <div>
                     <div className="flex items-center gap-2 mb-4">
@@ -1087,7 +1087,7 @@ const HostGame = () => {
                       <h3 className="text-xs font-black uppercase text-white tracking-wider">Quick Game Settings</h3>
                     </div>
                     <div className="space-y-3">
-                      <div className="flex items-center gap-3 bg-[#000000] p-3 rounded-[16px] border border-white/10 justify-between">
+                      <div className="flex items-center gap-3 bg-[#000000] p-2.5 rounded-[16px] border border-white/10 justify-between">
                         <div className="flex flex-col text-left">
                           <span className="text-[9px] font-black uppercase text-white/70 tracking-wider">Total Players</span>
                           <span className="text-[8px] text-white/70 font-medium">Pool including you</span>
@@ -1112,7 +1112,7 @@ const HostGame = () => {
                           </button>
                         </div>
                       </div>
-                      <div className="flex items-center gap-3 bg-[#000000] p-3 rounded-[16px] border border-white/10 justify-between">
+                      <div className="flex items-center gap-3 bg-[#000000] p-2.5 rounded-[16px] border border-white/10 justify-between">
                         <div className="flex flex-col text-left">
                           <span className="text-[9px] font-black uppercase text-white/70 tracking-wider">Entry Fee</span>
                           <span className="text-[8px] text-white/70 font-medium">Per player (₹)</span>
@@ -1486,7 +1486,7 @@ const HostGame = () => {
               <span className="bg-[#BFF367]/10 text-[#BFF367] text-[10px] font-black px-3 py-1 rounded-[4px] uppercase tracking-widest font-inter inline-block border border-[#BFF367]/20">
                 {gameData.gameMode === 'QUICK' ? 'Quick Game' : 'Professional Match'}
               </span>
-              <h2 className="text-3xl font-black tracking-tight font-open-sans uppercase text-white">{gameData.gameType} Battle</h2>
+              <h2 className="text-xl font-black tracking-tight font-open-sans uppercase text-white">{gameData.gameType} Battle</h2>
               <div className="flex justify-center items-center gap-3 text-white/70 font-bold text-[11px] uppercase tracking-widest font-inter">
                 <span className="flex items-center gap-1.5"><Calendar size={14} className="text-[#BFF367]" /> {gameData.date}</span>
                 <span className="flex items-center gap-1.5"><Clock size={14} className="text-[#BFF367]" /> {gameData.time}</span>
@@ -1494,7 +1494,7 @@ const HostGame = () => {
             </div>
 
             {/* Venue Details */}
-            <div className="bg-[#121212] border border-white/10 p-4 sm:p-5 rounded-[16px] flex items-center gap-3">
+            <div className="bg-[#121212] border border-white/10 p-3 sm:p-4 rounded-[16px] flex items-center gap-3">
               <div className="w-12 h-12 sm:w-14 sm:h-14 bg-[#1B1B1B]/80 rounded-[16px] flex items-center justify-center shrink-0 border border-white/10/50">
                 <MapPin className="text-[#BFF367] w-5 h-5" />
               </div>
@@ -1547,7 +1547,7 @@ const HostGame = () => {
 
             {/* Entry Fee */}
             {gameData.perPlayerCharge > 0 && (
-               <div className="bg-[#121212] border border-white/10 p-4 sm:p-5 rounded-[16px] flex items-center justify-between">
+               <div className="bg-[#121212] border border-white/10 p-3 sm:p-4 rounded-[16px] flex items-center justify-between">
                  <div className="text-left">
                    <p className="text-[10px] text-white/70 uppercase font-black tracking-widest mb-1 font-inter">Entry Charge</p>
                    <p className="font-black text-sm text-white uppercase font-open-sans">Per Player</p>
@@ -1561,12 +1561,12 @@ const HostGame = () => {
 
             {/* Billing Summary & Coupon */}
             <div className="bg-[#121212] border border-white/10 rounded-[16px] overflow-hidden">
-              <div className="p-5 border-b border-white/10/50 flex items-center gap-3 bg-[#1B1B1B]/20">
+              <div className="p-3 border-b border-white/10/50 flex items-center gap-3 bg-[#1B1B1B]/20">
                  <Receipt className="text-[#BFF367] w-5 h-5" />
                  <h3 className="text-sm font-black uppercase tracking-widest text-white font-open-sans">Checkout Summary</h3>
               </div>
               
-              <div className="p-5 space-y-4">
+              <div className="p-3 space-y-3">
                 <div className="space-y-3 text-sm font-medium text-white/70 font-inter">
                   <div className="flex justify-between items-center">
                     <span>Venue Cost</span>
@@ -1618,14 +1618,14 @@ const HostGame = () => {
               </div>
 
               {/* Total Box */}
-              <div className="bg-[#BFF367] p-5 flex justify-between items-center">
+              <div className="bg-[#BFF367] p-3 flex justify-between items-center">
                  <div>
                    <p className="text-[10px] text-black/70 font-black uppercase tracking-widest font-inter mb-0.5">Total Amount</p>
                    <p className="text-xs text-black/70 font-bold font-inter italic">To be reserved from wallet</p>
                  </div>
                  <div className="flex items-center gap-2 text-black">
                    <Coins size={24} className="text-black" />
-                   <span className="font-black text-3xl font-open-sans tracking-tight">{totalCost.toFixed(2)}</span>
+                   <span className="font-black text-2xl font-open-sans tracking-tight">{totalCost.toFixed(2)}</span>
                  </div>
               </div>
             </div>
@@ -1634,7 +1634,7 @@ const HostGame = () => {
             <div className="flex gap-3 pt-2">
               <button 
                 onClick={() => setStep(gameData.gameMode === 'QUICK' ? 4.5 : 4)} 
-                className="flex-[0.8] py-4 bg-[#121212] text-white/70 font-black rounded-[16px] border border-white/10 hover:border-white/10 hover:text-white transition-all text-sm uppercase tracking-widest font-open-sans"
+                className="flex-[0.8] h-[40px] bg-[#121212] text-white/70 font-black rounded-[16px] border border-white/10 hover:border-white/10 hover:text-white transition-all text-[11px] uppercase tracking-widest font-open-sans flex items-center justify-center"
               >
                 Back
               </button>
