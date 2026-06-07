@@ -629,146 +629,6 @@ const ChatWindow = ({ chat, onBack, onSelectChat }) => {
  ? messages.filter(m => m.content.toLowerCase().includes(messageSearchQuery.toLowerCase()))
  : messages;
 
- if (chat.isCommunity) {
- const childGroups = chatData?.chats?.filter(c => 
- (c.parentCommunity === chat._id || c.parentCommunity?._id === chat._id) && !c.isCommunity
- ) || [];
-
- const announcementGroup = childGroups.find(g => g.isAnnouncementGroup || g.chatName === "Announcements");
- const regularGroups = childGroups.filter(g => !g.isAnnouncementGroup && g.chatName !== "Announcements");
-
- const myId = user?._id || user?.id || user?.userId;
- const adminId = chat.groupAdmin?.user?._id || chat.groupAdmin?.user || chat.groupAdmin || chat.createdBy?.user?._id || chat.createdBy?.user || chat.createdBy;
- const isAdmin = myId && adminId && String(myId) === String(adminId);
- const isActuallyAdmin = isAdmin || chat.groupAdmins?.some(admin => {
-   const aid = (admin.user?._id || admin.user)?.toString();
-   return aid === myId?.toString();
- });
- const canMessage = !chat.adminOnlyMessages || isActuallyAdmin;
-
- return (
- <div className="flex-1 flex flex-col px-6 pt-5 pb-8 animate-fade-in">
- {/* Dashboard Header */}
- <div className="flex flex-col items-center text-center mb-10">
- <div className="w-24 h-24 rounded-[8px] bg-[#BFF367]/10 flex items-center justify-center mb-4 border border-[#BFF367]/20 shadow-[0_0_40px_-10px_rgba(85,222,232,0.2)]">
- <Globe size={48} className="text-[#BFF367]" />
- </div>
- <h2 className="text-xl font-bold text-white uppercase tracking-tight">{chat.chatName}</h2>
- <p className="community-copy text-white/40 mt-1.5 max-w-md">{chat.description || "Welcome to our community! Add groups below to get started."}</p>
- </div>
-
- {/* Groups Section */}
- <div className="max-w-2xl mx-auto w-full space-y-3">
- <div className="flex items-center justify-between px-2">
- <h3 className="text-xs font-semibold text-white/50 uppercase tracking-wider">Groups in this community</h3>
- <span className="text-[10px] font-bold text-white/20 uppercase tracking-[0.2em]">{childGroups.length} Groups</span>
- </div>
-
- <div className="grid gap-3">
- {/* Add Group Action */}
- <button 
- onClick={() => setIsAddGroupToCommunityOpen(true)}
- className="w-full flex items-center gap-4 p-4 bg-white/[0.03] border border-white/5 rounded-[8px] hover:bg-[#BFF367]/10 hover:border-[#BFF367]/30 transition-all group"
- >
- <div className="w-12 h-12 rounded-[8px] bg-[#BFF367] text-black flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform">
- <Plus size={24} />
- </div>
- <div className="text-left">
- <p className="font-semibold text-white text-base">Add group</p>
- <p className="community-copy text-white/40 mt-0.5">Create or add existing groups to this community</p>
- </div>
- </button>
-
- {/* Announcement Group */}
- {announcementGroup ? (
- <button 
- onClick={() => onSelectChat && onSelectChat(announcementGroup)}
- className="w-full flex items-center gap-4 p-4 bg-white/[0.03] border border-white/5 rounded-[8px] hover:bg-white/[0.05] transition-all"
- >
- <div className="w-12 h-12 rounded-[8px] bg-white/5 flex items-center justify-center">
- <MessageSquare size={20} className="text-[#BFF367]" />
- </div>
- <div className="text-left flex-1">
- <div className="flex justify-between">
- <p className="font-semibold text-white text-base">Announcements</p>
- <span className="text-[10px] bg-[#BFF367]/20 text-[#BFF367] px-2 py-0.5 rounded font-bold uppercase">System</span>
- </div>
- <p className="community-copy text-white/40 mt-0.5">Only admins can post messages here</p>
- </div>
- </button>
- ) : (
- <div className="w-full flex items-center gap-4 p-4 bg-white/[0.03] border border-white/5 rounded-[8px] cursor-default opacity-80">
- <div className="w-12 h-12 rounded-[8px] bg-white/5 flex items-center justify-center">
- <MessageSquare size={20} className="text-[#BFF367]" />
- </div>
- <div className="text-left flex-1">
- <div className="flex justify-between">
- <p className="font-semibold text-white text-base">Announcements</p>
- <span className="text-[10px] bg-[#BFF367]/20 text-[#BFF367] px-2 py-0.5 rounded font-bold uppercase">System</span>
- </div>
- <p className="community-copy text-white/40 mt-0.5">Only admins can post messages here</p>
- </div>
- </div>
- )}
-
- {/* Render Sub-groups */}
- {regularGroups.map((group) => (
- <button 
- key={group._id}
- onClick={() => onSelectChat && onSelectChat(group)}
- className="w-full flex items-center gap-4 p-4 bg-white/[0.02] border border-transparent hover:border-white/5 hover:bg-white/[0.04] rounded-[8px] transition-all"
- >
- <div className="w-12 h-12 rounded-[8px] bg-white/5 flex items-center justify-center">
- <Users size={20} className="text-white/20" />
- </div>
- <div className="text-left">
- <p className="font-semibold text-white text-base">{group.chatName}</p>
- <p className="community-copy text-white/40 mt-0.5">{group.users?.length || 0} Members</p>
- </div>
- </button>
- ))}
- </div>
-
- <div className="pt-4 text-center">
- <p className="community-copy text-white/10 font-bold uppercase leading-relaxed">
- Groups added to the community will appear here.<br/>Community members can join these groups.
- </p>
- </div>
-
- {/* Community Members Section */}
- <div className="max-w-2xl mx-auto w-full pt-7 pb-16 space-y-4">
- <div className="flex items-center justify-between px-2">
- <h3 className="text-xs font-semibold text-white/50 uppercase tracking-wider">Community Members</h3>
- <span className="text-[10px] font-bold text-white/20 uppercase tracking-[0.2em]">{chat.users?.length || 0} Members</span>
- </div>
- 
- <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
- {chat.users?.map((u, i) => {
- const member = u.user;
- if (!member) return null;
- const isMemberAdmin = chat.groupAdmins?.some(admin => (admin.user?._id || admin.user)?.toString() === member._id?.toString()) || 
- String(member._id) === String(chat.groupAdmin?.user?._id || chat.groupAdmin?.user || chat.groupAdmin || chat.createdBy?.user?._id || chat.createdBy?.user || chat.createdBy);
- 
- return (
- <div key={`member-${member._id}-${i}`} className="flex items-center gap-3 p-3 bg-white/[0.02] border border-white/5 rounded-[8px]">
- <img 
- src={member.profilePicture || `https://ui-avatars.com/api/?name=${member.name}&background=random`} 
- className="w-10 h-10 rounded-full object-cover border border-white/5" 
- alt="" 
- />
- <div className="flex-1 min-w-0">
- <p className="font-semibold text-white text-base truncate">{member.name}</p>
- <div className="flex items-center gap-2">
- <p className="chat-subheading text-white/30 truncate">@{member.username || "user"}</p>
- {isMemberAdmin && (
- <span className="text-[8px] bg-[#BFF367]/20 text-[#BFF367] px-1.5 py-0.5 rounded font-bold uppercase tracking-wider">Admin</span>
- )}
- </div>
- </div>
- </div>
- );
- })}
- </div>
  </div>
  </div>
  </div>
@@ -929,8 +789,7 @@ const ChatWindow = ({ chat, onBack, onSelectChat }) => {
  </div>
 
  {/* Input Area */}
- {!chat.isCommunity && (
-  (() => {
+ {(() => {
     const myId = (user?._id || user?.id || user?.userId)?.toString();
     
     // Check if user is an admin of the current group
@@ -997,7 +856,7 @@ const ChatWindow = ({ chat, onBack, onSelectChat }) => {
       </div>
     );
   })()
- )}
+  }
 
  {isGroupInfoOpen && (
  <GroupInfoModal 
