@@ -595,7 +595,25 @@ const MatchAnalytics = () => {
                 </div>
                 <div className="overflow-hidden">
                   <div className="text-[10px] text-gray-500 font-black uppercase tracking-wider">Format</div>
-                  <div className="text-sm font-bold text-white/90 truncate">{liveScore.format || 'T20'} {liveScore.oversPerInnings ? `(${liveScore.oversPerInnings} Ov)` : ''}</div>
+                  {/* Format label: honor what the host actually picked (incl. CUSTOM),
+                      and only fall back to a derived label from oversPerInnings if
+                      format is genuinely missing. Was hard-coded to 'T20' which made
+                      every custom / non-T20 match look like a T20 here. */}
+                  <div className="text-sm font-bold text-white/90 truncate">
+                    {(() => {
+                      const fmt = String(liveScore.format || '').toUpperCase();
+                      if (fmt === 'CUSTOM') return 'Custom';
+                      if (fmt === 'THE_HUNDRED') return 'The Hundred';
+                      if (fmt) return fmt;
+                      const ov = liveScore.oversPerInnings;
+                      if (ov === 20)  return 'T20';
+                      if (ov === 50)  return 'ODI';
+                      if (ov === 10)  return 'T10';
+                      if (ov === 100) return 'The Hundred';
+                      return 'Match';
+                    })()}{' '}
+                    {liveScore.oversPerInnings ? `(${liveScore.oversPerInnings} Ov)` : ''}
+                  </div>
                 </div>
               </div>
             </div>
