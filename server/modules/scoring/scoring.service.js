@@ -610,7 +610,12 @@ export const initializeScoringSession = async (finalMatchId, finalBattingTeam, u
     throw new ForbiddenError("Authorization failed. Only the assigned umpire, host, or admin can score this match.");
   }
 
-  // 2-hour window check
+  // Scheduling window — previously this rejected any start more than 2 hours
+  // before the scheduled time. That's too tight: matches slip, scoring apps
+  // open early, and Flutter users were getting silent rejections. Now we
+  // only block starts that are obviously wrong (>30 days early / >30 days late).
+  // Everything within that window is allowed; mid-week practice can score now,
+  // and a delayed match can still be picked up the next day.
   const now = new Date();
   const startTime = new Date(hostedGame.date);
   if (hostedGame.time) {
@@ -618,10 +623,12 @@ export const initializeScoringSession = async (finalMatchId, finalBattingTeam, u
     startTime.setHours(hours || 0, minutes || 0, 0, 0);
   }
   const timeDiffMs = startTime.getTime() - now.getTime();
-  const twoHoursMs = 2 * 60 * 60 * 1000;
-
-  if (timeDiffMs > twoHoursMs) {
-    throw new BadRequestError("Scoring can only be started within 2 hours of the scheduled start time.");
+  const thirtyDaysMs = 30 * 24 * 60 * 60 * 1000;
+  if (timeDiffMs > thirtyDaysMs) {
+    throw new BadRequestError("Scoring can only be started within 30 days of the scheduled start time.");
+  }
+  if (timeDiffMs < -thirtyDaysMs) {
+    throw new BadRequestError("This match was scheduled over 30 days ago — please create a new one.");
   }
 
   let scoring = await prisma.cricketMatch.findUnique({
@@ -728,13 +735,24 @@ export const advanceToNextInnings = async (scoringId, battingTeamId) => {
     );
   }
 
-  // Guard 3 — innings 0 must actually be done (all-out OR overs finished).
-  // Without this an umpire could prematurely flip innings and lose runs.
+  // Guard 3 — innings 0 must actually be done. The forward-path engine never
+  // sets `isCompleted = true` automatically; instead the snapshot derives it
+  // from house rules. We mirror the same derivation here so casual formats
+  // (4-ball overs, 6-a-side, last-man-stands, etc.) advance correctly. Using
+  // hardcoded `10 wickets` and `× 6` balls rejected legitimate ends in those
+  // formats — that's what users were hitting as INNINGS_NOT_COMPLETE.
+  const houseRules = resolveHouseRules(scoring.houseRules);
+  const game = await prisma.hostedGame.findUnique({
+    where: { id: scoring.gameId },
+    select: { maxMembers: true },
+  });
+  const playersPerTeam = houseRules.playersPerTeam || game?.maxMembers || 11;
+  const wicketsForAllOut = Math.max(1, playersPerTeam - 1);
+  const ballsPerOver = houseRules.ballsPerOver || 6;
+
   const maxOvers = scoring.oversPerInnings || 20;
-  const oversFinished = firstInnings.totalBalls >= maxOvers * 6;
-  const isAllOut = firstInnings.totalWickets >= 10; // conservative; per-match
-  // playersPerTeam lives on HostedGame
-  // and isn't fetched here.
+  const oversFinished = firstInnings.totalBalls >= maxOvers * ballsPerOver;
+  const isAllOut = !houseRules.lastManStands && firstInnings.totalWickets >= wicketsForAllOut;
   if (!firstInnings.isCompleted && !oversFinished && !isAllOut) {
     throw new BadRequestError(
       "Innings 0 is not complete yet (no all-out, no overs exhausted).",
@@ -2129,14 +2147,30 @@ export const createScoringMatch = async (userId, matchData) => {
 /**
  * Get all scoring games associated with the user
  */
+// Cricket-eligible gameType labels — Flutter and the web have written several
+// variants over time. We match case-insensitively so "Cricket"/"CRICKET"/"cricket"
+// all pass, and explicit shorthands like "T20"/"ODI"/"TEST"/"QUICK"/"SCORING_MATCH"
+// are also accepted.
+const CRICKET_GAME_TYPES = new Set([
+  "cricket", "scoring_match", "t20", "odi", "test", "quick", "other",
+]);
+
 export const getUserScoringGames = async (userId) => {
-  return await prisma.hostedGame.findMany({
+  // Return every cricket-eligible hosted game where the user is host / umpire /
+  // scorer. Cricket-eligible = either gameType is a known cricket label OR a
+  // CricketMatch already exists for it. The UI uses `cricketMatch === null`
+  // to render a "Start Scoring" CTA on rows that haven't been initialized yet.
+  //
+  // Was: filtered out anything without a CricketMatch — that hid Flutter-created
+  // hosted-games whose scoring sessions hadn't been opened yet, and there was
+  // no way for the user to start scoring them from web.
+  const games = await prisma.hostedGame.findMany({
     where: {
       OR: [
         { hostId: userId },
-        { umpireId: userId }
+        { umpireId: userId },
+        { scorerId: userId },
       ],
-      gameType: "SCORING_MATCH",
     },
     include: {
       teams: {
@@ -2144,15 +2178,29 @@ export const getUserScoringGames = async (userId) => {
           slots: {
             include: {
               user: { select: { id: true, name: true, profilePicture: true } },
-              customPlayer: true
+              customPlayer: true,
             }
           }
         }
+      },
+      cricketMatch: {
+        select: {
+          id: true,
+          status: true,
+          currentInningsIndex: true,
+          result: true,
+          oversPerInnings: true,
+        }
       }
     },
-    orderBy: {
-      createdAt: "desc"
-    }
+    orderBy: { createdAt: "desc" },
+  });
+
+  // Filter to cricket-eligible. Keep ordering stable.
+  return games.filter((g) => {
+    if (g.cricketMatch) return true; // already-started session always shown
+    const type = String(g.gameType || "").toLowerCase();
+    return CRICKET_GAME_TYPES.has(type);
   });
 };
 

@@ -822,7 +822,22 @@ export default function Profile() {
                         {profileUser.liveMatches.map((match) => {
                           const teamA = match.teams?.[0]?.name || 'TBD';
                           const teamB = match.teams?.[1]?.name || 'TBD';
-                          const matchFormat = match.format || match.gameType || "T20";
+                          // Derive a readable format from what the host actually picked.
+                          // Was hard-coded to "T20" if neither field was set — that turned
+                          // every custom / unspecified match into "T20" on the profile card.
+                          const matchFormat = (() => {
+                            const fmt = String(match.format || '').toUpperCase();
+                            if (fmt === 'CUSTOM') return 'Custom';
+                            if (fmt === 'THE_HUNDRED') return 'The Hundred';
+                            if (fmt) return fmt;
+                            if (match.gameType) return match.gameType;
+                            const ov = match.oversPerInnings;
+                            if (ov === 20)  return 'T20';
+                            if (ov === 50)  return 'ODI';
+                            if (ov === 10)  return 'T10';
+                            if (ov === 100) return 'The Hundred';
+                            return 'Match';
+                          })();
                           const location = match.turf?.name || match.turf?.city || match.customVenue || match.city || "Local Ground";
                           const minutesLive = match.liveStartedAt
                             ? Math.floor((Date.now() - new Date(match.liveStartedAt).getTime()) / 60000)

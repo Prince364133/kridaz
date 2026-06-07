@@ -187,23 +187,38 @@ const TeamSidebar = ({ onSelectTeam, selectedTeamId, onCreateTeam }) => {
                 'PAUSED':      { bg: 'bg-yellow-500/20', text: 'text-yellow-400' },
                 'COMPLETED':   { bg: 'bg-[#BFF367]/10', text: 'text-[#BFF367]' },
               };
-              const statusStyle = statusColors[item.scoringStatus] || statusColors['NOT_STARTED'];
+              // Games created on Flutter (or any hosted-game without a scoring
+              // session yet) come through with `cricketMatch === null`. We show
+              // them with a "Setup & Score" CTA instead of "Launch App", since
+              // a CricketMatch row needs to be created on first open.
+              const hasScoringSession = !!item.cricketMatch;
+              const effectiveStatus = hasScoringSession ? item.scoringStatus : 'NOT_STARTED';
+              const statusStyle = statusColors[effectiveStatus] || statusColors['NOT_STARTED'];
+              const statusLabel = hasScoringSession
+                ? (effectiveStatus === 'NOT_STARTED' ? 'SETUP' : effectiveStatus)
+                : 'NOT SET UP';
               if (isMatch) return (
                 <div key={itemId} className="w-full flex flex-col p-3 rounded-[8px] bg-white/[0.02] border border-white/5 mb-2 hover:border-white/10 transition-colors">
                   <div className="flex items-center justify-between mb-2">
-                    <h4 className="font-black text-[#BFF367] text-sm truncate flex-1 mr-2">{item.name || item.title}</h4>
+                    <h4 className="font-black text-[#BFF367] text-sm truncate flex-1 mr-2">{item.name || item.title || '(unnamed match)'}</h4>
                     <div className="flex items-center gap-1.5 flex-shrink-0">
                       <span className={`text-[9px] font-black px-1.5 py-0.5 rounded uppercase ${statusStyle.bg} ${statusStyle.text}`}>
-                        {item.scoringStatus === 'NOT_STARTED' ? 'SETUP' : item.scoringStatus}
+                        {statusLabel}
                       </span>
-                      <span className="text-[10px] font-black text-black bg-[#BFF367] px-2 py-0.5 rounded uppercase">{item.shortId}</span>
+                      {item.shortId && (
+                        <span className="text-[10px] font-black text-black bg-[#BFF367] px-2 py-0.5 rounded uppercase">{item.shortId}</span>
+                      )}
                     </div>
                   </div>
-                  <div className="flex items-center gap-1 mb-1">
-                    <span className="text-[10px] text-white/30 uppercase font-bold">{item.format}</span>
-                    <span className="text-white/20">·</span>
-                    <span className="text-[10px] text-white/30 uppercase font-bold">{item.ballType}</span>
-                  </div>
+                  {(item.format || item.ballType || item.gameType) && (
+                    <div className="flex items-center gap-1 mb-1">
+                      <span className="text-[10px] text-white/30 uppercase font-bold">{item.format || item.gameType}</span>
+                      {item.ballType && (<>
+                        <span className="text-white/20">·</span>
+                        <span className="text-[10px] text-white/30 uppercase font-bold">{item.ballType}</span>
+                      </>)}
+                    </div>
+                  )}
                   <div className="flex gap-2 mb-3">
                     <div className="flex-1 text-center bg-black/40 rounded-lg py-1 border border-white/5">
                       <span className="text-xs text-white/80 font-bold">{item.teams?.[0]?.name || 'TBD'}</span>
@@ -214,8 +229,14 @@ const TeamSidebar = ({ onSelectTeam, selectedTeamId, onCreateTeam }) => {
                     </div>
                   </div>
                   <div className="flex gap-2 mt-auto">
-                    <a href={`/scoring/${item.id}`} className="flex-1 text-center text-[10px] uppercase font-black tracking-widest text-[#BFF367] border border-[#BFF367]/30 rounded-lg py-1.5 hover:bg-[#BFF367]/10 transition-colors">Launch App</a>
-                    <a href={`/analytics/${item.shortId || item.id}`} target="_blank" rel="noreferrer" className="flex-1 text-center text-[10px] uppercase font-black tracking-widest text-[#BFF367] border border-[#BFF367]/30 rounded-lg py-1.5 hover:bg-[#BFF367]/10 transition-colors">Watch Live</a>
+                    {hasScoringSession ? (
+                      <>
+                        <a href={`/scoring/${item.id}`} className="flex-1 text-center text-[10px] uppercase font-black tracking-widest text-[#BFF367] border border-[#BFF367]/30 rounded-lg py-1.5 hover:bg-[#BFF367]/10 transition-colors">Launch App</a>
+                        <a href={`/analytics/${item.shortId || item.id}`} target="_blank" rel="noreferrer" className="flex-1 text-center text-[10px] uppercase font-black tracking-widest text-[#BFF367] border border-[#BFF367]/30 rounded-lg py-1.5 hover:bg-[#BFF367]/10 transition-colors">Watch Live</a>
+                      </>
+                    ) : (
+                      <a href={`/scoring/${item.id}`} className="flex-1 text-center text-[10px] uppercase font-black tracking-widest text-black bg-[#BFF367] rounded-lg py-1.5 hover:opacity-90 transition-opacity shadow-lg shadow-[#BFF367]/10">⚡ Start Scoring</a>
+                    )}
                   </div>
                 </div>
               );
