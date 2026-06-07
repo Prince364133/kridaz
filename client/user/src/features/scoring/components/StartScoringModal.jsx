@@ -3410,8 +3410,11 @@ const TouchSliderWheel = ({ value, onChange, min = 0, max = 20, label }) => {
           onDragStart={() => { isDragging.current = true; }}
           onDrag={handleDrag}
           onDragEnd={handleDragEnd}
-          className="absolute left-0 h-full flex items-center"
+          className="absolute left-0 h-full flex items-center cursor-grab active:cursor-grabbing"
         >
+          {/* HUGE HIT AREA FOR DRAGGING */}
+          <div className="absolute top-0 bottom-0 -left-[2000px] w-[4000px] bg-transparent" />
+
           {ticks.map((tick) => {
             const isSelected = tick === value;
             const distanceFromCenter = Math.abs(tick - value);
@@ -3423,7 +3426,8 @@ const TouchSliderWheel = ({ value, onChange, min = 0, max = 20, label }) => {
             return (
               <div
                 key={tick}
-                className="absolute flex flex-col items-center justify-center pointer-events-none"
+                className="absolute flex flex-col items-center justify-center cursor-pointer"
+                onClick={() => onChange(tick)}
                 style={{
                   left: (tick - min) * tickWidth,
                   width: tickWidth,
