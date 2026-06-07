@@ -279,29 +279,34 @@ const Navbar = () => {
           <div className="flex items-center gap-2 sm:gap-4">
 
             {/* Search Icon */}
-            <Link
-              to="/search"
-              className="hidden sm:flex relative w-9 sm:w-11 h-9 sm:h-11 border border-white/10 items-center justify-center bg-white/5 hover:border-[#84CC16]/50 transition-all cursor-pointer rounded-full group"
-            >
-              <Search size={18} className="text-white/40 group-hover:text-[#84CC16] transition-colors" />
-            </Link>
+            {!isMessagesPage && (
+              <Link
+                to="/search"
+                className="hidden sm:flex relative w-9 sm:w-11 h-9 sm:h-11 border border-white/10 items-center justify-center bg-white/5 hover:border-[#84CC16]/50 transition-all cursor-pointer rounded-full group"
+              >
+                <Search size={18} className="text-white/40 group-hover:text-[#84CC16] transition-colors" />
+              </Link>
+            )}
 
             {/* Message Button */}
-            <Link
-              to="/messages"
-              className="relative w-9 sm:w-11 h-9 sm:h-11 border border-white/10 flex items-center justify-center bg-white/5 hover:border-[#84CC16]/50 transition-all cursor-pointer rounded-full group"
-            >
-              <MessageCircle size={18} className="text-white/40 group-hover:text-[#84CC16] transition-colors" />
-            </Link>
-
-            {/* Plus Dropdown */}
-            <div className="dropdown dropdown-end">
-              <label
-                tabIndex={0}
+            {!isMessagesPage && (
+              <Link
+                to="/messages"
                 className="relative w-9 sm:w-11 h-9 sm:h-11 border border-white/10 flex items-center justify-center bg-white/5 hover:border-[#84CC16]/50 transition-all cursor-pointer rounded-full group"
               >
-                <Plus size={18} className="text-white/40 group-hover:text-[#84CC16] transition-colors" />
-              </label>
+                <MessageCircle size={18} className="text-white/40 group-hover:text-[#84CC16] transition-colors" />
+              </Link>
+            )}
+
+            {/* Plus Dropdown */}
+            {!isMessagesPage && (
+              <div className="dropdown dropdown-end">
+                <label
+                  tabIndex={0}
+                  className="relative w-9 sm:w-11 h-9 sm:h-11 border border-white/10 flex items-center justify-center bg-white/5 hover:border-[#84CC16]/50 transition-all cursor-pointer rounded-full group"
+                >
+                  <Plus size={18} className="text-white/40 group-hover:text-[#84CC16] transition-colors" />
+                </label>
               <ul tabIndex={0} className="dropdown-content z-[100] mt-1 p-1 shadow-2xl bg-[#0A0A0A] border border-white/10 rounded-[8px] w-48 overflow-hidden backdrop-blur-xl">
                 <li>
                   <Link 
