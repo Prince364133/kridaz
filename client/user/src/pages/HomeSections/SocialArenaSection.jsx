@@ -28,11 +28,6 @@ const SocialArenaReelCard = ({ reel, shouldPlay, navigate }) => {
 
   const thumbnailUrl = reel.thumbnailUrl || reel.image;
 
-  const shouldPlayRef = useRef(shouldPlay);
-  useEffect(() => {
-    shouldPlayRef.current = shouldPlay;
-  }, [shouldPlay]);
-
   // HLS initialization
   useEffect(() => {
     const video = videoRef.current;
@@ -51,7 +46,7 @@ const SocialArenaReelCard = ({ reel, shouldPlay, navigate }) => {
         hls.attachMedia(video);
 
         hls.on(Hls.Events.MANIFEST_PARSED, () => {
-          if (shouldPlayRef.current) {
+          if (shouldPlay) {
             hls.startLoad();
             video.play().catch(e => console.warn('HLS Autoplay failed:', e));
           }
@@ -69,7 +64,7 @@ const SocialArenaReelCard = ({ reel, shouldPlay, navigate }) => {
         hlsRef.current = null;
       }
     };
-  }, [finalHlsUrl]);
+  }, [finalHlsUrl, shouldPlay]);
 
   // Play/pause logic based on visibility
   useEffect(() => {
