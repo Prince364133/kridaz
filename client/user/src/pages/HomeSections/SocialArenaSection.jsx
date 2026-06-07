@@ -15,7 +15,7 @@ const SocialArenaReelCard = ({ reel, shouldPlay, navigate }) => {
 
   const hasVideo = !!(reel.hlsUrl || reel.mediaUrl || reel.rawVideoUrl);
   const videoUrl = reel.hlsUrl || reel.mediaUrl || reel.rawVideoUrl;
-  
+
   // CORS Proxy for local development
   const finalHlsUrl = React.useMemo(() => {
     if (!videoUrl) return videoUrl;
@@ -27,6 +27,11 @@ const SocialArenaReelCard = ({ reel, shouldPlay, navigate }) => {
   }, [videoUrl]);
 
   const thumbnailUrl = reel.thumbnailUrl || reel.image;
+
+  const shouldPlayRef = useRef(shouldPlay);
+  useEffect(() => {
+    shouldPlayRef.current = shouldPlay;
+  }, [shouldPlay]);
 
   // HLS initialization
   useEffect(() => {
@@ -44,9 +49,9 @@ const SocialArenaReelCard = ({ reel, shouldPlay, navigate }) => {
         hlsRef.current = hls;
         hls.loadSource(finalHlsUrl);
         hls.attachMedia(video);
-        
+
         hls.on(Hls.Events.MANIFEST_PARSED, () => {
-          if (shouldPlay) {
+          if (shouldPlayRef.current) {
             hls.startLoad();
             video.play().catch(e => console.warn('HLS Autoplay failed:', e));
           }
@@ -64,7 +69,7 @@ const SocialArenaReelCard = ({ reel, shouldPlay, navigate }) => {
         hlsRef.current = null;
       }
     };
-  }, [finalHlsUrl, shouldPlay]);
+  }, [finalHlsUrl]);
 
   // Play/pause logic based on visibility
   useEffect(() => {
@@ -134,17 +139,17 @@ const SocialArenaReelCard = ({ reel, shouldPlay, navigate }) => {
           <Play size={24} />
         </div>
       )}
-      
+
       <div className="absolute inset-0 bg-black/20 group-hover:bg-black/40 transition-colors pointer-events-none z-10"></div>
-      
+
       {/* Views Pill */}
       <div className="absolute bottom-3 left-3 z-20 pointer-events-none">
         <div className="flex items-center gap-1.5 w-fit px-3 py-1.5 bg-black/40 backdrop-blur-md rounded-full border border-white/10 shadow-sm">
           <Eye size={16} className="text-white" strokeWidth={2.5} />
           <span className="text-white text-xs font-bold tracking-wide drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)]">
             {Intl.NumberFormat('en-US', { notation: 'compact', maximumFractionDigits: 1 }).format(
-              typeof reel.views === 'number' ? reel.views : 
-              reel.stats?.views || reel.viewsCount || 0
+              typeof reel.views === 'number' ? reel.views :
+                reel.stats?.views || reel.viewsCount || 0
             ).toLowerCase()}
           </span>
         </div>
@@ -222,7 +227,7 @@ export default function SocialArenaSection({ reelsFeed }) {
 
         {/* Reels Section (Horizontal Mock Data) */}
         <div className="mb-2">
-          <div 
+          <div
             ref={containerRef}
             className="flex gap-4 overflow-x-auto pb-4 scrollbar-hide snap-x relative"
           >
@@ -245,10 +250,10 @@ export default function SocialArenaSection({ reelsFeed }) {
 
                 return (
                   <div key={`reel-${idx}`} data-index={idx} className="shrink-0 snap-start">
-                    <SocialArenaReelCard 
-                      reel={reel} 
-                      shouldPlay={shouldPlay} 
-                      navigate={navigate} 
+                    <SocialArenaReelCard
+                      reel={reel}
+                      shouldPlay={shouldPlay}
+                      navigate={navigate}
                     />
                   </div>
                 );

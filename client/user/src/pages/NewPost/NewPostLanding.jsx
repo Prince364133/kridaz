@@ -14,7 +14,7 @@ const NewPostLanding = () => {
   
   const [stream, setStream] = useState(null);
   const streamRef = useRef(null);
-  const [activeTab, setActiveTab] = useState("Story");
+  const [activeTab, setActiveTab] = useState("Reel");
   const [facingMode, setFacingMode] = useState("environment");
   const [isRecording, setIsRecording] = useState(false);
   const [recordingDuration, setRecordingDuration] = useState(0);

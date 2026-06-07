@@ -3,11 +3,11 @@ import { Play, Volume2, VolumeX } from 'lucide-react';
 import { useTrackHeartbeatMutation } from '@redux/api/reelsApi';
 import Hls from 'hls.js';
 
-const ReelPlayer = ({ reelId, hlsUrl, isVisible, poster, hideControls = false, alwaysMuted = false }) => {
+const ReelPlayer = ({ reelId, hlsUrl, isVisible, poster }) => {
   const videoRef = useRef(null);
   const hlsRef = useRef(null);
   const [isPlaying, setIsPlaying] = useState(false);
-  const [isMuted, setIsMuted] = useState(alwaysMuted);
+  const [isMuted, setIsMuted] = useState(false);
   const [isLoaded, setIsLoaded] = useState(false);
   const [trackHeartbeat] = useTrackHeartbeatMutation();
   const watchTimeRef = useRef(0);
@@ -25,7 +25,7 @@ const ReelPlayer = ({ reelId, hlsUrl, isVisible, poster, hideControls = false, a
   // Heartbeat tracking
   useEffect(() => {
     let interval;
-    if (!hideControls && isVisible && videoRef.current && isLoaded) {
+    if (isVisible && videoRef.current && isLoaded) {
       interval = setInterval(() => {
         if (!videoRef.current.paused) {
           watchTimeRef.current += 1;
@@ -43,7 +43,7 @@ const ReelPlayer = ({ reelId, hlsUrl, isVisible, poster, hideControls = false, a
     return () => {
       if (interval) clearInterval(interval);
       // Send final heartbeat on unmount/deactivate
-      if (!hideControls && watchTimeRef.current % 5 !== 0 && watchTimeRef.current > 0) {
+      if (watchTimeRef.current % 5 !== 0 && watchTimeRef.current > 0) {
         trackHeartbeat({ 
           reelId, 
           watchTime: watchTimeRef.current % 5, 
@@ -52,7 +52,7 @@ const ReelPlayer = ({ reelId, hlsUrl, isVisible, poster, hideControls = false, a
       }
       watchTimeRef.current = 0;
     };
-  }, [isVisible, reelId, trackHeartbeat, hideControls, isLoaded]);
+  }, [isVisible, reelId, trackHeartbeat]);
 
   // HLS Initialization
   useEffect(() => {
@@ -117,7 +117,6 @@ const ReelPlayer = ({ reelId, hlsUrl, isVisible, poster, hideControls = false, a
   }, [isVisible]);
 
   const togglePlay = () => {
-    if (hideControls) return;
     if (videoRef.current.paused) {
       videoRef.current.play();
       setIsPlaying(true);
@@ -138,7 +137,7 @@ const ReelPlayer = ({ reelId, hlsUrl, isVisible, poster, hideControls = false, a
       <video
         ref={videoRef}
         poster={poster}
-        className="w-full h-full object-cover"
+        className="w-full h-full object-contain"
         loop
         muted={isMuted}
         playsInline
@@ -149,25 +148,23 @@ const ReelPlayer = ({ reelId, hlsUrl, isVisible, poster, hideControls = false, a
       />
 
       {/* Play/Pause Indicator Overlay (Mobile Style) */}
-      {!hideControls && !isPlaying && isLoaded && (
+      {!isPlaying && isLoaded && (
         <div className="absolute inset-0 flex items-center justify-center bg-black/20 pointer-events-none">
           <Play size={64} className="text-white/80" fill="currentColor" />
         </div>
       )}
 
       {/* Mute/Unmute Button */}
-      {!hideControls && (
-        <button 
-          onClick={toggleMute}
-          className="absolute bottom-10 right-4 p-2 bg-black/40 rounded-[8px] text-white backdrop-blur-sm z-10"
-        >
-          {isMuted ? <VolumeX size={20} /> : <Volume2 size={20} />}
-        </button>
-      )}
+      <button 
+        onClick={toggleMute}
+        className="absolute bottom-10 right-4 p-2 bg-black/40 rounded-[8px] text-white backdrop-blur-sm z-10"
+      >
+        {isMuted ? <VolumeX size={20} /> : <Volume2 size={20} />}
+      </button>
 
       {/* Loading Spinner */}
-      {!hideControls && !isLoaded && (
-        <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+      {!isLoaded && (
+        <div className="absolute inset-0 flex items-center justify-center">
           <div className="w-10 h-10 border-4 border-white/30 border-t-white rounded-full animate-spin"></div>
         </div>
       )}
