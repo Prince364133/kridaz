@@ -1263,7 +1263,7 @@ const HostGame = () => {
             </div>
 
             <div className="flex gap-4 max-w-lg mx-auto w-full">
-              <button onClick={() => setStep(4)} className="flex-1 py-3 sm:py-3.5 bg-neutral-900 text-neutral-400 font-black rounded-[8px] border-2 border-neutral-800 hover:border-neutral-700 transition-all text-sm sm:text-base uppercase tracking-widest">BACK</button>
+              <button onClick={() => setStep(3)} className="flex-1 py-3 sm:py-3.5 bg-neutral-900 text-neutral-400 font-black rounded-[8px] border-2 border-neutral-800 hover:border-neutral-700 transition-all text-sm sm:text-base uppercase tracking-widest">BACK</button>
               <button
                 onClick={() => setStep(5)}
                 className="flex-[2] py-3 bg-gradient-to-r from-[#BFF367] to-[#BFF367] text-black font-black rounded-[8px] hover:scale-[1.01] active:scale-[0.99] transition-all duration-300 text-sm font-open-sans shadow-[0_10px_25px_rgba(85,222,232,0.25)] uppercase tracking-widest"
