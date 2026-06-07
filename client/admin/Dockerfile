@@ -8,7 +8,6 @@ FROM base AS deps
 COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
 COPY packages/common/package.json ./packages/common/
 COPY packages/shared-constants/package.json ./packages/shared-constants/
-COPY packages/ui/package.json ./packages/ui/
 COPY client/admin/package.json ./client/admin/
 RUN pnpm install --frozen-lockfile
 
@@ -16,13 +15,11 @@ RUN pnpm install --frozen-lockfile
 FROM deps AS builder
 COPY packages/common ./packages/common
 COPY packages/shared-constants ./packages/shared-constants
-COPY packages/ui ./packages/ui
 COPY client/admin ./client/admin
 
 # Build internal dependencies
 RUN pnpm --filter @kridaz/common build
 RUN pnpm --filter @kridaz/shared-constants build
-RUN pnpm --filter @kridaz/ui build
 
 # Build Admin App
 RUN pnpm --filter @kridaz/admin build
