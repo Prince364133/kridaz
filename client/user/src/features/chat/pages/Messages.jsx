@@ -3,12 +3,15 @@ import ChatSidebar from '@features/chat/components/ChatSidebar';
 import ChatWindow from '@features/chat/components/ChatWindow';
 import CreateGroupModal from '@features/chat/components/CreateGroupModal';
 import CreateCommunityModal from '@features/chat/components/CreateCommunityModal';
-import { useSearchParams } from 'react-router-dom';
+import { useSearchParams, useNavigate, useLocation } from 'react-router-dom';
 import { useGetChatsQuery, useAccessChatMutation } from '@redux/api/chatApi';
 
 const Messages = () => {
   const [searchParams] = useSearchParams();
+  const navigate = useNavigate();
+  const location = useLocation();
   const userIdParam = searchParams.get('userId');
+  const chatIdParam = searchParams.get('chatId');
   const [selectedChat, setSelectedChat] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isCommunityModalOpen, setIsCommunityModalOpen] = useState(false);
@@ -32,6 +35,16 @@ const Messages = () => {
     }
   }, [userIdParam]);
 
+  // Load chat from URL if available
+  useEffect(() => {
+    if (chatIdParam && chatData?.chats) {
+      const chatToSelect = chatData.chats.find(c => (c.id || c._id) === chatIdParam);
+      if (chatToSelect && (!selectedChat || (selectedChat.id || selectedChat._id) !== chatIdParam)) {
+        setSelectedChat(chatToSelect);
+      }
+    }
+  }, [chatIdParam, chatData, selectedChat]);
+
   // Keep selectedChat updated if chatData changes (e.g., group rename, member add/remove)
   useEffect(() => {
     if (selectedChat && chatData) {
@@ -47,9 +60,18 @@ const Messages = () => {
   const handleAccessChat = async (userId) => {
     try {
       const data = await accessChat(userId).unwrap();
-      setSelectedChat(data);
+      handleSelectChat(data);
     } catch (err) {
       console.error("Failed to access chat:", err);
+    }
+  };
+
+  const handleSelectChat = (chat) => {
+    setSelectedChat(chat);
+    if (chat) {
+      navigate(`/messages?chatId=${chat.id || chat._id}`, { replace: true });
+    } else {
+      navigate(`/messages`, { replace: true });
     }
   };
 
@@ -58,7 +80,7 @@ const Messages = () => {
       {/* Sidebar - hidden on mobile when a chat is selected */}
       <div className={`${selectedChat ? 'hidden md:block' : 'block'} w-full md:w-[340px] h-full shrink-0`}>
         <ChatSidebar 
-          onSelectChat={setSelectedChat} 
+          onSelectChat={handleSelectChat} 
           selectedChatId={selectedChat?.id || selectedChat?._id}
           onCreateGroup={() => setIsModalOpen(true)}
           onCreateCommunity={() => setIsCommunityModalOpen(true)}
@@ -66,8 +88,8 @@ const Messages = () => {
       </div>
       
       {/* Chat Window - hidden on mobile when no chat is selected */}
-      <div className={`${selectedChat ? 'block' : 'hidden md:block'} flex-1 h-full pb-20 md:pb-0`}>
-        <ChatWindow chat={selectedChat} onBack={() => setSelectedChat(null)} onSelectChat={setSelectedChat} />
+      <div className={`${selectedChat ? 'block' : 'hidden md:block'} flex-1 h-full`}>
+        <ChatWindow chat={selectedChat} onBack={() => handleSelectChat(null)} onSelectChat={handleSelectChat} />
       </div>
 
       {isModalOpen && (

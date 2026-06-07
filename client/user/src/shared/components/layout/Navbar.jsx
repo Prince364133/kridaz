@@ -169,15 +169,17 @@ const Navbar = () => {
   const isJoinGames = location.pathname.startsWith("/join-games");
   const isUploadReel = location.pathname.startsWith("/reels/upload") || location.pathname.startsWith("/shorts/upload");
   const isTeamsPage = location.pathname.startsWith("/my-teams");
+  const isMessagesPage = location.pathname.startsWith("/messages");
   const useRestrictedWidth = isHome || isVenue || isUploadReel || isTeamsPage || isPlayer || isProfessional || isJoinGames;
 
   return (
     <>      {/* Mobile Top Header (100% original layout and classes) */}
-      <nav className={`sticky top-0 w-full z-[90] flex flex-col transition-all duration-300 group/nav overflow-hidden bg-black/40 backdrop-blur-xl lg:hidden
-        ${ scrollDirection === "down" && window.innerWidth < 1024 ? "-translate-y-full" : "translate-y-0" }
-      `}>
-        <div className="flex justify-center">
-          <div className="relative w-full max-w-full h-16 sm:h-20 border-b border-white/10 flex items-center justify-between px-2 sm:px-4">
+      {!isMessagesPage && (
+        <nav className={`sticky top-0 w-full z-[90] flex flex-col transition-all duration-300 group/nav overflow-hidden bg-black/40 backdrop-blur-xl lg:hidden
+          ${ scrollDirection === "down" && window.innerWidth < 1024 ? "-translate-y-full" : "translate-y-0" }
+        `}>
+          <div className="flex justify-center">
+            <div className="relative w-full max-w-full h-16 sm:h-20 border-b border-white/10 flex items-center justify-between px-2 sm:px-4">
             {/* Logo & Mobile Location Section */}
             <div className="flex flex-col items-start justify-center w-full overflow-hidden">
               {isLoggedIn ? (
@@ -235,6 +237,7 @@ const Navbar = () => {
           </div>
         </div>
       </nav>
+      )}
 
       {/* Desktop Top Header */}
       <nav className="hidden lg:flex sticky top-0 w-full z-[90] flex-col transition-all duration-300 border-b border-white/10 bg-black/40 backdrop-blur-xl">
