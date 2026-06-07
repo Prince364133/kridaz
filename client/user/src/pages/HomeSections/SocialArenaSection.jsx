@@ -3,81 +3,15 @@ import { useNavigate } from "react-router-dom";
 import { Play, Eye } from "lucide-react";
 import { useSelector } from "react-redux";
 import useLoginOnDemand from "@hooks/useLoginOnDemand";
-import Hls from "hls.js";
+import ReelPlayer from "@features/reels/components/ReelPlayer";
 
 const GRAD = "linear-gradient(90deg, #BFF367 0%, #BFF367 100%)";
 const BDR = "#2A2A2A";
 
 const SocialArenaReelCard = ({ reel, shouldPlay, navigate }) => {
-  const videoRef = useRef(null);
-  const hlsRef = useRef(null);
-
   const hasVideo = !!(reel.hlsUrl || reel.mediaUrl || reel.rawVideoUrl);
   const videoUrl = reel.hlsUrl || reel.mediaUrl || reel.rawVideoUrl;
-  
-  // CORS Proxy for local development
-  const finalHlsUrl = React.useMemo(() => {
-    if (!videoUrl) return videoUrl;
-    const cdnUrl = import.meta.env.VITE_REELS_CDN_URL;
-    if (import.meta.env.DEV && cdnUrl && videoUrl.startsWith(cdnUrl)) {
-      return videoUrl.replace(cdnUrl, '/r2-reels');
-    }
-    return videoUrl;
-  }, [videoUrl]);
-
   const thumbnailUrl = reel.thumbnailUrl || reel.image;
-
-  // HLS initialization
-  useEffect(() => {
-    const video = videoRef.current;
-    if (!video || !finalHlsUrl) return;
-
-    if (finalHlsUrl && (finalHlsUrl.endsWith('.m3u8') || finalHlsUrl.includes('.m3u8'))) {
-      if (Hls.isSupported()) {
-        const hls = new Hls({
-          capLevelToPlayerSize: true,
-          autoStartLoad: false
-        });
-        hlsRef.current = hls;
-        hls.loadSource(finalHlsUrl);
-        hls.attachMedia(video);
-      } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
-        video.src = finalHlsUrl;
-      }
-    } else {
-      video.src = finalHlsUrl;
-    }
-
-    return () => {
-      if (hlsRef.current) {
-        hlsRef.current.destroy();
-        hlsRef.current = null;
-      }
-    };
-  }, [finalHlsUrl]);
-
-  // Play/pause logic based on visibility
-  useEffect(() => {
-    const video = videoRef.current;
-    if (!video) return;
-
-    if (shouldPlay) {
-      if (hlsRef.current) {
-        hlsRef.current.startLoad();
-      }
-      const playPromise = video.play();
-      if (playPromise !== undefined) {
-        playPromise.catch((err) => {
-          console.warn('Video auto-play failed:', err);
-        });
-      }
-    } else {
-      video.pause();
-      if (hlsRef.current) {
-        hlsRef.current.stopLoad();
-      }
-    }
-  }, [shouldPlay]);
 
   return (
     <div
@@ -89,26 +23,16 @@ const SocialArenaReelCard = ({ reel, shouldPlay, navigate }) => {
       }}
     >
       {hasVideo ? (
-        <>
-          <video
-            ref={videoRef}
-            poster={thumbnailUrl || undefined}
-            className={`w-full h-full object-cover transition-transform duration-700 group-hover:scale-110 ${!shouldPlay && thumbnailUrl ? 'opacity-0' : 'opacity-100'}`}
-            preload="none"
-            muted
-            playsInline
-            loop
-            style={{ position: 'absolute', top: 0, left: 0, zIndex: 1 }}
+        <div className={`w-full h-full object-cover transition-transform duration-700 group-hover:scale-110 absolute top-0 left-0 z-0`}>
+          <ReelPlayer 
+            reelId={reel.id || reel._id}
+            hlsUrl={videoUrl}
+            isVisible={shouldPlay}
+            poster={thumbnailUrl}
+            hideControls={true}
+            alwaysMuted={true}
           />
-          {thumbnailUrl && (
-            <img
-              src={thumbnailUrl}
-              alt="Reel thumbnail"
-              className={`w-full h-full object-cover transition-all duration-700 group-hover:scale-110 absolute top-0 left-0 ${shouldPlay ? 'opacity-0' : 'opacity-100'}`}
-              style={{ zIndex: 0 }}
-            />
-          )}
-        </>
+        </div>
       ) : thumbnailUrl ? (
         <img
           src={thumbnailUrl}
