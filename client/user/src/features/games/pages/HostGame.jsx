@@ -990,11 +990,17 @@ const HostGame = () => {
                 </div>
               </section>
             
-            <div className="flex pt-4 mt-4">
+            <div className="flex gap-4 pt-4 mt-4">
+              <button 
+                onClick={() => navigate(-1)} 
+                className="flex-1 py-3 sm:py-3.5 bg-neutral-900/60 text-neutral-400 font-bold rounded-[8px] sm:rounded-[8px] border border-neutral-800 hover:border-neutral-700 transition-all duration-300 text-sm sm:text-base font-open-sans uppercase tracking-wider"
+              >
+                Cancel
+              </button>
               <button
                 onClick={() => setStep(3)}
                 disabled={!gameData.gameMode || !gameData.gameType || !gameData.date || !gameData.time || !gameData.city || !gameData.state}
-                className="w-full py-3.5 sm:py-4 bg-gradient-to-r from-[#BFF367] to-[#BFF367] text-black font-black rounded-[8px] sm:rounded-[8px] hover:scale-[1.01] active:scale-[0.99] transition-all duration-300 text-sm sm:text-base font-open-sans shadow-[0_10px_25px_rgba(191,243,103,0.15)] uppercase tracking-wider disabled:opacity-40 disabled:pointer-events-none disabled:shadow-none"
+                className="flex-[2] py-3.5 sm:py-4 bg-gradient-to-r from-[#BFF367] to-[#BFF367] text-black font-black rounded-[8px] sm:rounded-[8px] hover:scale-[1.01] active:scale-[0.99] transition-all duration-300 text-sm sm:text-base font-open-sans shadow-[0_10px_25px_rgba(191,243,103,0.15)] uppercase tracking-wider disabled:opacity-40 disabled:pointer-events-none disabled:shadow-none"
               >
                 CONTINUE
               </button>
