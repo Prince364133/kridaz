@@ -112,7 +112,7 @@ const WalletPage = () => {
   }
 
   return (
-    <div className="min-h-screen bg-black text-white pt-2 md:pt-24 pb-20 px-4 font-inter">
+    <div className="min-h-screen bg-black text-white pt-2 md:pt-24 pb-20 px-0 sm:px-4 font-inter">
       <div className="max-w-4xl mx-auto space-y-4">
         {/* Header */}
         <div className="space-y-2">
