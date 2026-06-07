@@ -38,17 +38,17 @@ const VenueCard = ({ t, onClick }) => {
           </div>
 
           {/* Location & Rating Row */}
-          <div className="flex justify-between items-center mt-1">
+          <div className="flex justify-between items-center mt-1 w-full gap-1 overflow-hidden">
             {/* Plain Text Location */}
-            <div className="flex items-center gap-1 text-white/80">
-              <MapPin size={10} className="text-white/70" />
-              <span className="text-[10px] font-medium">{t.distance ? `${Math.round(t.distance)} km` : "1 km"} away</span>
+            <div className="flex items-center gap-0.5 text-white/80 min-w-0">
+              <MapPin size={8} className="text-white/70 shrink-0" />
+              <span className="text-[8px] font-medium whitespace-nowrap truncate">{t.distance ? `${Math.round(t.distance)} km` : "1 km"} away</span>
             </div>
             
             {/* Rating Pill on the right */}
-            <div className="flex items-center gap-1 px-2 py-1 bg-white/20 backdrop-blur-md rounded-full border border-white/10 shrink-0 ml-2">
-              <Star size={10} className="text-white" fill="currentColor" />
-              <span className="text-[9px] font-semibold text-white">{t.averageRating || t.avgRating || t.rating || "4.8"}</span>
+            <div className="flex items-center gap-0.5 px-1 py-0.5 bg-white/20 backdrop-blur-md rounded-full border border-white/10 shrink-0">
+              <Star size={8} className="text-white" fill="currentColor" />
+              <span className="text-[8px] font-semibold text-white">{t.averageRating || t.avgRating || t.rating || "4.8"}</span>
             </div>
           </div>
         </div>

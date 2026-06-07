@@ -32,6 +32,9 @@ RUN pnpm prisma generate
 FROM base AS runner
 ENV NODE_ENV=production
 
+# Install ffmpeg for media processing
+RUN apk add --no-cache ffmpeg
+
 # Copy node_modules, compiled packages, and application source code
 COPY --from=builder /app/node_modules ./node_modules
 COPY --from=builder /app/packages ./packages
