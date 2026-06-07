@@ -809,12 +809,12 @@ const HostGame = () => {
                           {sport}
                         </span>
                         {gameData.gameType === sport && (
-                          <div className="w-5 h-[2px] bg-gradient-to-r from-[#55DEE8] to-[#BFF367] mt-1.5 rounded-full h-[58px]" />
+                          <div className="w-5 h-[2px] bg-gradient-to-r from-[#55DEE8] to-[#BFF367] mt-1.5 rounded-full" />
                         )}
                       </div>
                       
                       {gameData.gameType === sport && (
-                        <div className="absolute top-2.5 right-2.5 bg-gradient-to-r from-[#55DEE8] to-[#BFF367] text-[#000000] rounded-full p-0.5 flex items-center justify-center w-4 h-4 shadow-[0_0_10px_rgba(6,182,212,0.35)] z-10 h-[58px]">
+                        <div className="absolute top-2.5 right-2.5 bg-gradient-to-r from-[#55DEE8] to-[#BFF367] text-[#000000] rounded-full p-0.5 flex items-center justify-center w-4 h-4 shadow-[0_0_10px_rgba(6,182,212,0.35)] z-10">
                           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="4.5" className="w-2.5 h-2.5">
                             <polyline points="20 6 9 17 4 12" />
                           </svg>
@@ -1296,7 +1296,7 @@ const HostGame = () => {
                   {activeTeamTab === tab && (
                     <motion.div
                       layoutId="activeTeamTabIndicator"
-                      className="absolute inset-0 bg-gradient-to-r from-[#55DEE8] to-[#BFF367] rounded-[16px] h-[58px]"
+                      className="absolute inset-0 bg-gradient-to-r from-[#55DEE8] to-[#BFF367] rounded-[16px]"
                       transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
                     />
                   )}
@@ -1375,7 +1375,7 @@ const HostGame = () => {
                           <div className="w-8 h-8 rounded-full bg-[#BFF367]/10 border border-[#BFF367]/20 flex items-center justify-center group-hover:bg-[#BFF367]/20 transition-all">
                             <ImageIcon size={16} className="text-[#BFF367] group-hover:text-[#BFF367] transition-colors" />
                           </div>
-                          <span className="text-[10px] font-bold bg-gradient-to-r from-[#55DEE8] to-[#BFF367] bg-clip-text text-transparent uppercase tracking-widest h-[58px]">
+                          <span className="text-[10px] font-bold bg-gradient-to-r from-[#55DEE8] to-[#BFF367] bg-clip-text text-transparent uppercase tracking-widest">
                             {gameData[teamKey].imageName ? 'Change Photo' : 'Upload Photo'}
                           </span>
                           {gameData[teamKey].imageName && (
@@ -1679,11 +1679,11 @@ const HostGame = () => {
                         <img src={team.logo || `https://api.dicebear.com/7.x/initials/svg?seed=${team.name}`} alt={team.name} className="w-full h-full object-cover" />
                       </div>
                       <div>
-                        <h4 className="font-bold text-[18px] group-hover:text-transparent bg-clip-text bg-gradient-to-r from-[#55DEE8] to-[#BFF367] transition-colors h-[58px]">{team.name}</h4>
+                        <h4 className="font-bold text-[18px] group-hover:text-transparent bg-clip-text bg-gradient-to-r from-[#55DEE8] to-[#BFF367] transition-colors">{team.name}</h4>
                         <p className="text-[10px] text-white/70 font-black uppercase tracking-widest">{team.members?.length || 0} Members</p>
                       </div>
                     </div>
-                    <div className="p-2 bg-gradient-to-r from-[#BFF367]/10 to-[#BFF367]/10 rounded-lg text-transparent bg-clip-text bg-gradient-to-r from-[#55DEE8] to-[#BFF367] group-hover:bg-gradient-to-r from-[#55DEE8] to-[#BFF367] group-hover:text-[#000000] transition-all h-[58px]">
+                    <div className="p-2 bg-gradient-to-r from-[#BFF367]/10 to-[#BFF367]/10 rounded-lg text-transparent bg-clip-text bg-gradient-to-r from-[#55DEE8] to-[#BFF367] group-hover:bg-gradient-to-r from-[#55DEE8] to-[#BFF367] group-hover:text-[#000000] transition-all">
                       <Plus size={16} />
                     </div>
                   </div>
@@ -1858,7 +1858,7 @@ const HostGame = () => {
               <div className="absolute inset-0 border-4 border-[#BFF367]/20 rounded-full" />
               <div className="absolute inset-0 border-4 border-[#BFF367] border-t-transparent rounded-full animate-spin" />
             </div>
-            <p className="text-transparent bg-clip-text bg-gradient-to-r from-[#55DEE8] to-[#BFF367] font-bold uppercase tracking-[0.3em] text-[18px] h-[58px]">Reserving Coins...</p>
+            <p className="text-transparent bg-clip-text bg-gradient-to-r from-[#55DEE8] to-[#BFF367] font-bold uppercase tracking-[0.3em] text-[18px]">Reserving Coins...</p>
           </div>
         </div>
       )}
