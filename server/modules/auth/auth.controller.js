@@ -1,4 +1,5 @@
 import asyncHandler from "../../utils/asyncHandler.js";
+import { BadRequestError, UnauthorizedError, InternalError } from '@kridaz/common';
 import * as argon2 from "argon2";
 import { OAuth2Client } from "google-auth-library";
 import { generateUserToken, generateOwnerToken, generateRefreshToken } from "../../utils/generateJwtToken.js";
@@ -79,21 +80,17 @@ const generateOTP = () => {
 const REG_TOKEN_TTL_S = 35 * 60;
 const claimRegistrationToken = async token => {
   if (!token) {
-    throw {
-      status: 400,
-      code: "REGISTRATION_TOKEN_MISSING",
-      message: "Registration token is missing. Please verify your OTP again."
-    };
+    throw new BadRequestError("Registration token is missing. Please verify your OTP again.", {
+      code: "REGISTRATION_TOKEN_MISSING"
+    });
   }
   let decoded;
   try {
     decoded = jwt.verify(token, getRegistrationSecret());
   } catch (err) {
-    throw {
-      status: 400,
-      code: "REGISTRATION_TOKEN_INVALID",
-      message: "Registration token is invalid or expired. Please start over."
-    };
+    throw new BadRequestError("Registration token is invalid or expired. Please start over.", {
+      code: "REGISTRATION_TOKEN_INVALID"
+    });
   }
 
   // Older tokens minted before the jti rollout don't have one; let them through
@@ -102,11 +99,9 @@ const claimRegistrationToken = async token => {
   if (decoded.jti) {
     const claimed = await redisClient.set(`reg:used:${decoded.jti}`, "1", "EX", REG_TOKEN_TTL_S, "NX");
     if (claimed !== "OK") {
-      throw {
-        status: 400,
-        code: "REGISTRATION_TOKEN_USED",
-        message: "Registration token has already been used. Please verify your OTP again."
-      };
+      throw new BadRequestError("Registration token has already been used.", {
+        code: "REGISTRATION_TOKEN_USED"
+      });
     }
   }
   return decoded;
@@ -1154,7 +1149,10 @@ export const googleAuth = asyncHandler(async (req, res) => {
     if (!response.ok) {
       const errorBody = await response.text();
       logger.error("Google userinfo fetch failed:", response.status, errorBody);
-      throw new Error(`Failed to fetch user info from Google: ${response.status}`);
+      throw new InternalError(`Failed to fetch user info from Google.`, {
+        code: "GOOGLE_FETCH_FAILED",
+        httpStatus: response.status,
+      });
     }
     payload = await response.json();
   } else {

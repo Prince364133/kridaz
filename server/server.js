@@ -1,6 +1,7 @@
 import { initSentry } from "./config/sentry.js";
 initSentry();
 
+import * as Sentry from "@sentry/node";
 import dotenv from "dotenv";
 dotenv.config();
 
@@ -44,6 +45,30 @@ const startServer = () => {
   } catch (error) {
     logger.error("[DATABASE] Failed to sync schema:", error);
   }
+
+  // Catch unhandled Promise rejections (e.g. BullMQ processors, setTimeout callbacks)
+  process.on('unhandledRejection', (reason, promise) => {
+    logger.error('[UNHANDLED_REJECTION] Unhandled Promise rejection', {
+      reason: reason instanceof Error ? reason.message : String(reason),
+      stack:  reason instanceof Error ? reason.stack : undefined,
+    });
+    Sentry.captureException(reason instanceof Error ? reason : new Error(String(reason)), {
+      extra: { type: 'unhandledRejection' },
+    });
+    // Do NOT crash — log and continue. Crashing on every rejected promise
+    // causes unnecessary restarts. Investigate Sentry alerts instead.
+  });
+
+  // Catch synchronous uncaught exceptions
+  process.on('uncaughtException', (err) => {
+    logger.error('[UNCAUGHT_EXCEPTION] Synchronous uncaught exception — process will exit', {
+      message: err.message,
+      stack:   err.stack,
+    });
+    Sentry.captureException(err, { extra: { type: 'uncaughtException' } });
+    // Flush Sentry then exit — uncaughtException leaves process in undefined state
+    Sentry.close(2000).finally(() => process.exit(1));
+  });
 
   server.listen(port, () => {
     logger.info(`[SERVER] Running on http://localhost:${port}`);

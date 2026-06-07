@@ -22,7 +22,7 @@ RUN pnpm --filter @kridaz/common build
 RUN pnpm --filter @kridaz/shared-constants build
 
 # Build User App
-RUN pnpm --filter @kridaz/user build
+RUN pnpm --filter user build
 
 # --- Stage 4: Runner (Nginx) ---
 FROM nginx:alpine AS runner

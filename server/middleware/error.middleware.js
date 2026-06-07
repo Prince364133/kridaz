@@ -1,5 +1,6 @@
 import logger from '../utils/logger.js';
-import { HttpError, NotFoundError } from '@kridaz/common';
+import { HttpError, NotFoundError, BadRequestError, ConflictError, InternalError } from '@kridaz/common';
+import { PrismaClientKnownRequestError, PrismaClientValidationError } from '@prisma/client/runtime/library.js';
 import * as Sentry from '@sentry/node';
 
 /**
@@ -14,6 +15,42 @@ import * as Sentry from '@sentry/node';
 const LEGACY_MESSAGE_AS_CODE = new Set([
   "TOKEN_EXPIRED",
 ]);
+
+/**
+ * Maps Prisma errors to typed HttpErrors before they reach the 500 catch-all.
+ * Call this at the TOP of errorHandler, before the instanceof HttpError check.
+ */
+const normalizePrismaError = (err) => {
+  if (err instanceof PrismaClientKnownRequestError) {
+    switch (err.code) {
+      case 'P2002': {
+        const field = Array.isArray(err.meta?.target) ? err.meta.target.join(', ') : 'field';
+        return new ConflictError(`A record with this ${field} already exists.`, {
+          code: 'DUPLICATE_ENTRY',
+          field: err.meta?.target,
+        });
+      }
+      case 'P2025':
+        return new NotFoundError('Record not found.', { code: 'RECORD_NOT_FOUND' });
+      case 'P2003':
+        return new ConflictError('Related record not found or constraint violated.', {
+          code: 'FOREIGN_KEY_VIOLATION',
+        });
+      case 'P2014':
+        return new BadRequestError('Required relation is missing.', {
+          code: 'RELATION_VIOLATION',
+        });
+      default:
+        return new InternalError('Database operation failed.', { code: 'DB_ERROR', prismaCode: err.code });
+    }
+  }
+
+  if (err instanceof PrismaClientValidationError) {
+    return new BadRequestError('Invalid data provided.', { code: 'VALIDATION_ERROR' });
+  }
+
+  return null; // not a Prisma error — let caller handle
+};
 
 /**
  * Global error handler. Must be the LAST middleware registered in app.js.
@@ -31,6 +68,12 @@ const LEGACY_MESSAGE_AS_CODE = new Set([
  */
 export const errorHandler = (err, req, res, next) => {
   const requestId = res.locals?.requestId;
+
+  // Normalize Prisma errors first
+  const normalized = normalizePrismaError(err);
+  if (normalized) {
+    return errorHandler(normalized, req, res, next); // re-enter with typed error
+  }
 
   // Typed errors — use their statusCode and name directly
   if (err instanceof HttpError) {
