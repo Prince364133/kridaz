@@ -1071,24 +1071,85 @@ const HostGame = () => {
 
             </div>
 
-            {/* Pricing Section */}
-            <div className="bg-neutral-900 p-8 rounded-[8px] border-2 border-neutral-800 flex flex-col md:flex-row items-center justify-between gap-6 mb-6">
-              <div className="space-y-1">
-                <span className="text-xs font-black text-neutral-400 uppercase tracking-widest">Entry Charge per Player</span>
-                <p className="text-[11px] text-neutral-500 font-medium italic">Recommended: Total Cost ({totalCost}) / Total Players</p>
-              </div>
-              <div className="flex items-center gap-4 bg-black p-2 rounded-[8px] border border-neutral-800">
-                <div className="w-12 h-12 bg-yellow-500/10 rounded-[8px] flex items-center justify-center">
-                  <Coins className="text-yellow-500" size={24} />
+            {/* Pricing / Quick Settings Section */}
+            {gameData.gameMode === 'QUICK' ? (
+              <div className="bg-neutral-900/40 border border-neutral-800/80 rounded-[8px] p-5 sm:p-6 shadow-xl shadow-black/30 mb-6">
+                <div className="space-y-4 flex flex-col justify-between">
+                  <div>
+                    <div className="flex items-center gap-2 mb-4">
+                      <div className="w-[3px] h-[16px] bg-gradient-to-b from-[#BFF367] to-[#BFF367] rounded-full" />
+                      <h3 className="text-xs font-black uppercase text-white tracking-wider">Quick Game Settings</h3>
+                    </div>
+                    <div className="space-y-3">
+                      <div className="flex items-center gap-4 bg-neutral-950/60 p-3 rounded-[8px] border border-neutral-850 justify-between">
+                        <div className="flex flex-col text-left">
+                          <span className="text-[10px] font-black uppercase text-neutral-400 tracking-wider">Total Players</span>
+                          <span className="text-[8px] text-neutral-500 font-medium">Pool including you</span>
+                        </div>
+                        <div className="flex items-center gap-3">
+                          <button 
+                            type="button"
+                            onClick={() => setGameData(prev => ({ ...prev, quickPlayerCount: Math.max(2, prev.quickPlayerCount - 1) }))}
+                            className="w-8 h-8 rounded-full bg-neutral-900 border border-[#BFF367]/20 text-[#BFF367] flex items-center justify-center hover:bg-[#BFF367]/10 transition-colors"
+                          >
+                            <Minus size={14} />
+                          </button>
+                          <span className="text-lg font-black text-white w-6 text-center select-none tabular-nums">
+                            {gameData.quickPlayerCount || 2}
+                          </span>
+                          <button 
+                            type="button"
+                            onClick={() => setGameData(prev => ({ ...prev, quickPlayerCount: Math.min(22, prev.quickPlayerCount + 1) }))}
+                            className="w-8 h-8 rounded-full bg-neutral-900 border border-[#BFF367]/20 text-[#BFF367] flex items-center justify-center hover:bg-[#BFF367]/10 transition-colors"
+                          >
+                            <Plus size={14} />
+                          </button>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-4 bg-neutral-950/60 p-3 rounded-[8px] border border-neutral-850 justify-between">
+                        <div className="flex flex-col text-left">
+                          <span className="text-[10px] font-black uppercase text-neutral-400 tracking-wider">Entry Fee</span>
+                          <span className="text-[8px] text-neutral-500 font-medium">Per player (₹)</span>
+                        </div>
+                        <div className="flex items-center gap-2 bg-neutral-900 p-1.5 px-3 rounded-[6px] border border-neutral-800 focus-within:border-[#BFF367] transition-all">
+                          <Coins className="text-[#BFF367]" size={14} />
+                          <input 
+                            type="number"
+                            placeholder="0"
+                            value={gameData.perPlayerCharge || ''}
+                            onChange={(e) => setGameData({ ...gameData, perPlayerCharge: parseInt(e.target.value) || 0 })}
+                            className="w-16 bg-transparent border-none text-right font-black text-sm outline-none focus:ring-0 text-white p-0"
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="text-center py-2.5 px-3 bg-[#BFF367]/5 border border-[#BFF367]/10 rounded-[8px] mt-4 md:mt-0">
+                    <span className="text-[9px] font-black text-[#BFF367] uppercase tracking-widest">
+                      You + {gameData.quickPlayerCount - 1} Players Pool
+                    </span>
+                  </div>
                 </div>
-                <input 
-                  type="number"
-                  value={gameData.perPlayerCharge}
-                  onChange={(e) => setGameData({ ...gameData, perPlayerCharge: parseInt(e.target.value) || 0 })}
-                  className="w-24 bg-transparent border-none text-center font-black text-2xl outline-none focus:ring-0"
-                />
               </div>
-            </div>
+            ) : (
+              <div className="bg-neutral-900 p-8 rounded-[8px] border-2 border-neutral-800 flex flex-col md:flex-row items-center justify-between gap-6 mb-6">
+                <div className="space-y-1">
+                  <span className="text-xs font-black text-neutral-400 uppercase tracking-widest">Entry Charge per Player</span>
+                  <p className="text-[11px] text-neutral-500 font-medium italic">Recommended: Total Cost ({totalCost}) / Total Players</p>
+                </div>
+                <div className="flex items-center gap-4 bg-black p-2 rounded-[8px] border border-neutral-800">
+                  <div className="w-12 h-12 bg-yellow-500/10 rounded-[8px] flex items-center justify-center">
+                    <Coins className="text-yellow-500" size={24} />
+                  </div>
+                  <input 
+                    type="number"
+                    value={gameData.perPlayerCharge}
+                    onChange={(e) => setGameData({ ...gameData, perPlayerCharge: parseInt(e.target.value) || 0 })}
+                    className="w-24 bg-transparent border-none text-center font-black text-2xl outline-none focus:ring-0"
+                  />
+                </div>
+              </div>
+            )}
 
              <div className="flex gap-4">
               <button 
@@ -1097,103 +1158,27 @@ const HostGame = () => {
               >
                 Back
               </button>
-              <button
-                onClick={() => setStep(4)}
-                className="flex-[2] py-3 sm:py-3.5 bg-gradient-to-r from-[#BFF367] to-[#BFF367] text-black font-black rounded-[8px] sm:rounded-[8px] hover:scale-[1.01] active:scale-[0.99] transition-all duration-300 text-sm sm:text-base font-open-sans shadow-[0_10px_25px_rgba(85,222,232,0.25)] uppercase tracking-wider"
-              >
-                Continue
-              </button>
+              {gameData.gameMode === 'QUICK' ? (
+                <button
+                  disabled={gameData.quickPlayerCount < 2}
+                  onClick={initQuickSlots}
+                  className="flex-[2] py-3 sm:py-3.5 bg-gradient-to-r from-[#BFF367] to-[#BFF367] text-black font-black rounded-[8px] sm:rounded-[8px] hover:scale-[1.01] active:scale-[0.99] transition-all duration-300 text-sm sm:text-base font-open-sans shadow-[0_10px_25px_rgba(85,222,232,0.25)] disabled:opacity-50 uppercase tracking-wider"
+                >
+                  SETUP SLOTS
+                </button>
+              ) : (
+                <button
+                  onClick={() => setStep(4)}
+                  className="flex-[2] py-3 sm:py-3.5 bg-gradient-to-r from-[#BFF367] to-[#BFF367] text-black font-black rounded-[8px] sm:rounded-[8px] hover:scale-[1.01] active:scale-[0.99] transition-all duration-300 text-sm sm:text-base font-open-sans shadow-[0_10px_25px_rgba(85,222,232,0.25)] uppercase tracking-wider"
+                >
+                  Continue
+                </button>
+              )}
             </div>
           </motion.div>
         )}
 
-        {/* Step 4: Setup (Quick vs Professional) */}
-        {step === 4 && gameData.gameMode === 'QUICK' && (
-          <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} className="space-y-6 max-w-md mx-auto">
-            <div className="bg-neutral-900/40 border border-neutral-800/80 rounded-[8px] p-5 sm:p-6 shadow-xl shadow-black/30">
-              
-              {/* Settings (Total Players & Entry Fee) */}
-              <div className="space-y-4 flex flex-col justify-between">
-                <div>
-                  <div className="flex items-center gap-2 mb-4">
-                    <div className="w-[3px] h-[16px] bg-gradient-to-b from-[#BFF367] to-[#BFF367] rounded-full" />
-                    <h3 className="text-xs font-black uppercase text-white tracking-wider">Quick Game Settings</h3>
-                  </div>
-
-                  <div className="space-y-3">
-                    {/* Compact Total Players Selection */}
-                    <div className="flex items-center gap-4 bg-neutral-950/60 p-3 rounded-[8px] border border-neutral-850 justify-between">
-                      <div className="flex flex-col text-left">
-                        <span className="text-[10px] font-black uppercase text-neutral-400 tracking-wider">Total Players</span>
-                        <span className="text-[8px] text-neutral-500 font-medium">Pool including you</span>
-                      </div>
-                      <div className="flex items-center gap-3">
-                        <button 
-                          type="button"
-                          onClick={() => setGameData(prev => ({ ...prev, quickPlayerCount: Math.max(2, prev.quickPlayerCount - 1) }))}
-                          className="w-8 h-8 rounded-full bg-neutral-900 border border-[#BFF367]/20 text-[#BFF367] flex items-center justify-center hover:bg-[#BFF367]/10 transition-colors"
-                        >
-                          <Minus size={14} />
-                        </button>
-                        <span className="text-lg font-black text-white w-6 text-center select-none tabular-nums">
-                          {gameData.quickPlayerCount || 2}
-                        </span>
-                        <button 
-                          type="button"
-                          onClick={() => setGameData(prev => ({ ...prev, quickPlayerCount: Math.min(22, prev.quickPlayerCount + 1) }))}
-                          className="w-8 h-8 rounded-full bg-neutral-900 border border-[#BFF367]/20 text-[#BFF367] flex items-center justify-center hover:bg-[#BFF367]/10 transition-colors"
-                        >
-                          <Plus size={14} />
-                        </button>
-                      </div>
-                    </div>
-
-                    {/* Compact Entry Fee Input */}
-                    <div className="flex items-center gap-4 bg-neutral-950/60 p-3 rounded-[8px] border border-neutral-850 justify-between">
-                      <div className="flex flex-col text-left">
-                        <span className="text-[10px] font-black uppercase text-neutral-400 tracking-wider">Entry Fee</span>
-                        <span className="text-[8px] text-neutral-500 font-medium">Per player (₹)</span>
-                      </div>
-                      <div className="flex items-center gap-2 bg-neutral-900 p-1.5 px-3 rounded-[6px] border border-neutral-800 focus-within:border-[#BFF367] transition-all">
-                        <Coins className="text-[#BFF367]" size={14} />
-                        <input 
-                          type="number"
-                          placeholder="0"
-                          value={gameData.perPlayerCharge || ''}
-                          onChange={(e) => setGameData({ ...gameData, perPlayerCharge: parseInt(e.target.value) || 0 })}
-                          className="w-16 bg-transparent border-none text-right font-black text-sm outline-none focus:ring-0 text-white p-0"
-                        />
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Pool Status Badge */}
-                <div className="text-center py-2.5 px-3 bg-[#BFF367]/5 border border-[#BFF367]/10 rounded-[8px] mt-4 md:mt-0">
-                  <span className="text-[9px] font-black text-[#BFF367] uppercase tracking-widest">
-                    You + {gameData.quickPlayerCount - 1} Players Pool
-                  </span>
-                </div>
-              </div>
-            </div>
-
-            <div className="flex gap-4 max-w-lg mx-auto w-full">
-              <button 
-                onClick={() => setStep(3)} 
-                className="flex-1 py-3 sm:py-3.5 bg-neutral-800 text-white font-black rounded-[8px] sm:rounded-[8px] hover:bg-neutral-700 transition-all duration-300 text-sm sm:text-base font-open-sans uppercase tracking-wider"
-              >
-                BACK
-              </button>
-              <button
-                disabled={gameData.quickPlayerCount < 2}
-                onClick={initQuickSlots}
-                className="flex-[2] py-3 bg-gradient-to-r from-[#BFF367] to-[#BFF367] text-black font-black rounded-[8px] hover:scale-[1.01] active:scale-[0.99] transition-all duration-300 text-sm font-open-sans shadow-[0_10px_25px_rgba(85,222,232,0.25)] disabled:opacity-50 uppercase tracking-wider"
-              >
-                SETUP SLOTS
-              </button>
-            </div>
-          </motion.div>
-        )}
+        {/* Step 4: Setup (Professional) */}
 
         {/* Step 4.5: Quick Slot Setup */}
         {step === 4.5 && (
