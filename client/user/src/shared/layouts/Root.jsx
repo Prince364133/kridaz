@@ -43,9 +43,10 @@ const Root = () => {
   const isNewPostPage = location.pathname.startsWith('/new-post') || location.pathname.startsWith('/create-post') || location.pathname.startsWith('/create-story');
   const isTeamsPage = location.pathname.startsWith('/my-teams');
   const isMessagesPage = location.pathname.startsWith('/messages');
+  const isChatOpen = isMessagesPage && searchParams.get('chatId') !== null;
   const isProfile = location.pathname.startsWith('/profile');
   const isBookingHistory = location.pathname.startsWith('/booking-history');
-  const hideNav = isReelsPage || isNewPostPage;
+  const hideNav = isReelsPage || isNewPostPage || isChatOpen;
   const isHome = location.pathname === "/" || location.pathname === "/community";
   const isSingleVenue = location.pathname.startsWith("/venue/");
   const isVenue = (location.pathname.startsWith("/venue") || location.pathname === "/venues") && !isSingleVenue;
