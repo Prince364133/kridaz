@@ -156,7 +156,7 @@ const BackgroundUploadManager = () => {
         await confirmCommunity({
           postId: dbId,
           key,
-          mediaType: upload.file.type.startsWith('video') ? 'video' : 'image',
+          mediaType: upload.file.type.startsWith('video') || upload.file.name.match(/\.(mp4|mov|webm|avi|mkv)$/i) ? 'video' : 'image',
           title: upload.metadata.title,
           content: upload.metadata.content
         }).unwrap();
@@ -164,7 +164,7 @@ const BackgroundUploadManager = () => {
         await confirmStory({
           storyId: dbId,
           key,
-          mediaType: upload.file.type.startsWith('video') ? 'video' : 'image',
+          mediaType: upload.file.type.startsWith('video') || upload.file.name.match(/\.(mp4|mov|webm|avi|mkv)$/i) ? 'video' : 'image',
           content: upload.metadata.content,
           durationDays: upload.metadata.durationDays
         }).unwrap();

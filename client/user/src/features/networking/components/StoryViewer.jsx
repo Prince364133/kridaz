@@ -188,12 +188,12 @@ const StoryViewer = ({ storyGroup, onClose, onDelete, currentUser, isAdmin, init
 
  {/* Content */}
  <div className="relative flex-1 flex items-center justify-center bg-black overflow-hidden">
- {currentStory.mediaUrl ? (
+ {currentStory.mediaUrl || currentStory.rawMediaUrl ? (
    currentStory.mediaType === 'video' ? (
-     <StoryVideoPlayer src={currentStory.mediaUrl} onDurationReady={handleVideoDuration} />
+     <StoryVideoPlayer src={currentStory.mediaUrl || currentStory.rawMediaUrl} onDurationReady={handleVideoDuration} />
    ) : (
     <img 
-      src={currentStory.mediaUrl} 
+      src={currentStory.mediaUrl || currentStory.rawMediaUrl} 
       alt="" 
       className="w-full h-full object-contain"
     />
@@ -205,7 +205,7 @@ const StoryViewer = ({ storyGroup, onClose, onDelete, currentUser, isAdmin, init
  )}
 
  {/* Caption Overlay */}
- {currentStory.mediaUrl && currentStory.content && (
+ {(currentStory.mediaUrl || currentStory.rawMediaUrl) && currentStory.content && (
  <div className="absolute bottom-24 left-0 right-0 p-8 bg-gradient-to-t from-black/80 via-black/40 to-transparent">
  <p className="text-sm font-medium text-center text-white/90 leading-relaxed">{currentStory.content}</p>
  </div>

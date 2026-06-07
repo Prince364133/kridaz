@@ -123,7 +123,7 @@ const CreateStoryPage = () => {
 
         mediaItems.push({
           key: uploadData.key,
-          mediaType: file.type.startsWith("video") ? "video" : "image",
+          mediaType: file.type.startsWith("video") || file.name.match(/\.(mp4|mov|webm|avi|mkv)$/i) ? "video" : "image",
         });
       }
 

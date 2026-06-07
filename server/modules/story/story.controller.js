@@ -150,63 +150,7 @@ export const confirmStory = async (req, res) => {
 
 
 export const createStory = async (req, res) => {
-  try {
-    const { mediaType, durationDays, content } = req.body;
-    const rawId = req.user.id;
-    const userId = await resolveUserId(rawId);
-
-    const expiresAt = new Date();
-    expiresAt.setDate(expiresAt.getDate() + parseInt(durationDays || 1));
-
-    let createdStories = [];
-
-    if (req.files && req.files.length > 0) {
-      for (const file of req.files) {
-        const mediaUrl = await uploadToCloudinary(file.buffer, 'kridaz/stories');
-        const newStory = await prisma.story.create({
-          data: {
-            userId,
-            mediaUrl,
-            mediaType: mediaType || 'image',
-            content,
-            durationDays: parseInt(durationDays || 1),
-            expiresAt
-          }
-        });
-        createdStories.push(newStory);
-      }
-    } else if (req.file) {
-      const mediaUrl = await uploadToCloudinary(req.file.buffer, 'kridaz/stories');
-      const newStory = await prisma.story.create({
-        data: {
-          userId,
-          mediaUrl,
-          mediaType: mediaType || 'image',
-          content,
-          durationDays: parseInt(durationDays || 1),
-          expiresAt
-        }
-      });
-      createdStories.push(newStory);
-    } else {
-      const newStory = await prisma.story.create({
-        data: {
-          userId,
-          mediaUrl: '',
-          mediaType: 'text',
-          content,
-          durationDays: parseInt(durationDays || 1),
-          expiresAt
-        }
-      });
-      createdStories.push(newStory);
-    }
-
-    res.status(201).json({ success: true, stories: createdStories, story: createdStories[0] });
-  } catch (error) {
-    logger.error('Error creating story:', error);
-    res.status(500).json({ success: false, message: error.message });
-  }
+  res.status(400).json({ success: false, message: 'Deprecated: Please use direct R2 upload flow (/upload-url)' });
 };
 
 export const getStories = async (req, res) => {
@@ -353,7 +297,7 @@ export const updateStory = async (req, res) => {
     }
 
     if (req.file) {
-      updateData.mediaUrl = await uploadToCloudinary(req.file.buffer, 'kridaz/stories');
+      return res.status(400).json({ success: false, message: 'Media updates must use the R2 upload flow.' });
     }
 
     const updatedStory = await prisma.story.update({
