@@ -96,7 +96,7 @@ const Messages = () => {
         <CreateGroupModal 
           isOpen={isModalOpen} 
           onClose={() => setIsModalOpen(false)} 
-          onSuccess={(newChat) => setSelectedChat(newChat)}
+          onSuccess={handleSelectChat}
         />
       )}
 
@@ -104,7 +104,7 @@ const Messages = () => {
         <CreateCommunityModal 
           isOpen={isCommunityModalOpen}
           onClose={() => setIsCommunityModalOpen(false)}
-          onSuccess={(newChat) => setSelectedChat(newChat)}
+          onSuccess={handleSelectChat}
         />
       )}
     </div>
