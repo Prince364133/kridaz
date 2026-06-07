@@ -12,8 +12,8 @@ import axiosInstance from "@hooks/useAxiosInstance";
 import useSimilarRecommendations from "@hooks/useSimilarRecommendations";
 import TurfCard from "./TurfCard.jsx";
 import toast from "react-hot-toast";
-import {
 import GlobalBackButton from '@/shared/components/GlobalBackButton';
+import {
   MapPin,
   Clock,
   IndianRupee,
