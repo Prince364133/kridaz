@@ -150,6 +150,39 @@ const StartScoringModal = ({ isOpen, onClose, onSuccess, initialData }) => {
   const { user } = useSelector((state) => state.auth);
   const [step, setStep] = useState(1);
   const [showCustomVenuePopup, setShowCustomVenuePopup] = useState(false);
+  
+  const [supportsContacts, setSupportsContacts] = useState(false);
+
+  useEffect(() => {
+    if ('contacts' in navigator && 'ContactsManager' in window) {
+      const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+      if (isMobile) {
+        setSupportsContacts(true);
+      }
+    }
+  }, []);
+
+  const handleImportFromContacts = async () => {
+    try {
+      const props = ['name', 'tel'];
+      const opts = { multiple: false };
+      const contacts = await navigator.contacts.select(props, opts);
+      if (contacts && contacts.length > 0) {
+        const contact = contacts[0];
+        if (contact.name && contact.name.length > 0) {
+          setCustomPlayerName(contact.name[0]);
+        }
+        if (contact.tel && contact.tel.length > 0) {
+          let rawPhone = contact.tel[0].replace(/\D/g, '');
+          if (rawPhone.length > 10) rawPhone = rawPhone.slice(-10);
+          setCustomPlayerPhone(rawPhone);
+        }
+      }
+    } catch (ex) {
+      console.log('Contacts API failed:', ex);
+    }
+  };
+
   const [customVenueNameInput, setCustomVenueNameInput] = useState('');
   const [customVenueLocationInput, setCustomVenueLocationInput] = useState('');
   const [showVenuePopup, setShowVenuePopup] = useState(false);
@@ -1942,6 +1975,15 @@ const StartScoringModal = ({ isOpen, onClose, onSuccess, initialData }) => {
               <div className="space-y-4">
                 {!customInviteData ? (
                   <form id="customPlayerForm" onSubmit={handleAddCustomPlayerSubmit} className="space-y-4">
+                    {supportsContacts && (
+                      <button
+                        type="button"
+                        onClick={handleImportFromContacts}
+                        className="w-full flex items-center justify-center gap-2 py-3 bg-[#121212] border border-white/10 rounded-[12px] text-[#BFF367] font-semibold text-xs hover:border-[#BFF367]/30 transition-colors uppercase tracking-wider"
+                      >
+                        <Users size={16} /> Add player from your contacts
+                      </button>
+                    )}
 
                     <div>
                       <label className={labelClass}>Player Name *</label>
