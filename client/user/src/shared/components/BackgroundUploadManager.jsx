@@ -21,6 +21,7 @@ import {
 } from '@redux/api/communityApi';
 import { uploadFileToR2 } from '@utils/mediaUpload';
 import toast from 'react-hot-toast';
+import { useSocket } from '@context/SocketContext';
 
 const BackgroundUploadManager = () => {
   const dispatch = useDispatch();
@@ -34,6 +35,8 @@ const BackgroundUploadManager = () => {
   const [getStoryUploadUrl] = useLazyGetStoryUploadUrlQuery();
   const [confirmStory] = useConfirmStoryUploadMutation();
   
+  const { socket } = useSocket();
+
   // Track if we are currently processing the active upload to avoid double triggers
   const processingId = useRef(null);
 
@@ -42,6 +45,59 @@ const BackgroundUploadManager = () => {
       processUpload(activeUpload);
     }
   }, [activeUpload]);
+
+  useEffect(() => {
+    if (!socket) return;
+
+    const handleMediaComplete = (data) => {
+      console.log('[SOCKET] Media processing complete:', data);
+      if (data.mediaType === 'reel') {
+        import('@redux/api/reelsApi').then(({ reelsApi }) => {
+          dispatch(reelsApi.util.updateQueryData('getReelsFeed', undefined, (draft) => {
+            if (draft && draft.reels) {
+              const reel = draft.reels.find(r => r.id === data.mediaId || r._id === data.mediaId);
+              if (reel) {
+                reel.status = 'ready';
+                reel.hlsUrl = data.hlsUrl;
+                reel.thumbnailUrl = data.thumbnailUrl;
+                reel.rawVideoUrl = null;
+              }
+            }
+          }));
+        });
+      } else if (data.mediaType === 'community') {
+        import('@redux/api/communityApi').then(({ communityApi }) => {
+          dispatch(communityApi.util.updateQueryData('getFeed', undefined, (draft) => {
+            if (draft && draft.posts) {
+              const post = draft.posts.find(p => p.id === data.mediaId || p._id === data.mediaId);
+              if (post) {
+                post.status = 'ready';
+                post.mediaUrls = [data.hlsUrl];
+              }
+            }
+          }));
+        });
+      } else if (data.mediaType === 'story') {
+        import('@redux/api/communityApi').then(({ communityApi }) => {
+          dispatch(communityApi.util.updateQueryData('getFeed', undefined, (draft) => {
+            if (draft && draft.stories) {
+              draft.stories.forEach(storyGroup => {
+                const story = storyGroup.stories?.find(s => s.id === data.mediaId || s._id === data.mediaId);
+                if (story) {
+                  story.status = 'ready';
+                  story.mediaUrl = data.hlsUrl;
+                  story.rawMediaUrl = null;
+                }
+              });
+            }
+          }));
+        });
+      }
+    };
+
+    socket.on('MEDIA_PROCESSING_COMPLETE', handleMediaComplete);
+    return () => socket.off('MEDIA_PROCESSING_COMPLETE', handleMediaComplete);
+  }, [socket, dispatch]);
 
   const processUpload = async (upload) => {
     processingId.current = upload.id;
