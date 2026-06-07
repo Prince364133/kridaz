@@ -26,6 +26,17 @@ const NewPostLanding = () => {
   }, [recordingDuration]);
   
   const startCamera = useCallback(async () => {
+    // Ensure any existing streams are fully stopped before starting a new one
+    if (streamRef.current) {
+      streamRef.current.getTracks().forEach(track => track.stop());
+      streamRef.current = null;
+    }
+    if (videoRef.current && videoRef.current.srcObject) {
+      const tracks = videoRef.current.srcObject.getTracks();
+      tracks.forEach(track => track.stop());
+      videoRef.current.srcObject = null;
+    }
+    
     try {
       const mediaStream = await navigator.mediaDevices.getUserMedia({ 
         video: { facingMode },
@@ -59,15 +70,27 @@ const NewPostLanding = () => {
 
   const stopCamera = useCallback(() => {
     if (streamRef.current) {
-      streamRef.current.getTracks().forEach(track => track.stop());
+      streamRef.current.getTracks().forEach(track => {
+        track.stop();
+        // Also fire stop event manually just in case
+        try { track.enabled = false; } catch(e) {}
+      });
       streamRef.current = null;
     }
     if (videoRef.current && videoRef.current.srcObject) {
       const tracks = videoRef.current.srcObject.getTracks();
-      tracks.forEach(track => track.stop());
+      tracks.forEach(track => {
+        track.stop();
+        try { track.enabled = false; } catch(e) {}
+      });
       videoRef.current.srcObject = null;
     }
-    setStream(null);
+    setStream(prevStream => {
+      if (prevStream) {
+        prevStream.getTracks().forEach(track => track.stop());
+      }
+      return null;
+    });
   }, []);
 
   // Start the camera when the component mounts
