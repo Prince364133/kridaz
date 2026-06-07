@@ -23,6 +23,7 @@ import { getEmitter } from '../../config/socketEmitter.js';
 import * as Sentry from '@sentry/node';
 import { initSentry } from '../../config/sentry.js';
 import logger from '../../utils/logger.js';
+import { invalidateCache } from '../../utils/cache.js';
 
 // Initialize Sentry for error tracking
 initSentry();
@@ -89,6 +90,16 @@ export default async function mediaProcessor(job) {
     }
 
     await Model.update({ where: { id: mediaId }, data: updateData });
+
+    // Invalidate caches based on media type
+    try {
+      if (mediaType === 'reel') await invalidateCache('reels:feed*');
+      else if (mediaType === 'story') await invalidateCache('story:feed*');
+      else if (mediaType === 'community') await invalidateCache('community:feed*');
+      logger.info(`[PROCESSOR] Invalidated cache for new ${mediaType}: ${mediaId}`);
+    } catch (err) {
+      logger.warn(`[PROCESSOR] Failed to invalidate cache: ${err.message}`);
+    }
 
     // ── 5. Delete raw temp file from R2 ────────────────────────────────────
     // Done AFTER the DB update so that on failure, rawVideoUrl is still set

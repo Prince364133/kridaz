@@ -66,6 +66,13 @@ export const confirmUpload = async (req, res) => {
       }
     });
 
+    // Invalidate the cache so the new pending reel is visible
+    try {
+      await invalidateCache('reels:feed*');
+    } catch (err) {
+      logger.warn('[REELS] Failed to invalidate cache on confirm:', err);
+    }
+
     // 2. Push to transcoding queue
     await mediaQueue.add('TRANSCODE_VIDEO', { 
       mediaId: reel.id,
