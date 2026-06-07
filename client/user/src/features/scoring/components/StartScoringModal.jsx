@@ -154,16 +154,18 @@ const StartScoringModal = ({ isOpen, onClose, onSuccess, initialData }) => {
   const [supportsContacts, setSupportsContacts] = useState(false);
 
   useEffect(() => {
-    if ('contacts' in navigator && 'ContactsManager' in window) {
-      const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-      if (isMobile) {
-        setSupportsContacts(true);
-      }
+    const isMobileView = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini|Mobi/i.test(navigator.userAgent);
+    if (isMobileView) {
+      setSupportsContacts(true);
     }
   }, []);
 
   const handleImportFromContacts = async () => {
     try {
+      if (!('contacts' in navigator && 'ContactsManager' in window)) {
+        toast.error('Contacts API is only supported on a real mobile device. Please test this on your phone.');
+        return;
+      }
       const props = ['name', 'tel'];
       const opts = { multiple: false };
       const contacts = await navigator.contacts.select(props, opts);
