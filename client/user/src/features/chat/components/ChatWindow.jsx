@@ -139,9 +139,13 @@ const ChatWindow = ({ chat, onBack, onSelectChat }) => {
  }
  }, [socket, chat]);
 
- useEffect(() => {
- scrollRef.current?.scrollIntoView({ behavior: "smooth" });
- }, [messages, showTypingIndicator]);
+  useEffect(() => {
+    if (scrollRef.current && scrollRef.current.parentElement) {
+      const parent = scrollRef.current.parentElement;
+      // Use scrollTo instead of scrollIntoView to prevent entire page shifting
+      parent.scrollTo({ top: parent.scrollHeight, behavior: 'smooth' });
+    }
+  }, [messages, showTypingIndicator]);
 
  const handleSendMessage = async (e) => {
  e.preventDefault();
