@@ -26,6 +26,7 @@ const SupportTab  = lazy(() => import("@features/professional/pages/SupportTab")
 const TrustScoreHistory = lazy(() => import("@features/professional/pages/TrustScoreHistory"));
 
 // Î“Ã¶Ã‡Î“Ã¶Ã‡ Lazy: User Portal Pages Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡Î“Ã¶Ã‡
+const LandingPage              = lazy(() => import("@user/pages/LandingPage"));
 const UserHome               = lazy(() => import("@user/pages/Home"));
 const UserLogin              = lazy(() => import("@features/auth").then(m => ({ default: m.Login })));
 const UserSignUp             = lazy(() => import("@features/auth").then(m => ({ default: m.SignUp })));
@@ -202,6 +203,10 @@ const router = createBrowserRouter([
   {
     path: "/live-overlay/:matchId/preview",
     element: <S><ThemePreview /></S>,
+  },
+  {
+    path: "/landing",
+    element: <S><LandingPage /></S>,
   },
 
   // Î“Ã¶Ã‡Î“Ã¶Ã‡ USER PORTAL (Fall-through Priority) Î“Ã¶Ã‡Î“Ã¶Ã‡
