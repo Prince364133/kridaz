@@ -45,7 +45,7 @@ const Root = () => {
   const isMessagesPage = location.pathname.startsWith('/messages');
   const isProfile = location.pathname.startsWith('/profile');
   const isBookingHistory = location.pathname.startsWith('/booking-history');
-  const hideNav = isReelsPage || isNewPostPage || isMessagesPage;
+  const hideNav = isReelsPage || isNewPostPage;
   const isHome = location.pathname === "/" || location.pathname === "/community";
   const isSingleVenue = location.pathname.startsWith("/venue/");
   const isVenue = (location.pathname.startsWith("/venue") || location.pathname === "/venues") && !isSingleVenue;
