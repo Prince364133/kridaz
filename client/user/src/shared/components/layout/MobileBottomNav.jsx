@@ -62,7 +62,7 @@ const MobileBottomNav = () => {
   return (
     <>
       {/* Invisible Drag Constraints Area */}
-      <div className="lg:hidden fixed inset-4 z-[-1] pointer-events-none" ref={dragConstraintsRef} />
+      <div className="lg:hidden fixed inset-4 z-[-1] pointer-events-none" style={{ bottom: 'calc(1rem + env(safe-area-inset-bottom))' }} ref={dragConstraintsRef} />
 
       {/* Full Screen Blur Overlay */}
       {isMenuOpen && (
@@ -73,7 +73,10 @@ const MobileBottomNav = () => {
       )}
 
       {/* Free Floating Draggable Container */}
-      <div className="lg:hidden fixed bottom-4 left-0 right-0 z-[100] pointer-events-none flex justify-center items-end">
+      <div 
+        className="lg:hidden fixed left-0 right-0 z-[100] pointer-events-none flex justify-center items-end"
+        style={{ bottom: 'calc(1rem + env(safe-area-inset-bottom))' }}
+      >
         <motion.div
           drag
           dragConstraints={dragConstraintsRef}
