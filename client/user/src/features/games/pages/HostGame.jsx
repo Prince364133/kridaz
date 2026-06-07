@@ -1092,7 +1092,7 @@ const HostGame = () => {
 
              <div className="flex gap-4">
               <button 
-                onClick={() => setStep(2)} 
+                onClick={() => setStep(1)} 
                 className="flex-1 py-3 sm:py-3.5 bg-neutral-900/60 text-neutral-400 font-bold rounded-[8px] sm:rounded-[8px] border border-neutral-800 hover:border-neutral-700 transition-all duration-300 text-sm sm:text-base font-open-sans uppercase tracking-wider"
               >
                 Back
