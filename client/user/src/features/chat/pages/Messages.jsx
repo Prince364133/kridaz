@@ -66,7 +66,7 @@ const Messages = () => {
       </div>
       
       {/* Chat Window - hidden on mobile when no chat is selected */}
-      <div className={`${selectedChat ? 'block' : 'hidden md:block'} flex-1 h-full`}>
+      <div className={`${selectedChat ? 'block' : 'hidden md:block'} flex-1 h-full pb-20 md:pb-0`}>
         <ChatWindow chat={selectedChat} onBack={() => setSelectedChat(null)} onSelectChat={setSelectedChat} />
       </div>
 

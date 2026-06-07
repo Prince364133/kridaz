@@ -222,11 +222,11 @@ const ChatWindow = ({ chat, onBack, onSelectChat }) => {
  return chat.users?.find((u) => u.user?.name === user?.name);
  };
 
- const getChatName = () => {
- if (chat.isGroupChat) return chat.chatName;
- const otherUser = getChatOtherUser();
- return otherUser?.name || "Unknown User";
- };
+  const getChatName = () => {
+    if (chat.isGroupChat) return chat.chatName || (chat.isAnnouncementGroup ? "Announcements" : "Unnamed Group");
+    const otherUser = getChatOtherUser();
+    return otherUser?.name || "Unknown User";
+  };
 
  // Format last seen
  // Format status text (online/last seen)
@@ -771,14 +771,27 @@ const ChatWindow = ({ chat, onBack, onSelectChat }) => {
  );
  }
 
- if (messageSearchQuery.trim() && filteredMessages.length === 0) {
- return (
- <div className="flex flex-col items-center justify-center h-full text-white/40 mt-10">
- <svg className="w-12 h-12 mb-3 opacity-20" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
- <p className="chat-subheading">No messages found for "{messageSearchQuery}"</p>
- </div>
- );
- }
+ if (filteredMessages.length === 0) {
+    if (messageSearchQuery.trim()) {
+      return (
+        <div className="flex flex-col items-center justify-center h-full text-white/40 mt-10">
+          <svg className="w-12 h-12 mb-3 opacity-20" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
+          <p className="chat-subheading">No messages found for "{messageSearchQuery}"</p>
+        </div>
+      );
+    }
+    return (
+      <div className="flex flex-col items-center justify-center h-full text-white/40 mt-10">
+        <div className="w-16 h-16 rounded-full bg-white/[0.03] border border-white/5 flex items-center justify-center mb-4">
+          <svg className="w-8 h-8 opacity-20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+          </svg>
+        </div>
+        <p className="chat-subheading text-white/20">No messages yet.</p>
+        <p className="text-[11px] text-white/10 mt-1">Start the conversation!</p>
+      </div>
+    );
+  }
 
  return filteredMessages.map((m, i) => {
  const senderId = getSenderId(m);
