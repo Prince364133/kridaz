@@ -116,50 +116,50 @@ const WalletPage = () => {
       <div className="max-w-4xl mx-auto space-y-8">
         {/* Header */}
         <div className="space-y-2">
-          <h1 className="text-4xl md:text-5xl font-black uppercase tracking-tighter font-open-sans">My Wallet</h1>
-          <p className="text-zinc-500 uppercase tracking-widest text-[20px]" style={SUBHEADING_STYLE}>Manage your coins & transactions</p>
+          <h1 className="text-[24px] font-black uppercase tracking-tight font-open-sans">My Wallet</h1>
+          <p className="text-white/70 uppercase tracking-widest text-[11px]" style={SUBHEADING_STYLE}>Manage your coins & transactions</p>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-12 gap-8">
           {/* Balance Card */}
           <div className="md:col-span-5 space-y-6">
-            <div className="relative group overflow-hidden bg-gradient-to-br from-[#BFF367] to-[#BFF367] p-8 rounded-[8px] shadow-2xl shadow-[#BFF367]/20 animate-slide-in-left text-black">
+            <div className="relative group overflow-hidden bg-[#121212] border-2 border-white/10 p-6 rounded-[16px] shadow-xl animate-slide-in-left text-white">
               <div className="absolute top-0 right-0 p-8 opacity-10 group-hover:scale-110 transition-transform duration-500">
-                <Wallet className="w-32 h-32 text-black" />
+                <Wallet className="w-32 h-32 text-white/5" />
               </div>
               <div className="relative z-10 space-y-8">
                 <div className="flex items-center gap-3">
-                  <div className="p-2 bg-black/20 rounded-[8px] backdrop-blur-sm">
-                    <Zap className="w-5 h-5 text-black" />
+                  <div className="p-2 bg-[#1B1B1B] rounded-[12px] backdrop-blur-sm">
+                    <Zap className="w-5 h-5 text-[#BFF367]" />
                   </div>
-                  <span className="font-inter text-[20px] font-black uppercase text-black/70 tracking-wider">Available Coins</span>
+                  <span className="font-inter text-[20px] font-black uppercase text-white/70 tracking-wider text-[11px]">Available Coins</span>
                 </div>
                 <div className="space-y-1">
                   <div className="flex items-center gap-2">
-                    <span className="text-6xl font-black text-black tracking-tighter font-open-sans">{usableBalance}</span>
-                    <IndianRupee className="w-8 h-8 text-black/50 mt-4" />
+                    <span className="text-5xl font-black text-white tracking-tighter font-open-sans">{usableBalance}</span>
+                    <IndianRupee className="w-8 h-8 text-white/50 mt-4" />
                   </div>
-                  <p className="font-inter text-[20px] font-bold text-black/70 uppercase">Spendable Coins Right Now</p>
+                  <p className="font-inter text-[12px] font-bold text-[#BFF367] uppercase">Spendable Coins Right Now</p>
                 </div>
                 
                 <div className="grid grid-cols-2 gap-4">
-                  <div className="p-3 bg-black/10 rounded-[8px] backdrop-blur-sm">
-                    <p className="font-inter text-xs font-black uppercase text-black/60 mb-1">Total</p>
-                    <p className="text-xl font-black text-black tracking-tighter font-open-sans">{balance}</p>
+                  <div className="p-3 bg-[#1B1B1B] rounded-[16px] backdrop-blur-sm">
+                    <p className="font-inter text-xs font-black uppercase text-white/70 mb-1 tracking-widest">Total</p>
+                    <p className="text-lg font-black text-white tracking-tighter font-open-sans">{balance}</p>
                   </div>
-                  <div className="p-3 bg-black/10 rounded-[8px] backdrop-blur-sm">
-                    <p className="font-inter text-xs font-black uppercase text-black/60 mb-1">Reserved</p>
-                    <p className="text-xl font-black text-black tracking-tighter font-open-sans">{reservedBalance}</p>
+                  <div className="p-3 bg-[#1B1B1B] rounded-[16px] backdrop-blur-sm">
+                    <p className="font-inter text-xs font-black uppercase text-white/70 mb-1 tracking-widest">Reserved</p>
+                    <p className="text-lg font-black text-white tracking-tighter font-open-sans">{reservedBalance}</p>
                   </div>
                 </div>
-                <div className="pt-4 border-t border-black/10">
-                  <p className="font-inter text-xs font-bold text-black/60 uppercase">Last updated: {new Date().toLocaleTimeString()}</p>
+                <div className="pt-4 border-t border-white/10">
+                  <p className="font-inter text-xs font-bold text-white/50 uppercase tracking-widest text-[9px]">Last updated: {new Date().toLocaleTimeString()}</p>
                 </div>
               </div>
             </div>
 
             {/* Top-up Form */}
-            <div className="bg-zinc-900/50 border border-zinc-800 p-8 rounded-[8px] space-y-6">
+            <div className="bg-[#121212] border border-white/10 p-6 rounded-[16px] space-y-6">
               <h2 className="text-lg font-bold uppercase tracking-tight flex items-center gap-3 font-open-sans">
                 <Plus className="w-5 h-5 text-[#BFF367]" />
                 Top-up Wallet
@@ -172,7 +172,7 @@ const WalletPage = () => {
                     value={topupAmount}
                     onChange={(e) => setTopupAmount(e.target.value)}
                     placeholder="Enter amount (e.g. 500)"
-                    className="w-full bg-zinc-950 border border-zinc-800 rounded-[8px] py-4 pl-11 pr-3 text-sm font-bold focus:border-[#BFF367] focus:ring-1 focus:ring-[#BFF367] transition-all outline-none text-white font-inter"
+                    className="w-full bg-[#000000] border border-white/10 rounded-[16px] py-3 pl-11 pr-3 text-sm font-bold focus:border-[#BFF367] focus:ring-1 focus:ring-[#BFF367] transition-all outline-none text-white font-inter"
                   />
                 </div>
                 <div className="grid grid-cols-3 gap-2 font-inter">
@@ -180,7 +180,7 @@ const WalletPage = () => {
                     <button
                       key={amt}
                       onClick={() => setTopupAmount(amt.toString())}
-                      className="py-3 rounded-[8px] border border-zinc-800 hover:border-[#BFF367] hover:text-[#BFF367] font-bold text-xs uppercase transition-all"
+                      className="py-3 rounded-[16px] bg-[#1B1B1B] border border-white/10 hover:border-[#55DEE8] hover:text-[#55DEE8] font-bold text-xs uppercase transition-all"
                     >
                       +{amt}
                     </button>
@@ -189,7 +189,7 @@ const WalletPage = () => {
                 <button
                   onClick={handleTopup}
                   disabled={isProcessing}
-                  className="w-full bg-gradient-to-r from-[#BFF367] to-[#BFF367] text-black h-16 rounded-[8px] font-black uppercase tracking-wider flex items-center justify-center gap-3 hover:scale-[1.02] active:scale-[0.98] transition-all disabled:opacity-50 disabled:grayscale font-open-sans shadow-[0_10px_25px_rgba(85,222,232,0.25)]"
+                  className="w-full bg-gradient-to-r from-[#55DEE8] to-[#BFF367] text-[#000000] h-[46px] rounded-[16px] font-bold uppercase tracking-widest text-xs flex items-center justify-center gap-3 hover:scale-[1.02] active:scale-[0.98] transition-all disabled:opacity-50 disabled:grayscale font-open-sans shadow-[0_10px_25px_rgba(85,222,232,0.25)]"
                 >
                   {isProcessing ? (
                     <Loader2 className="w-6 h-6 animate-spin" />
@@ -205,13 +205,13 @@ const WalletPage = () => {
           </div>
 
           {/* Transaction History */}
-          <div className="md:col-span-7 bg-zinc-900/50 border border-zinc-800 rounded-[8px] overflow-hidden flex flex-col font-inter">
-            <div className="p-8 border-b border-zinc-800 flex items-center justify-between">
+          <div className="md:col-span-7 bg-[#121212] border border-white/10 rounded-[16px] overflow-hidden flex flex-col font-inter">
+            <div className="p-6 border-b border-white/10 flex items-center justify-between">
               <h2 className="text-lg font-bold uppercase tracking-tight flex items-center gap-3 font-open-sans">
                 <History className="w-5 h-5 text-[#BFF367]" />
                 Coin Activity
               </h2>
-              <span className="font-inter text-xs font-bold text-zinc-500 uppercase">Recent 20 entries</span>
+              <span className="font-inter text-xs font-bold text-white/50 uppercase tracking-widest">Recent 20 entries</span>
             </div>
             <div className="flex-1 overflow-y-auto max-h-[600px] scrollbar-hide">
               {transactions.length === 0 ? (
@@ -222,13 +222,13 @@ const WalletPage = () => {
                   <p className="text-zinc-500 font-bold uppercase text-xs font-inter">No transactions yet</p>
                 </div>
               ) : (
-                <div className="divide-y divide-zinc-800 font-inter">
+                <div className="divide-y divide-white/10 font-inter">
                   {transactions.map((tx) => {
                     const isPositive = ['TOPUP', 'OFFER', 'REFUND', 'SLOT_INCOME', 'CREDIT'].includes(tx.type);
                     return (
-                    <div key={tx._id || tx.id} className="p-6 flex items-center justify-between hover:bg-zinc-800/30 transition-colors">
+                    <div key={tx._id || tx.id} className="p-6 flex items-center justify-between hover:bg-[#1B1B1B]/50 transition-colors">
                       <div className="flex items-center gap-4">
-                        <div className={`p-3 rounded-[8px] ${ isPositive ? "bg-emerald-500/10 text-emerald-500" : "bg-rose-500/10 text-rose-500" }`}>
+                        <div className={`p-2.5 rounded-[12px] ${ isPositive ? "bg-emerald-500/10 text-emerald-500" : "bg-rose-500/10 text-rose-500" }`}>
                           {isPositive ? <ArrowDownLeft className="w-5 h-5" /> : <ArrowUpRight className="w-5 h-5" />}
                         </div>
                         <div>
