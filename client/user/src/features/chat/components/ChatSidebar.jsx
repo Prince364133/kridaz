@@ -395,7 +395,7 @@ const ChatSidebar = ({ onSelectChat, selectedChatId, onCreateGroup, onCreateComm
         {/* Invitations Section */}
         {invitations.length > 0 && (
           <div className="p-3 space-y-2">
-            <h3 className="px-3 py-2 text-[10px] font-bold text-[#BFF367] uppercase">Pending Invitations</h3>
+            <h3 className="px-3 py-2 text-xs font-semibold text-white/50 uppercase tracking-wider">Pending Invitations</h3>
             {invitations.map((chat) => (
               <div key={chat._id} className="bg-white/[0.03] border border-white/5 rounded-[8px] p-4">
                 <div className="flex items-center gap-3 mb-3">
@@ -407,7 +407,7 @@ const ChatSidebar = ({ onSelectChat, selectedChatId, onCreateGroup, onCreateComm
                     )}
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className="chat-heading text-white font-bold text-sm truncate">{chat.chatName}</p>
+                    <p className="font-semibold text-white text-base truncate">{chat.chatName}</p>
                     <p className="chat-subheading text-white/40 font-medium uppercase">Group Invitation</p>
                   </div>
                 </div>

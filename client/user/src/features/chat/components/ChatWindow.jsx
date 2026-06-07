@@ -656,7 +656,7 @@ const ChatWindow = ({ chat, onBack, onSelectChat }) => {
  {/* Groups Section */}
  <div className="max-w-2xl mx-auto w-full space-y-3">
  <div className="flex items-center justify-between px-2">
- <h3 className="text-[10px] font-bold text-[#BFF367] uppercase">Groups in this community</h3>
+ <h3 className="text-xs font-semibold text-white/50 uppercase tracking-wider">Groups in this community</h3>
  <span className="text-[10px] font-bold text-white/20 uppercase tracking-[0.2em]">{childGroups.length} Groups</span>
  </div>
 
@@ -670,7 +670,7 @@ const ChatWindow = ({ chat, onBack, onSelectChat }) => {
  <Plus size={24} />
  </div>
  <div className="text-left">
- <p className="chat-heading text-white font-bold text-sm">Add group</p>
+ <p className="font-semibold text-white text-base">Add group</p>
  <p className="community-copy text-white/40 mt-0.5">Create or add existing groups to this community</p>
  </div>
  </button>
@@ -686,7 +686,7 @@ const ChatWindow = ({ chat, onBack, onSelectChat }) => {
  </div>
  <div className="text-left flex-1">
  <div className="flex justify-between">
- <p className="chat-heading text-white font-bold text-sm">Announcements</p>
+ <p className="font-semibold text-white text-base">Announcements</p>
  <span className="text-[10px] bg-[#BFF367]/20 text-[#BFF367] px-2 py-0.5 rounded font-bold uppercase">System</span>
  </div>
  <p className="community-copy text-white/40 mt-0.5">Only admins can post messages here</p>
@@ -699,7 +699,7 @@ const ChatWindow = ({ chat, onBack, onSelectChat }) => {
  </div>
  <div className="text-left flex-1">
  <div className="flex justify-between">
- <p className="chat-heading text-white font-bold text-sm">Announcements</p>
+ <p className="font-semibold text-white text-base">Announcements</p>
  <span className="text-[10px] bg-[#BFF367]/20 text-[#BFF367] px-2 py-0.5 rounded font-bold uppercase">System</span>
  </div>
  <p className="community-copy text-white/40 mt-0.5">Only admins can post messages here</p>
@@ -718,7 +718,7 @@ const ChatWindow = ({ chat, onBack, onSelectChat }) => {
  <Users size={20} className="text-white/20" />
  </div>
  <div className="text-left">
- <p className="chat-heading text-white font-bold text-sm">{group.chatName}</p>
+ <p className="font-semibold text-white text-base">{group.chatName}</p>
  <p className="community-copy text-white/40 mt-0.5">{group.users?.length || 0} Members</p>
  </div>
  </button>
@@ -734,7 +734,7 @@ const ChatWindow = ({ chat, onBack, onSelectChat }) => {
  {/* Community Members Section */}
  <div className="max-w-2xl mx-auto w-full pt-7 pb-16 space-y-4">
  <div className="flex items-center justify-between px-2">
- <h3 className="text-[10px] font-bold text-[#BFF367] uppercase">Community Members</h3>
+ <h3 className="text-xs font-semibold text-white/50 uppercase tracking-wider">Community Members</h3>
  <span className="text-[10px] font-bold text-white/20 uppercase tracking-[0.2em]">{chat.users?.length || 0} Members</span>
  </div>
  
@@ -753,7 +753,7 @@ const ChatWindow = ({ chat, onBack, onSelectChat }) => {
  alt="" 
  />
  <div className="flex-1 min-w-0">
- <p className="chat-heading text-white font-bold text-sm truncate">{member.name}</p>
+ <p className="font-semibold text-white text-base truncate">{member.name}</p>
  <div className="flex items-center gap-2">
  <p className="chat-subheading text-white/30 truncate">@{member.username || "user"}</p>
  {isMemberAdmin && (
