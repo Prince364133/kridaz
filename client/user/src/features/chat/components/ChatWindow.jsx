@@ -629,11 +629,7 @@ const ChatWindow = ({ chat, onBack, onSelectChat }) => {
  ? messages.filter(m => m.content.toLowerCase().includes(messageSearchQuery.toLowerCase()))
  : messages;
 
- </div>
- </div>
- </div>
- );
- }
+
 
  if (filteredMessages.length === 0) {
     if (messageSearchQuery.trim()) {
