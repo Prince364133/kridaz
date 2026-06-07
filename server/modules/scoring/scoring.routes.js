@@ -8,7 +8,6 @@ import {
   getMatchAnalytics,
   goLive,
   endLive,
-  updateStreamConfig,
   updateCommentarySettings,
   startNextInnings,
   // Phase 1 additions
@@ -358,20 +357,6 @@ router.post("/:matchId/go-live", goLive);
  *         description: Broadcast stopped
  */
 router.post("/:matchId/end-live", endLive);
-
-/**
- * @swagger
- * /scoring/{matchId}/stream-config:
- *   post:
- *     summary: Update stream overlay config
- *     tags: [Scoring]
- *     security:
- *       - BearerAuth: []
- *     responses:
- *       200:
- *         description: Config updated
- */
-router.post("/:matchId/stream-config", updateStreamConfig);
 
 /**
  * @swagger

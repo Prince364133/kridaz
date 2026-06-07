@@ -3,6 +3,7 @@ import * as bookingService from "./booking.service.js";
 import { generateInvoice } from "../../utils/generateInvoice.js";
 import { format } from "date-fns";
 import logger from "../../utils/logger.js";
+import { NotFoundError } from "@kridaz/common";
 
 // --- USER OPERATIONS ---
 
@@ -58,11 +59,7 @@ export const getBookingById = asyncHandler(async (req, res) => {
     id
   } = req.params;
   const booking = await bookingService.findBookingDetailsById(id);
-  if (!booking) {
-    return res.status(404).json({
-      message: "Booking not found"
-    });
-  }
+  if (!booking) throw new NotFoundError("Booking not found", { code: "BOOKING_NOT_FOUND" });
   return res.status(200).json(booking);
 });
 
@@ -133,12 +130,7 @@ export const downloadInvoice = asyncHandler(async (req, res) => {
     id
   } = req.params;
   const booking = await bookingService.findBookingDetailsById(id);
-  if (!booking) {
-    return res.status(404).json({
-      success: false,
-      message: "Booking not found"
-    });
-  }
+  if (!booking) throw new NotFoundError("Booking not found", { code: "BOOKING_NOT_FOUND" });
   const customerInfo = booking.user || {
     name: booking.guestName || "Guest Customer",
     email: booking.guestEmail || "N/A",

@@ -1,3 +1,7 @@
+import {
+  BadRequestError, NotFoundError, ForbiddenError,
+  ConflictError, UnauthorizedError, InternalError
+} from '@kridaz/common';
 import { prisma } from "../../config/prisma.js";
 import { randomUUID } from "crypto";
 import NotificationService from "../../services/notification.service.js";
@@ -390,7 +394,7 @@ export const createHostedGame = async (req, res) => {
       const finalStreamerId = streamerId || streamer?.id;
 
       if (!hostId) {
-        throw new Error("Host ID missing. Please login again.");
+        throw new BadRequestError("Host ID missing. Please login again.", { code: "BAD_REQUEST" });
       }
 
       // 1. Calculate Total Costs
@@ -747,7 +751,7 @@ export const joinHostedGame = async (req, res) => {
           teams: { include: { slots: { orderBy: { createdAt: 'asc' } } } }
         }
       });
-      if (!game) throw new Error("Game not found");
+      if (!game) throw new NotFoundError("Game not found", { code: "ENTITY_NOT_FOUND" });
 
       if (game.scoringStatus !== "NOT_STARTED") {
         const error = new Error("Cannot join a game that is already locked for scoring.");
@@ -786,11 +790,11 @@ export const joinHostedGame = async (req, res) => {
       } else {
         const teamKey = team === "A" ? "teamA" : "teamB";
         const targetTeam = game.teams.find(t => t.teamKey === teamKey);
-        if (!targetTeam) throw new Error("Team not found");
+        if (!targetTeam) throw new NotFoundError("Team not found", { code: "ENTITY_NOT_FOUND" });
         targetSlot = targetTeam.slots[slotIndex];
       }
 
-      if (!targetSlot) throw new Error("Slot not found");
+      if (!targetSlot) throw new NotFoundError("Slot not found", { code: "ENTITY_NOT_FOUND" });
       if (targetSlot.status !== "OPEN") {
         const error = new Error("Slot already taken or pending.");
         error.status = 400;
@@ -881,7 +885,7 @@ export const approveJoinRequest = async (req, res) => {
           teams: { include: { slots: { orderBy: { createdAt: 'asc' } } } }
         }
       });
-      if (!game || game.hostId !== hostId) throw new Error("Unauthorized or game not found");
+      if (!game || game.hostId !== hostId) throw new NotFoundError("Unauthorized or game not found", { code: "ENTITY_NOT_FOUND" });
 
       if (game.scoringStatus !== "NOT_STARTED") {
         const error = new Error("Cannot modify roster for a game that is already locked for scoring.");
@@ -912,11 +916,11 @@ export const approveJoinRequest = async (req, res) => {
       } else {
         const teamKey = (team === "A" || team === "teamA") ? "teamA" : "teamB";
         targetTeam = game.teams.find(t => t.teamKey === teamKey);
-        if (!targetTeam) throw new Error("Team not found");
+        if (!targetTeam) throw new NotFoundError("Team not found", { code: "ENTITY_NOT_FOUND" });
         targetSlot = targetTeam.slots[slotIndex];
       }
 
-      if (!targetSlot || targetSlot.status !== "PENDING") throw new Error("No pending request for this slot");
+      if (!targetSlot || targetSlot.status !== "PENDING") throw new InternalError("No pending request for this slot", { code: "INTERNAL_ERROR" });
 
       const playerUserId = targetSlot.userId;
       const perPlayerCharge = Number(game.perPlayerCharge || 0);
@@ -1041,7 +1045,7 @@ export const rejectJoinRequest = async (req, res) => {
           teams: { include: { slots: { orderBy: { createdAt: 'asc' } } } }
         }
       });
-      if (!game || game.hostId !== hostId) throw new Error("Unauthorized or game not found");
+      if (!game || game.hostId !== hostId) throw new NotFoundError("Unauthorized or game not found", { code: "ENTITY_NOT_FOUND" });
 
       if (game.scoringStatus !== "NOT_STARTED") {
         const error = new Error("Cannot modify roster for a game that is already locked for scoring.");
@@ -1064,11 +1068,11 @@ export const rejectJoinRequest = async (req, res) => {
       } else {
         const teamKey = (team === "A" || team === "teamA") ? "teamA" : "teamB";
         const targetTeam = game.teams.find(t => t.teamKey === teamKey);
-        if (!targetTeam) throw new Error("Team not found");
+        if (!targetTeam) throw new NotFoundError("Team not found", { code: "ENTITY_NOT_FOUND" });
         targetSlot = targetTeam.slots[slotIndex];
       }
 
-      if (!targetSlot || targetSlot.status !== "PENDING") throw new Error("No pending request for this slot");
+      if (!targetSlot || targetSlot.status !== "PENDING") throw new InternalError("No pending request for this slot", { code: "INTERNAL_ERROR" });
 
       const playerUserId = targetSlot.userId;
       const perPlayerCharge = Number(game.perPlayerCharge || 0);
@@ -1121,8 +1125,8 @@ export const cancelHostedGame = async (req, res) => {
           teams: { include: { slots: true } }
         }
       });
-      if (!game || game.hostId !== hostId) throw new Error("Unauthorized or game not found");
-      if (game.status === "CANCELLED") throw new Error("Game already cancelled");
+      if (!game || game.hostId !== hostId) throw new NotFoundError("Unauthorized or game not found", { code: "ENTITY_NOT_FOUND" });
+      if (game.status === "CANCELLED") throw new ConflictError("Game already cancelled", { code: "CONFLICT" });
       
       if (game.scoringStatus !== "NOT_STARTED") {
         const error = new Error("Cannot cancel a game that has already started scoring.");
@@ -1272,7 +1276,7 @@ export const leaveHostedGame = async (req, res) => {
         include: { game: true }
       });
 
-      if (!userSlot) throw new Error("You are not part of this game");
+      if (!userSlot) throw new InternalError("You are not part of this game", { code: "INTERNAL_ERROR" });
 
       const game = userSlot.game;
 
@@ -1382,15 +1386,15 @@ export const requestToUmpire = async (req, res) => {
     const game = await prisma.hostedGame.findUnique({
       where: { id: gameId }
     });
-    if (!game) throw new Error("Game not found");
+    if (!game) throw new NotFoundError("Game not found", { code: "ENTITY_NOT_FOUND" });
 
-    if (game.umpireId) throw new Error("This game already has an umpire assigned");
+    if (game.umpireId) throw new ConflictError("This game already has an umpire assigned", { code: "CONFLICT" });
 
     const owner = await prisma.ownerProfile.findFirst({ where: { userId } });
     const umpireId = owner ? owner.id : userId;
 
     if (game.umpireRequest?.userId === umpireId || game.umpireRequest?.userId === userId) {
-      throw new Error("You have already sent a request for this game");
+      throw new ConflictError("You have already sent a request for this game", { code: "CONFLICT" });
     }
 
     await prisma.hostedGame.update({
@@ -1415,7 +1419,7 @@ export const handleUmpireRequest = async (req, res) => {
     const game = await prisma.hostedGame.findFirst({
       where: { id: gameId, hostId }
     });
-    if (!game) throw new Error("Unauthorized or game not found");
+    if (!game) throw new NotFoundError("Unauthorized or game not found", { code: "ENTITY_NOT_FOUND" });
 
     if (action === "APPROVE") {
       const currentRequest = game.umpireRequest || {};
@@ -1452,15 +1456,15 @@ export const requestToStreamer = async (req, res) => {
     const game = await prisma.hostedGame.findUnique({
       where: { id: gameId }
     });
-    if (!game) throw new Error("Game not found");
+    if (!game) throw new NotFoundError("Game not found", { code: "ENTITY_NOT_FOUND" });
 
-    if (game.streamerId) throw new Error("This game already has a streamer assigned");
+    if (game.streamerId) throw new ConflictError("This game already has a streamer assigned", { code: "CONFLICT" });
 
     const owner = await prisma.ownerProfile.findFirst({ where: { userId } });
     const streamerId = owner ? owner.id : userId;
 
     if (game.streamerRequest?.userId === streamerId || game.streamerRequest?.userId === userId) {
-      throw new Error("You have already sent a request for this game");
+      throw new ConflictError("You have already sent a request for this game", { code: "CONFLICT" });
     }
 
     await prisma.hostedGame.update({
@@ -1485,7 +1489,7 @@ export const handleStreamerRequest = async (req, res) => {
     const game = await prisma.hostedGame.findFirst({
       where: { id: gameId, hostId }
     });
-    if (!game) throw new Error("Unauthorized or game not found");
+    if (!game) throw new NotFoundError("Unauthorized or game not found", { code: "ENTITY_NOT_FOUND" });
 
     if (action === "APPROVE") {
       const currentRequest = game.streamerRequest || {};
@@ -1522,15 +1526,15 @@ export const requestToScorer = async (req, res) => {
     const game = await prisma.hostedGame.findUnique({
       where: { id: gameId }
     });
-    if (!game) throw new Error("Game not found");
+    if (!game) throw new NotFoundError("Game not found", { code: "ENTITY_NOT_FOUND" });
 
-    if (game.scorerId) throw new Error("This game already has a scorer assigned");
+    if (game.scorerId) throw new ConflictError("This game already has a scorer assigned", { code: "CONFLICT" });
 
     const owner = await prisma.ownerProfile.findFirst({ where: { userId } });
     const scorerId = owner ? owner.id : userId;
 
     if (game.scorerRequest?.userId === scorerId || game.scorerRequest?.userId === userId) {
-      throw new Error("You have already sent a request for this game");
+      throw new ConflictError("You have already sent a request for this game", { code: "CONFLICT" });
     }
 
     await prisma.hostedGame.update({
@@ -1555,7 +1559,7 @@ export const handleScorerRequest = async (req, res) => {
     const game = await prisma.hostedGame.findFirst({
       where: { id: gameId, hostId }
     });
-    if (!game) throw new Error("Unauthorized or game not found");
+    if (!game) throw new NotFoundError("Unauthorized or game not found", { code: "ENTITY_NOT_FOUND" });
 
     if (action === "APPROVE") {
       const currentRequest = game.scorerRequest || {};
@@ -1594,24 +1598,24 @@ export const inviteOfficial = async (req, res) => {
       where: { id: gameId }
     });
 
-    if (!game || game.hostId !== hostId) throw new Error("Unauthorized or game not found");
+    if (!game || game.hostId !== hostId) throw new NotFoundError("Unauthorized or game not found", { code: "ENTITY_NOT_FOUND" });
 
     const official = await prisma.user.findUnique({ where: { id: officialId } });
-    if (!official) throw new Error("User not found");
+    if (!official) throw new NotFoundError("User not found", { code: "ENTITY_NOT_FOUND" });
 
     let fieldName = "";
     if (type === "UMPIRE") {
-      if (game.umpireId) throw new Error("Umpire already assigned");
+      if (game.umpireId) throw new ConflictError("Umpire already assigned", { code: "CONFLICT" });
       fieldName = "umpireRequest";
     } else if (type === "SCORER") {
-      if (game.scorerId) throw new Error("Scorer already assigned");
+      if (game.scorerId) throw new ConflictError("Scorer already assigned", { code: "CONFLICT" });
       fieldName = "scorerRequest";
     } else if (type === "STREAMER") {
-      if (game.streamerId) throw new Error("Streamer already assigned");
+      if (game.streamerId) throw new ConflictError("Streamer already assigned", { code: "CONFLICT" });
       fieldName = "streamerRequest";
     }
 
-    if (!fieldName) throw new Error("Invalid official type");
+    if (!fieldName) throw new BadRequestError("Invalid official type", { code: "BAD_REQUEST" });
 
     await prisma.hostedGame.update({
       where: { id: gameId },
@@ -1647,30 +1651,30 @@ export const respondToOfficialInvitation = async (req, res) => {
     const game = await prisma.hostedGame.findUnique({
       where: { id: gameId }
     });
-    if (!game) throw new Error("Game not found");
+    if (!game) throw new NotFoundError("Game not found", { code: "ENTITY_NOT_FOUND" });
 
     let fieldName = "";
     let requestId = "";
     let roleToAssign = "";
 
     if (type === "UMPIRE") {
-      if (game.umpireRequest?.userId !== userId) throw new Error("Unauthorized");
+      if (game.umpireRequest?.userId !== userId) throw new ForbiddenError("Unauthorized", { code: "FORBIDDEN" });
       fieldName = "umpireId";
       requestId = "umpireRequest";
       roleToAssign = "umpire";
     } else if (type === "SCORER") {
-      if (game.scorerRequest?.userId !== userId) throw new Error("Unauthorized");
+      if (game.scorerRequest?.userId !== userId) throw new ForbiddenError("Unauthorized", { code: "FORBIDDEN" });
       fieldName = "scorerId";
       requestId = "scorerRequest";
       roleToAssign = "scorer";
     } else if (type === "STREAMER") {
-      if (game.streamerRequest?.userId !== userId) throw new Error("Unauthorized");
+      if (game.streamerRequest?.userId !== userId) throw new ForbiddenError("Unauthorized", { code: "FORBIDDEN" });
       fieldName = "streamerId";
       requestId = "streamerRequest";
       roleToAssign = "streamer";
     }
 
-    if (!fieldName) throw new Error("Invalid official type");
+    if (!fieldName) throw new BadRequestError("Invalid official type", { code: "BAD_REQUEST" });
 
     if (action === "APPROVE") {
       const currentRequest = game[requestId] || {};
@@ -1745,7 +1749,7 @@ export const updateVenue = async (req, res) => {
     const game = await prisma.hostedGame.findFirst({
       where: { id: gameId, hostId }
     });
-    if (!game) throw new Error("Unauthorized or game not found");
+    if (!game) throw new NotFoundError("Unauthorized or game not found", { code: "ENTITY_NOT_FOUND" });
 
     const updatedGame = await prisma.hostedGame.update({
       where: { id: gameId },
@@ -1807,7 +1811,7 @@ export const updateStreamConfig = async (req, res) => {
     const config = req.body;
 
     const game = await prisma.hostedGame.findUnique({ where: { id } });
-    if (!game) throw new Error("Game not found");
+    if (!game) throw new NotFoundError("Game not found", { code: "ENTITY_NOT_FOUND" });
 
     const userId = req.user.id;
     const owner = await prisma.ownerProfile.findFirst({ where: { userId } });
@@ -2067,7 +2071,7 @@ export const claimInviteSlot = async (req, res) => {
       const userId = req.user.id;
       const { token } = req.body;
 
-      if (!token) throw new Error("Token is required");
+      if (!token) throw new BadRequestError("Token is required", { code: "BAD_REQUEST" });
 
       // Try player invite first
       let customPlayer = await tx.customPlayer.findUnique({
@@ -2095,7 +2099,7 @@ export const claimInviteSlot = async (req, res) => {
         }
       }
 
-      if (!game || !inviteData) throw new Error("Invite not found or already claimed");
+      if (!game || !inviteData) throw new NotFoundError("Invite not found or already claimed", { code: "ENTITY_NOT_FOUND" });
 
       if (isUmpire) {
         // Handle Umpire Claim
@@ -2216,7 +2220,7 @@ export const updateTickerTheme = async (req, res) => {
     const userId = req.user.id || req.user.user;
 
     const game = await prisma.hostedGame.findUnique({ where: { id } });
-    if (!game) throw new Error("Game not found");
+    if (!game) throw new NotFoundError("Game not found", { code: "ENTITY_NOT_FOUND" });
 
     // Authorization: Only Host, assigned Streamer, or Scorer
     const isAuthorizedUser = (game.hostId === userId || game.streamerId === userId || game.scorerId === userId) && userId !== undefined;
@@ -2271,21 +2275,21 @@ export const voteGameStarted = async (req, res) => {
         where: { id: gameId },
         include: { slots: true }
       });
-      if (!game) throw new Error("Game not found");
+      if (!game) throw new NotFoundError("Game not found", { code: "ENTITY_NOT_FOUND" });
 
       if (game.coinTransferStatus !== "PENDING") {
-        throw new Error("Game is already settled or in dispute");
+        throw new ConflictError("Game is already settled or in dispute", { code: "CONFLICT" });
       }
 
       if (game.perPlayerCharge <= 0) {
-        throw new Error("Voting is only applicable for paid games");
+        throw new InternalError("Voting is only applicable for paid games", { code: "INTERNAL_ERROR" });
       }
 
       const userSlot = game.slots.find(s => s.userId === userId && s.status === "JOINED");
-      if (!userSlot) throw new Error("Only joined users can vote");
+      if (!userSlot) throw new InternalError("Only joined users can vote", { code: "INTERNAL_ERROR" });
 
       if (game.votedStartedBy.includes(userId)) {
-        throw new Error("You have already voted");
+        throw new ConflictError("You have already voted", { code: "CONFLICT" });
       }
 
       const updatedVotes = [...game.votedStartedBy, userId];
@@ -2339,14 +2343,14 @@ export const raiseDispute = async (req, res) => {
         where: { id: gameId },
         include: { slots: true }
       });
-      if (!game) throw new Error("Game not found");
+      if (!game) throw new NotFoundError("Game not found", { code: "ENTITY_NOT_FOUND" });
 
       if (game.coinTransferStatus === "COMPLETED") {
-        throw new Error("Cannot raise dispute after coins have been transferred");
+        throw new InternalError("Cannot raise dispute after coins have been transferred", { code: "INTERNAL_ERROR" });
       }
 
       const userSlot = game.slots.find(s => s.userId === userId && s.status === "JOINED");
-      if (!userSlot) throw new Error("Only joined users can raise a dispute");
+      if (!userSlot) throw new InternalError("Only joined users can raise a dispute", { code: "INTERNAL_ERROR" });
 
       await tx.hostedGame.update({
         where: { id: gameId },

@@ -1,3 +1,4 @@
+import { NotFoundError, ConflictError, BadRequestError } from '@kridaz/common';
 import { prisma } from "../../config/prisma.js";
 import { logAdminAction } from "../../utils/auditLogger.js";
 import NotificationService from "../../services/notification.service.js";
@@ -1360,9 +1361,9 @@ export const resolveDispute = async (req, res) => {
         where: { id: gameId },
         include: { slots: true }
       });
-      if (!game) throw new Error("Game not found");
+      if (!game) throw new NotFoundError("Game not found", { code: "GAME_NOT_FOUND" });
       if (game.coinTransferStatus !== "DISPUTED") {
-        throw new Error("Game is not in a disputed state");
+        throw new ConflictError("Game is not in a disputed state", { code: "VALIDATION_ERROR" });
       }
 
       const totalPaidSlots = game.slots.filter(s => s.status === "JOINED" && s.userId).length;
@@ -1388,7 +1389,7 @@ export const resolveDispute = async (req, res) => {
           for (const refund of refunds) {
             const { userId, amount } = refund;
             if (amount > game.perPlayerCharge) {
-              throw new Error("Refund amount cannot exceed limit");
+              throw new BadRequestError("Refund amount cannot exceed limit", { code: "VALIDATION_ERROR" });
             }
             
             await WalletService.credit(userId, 'user', amount, tx);

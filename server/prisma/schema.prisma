@@ -32,16 +32,6 @@ model User {
   lastSeen                DateTime                      @default(now())
   status                  String                        @default("active")
   migrationStatus         Json?
-  youtubeAccessToken      String?
-  youtubeRefreshToken     String?
-  youtubeTokenExpiry      DateTime?
-  youtubeChannelId        String?
-  youtubeChannelName      String?
-  youtubeChannelThumb     String?
-  facebookAccessToken     String?
-  facebookPageId          String?
-  facebookPageName        String?
-  facebookPageThumb       String?
   socialAccounts          Json?
   notificationPreferences Json?
   walletBalance           Decimal                       @default(0) @db.Decimal(12, 2)
@@ -133,16 +123,6 @@ model UserProfile {
 model UserOAuth {
   id                  String    @id @default(uuid())
   userId              String    @unique
-  youtubeAccessToken  String?
-  youtubeRefreshToken String?
-  youtubeTokenExpiry  DateTime?
-  youtubeChannelId    String?
-  youtubeChannelName  String?
-  youtubeChannelThumb String?
-  facebookAccessToken String?
-  facebookPageId      String?
-  facebookPageName    String?
-  facebookPageThumb   String?
   socialAccounts      Json?     @default("{}")
   updatedAt           DateTime  @updatedAt
   user                User      @relation(fields: [userId], references: [id], onDelete: Cascade)

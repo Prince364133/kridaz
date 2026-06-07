@@ -1,6 +1,7 @@
 import logger from '../utils/logger.js';
 import { HttpError, NotFoundError, BadRequestError, ConflictError, InternalError } from '@kridaz/common';
-import { PrismaClientKnownRequestError, PrismaClientValidationError } from '@prisma/client/runtime/library.js';
+import { Prisma } from '@prisma/client';
+const { PrismaClientKnownRequestError, PrismaClientValidationError } = Prisma;
 import * as Sentry from '@sentry/node';
 
 /**

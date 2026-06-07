@@ -136,30 +136,7 @@ export const endLive = async (req, res) => {
   }
 };
 
-/**
- * Update YouTube Stream Configuration
- * Body: { youtubeVideoId, youtubeLiveChatId }
- */
-export const updateStreamConfig = async (req, res) => {
-  try {
-    const { matchId } = req.params;
-    const { youtubeVideoId, youtubeLiveChatId } = req.body;
-    
-    const { streamStatus } = await scoringService.configureStream(matchId, { 
-      youtubeVideoId, 
-      youtubeLiveChatId 
-    });
 
-    res.status(200).json({ 
-      success: true, 
-      message: "Stream configuration updated", 
-      streamStatus 
-    });
-  } catch (error) {
-    logger.error("[Scoring] Update Stream Config Controller Error:", error);
-    handleControllerError(res, error);
-  }
-};
 
 /**
  * Finalize Cricket Match and run user/umpire stats aggregation.

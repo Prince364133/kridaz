@@ -104,7 +104,7 @@ const main = async () => {
       np.statusCode === 200 && Array.isArray(np.body.players), `count=${np.body.players?.length}`);
     pass('/players/nearby anon rows have isFollowing:false',
       sample && sample.isFollowing === false, `sample.isFollowing=${sample?.isFollowing}`);
-    const banned = ['password','fcmToken','googleId','email','phone','notificationPreferences','youtubeAccessToken','youtubeRefreshToken','facebookAccessToken','migrationStatus','socialAccounts'];
+    const banned = ['password','fcmToken','googleId','email','phone','notificationPreferences','migrationStatus','socialAccounts'];
     const leaks = sample ? banned.filter(k => k in sample) : [];
     pass('/players/nearby leaks no secrets', leaks.length === 0, leaks.join(',') || '(clean)');
   } else {

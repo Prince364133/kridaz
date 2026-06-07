@@ -1,3 +1,4 @@
+import { InternalError } from '@kridaz/common';
 import crypto from "crypto";
 import { prisma } from "../../config/prisma.js";
 import logger from "../../utils/logger.js";
@@ -29,7 +30,7 @@ export const createUniqueTeamCode = async () => {
   do {
     code = generateTeamCode();
     attempts++;
-    if (attempts > 10) throw new Error("Failed to generate unique team code");
+    if (attempts > 10) throw new InternalError("Failed to generate unique team code", { code: "INTERNAL_ERROR" });
   } while (await prisma.team.findUnique({ where: { teamCode: code } }));
   return code;
 };

@@ -1,6 +1,6 @@
 import { prisma } from "../../config/prisma.js";
 import { randomUUID } from "crypto";
-import { BadRequestError, NotFoundError, ForbiddenError, UnauthorizedError, InternalError } from "@kridaz/common";
+import { BadRequestError, NotFoundError, ForbiddenError, UnauthorizedError, InternalError, ConflictError } from "@kridaz/common";
 import StatsService from "../../services/stats.service.js";
 import CareerStatsService from "../../services/careerStats.service.js";
 import { liveStateService } from "../../services/liveState.service.js";
@@ -340,7 +340,6 @@ export const goLiveSession = async (matchId) => {
   return {
     overlayToken,
     streamStatus: 'starting',
-    youtubeVideoId: hostedGame.youtubeVideoId,
     urls: {
       obsOverlay: `${appBase}/live-overlay/${finalMatchId}?token=${overlayToken}`,
       publicScoreboard: `${appBase}/live-score/${finalMatchId}`
@@ -430,82 +429,6 @@ export const endLiveSession = async (matchId) => {
   }
 };
 
-/**
- * Updates YouTube streaming config keys.
- */
-export const configureStream = async (matchId, { youtubeVideoId, youtubeLiveChatId }) => {
-  let hostedGame = await prisma.hostedGame.findUnique({ where: { id: matchId } });
-  if (!hostedGame) {
-    const scoring = await prisma.cricketMatch.findUnique({ where: { id: matchId } });
-    if (scoring) hostedGame = await prisma.hostedGame.findUnique({ where: { id: scoring.gameId } });
-  }
-
-  if (!hostedGame) {
-    throw new NotFoundError("Match not found");
-  }
-
-  const finalMatchId = hostedGame.id;
-  const streamStatus = youtubeVideoId ? 'online' : 'offline';
-
-  await prisma.hostedGame.update({
-    where: { id: finalMatchId },
-    data: {
-      streamConfig: {
-        ...(typeof hostedGame.streamConfig === 'object' && hostedGame.streamConfig !== null ? hostedGame.streamConfig : {}),
-        youtubeVideoId,
-        youtubeLiveChatId
-      },
-      streamStatus: streamStatus
-    }
-  });
-
-  await liveStateService.setStreamStatus(finalMatchId, streamStatus);
-
-  // Broadcast updated live score so YouTube embed appears immediately
-  try {
-    const updatedHostedGame = await prisma.hostedGame.findUnique({
-      where: { id: finalMatchId },
-      include: HOSTED_GAME_SCORING_INCLUDE
-    });
-    const mappedMatch = mapHostedGame(updatedHostedGame);
-
-    const scoring = await prisma.cricketMatch.findUnique({
-      where: { gameId: finalMatchId },
-      include: {
-        innings: true,
-        playerStats: true,
-        timeline: { take: 6, orderBy: { timestamp: 'desc' } }
-      }
-    });
-
-    let snapshot = null;
-    if (scoring) {
-      snapshot = computeScoreSnapshot(scoring, mappedMatch);
-    } else {
-      snapshot = {
-        matchId: finalMatchId,
-        status: 'NOT_STARTED',
-        matchName: mappedMatch.name,
-        teamA: mappedMatch.teamA,
-        teamB: mappedMatch.teamB,
-        date: mappedMatch.date,
-        time: mappedMatch.time,
-        scheduledStartAt: mappedMatch.scheduledStartAt,
-        tickerTheme: mappedMatch.tickerTheme || 'neon_classic',
-        youtubeVideoId: updatedHostedGame.streamConfig?.youtubeVideoId || null,
-        isLive: updatedHostedGame.isLive,
-      };
-    }
-
-    await liveStateService.setLiveScore(finalMatchId, snapshot);
-    const io = getIO();
-    if (io) io.to(finalMatchId).emit(SOCKET.SCORE_UPDATED, snapshot);
-  } catch (err) {
-    logger.error("Error caching/broadcasting live snapshot in configureStream:", err);
-  }
-
-  return { streamStatus };
-};
 
 /**
  * Finalizes the scoring session, normalizes game/match states and runs aggregation.
@@ -820,7 +743,7 @@ export const updateMatchStatus = async (scoringId, newStatus) => {
     where: { id: scoringId }
   });
 
-  if (!match) throw new Error("Match not found");
+  if (!match) throw new NotFoundError("Match not found", { code: "MATCH_NOT_FOUND" });
 
   const now = new Date();
   let timerUpdate = {};
@@ -981,13 +904,13 @@ export const useReview = async (scoringId, inningsIndex, team, isSuccessful) => 
     include: { innings: true }
   });
   const innings = scoring.innings.find(i => i.inningsIndex === inningsIndex);
-  if (!innings) throw new Error("Innings not found");
+  if (!innings) throw new NotFoundError("Innings not found", { code: "INNINGS_NOT_FOUND" });
 
   const field = team === 'batting' ? 'battingTeamReviews' : 'fieldingTeamReviews';
   const currentReviews = innings[field];
 
   if (currentReviews <= 0) {
-    throw new Error("No reviews remaining for this team");
+    throw new ConflictError("No reviews remaining for this team", { code: "NO_REVIEWS_REMAINING" });
   }
 
   if (!isSuccessful) {
@@ -2310,7 +2233,7 @@ export const toggleMatchTimer = async (scoringId) => {
     include: { playerStats: true }
   });
 
-  if (!match) throw new Error("Match not found");
+  if (!match) throw new NotFoundError("Match not found", { code: "MATCH_NOT_FOUND" });
 
   const now = new Date();
   let newTimerState;
@@ -2328,7 +2251,7 @@ export const toggleMatchTimer = async (scoringId) => {
     }
     newTimerLastStartedAt = null;
   } else {
-    throw new Error("Match already ended");
+    throw new ConflictError("Match already ended", { code: "MATCH_ALREADY_ENDED" });
   }
 
   const newMatchStatus = newTimerState === "RUNNING" ? "LIVE" : "PAUSED";
@@ -2395,10 +2318,10 @@ export const addPenaltyRuns = async (scoringId, runs, teamId) => {
     include: { innings: true }
   });
 
-  if (!match) throw new Error("Match not found");
+  if (!match) throw new NotFoundError("Match not found", { code: "MATCH_NOT_FOUND" });
 
   const currentInnings = match.innings.find(i => i.inningsIndex === match.currentInningsIndex);
-  if (!currentInnings) throw new Error("Innings not active");
+  if (!currentInnings) throw new ConflictError("Innings not active", { code: "INNINGS_NOT_ACTIVE" });
 
   // Casual / pickup games often disable penalties entirely.
   const houseRules = resolveHouseRules(match.houseRules);
@@ -2601,7 +2524,7 @@ export const getMatchReport = async (matchId) => {
     }
   });
 
-  if (!match) throw new Error("Match not found");
+  if (!match) throw new NotFoundError("Match not found", { code: "MATCH_NOT_FOUND" });
 
   return match;
 };

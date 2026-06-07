@@ -141,7 +141,7 @@ export const createRazorpayOrder = async (userId, totalPrice) => {
   });
 
   if (!user) {
-    throw new NotFoundError("Account not found. Please ensure you are logged in correctly.");
+    throw new NotFoundError("Account not found.", { code: "ACCOUNT_NOT_FOUND" });
   }
 
   const options = {
@@ -187,7 +187,7 @@ export const verifyBookingPayment = async (userId, paymentData) => {
   hmac.update(`${orderId}|${paymentId}`);
   const generatedSignature = hmac.digest("hex");
   if (generatedSignature !== razorpay_signature) {
-    throw new BadRequestError("Payment Verification Failed");
+    throw new BadRequestError("Payment verification failed.", { code: "PAYMENT_VERIFICATION_FAILED" });
   }
 
   const adjustedStartTime = adjustTime(startTime, selectedTurfDate);
@@ -210,7 +210,7 @@ export const verifyBookingPayment = async (userId, paymentData) => {
   ]);
 
   if (!user || !turf || !turf.owner) {
-    throw new NotFoundError(!turf ? "Turf not found" : !turf.owner ? "Turf owner not found. Please contact support." : "Account not found");
+    throw new NotFoundError(!turf ? "Turf not found" : !turf.owner ? "Turf owner not found." : "Account not found.", { code: !turf ? "TURF_NOT_FOUND" : !turf.owner ? "TURF_OWNER_NOT_FOUND" : "ACCOUNT_NOT_FOUND" });
   }
 
   const settings = settingsDoc?.value || {};
@@ -222,7 +222,7 @@ export const verifyBookingPayment = async (userId, paymentData) => {
   startOfSelectedDate.setHours(0, 0, 0, 0);
 
   if (turf.slotsConfigDuration === "Fixed Weeks" && turf.slotsConfigExpiry && startOfSelectedDate > turf.slotsConfigExpiry) {
-    throw new BadRequestError("This slot is no longer available as the venue configuration has expired.");
+    throw new BadRequestError("This slot is no longer available.", { code: "SLOT_UNAVAILABLE" });
   }
 
   const gstAmountCalc = Math.round(totalPrice * (gstPercentage / (100 + gstPercentage)));
@@ -250,7 +250,7 @@ export const verifyBookingPayment = async (userId, paymentData) => {
     });
 
     if (overlappingSlot) {
-      throw new BadRequestError("SLOT_UNAVAILABLE");
+      throw new BadRequestError("This slot is no longer available.", { code: "SLOT_UNAVAILABLE" });
     }
 
     const timeSlot = await tx.timeSlot.create({
@@ -401,7 +401,7 @@ export const processWalletBooking = async (userId, bookingData) => {
   ]);
 
   if (!user || !turf || !turf.owner) {
-    throw new NotFoundError(!turf ? "Turf not found" : !turf.owner ? "Turf owner not found" : "Account not found");
+    throw new NotFoundError(!turf ? "Turf not found" : !turf.owner ? "Turf owner not found." : "Account not found.", { code: !turf ? "TURF_NOT_FOUND" : !turf.owner ? "TURF_OWNER_NOT_FOUND" : "ACCOUNT_NOT_FOUND" });
   }
 
   const settings = settingsDoc?.value || {};
@@ -418,7 +418,7 @@ export const processWalletBooking = async (userId, bookingData) => {
   const wallet = await WalletService.getWallet(userId, "user");
 
   if (wallet.usableBalance < amountToDeduct) {
-    throw new BadRequestError("Insufficient wallet balance");
+    throw new BadRequestError("Insufficient wallet balance.", { code: "INSUFFICIENT_WALLET_BALANCE" });
   }
 
   // Overlap Guard is moved inside the transaction to prevent race conditions
@@ -440,7 +440,7 @@ export const processWalletBooking = async (userId, bookingData) => {
     });
 
     if (overlappingSlot) {
-      throw new BadRequestError("SLOT_UNAVAILABLE");
+      throw new BadRequestError("This slot is no longer available.", { code: "SLOT_UNAVAILABLE" });
     }
 
     // Deduct from wallet
@@ -795,19 +795,19 @@ export const verifyCoupon = async (code, turfId, amount) => {
   });
   
   if (!coupon) {
-    throw new NotFoundError("Invalid or inactive coupon code");
+    throw new NotFoundError("Invalid or inactive coupon code.", { code: "VALIDATION_ERROR" });
   }
 
   if (new Date() > new Date(coupon.validUntil)) {
-    throw new BadRequestError("This coupon has expired");
+    throw new BadRequestError("This coupon has expired.", { code: "VALIDATION_ERROR" });
   }
 
   if (coupon.turfId && coupon.turfId !== turfId) {
-    throw new BadRequestError("This coupon is not valid for this ground");
+    throw new BadRequestError("This coupon is not valid for this ground.", { code: "VALIDATION_ERROR" });
   }
 
   if (coupon.usageLimit > 0 && coupon.timesUsed >= coupon.usageLimit) {
-    throw new BadRequestError("This coupon's usage limit has been reached");
+    throw new BadRequestError("This coupon's usage limit has been reached.", { code: "VALIDATION_ERROR" });
   }
 
   let discount = 0;
@@ -874,7 +874,7 @@ export const processManualBooking = async (ownerId, manualData) => {
   });
 
   if (!turf || turf.owner.userId !== ownerId) {
-    throw new ForbiddenError("Unauthorized or Turf not found");
+    throw new ForbiddenError("Unauthorized or Turf not found.", { code: "FORBIDDEN" });
   }
 
   // Overlap Guard
@@ -890,7 +890,7 @@ export const processManualBooking = async (ownerId, manualData) => {
   });
 
   if (overlapping) {
-    throw new BadRequestError("Slot already booked");
+    throw new BadRequestError("This slot is no longer available.", { code: "SLOT_UNAVAILABLE" });
   }
 
   const booking = await prisma.$transaction(async (tx) => {
@@ -947,22 +947,22 @@ export const processBookingCancellation = async (userId, bookingId) => {
     });
 
     if (!booking) {
-      throw new NotFoundError("Booking not found");
+      throw new NotFoundError("Booking not found.", { code: "BOOKING_NOT_FOUND" });
     }
 
     if (booking.userId !== userId) {
-      throw new ForbiddenError("Unauthorized");
+      throw new ForbiddenError("Unauthorized.", { code: "FORBIDDEN" });
     }
 
     if (booking.status !== "CONFIRMED" && booking.status !== "PLAYING") {
-      throw new BadRequestError("This booking cannot be cancelled at this stage.");
+      throw new BadRequestError("This booking cannot be cancelled at this stage.", { code: "BOOKING_CANNOT_CANCEL" });
     }
 
     const playStartTime = new Date(booking.playStartTime);
     const hoursRemaining = (playStartTime - now) / (1000 * 60 * 60);
 
     if (hoursRemaining < 72) {
-      throw new BadRequestError("Cancellations are only allowed at least 72 hours before the slot time.");
+      throw new BadRequestError("Cancellations are only allowed at least 72 hours before the slot time.", { code: "CANCELLATION_WINDOW_EXPIRED" });
     }
 
     const refundAmount = Math.round(booking.paidAmount * 0.3);

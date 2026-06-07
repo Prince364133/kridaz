@@ -77,16 +77,7 @@ services:
         sync: false
       - key: GOOGLE_CLIENT_SECRET
         sync: false
-      - key: YOUTUBE_REDIRECT_URI
-        sync: false
 
-      # ── OAuth: Facebook ───────────────────────────────────────────────────
-      - key: FACEBOOK_APP_ID
-        sync: false
-      - key: FACEBOOK_APP_SECRET
-        sync: false
-      - key: FACEBOOK_REDIRECT_URI
-        sync: false
 
       # ── Monitoring (optional, gracefully skipped if absent) ───────────────
       - key: SENTRY_DSN

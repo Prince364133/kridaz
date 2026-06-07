@@ -1,4 +1,5 @@
 import { prisma } from "../../config/prisma.js";
+import { BadRequestError, NotFoundError, ForbiddenError, ConflictError, UnauthorizedError, InternalError } from '@kridaz/common';
 import NotificationService from "../../services/notification.service.js";
 import logger from "../../utils/logger.js";
 import { uploadToCloudinary } from "../../utils/cloudinary.js";
@@ -42,7 +43,7 @@ export const raiseDispute = async (req, res) => {
         });
 
         if (!professionalBooking) {
-          throw new Error("Booking not found or not eligible for dispute.");
+          throw new NotFoundError("Booking not found or not eligible for dispute.", { code: "ENTITY_NOT_FOUND" });
         }
       }
 
@@ -50,11 +51,11 @@ export const raiseDispute = async (req, res) => {
 
       if (activeBooking.status === "COMPLETED") {
         if (activeBooking.isManuallyCompleted) {
-          throw new Error("Cannot raise a dispute for a booking that you manually marked as complete.");
+          throw new ConflictError("Cannot raise a dispute for a booking that you manually marked as complete.", { code: "CONFLICT" });
         }
         const timeSinceCompletion = Date.now() - new Date(activeBooking.updatedAt).getTime();
         if (timeSinceCompletion > 12 * 60 * 60 * 1000) {
-          throw new Error("Dispute window has closed. You can only raise a dispute within 12 hours of auto-completion.");
+          throw new BadRequestError("Dispute window has closed. You can only raise a dispute within 12 hours of auto-completion.", { code: "BAD_REQUEST" });
         }
       }
 
@@ -64,7 +65,7 @@ export const raiseDispute = async (req, res) => {
       });
 
       if (existingDispute) {
-        throw new Error("A dispute is already active for this booking.");
+        throw new ConflictError("A dispute is already active for this booking.", { code: "CONFLICT" });
       }
 
       // 1. Create the dispute
@@ -377,11 +378,11 @@ export const resolveDispute = async (req, res) => {
         include: { booking: true, onDemandBooking: true }
       });
       if (!dispute) {
-        throw new Error("Dispute not found.");
+        throw new NotFoundError("Dispute not found.", { code: "ENTITY_NOT_FOUND" });
       }
 
       if (dispute.status === "RESOLVED") {
-        throw new Error("Dispute is already resolved.");
+        throw new ConflictError("Dispute is already resolved.", { code: "CONFLICT" });
       }
 
       const isProfessional = !!dispute.onDemandBooking;
@@ -481,7 +482,7 @@ export const resolveDispute = async (req, res) => {
         } else if (resolutionAction === "PARTIAL_REFUND") {
         const pAmount = Number(partialAmount);
         if (!pAmount || pAmount <= 0 || pAmount > ownerRevenue) {
-          throw new Error("Invalid partial refund amount.");
+          throw new BadRequestError("Invalid partial refund amount.", { code: "BAD_REQUEST" });
         }
 
         const amountToOwner = ownerRevenue - pAmount;
@@ -577,7 +578,7 @@ export const resolveDispute = async (req, res) => {
           });
         }
       } else {
-        throw new Error("Invalid resolution action.");
+        throw new BadRequestError("Invalid resolution action.", { code: "BAD_REQUEST" });
       }
 
       const updatedDispute = await tx.dispute.update({
