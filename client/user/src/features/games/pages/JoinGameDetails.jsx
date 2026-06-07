@@ -7,11 +7,12 @@ import { useNavigate, useParams } from 'react-router-dom';
 import axiosInstance from '@hooks/useAxiosInstance';
 import { toast } from 'react-hot-toast';
 import { 
-  Users, MapPin, Coins, Trophy, Info
+  Users, MapPin, Coins, Trophy, Info, Calendar, ShieldCheck, Zap
 } from 'lucide-react';
 import { GiCricketBat, GiGloves, GiRun } from 'react-icons/gi';
 import CoinAnimation from '@components/CoinAnimation';
 import useLoginOnDemand from "@hooks/useLoginOnDemand";
+import GlobalBackButton from '@/shared/components/GlobalBackButton';
 
 // Custom cricket ball SVG icon for Bowler role
 const CricketBallIcon = ({ size = 12, className = '' }) => (
@@ -186,103 +187,84 @@ const JoinGameDetails = () => {
 
   return (
     <div className="min-h-screen bg-[#000000] text-white px-1 md:px-3 pt-4 pb-24 relative overflow-hidden font-inter">
-      {/* Dynamic Background Glow */}
-      <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-[#BFF367]/5 blur-[150px] pointer-events-none" />
-      <div className="absolute bottom-0 left-0 w-[500px] h-[500px] bg-[#BFF367]/5 blur-[150px] pointer-events-none" />
+
 
       <div className="max-w-7xl mx-auto relative z-10">
         <div className="w-full pb-20">
           {/* Top Navigation Row */}
           <div className="max-w-4xl mx-auto flex items-center justify-between gap-4 mb-8">
-            <button 
-              onClick={() => navigate('/join-games')}
-              className="flex items-center gap-2 text-white/60 hover:text-white transition-colors py-2 px-4 bg-white/5 border border-white/10 rounded-[8px] text-[10px] font-black uppercase tracking-wider"
-            >
-              ← Back to Matches
-            </button>
+            <GlobalBackButton />
             
-            <div className="flex items-center gap-2">
-              <span className="px-3 py-1.5 bg-[#BFF367]/10 text-[#BFF367] text-[10px] font-black uppercase tracking-wider rounded-[8px] border border-[#BFF367]/20">
-                {game.gameType === 'SCORING_MATCH' ? 'CRICKET' : game.gameType} Elite
+            <div className="flex items-center gap-4">
+              <span className="text-[#B3DC26] text-[12px] font-black uppercase tracking-widest">
+                {game.sport || (game.gameType === 'SCORING_MATCH' ? 'LIVE MATCH' : game.gameType?.replace('_', ' '))}
               </span>
               {game.shortId && (
                 <button
                   onClick={() => { navigator.clipboard?.writeText(game.shortId); toast.success('Game ID copied!'); }}
-                  className="px-3 py-1.5 bg-white/5 border border-white/10 hover:border-[#BFF367]/40 text-[#BFF367] rounded-[8px] flex items-center gap-1.5 transition-all text-[10px] font-bold uppercase tracking-widest"
+                  className="flex items-center gap-1.5 text-white/60 hover:text-white transition-colors text-[12px] font-black uppercase tracking-widest group"
                 >
-                  ID: {game.shortId}
+                  ID: <span className="text-[#55DEE8] group-hover:underline">{game.shortId}</span>
                 </button>
               )}
             </div>
           </div>
 
           <div className="max-w-4xl mx-auto mb-8">
-            <h1 className="text-3xl md:text-5xl font-black text-white uppercase tracking-tighter leading-none mb-2 font-open-sans">
+            <h1 className="text-3xl md:text-5xl font-black text-white uppercase tracking-tighter leading-none mb-4 font-open-sans">
               Match <span className="bg-gradient-to-r from-[#BFF367] to-[#BFF367] bg-clip-text text-transparent">Intelligence</span>
             </h1>
+            
+            {/* Clean Meta Info Bar */}
+            <div className="flex flex-wrap items-center gap-x-4 gap-y-3 mb-4 pb-4 border-b border-white/5 text-[11px] md:text-xs font-bold uppercase text-white/70 tracking-wider">
+              <div className="flex items-center gap-1.5">
+                <Calendar size={14} className="text-[#BFF367]" />
+                <span className="text-white">{new Date(game.date).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })} <span className="text-[#BFF367]">{game.time}</span></span>
+              </div>
+              
+              <div className="w-1 h-1 rounded-full bg-white/20 hidden md:block"></div>
+
+              <div className="flex items-center gap-1.5">
+                <MapPin size={14} className="text-[#BFF367]" />
+                <span className="text-white truncate max-w-[200px] md:max-w-none">{game.name || game.customVenue || game.turf?.name || game.city || 'HYDERABAD'}, {game.state || 'TELANGANA'}</span>
+              </div>
+
+              <div className="w-1 h-1 rounded-full bg-white/20"></div>
+
+              <div className="flex items-center gap-1.5">
+                <Coins size={14} className="text-[#BFF367]" />
+                <span className="text-white">{game.perPlayerCharge ? `${game.perPlayerCharge} Coins` : 'FREE ENTRY'}</span>
+              </div>
+
+              <div className="w-1 h-1 rounded-full bg-white/20 hidden md:block"></div>
+
+              <div className="flex items-center gap-1.5">
+                <ShieldCheck size={14} className="text-[#BFF367] shrink-0" />
+                {game.umpire ? (
+                  <button onClick={(e) => { e.stopPropagation(); navigate(`/profile/${game.umpire.id || game.umpire._id}`); }} className="flex items-center gap-1.5 hover:opacity-80 transition-opacity">
+                    {game.umpire.profilePicture ? (
+                      <img src={game.umpire.profilePicture} alt={game.umpire.name} className="w-4 h-4 rounded-full object-cover shrink-0" />
+                    ) : (
+                      <div className="w-4 h-4 rounded-full bg-neutral-800 flex items-center justify-center text-[8px] font-bold text-white uppercase shrink-0">
+                        {game.umpire.name?.charAt(0) || 'U'}
+                      </div>
+                    )}
+                    <span className="text-white hover:text-[#BFF367] transition-colors truncate text-left max-w-[120px]">{game.umpire.name || 'Verified Umpire'}</span>
+                  </button>
+                ) : (
+                  <span className="text-white">Unmanaged</span>
+                )}
+              </div>
+
+              <div className="w-1 h-1 rounded-full bg-white/20"></div>
+
+              <div className="flex items-center gap-1.5">
+                <Zap size={14} className="text-[#BFF367]" />
+                <span className="text-[#BFF367]">{game.gameMode || 'REGULAR'}</span>
+              </div>
+            </div>
+
             <p className="text-white/40 text-xs font-bold uppercase tracking-wider">Secure your slot and deploy on the field</p>
-          </div>
-
-          {/* Bento Details Grid */}
-          <div className="max-w-4xl mx-auto grid grid-cols-2 md:grid-cols-3 gap-4 mb-10">
-            {/* Date & Time */}
-            <div className="bg-[#0a0a0c] border border-white/5 p-5 rounded-[12px] flex flex-col justify-between min-h-[110px] shadow-2xl relative overflow-hidden group hover:border-white/10 transition-colors">
-              <span className="text-[9px] font-black text-white/30 uppercase tracking-widest">Schedule</span>
-              <div>
-                <div className="text-sm font-black uppercase text-white">
-                  {new Date(game.date).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}
-                </div>
-                <div className="text-xs text-[#BFF367] font-bold uppercase mt-1">{game.time}</div>
-              </div>
-            </div>
-
-            {/* Wallet / Entry Fee */}
-            <div className="bg-[#0a0a0c] border border-white/5 p-5 rounded-[12px] flex flex-col justify-between min-h-[110px] shadow-2xl relative overflow-hidden group hover:border-white/10 transition-colors">
-              <span className="text-[9px] font-black text-white/30 uppercase tracking-widest">Entry Fee</span>
-              <div>
-                <div className="text-sm font-black uppercase text-white flex items-center gap-1.5">
-                  <Coins size={16} className="text-[#BFF367]" />
-                  {game.perPlayerCharge ? `${game.perPlayerCharge} Coins` : 'FREE ENTRY'}
-                </div>
-                <span className="text-[10px] text-white/40 font-bold uppercase mt-1 block">Secured Escrow</span>
-              </div>
-            </div>
-
-            {/* Umpire Management */}
-            <div className="bg-[#0a0a0c] border border-white/5 p-5 rounded-[12px] flex flex-col justify-between min-h-[110px] shadow-2xl relative overflow-hidden group hover:border-white/10 transition-colors">
-              <span className="text-[9px] font-black text-white/30 uppercase tracking-widest">Management</span>
-              <div>
-                <div className="text-sm font-black uppercase text-white">
-                  {game.umpire ? 'Verified Umpire' : 'Unmanaged Match'}
-                </div>
-                <span className="text-[10px] text-white/40 font-bold uppercase mt-1 block">Official Scoring</span>
-              </div>
-            </div>
-
-            {/* Location & City */}
-            <div className="col-span-2 bg-[#0a0a0c] border border-white/5 p-5 rounded-[12px] flex flex-col justify-between min-h-[110px] shadow-2xl relative overflow-hidden group hover:border-white/10 transition-colors">
-              <span className="text-[9px] font-black text-white/30 uppercase tracking-widest">Location</span>
-              <div>
-                <div className="text-sm font-black uppercase text-white flex items-center gap-1.5 truncate">
-                  <MapPin size={16} className="text-[#BFF367]" />
-                  {game.city || 'HYDERABAD'}, {game.state || 'TELANGANA'}
-                </div>
-                <span className="text-[10px] text-white/40 font-bold uppercase mt-1 block truncate">
-                  {game.ground?.name || 'Local Playground Venue'}
-                </span>
-              </div>
-            </div>
-
-            {/* Match Mode */}
-            <div className="bg-[#0a0a0c] border border-white/5 p-5 rounded-[12px] flex flex-col justify-between min-h-[110px] shadow-2xl relative overflow-hidden group hover:border-white/10 transition-colors">
-              <span className="text-[9px] font-black text-white/30 uppercase tracking-widest">Match Type</span>
-              <div>
-                <div className="text-sm font-black uppercase text-[#BFF367]">
-                  {game.gameMode || 'REGULAR'}
-                </div>
-                <span className="text-[10px] text-white/40 font-bold uppercase mt-1 block">Ledger Mode</span>
-              </div>
-            </div>
           </div>
 
           {/* Team Tabs Selection (only for non-QUICK matches) */}
@@ -320,7 +302,7 @@ const JoinGameDetails = () => {
           )}
 
           {/* Slot Grid Container */}
-          <div className="max-w-4xl mx-auto bg-[#0a0a0c]/40 border border-white/5 rounded-[12px] p-6 shadow-2xl">
+          <div className="max-w-4xl mx-auto bg-neutral-900/50 border border-white/5 rounded-[8px] p-6 shadow-2xl">
             {game.gameMode === 'QUICK' ? (
               <div className="space-y-6">
                 <div className="flex items-center justify-between pb-3 border-b border-white/[0.08]">

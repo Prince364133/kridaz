@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import toast from "react-hot-toast";
 import axiosInstance from "@hooks/useAxiosInstance";
 
-export default function useOwnerRevenue() {
+export default function useVenueOwnerRevenue() {
   const [loading, setLoading] = useState(true);
   const [revenueData, setRevenueData] = useState(null);
   const [transactionsData, setTransactionsData] = useState({ transactions: [], pagination: {} });

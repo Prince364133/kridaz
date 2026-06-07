@@ -6,16 +6,17 @@ import { searchLocations } from "@utils/locationService";
 import { closeLocationSidebar, setUserLocation, setLocationStatus } from "@redux/slices/uiSlice";
 import { motion, AnimatePresence } from "framer-motion";
 
-const POPULAR_AREAS = [
-  "Mylapore",
-  "Velachery",
-  "Thoraipakkam",
-  "Sholinganallur",
-  "Ramapuram",
-  "Porur",
-  "Nungambakkam",
-  "Nolambur"
-];
+const POPULAR_AREAS_BY_CITY = {
+  "Chennai": ["Mylapore", "Velachery", "Thoraipakkam", "Sholinganallur", "Ramapuram", "Porur", "Nungambakkam", "Nolambur"],
+  "Hyderabad": ["Banjara Hills", "Jubilee Hills", "HITEC City", "Gachibowli", "Madhapur", "Kondapur", "Kukatpally", "Begumpet"],
+  "Bengaluru": ["Koramangala", "Indiranagar", "Whitefield", "Jayanagar", "HSR Layout", "Malleswaram", "Marathahalli", "BTM Layout"],
+  "Bangalore": ["Koramangala", "Indiranagar", "Whitefield", "Jayanagar", "HSR Layout", "Malleswaram", "Marathahalli", "BTM Layout"],
+  "Mumbai": ["Andheri", "Bandra", "Juhu", "Colaba", "Worli", "Powai", "Borivali", "Goregaon"],
+  "New Delhi": ["Connaught Place", "Hauz Khas", "Saket", "Vasant Kunj", "Dwarka", "Rohini", "Karol Bagh", "Lajpat Nagar"],
+  "Delhi": ["Connaught Place", "Hauz Khas", "Saket", "Vasant Kunj", "Dwarka", "Rohini", "Karol Bagh", "Lajpat Nagar"],
+  "Pune": ["Koregaon Park", "Kalyani Nagar", "Viman Nagar", "Hinjewadi", "Baner", "Wakad", "Kothrud", "Magarpatta"],
+  "Kolkata": ["Salt Lake", "New Town", "Ballygunge", "Park Street", "Alipore", "Dum Dum", "Jadavpur", "Gariahat"],
+};
 
 const LocationSidebar = () => {
   const dispatch = useDispatch();
@@ -27,6 +28,35 @@ const LocationSidebar = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [searchResults, setSearchResults] = useState([]);
   const [isSearching, setIsSearching] = useState(false);
+
+  const currentCity = userLocation?.city || "Chennai";
+  
+  const getPopularAreas = (city) => {
+    if (!city) return { name: "Chennai", areas: POPULAR_AREAS_BY_CITY["Chennai"] };
+    
+    const match = Object.keys(POPULAR_AREAS_BY_CITY).find(key => 
+      city.toLowerCase().includes(key.toLowerCase()) || 
+      key.toLowerCase().includes(city.toLowerCase())
+    );
+    
+    if (match) return { name: match, areas: POPULAR_AREAS_BY_CITY[match] };
+    
+    return {
+      name: city,
+      areas: [
+        `${city} Central`,
+        `North ${city}`,
+        `South ${city}`,
+        `${city} East`,
+        `${city} West`,
+        `Downtown ${city}`,
+        `Old ${city}`,
+        `New ${city}`
+      ]
+    };
+  };
+
+  const { name: displayCityName, areas: currentPopularAreas } = getPopularAreas(currentCity);
 
   useEffect(() => {
     if (searchQuery.length < 3) {
@@ -121,30 +151,32 @@ const LocationSidebar = () => {
   };
 
   const handleSelectArea = (area) => {
-    dispatch(setUserLocation({ lat: null, lng: null, city: area, state: "Tamil Nadu" }));
+    dispatch(setUserLocation({ lat: null, lng: null, city: area, state: userLocation?.state || "" }));
     dispatch(setLocationStatus("granted"));
     handleClose();
   };
 
   const sidebarContent = (
-    <div className="fixed inset-0 z-[9999] flex flex-col justify-end sm:flex-row sm:justify-start">
+    <>
       {/* Backdrop */}
       <motion.div
+        key="backdrop"
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
         transition={{ duration: 0.2 }}
-        className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+        className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[9999]"
         onClick={handleClose}
       />
 
       {/* Sidebar Panel */}
       <motion.div
-        initial={isMobile ? { y: "100%" } : { x: "-100%" }}
-        animate={isMobile ? { y: 0 } : { x: 0 }}
-        exit={isMobile ? { y: "100%" } : { x: "-100%" }}
+        key="panel"
+        initial={isMobile ? { y: "100%", x: 0 } : { x: "100%", y: 0 }}
+        animate={{ x: 0, y: 0 }}
+        exit={isMobile ? { y: "100%", x: 0 } : { x: "100%", y: 0 }}
         transition={{ type: "spring", damping: 25, stiffness: 200 }}
-        className="relative w-full max-h-[90dvh] sm:max-h-none sm:h-full sm:w-[400px] bg-[#161616] flex flex-col shadow-2xl sm:border-r border-white/5 rounded-t-[24px] sm:rounded-none"
+        className="fixed bottom-0 left-0 right-0 sm:top-0 sm:bottom-0 sm:left-auto sm:right-0 w-full sm:w-[400px] max-h-[90dvh] sm:max-h-[100dvh] bg-[#161616] flex flex-col shadow-2xl sm:border-l border-white/5 rounded-t-[24px] sm:rounded-none z-[10000]"
       >
         {/* Header */}
         <div className="flex items-center gap-4 p-5 pb-4">
@@ -223,10 +255,10 @@ const LocationSidebar = () => {
           {searchQuery.length < 3 && (
             <div className="flex flex-col">
             <h3 className="text-[12px] font-bold text-white/50 uppercase tracking-[0.1em] mb-4">
-              Popular Areas in Chennai
+              Popular Areas in {displayCityName}
             </h3>
             <div className="flex flex-col gap-2">
-              {POPULAR_AREAS.map((area) => (
+              {currentPopularAreas.map((area) => (
                 <button
                   key={area}
                   onClick={() => handleSelectArea(area)}
@@ -245,7 +277,7 @@ const LocationSidebar = () => {
           )}
         </div>
       </motion.div>
-    </div>
+    </>
   );
 
   return createPortal(

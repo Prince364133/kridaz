@@ -36,8 +36,6 @@ const PartnerSidebar = ({ isOpen, toggleSidebar, isMinimized, className }) => {
     { to: "/venue-owner/revenue", label: "Revenue", icon: IndianRupee },
     { to: "/venue-owner/banking", label: "Payout & Banking", icon: Landmark },
     { to: "/venue-owner/reviews", label: "Reviews", icon: Star },
-    { to: "/venue-owner/promotions", label: "Promotions", icon: Tag },
-    { to: "/venue-owner/support", label: "Docs & Support", icon: HelpCircle },
   ];
 
 
@@ -79,7 +77,7 @@ const PartnerSidebar = ({ isOpen, toggleSidebar, isMinimized, className }) => {
 
   return (
     <aside
-      className={`fixed left-0 top-16 lg:top-20 h-[calc(100vh-64px)] lg:h-[calc(100vh-80px)] bg-[#000000] border-r border-[#2D2D2D] overflow-x-hidden transition-all duration-300 ease-in-out z-40 flex flex-col ${isMinimized ? "lg:w-20" : "w-64 lg:w-[280px]"} ${isOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"} ${className || ""}`}
+      className={`hidden lg:flex fixed left-0 top-16 lg:top-20 h-[calc(100vh-64px)] lg:h-[calc(100vh-80px)] bg-[#000000] border-r border-[#2D2D2D] overflow-x-hidden transition-all duration-300 ease-in-out z-40 flex-col ${isMinimized ? "lg:w-20" : "w-64 lg:w-[280px]"} ${isOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"} ${className || ""}`}
     >
       <div className="flex flex-col p-4 border-b border-[#2D2D2D] bg-[#000000] gap-4 lg:hidden">
         <div className="flex items-center justify-end">

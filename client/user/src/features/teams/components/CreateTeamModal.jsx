@@ -5,13 +5,7 @@ import { X, Loader2, Users, Upload, Trash2, MapPin, Map, Sparkles } from 'lucide
 import { motion, AnimatePresence } from 'framer-motion';
 import { toast } from 'react-hot-toast';
 
-const STATE_CITIES_MAP = {
-  'Maharashtra': ['Mumbai', 'Pune', 'Nagpur', 'Thane'],
-  'Karnataka': ['Bengaluru', 'Mysore', 'Hubli', 'Mangalore'],
-  'Delhi': ['New Delhi', 'Noida', 'Gurgaon', 'Faridabad'],
-  'Tamil Nadu': ['Chennai', 'Coimbatore', 'Madurai', 'Trichy'],
-  'Telangana': ['Hyderabad', 'Warangal', 'Nizamabad', 'Karimnagar']
-};
+import { fetchStates, fetchCities } from '../../../shared/utils/locationService';
 
 const CreateTeamModal = ({ isOpen, onClose, onSuccess }) => {
   const [createTeam, { isLoading: isCreating }] = useCreateTeamMutation();
@@ -30,21 +24,41 @@ const CreateTeamModal = ({ isOpen, onClose, onSuccess }) => {
   const [preview, setPreview] = useState(null);
   const [isDragging, setIsDragging] = useState(false);
   const [isGeneratingEmblem, setIsGeneratingEmblem] = useState(false);
-  const [citiesList, setCitiesList] = useState([]);
+  const [states, setStates] = useState([]);
+  const [cities, setCities] = useState([]);
+  const [loadingStates, setLoadingStates] = useState(false);
+  const [loadingCities, setLoadingCities] = useState(false);
+
+  React.useEffect(() => {
+    const loadStates = async () => {
+      setLoadingStates(true);
+      const data = await fetchStates();
+      setStates(data);
+      setLoadingStates(false);
+    };
+    loadStates();
+  }, []);
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  const handleStateChange = (e) => {
+  const handleStateChange = async (e) => {
     const selectedState = e.target.value;
-    const cities = STATE_CITIES_MAP[selectedState] || [];
-    setCitiesList(cities);
     setFormData(prev => ({
       ...prev,
       state: selectedState,
-      city: cities[0] || ''
+      city: ''
     }));
+
+    if (selectedState) {
+      setLoadingCities(true);
+      const data = await fetchCities(selectedState);
+      setCities(data);
+      setLoadingCities(false);
+    } else {
+      setCities([]);
+    }
   };
 
   
@@ -452,7 +466,7 @@ const CreateTeamModal = ({ isOpen, onClose, onSuccess }) => {
                       onChange={handleStateChange}
                     >
                       <option value="">Select State</option>
-                      {Object.keys(STATE_CITIES_MAP).map(st => (
+                      {states.map(st => (
                         <option key={st} value={st}>{st}</option>
                       ))}
                     </select>
@@ -480,7 +494,7 @@ const CreateTeamModal = ({ isOpen, onClose, onSuccess }) => {
                       onChange={handleChange}
                     >
                       <option value="">Select City</option>
-                      {citiesList.map(ct => (
+                      {cities.map(ct => (
                         <option key={ct} value={ct}>{ct}</option>
                       ))}
                     </select>

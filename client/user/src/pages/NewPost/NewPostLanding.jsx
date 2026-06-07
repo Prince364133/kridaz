@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState, useCallback } from "react";
-import { X, Image as ImageIcon, Video, Sparkles } from "lucide-react";
+import { X, Image as ImageIcon, Video, Sparkles, SwitchCamera } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
 const POST_TYPES = ["Post", "Reel", "Story"];
@@ -13,7 +13,9 @@ const NewPostLanding = () => {
   const holdTimerRef = useRef(null);
   
   const [stream, setStream] = useState(null);
-  const [activeTab, setActiveTab] = useState("Story");
+  const streamRef = useRef(null);
+  const [activeTab, setActiveTab] = useState("Reel");
+  const [facingMode, setFacingMode] = useState("environment");
   const [isRecording, setIsRecording] = useState(false);
   const [recordingDuration, setRecordingDuration] = useState(0);
   const recordingDurationRef = useRef(0);
@@ -24,12 +26,24 @@ const NewPostLanding = () => {
   }, [recordingDuration]);
   
   const startCamera = useCallback(async () => {
+    // Ensure any existing streams are fully stopped before starting a new one
+    if (streamRef.current) {
+      streamRef.current.getTracks().forEach(track => track.stop());
+      streamRef.current = null;
+    }
+    if (videoRef.current && videoRef.current.srcObject) {
+      const tracks = videoRef.current.srcObject.getTracks();
+      tracks.forEach(track => track.stop());
+      videoRef.current.srcObject = null;
+    }
+    
     try {
       const mediaStream = await navigator.mediaDevices.getUserMedia({ 
-        video: { facingMode: "environment" },
+        video: { facingMode },
         audio: true 
       });
       setStream(mediaStream);
+      streamRef.current = mediaStream;
       if (videoRef.current) {
         videoRef.current.srcObject = mediaStream;
       }
@@ -37,9 +51,10 @@ const NewPostLanding = () => {
       console.error("Error accessing camera:", err);
       try {
         const mediaStreamFallback = await navigator.mediaDevices.getUserMedia({ 
-          video: { facingMode: "environment" }
+          video: { facingMode }
         });
         setStream(mediaStreamFallback);
+        streamRef.current = mediaStreamFallback;
         if (videoRef.current) {
           videoRef.current.srcObject = mediaStreamFallback;
         }
@@ -47,17 +62,32 @@ const NewPostLanding = () => {
         console.error("Error accessing camera fallback:", fallbackErr);
       }
     }
-  }, []);
+  }, [facingMode]);
+
+  const toggleCamera = () => {
+    setFacingMode(prev => prev === "environment" ? "user" : "environment");
+  };
 
   const stopCamera = useCallback(() => {
+    if (streamRef.current) {
+      streamRef.current.getTracks().forEach(track => {
+        track.stop();
+        // Also fire stop event manually just in case
+        try { track.enabled = false; } catch(e) {}
+      });
+      streamRef.current = null;
+    }
     if (videoRef.current && videoRef.current.srcObject) {
       const tracks = videoRef.current.srcObject.getTracks();
-      tracks.forEach(track => track.stop());
+      tracks.forEach(track => {
+        track.stop();
+        try { track.enabled = false; } catch(e) {}
+      });
       videoRef.current.srcObject = null;
     }
-    setStream((currentStream) => {
-      if (currentStream) {
-        currentStream.getTracks().forEach(track => track.stop());
+    setStream(prevStream => {
+      if (prevStream) {
+        prevStream.getTracks().forEach(track => track.stop());
       }
       return null;
     });
@@ -425,6 +455,14 @@ const NewPostLanding = () => {
             <div className={`w-16 h-16 rounded-full flex items-center justify-center shadow-[0_0_30px_rgba(255,255,255,0.3)] transition-all duration-300 ${isRecording ? 'bg-red-500 scale-75 rounded-[12px]' : 'bg-white'}`}>
               {!isRecording && <div className="w-14 h-14 border-[2px] border-black/10 rounded-full" />}
             </div>
+          </button>
+
+          {/* Flip Camera Button */}
+          <button 
+            onClick={toggleCamera}
+            className={`absolute transition-all duration-300 flex items-center justify-center w-12 h-12 hover:bg-white/10 bg-black/60 backdrop-blur-md border border-white/20 rounded-full shadow-xl right-6`}
+          >
+            <SwitchCamera size={22} className="text-white" />
           </button>
         </div>
       </div>

@@ -43,6 +43,12 @@ const MaterialDateTimePicker = ({ isOpen, onClose, onSelect, initialDate, initia
 
   const handleMinuteClick = (m) => {
     setSelectedMinute(m);
+    setTimeout(() => {
+      const formattedDate = format(selectedDate, 'yyyy-MM-dd');
+      const formattedTime = `${String(selectedHour).padStart(2, '0')}:${String(m).padStart(2, '0')}`;
+      onSelect(formattedDate, formattedTime);
+      onClose();
+    }, 300);
   };
 
   const handleConfirm = () => {

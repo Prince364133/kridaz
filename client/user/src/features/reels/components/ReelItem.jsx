@@ -189,8 +189,9 @@ const ReelItem = ({ reel, isVisible }) => {
     }
   };
 
-  // If we have a playable URL, just play it. Otherwise, show processing.
-  const isProcessing = (reel.status === 'pending' || reel.status === 'processing') && !reel.temp && !reel.hlsUrl && !reel.rawVideoUrl && !reel.mediaUrl;
+  // If we don't have a final transcoded URL (hlsUrl) and it's pending/processing, show the processing state.
+  // We ignore rawVideoUrl here because the raw upload might not be playable or might be deleted soon.
+  const isProcessing = (reel.status === 'pending' || reel.status === 'processing') && !reel.temp && !reel.hlsUrl;
 
   return (
     <div className="relative w-full h-full bg-black overflow-hidden flex items-center justify-center">

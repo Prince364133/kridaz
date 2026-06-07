@@ -1,9 +1,11 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { ArrowLeft, Mail, KeyRound, ShieldCheck, ArrowRight, CheckCircle2 } from "lucide-react";
 import axiosInstance from "@hooks/useAxiosInstance";
 import toast from "react-hot-toast";
 import { Capacitor } from "@capacitor/core";
+import { auth } from "../../../config/firebase";
+import { RecaptchaVerifier, signInWithPhoneNumber } from "firebase/auth";
 
 const ForgotPassword = () => {
   const navigate = useNavigate();
@@ -14,6 +16,30 @@ const ForgotPassword = () => {
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    if (!window.recaptchaVerifier) {
+      window.recaptchaVerifier = new RecaptchaVerifier(auth, 'recaptcha-container', {
+        'size': 'invisible'
+      });
+    }
+
+    return () => {
+      if (window.recaptchaVerifier) {
+        window.recaptchaVerifier.clear();
+        window.recaptchaVerifier = null;
+      }
+    };
+  }, []);
+
+  useEffect(() => {
+    if (isLoggedIn) {
+      const redirectUrl = localStorage.getItem("redirectAfterLogin") || "/";
+      localStorage.removeItem("redirectAfterLogin");
+      navigate(redirectUrl);
+    }
+  }, [isLoggedIn, navigate]);
+
 
   const handleSendOtp = async (e) => {
     e.preventDefault();
@@ -26,23 +52,40 @@ const ForgotPassword = () => {
     try {
       const res = await axiosInstance.post("/api/user/auth/forgot-password-otp", { email });
       if (res.data.success) {
-        toast.success(res.data.message || "OTP sent!");
-        if (res.data.otp) {
-          setSentOtp(res.data.otp);
-          if (Capacitor.isNativePlatform()) {
-            toast((t) => (
-              <div className="flex flex-col gap-1 p-1">
-                <div className="font-bold text-sm text-black flex items-center gap-1">
-                  🔔 Kridaz Notification
-                </div>
-                <div className="text-xs text-gray-600">
-                  Your verification code is: <strong className="text-black text-sm">{res.data.otp}</strong>
-                </div>
-              </div>
-            ), { position: 'top-center', duration: 8000 });
+        if (res.data.requiresOtp) {
+          const phoneNum = email.startsWith('+') ? email : `+91${email}`;
+          if (window.recaptchaVerifier) {
+            try {
+              const confirmationResult = await signInWithPhoneNumber(auth, phoneNum, window.recaptchaVerifier);
+              window.confirmationResult = confirmationResult;
+              toast.success("OTP sent to your phone");
+              setStep(2);
+            } catch (fbError) {
+              console.error("Firebase send error:", fbError);
+              toast.error(fbError.message || "Failed to send SMS via Firebase");
+            }
+          } else {
+            toast.error("Recaptcha not initialized");
           }
+        } else {
+          toast.success(res.data.message || "OTP sent!");
+          if (res.data.otp) {
+            setSentOtp(res.data.otp);
+            if (Capacitor.isNativePlatform()) {
+              toast((t) => (
+                <div className="flex flex-col gap-1 p-1">
+                  <div className="font-bold text-sm text-black flex items-center gap-1">
+                    🔔 Kridaz Notification
+                  </div>
+                  <div className="text-xs text-gray-600">
+                    Your verification code is: <strong className="text-black text-sm">{res.data.otp}</strong>
+                  </div>
+                </div>
+              ), { position: 'top-center', duration: 8000 });
+            }
+          }
+          setStep(2);
         }
-        setStep(2);
       }
     } catch (err) {
       toast.error(err.response?.data?.message || "Failed to send OTP");
@@ -77,10 +120,24 @@ const ForgotPassword = () => {
     }
 
     setLoading(true);
+    let firebaseIdToken = null;
     try {
+      const isPhone = /^[0-9]{10}$/.test(email) || email.startsWith('+');
+      if (isPhone && window.confirmationResult) {
+        try {
+          const result = await window.confirmationResult.confirm(otp);
+          firebaseIdToken = await result.user.getIdToken();
+        } catch (err) {
+          console.error("Firebase OTP confirmation error:", err);
+          toast.error("Invalid verification code");
+          setLoading(false);
+          return;
+        }
+      }
+
       const res = await axiosInstance.post("/api/user/auth/reset-password", {
         email,
-        otp,
+        otp: firebaseIdToken || otp,
         newPassword
       });
       if (res.data.success) {
@@ -237,6 +294,7 @@ const ForgotPassword = () => {
           )}
         </div>
       </div>
+      <div id="recaptcha-container"></div>
     </div>
   );
 };

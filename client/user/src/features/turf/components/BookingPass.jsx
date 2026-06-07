@@ -15,7 +15,8 @@ import {
   Zap,
   User as UserIcon,
   ExternalLink,
-  AlertOctagon
+  AlertOctagon,
+  FileText
 } from "lucide-react";
 import useBookingPass from "../hooks/useBookingPass";
 import { motion } from "framer-motion";
@@ -142,10 +143,10 @@ const BookingPass = () => {
   const isSlotOver = new Date(booking.playEndTime || timeSlot?.endTime) < new Date();
 
   return (
-    <div className="min-h-screen bg-black text-white pt-8 pb-20 px-4">
-      <div className="container mx-auto max-w-2xl">
+    <div className="bg-[#000000] text-white pt-1 pb-10 px-0.5 font-inter">
+      <div className="max-w-6xl mx-auto">
         {/* Header Navigation */}
-        <div className="flex justify-between items-center mb-10">
+        <div className="flex justify-between items-center mb-4 px-1">
           <Link 
             to="/booking-history" 
             className="inline-flex items-center gap-2 text-zinc-400 hover:text-white transition-colors uppercase text-[10px] font-bold tracking-widest"
@@ -153,12 +154,18 @@ const BookingPass = () => {
             <ChevronLeft className="w-4 h-4" />
             Back
           </Link>
-          <div className="flex gap-3">
-            <button onClick={handleDownload} className="p-3 bg-zinc-900 border border-zinc-800 rounded-[8px] text-zinc-400 hover:text-[#84CC16] transition-all">
-              <Download size={18} />
+          <div className="flex items-center gap-2">
+            <Link 
+              to={`/booking-invoice/${booking.id || booking._id}`} 
+              className="flex items-center justify-center h-[30px] px-3 bg-[#1B1B1B] border border-[rgba(255,255,255,0.08)] rounded-[8px] text-zinc-400 hover:text-[#B3DC26] transition-all text-[9px] font-black uppercase tracking-widest gap-1.5"
+            >
+              <FileText size={12} /> Invoice
+            </Link>
+            <button onClick={handleDownload} className="flex items-center justify-center w-[30px] h-[30px] bg-[#1B1B1B] border border-[rgba(255,255,255,0.08)] rounded-[8px] text-zinc-400 hover:text-[#B3DC26] transition-all">
+              <Download size={14} />
             </button>
-            <button onClick={handleShare} className="p-3 bg-zinc-900 border border-zinc-800 rounded-[8px] text-zinc-400 hover:text-[#84CC16] transition-all">
-              <Share2 size={18} />
+            <button onClick={handleShare} className="flex items-center justify-center w-[30px] h-[30px] bg-[#1B1B1B] border border-[rgba(255,255,255,0.08)] rounded-[8px] text-zinc-400 hover:text-[#B3DC26] transition-all">
+              <Share2 size={14} />
             </button>
           </div>
         </div>
@@ -170,66 +177,66 @@ const BookingPass = () => {
           className="relative"
         >
           {/* Background Glow */}
-          <div className="absolute -inset-4 bg-[#84CC16]/10 blur-3xl rounded-[8px] pointer-events-none" />
+          <div className="absolute -inset-4 bg-[#B3DC26]/10 blur-3xl rounded-[8px] pointer-events-none" />
 
           {/* Pass Body */}
-          <div ref={passRef} className="relative bg-[#0A0A0A] border border-white/10 rounded-[8px] overflow-hidden shadow-2xl">
+          <div ref={passRef} className="relative bg-[#121212] border border-[rgba(255,255,255,0.08)] rounded-[12px] overflow-hidden shadow-2xl">
             {/* Top Section: Venue Image & Basic Info */}
-            <div className="relative h-48 sm:h-56">
+            <div className="relative h-[80px]">
               <img 
                 src={turf.images?.[0] || turf.image || "/banner-1.png"} 
                 className="w-full h-full object-cover" 
                 alt={turf.name}
                 crossOrigin="anonymous"
               />
-              <div className="absolute inset-0 bg-gradient-to-t from-[#0A0A0A] via-[#0A0A0A]/40 to-transparent" />
-              <div className="absolute bottom-6 left-8 right-8">
-                <div className="flex items-center gap-2 text-[#84CC16] font-bold text-[10px] uppercase tracking-widest mb-2">
-                  <ShieldCheck size={14} />
+              <div className="absolute inset-0 bg-gradient-to-t from-[#121212] via-[#121212]/40 to-transparent" />
+              <div className="absolute bottom-2 left-3 right-3">
+                <div className="flex items-center gap-2 text-[#B3DC26] font-bold text-[8px] uppercase tracking-widest mb-1">
+                  <ShieldCheck size={10} />
                   <span>Verified Entry Pass</span>
                 </div>
-                <h1 className="text-3xl sm:text-4xl font-black uppercase tracking-tight leading-none">
+                <h1 className="text-[18px] font-black uppercase tracking-tight leading-none text-white">
                   {turf.name}
                 </h1>
               </div>
             </div>
 
             {/* Content Grid */}
-            <div className="p-8 space-y-8">
+            <div className="px-2 py-3 space-y-3">
               {/* Primary Info Row */}
-              <div className="grid grid-cols-2 gap-8">
-                <div className="space-y-1.5">
-                  <p className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest">Scheduled For</p>
-                  <div className="flex items-center gap-2 text-white font-bold">
-                    <Calendar size={16} className="text-[#84CC16]" />
-                    <span className="text-sm">{timeSlot.date}</span>
+              <div className="grid grid-cols-2 gap-2">
+                <div className="space-y-1">
+                  <p className="text-[9px] font-bold text-zinc-500 uppercase tracking-widest">Scheduled For</p>
+                  <div className="flex items-center gap-1.5 text-white font-bold">
+                    <Calendar size={12} className="text-[#B3DC26]" />
+                    <span className="text-[11px]">{timeSlot.date}</span>
                   </div>
                 </div>
-                <div className="space-y-1.5">
-                  <p className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest">Time Window</p>
-                  <div className="flex items-center gap-2 text-white font-bold">
-                    <Clock size={16} className="text-[#84CC16]" />
-                    <span className="text-sm">{timeSlot.formattedStartTime} - {timeSlot.formattedEndTime}</span>
+                <div className="space-y-1">
+                  <p className="text-[9px] font-bold text-zinc-500 uppercase tracking-widest">Time Window</p>
+                  <div className="flex items-center gap-1.5 text-white font-bold">
+                    <Clock size={12} className="text-[#B3DC26]" />
+                    <span className="text-[11px]">{timeSlot.formattedStartTime} - {timeSlot.formattedEndTime}</span>
                   </div>
                 </div>
               </div>
 
               {/* Location Section */}
-              <div className="space-y-3">
-                <p className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest">Venue Location</p>
-                <div className="flex items-start gap-3 bg-white/5 p-4 rounded-[8px] border border-white/5">
-                  <div className="p-2 bg-[#84CC16]/10 text-[#84CC16] rounded-[8px] shrink-0">
-                    <MapPin size={18} />
+              <div className="space-y-1.5">
+                <p className="text-[9px] font-bold text-zinc-500 uppercase tracking-widest">Venue Location</p>
+                <div className="flex items-start gap-2 bg-[#1B1B1B] p-2 rounded-[8px] border border-[rgba(255,255,255,0.08)]">
+                  <div className="p-1.5 bg-[#B3DC26]/10 text-[#B3DC26] rounded-[6px] shrink-0">
+                    <MapPin size={12} />
                   </div>
                   <div className="flex-1">
-                    <p className="text-sm font-bold text-white mb-1 leading-tight">{turf.location}</p>
+                    <p className="text-[11px] font-bold text-white mb-0.5 leading-tight">{turf.location}</p>
                     <a 
                       href={turf.mapUrl || `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(turf.location)}`}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="inline-flex items-center gap-1.5 text-[#84CC16] text-[10px] font-black uppercase tracking-wider hover:underline"
+                      className="inline-flex items-center gap-1 text-[#B3DC26] text-[9px] font-black uppercase tracking-wider hover:underline"
                     >
-                      <Navigation size={10} />
+                      <Navigation size={8} />
                       Start Navigation
                     </a>
                   </div>
@@ -237,168 +244,111 @@ const BookingPass = () => {
               </div>
 
               {/* Financial Breakdown Section */}
-              <div className="p-5 bg-white/5 border border-white/5 rounded-[8px] space-y-4">
-                <div className="flex justify-between items-center">
+              <div className="p-2 bg-[#1B1B1B] border border-[rgba(255,255,255,0.08)] rounded-[8px] space-y-2">
+                <div className="flex justify-between items-start">
                   <div className="space-y-0.5">
-                    <p className="text-[9px] font-bold text-zinc-500 uppercase tracking-tight">Total Value</p>
-                    <p className="text-sm font-black text-white">₹{totalPrice}</p>
+                    <p className="text-[7px] font-bold text-zinc-500 uppercase tracking-tight">Total</p>
+                    <p className="text-[11px] font-black text-white">₹{totalPrice}</p>
+                  </div>
+                  <div className="space-y-0.5">
+                    <div className="flex items-center gap-0.5 text-[7px] font-bold text-[#B3DC26] uppercase tracking-tighter">
+                      <ShieldCheck size={8} />
+                      <span>Advance</span>
+                    </div>
+                    <p className="text-[11px] font-black text-white leading-none">₹{booking.advanceAmount || totalPrice}</p>
+                  </div>
+                  <div className="space-y-0.5">
+                    <div className="flex items-center gap-0.5 text-[7px] font-bold text-orange-400 uppercase tracking-tighter">
+                      <Clock size={8} />
+                      <span>Balance</span>
+                    </div>
+                    <p className="text-[11px] font-black text-white leading-none">₹{booking.balanceAmount || 0}</p>
                   </div>
                   <div className="text-right space-y-0.5">
-                    <p className="text-[9px] font-bold text-zinc-500 uppercase tracking-tight">Status</p>
-                    <p className={`text-[10px] font-black uppercase ${booking.paymentType === "PARTIAL" ? "text-orange-400" : "text-[#84CC16]"}`}>
-                        {booking.paymentType === "PARTIAL" ? "Partial Paid" : "Fully Paid"}
+                    <p className="text-[7px] font-bold text-zinc-500 uppercase tracking-tight">Status</p>
+                    <p className={`text-[9px] font-black uppercase ${booking.paymentType === "PARTIAL" ? "text-orange-400" : "text-[#B3DC26]"}`}>
+                        {booking.paymentType === "PARTIAL" ? "Partial" : "Paid"}
                     </p>
                   </div>
                 </div>
 
-                <div className="grid grid-cols-2 gap-4 pt-4 border-t border-white/5">
-                  <div className="space-y-1">
-                    <div className="flex items-center gap-1.5 text-[9px] font-bold text-[#84CC16] uppercase tracking-tighter">
-                      <ShieldCheck size={10} />
-                      <span>Advance Paid</span>
-                    </div>
-                    <p className="text-lg font-black text-white leading-none">₹{booking.advanceAmount || totalPrice}</p>
-                  </div>
-                  <div className="space-y-1">
-                    <div className="flex items-center gap-1.5 text-[9px] font-bold text-orange-400 uppercase tracking-tighter">
-                      <Clock size={10} />
-                      <span>Balance at Venue</span>
-                    </div>
-                    <p className="text-lg font-black text-white leading-none">₹{booking.balanceAmount || 0}</p>
-                  </div>
-                </div>
-
                 {booking.paymentType === "PARTIAL" && (
-                    <div className="flex items-center gap-2 p-2 bg-orange-400/10 rounded-[8px]">
-                        <Info size={12} className="text-orange-400" />
+                    <div className="flex items-center gap-1.5 p-1.5 bg-orange-400/10 rounded-[6px]">
+                        <Info size={10} className="text-orange-400" />
                         <p className="text-[8px] font-bold text-orange-400 uppercase leading-none">Please pay balance at venue before playing</p>
                     </div>
                 )}
               </div>
 
-              {/* Contacts Section */}
-              <div className="space-y-4">
-                <p className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest">On-Ground Support</p>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                  {turf.managerContacts && turf.managerContacts.length > 0 ? (
-                    turf.managerContacts.map((manager, idx) => (
-                      <div key={idx} className="flex items-center justify-between p-4 bg-white/5 border border-white/5 rounded-[8px] group hover:border-[#84CC16]/30 transition-all">
-                        <div className="flex items-center gap-3">
-                          <div className="w-8 h-8 rounded-full bg-zinc-800 flex items-center justify-center text-[#84CC16]">
-                            <UserIcon size={14} />
+              {/* QR and Info Row */}
+              <div className="flex gap-2 pt-2 border-t border-[rgba(255,255,255,0.08)]">
+                {/* Left: QR Code */}
+                <div className="w-[160px] shrink-0 bg-white rounded-[8px] p-2 flex flex-col items-center justify-center gap-1">
+                  <img src={qrCode} alt="Entry QR" className="w-full aspect-square" crossOrigin="anonymous" />
+                  <div className="text-center w-full mt-1">
+                    <p className="text-[9px] font-black text-black uppercase tracking-widest leading-none">Scan at Entrance</p>
+                    <p className="text-[7px] font-bold text-zinc-500 uppercase mt-1">1 Match Entry</p>
+                  </div>
+                </div>
+
+                {/* Right: Info */}
+                <div className="flex-1 flex flex-col justify-between space-y-1 bg-[#1B1B1B] border border-[rgba(255,255,255,0.08)] rounded-[8px] p-2">
+                  <div className="space-y-1.5">
+                    {/* Contacts */}
+                    <div className="space-y-0.5">
+                      <p className="text-[6px] font-bold text-zinc-500 uppercase tracking-widest">On-Ground Support</p>
+                      {turf.managerContacts && turf.managerContacts.length > 0 ? (
+                        turf.managerContacts.slice(0, 1).map((manager, idx) => (
+                          <div key={idx} className="flex items-center justify-between bg-[#121212] p-1 rounded-[4px]">
+                            <span className="text-[8px] font-bold text-white truncate pr-1">{manager.phone}</span>
+                            <a href={`tel:${manager.phone}`} className="text-[#B3DC26] shrink-0">
+                              <Phone size={8} fill="currentColor" />
+                            </a>
                           </div>
-                          <div className="space-y-0.5">
-                            <p className="text-[9px] font-bold text-zinc-500 uppercase tracking-tight">{manager.name || "Venue Manager"}</p>
-                            <p className="text-xs font-bold text-white">{manager.phone}</p>
-                          </div>
-                        </div>
-                        <a href={`tel:${manager.phone}`} className="p-2 bg-[#84CC16] text-black rounded-lg hover:scale-110 transition-transform">
-                          <Phone size={14} fill="currentColor" />
+                        ))
+                      ) : (
+                        <p className="text-[7px] text-zinc-600 uppercase">Not provided</p>
+                      )}
+                    </div>
+
+                    {/* Email */}
+                    <div className="space-y-0.5">
+                      <p className="text-[6px] font-bold text-zinc-500 uppercase tracking-widest">Correspondence</p>
+                      <div className="flex items-center justify-between bg-[#121212] p-1 rounded-[4px]">
+                        <span className="text-[7px] font-bold text-white truncate pr-1">{turf.owner?.email || "contact@kridaz.com"}</span>
+                        <a href={`mailto:${turf.owner?.email || "contact@kridaz.com"}`} className="text-[#B3DC26] shrink-0">
+                          <Mail size={8} />
                         </a>
                       </div>
-                    ))
-                  ) : (
-                    <div className="col-span-full py-4 text-center border border-dashed border-zinc-800 rounded-[8px]">
-                      <p className="text-[10px] font-bold text-zinc-600 uppercase">Manager contacts not provided</p>
                     </div>
-                  )}
-                </div>
-              </div>
+                  </div>
 
-              {/* Email Support */}
-              <div className="space-y-3 pt-2">
-                 <p className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest">Correspondence</p>
-                 <div className="flex flex-col gap-2">
-                    {turf.owner?.email && (
-                      <div className="flex items-center gap-3 text-xs">
-                        <Mail size={14} className="text-[#84CC16]" />
-                        <span className="text-zinc-400 font-bold uppercase text-[10px]">Venue:</span>
-                        <span className="text-white font-medium">{turf.owner.email}</span>
-                      </div>
-                    )}
-                    <div className="flex items-center gap-3 text-xs">
-                        <Mail size={14} className="text-[#84CC16]" />
-                        <span className="text-zinc-400 font-bold uppercase text-[10px]">Support:</span>
-                        <span className="text-white font-medium">contact@kridaz.com</span>
+                  {/* Payment Info */}
+                  <div className="mt-auto bg-gradient-to-r from-[#55DEE8]/10 to-[#B3DC26]/10 p-1.5 rounded-[4px] border border-[#B3DC26]/20">
+                    <div className="flex justify-between items-center mb-0.5">
+                      <span className="text-[6px] font-bold text-zinc-400 uppercase">Paid Via</span>
+                      <span className="text-[7px] font-black text-white uppercase">{booking.paymentMethod}</span>
                     </div>
-                 </div>
-              </div>
-
-              {/* QR Code Divider */}
-              <div className="flex items-center gap-4 py-4">
-                <div className="h-[1px] flex-1 bg-gradient-to-r from-transparent to-white/10" />
-                <div className="w-2 h-2 rounded-full bg-[#84CC16]/20" />
-                <div className="h-[1px] flex-1 bg-gradient-to-l from-transparent to-white/10" />
-              </div>
-
-              {/* Entry Verification */}
-              <div className="flex flex-col items-center gap-6 pb-4">
-                <div className="relative p-6 bg-white rounded-[8px] shadow-[0_0_50px_rgba(255,255,255,0.1)] group overflow-hidden">
-                  <motion.div 
-                    animate={{ x: [-100, 200] }}
-                    transition={{ repeat: Infinity, duration: 2, ease: "linear" }}
-                    className="absolute top-0 left-0 w-20 h-full bg-gradient-to-r from-transparent via-zinc-200/50 to-transparent skew-x-12"
-                  />
-                  <img src={qrCode} alt="Entry QR" className="w-40 h-40 relative z-10" crossOrigin="anonymous" />
-                </div>
-                <div className="text-center space-y-1">
-                  <p className="text-[10px] font-black text-white uppercase tracking-[0.2em]">Scan at Entrance</p>
-                  <p className="text-[8px] font-bold text-zinc-600 uppercase">Valid for 1 Match Entry</p>
+                    <div className="flex justify-between items-center">
+                      <span className="text-[6px] font-bold text-zinc-400 uppercase">Total Paid</span>
+                      <span className="text-[10px] font-black text-[#B3DC26]">₹{totalPrice}</span>
+                    </div>
+                  </div>
                 </div>
               </div>
-            </div>
-
-            {/* Bottom Footer Accent */}
-            <div className="p-6 bg-[#84CC16] text-black flex flex-col sm:flex-row justify-between items-center gap-4">
-               <div className="flex flex-col gap-1">
-                  <div className="flex items-center gap-2">
-                    <Zap size={16} fill="currentColor" />
-                    <span className="text-xs font-black uppercase italic tracking-tighter">Powered by Kridaz</span>
-                  </div>
-                  <div className="flex items-center gap-2 text-[10px] font-bold uppercase opacity-80">
-                    <span>Payment: {booking.paymentMethod}</span>
-                    {booking.cashback > 0 && (
-                        <>
-                            <span className="w-1 h-1 bg-black rounded-full" />
-                            <span>₹{booking.cashback} Cashback</span>
-                        </>
-                    )}
-                  </div>
-               </div>
-               <div className="flex items-center gap-1.5">
-                  <span className="text-[10px] font-black uppercase">
-                    {booking.paymentType === "PARTIAL" ? "Booking Value:" : "Total Paid:"}
-                  </span>
-                  <span className="text-lg font-black italic">₹{totalPrice}</span>
-               </div>
             </div>
           </div>
         </motion.div>
 
-        {/* Action Buttons */}
-        <div className="mt-8 grid grid-cols-2 gap-4">
-           <button onClick={handleDownload} className="w-full bg-zinc-900 border border-zinc-800 text-white h-14 rounded-[8px] font-bold uppercase text-[10px] tracking-widest hover:bg-zinc-800 transition-all flex items-center justify-center gap-2">
-              <Download size={14} />
-              Save Pass Image
-           </button>
-           <button 
-             onClick={() => window.print()}
-             className="w-full bg-white/5 border border-white/10 text-white h-14 rounded-[8px] font-bold uppercase text-[10px] tracking-widest hover:bg-white/10 transition-all flex items-center justify-center gap-2"
-           >
-              <ExternalLink size={14} />
-              Print Pass
-           </button>
-        </div>
-
         {/* Cancellation and Dispute Actions */}
-        <div className="mt-4 space-y-3">
+        <div className="mt-3 space-y-2 px-1">
             {/* 72-hr policy notice */}
             {status === "CONFIRMED" && hoursUntilSlot < 72 && !isSlotOver && (
               <div
-                className="w-full flex items-center gap-3 px-4 py-3.5 rounded-[8px] text-[11px] font-bold uppercase tracking-widest text-[#EF4444] bg-[#EF4444]/10 border border-[#EF4444]/20"
+                className="w-full flex items-center gap-2 px-3 py-2 rounded-[12px] text-[10px] font-[700] uppercase tracking-widest text-[#EF4444] bg-[#EF4444]/10 border border-[#EF4444]/20"
               >
-                <AlertOctagon size={15} />
-                Can't cancel within 72hrs of slot time
+                <AlertOctagon size={14} />
+                Can't cancel within 72hrs
               </div>
             )}
 
@@ -407,9 +357,9 @@ const BookingPass = () => {
               <button
                 onClick={handleCancel}
                 disabled={isCancelling}
-                className="w-full flex items-center justify-center gap-2 py-4 rounded-[8px] text-[11px] font-bold uppercase tracking-widest transition-all disabled:opacity-50 text-[#EF4444] bg-[#EF4444]/10 border border-[#EF4444]/20 hover:bg-[#EF4444]/20"
+                className="w-full flex items-center justify-center gap-2 h-[42px] rounded-[12px] text-[10px] font-[700] uppercase tracking-widest transition-all disabled:opacity-50 text-[#EF4444] bg-[#EF4444]/10 border border-[#EF4444]/20 hover:bg-[#EF4444]/20"
               >
-                <AlertOctagon size={16} />
+                <AlertOctagon size={14} />
                 {isCancelling ? "Cancelling..." : "Cancel Booking"}
               </button>
             )}
@@ -418,9 +368,9 @@ const BookingPass = () => {
             {status !== "CANCELLED" && status !== "DISPUTED" && (
               <button
                 onClick={() => setShowDisputeModal(true)}
-                className="w-full flex items-center justify-center gap-2 py-4 rounded-[8px] text-[11px] font-bold uppercase tracking-widest transition-all text-zinc-400 bg-zinc-900 border border-zinc-800 hover:text-white hover:bg-zinc-800"
+                className="w-full flex items-center justify-center gap-2 h-[42px] rounded-[12px] text-[10px] font-[700] uppercase tracking-widest transition-all text-zinc-400 bg-[#1B1B1B] border border-[rgba(255,255,255,0.08)] hover:text-white"
               >
-                <AlertOctagon size={16} />
+                <AlertOctagon size={14} />
                 Raise a Dispute
               </button>
             )}
@@ -428,9 +378,9 @@ const BookingPass = () => {
             {/* Dispute review state */}
             {status === "DISPUTED" && (
               <div
-                className="w-full flex items-center justify-center gap-2 py-4 rounded-[8px] text-[11px] font-bold uppercase tracking-widest text-[#BFF367] bg-[#BFF367]/10 border border-[#BFF367]/20"
+                className="w-full flex items-center justify-center gap-2 h-[42px] rounded-[12px] text-[10px] font-[700] uppercase tracking-widest text-[#000000] bg-gradient-to-r from-[#55DEE8] to-[#B3DC26]"
               >
-                <ShieldCheck size={16} />
+                <ShieldCheck size={14} />
                 Dispute Under Review
               </div>
             )}
@@ -438,13 +388,13 @@ const BookingPass = () => {
 
         {/* Recommendation Section: Keep Playing Next Week */}
         {(similarLoading || (similarTurfs && similarTurfs.length > 0)) && (
-          <div className="mt-16 pt-10 border-t border-white/5 space-y-6">
-            <div className="space-y-1">
-              <h3 className="text-sm font-black uppercase text-[#84CC16] tracking-[0.25em] flex items-center gap-2">
-                <Zap size={14} className="fill-current animate-pulse" /> Keep Playing Next Week
+          <div className="mt-8 pt-6 border-t border-[rgba(255,255,255,0.08)] space-y-4 px-1">
+            <div className="space-y-0.5">
+              <h3 className="text-[12px] font-black uppercase text-[#B3DC26] tracking-[0.1em] flex items-center gap-1.5">
+                <Zap size={12} className="fill-current animate-pulse" /> Keep Playing
               </h3>
-              <p className="text-[10px] text-zinc-400 font-bold uppercase tracking-wider">
-                Exclusively recommended sports hubs near {turf?.name || "this venue"}
+              <p className="text-[9px] text-zinc-500 font-[700] uppercase tracking-wider">
+                Recommended hubs near {turf?.name || "this venue"}
               </p>
             </div>
 

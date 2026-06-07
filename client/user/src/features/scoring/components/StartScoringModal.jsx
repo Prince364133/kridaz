@@ -75,10 +75,10 @@ const STEPS = [
 // ─── Field/Select components ─────────────────────────────────────────────────
 
 const inputClass =
-  'w-full bg-white/[0.03] border border-white/10 rounded-[8px] p-3 h-[48px] text-white focus:border-[#55DEE8]/30 outline-none transition-colors placeholder:text-white/30';
+  'w-full bg-white/[0.03] border border-white/10 rounded-[12px] p-3 h-[44px] text-white focus:border-[#55DEE8]/30 outline-none transition-colors placeholder:text-white/30';
 const labelClass = 'text-[10px] text-white/40 mb-1 block font-black uppercase tracking-widest';
 const selectClass =
-  'w-full bg-[#0a0a0a] border border-white/10 rounded-[8px] p-3 h-[48px] text-white outline-none transition-colors focus:border-[#55DEE8]/30';
+  'w-full bg-[#121212] border border-white/10 rounded-[12px] p-3 h-[44px] text-white outline-none transition-colors focus:border-[#55DEE8]/30';
 
 // ─── Custom Dropdown ──────────────────────────────────────────────────────────
 const CustomDropdown = ({ value, onChange, options, placeholder, className, disabled }) => {
@@ -106,7 +106,7 @@ const CustomDropdown = ({ value, onChange, options, placeholder, className, disa
         type="button"
         disabled={disabled}
         onClick={() => setIsOpen(!isOpen)}
-        className={`w-full h-[40px] bg-[#0a0a0a] border border-white/10 rounded-[8px] px-3 flex items-center justify-between transition-colors focus:border-[#55DEE8]/30 ${disabled ? 'opacity-50 cursor-not-allowed' : 'hover:border-white/20'}`}
+        className={`w-full h-[40px] bg-[#121212] border border-white/10 rounded-[12px] px-3 flex items-center justify-between transition-colors focus:border-[#55DEE8]/30 ${disabled ? 'opacity-50 cursor-not-allowed' : 'hover:border-white/20'}`}
       >
         <span className="truncate text-white text-sm font-bold">{selectedLabel}</span>
       </button>
@@ -118,7 +118,7 @@ const CustomDropdown = ({ value, onChange, options, placeholder, className, disa
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -5 }}
             transition={{ duration: 0.15 }}
-            className="absolute z-50 top-full mt-1 left-0 w-full min-w-[120px] bg-[#1A1A1A] border border-white/10 rounded-[8px] shadow-xl overflow-hidden max-h-48 overflow-y-auto scrollbar-hide"
+            className="absolute z-50 top-full mt-1 left-0 w-full min-w-[120px] bg-[#1A1A1A] border border-white/10 rounded-[12px] shadow-xl overflow-hidden max-h-48 overflow-y-auto scrollbar-hide"
           >
             {normalizedOptions.map((opt, i) => (
               <button
@@ -150,6 +150,41 @@ const StartScoringModal = ({ isOpen, onClose, onSuccess, initialData }) => {
   const { user } = useSelector((state) => state.auth);
   const [step, setStep] = useState(1);
   const [showCustomVenuePopup, setShowCustomVenuePopup] = useState(false);
+  
+  const [supportsContacts, setSupportsContacts] = useState(false);
+
+  useEffect(() => {
+    const isMobileView = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini|Mobi/i.test(navigator.userAgent);
+    if (isMobileView) {
+      setSupportsContacts(true);
+    }
+  }, []);
+
+  const handleImportFromContacts = async () => {
+    try {
+      if (!('contacts' in navigator && 'ContactsManager' in window)) {
+        toast.error('Contacts API is only supported on a real mobile device. Please test this on your phone.');
+        return;
+      }
+      const props = ['name', 'tel'];
+      const opts = { multiple: false };
+      const contacts = await navigator.contacts.select(props, opts);
+      if (contacts && contacts.length > 0) {
+        const contact = contacts[0];
+        if (contact.name && contact.name.length > 0) {
+          setCustomPlayerName(contact.name[0]);
+        }
+        if (contact.tel && contact.tel.length > 0) {
+          let rawPhone = contact.tel[0].replace(/\D/g, '');
+          if (rawPhone.length > 10) rawPhone = rawPhone.slice(-10);
+          setCustomPlayerPhone(rawPhone);
+        }
+      }
+    } catch (ex) {
+      console.log('Contacts API failed:', ex);
+    }
+  };
+
   const [customVenueNameInput, setCustomVenueNameInput] = useState('');
   const [customVenueLocationInput, setCustomVenueLocationInput] = useState('');
   const [showVenuePopup, setShowVenuePopup] = useState(false);
@@ -976,9 +1011,9 @@ const StartScoringModal = ({ isOpen, onClose, onSuccess, initialData }) => {
           initial={{ opacity: 0, scale: 0.95, y: 20 }}
           animate={{ opacity: 1, scale: 1, y: 0 }}
           exit={{ opacity: 0, scale: 0.95, y: 20 }}
-          className="relative w-full max-w-[390px] h-screen bg-[#0a0a0a] border-x border-white/10 rounded-none shadow-2xl overflow-hidden flex flex-col flex-shrink-0"
+          className="relative w-full max-w-full h-screen bg-[#121212] shadow-2xl overflow-hidden flex flex-col flex-shrink-0"
         >
-          <div className="flex-1 overflow-y-auto px-6 pb-6 pt-[35px] space-y-6 bg-[#0a0a0a] scrollbar-hide">
+          <div className="flex-1 overflow-y-auto px-6 pb-6 pt-[35px] space-y-4 bg-[#121212] scrollbar-hide">
             {/* Search and Locate Me Row */}
             <div className="space-y-2">
               <label className={labelClass}>Search City, State or Turf</label>
@@ -993,7 +1028,7 @@ const StartScoringModal = ({ isOpen, onClose, onSuccess, initialData }) => {
                       setLocationInput(e.target.value);
                       setShowLocationSuggestions(true);
                     }}
-                    className="w-full h-11 bg-[#0a0a0a] border border-white/10 rounded-[8px] pl-11 pr-4 text-white focus:outline-none focus:border-[#55DEE8]/30 transition-all text-sm font-semibold placeholder:text-white/30"
+                    className="w-full h-11 bg-[#121212] border border-white/10 rounded-[12px] pl-11 pr-4 text-white focus:outline-none focus:border-[#55DEE8]/30 transition-all text-sm font-semibold placeholder:text-white/30"
                     placeholder="Enter location (e.g. Indiranagar, Bengaluru)"
                   />
                   
@@ -1029,7 +1064,7 @@ const StartScoringModal = ({ isOpen, onClose, onSuccess, initialData }) => {
                   type="button"
                   onClick={handleDetectLiveLocation}
                   disabled={isDetectingLocation}
-                  className="px-4 h-11 bg-white/[0.03] hover:bg-white/[0.06] border border-white/10 rounded-[8px] text-white hover:text-[#55DEE8] font-semibold text-sm transition-all flex items-center justify-center gap-2 group disabled:opacity-50 flex-shrink-0"
+                  className="px-4 h-11 bg-white/[0.03] hover:bg-white/[0.06] border border-white/10 rounded-[12px] text-white hover:text-[#55DEE8] font-semibold text-sm transition-all flex items-center justify-center gap-2 group disabled:opacity-50 flex-shrink-0"
                 >
                   {isDetectingLocation && (
                     <Loader2 size={14} className="animate-spin text-[#55DEE8]" />
@@ -1047,7 +1082,7 @@ const StartScoringModal = ({ isOpen, onClose, onSuccess, initialData }) => {
               <button
                 type="button"
                 onClick={() => setShowGroundsDropdown(!showGroundsDropdown)}
-                className={`w-full flex items-center justify-between p-3.5 rounded-[8px] border text-sm font-semibold transition-all text-left ${
+                className={`w-full flex items-center justify-between p-3.5 rounded-[12px] border text-sm font-semibold transition-all text-left ${
                   formData.venueId 
                     ? 'bg-[#55DEE8]/10 border-[#55DEE8]/30 text-[#55DEE8]' 
                     : 'bg-white/[0.03] border-white/10 text-white/60 hover:border-white/20'
@@ -1074,7 +1109,7 @@ const StartScoringModal = ({ isOpen, onClose, onSuccess, initialData }) => {
                     initial={{ opacity: 0, height: 0 }}
                     animate={{ opacity: 1, height: 'auto' }}
                     exit={{ opacity: 0, height: 0 }}
-                    className="overflow-hidden mt-2 bg-[#121212] border border-white/10 rounded-[8px] p-3 space-y-3 z-50 shadow-2xl relative"
+                    className="overflow-hidden mt-2 bg-[#121212] border border-white/10 rounded-[12px] p-3 space-y-3 z-50 shadow-2xl relative"
                   >
                     {/* Dedicated search bar for listed grounds */}
                     <div className="relative">
@@ -1233,7 +1268,7 @@ const StartScoringModal = ({ isOpen, onClose, onSuccess, initialData }) => {
             {/* Google Interactive Map Embed Frame */}
             <div className="space-y-2">
               <label className={labelClass}>Location Map Preview</label>
-              <div className="relative w-full h-52 bg-white/[0.01] border border-white/10 rounded-[8px] overflow-hidden shadow-inner flex items-center justify-center">
+              <div className="relative w-full h-52 bg-white/[0.01] border border-white/10 rounded-[12px] overflow-hidden shadow-inner flex items-center justify-center">
                 <iframe
                   title="Location Map"
                   src={
@@ -1246,7 +1281,7 @@ const StartScoringModal = ({ isOpen, onClose, onSuccess, initialData }) => {
                   loading="lazy"
                 />
                 {/* Clean border overlay for premium styling */}
-                <div className="absolute inset-0 pointer-events-none border border-white/5 rounded-[8px]" />
+                <div className="absolute inset-0 pointer-events-none border border-white/5 rounded-[12px]" />
               </div>
             </div>
 
@@ -1255,7 +1290,7 @@ const StartScoringModal = ({ isOpen, onClose, onSuccess, initialData }) => {
               <button
                 type="button"
                 onClick={() => setShowLocationPopup(false)}
-                className="px-6 py-3.5 rounded-[8px] border border-white/10 text-white font-bold hover:bg-white/5 hover:border-white/20 transition-all flex items-center justify-center gap-2 text-xs uppercase tracking-widest"
+                className="px-6 py-2.5 rounded-[12px] border border-white/10 text-white font-bold hover:bg-white/5 hover:border-white/20 transition-all flex items-center justify-center gap-2 text-xs uppercase tracking-widest"
               >
                 <ChevronLeft size={14} /> Back
               </button>
@@ -1263,7 +1298,7 @@ const StartScoringModal = ({ isOpen, onClose, onSuccess, initialData }) => {
               <button
                 type="button"
                 onClick={handleApplyLocation}
-                className="flex-1 py-3.5 bg-gradient-to-r from-[#55DEE8] to-[#BFF367] text-black font-black rounded-[8px] uppercase tracking-widest text-xs hover:opacity-90 hover:scale-[1.02] transition-all flex items-center justify-center gap-2 shadow-lg shadow-[#55DEE8]/10"
+                className="flex-1 py-2.5 bg-gradient-to-r from-[#55DEE8] to-[#BFF367] text-black font-black rounded-[12px] uppercase tracking-widest text-xs hover:opacity-90 hover:scale-[1.02] transition-all flex items-center justify-center gap-2 shadow-lg shadow-[#55DEE8]/10"
               >
                 Confirm Location
               </button>
@@ -1340,17 +1375,17 @@ const StartScoringModal = ({ isOpen, onClose, onSuccess, initialData }) => {
           initial={{ opacity: 0, scale: 0.95, y: 20 }}
           animate={{ opacity: 1, scale: 1, y: 0 }}
           exit={{ opacity: 0, scale: 0.95, y: 20 }}
-          className="relative w-full max-w-[390px] h-screen bg-[#0a0a0a] border-x border-white/10 rounded-none shadow-2xl overflow-hidden flex flex-col flex-shrink-0"
+          className="relative w-full max-w-full h-screen bg-[#121212] shadow-2xl overflow-hidden flex flex-col flex-shrink-0"
         >
-          <div className="flex items-center justify-between px-6 pt-[35px] pb-5 border-b border-white/10 bg-black/40 flex-shrink-0">
+          <div className="flex items-center justify-between px-6 pt-6 pb-4 border-b border-white/10 bg-black flex-shrink-0">
             <div>
-              <h2 className="text-xl font-black text-white uppercase tracking-widest font-display" style={{ fontFamily: "'Open Sans', sans-serif" }}>
+              <h2 className="text-lg font-black text-white uppercase tracking-widest font-display" style={{ fontFamily: "'Open Sans', sans-serif" }}>
                 Select Match Date & Time
               </h2>
             </div>
           </div>
 
-          <div className="flex-1 overflow-y-auto p-6 space-y-6 bg-[#0a0a0a] scrollbar-hide">
+          <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-[#121212] scrollbar-hide">
             {/* Calendar Month Header */}
             <div className="flex items-center justify-between">
               <span className="text-sm font-black text-white uppercase tracking-widest">
@@ -1416,7 +1451,7 @@ const StartScoringModal = ({ isOpen, onClose, onSuccess, initialData }) => {
                           setTempPeriod(period);
                         }
                       }}
-                      className={`py-2 text-xs font-bold rounded-[8px] transition-all ${
+                      className={`py-2 text-xs font-bold rounded-[12px] transition-all ${
                         isSelected 
                           ? 'bg-gradient-to-r from-[#55DEE8] to-[#BFF367] text-black shadow-lg shadow-[#55DEE8]/20'
                           : isPast
@@ -1443,7 +1478,7 @@ const StartScoringModal = ({ isOpen, onClose, onSuccess, initialData }) => {
                   <select
                     value={tempHour}
                     onChange={e => setTempHour(parseInt(e.target.value))}
-                    className="w-full bg-[#0a0a0a] border border-white/10 rounded-[8px] px-3 py-2 text-white focus:outline-none focus:ring-1 focus:ring-[#55DEE8]/30 focus:border-[#55DEE8]/30 text-xs font-bold form-select-custom"
+                    className="w-full bg-[#121212] border border-white/10 rounded-[12px] px-3 py-2 text-white focus:outline-none focus:ring-1 focus:ring-[#55DEE8]/30 focus:border-[#55DEE8]/30 text-xs font-bold form-select-custom"
                   >
                     {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12].map(h => {
                       const isDisabled = isPastTime(h, tempMinute, tempPeriod);
@@ -1461,7 +1496,7 @@ const StartScoringModal = ({ isOpen, onClose, onSuccess, initialData }) => {
                   <select
                     value={tempMinute}
                     onChange={e => setTempMinute(parseInt(e.target.value))}
-                    className="w-full bg-[#0a0a0a] border border-white/10 rounded-[8px] px-3 py-2 text-white focus:outline-none focus:ring-1 focus:ring-[#55DEE8]/30 focus:border-[#55DEE8]/30 text-xs font-bold form-select-custom"
+                    className="w-full bg-[#121212] border border-white/10 rounded-[12px] px-3 py-2 text-white focus:outline-none focus:ring-1 focus:ring-[#55DEE8]/30 focus:border-[#55DEE8]/30 text-xs font-bold form-select-custom"
                   >
                     {[0, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55].map(m => {
                       const isDisabled = isPastTime(tempHour, m, tempPeriod);
@@ -1479,7 +1514,7 @@ const StartScoringModal = ({ isOpen, onClose, onSuccess, initialData }) => {
                   <select
                     value={tempPeriod}
                     onChange={e => setTempPeriod(e.target.value)}
-                    className="w-full bg-[#0a0a0a] border border-white/10 rounded-[8px] px-3 py-2 text-white focus:outline-none focus:ring-1 focus:ring-[#55DEE8]/30 focus:border-[#55DEE8]/30 text-xs font-bold form-select-custom"
+                    className="w-full bg-[#121212] border border-white/10 rounded-[12px] px-3 py-2 text-white focus:outline-none focus:ring-1 focus:ring-[#55DEE8]/30 focus:border-[#55DEE8]/30 text-xs font-bold form-select-custom"
                   >
                     {['AM', 'PM'].map(p => {
                       const isDisabled = isPastTime(tempHour, tempMinute, p);
@@ -1498,7 +1533,7 @@ const StartScoringModal = ({ isOpen, onClose, onSuccess, initialData }) => {
               <button
                 type="button"
                 onClick={() => setShowDatePickerPopup(false)}
-                className="px-6 py-3.5 rounded-[8px] border border-white/10 text-white font-bold hover:bg-white/5 hover:border-white/20 transition-all flex items-center justify-center gap-2 text-xs uppercase tracking-widest"
+                className="px-6 py-2.5 rounded-[12px] border border-white/10 text-white font-bold hover:bg-white/5 hover:border-white/20 transition-all flex items-center justify-center gap-2 text-xs uppercase tracking-widest"
               >
                 <ChevronLeft size={14} /> Back
               </button>
@@ -1506,7 +1541,7 @@ const StartScoringModal = ({ isOpen, onClose, onSuccess, initialData }) => {
                 type="button"
                 onClick={applyDatePicker}
                 disabled={!tempDate}
-                className="flex-1 py-3.5 bg-gradient-to-r from-[#55DEE8] to-[#BFF367] text-black font-black rounded-[8px] uppercase tracking-widest text-xs hover:opacity-90 hover:scale-[1.02] transition-all flex items-center justify-center gap-2 shadow-lg shadow-[#55DEE8]/10"
+                className="flex-1 py-2.5 bg-gradient-to-r from-[#55DEE8] to-[#BFF367] text-black font-black rounded-[12px] uppercase tracking-widest text-xs hover:opacity-90 hover:scale-[1.02] transition-all flex items-center justify-center gap-2 shadow-lg shadow-[#55DEE8]/10"
               >
                 Apply Date & Time
               </button>
@@ -1526,17 +1561,17 @@ const StartScoringModal = ({ isOpen, onClose, onSuccess, initialData }) => {
           initial={{ opacity: 0, scale: 0.95, y: 20 }}
           animate={{ opacity: 1, scale: 1, y: 0 }}
           exit={{ opacity: 0, scale: 0.95, y: 20 }}
-          className="relative w-full max-w-[390px] h-screen bg-[#0a0a0a] border-x border-white/10 rounded-none shadow-2xl overflow-hidden flex flex-col flex-shrink-0"
+          className="relative w-full max-w-full h-screen bg-[#121212] shadow-2xl overflow-hidden flex flex-col flex-shrink-0"
         >
-          <div className="flex items-center justify-between px-6 pt-[35px] pb-5 border-b border-white/10 bg-black/40 flex-shrink-0">
+          <div className="flex items-center justify-between px-6 pt-6 pb-4 border-b border-white/10 bg-black flex-shrink-0">
             <div>
-              <h2 className="text-xl font-black text-white uppercase tracking-widest font-display" style={{ fontFamily: "'Open Sans', sans-serif" }}>
+              <h2 className="text-lg font-black text-white uppercase tracking-widest font-display" style={{ fontFamily: "'Open Sans', sans-serif" }}>
                 Match Setup Settings
               </h2>
             </div>
           </div>
 
-          <div className="flex-1 overflow-y-auto p-6 space-y-6 bg-[#0a0a0a] scrollbar-hide">
+          <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-[#121212] scrollbar-hide">
             <div className="grid grid-cols-2 gap-4">
               {/* Ball Type */}
               <div className="space-y-1">
@@ -1649,14 +1684,14 @@ const StartScoringModal = ({ isOpen, onClose, onSuccess, initialData }) => {
               <button
                 type="button"
                 onClick={() => setShowMatchSettingsPopup(false)}
-                className="px-6 py-3.5 rounded-[8px] border border-white/10 text-white font-bold hover:bg-white/5 hover:border-white/20 transition-all flex items-center justify-center gap-2 text-xs uppercase tracking-widest"
+                className="px-6 py-2.5 rounded-[12px] border border-white/10 text-white font-bold hover:bg-white/5 hover:border-white/20 transition-all flex items-center justify-center gap-2 text-xs uppercase tracking-widest"
               >
                 <ChevronLeft size={14} /> Back
               </button>
               <button
                 type="button"
                 onClick={() => setShowMatchSettingsPopup(false)}
-                className="flex-1 py-3.5 bg-gradient-to-r from-[#55DEE8] to-[#BFF367] text-black font-black rounded-[8px] uppercase tracking-widest text-xs hover:opacity-90 hover:scale-[1.02] transition-all flex items-center justify-center gap-2 shadow-lg shadow-[#55DEE8]/10"
+                className="flex-1 py-2.5 bg-gradient-to-r from-[#55DEE8] to-[#BFF367] text-black font-black rounded-[12px] uppercase tracking-widest text-xs hover:opacity-90 hover:scale-[1.02] transition-all flex items-center justify-center gap-2 shadow-lg shadow-[#55DEE8]/10"
               >
                 Apply Settings
               </button>
@@ -1675,16 +1710,16 @@ const StartScoringModal = ({ isOpen, onClose, onSuccess, initialData }) => {
         <motion.div
           initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}
-          className="relative w-full max-w-[390px] h-screen bg-[#0F0F0F] border-x border-white/10 rounded-none shadow-2xl overflow-hidden flex flex-col flex-shrink-0"
+          className="relative w-full max-w-full h-screen bg-[#0F0F0F] shadow-2xl overflow-hidden flex flex-col flex-shrink-0"
         >
-          <div className="flex items-center justify-between px-5 pt-[35px] pb-5 border-b border-white/10">
+          <div className="flex items-center justify-between px-5 pt-6 pb-4 border-b border-white/10">
             <h3 className="text-lg font-black text-white uppercase tracking-wider">
               Select Team {selectingTeam}
             </h3>
           </div>
-          <div className="flex-1 overflow-y-auto p-5 space-y-4 scrollbar-hide">
+          <div className="flex-1 overflow-y-auto p-4 space-y-4 scrollbar-hide">
             {/* Tabs */}
-            <div className="flex gap-2 p-1 bg-white/[0.03] rounded-[8px] border border-white/5">
+            <div className="flex gap-2 p-1 bg-white/[0.03] rounded-[12px] border border-white/5">
               {['myTeams', 'opponentTeams'].map(tab => (
                 <button key={tab} onClick={() => setTeamTab(tab)}
                   className={`flex-1 py-2 text-xs font-bold uppercase tracking-wider rounded-lg transition-all ${teamTab === tab ? 'bg-gradient-to-r from-[#55DEE8] to-[#BFF367] text-black shadow-lg' : 'text-white/40 hover:text-white'}`}>
@@ -1696,7 +1731,7 @@ const StartScoringModal = ({ isOpen, onClose, onSuccess, initialData }) => {
             {/* Create Team Button */}
             <button
               onClick={() => setShowCreateTeam(true)}
-              className="w-full py-2.5 bg-white/5 border border-white/10 hover:bg-white/10 transition-all rounded-[8px] text-[#BFF367] text-xs font-black uppercase tracking-widest flex items-center justify-center gap-2"
+              className="w-full py-2.5 bg-white/5 border border-white/10 hover:bg-white/10 transition-all rounded-[12px] text-[#BFF367] text-xs font-black uppercase tracking-widest flex items-center justify-center gap-2"
             >
               <Plus size={16} /> Create Team
             </button>
@@ -1713,7 +1748,7 @@ const StartScoringModal = ({ isOpen, onClose, onSuccess, initialData }) => {
                   className={inputClass}
                 />
                 <button onClick={handleTeamSearch} disabled={isSearching}
-                  className="px-3 bg-white/10 hover:bg-white/20 rounded-[8px] transition-colors text-white">
+                  className="px-3 bg-white/10 hover:bg-white/20 rounded-[12px] transition-colors text-white">
                   {isSearching ? <Loader2 size={16} className="animate-spin" /> : <Search size={16} />}
                 </button>
               </div>
@@ -1725,7 +1760,7 @@ const StartScoringModal = ({ isOpen, onClose, onSuccess, initialData }) => {
                  const isSelected = formData.teamAId === tid || formData.teamBId === tid;
                  return (
                    <button key={tid} onClick={() => selectTeam(tid, t.name)}
-                     className="w-full flex items-center justify-between p-3 rounded-[8px] bg-white/5 hover:bg-white/10 border border-transparent hover:border-white/10 transition-all text-left">
+                     className="w-full flex items-center justify-between p-3 rounded-[12px] bg-white/5 hover:bg-white/10 border border-transparent hover:border-white/10 transition-all text-left">
                      <div className="flex items-center gap-3">
                        {t.logo ? <img src={t.logo} className="w-8 h-8 rounded-lg object-cover" alt={t.name} /> : <div className="w-8 h-8 rounded-lg bg-white/10 flex items-center justify-center text-white/40"><Users size={14} /></div>}
                        <span className="font-bold text-white text-sm">{t.name}</span>
@@ -1741,7 +1776,7 @@ const StartScoringModal = ({ isOpen, onClose, onSuccess, initialData }) => {
                      const isSelected = formData.teamAId === tid || formData.teamBId === tid;
                      return (
                        <button key={tid} onClick={() => selectTeam(tid, t.name)}
-                         className="w-full flex items-center justify-between p-3 rounded-[8px] bg-white/5 hover:bg-white/10 border border-transparent hover:border-white/10 transition-all text-left">
+                         className="w-full flex items-center justify-between p-3 rounded-[12px] bg-white/5 hover:bg-white/10 border border-transparent hover:border-white/10 transition-all text-left">
                          <div className="flex items-center gap-3">
                            {t.logo ? <img src={t.logo} className="w-8 h-8 rounded-lg object-cover" alt={t.name} /> : <div className="w-8 h-8 rounded-lg bg-white/10 flex items-center justify-center text-white/40"><Swords size={14} /></div>}
                            <div>
@@ -1755,7 +1790,7 @@ const StartScoringModal = ({ isOpen, onClose, onSuccess, initialData }) => {
                    })}
                    {searchedTeamData?.team && (
                      <button onClick={() => selectTeam(searchedTeamData.team._id || searchedTeamData.team.id, searchedTeamData.team.name)}
-                       className="w-full flex items-center justify-between p-3 rounded-[8px] bg-gradient-to-r from-[#55DEE8]/10 to-[#BFF367]/10 border border-[#55DEE8]/30 hover:border-[#55DEE8] transition-all text-left mt-2">
+                       className="w-full flex items-center justify-between p-3 rounded-[12px] bg-gradient-to-r from-[#55DEE8]/10 to-[#BFF367]/10 border border-[#55DEE8]/30 hover:border-[#55DEE8] transition-all text-left mt-2">
                        <div>
                          <div className="font-bold text-white text-sm">{searchedTeamData.team.name}</div>
                          <div className="text-[10px] text-[#55DEE8]">Search Result · {searchedTeamData.team.teamCode}</div>
@@ -1767,11 +1802,11 @@ const StartScoringModal = ({ isOpen, onClose, onSuccess, initialData }) => {
                )}
              </div>
            </div>
-           <div className="p-5 border-t border-white/10 bg-black/40 flex-shrink-0">
+           <div className="p-4 border-t border-white/10 bg-black flex-shrink-0">
              <button
                type="button"
                onClick={() => setSelectingTeam(null)}
-               className="w-full py-3 rounded-[8px] border border-white/10 text-white font-bold hover:bg-white/5 hover:border-white/20 transition-all flex items-center justify-center gap-2 text-xs uppercase tracking-widest"
+               className="w-full py-3 rounded-[12px] border border-white/10 text-white font-bold hover:bg-white/5 hover:border-white/20 transition-all flex items-center justify-center gap-2 text-xs uppercase tracking-widest"
              >
                <ChevronLeft size={14} /> Back
              </button>
@@ -1823,9 +1858,9 @@ const StartScoringModal = ({ isOpen, onClose, onSuccess, initialData }) => {
           animate={{ opacity: 1, x: 0 }}
           exit={{ opacity: 0, x: '-100%' }}
           transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-          className="relative w-full max-w-[390px] h-screen bg-[#0F0F0F] border-x border-white/10 rounded-none shadow-2xl overflow-hidden flex flex-col flex-shrink-0"
+          className="relative w-full max-w-full h-screen bg-[#0F0F0F] shadow-2xl overflow-hidden flex flex-col flex-shrink-0"
         >
-          <div className="flex items-center justify-between px-5 pt-[35px] pb-5 border-b border-white/10 flex-shrink-0">
+          <div className="flex items-center justify-between px-5 pt-6 pb-4 border-b border-white/10 flex-shrink-0">
             <h3 className="text-lg font-black text-white uppercase tracking-wider">
               {playerPopup.action === 'REPLACE' ? 'Replace Player' : 'Add Player'}
             </h3>
@@ -1853,7 +1888,7 @@ const StartScoringModal = ({ isOpen, onClose, onSuccess, initialData }) => {
             </button>
           </div>
 
-          <div className="flex-1 overflow-y-auto p-5 space-y-4 scrollbar-hide">
+          <div className="flex-1 overflow-y-auto p-4 space-y-4 scrollbar-hide">
             {activePlayerTab === 'roster' ? (
               <div className="space-y-2">
                 {rosterMembers.length > 0 ? rosterMembers.map(p => {
@@ -1870,7 +1905,7 @@ const StartScoringModal = ({ isOpen, onClose, onSuccess, initialData }) => {
                         selectPlayer(p);
                       }
                     }}
-                      className={`w-full flex items-center justify-between p-3 rounded-[8px] border transition-all text-left ${isAdded ? 'bg-[#BFF367]/10 border-[#BFF367]/30' : 'bg-white/5 hover:bg-white/10 border-transparent hover:border-white/10'}`}>
+                      className={`w-full flex items-center justify-between p-3 rounded-[12px] border transition-all text-left ${isAdded ? 'bg-[#BFF367]/10 border-[#BFF367]/30' : 'bg-white/5 hover:bg-white/10 border-transparent hover:border-white/10'}`}>
                       <div className="flex items-center gap-3">
                         {p.profilePicture ? <img src={p.profilePicture} className="w-10 h-10 rounded-full object-cover" alt={p.name} /> : <div className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center text-white/40"><Users size={16} /></div>}
                         <div>
@@ -1913,7 +1948,7 @@ const StartScoringModal = ({ isOpen, onClose, onSuccess, initialData }) => {
                 <div className="space-y-2">
                   {searchPlayersData?.players?.map(p => (
                     <button key={p._id} onClick={() => handleInviteAndAdd(p)}
-                      className="w-full flex items-center justify-between p-3 rounded-[8px] bg-white/5 hover:bg-white/10 border border-transparent hover:border-white/10 transition-all text-left">
+                      className="w-full flex items-center justify-between p-3 rounded-[12px] bg-white/5 hover:bg-white/10 border border-transparent hover:border-white/10 transition-all text-left">
                       <div className="flex items-center gap-3">
                         {p.profilePicture ? <img src={p.profilePicture} className="w-10 h-10 rounded-full object-cover" alt={p.username} /> : <div className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center text-white/40"><Users size={16} /></div>}
                         <div>
@@ -1942,6 +1977,15 @@ const StartScoringModal = ({ isOpen, onClose, onSuccess, initialData }) => {
               <div className="space-y-4">
                 {!customInviteData ? (
                   <form id="customPlayerForm" onSubmit={handleAddCustomPlayerSubmit} className="space-y-4">
+                    {supportsContacts && (
+                      <button
+                        type="button"
+                        onClick={handleImportFromContacts}
+                        className="w-full flex items-center justify-center gap-2 py-3 bg-[#121212] border border-white/10 rounded-[12px] text-[#BFF367] font-semibold text-xs hover:border-[#BFF367]/30 transition-colors uppercase tracking-wider"
+                      >
+                        <Users size={16} /> Add player from your contacts
+                      </button>
+                    )}
 
                     <div>
                       <label className={labelClass}>Player Name *</label>
@@ -1956,14 +2000,14 @@ const StartScoringModal = ({ isOpen, onClose, onSuccess, initialData }) => {
                     </div>
                     <div>
                       <label className={labelClass}>Phone Number</label>
-                      <div className="flex bg-[#0a0a0a] border border-white/10 rounded-[8px] focus-within:border-[#55DEE8]/30 transition-colors h-[48px] overflow-hidden">
+                      <div className="flex bg-[#121212] border border-white/10 rounded-[12px] focus-within:border-[#55DEE8]/30 transition-colors h-[44px] overflow-hidden">
                         <select
                           value={customPlayerCountryCode}
                           onChange={e => setCustomPlayerCountryCode(e.target.value)}
                           className="w-[90px] bg-transparent text-white text-sm outline-none px-2 border-r border-white/10 cursor-pointer"
                         >
                           {countryCodes.map(c => (
-                            <option key={c.code} value={c.dial_code} className="bg-[#0a0a0a] text-white">
+                            <option key={c.code} value={c.dial_code} className="bg-[#121212] text-white">
                               {c.code} (+{c.dial_code})
                             </option>
                           ))}
@@ -1983,7 +2027,7 @@ const StartScoringModal = ({ isOpen, onClose, onSuccess, initialData }) => {
 
                   </form>
                 ) : (
-                  <div className="text-center space-y-5 py-4">
+                  <div className="text-center space-y-3 py-4">
                     <div className="w-16 h-16 bg-[#25D366]/20 rounded-full flex items-center justify-center mx-auto border-2 border-[#25D366]/30">
                       <MessageCircle size={32} className="text-[#25D366]" />
                     </div>
@@ -2001,7 +2045,7 @@ const StartScoringModal = ({ isOpen, onClose, onSuccess, initialData }) => {
                             setPlayerPopup(null);
                             setCustomInviteData(null);
                           }}
-                          className="flex-1 py-3 bg-[#25D366] text-white font-bold rounded-[8px] flex items-center justify-center gap-2 hover:bg-[#20bd5a] transition-colors"
+                          className="flex-1 py-3 bg-[#25D366] text-white font-bold rounded-[12px] flex items-center justify-center gap-2 hover:bg-[#20bd5a] transition-colors"
                         >
                           <MessageCircle size={18} />
                           Send WhatsApp
@@ -2011,7 +2055,7 @@ const StartScoringModal = ({ isOpen, onClose, onSuccess, initialData }) => {
                             setPlayerPopup(null);
                             setCustomInviteData(null);
                           }}
-                          className="py-3 px-6 bg-white/10 text-white font-bold rounded-[8px] hover:bg-white/20 transition-colors"
+                          className="py-3 px-6 bg-white/10 text-white font-bold rounded-[12px] hover:bg-white/20 transition-colors"
                         >
                           Skip
                         </button>
@@ -2022,14 +2066,14 @@ const StartScoringModal = ({ isOpen, onClose, onSuccess, initialData }) => {
               </div>
             )}
           </div>
-          <div className="flex gap-3 p-5 border-t border-white/10 bg-black/40 flex-shrink-0">
+          <div className="flex gap-3 p-4 border-t border-white/10 bg-black flex-shrink-0">
             <button
               type="button"
               onClick={() => {
                 setPlayerPopup(null);
                 setCustomInviteData(null);
               }}
-              className={`${activePlayerTab === 'custom' && !customInviteData ? 'px-6' : 'w-full'} py-3 rounded-[8px] border border-white/10 text-white font-bold hover:bg-white/5 hover:border-white/20 transition-all flex items-center justify-center gap-2 text-xs uppercase tracking-widest`}
+              className={`${activePlayerTab === 'custom' && !customInviteData ? 'px-6' : 'w-full'} py-3 rounded-[12px] border border-white/10 text-white font-bold hover:bg-white/5 hover:border-white/20 transition-all flex items-center justify-center gap-2 text-xs uppercase tracking-widest`}
             >
               Next <ChevronRight size={14} />
             </button>
@@ -2038,7 +2082,7 @@ const StartScoringModal = ({ isOpen, onClose, onSuccess, initialData }) => {
                 type="submit" 
                 form="customPlayerForm"
                 disabled={isAddingCustom || !customPlayerName.trim()}
-                className="flex-1 py-3 bg-gradient-to-r from-[#55DEE8] to-[#BFF367] text-black font-black rounded-[8px] uppercase tracking-wider text-xs hover:opacity-90 transition-all flex items-center justify-center gap-2"
+                className="flex-1 py-3 bg-gradient-to-r from-[#55DEE8] to-[#BFF367] text-black font-black rounded-[12px] uppercase tracking-wider text-xs hover:opacity-90 transition-all flex items-center justify-center gap-2"
               >
                 {isAddingCustom && <Loader2 size={16} className="animate-spin" />}
                 Add Custom Player
@@ -2056,7 +2100,7 @@ const StartScoringModal = ({ isOpen, onClose, onSuccess, initialData }) => {
       // ── Step 1: Match Setup ───────────────────────────────────────────────────
       case 1:
         return (
-          <div className="space-y-6 pt-2 pb-2">
+          <div className="space-y-4 pt-2 pb-2">
             {/* Max Members */}
             <TouchSliderWheel
               label="Max Members per Team"
@@ -2098,7 +2142,7 @@ const StartScoringModal = ({ isOpen, onClose, onSuccess, initialData }) => {
                 <button
                   type="button"
                   onClick={openDatePicker}
-                  className="w-full bg-[#0a0a0a] border border-white/10 rounded-[8px] px-4 py-3.5 text-left text-white focus:outline-none focus:border-[#55DEE8]/30 transition-all text-sm font-semibold animate-pulse-subtle"
+                  className="w-full bg-[#121212] border border-white/10 rounded-[12px] px-4 py-2.5 text-left text-white focus:outline-none focus:border-[#55DEE8]/30 transition-all text-sm font-semibold animate-pulse-subtle"
                 >
                   <span className="block truncate">
                     {formData.matchDateTime ? (() => {
@@ -2122,7 +2166,7 @@ const StartScoringModal = ({ isOpen, onClose, onSuccess, initialData }) => {
             
 
             {formData.format === 'CUSTOM' && (
-              <div className="grid grid-cols-2 gap-4 bg-white/5 p-4 rounded-[8px] border border-white/10">
+              <div className="grid grid-cols-2 gap-4 bg-white/5 p-4 rounded-[12px] border border-white/10">
                 <div className="space-y-1">
                   <label htmlFor="customDays" className={labelClass}>
                     Days
@@ -2162,7 +2206,7 @@ const StartScoringModal = ({ isOpen, onClose, onSuccess, initialData }) => {
               <button
                 type="button"
                 onClick={() => setShowVenuePopup(true)}
-                className="w-full bg-[#0a0a0a] border border-white/10 rounded-[8px] pl-12 pr-4 py-3 text-white text-left focus:outline-none focus:border-[#55DEE8]/30 transition-all text-sm font-semibold relative flex items-center min-h-[46px] hover:border-white/20 hover:scale-[1.005] transition-all"
+                className="w-full bg-[#121212] border border-white/10 rounded-[12px] pl-12 pr-4 py-3 text-white text-left focus:outline-none focus:border-[#55DEE8]/30 transition-all text-sm font-semibold relative flex items-center min-h-[42px] hover:border-white/20 hover:scale-[1.005] transition-all"
               >
                 <MapPin className="absolute left-4 text-white/40 text-[18px]" size={18} />
                 <span className="block truncate">
@@ -2179,7 +2223,7 @@ const StartScoringModal = ({ isOpen, onClose, onSuccess, initialData }) => {
               <button
                 type="button"
                 onClick={() => setShowProfessionalsPopup(true)}
-                className="w-full bg-[#0a0a0a] border border-white/10 rounded-[8px] pl-12 pr-4 py-3 text-white text-left focus:outline-none focus:border-[#55DEE8]/30 transition-all text-sm font-semibold relative flex items-center min-h-[46px] hover:border-white/20 hover:scale-[1.005] transition-all"
+                className="w-full bg-[#121212] border border-white/10 rounded-[12px] pl-12 pr-4 py-3 text-white text-left focus:outline-none focus:border-[#55DEE8]/30 transition-all text-sm font-semibold relative flex items-center min-h-[42px] hover:border-white/20 hover:scale-[1.005] transition-all"
               >
                 <UserCheck className="absolute left-4 text-white/40 text-[18px]" size={18} />
                 <span className="block truncate">
@@ -2195,7 +2239,7 @@ const StartScoringModal = ({ isOpen, onClose, onSuccess, initialData }) => {
               <button
                 type="button"
                 onClick={() => setShowMatchSettingsPopup(true)}
-                className="w-full bg-[#0a0a0a] border border-white/10 rounded-[8px] px-4 py-3 text-left text-white focus:outline-none focus:border-[#55DEE8]/30 transition-all text-sm font-semibold"
+                className="w-full bg-[#121212] border border-white/10 rounded-[12px] px-4 py-3 text-left text-white focus:outline-none focus:border-[#55DEE8]/30 transition-all text-sm font-semibold"
               >
                 <span className="block truncate">{`${BALL_TYPES.find(b => b.value === formData.ballType)?.label || 'Tennis Ball'} · ${GROUND_TYPES.find(g => g.value === formData.groundType)?.label || 'Outdoor Ground'} · ${PITCH_TYPES.find(p => p.value === formData.pitchType)?.label || 'Turf'} · ${MATCH_TIMINGS.find(m => m.value === formData.matchTiming)?.label || 'Day Match'}`}</span>
               </button>
@@ -2246,15 +2290,15 @@ const StartScoringModal = ({ isOpen, onClose, onSuccess, initialData }) => {
                 <div className="flex flex-col gap-4 mt-8">
                   <button 
                     onClick={() => setSelectingTeam('A')}
-                    className="w-full bg-white/[0.02] border border-white/5 hover:bg-white/[0.05] hover:border-white/10 active:scale-[0.98] transition-all p-5 rounded-[12px] flex items-center justify-between group text-left"
+                    className="w-full bg-white/[0.02] border border-white/5 hover:bg-white/[0.05] hover:border-white/10 active:scale-[0.98] transition-all p-4 rounded-[12px] flex items-center justify-between group text-left"
                   >
                     <div className="flex items-center gap-4">
-                      <div className="w-16 h-16 rounded-[12px] flex items-center justify-center transition-colors" style={{ background: '#45DADA15', border: '1px solid #45DADA25' }}>
-                        <Users size={28} style={{ color: '#45DADA' }} />
+                      <div className="w-16 h-16 rounded-[12px] flex items-center justify-center transition-colors" style={{ background: '#55DEE815', border: '1px solid #55DEE825' }}>
+                        <Users size={28} style={{ color: '#55DEE8' }} />
                       </div>
                       <div>
-                        <span className="text-[10px] font-black uppercase tracking-widest block mb-1" style={{ color: '#45DADA' }}>TEAM A</span>
-                        <p className="text-white font-bold text-base transition-colors group-hover:text-[#45DADA]">Select TEAM A</p>
+                        <span className="text-[10px] font-black uppercase tracking-widest block mb-1" style={{ color: '#55DEE8' }}>TEAM A</span>
+                        <p className="text-white font-bold text-base transition-colors group-hover:text-[#55DEE8]">Select TEAM A</p>
                       </div>
                     </div>
                     <ChevronRight size={20} className="text-white/30 group-hover:text-white transition-colors" />
@@ -2285,15 +2329,15 @@ const StartScoringModal = ({ isOpen, onClose, onSuccess, initialData }) => {
                 <div className="flex flex-col gap-4 mt-8">
                   <button 
                     onClick={() => setSelectingTeam('B')}
-                    className="w-full bg-white/[0.02] border border-white/5 hover:bg-white/[0.05] hover:border-white/10 active:scale-[0.98] transition-all p-5 rounded-[12px] flex items-center justify-between group text-left"
+                    className="w-full bg-white/[0.02] border border-white/5 hover:bg-white/[0.05] hover:border-white/10 active:scale-[0.98] transition-all p-4 rounded-[12px] flex items-center justify-between group text-left"
                   >
                     <div className="flex items-center gap-4">
-                      <div className="w-16 h-16 rounded-[12px] flex items-center justify-center transition-colors" style={{ background: '#69DE8015', border: '1px solid #69DE8025' }}>
-                        <Users size={28} style={{ color: '#69DE80' }} />
+                      <div className="w-16 h-16 rounded-[12px] flex items-center justify-center transition-colors" style={{ background: '#BFF36715', border: '1px solid #BFF36725' }}>
+                        <Users size={28} style={{ color: '#BFF367' }} />
                       </div>
                       <div>
-                        <span className="text-[10px] font-black uppercase tracking-widest block mb-1" style={{ color: '#69DE80' }}>TEAM B</span>
-                        <p className="text-white font-bold text-base transition-colors group-hover:text-[#69DE80]">Select TEAM B</p>
+                        <span className="text-[10px] font-black uppercase tracking-widest block mb-1" style={{ color: '#BFF367' }}>TEAM B</span>
+                        <p className="text-white font-bold text-base transition-colors group-hover:text-[#BFF367]">Select TEAM B</p>
                       </div>
                     </div>
                     <ChevronRight size={20} className="text-white/30 group-hover:text-white transition-colors" />
@@ -2336,7 +2380,7 @@ const StartScoringModal = ({ isOpen, onClose, onSuccess, initialData }) => {
     <>
       <AnimatePresence>
         {isLoading && (
-          <div className="fixed inset-0 z-[20000] flex flex-col items-center justify-center bg-black/60 backdrop-blur-md">
+          <div className="fixed inset-0 z-[20000] flex flex-col items-center justify-center bg-black/80 backdrop-blur-md">
             <div className="flex flex-col items-center gap-4">
               <Loader2 className="animate-spin text-[#55DEE8] w-12 h-12" />
               <p className="text-white text-xs font-black tracking-widest uppercase animate-pulse">Creating Match...</p>
@@ -2352,18 +2396,18 @@ const StartScoringModal = ({ isOpen, onClose, onSuccess, initialData }) => {
         initial={{ opacity: 0, scale: 0.95, y: 20 }}
         animate={{ opacity: 1, scale: 1, y: 0 }}
         exit={{ opacity: 0, scale: 0.95, y: 20 }}
-        className="relative w-full max-w-[390px] h-[100dvh] sm:h-screen bg-[#0a0a0a] border-x border-white/10 rounded-none shadow-2xl overflow-hidden flex flex-col flex-shrink-0"
+        className="relative w-full max-w-full h-[100dvh] sm:h-screen bg-[#121212] shadow-2xl overflow-hidden flex flex-col flex-shrink-0"
       >
         {/* Header */}
-        <div className="flex items-center justify-between px-6 pt-[35px] pb-5 border-b border-white/10 bg-black/40 flex-shrink-0">
+        <div className="flex items-center justify-between px-6 pt-6 pb-4 border-b border-white/10 bg-black flex-shrink-0">
           <div>
-            <h2 className="text-xl font-black text-white uppercase tracking-widest font-display" style={{ fontFamily: "'Open Sans', sans-serif" }}>Start Scoring Match</h2>
+            <h2 className="text-lg font-black text-white uppercase tracking-widest font-display" style={{ fontFamily: "'Open Sans', sans-serif" }}>Start Scoring Match</h2>
           </div>
         </div>
 
 
         {/* Content */}
-        <div className="flex-1 overflow-y-auto p-6 pt-4 bg-[#0a0a0a] scrollbar-hide">
+        <div className="flex-1 overflow-y-auto p-4 bg-[#121212] scrollbar-hide">
           <AnimatePresence mode="wait">
             <motion.div
               key={step}
@@ -2378,19 +2422,19 @@ const StartScoringModal = ({ isOpen, onClose, onSuccess, initialData }) => {
         </div>
 
         {/* Persistent Add Custom Venue / Pro Button */}
-        <div className="flex gap-3 p-5 pb-10 border-t border-white/10 bg-black/40 flex-shrink-0">
+        <div className="flex gap-3 p-4 pb-6 border-t border-white/10 bg-black flex-shrink-0">
           <button onClick={step > 1 ? handlePrev : handleClose}
-            className="px-6 py-3 rounded-[8px] border border-white/10 text-white font-bold hover:bg-white/5 hover:border-white/20 transition-all flex items-center gap-2 text-xs uppercase tracking-widest">
+            className="px-6 py-3 rounded-[12px] border border-white/10 text-white font-bold hover:bg-white/5 hover:border-white/20 transition-all flex items-center gap-2 text-xs uppercase tracking-widest">
             <ChevronLeft size={14} /> Back
           </button>
           {step < STEPS.length ? (
             <button onClick={handleNext} disabled={!canGoNext()}
-              className="flex-1 py-3 px-4 rounded-[8px] bg-gradient-to-r from-[#45dada] to-[#69de80] text-black font-black hover:opacity-90 hover:scale-[1.02] hover:-translate-y-0.5 transition-all flex items-center justify-center gap-2 uppercase text-xs tracking-widest disabled:opacity-40 disabled:cursor-not-allowed shadow-lg shadow-[#45dada]/20">
+              className="flex-1 py-3 px-4 rounded-[12px] bg-gradient-to-r from-[#55DEE8] to-[#BFF367] text-black font-black hover:opacity-90 hover:scale-[1.02] hover:-translate-y-0.5 transition-all flex items-center justify-center gap-2 uppercase text-xs tracking-widest disabled:opacity-40 disabled:cursor-not-allowed shadow-lg shadow-[#55DEE8]/20">
               <>Next <ChevronRight size={14} /></>
             </button>
           ) : (
             <button type="button" onClick={() => setShowPasswordPopup(true)} disabled={isLoading || !canGoNext()}
-              className="flex-1 py-3 px-4 rounded-[8px] bg-gradient-to-r from-[#45dada] to-[#69de80] text-black font-black hover:opacity-90 hover:scale-[1.02] hover:-translate-y-0.5 transition-all flex items-center justify-center gap-2 uppercase text-xs tracking-widest disabled:opacity-40 disabled:cursor-not-allowed shadow-lg shadow-[#45dada]/20">
+              className="flex-1 py-3 px-4 rounded-[12px] bg-gradient-to-r from-[#55DEE8] to-[#BFF367] text-black font-black hover:opacity-90 hover:scale-[1.02] hover:-translate-y-0.5 transition-all flex items-center justify-center gap-2 uppercase text-xs tracking-widest disabled:opacity-40 disabled:cursor-not-allowed shadow-lg shadow-[#55DEE8]/20">
               {isLoading ? <><Loader2 size={16} className="animate-spin" /> Creating...</> : <><Trophy size={16} /> Create Match</>}
             </button>
           )}
@@ -2399,7 +2443,7 @@ const StartScoringModal = ({ isOpen, onClose, onSuccess, initialData }) => {
 
       <AnimatePresence>
         {showPasswordPopup && (
-          <div className="absolute inset-0 z-[1000] flex items-center justify-center p-6">
+          <div className="absolute inset-0 z-[1000] flex items-center justify-center p-4">
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
@@ -2411,9 +2455,9 @@ const StartScoringModal = ({ isOpen, onClose, onSuccess, initialData }) => {
               initial={{ opacity: 0, scale: 0.95, y: 20 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.95, y: 20 }}
-              className="relative w-full max-w-[340px] bg-[#111] border border-white/10 rounded-2xl p-6 shadow-2xl flex flex-col items-center"
+              className="relative w-full max-w-[340px] bg-[#111] border border-white/10 rounded-2xl p-4 shadow-2xl flex flex-col items-center"
             >
-              <h3 className="text-xl font-black text-white uppercase tracking-wide mb-1 text-center font-display">Match Security</h3>
+              <h3 className="text-lg font-black text-white uppercase tracking-wide mb-1 text-center font-display">Match Security</h3>
               <p className="text-xs text-white/40 text-center mb-6 leading-relaxed">Set a password for the scoring app to prevent unauthorized access.</p>
               
               <div className="w-full mb-6">
@@ -2423,7 +2467,7 @@ const StartScoringModal = ({ isOpen, onClose, onSuccess, initialData }) => {
                 <div className="relative">
                   <input type={showPassword ? "text" : "password"} value={formData.scoringPassword}
                     onChange={e => setFormData(f => ({ ...f, scoringPassword: e.target.value }))}
-                    className="w-full bg-[#1A1A1A] text-white pl-4 pr-12 py-3.5 rounded-[8px] focus:outline-none focus:ring-1 focus:ring-[#55DEE8] border border-white/5 font-mono text-sm tracking-widest placeholder:tracking-normal placeholder:font-sans" 
+                    className="w-full bg-[#1A1A1A] text-white pl-4 pr-12 py-2.5 rounded-[12px] focus:outline-none focus:ring-1 focus:ring-[#55DEE8] border border-white/5 font-mono text-sm tracking-widest placeholder:tracking-normal placeholder:font-sans" 
                     placeholder="Minimum 6 characters" />
                   <button 
                     type="button" 
@@ -2437,7 +2481,7 @@ const StartScoringModal = ({ isOpen, onClose, onSuccess, initialData }) => {
               
               <div className="flex gap-3 w-full">
                 <button onClick={() => setShowPasswordPopup(false)}
-                  className="flex-1 py-3 bg-white/5 border border-white/10 text-white rounded-[8px] text-[11px] font-bold uppercase tracking-widest hover:bg-white/10 transition-all flex items-center justify-center">
+                  className="flex-1 py-3 bg-white/5 border border-white/10 text-white rounded-[12px] text-[11px] font-bold uppercase tracking-widest hover:bg-white/10 transition-all flex items-center justify-center">
                   Back
                 </button>
                 <button 
@@ -2448,7 +2492,7 @@ const StartScoringModal = ({ isOpen, onClose, onSuccess, initialData }) => {
                     }
                   }} 
                   disabled={isLoading || formData.scoringPassword.trim() === '' || formData.scoringPassword.length < 6}
-                  className="flex-[1.5] py-3 bg-gradient-to-r from-[#55DEE8] to-[#BFF367] text-black rounded-[8px] text-[11px] font-black uppercase tracking-widest hover:opacity-90 transition-all disabled:opacity-50 flex items-center justify-center gap-2 shadow-lg shadow-[#55DEE8]/10">
+                  className="flex-[1.5] py-3 bg-gradient-to-r from-[#55DEE8] to-[#BFF367] text-black rounded-[12px] text-[11px] font-black uppercase tracking-widest hover:opacity-90 transition-all disabled:opacity-50 flex items-center justify-center gap-2 shadow-lg shadow-[#55DEE8]/10">
                   {isLoading ? <Loader2 size={14} className="animate-spin" /> : <><Trophy size={14} /> Create Match</>}
                 </button>
               </div>
@@ -2466,7 +2510,7 @@ const StartScoringModal = ({ isOpen, onClose, onSuccess, initialData }) => {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              className="absolute inset-0 z-40 bg-black/60 backdrop-blur-sm" 
+              className="absolute inset-0 z-40 bg-black/80 backdrop-blur-sm" 
               onClick={() => setShowCustomVenuePopup(false)}
             />
             <motion.div
@@ -2479,7 +2523,7 @@ const StartScoringModal = ({ isOpen, onClose, onSuccess, initialData }) => {
               <div className="w-12 h-1 bg-white/20 rounded-full mx-auto mb-6" />
               <div className="flex flex-col">
                 <div className="flex justify-between items-center mb-6">
-                  <h3 className="text-xl font-black text-white uppercase tracking-wider">Add Custom Venue</h3>
+                  <h3 className="text-lg font-black text-white uppercase tracking-wider">Add Custom Venue</h3>
                 </div>
                 <div className="flex-1 space-y-4 mb-8">
                 <div>
@@ -2507,7 +2551,7 @@ const StartScoringModal = ({ isOpen, onClose, onSuccess, initialData }) => {
                 <button
                   type="button"
                   onClick={() => setShowCustomVenuePopup(false)}
-                  className="px-6 py-4 rounded-[8px] border border-white/10 text-white font-bold hover:bg-white/5 hover:border-white/20 transition-all flex items-center justify-center gap-2 text-xs uppercase tracking-widest"
+                  className="px-6 py-4 rounded-[12px] border border-white/10 text-white font-bold hover:bg-white/5 hover:border-white/20 transition-all flex items-center justify-center gap-2 text-xs uppercase tracking-widest"
                 >
                   <ChevronLeft size={14} /> Back
                 </button>
@@ -2526,7 +2570,7 @@ const StartScoringModal = ({ isOpen, onClose, onSuccess, initialData }) => {
                     setShowCustomVenuePopup(false);
                   }}
                   disabled={!customVenueNameInput.trim()}
-                  className="flex-1 py-4 rounded-[8px] bg-gradient-to-r from-[#55DEE8] to-[#BFF367] text-black font-black uppercase tracking-wider disabled:opacity-50 hover:opacity-90 transition-opacity shadow-lg shadow-[#55DEE8]/20"
+                  className="flex-1 py-4 rounded-[12px] bg-gradient-to-r from-[#55DEE8] to-[#BFF367] text-black font-black uppercase tracking-wider disabled:opacity-50 hover:opacity-90 transition-opacity shadow-lg shadow-[#55DEE8]/20"
                 >
                   Add Venue
                 </button>
@@ -2545,7 +2589,7 @@ const StartScoringModal = ({ isOpen, onClose, onSuccess, initialData }) => {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              className="absolute inset-0 z-40 bg-black/60 backdrop-blur-sm" 
+              className="absolute inset-0 z-40 bg-black/80 backdrop-blur-sm" 
               onClick={() => setShowCustomProInvite(false)}
             />
             <motion.div
@@ -2567,7 +2611,7 @@ const StartScoringModal = ({ isOpen, onClose, onSuccess, initialData }) => {
                       <div>
                         <h4 className="text-lg font-bold text-white">Send WhatsApp Invite</h4>
                       </div>
-                      <div className="bg-white/5 p-3 rounded-[8px] text-left w-full mt-4 border border-white/10">
+                      <div className="bg-white/5 p-3 rounded-[12px] text-left w-full mt-4 border border-white/10">
                         <p className="text-xs text-white/60 font-mono break-words">
                           Hey {customProInviteData.name}, I've invited you to officiate as a {customProInviteData.role} for an upcoming match on Kridaz! Click here to join:
                           https://kridaz.com/invite?token=CUSTOM&role={customProInviteData.role}
@@ -2580,7 +2624,7 @@ const StartScoringModal = ({ isOpen, onClose, onSuccess, initialData }) => {
                           setShowCustomProInvite(false);
                           setCustomProInviteData(null);
                         }}
-                        className="w-full py-4 rounded-[8px] bg-[#BFF367] text-black font-black uppercase tracking-wider hover:bg-[#a5db4e] transition-colors mt-6"
+                        className="w-full py-4 rounded-[12px] bg-[#BFF367] text-black font-black uppercase tracking-wider hover:bg-[#a5db4e] transition-colors mt-6"
                       >
                         Send via WhatsApp
                       </button>
@@ -2592,7 +2636,7 @@ const StartScoringModal = ({ isOpen, onClose, onSuccess, initialData }) => {
                 ) : (
                   <div className="flex flex-col h-full">
                     <div className="flex justify-between items-center mb-6 shrink-0">
-                      <h3 className="text-xl font-black text-white uppercase tracking-wider">Invite Professional</h3>
+                      <h3 className="text-lg font-black text-white uppercase tracking-wider">Invite Professional</h3>
                     </div>
                     <div className="flex-1 space-y-4">
                       <div>
@@ -2607,14 +2651,14 @@ const StartScoringModal = ({ isOpen, onClose, onSuccess, initialData }) => {
                       </div>
                       <div>
                         <label className={labelClass}>WhatsApp Number</label>
-                        <div className="flex bg-[#0a0a0a] border border-white/10 rounded-[8px] focus-within:border-[#55DEE8]/30 transition-colors h-[48px] overflow-hidden">
+                        <div className="flex bg-[#121212] border border-white/10 rounded-[12px] focus-within:border-[#55DEE8]/30 transition-colors h-[44px] overflow-hidden">
                           <select
                             value={customPlayerCountryCode}
                             onChange={e => setCustomPlayerCountryCode(e.target.value)}
                             className="w-[90px] bg-transparent text-white px-3 border-r border-white/10 outline-none text-sm cursor-pointer hover:bg-white/5 appearance-none font-bold"
                           >
                             {countryCodes.map(c => (
-                              <option key={c.code} value={c.dial_code} className="bg-[#0a0a0a] text-white">
+                              <option key={c.code} value={c.dial_code} className="bg-[#121212] text-white">
                                 {c.code} (+{c.dial_code})
                               </option>
                             ))}
@@ -2644,7 +2688,7 @@ const StartScoringModal = ({ isOpen, onClose, onSuccess, initialData }) => {
                                 key={role.id}
                                 type="button"
                                 onClick={() => setCustomProfessionalRole(role.id)}
-                                className={`flex flex-col items-center justify-center py-4 rounded-[8px] border transition-all ${isSelected ? 'bg-white/5 border-white/10 text-[#BFF367]' : 'bg-white/5 border-white/10 text-white/40 hover:border-white/20 hover:text-white'}`}
+                                className={`flex flex-col items-center justify-center py-4 rounded-[12px] border transition-all ${isSelected ? 'bg-white/5 border-white/10 text-[#BFF367]' : 'bg-white/5 border-white/10 text-white/40 hover:border-white/20 hover:text-white'}`}
                               >
                                 <Icon size={24} className="mb-2" />
                                 <span className="text-[10px] font-bold uppercase tracking-wider">{role.label}</span>
@@ -2658,7 +2702,7 @@ const StartScoringModal = ({ isOpen, onClose, onSuccess, initialData }) => {
                       <button
                         type="button"
                         onClick={() => setShowCustomProInvite(false)}
-                        className="px-6 py-4 rounded-[8px] border border-white/10 text-white font-bold hover:bg-white/5 hover:border-white/20 transition-all flex items-center justify-center gap-2 text-xs uppercase tracking-widest"
+                        className="px-6 py-4 rounded-[12px] border border-white/10 text-white font-bold hover:bg-white/5 hover:border-white/20 transition-all flex items-center justify-center gap-2 text-xs uppercase tracking-widest"
                       >
                         <ChevronLeft size={14} /> Back
                       </button>
@@ -2679,7 +2723,7 @@ const StartScoringModal = ({ isOpen, onClose, onSuccess, initialData }) => {
                           setCustomProfessionalPhone('');
                         }}
                         disabled={!customProfessionalName || !customProfessionalPhone}
-                        className="flex-1 py-4 rounded-[8px] bg-gradient-to-r from-[#55DEE8] to-[#BFF367] text-black font-black uppercase tracking-wider disabled:opacity-50 hover:opacity-90 transition-opacity shadow-lg shadow-[#55DEE8]/20"
+                        className="flex-1 py-4 rounded-[12px] bg-gradient-to-r from-[#55DEE8] to-[#BFF367] text-black font-black uppercase tracking-wider disabled:opacity-50 hover:opacity-90 transition-opacity shadow-lg shadow-[#55DEE8]/20"
                       >
                         Invite
                       </button>
@@ -2703,7 +2747,7 @@ const StartScoringModal = ({ isOpen, onClose, onSuccess, initialData }) => {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              className="absolute inset-0 z-[10000] bg-black/60 backdrop-blur-sm" 
+              className="absolute inset-0 z-[10000] bg-black/80 backdrop-blur-sm" 
               onClick={() => setShowVenuePopup(false)}
             />
             <motion.div
@@ -2715,7 +2759,7 @@ const StartScoringModal = ({ isOpen, onClose, onSuccess, initialData }) => {
             >
               <div className="w-12 h-1 bg-white/20 rounded-full mx-auto mb-6 shrink-0" />
               <div className="flex justify-between items-center mb-6 shrink-0">
-                <h3 className="text-xl font-black text-white uppercase tracking-wider">Select Venue</h3>
+                <h3 className="text-lg font-black text-white uppercase tracking-wider">Select Venue</h3>
               </div>
               <div className="flex-1 overflow-y-auto scrollbar-hide space-y-4">
                  
@@ -2758,7 +2802,7 @@ const StartScoringModal = ({ isOpen, onClose, onSuccess, initialData }) => {
                         <div className="absolute inset-0 bg-gradient-to-r from-white/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
                         
                         <div className="flex items-center gap-4 relative z-10">
-                          <div className="w-10 h-10 rounded-[8px] bg-white/5 flex items-center justify-center border border-white/10 group-hover:scale-110 transition-transform">
+                          <div className="w-10 h-10 rounded-[12px] bg-white/5 flex items-center justify-center border border-white/10 group-hover:scale-110 transition-transform">
                             <MapPin size={18} className="text-white/60" />
                           </div>
                           <div>
@@ -2793,7 +2837,7 @@ const StartScoringModal = ({ isOpen, onClose, onSuccess, initialData }) => {
 
                       return filteredVenues.map(g => (
                         <button key={g.id} onClick={() => { setFormData(f => ({ ...f, venueId: f.venueId === g.id ? null : g.id, customVenue: '' })); setShowVenuePopup(false); setShowGroundsDropdown(false); }}
-                          className={`w-full flex items-center justify-between p-3 rounded-[8px] border transition-all text-left ${formData.venueId === g.id ? 'bg-[#55DEE8]/10 border-[#55DEE8]' : 'bg-white/5 border-white/10 hover:border-white/20'}`}>
+                          className={`w-full flex items-center justify-between p-3 rounded-[12px] border transition-all text-left ${formData.venueId === g.id ? 'bg-[#55DEE8]/10 border-[#55DEE8]' : 'bg-white/5 border-white/10 hover:border-white/20'}`}>
                           <div className="flex items-center gap-3">
                             <MapPin size={18} className={formData.venueId === g.id ? 'text-[#55DEE8]' : 'text-white/40'} />
                             <div>
@@ -2819,14 +2863,14 @@ const StartScoringModal = ({ isOpen, onClose, onSuccess, initialData }) => {
                     setCustomVenueLocationInput(formData.location || '');
                     setShowCustomVenuePopup(true);
                   }}
-                  className="bg-[#1a1a1a] text-white border border-white/20 shadow-xl w-full py-4 rounded-[8px] font-black text-xs uppercase tracking-widest hover:bg-[#2a2a2a] hover:border-white/50 hover:text-white hover:scale-[1.02] transition-all flex items-center justify-center gap-2"
+                  className="bg-[#1a1a1a] text-white border border-white/20 shadow-xl w-full py-4 rounded-[12px] font-black text-xs uppercase tracking-widest hover:bg-[#2a2a2a] hover:border-white/50 hover:text-white hover:scale-[1.02] transition-all flex items-center justify-center gap-2"
                 >
                   <Plus size={16} /> Add Custom Venue
                 </button>
                 <button
                   type="button"
                   onClick={() => setShowVenuePopup(false)}
-                  className="px-6 py-4 rounded-[8px] border border-white/10 text-white font-bold hover:bg-white/5 hover:border-white/20 transition-all flex items-center justify-center gap-2 text-xs uppercase tracking-widest"
+                  className="px-6 py-4 rounded-[12px] border border-white/10 text-white font-bold hover:bg-white/5 hover:border-white/20 transition-all flex items-center justify-center gap-2 text-xs uppercase tracking-widest"
                 >
                   <ChevronLeft size={14} /> Back
                 </button>
@@ -2844,7 +2888,7 @@ const StartScoringModal = ({ isOpen, onClose, onSuccess, initialData }) => {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              className="absolute inset-0 z-[10000] bg-black/60 backdrop-blur-sm" 
+              className="absolute inset-0 z-[10000] bg-black/80 backdrop-blur-sm" 
               onClick={() => setShowProfessionalsPopup(false)}
             />
             <motion.div
@@ -2856,7 +2900,7 @@ const StartScoringModal = ({ isOpen, onClose, onSuccess, initialData }) => {
             >
               <div className="w-12 h-1 bg-white/20 rounded-full mx-auto mb-6 shrink-0" />
               <div className="flex justify-between items-center mb-6 shrink-0">
-                <h3 className="text-xl font-black text-white uppercase tracking-wider">Select Professional</h3>
+                <h3 className="text-lg font-black text-white uppercase tracking-wider">Select Professional</h3>
               </div>
               <div className="flex-1 overflow-y-auto scrollbar-hide space-y-4">
                  
@@ -2901,7 +2945,7 @@ const StartScoringModal = ({ isOpen, onClose, onSuccess, initialData }) => {
                       <div key={`custom-${idx}`} className="w-full flex flex-col p-0 rounded-[4px] overflow-hidden transition-all text-left bg-transparent relative">
                         {/* Remove button */}
                         <button onClick={() => setFormData(f => ({ ...f, customProfessionals: f.customProfessionals.filter((_, i) => i !== idx) }))}
-                          className="absolute top-3 right-3 z-10 w-8 h-8 rounded-full bg-black/40 backdrop-blur-md flex items-center justify-center hover:bg-red-500/80 transition-colors">
+                          className="absolute top-3 right-3 z-10 w-8 h-8 rounded-full bg-black backdrop-blur-md flex items-center justify-center hover:bg-red-500/80 transition-colors">
                           <X size={16} className="text-white" />
                         </button>
                         
@@ -2970,7 +3014,7 @@ const StartScoringModal = ({ isOpen, onClose, onSuccess, initialData }) => {
                                   )}
                                   
                                   {/* Heart / Favorite Icon */}
-                                  <div className="absolute top-3 right-3 w-8 h-8 rounded-full bg-black/20 backdrop-blur-md flex items-center justify-center hover:bg-black/40 transition-colors">
+                                  <div className="absolute top-3 right-3 w-8 h-8 rounded-full bg-black/20 backdrop-blur-md flex items-center justify-center hover:bg-black transition-colors">
                                     <Heart size={16} className="text-white" />
                                   </div>
 
@@ -3025,14 +3069,14 @@ const StartScoringModal = ({ isOpen, onClose, onSuccess, initialData }) => {
                     setShowProfessionalsPopup(false);
                     setShowCustomProInvite(true);
                   }}
-                  className="bg-[#1a1a1a] text-white border border-white/20 shadow-xl w-full py-4 rounded-[8px] font-black text-xs uppercase tracking-widest hover:bg-[#2a2a2a] hover:border-white/50 hover:text-white hover:scale-[1.02] transition-all flex items-center justify-center gap-2"
+                  className="bg-[#1a1a1a] text-white border border-white/20 shadow-xl w-full py-4 rounded-[12px] font-black text-xs uppercase tracking-widest hover:bg-[#2a2a2a] hover:border-white/50 hover:text-white hover:scale-[1.02] transition-all flex items-center justify-center gap-2"
                 >
                   <UserPlus size={16} /> Invite Professional
                 </button>
                 <button
                   type="button"
                   onClick={() => setShowProfessionalsPopup(false)}
-                  className="px-6 py-4 rounded-[8px] border border-white/10 text-white font-bold hover:bg-white/5 hover:border-white/20 transition-all flex items-center justify-center gap-2 text-xs uppercase tracking-widest"
+                  className="px-6 py-4 rounded-[12px] border border-white/10 text-white font-bold hover:bg-white/5 hover:border-white/20 transition-all flex items-center justify-center gap-2 text-xs uppercase tracking-widest"
                 >
                   <ChevronLeft size={14} /> Back
                 </button>
@@ -3068,7 +3112,7 @@ const PlayingXIStep = ({ teamKey, teamName, players, maxMembers, teamDetails, on
   const [activeRoleSelect, setActiveRoleSelect] = React.useState(null);
 
   return (
-    <div className="space-y-5 h-full flex flex-col relative">
+    <div className="space-y-3 h-full flex flex-col relative">
       {/* Header */}
       <div className="flex items-center justify-between flex-shrink-0">
         <h2 className="text-lg font-black text-white uppercase tracking-wide truncate pr-4" title={teamName ? `${teamName} Playing XI` : `Team ${teamKey} Playing XI`}>
@@ -3138,7 +3182,7 @@ const PlayingXIStep = ({ teamKey, teamName, players, maxMembers, teamDetails, on
               animate={{ y: 0 }}
               exit={{ y: '100%' }}
               transition={{ type: 'spring', damping: 26, stiffness: 320 }}
-              className="relative bg-[#0a0a0a] border-t border-white/10 rounded-t-2xl p-5 flex flex-col max-h-[70vh] shadow-2xl"
+              className="relative bg-[#121212] border-t border-white/10 rounded-t-2xl p-4 flex flex-col max-h-[70vh] shadow-2xl"
             >
               <div className="flex justify-between items-center mb-4">
                 <h3 className="text-sm font-black text-white uppercase tracking-wider">
@@ -3347,7 +3391,7 @@ const TouchSliderWheel = ({ value, onChange, min = 0, max = 20, label }) => {
       )}
       <div
         ref={containerRef}
-        className="relative w-full h-16 bg-white/[0.02] border border-white/10 rounded-[8px] overflow-hidden cursor-ew-resize flex items-center shadow-inner touch-none"
+        className="relative w-full h-16 bg-white/[0.02] border border-white/10 rounded-[12px] overflow-hidden cursor-ew-resize flex items-center shadow-inner touch-none"
         onWheel={handleWheel}
       >
         {/* Glow behind center selected number */}
@@ -3366,8 +3410,11 @@ const TouchSliderWheel = ({ value, onChange, min = 0, max = 20, label }) => {
           onDragStart={() => { isDragging.current = true; }}
           onDrag={handleDrag}
           onDragEnd={handleDragEnd}
-          className="absolute left-0 h-full flex items-center"
+          className="absolute left-0 h-full flex items-center cursor-grab active:cursor-grabbing"
         >
+          {/* HUGE HIT AREA FOR DRAGGING */}
+          <div className="absolute top-0 bottom-0 -left-[2000px] w-[4000px] bg-transparent" />
+
           {ticks.map((tick) => {
             const isSelected = tick === value;
             const distanceFromCenter = Math.abs(tick - value);
@@ -3379,7 +3426,8 @@ const TouchSliderWheel = ({ value, onChange, min = 0, max = 20, label }) => {
             return (
               <div
                 key={tick}
-                className="absolute flex flex-col items-center justify-center pointer-events-none"
+                className="absolute flex flex-col items-center justify-center cursor-pointer"
+                onClick={() => onChange(tick)}
                 style={{
                   left: (tick - min) * tickWidth,
                   width: tickWidth,

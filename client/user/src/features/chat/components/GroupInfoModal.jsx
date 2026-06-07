@@ -141,7 +141,7 @@ const GroupInfoModal = ({ isOpen, onClose, chat }) => {
 
  {/* Sliding Drawer */}
  <div 
- className={`absolute top-0 right-0 h-full w-full sm:w-[380px] bg-[#0a0a0a] border-l border-white/10 z-50 flex flex-col transition-transform duration-300 ease-in-out shadow-2xl ${ isOpen ? "translate-x-0" : "translate-x-full" }`}
+ className={`absolute top-0 right-0 h-full w-full sm:w-[380px] bg-[#1A1A1A] border-l border-white/10 z-50 flex flex-col transition-transform duration-300 ease-in-out shadow-2xl ${ isOpen ? "translate-x-0" : "translate-x-full" }`}
  >
  {/* Header - WhatsApp Style */}
  <div className="bg-[#111111] border-b border-white/10 px-5 py-4 flex items-center gap-4 shrink-0 shadow-sm">

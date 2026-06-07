@@ -1,7 +1,7 @@
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { getDynamicProfileRoute } from "@utils/routeUtils";
 import { useSelector, useDispatch } from "react-redux";
-import { User, Users, X, LogOut, Activity, ShieldCheck, Zap, ArrowRight, Clock, Trophy, Target, MessageCircle, MapPin, Bell, UserSearch, Search, Plus, Bookmark, FileText, Home, Briefcase, ChevronDown } from "lucide-react";
+import { User, Users, X, LogOut, Activity, ShieldCheck, Zap, ArrowRight, Clock, Trophy, Target, MessageCircle, MapPin, Bell, UserSearch, Search, Plus, Bookmark, FileText, Home, Briefcase, ChevronDown, Award, Mail, HelpCircle } from "lucide-react";
 import { useState, useCallback } from "react";
 import { createPortal } from "react-dom";
 import { logout } from "@redux/slices/authSlice";
@@ -97,9 +97,9 @@ const Navbar = () => {
     { name: "Professionals", path: "/business/professional", icon: Briefcase },
   ] : [
     { name: "Home", path: "/", icon: Home },
-    { name: "Venues", path: "/venues", icon: MapPin },
-    { name: "Pros", path: "/professionals", icon: UserSearch },
-    { name: "Join Games", path: "/join-games", icon: Target },
+    { name: "My Teams", path: "/my-teams", icon: Users },
+    { name: "Pros", path: "/professionals", icon: Award },
+    { name: "Join Games", path: "/join-games", icon: Trophy },
     { name: "Players", path: "/players", icon: Users },
     { name: "Business", path: "#", icon: Briefcase },
   ];
@@ -131,7 +131,7 @@ const Navbar = () => {
       className: location.pathname === "/venues" ? "active-dock-item" : ""
     },
     { 
-      icon: <UserSearch size={22} className={location.pathname === "/professionals" ? "text-[#BFF367]" : ""} />, 
+      icon: <Award size={22} className={location.pathname === "/professionals" ? "text-[#BFF367]" : ""} />, 
       label: "Pros", 
       onClick: () => navigate("/professionals"),
       className: location.pathname === "/professionals" ? "active-dock-item" : ""
@@ -169,15 +169,16 @@ const Navbar = () => {
   const isJoinGames = location.pathname.startsWith("/join-games");
   const isUploadReel = location.pathname.startsWith("/reels/upload") || location.pathname.startsWith("/shorts/upload");
   const isTeamsPage = location.pathname.startsWith("/my-teams");
+  const isMessagesPage = location.pathname.startsWith("/messages");
   const useRestrictedWidth = isHome || isVenue || isUploadReel || isTeamsPage || isPlayer || isProfessional || isJoinGames;
 
   return (
     <>      {/* Mobile Top Header (100% original layout and classes) */}
       <nav className={`sticky top-0 w-full z-[90] flex flex-col transition-all duration-300 group/nav overflow-hidden bg-black/40 backdrop-blur-xl lg:hidden
-        ${ scrollDirection === "down" && window.innerWidth < 1024 ? "-translate-y-full" : "translate-y-0" }
-      `}>
-        <div className="flex justify-center">
-          <div className="relative w-full max-w-full h-16 sm:h-20 border-b border-white/10 flex items-center justify-between px-2 sm:px-4">
+          ${ scrollDirection === "down" && window.innerWidth < 1024 ? "-translate-y-full" : "translate-y-0" }
+        `}>
+          <div className="flex justify-center">
+            <div className="relative w-full max-w-full h-16 sm:h-20 border-b border-white/10 flex items-center justify-between px-2 sm:px-4">
             {/* Logo & Mobile Location Section */}
             <div className="flex flex-col items-start justify-center w-full overflow-hidden">
               {isLoggedIn ? (
@@ -200,7 +201,7 @@ const Navbar = () => {
                       <div className="flex flex-col items-center justify-center">
                         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="18" height="18">
                           <g fill="none">
-                            <path d="m12.593 23.258l-.011.002l-.071.035l-.02.004l-.014-.004l-.071-.035q-.016-.005-.024.005l-.004.01l-.017.428l.005.02l.01.013l.104.074l.015.004l.012-.004l.104-.074l.012-.016l.004-.017l-.017-.427q-.004-.016-.017-.018m.265-.113l-.013.002l-.185.093l-.01.01l-.003.011l.018.43l.005.012l.008.007l.201.093q.019.005.029-.008l.004-.014l-.034-.614q-.005-.018-.02-.022m-.715.002a.02.02 0 0 0-.027.006l-.006.014l-.034.614q.001.018.017.024l.015-.002l.201-.093l.01-.008l.004-.011l.017-.43l-.003-.012l-.01-.01z" />
+                            <path d="m12.593 23.258l-.011.002l-.071.035l-.02.004l-.014-.004l-.071-.035q-.016-.005-.024.005l-.004.01l-.017.428l.005.02l.01.013l.104.074l.015.004l.012-.004l.104-.074l.012-.016l.004-.017l-.017-.427q-.004-.016-.017-.018m.265-.113l-.013.002l-.185.093l-.01.01l-.003.011l.018.43l.005.012l.008.007l.201.093q.019.005.029-.008l.004-.014l-.034-.614q-.005-.018-.02-.022m-.715.002a.02.02 0 0 0-.027.006l-.006.014l-.034.614q-.001.018.017.024l.015-.002l.201-.093l.01-.008l.004-.011l.017-.43l-.003-.012l-.01-.01z" />
                             <path fill="url(#mapPinGradientMobile)" d="M12 2a9 9 0 0 1 9 9c0 3.074-1.676 5.59-3.442 7.395a20.4 20.4 0 0 1-2.876 2.416l-.426.29l-.2.133l-.377.24l-.336.205l-.416.242a1.87 1.87 0 0 1-1.854 0l-.416-.242l-.52-.32l-.192-.125l-.41-.273a20.6 20.6 0 0 1-3.093-2.566C4.676 16.589 3 14.074 3 11a9 9 0 0 1 9-9m0 6a3 3 0 1 0 0 6a3 3 0 0 0 0-6" />
                           </g>
                         </svg>
@@ -278,29 +279,34 @@ const Navbar = () => {
           <div className="flex items-center gap-2 sm:gap-4">
 
             {/* Search Icon */}
-            <Link
-              to="/search"
-              className="relative w-9 sm:w-11 h-9 sm:h-11 border border-white/10 flex items-center justify-center bg-white/5 hover:border-[#84CC16]/50 transition-all cursor-pointer rounded-full group"
-            >
-              <Search size={18} className="text-white/40 group-hover:text-[#84CC16] transition-colors" />
-            </Link>
+            {!isMessagesPage && (
+              <Link
+                to="/search"
+                className="hidden sm:flex relative w-9 sm:w-11 h-9 sm:h-11 border border-white/10 items-center justify-center bg-white/5 hover:border-[#84CC16]/50 transition-all cursor-pointer rounded-full group"
+              >
+                <Search size={18} className="text-white/40 group-hover:text-[#84CC16] transition-colors" />
+              </Link>
+            )}
 
             {/* Message Button */}
-            <Link
-              to="/messages"
-              className="relative w-9 sm:w-11 h-9 sm:h-11 border border-white/10 flex items-center justify-center bg-white/5 hover:border-[#84CC16]/50 transition-all cursor-pointer rounded-full group"
-            >
-              <MessageCircle size={18} className="text-white/40 group-hover:text-[#84CC16] transition-colors" />
-            </Link>
-
-            {/* Plus Dropdown */}
-            <div className="dropdown dropdown-end">
-              <label
-                tabIndex={0}
+            {!isMessagesPage && (
+              <Link
+                to="/messages"
                 className="relative w-9 sm:w-11 h-9 sm:h-11 border border-white/10 flex items-center justify-center bg-white/5 hover:border-[#84CC16]/50 transition-all cursor-pointer rounded-full group"
               >
-                <Plus size={18} className="text-white/40 group-hover:text-[#84CC16] transition-colors" />
-              </label>
+                <MessageCircle size={18} className="text-white/40 group-hover:text-[#84CC16] transition-colors" />
+              </Link>
+            )}
+
+            {/* Plus Dropdown */}
+            {!isMessagesPage && (
+              <div className="dropdown dropdown-end">
+                <label
+                  tabIndex={0}
+                  className="relative w-9 sm:w-11 h-9 sm:h-11 border border-white/10 flex items-center justify-center bg-white/5 hover:border-[#84CC16]/50 transition-all cursor-pointer rounded-full group"
+                >
+                  <Plus size={18} className="text-white/40 group-hover:text-[#84CC16] transition-colors" />
+                </label>
               <ul tabIndex={0} className="dropdown-content z-[100] mt-1 p-1 shadow-2xl bg-[#0A0A0A] border border-white/10 rounded-[8px] w-48 overflow-hidden backdrop-blur-xl">
                 <li>
                   <Link 
@@ -328,6 +334,7 @@ const Navbar = () => {
                 </li>
               </ul>
             </div>
+            )}
 
             <div className="flex items-center gap-2">
 
@@ -425,6 +432,51 @@ const Navbar = () => {
                       </div>
                     </Link>
 
+                    {/* COMMUNICATION */}
+                    <div className="flex flex-col">
+                      <span className="text-[10px] font-bold text-white/30 uppercase tracking-[0.2em] mb-2 px-1">Communication</span>
+                      <div className="flex flex-col gap-1">
+                        <Link to="/messages" onClick={() => setIsSidebarOpen(false)} className="flex items-center gap-3 p-3 rounded-[8px] hover:bg-white/5 text-white/70 hover:text-white transition-all">
+                          <MessageCircle size={18} className="text-white/40" />
+                          <span className="text-sm font-semibold">Messages</span>
+                        </Link>
+                        <Link to="/notifications" onClick={() => setIsSidebarOpen(false)} className="flex items-center gap-3 p-3 rounded-[8px] hover:bg-white/5 text-white/70 hover:text-white transition-all">
+                          <div className="relative">
+                            <Bell size={18} className="text-white/40" />
+                            <NotificationBadge />
+                          </div>
+                          <span className="text-sm font-semibold">Notifications</span>
+                        </Link>
+                      </div>
+                    </div>
+
+                    {/* PLAY */}
+                    <div className="flex flex-col">
+                      <span className="text-[10px] font-bold text-white/30 uppercase tracking-[0.2em] mb-2 px-1">Play</span>
+                      <div className="flex flex-col gap-1">
+                        <Link to="/booking-history" onClick={() => setIsSidebarOpen(false)} className="flex items-center gap-3 p-3 rounded-[8px] hover:bg-white/5 text-white/70 hover:text-white transition-all">
+                          <Clock size={18} className="text-white/40" />
+                          <span className="text-sm font-semibold">My Bookings</span>
+                        </Link>
+                        <Link to="/my-teams" onClick={() => setIsSidebarOpen(false)} className="flex items-center gap-3 p-3 rounded-[8px] hover:bg-white/5 text-white/70 hover:text-white transition-all">
+                          <Users size={18} className="text-white/40" />
+                          <span className="text-sm font-semibold">My Teams</span>
+                        </Link>
+                        <Link to="/my-joined-games" onClick={() => setIsSidebarOpen(false)} className="flex items-center gap-3 p-3 rounded-[8px] hover:bg-white/5 text-white/70 hover:text-white transition-all">
+                          <Trophy size={18} className="text-white/40" />
+                          <span className="text-sm font-semibold">My Joined Matches</span>
+                        </Link>
+                        <Link to="/my-hosted-games" onClick={() => setIsSidebarOpen(false)} className="flex items-center gap-3 p-3 rounded-[8px] hover:bg-white/5 text-white/70 hover:text-white transition-all">
+                          <Target size={18} className="text-white/40" />
+                          <span className="text-sm font-semibold">My Hosted Games</span>
+                        </Link>
+                        <Link to="/wallet" onClick={() => setIsSidebarOpen(false)} className="flex items-center gap-3 p-3 rounded-[8px] hover:bg-white/5 text-white/70 hover:text-white transition-all">
+                          <Zap size={18} className="text-white/40" />
+                          <span className="text-sm font-semibold">My Wallet</span>
+                        </Link>
+                      </div>
+                    </div>
+
                     {/* PROFESSIONAL HUB */}
                     <div className="flex flex-col">
                       <span className="text-[10px] font-bold text-white/30 uppercase tracking-[0.2em] mb-2 px-1">Professional Hub</span>
@@ -457,51 +509,6 @@ const Navbar = () => {
                       </div>
                     </div>
 
-                    {/* PLAY */}
-                    <div className="flex flex-col">
-                      <span className="text-[10px] font-bold text-white/30 uppercase tracking-[0.2em] mb-2 px-1">Play</span>
-                      <div className="flex flex-col gap-1">
-                        <Link to="/booking-history" onClick={() => setIsSidebarOpen(false)} className="flex items-center gap-3 p-3 rounded-[8px] hover:bg-white/5 text-white/70 hover:text-white transition-all">
-                          <Clock size={18} className="text-white/40" />
-                          <span className="text-sm font-semibold">My Bookings</span>
-                        </Link>
-                        <Link to="/my-teams" onClick={() => setIsSidebarOpen(false)} className="flex items-center gap-3 p-3 rounded-[8px] hover:bg-white/5 text-white/70 hover:text-white transition-all">
-                          <Users size={18} className="text-white/40" />
-                          <span className="text-sm font-semibold">My Teams</span>
-                        </Link>
-                        <Link to="/my-joined-games" onClick={() => setIsSidebarOpen(false)} className="flex items-center gap-3 p-3 rounded-[8px] hover:bg-white/5 text-white/70 hover:text-white transition-all">
-                          <Trophy size={18} className="text-white/40" />
-                          <span className="text-sm font-semibold">My Joined Matches</span>
-                        </Link>
-                        <Link to="/my-hosted-games" onClick={() => setIsSidebarOpen(false)} className="flex items-center gap-3 p-3 rounded-[8px] hover:bg-white/5 text-white/70 hover:text-white transition-all">
-                          <Target size={18} className="text-white/40" />
-                          <span className="text-sm font-semibold">My Hosted Games</span>
-                        </Link>
-                        <Link to="/wallet" onClick={() => setIsSidebarOpen(false)} className="flex items-center gap-3 p-3 rounded-[8px] hover:bg-white/5 text-white/70 hover:text-white transition-all">
-                          <Zap size={18} className="text-white/40" />
-                          <span className="text-sm font-semibold">My Wallet</span>
-                        </Link>
-                      </div>
-                    </div>
-
-                    {/* COMMUNICATION */}
-                    <div className="flex flex-col">
-                      <span className="text-[10px] font-bold text-white/30 uppercase tracking-[0.2em] mb-2 px-1">Communication</span>
-                      <div className="flex flex-col gap-1">
-                        <Link to="/messages" onClick={() => setIsSidebarOpen(false)} className="flex items-center gap-3 p-3 rounded-[8px] hover:bg-white/5 text-white/70 hover:text-white transition-all">
-                          <MessageCircle size={18} className="text-white/40" />
-                          <span className="text-sm font-semibold">Messages</span>
-                        </Link>
-                        <Link to="/notifications" onClick={() => setIsSidebarOpen(false)} className="flex items-center gap-3 p-3 rounded-[8px] hover:bg-white/5 text-white/70 hover:text-white transition-all">
-                          <div className="relative">
-                            <Bell size={18} className="text-white/40" />
-                            <NotificationBadge />
-                          </div>
-                          <span className="text-sm font-semibold">Notifications</span>
-                        </Link>
-                      </div>
-                    </div>
-
                     {/* COMMUNITY */}
                     <div className="flex flex-col">
                       <span className="text-[10px] font-bold text-white/30 uppercase tracking-[0.2em] mb-2 px-1">Community</span>
@@ -517,6 +524,29 @@ const Navbar = () => {
                         <Link to="/blogs" onClick={() => setIsSidebarOpen(false)} className="flex items-center gap-3 p-3 rounded-[8px] hover:bg-white/5 text-white/70 hover:text-white transition-all">
                           <FileText size={18} className="text-white/40" />
                           <span className="text-sm font-semibold">Blogs</span>
+                        </Link>
+                      </div>
+                    </div>
+
+                    {/* SUPPORT & LEGAL */}
+                    <div className="flex flex-col">
+                      <span className="text-[10px] font-bold text-white/30 uppercase tracking-[0.2em] mb-2 px-1">Support & Legal</span>
+                      <div className="flex flex-col gap-1">
+                        <Link to="/contact-us" onClick={() => setIsSidebarOpen(false)} className="flex items-center gap-3 p-3 rounded-[8px] hover:bg-white/5 text-white/70 hover:text-white transition-all">
+                          <Mail size={18} className="text-white/40" />
+                          <span className="text-sm font-semibold">Contact Us</span>
+                        </Link>
+                        <Link to="/faq" onClick={() => setIsSidebarOpen(false)} className="flex items-center gap-3 p-3 rounded-[8px] hover:bg-white/5 text-white/70 hover:text-white transition-all">
+                          <HelpCircle size={18} className="text-white/40" />
+                          <span className="text-sm font-semibold">FAQ</span>
+                        </Link>
+                        <Link to="/terms-of-service" onClick={() => setIsSidebarOpen(false)} className="flex items-center gap-3 p-3 rounded-[8px] hover:bg-white/5 text-white/70 hover:text-white transition-all">
+                          <FileText size={18} className="text-white/40" />
+                          <span className="text-sm font-semibold">Terms & Conditions</span>
+                        </Link>
+                        <Link to="/privacy-policy" onClick={() => setIsSidebarOpen(false)} className="flex items-center gap-3 p-3 rounded-[8px] hover:bg-white/5 text-white/70 hover:text-white transition-all">
+                          <ShieldCheck size={18} className="text-white/40" />
+                          <span className="text-sm font-semibold">Privacy Policy</span>
                         </Link>
                       </div>
                     </div>

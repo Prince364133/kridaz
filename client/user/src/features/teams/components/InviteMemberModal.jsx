@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
-import { X, Search, UserPlus, Phone, Loader2, Sparkles, MessageCircle } from 'lucide-react';
+import { X, Search, UserPlus, Phone, Loader2, Sparkles, MessageCircle, Users } from 'lucide-react';
 import { useSearchPlayersQuery, useInviteMemberMutation, useAddCustomMemberMutation } from '@redux/api/teamApi';
 import { useSelector } from 'react-redux';
 import toast from 'react-hot-toast';
@@ -16,6 +16,43 @@ const InviteMemberModal = ({ isOpen, onClose, teamId, teamName }) => {
   const [customPhone, setCustomPhone] = useState('');
   const [customCountryCode, setCustomCountryCode] = useState('91');
   const [customInviteData, setCustomInviteData] = useState(null);
+
+  const [supportsContacts, setSupportsContacts] = useState(false);
+
+  useEffect(() => {
+    const isMobileView = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini|Mobi/i.test(navigator.userAgent);
+    if (isMobileView) {
+      setSupportsContacts(true);
+    }
+  }, []);
+
+  const handleImportFromContacts = async () => {
+    try {
+      if (!('contacts' in navigator && 'ContactsManager' in window)) {
+        toast.error('Contacts API is only supported on a real mobile device. Please test this on your phone.');
+        return;
+      }
+      const props = ['name', 'tel'];
+      const opts = { multiple: false };
+      const contacts = await navigator.contacts.select(props, opts);
+      if (contacts && contacts.length > 0) {
+        const contact = contacts[0];
+        if (contact.name && contact.name.length > 0) {
+          setCustomName(contact.name[0]);
+        }
+        if (contact.tel && contact.tel.length > 0) {
+          const rawPhone = contact.tel[0].replace(/\D/g, '');
+          if (rawPhone.length >= 10) {
+            setCustomPhone(rawPhone.slice(-10));
+          } else {
+            setCustomPhone(rawPhone);
+          }
+        }
+      }
+    } catch (ex) {
+      console.log('Contacts API failed:', ex);
+    }
+  };
 
   useEffect(() => {
     if (isOpen) {
@@ -222,6 +259,15 @@ const InviteMemberModal = ({ isOpen, onClose, teamId, teamName }) => {
             </div>
           ) : (
             <form onSubmit={handleAddCustom} className="space-y-4">
+              {supportsContacts && (
+                <button
+                  type="button"
+                  onClick={handleImportFromContacts}
+                  className="w-full flex items-center justify-center gap-2 py-3 bg-[#CCFF00]/10 text-[#CCFF00] rounded-lg font-bold text-[10px] uppercase tracking-widest hover:bg-[#CCFF00]/20 transition-colors mb-2"
+                >
+                  <Users size={16} /> Add player from your contacts
+                </button>
+              )}
               <div className="space-y-2">
                 <label className="text-[10px] font-black text-white/40 uppercase tracking-widest px-1">Player Name</label>
                 <input 

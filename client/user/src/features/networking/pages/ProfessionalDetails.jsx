@@ -2,9 +2,10 @@ import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useSelector } from "react-redux";
 import axiosInstance from "@hooks/useAxiosInstance";
+import cricketLoading from "../../../assets/cricket-loading.gif";
 import { 
   MapPin, Star, Shield, Award, Loader2, Pencil,
-  Building, Globe, Clock, Layout, BookOpen, Play, X, Eye, Tv, Layers, ShieldCheck, MessageSquare, Users, UserPlus, Heart, MessageCircle, Share2
+  Building, Globe, Clock, Layout, BookOpen, Play, X, Eye, Tv, Layers, ShieldCheck, MessageSquare, Users, UserPlus, Heart, MessageCircle, Share2, ChevronLeft
 } from "lucide-react";
 import toast from "react-hot-toast";
 
@@ -29,6 +30,7 @@ export default function ProfessionalDetails() {
   const [grounds, setGrounds] = useState([]);
   const [activeMedia, setActiveMedia] = useState(null); // Lightbox state
   const [activeCertificate, setActiveCertificate] = useState(null); // Certificate popup state
+  const [isBioExpanded, setIsBioExpanded] = useState(false);
 
   useEffect(() => {
     fetchProDetails();
@@ -176,9 +178,9 @@ export default function ProfessionalDetails() {
   const renderConsistencyBadge = (count) => {
     let badge = null;
     if (count >= 500) badge = { label: "Supreme Master", desc: "Completed 500+ Bookings", color: "#FF007F", icon: "💎" };
-    else if (count >= 200) badge = { label: "Elite Professional", desc: "Completed 200+ Bookings", color: "#BFF367", icon: "⚡" };
-    else if (count >= 100) badge = { label: "Master Scorer/Umpire", desc: "Completed 100+ Bookings", color: "#BFF367", icon: "🏆" };
-    else if (count >= 50) badge = { label: "Master Pro", desc: "Completed 50+ Bookings", color: "#BFF367", icon: "🛡️" };
+    else if (count >= 200) badge = { label: "Elite Professional", desc: "Completed 200+ Bookings", color: "#B3DC26", icon: "⚡" };
+    else if (count >= 100) badge = { label: "Master Scorer/Umpire", desc: "Completed 100+ Bookings", color: "#B3DC26", icon: "🏆" };
+    else if (count >= 50) badge = { label: "Master Pro", desc: "Completed 50+ Bookings", color: "#B3DC26", icon: "🛡️" };
     else if (count >= 10) badge = { label: "Consistent Associate", desc: "Completed 10+ Bookings", color: "#F59E0B", icon: "🟢" };
 
     if (!badge) return null;
@@ -197,14 +199,14 @@ export default function ProfessionalDetails() {
 
   if (loading && !pro) return (
     <div className="min-h-screen bg-black flex items-center justify-center font-sans">
-      <Loader2 className="animate-spin text-[#BFF367]" size={40} />
+      <img src={cricketLoading} alt="Loading..." className="w-16 h-16 object-contain" />
     </div>
   );
 
   if (!pro) return (
     <div className="min-h-screen bg-black flex flex-col items-center justify-center font-sans">
       <h2 className="text-white text-2xl font-bold mb-4">Professional Not Found</h2>
-      <button onClick={() => navigate(-1)} className="px-6 py-2 bg-gradient-to-r from-[#BFF367] to-[#BFF367] text-black font-bold rounded-lg hover:opacity-90 transition-opacity">
+      <button onClick={() => navigate(-1)} className="px-6 py-2 bg-gradient-to-r from-[#B3DC26] to-[#B3DC26] text-black font-bold rounded-lg hover:opacity-90 transition-opacity">
         Go Back
       </button>
     </div>
@@ -221,54 +223,58 @@ export default function ProfessionalDetails() {
   };
 
   return (
-    <div className="min-h-screen bg-black text-white pt-2 pb-20 px-0 font-sans selection:bg-[#BFF367] selection:text-black">
+    <div className="min-h-screen bg-black text-white pt-2 pb-20 px-0 font-sans selection:bg-[#B3DC26] selection:text-black">
       <div className="max-w-7xl mx-auto">
         {/* MERGED BANNER & PROFILE HEADER */}
-        <div className="relative w-full rounded-2xl overflow-hidden mb-8 border border-white/5 bg-[#0a0a0c] shadow-2xl">
+        <div className="relative w-full rounded-2xl overflow-hidden mb-8 border border-white/5 bg-[#1A1A1A] shadow-2xl">
 
+          {/* Back Navigation Button */}
+          <button 
+            onClick={() => navigate(-1)}
+            className="absolute top-6 left-6 z-30 p-2 md:p-3 bg-black/40 backdrop-blur-md border border-white/10 hover:border-white/20 text-white rounded-[8px] hover:scale-105 active:scale-95 transition-all shadow-lg flex items-center justify-center"
+          >
+            <ChevronLeft size={20} className="text-white" />
+          </button>
 
           {/* Background Image (Top Half) */}
-          <div className="absolute top-0 left-0 right-0 h-[280px] md:h-[340px]">
+          <div className="absolute top-0 left-0 right-0 h-[200px] md:h-[312px]">
             {pro.bannerUrl ? (
-              <img src={pro.bannerUrl} alt="Cover Banner" className="w-full h-full object-cover opacity-80" />
+              <img src={pro.bannerUrl} alt="Cover Banner" className="w-full h-full object-cover" />
             ) : (
               <div className="w-full h-full bg-white/[0.01] flex items-center justify-center opacity-30">
                 <span className="text-[10px] font-black uppercase tracking-[0.4em] text-white">BOOKMYSPORTZ PROFESSIONAL PARTNER</span>
               </div>
             )}
-            {/* Gradients for readability */}
-            <div className="absolute inset-0 bg-gradient-to-t from-[#0a0a0c] via-[#0a0a0c]/60 to-transparent" />
-            <div className="absolute inset-0 bg-gradient-to-r from-[#0a0a0c]/80 via-[#0a0a0c]/20 to-transparent" />
           </div>
 
           {/* Profile Content Overlay */}
-          <div className="relative z-10 p-6 md:p-8 pt-[200px] md:pt-[240px]">
+          <div className="relative z-10 p-6 md:p-8 pt-[144px] md:pt-[240px]">
             
             {/* Top Row: Picture + Basic Info */}
             <div className="flex flex-col md:flex-row gap-6 md:gap-8 items-start">
               {/* Profile Image & Actions */}
               <div className="flex flex-col items-center gap-3 shrink-0">
                 <div className="relative">
-                  <div className="w-28 h-28 md:w-36 md:h-36 rounded-full overflow-hidden border-[3px] border-[#BFF367] shadow-[0_0_20px_rgba(191,243,103,0.15)]">
+                  <div className="w-28 h-28 md:w-36 md:h-36 rounded-full overflow-hidden border-[3px] border-[#B3DC26] shadow-[0_0_20px_rgba(191,243,103,0.15)]">
                     <div className="w-full h-full bg-black flex items-center justify-center">
                       {pro.profilePicture ? (
                         <img src={pro.profilePicture} alt={pro.name} className="w-full h-full object-cover" />
                       ) : (
-                        <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#BFF367] to-[#BFF367] font-black text-4xl tracking-tighter">
+                        <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#B3DC26] to-[#B3DC26] font-black text-4xl tracking-tighter">
                           {pro.name?.split(" ").map(w => w[0]).join("").toUpperCase().slice(0, 2) || "P"}
                         </span>
                       )}
                     </div>
                   </div>
                   {/* Green dot status */}
-                  <div className="absolute bottom-1 right-2 w-7 h-7 bg-[#0a0a0c] rounded-full p-1.5 border border-black/50" title={pro.isOnline ? "Online" : "Offline"}>
+                  <div className="absolute bottom-1 right-2 w-7 h-7 bg-[#1A1A1A] rounded-full p-1.5 border border-black/50" title={pro.isOnline ? "Online" : "Offline"}>
                     <div className={`w-full h-full rounded-full ${pro.isOnline ? "bg-[#22c55e] shadow-[0_0_8px_rgba(34,197,94,0.6)]" : "bg-neutral-600 shadow-none"}`}></div>
                   </div>
                   {/* Edit button — only on own profile */}
                   {currentUser?.ownerProfile?.id === id && (
                     <button
                       onClick={() => navigate(`/professional/${role?.toLowerCase()}/profile`)}
-                      className="absolute top-0 right-0 w-8 h-8 bg-[#BFF367] rounded-full flex items-center justify-center text-black shadow-lg border-2 border-[#0a0a0c] hover:scale-110 transition-transform cursor-pointer"
+                      className="absolute top-0 right-0 w-8 h-8 bg-[#B3DC26] rounded-full flex items-center justify-center text-black shadow-lg border-2 border-[#1A1A1A] hover:scale-110 transition-transform cursor-pointer"
                       title="Edit Profile"
                     >
                       <Pencil size={14} strokeWidth={2.5} />
@@ -287,10 +293,10 @@ export default function ProfessionalDetails() {
                     </div>
                   </div>
                   <div className="flex items-center gap-3 mb-3">
-                    <p className="text-[#BFF367] text-xs md:text-sm font-sans font-bold">
+                    <p className="text-[#B3DC26] text-xs md:text-sm font-sans font-bold">
                       @{pro.username || "not_specified"}
                     </p>
-                    <span className="flex items-center gap-1.5 px-2 py-0.5 rounded-full border border-[#BFF367]/30 bg-black/50 text-[#BFF367] text-[9px] font-black tracking-widest uppercase backdrop-blur-md">
+                    <span className="flex items-center gap-1.5 px-2 py-0.5 rounded-full border border-[#B3DC26]/30 bg-black/50 text-[#B3DC26] text-[9px] font-black tracking-widest uppercase backdrop-blur-md">
                       <svg className="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 14a1 1 0 011-1h16a1 1 0 011 1v2a1 1 0 01-1 1H4a1 1 0 01-1-1v-2z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 13V5a2 2 0 012-2h4a2 2 0 012 2v8" /></svg>
                       {pro.role}
                     </span>
@@ -298,8 +304,8 @@ export default function ProfessionalDetails() {
                   
                   {/* Followers and Following */}
                   <div className="flex flex-wrap items-center gap-4 text-xs text-white/90 font-sans font-bold mb-5">
-                    <span className="flex items-center gap-1.5 cursor-pointer hover:text-[#BFF367] transition-colors"><Users size={14} className="text-[#BFF367]" /> {followersCount.toLocaleString()} Followers</span>
-                    <span className="flex items-center gap-1.5 cursor-pointer hover:text-[#BFF367] transition-colors"><UserPlus size={14} className="text-[#BFF367]" /> {followingCount.toLocaleString()} Following</span>
+                    <span className="flex items-center gap-1.5 cursor-pointer hover:text-[#B3DC26] transition-colors"><Users size={14} className="text-[#B3DC26]" /> {followersCount.toLocaleString()} Followers</span>
+                    <span className="flex items-center gap-1.5 cursor-pointer hover:text-[#B3DC26] transition-colors"><UserPlus size={14} className="text-[#B3DC26]" /> {followingCount.toLocaleString()} Following</span>
                     
                     {/* Follow Button */}
                     <button 
@@ -331,17 +337,27 @@ export default function ProfessionalDetails() {
               {pro.specialization && (
                 <div className="mb-4">
                   <span className="text-[11px] font-black text-white/50 uppercase tracking-[0.15em] block mb-2">Specialization</span>
-                  <div className="inline-flex items-center gap-2 px-4 py-1.5 bg-white/[0.02] border border-white/5 rounded-full backdrop-blur-sm">
-                    <svg className="w-3.5 h-3.5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 10l-2 1m0 0l-1-1m1 1v4m-4 0h8" /></svg>
-                    <span className="text-xs font-semibold text-white/90 tracking-wide">{pro.specialization}</span>
+                  <div className="inline-flex max-w-full items-start gap-2 px-4 py-1.5 bg-white/[0.02] border border-white/5 rounded-2xl backdrop-blur-sm">
+                    <svg className="w-3.5 h-3.5 text-white shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 10l-2 1m0 0l-1-1m1 1v4m-4 0h8" /></svg>
+                    <span className="text-xs font-semibold text-white/90 tracking-wide break-words whitespace-pre-wrap">{pro.specialization}</span>
                   </div>
                 </div>
               )}
 
-              <div className="flex flex-col xl:flex-row xl:items-center justify-between gap-6 mt-1">
-                <p className="text-white/60 leading-relaxed text-xs font-sans max-w-2xl" style={SUBHEADING_STYLE}>
-                  {pro.bio || "Not Specified"}
-                </p>
+              <div className="flex flex-col xl:flex-row xl:items-start justify-between gap-6 mt-1 w-full overflow-hidden">
+                <div className="max-w-2xl">
+                  <p className={`text-white/60 leading-relaxed text-xs font-sans break-words whitespace-pre-wrap ${!isBioExpanded ? 'line-clamp-4' : ''}`} style={SUBHEADING_STYLE}>
+                    {pro.bio || "Not Specified"}
+                  </p>
+                  {pro.bio && pro.bio.length > 150 && (
+                    <button 
+                      onClick={() => setIsBioExpanded(!isBioExpanded)}
+                      className="mt-2 text-[#B3DC26] text-xs font-bold hover:underline transition-colors"
+                    >
+                      {isBioExpanded ? "Read less" : "Read more"}
+                    </button>
+                  )}
+                </div>
 
                 <div className="flex flex-wrap items-center gap-2.5 shrink-0">
                   {/* Sport Tags */}
@@ -367,7 +383,7 @@ export default function ProfessionalDetails() {
           <div className={activeTab === "overview" ? "lg:col-span-8 space-y-8" : "lg:col-span-12 space-y-8"}>
 
             {/* HIGH-FIDELITY GLASSMORPHIC TAB MENU */}
-            <div className="flex overflow-x-auto hide-scrollbar bg-[#0a0a0c] p-1 rounded-xl border border-white/5 shadow-xl">
+            <div className="flex overflow-x-auto bg-[#1A1A1A] p-1 rounded-xl border border-white/5 shadow-xl [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
               {[
                 { id: "overview", label: "Overview", icon: BookOpen },
                 { id: "posts", label: "Posts", icon: MessageSquare },
@@ -382,7 +398,7 @@ export default function ProfessionalDetails() {
                     key={tab.id}
                     onClick={() => setActiveTab(tab.id)}
                     className={`shrink-0 flex-1 py-3 px-4 text-[9px] font-black uppercase tracking-widest rounded-lg transition-all flex items-center justify-center gap-2 whitespace-nowrap ${
-                      isSelected ? "bg-gradient-to-r from-[#BFF367] to-[#BFF367] text-black shadow-lg" : "text-neutral-500 hover:text-white"
+                      isSelected ? "bg-gradient-to-r from-[#B3DC26] to-[#B3DC26] text-black shadow-lg" : "text-neutral-500 hover:text-white"
                     }`}
                   >
                     <Icon size={12} /> {tab.label}
@@ -395,9 +411,9 @@ export default function ProfessionalDetails() {
             {activeTab === "overview" && (
               <div className="space-y-6 animate-in fade-in duration-300">
                 {/* Availability, Timeline & General Info */}
-                <div className="bg-[#0a0a0c] rounded-xl border border-white/5 p-8 grid grid-cols-1 md:grid-cols-2 gap-8 shadow-xl">
+                <div className="bg-[#1A1A1A] rounded-xl border border-white/5 p-8 grid grid-cols-1 md:grid-cols-2 gap-8 shadow-xl">
                   <div className="space-y-5">
-                    <h3 style={SECTION_HEADING_STYLE} className="font-heading text-xs font-black uppercase tracking-widest text-[#BFF367] flex items-center gap-2 border-b border-white/5 pb-3">
+                    <h3 style={SECTION_HEADING_STYLE} className="font-sans text-xs font-bold uppercase tracking-wider text-white flex items-center gap-2 border-b border-white/5 pb-3">
                       <Clock size={14} className="text-white" /> Schedule & Timings
                     </h3>
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 font-sans">
@@ -417,13 +433,13 @@ export default function ProfessionalDetails() {
                   </div>
 
                   <div className="space-y-5">
-                    <h3 style={SECTION_HEADING_STYLE} className="font-heading text-xs font-black uppercase tracking-widest text-[#BFF367] flex items-center gap-2 border-b border-white/5 pb-3">
+                    <h3 style={SECTION_HEADING_STYLE} className="font-sans text-xs font-bold uppercase tracking-wider text-white flex items-center gap-2 border-b border-white/5 pb-3">
                       <Globe size={14} className="text-white" /> Languages & Communication
                     </h3>
                     <div className="flex flex-wrap gap-2.5 pt-1">
                       {languagesList.map(lang => (
-                        <span key={lang} className="px-3.5 py-1.5 rounded-full bg-[#BFF367]/10 text-[#BFF367] border border-[#BFF367]/20 text-[10px] font-bold uppercase tracking-wider flex items-center gap-1.5 shadow-sm">
-                          <div className="w-1.5 h-1.5 rounded-full bg-[#BFF367] opacity-80" />
+                        <span key={lang} className="px-3.5 py-1.5 rounded-full bg-[#B3DC26]/10 text-[#B3DC26] border border-[#B3DC26]/20 text-[10px] font-bold uppercase tracking-wider flex items-center gap-1.5 shadow-sm">
+                          <div className="w-1.5 h-1.5 rounded-full bg-[#B3DC26] opacity-80" />
                           {lang}
                         </span>
                       ))}
@@ -440,8 +456,8 @@ export default function ProfessionalDetails() {
                   (pro.role?.toLowerCase().includes("scorer")) || 
                   (pro.role?.toLowerCase().includes("umpire")) || 
                   (pro.matchesCovered || pro.matchFormats?.length > 0)) && (
-                  <div className="bg-[#0a0a0c] rounded-xl border border-white/5 p-8 space-y-6 shadow-xl">
-                    <h3 style={SECTION_HEADING_STYLE} className="font-heading text-xs font-black uppercase tracking-widest text-[#BFF367] flex items-center gap-2 border-b border-white/5 pb-3">
+                  <div className="bg-[#1A1A1A] rounded-xl border border-white/5 p-8 space-y-6 shadow-xl">
+                    <h3 style={SECTION_HEADING_STYLE} className="font-sans text-xs font-bold uppercase tracking-wider text-white flex items-center gap-2 border-b border-white/5 pb-3">
                       <Layers size={14} className="text-white" /> Operational Specifications & Services
                     </h3>
 
@@ -461,7 +477,7 @@ export default function ProfessionalDetails() {
                               <span className="text-[8px] font-black text-neutral-500 uppercase tracking-widest block mb-1.5">Match Formats Supported</span>
                               <div className="flex flex-wrap gap-1">
                                 {pro.matchFormats.map(fmt => (
-                                  <span key={fmt} className="px-2 py-0.5 bg-[#BFF367]/10 text-[#BFF367] text-[8px] font-black uppercase tracking-wider rounded border border-[#BFF367]/20">{fmt}</span>
+                                  <span key={fmt} className="px-2 py-0.5 bg-[#B3DC26]/10 text-[#B3DC26] text-[8px] font-black uppercase tracking-wider rounded border border-[#B3DC26]/20">{fmt}</span>
                                 ))}
                               </div>
                             </div>
@@ -520,7 +536,7 @@ export default function ProfessionalDetails() {
                           <div className="space-y-2 text-xs">
                             <div className="flex justify-between">
                               <span className="text-white/40">Live Kridaz App Scoring:</span>
-                              <span className="font-bold text-[#BFF367] uppercase">{pro.liveScoringSupport ? "🟢 Supported" : "🔴 Independent"}</span>
+                              <span className="font-bold text-[#B3DC26] uppercase">{pro.liveScoringSupport ? "🟢 Supported" : "🔴 Independent"}</span>
                             </div>
                           </div>
                         </div>
@@ -530,8 +546,8 @@ export default function ProfessionalDetails() {
                 )}
 
                 {/* SERVICE AREAS & LOCATIONS */}
-                <div className="bg-[#0a0a0c] rounded-xl border border-white/5 p-8 space-y-6 shadow-xl">
-                  <h3 style={SECTION_HEADING_STYLE} className="font-heading text-xs font-black uppercase tracking-widest text-[#BFF367] flex items-center gap-2">
+                <div className="bg-[#1A1A1A] rounded-xl border border-white/5 p-8 space-y-6 shadow-xl">
+                  <h3 style={SECTION_HEADING_STYLE} className="font-sans text-xs font-bold uppercase tracking-wider text-white flex items-center gap-2">
                     <MapPin size={14} className="text-white" /> Service Area Coverage
                   </h3>
                   
@@ -565,7 +581,7 @@ export default function ProfessionalDetails() {
                       <div className="space-y-3">
                         {pro.preferredLocations?.customLocations?.map((item, idx) => (
                           <div key={idx} className="text-xs font-sans">
-                            <span className="font-bold text-[#BFF367] uppercase tracking-wider block text-[9px]">{item.state}:</span>
+                            <span className="font-bold text-[#B3DC26] uppercase tracking-wider block text-[9px]">{item.state}:</span>
                             <span className="text-white/60 leading-normal">{item.cities.join(", ")}</span>
                           </div>
                         ))}
@@ -582,9 +598,9 @@ export default function ProfessionalDetails() {
             {/* EXHIBITION & GALLERY TAB */}
             {activeTab === "exhibition" && (
               <div className="space-y-6 animate-in fade-in duration-300">
-                <div className="bg-[#0a0a0c] rounded-xl border border-white/5 p-8 space-y-6 shadow-xl min-h-[400px]">
+                <div className="bg-[#1A1A1A] rounded-xl border border-white/5 p-8 space-y-6 shadow-xl min-h-[400px]">
                   <div className="border-b border-white/5 pb-4">
-                    <h3 style={SECTION_HEADING_STYLE} className="font-heading text-xs font-black uppercase tracking-widest text-[#BFF367] flex items-center gap-2">
+                    <h3 style={SECTION_HEADING_STYLE} className="font-sans text-xs font-bold uppercase tracking-wider text-white flex items-center gap-2">
                       <Layout size={14} className="text-white" /> Gallery
                     </h3>
                   </div>
@@ -612,10 +628,10 @@ export default function ProfessionalDetails() {
                                     <div className="w-full h-full relative group cursor-pointer" onClick={() => setActiveMedia({ title: item.title, url: item.mediaUrl, type: 'video' })}>
                                       <img src={`https://img.youtube.com/vi/${ytId}/hqdefault.jpg`} className="w-full h-full object-cover opacity-60 transition-transform duration-500 group-hover:scale-105" />
                                       <div className="absolute inset-0 flex flex-col items-center justify-center gap-1.5 bg-black/40 group-hover:bg-black/60 transition-colors">
-                                        <div className="w-12 h-12 rounded-full bg-[#BFF367]/10 border border-[#BFF367]/20 flex items-center justify-center text-[#BFF367] shadow-lg group-hover:scale-110 transition-transform duration-300">
+                                        <div className="w-12 h-12 rounded-full bg-[#B3DC26]/10 border border-[#B3DC26]/20 flex items-center justify-center text-[#B3DC26] shadow-lg group-hover:scale-110 transition-transform duration-300">
                                           <Play size={20} className="fill-white ml-0.5" />
                                         </div>
-                                        <span className="text-[8px] font-black text-[#BFF367] uppercase tracking-[0.25em]">Watch Showcase</span>
+                                        <span className="text-[8px] font-black text-[#B3DC26] uppercase tracking-[0.25em]">Watch Showcase</span>
                                       </div>
                                     </div>
                                   );
@@ -651,8 +667,8 @@ export default function ProfessionalDetails() {
             {activeTab === "certificates" && (
                <div className="space-y-6 animate-in fade-in duration-300">
                 {/* Verified Certifications Stack */}
-                <div className="bg-[#0a0a0c] rounded-xl border border-white/5 p-8 shadow-xl">
-                  <h3 style={SECTION_HEADING_STYLE} className="font-heading text-xs font-black uppercase tracking-widest text-[#BFF367] mb-6 flex items-center gap-2">
+                <div className="bg-[#1A1A1A] rounded-xl border border-white/5 p-8 shadow-xl">
+                  <h3 style={SECTION_HEADING_STYLE} className="font-sans text-xs font-bold uppercase tracking-wider text-white mb-6 flex items-center gap-2">
                     <Shield size={14} className="text-white" /> Verified Certifications Stack
                   </h3>
                   
@@ -665,7 +681,7 @@ export default function ProfessionalDetails() {
                             <>
                               <img src={cert.image} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" alt={cert.title} />
                               <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end justify-center pb-3">
-                                <span className="text-[8px] font-black text-[#BFF367] uppercase tracking-[0.25em] flex items-center gap-1.5">
+                                <span className="text-[8px] font-black text-[#B3DC26] uppercase tracking-[0.25em] flex items-center gap-1.5">
                                   <Eye size={12} /> View Certificate
                                 </span>
                               </div>
@@ -684,7 +700,7 @@ export default function ProfessionalDetails() {
                           {cert.description && cert.description.length > 80 && (
                             <button
                               onClick={(e) => { e.stopPropagation(); setActiveCertificate(cert); }}
-                              className="text-[9px] font-black uppercase tracking-widest text-[#BFF367] hover:text-[#BFF367] transition-colors pt-0.5"
+                              className="text-[9px] font-black uppercase tracking-widest text-[#B3DC26] hover:text-[#B3DC26] transition-colors pt-0.5"
                             >
                               Read More →
                             </button>
@@ -707,8 +723,8 @@ export default function ProfessionalDetails() {
             {/* REVIEWS TAB */}
             {activeTab === "reviews" && (
               <div className="space-y-6 animate-in fade-in duration-300">
-                <div className="bg-[#0a0a0c] rounded-xl border border-white/5 p-8 shadow-xl min-h-[400px]">
-                  <h3 style={SECTION_HEADING_STYLE} className="font-heading text-xs font-black uppercase tracking-widest text-[#BFF367] mb-6 flex items-center gap-2 border-b border-white/5 pb-3">
+                <div className="bg-[#1A1A1A] rounded-xl border border-white/5 p-8 shadow-xl min-h-[400px]">
+                  <h3 style={SECTION_HEADING_STYLE} className="font-sans text-xs font-bold uppercase tracking-wider text-white mb-6 flex items-center gap-2 border-b border-white/5 pb-3">
                     <Star size={14} className="text-white fill-white" /> Customer Ratings & Reviews
                   </h3>
 
@@ -734,7 +750,7 @@ export default function ProfessionalDetails() {
                               </div>
                               <div>
                                 <span className="text-[10px] text-white/70 font-bold capitalize block">{review.user?.name?.toLowerCase()}</span>
-                                <div className="flex items-center text-[#BFF367] text-[8px] font-black mt-0.5">
+                                <div className="flex items-center text-[#B3DC26] text-[8px] font-black mt-0.5">
                                   <Star size={10} className="fill-white mr-1 text-white" />
                                   {review.rating > 0 ? review.rating.toFixed(1) : "Not Specified"}
                                 </div>
@@ -755,8 +771,8 @@ export default function ProfessionalDetails() {
             {/* POSTS TAB */}
             {activeTab === "posts" && (
               <div className="space-y-6 animate-in fade-in duration-300">
-                <div className="bg-[#0a0a0c] rounded-xl border border-white/5 p-8 shadow-xl min-h-[400px]">
-                  <h3 style={SECTION_HEADING_STYLE} className="font-heading text-xs font-black uppercase tracking-widest text-[#BFF367] mb-6 flex items-center gap-2 border-b border-white/5 pb-3">
+                <div className="bg-[#1A1A1A] rounded-xl border border-white/5 p-8 shadow-xl min-h-[400px]">
+                  <h3 style={SECTION_HEADING_STYLE} className="font-sans text-xs font-bold uppercase tracking-wider text-white mb-6 flex items-center gap-2 border-b border-white/5 pb-3">
                     <MessageSquare size={14} className="text-white" /> Recent Posts & Updates
                   </h3>
 
@@ -770,7 +786,7 @@ export default function ProfessionalDetails() {
                       {pro.posts.map((post) => (
                         <div key={post.id} className="p-5 bg-white/[0.02] border border-white/5 rounded-xl space-y-4">
                           <div className="flex items-center gap-3">
-                            <div className="w-10 h-10 rounded-full bg-neutral-900 overflow-hidden border border-[#BFF367]/30">
+                            <div className="w-10 h-10 rounded-full bg-neutral-900 overflow-hidden border border-[#B3DC26]/30">
                               <img src={pro.profilePicture} className="w-full h-full object-cover" />
                             </div>
                             <div>
@@ -815,7 +831,7 @@ export default function ProfessionalDetails() {
             <div className="sticky top-24 space-y-6">
               
               {/* Matchmaking Action Card */}
-              <div className="bg-[#0a0a0c] rounded-xl p-6 sm:p-8 border border-white/10 shadow-2xl space-y-6">
+              <div className="bg-[#1A1A1A] rounded-xl p-6 sm:p-8 border border-white/10 shadow-2xl space-y-6">
                 <div className="flex items-center gap-3 justify-between">
                   <h2 style={{ fontFamily: "\"Open Sans\", sans-serif" }} className="font-heading text-lg font-black uppercase text-white">Hire Professional</h2>
                   <span className={`px-2.5 py-1 rounded-[6px] text-[9px] font-black uppercase tracking-wider ${
@@ -834,7 +850,7 @@ export default function ProfessionalDetails() {
                 <div className="bg-black/40 border border-white/5 rounded-lg p-4 font-sans text-xs space-y-3">
                   <div className="flex justify-between">
                     <span className="text-white/40">Hourly/Match Rate:</span>
-                    <span className="text-[#BFF367] font-black">₹{pro.price > 0 ? pro.price : "Not Set"}</span>
+                    <span className="text-[#B3DC26] font-black">₹{pro.price > 0 ? pro.price : "Not Set"}</span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-white/40">Professional Role:</span>
@@ -845,7 +861,7 @@ export default function ProfessionalDetails() {
 
                 <button 
                   onClick={() => navigate(`/professionals?role=${pro.role}`)}
-                  className="w-full bg-gradient-to-r from-[#BFF367] to-[#BFF367] text-black py-4 rounded-lg font-black text-xs uppercase tracking-widest hover:opacity-90 active:scale-95 transition-all shadow-lg"
+                  className="w-full bg-gradient-to-r from-[#B3DC26] to-[#B3DC26] text-black py-4 rounded-lg font-black text-xs uppercase tracking-widest hover:opacity-90 active:scale-95 transition-all shadow-lg"
                 >
                   ⚡ Request Matching Now
                 </button>
@@ -853,8 +869,8 @@ export default function ProfessionalDetails() {
 
               
               {/* Connect & Socials Card */}
-              <div className="bg-[#0a0a0c] rounded-xl p-6 sm:p-8 border border-white/10 shadow-2xl space-y-5">
-                <h3 style={SECTION_HEADING_STYLE} className="font-heading text-sm font-bold text-white uppercase tracking-wider">Connect & Socials</h3>
+              <div className="bg-[#1A1A1A] rounded-xl p-6 sm:p-8 border border-white/10 shadow-2xl space-y-5">
+                <h3 style={SECTION_HEADING_STYLE} className="font-sans text-sm font-bold text-white uppercase tracking-wider">Connect & Socials</h3>
                 <div className="flex flex-wrap items-center gap-3">
                   {/* Social Buttons */}
                   {pro.linkedin && (
@@ -874,7 +890,7 @@ export default function ProfessionalDetails() {
                   )}
                   <button 
                     onClick={() => navigate(`/messages?userId=${pro.userId}`)}
-                    className="ml-auto px-4 py-1.5 rounded-lg border border-[#BFF367]/40 bg-[#BFF367]/10 text-[#BFF367] text-[10px] font-black uppercase tracking-wider hover:bg-[#BFF367]/20 transition-all flex items-center gap-2"
+                    className="ml-auto px-4 py-1.5 rounded-lg border border-[#B3DC26]/40 bg-[#B3DC26]/10 text-[#B3DC26] text-[10px] font-black uppercase tracking-wider hover:bg-[#B3DC26]/20 transition-all flex items-center gap-2"
                   >
                     <MessageSquare size={14} /> Chat Now
                   </button>
@@ -885,8 +901,8 @@ export default function ProfessionalDetails() {
               </div>
 
               {/* Reviews Card */}
-              <div className="bg-[#0a0a0c] rounded-xl p-6 border border-white/5 shadow-lg">
-                <h3 style={SECTION_HEADING_STYLE} className="font-heading text-sm font-bold text-white mb-6 uppercase tracking-wider">Recent Reviews</h3>
+              <div className="bg-[#1A1A1A] rounded-xl p-6 border border-white/5 shadow-lg">
+                <h3 style={SECTION_HEADING_STYLE} className="font-sans text-sm font-bold text-white mb-6 uppercase tracking-wider">Recent Reviews</h3>
                 {reviews.length === 0 ? (
                   <p className="text-xs text-white/40 pb-2 font-sans italic">No reviews yet.</p>
                 ) : (
@@ -905,7 +921,7 @@ export default function ProfessionalDetails() {
                         <div className="flex-1">
                           <div className="flex items-center gap-1.5 mb-1 justify-between">
                             <span className="text-[10px] text-white/70 font-bold capitalize">{review.user?.name?.toLowerCase()}</span>
-                            <div className="flex items-center text-[#BFF367] text-[8px] font-bold">
+                            <div className="flex items-center text-[#B3DC26] text-[8px] font-bold">
                               <Star size={8} className="fill-white mr-0.5 text-white" />
                               {review.rating > 0 ? review.rating.toFixed(1) : "Not Specified"}
                             </div>
@@ -987,7 +1003,7 @@ export default function ProfessionalDetails() {
             <X size={20} />
           </button>
           
-          <div className="bg-[#0a0a0c] border border-white/10 rounded-2xl max-w-2xl w-full max-h-[85vh] overflow-y-auto shadow-2xl" onClick={(e) => e.stopPropagation()}>
+          <div className="bg-[#1A1A1A] border border-white/10 rounded-2xl max-w-2xl w-full max-h-[85vh] overflow-y-auto shadow-2xl" onClick={(e) => e.stopPropagation()}>
             {/* Certificate Image */}
             {activeCertificate.image && (
               <div className="w-full aspect-[16/10] bg-neutral-900 overflow-hidden rounded-t-2xl border-b border-white/5">
@@ -998,12 +1014,12 @@ export default function ProfessionalDetails() {
             {/* Certificate Details */}
             <div className="p-6 md:p-8 space-y-4">
               <div className="flex items-start gap-3">
-                <div className="w-10 h-10 rounded-lg bg-[#BFF367]/10 border border-[#BFF367]/20 flex items-center justify-center shrink-0 mt-0.5">
-                  <ShieldCheck size={18} className="text-[#BFF367]" />
+                <div className="w-10 h-10 rounded-lg bg-[#B3DC26]/10 border border-[#B3DC26]/20 flex items-center justify-center shrink-0 mt-0.5">
+                  <ShieldCheck size={18} className="text-[#B3DC26]" />
                 </div>
                 <div className="space-y-1">
                   <h3 className="text-sm font-black text-white uppercase tracking-tight">{activeCertificate.title}</h3>
-                  <span className="text-[8px] font-black text-[#BFF367] uppercase tracking-widest">Verified Certification</span>
+                  <span className="text-[8px] font-black text-[#B3DC26] uppercase tracking-widest">Verified Certification</span>
                 </div>
               </div>
               

@@ -139,9 +139,13 @@ const ChatWindow = ({ chat, onBack, onSelectChat }) => {
  }
  }, [socket, chat]);
 
- useEffect(() => {
- scrollRef.current?.scrollIntoView({ behavior: "smooth" });
- }, [messages, showTypingIndicator]);
+  useEffect(() => {
+    if (scrollRef.current && scrollRef.current.parentElement) {
+      const parent = scrollRef.current.parentElement;
+      // Use scrollTo instead of scrollIntoView to prevent entire page shifting
+      parent.scrollTo({ top: parent.scrollHeight, behavior: 'smooth' });
+    }
+  }, [messages, showTypingIndicator]);
 
  const handleSendMessage = async (e) => {
  e.preventDefault();
@@ -222,11 +226,11 @@ const ChatWindow = ({ chat, onBack, onSelectChat }) => {
  return chat.users?.find((u) => u.user?.name === user?.name);
  };
 
- const getChatName = () => {
- if (chat.isGroupChat) return chat.chatName;
- const otherUser = getChatOtherUser();
- return otherUser?.name || "Unknown User";
- };
+  const getChatName = () => {
+    if (chat.isGroupChat) return chat.chatName || (chat.isAnnouncementGroup ? "Announcements" : "Unnamed Group");
+    const otherUser = getChatOtherUser();
+    return otherUser?.name || "Unknown User";
+  };
 
  // Format last seen
  // Format status text (online/last seen)
@@ -296,7 +300,7 @@ const ChatWindow = ({ chat, onBack, onSelectChat }) => {
 
  if (!chat) {
  return (
- <div className="flex-1 flex flex-col items-center justify-center bg-black/40 text-white/40">
+ <div className="flex-1 flex flex-col items-center justify-center bg-[#0A0A0A] text-white/40">
  <div className="w-20 h-20 rounded-full bg-white/[0.03] border border-white/5 flex items-center justify-center mb-6">
  <svg className="w-10 h-10 opacity-20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />
@@ -313,9 +317,9 @@ const ChatWindow = ({ chat, onBack, onSelectChat }) => {
  const otherOnline = otherUserObj?._id ? isUserOnline(otherUserObj._id) : false;
 
  return (
- <div className="flex-1 flex flex-col h-full bg-black/40 relative">
+ <div className="flex-1 flex flex-col h-full bg-[#0A0A0A] relative">
  {/* Header */}
- <div className="px-4 py-3 border-b border-white/10 flex items-center gap-3 bg-black/60 backdrop-blur-md sticky top-0 z-10">
+ <div className="px-4 py-3 border-b border-white/5 flex items-center gap-3 bg-[#0A0A0A] backdrop-blur-md sticky top-0 z-10">
  <button 
  onClick={onBack}
  className="md:hidden p-2 -ml-2 text-white/60 hover:text-white transition-colors"
@@ -358,7 +362,7 @@ const ChatWindow = ({ chat, onBack, onSelectChat }) => {
  className="w-full h-full flex items-center justify-center"
  style={{ display: imageUrl ? 'none' : 'flex' }}
  >
- <span className="text-[#BFF367] font-black text-xs">
+ <span className="text-[#BFF367] font-bold text-xs">
  {otherUserObj?.name ? otherUserObj.name.split(" ").map(w => w[0]).join("").toUpperCase().slice(0, 2) : "U"}
  </span>
  </div>
@@ -392,7 +396,7 @@ const ChatWindow = ({ chat, onBack, onSelectChat }) => {
  {chat.isCommunity && !isSelectionMode && (
  <button 
  onClick={() => setIsAddGroupToCommunityOpen(true)}
- className="flex items-center gap-2 px-3 py-1.5 bg-[#BFF367]/10 text-[#BFF367] hover:bg-[#BFF367] hover:text-black rounded-[6px] transition-all text-[11px] font-black uppercase tracking-wider shadow-sm"
+ className="flex items-center gap-2 px-3 py-1.5 bg-[#BFF367]/10 text-[#BFF367] hover:bg-[#BFF367] hover:text-black rounded-[6px] transition-all text-[11px] font-bold uppercase tracking-wider shadow-sm"
  >
  <Plus size={14} />
  <span>Add Group</span>
@@ -422,7 +426,7 @@ const ChatWindow = ({ chat, onBack, onSelectChat }) => {
 
  {/* Dropdown Menu */}
  {isDropdownOpen && (
- <div className="absolute top-12 right-0 w-48 bg-[#232323] border border-white/10 rounded-[8px] shadow-xl py-2 z-50 animate-fade-in">
+ <div className="absolute top-12 right-0 w-48 bg-[#121212] border border-white/5 rounded-[8px] shadow-xl py-2 z-50 animate-fade-in">
  <button 
  onClick={() => {
  setIsDropdownOpen(false);
@@ -582,8 +586,8 @@ const ChatWindow = ({ chat, onBack, onSelectChat }) => {
 
  {/* Inline Search Bar */}
  {isSearchOpen && (
- <div className="bg-[#111111] px-4 py-2 border-b border-white/10 flex items-center gap-3 shadow-md z-10 animate-fade-in relative">
- <div className="flex-1 bg-white/[0.05] rounded-lg flex items-center px-3 border border-white/10 focus-within:border-[#BFF367]/40 transition-colors">
+ <div className="bg-[#0A0A0A] px-4 py-2 border-b border-white/5 flex items-center gap-3 shadow-md z-10 animate-fade-in relative">
+ <div className="flex-1 bg-white/[0.05] rounded-lg flex items-center px-3 border border-white/5 focus-within:border-[#BFF367]/40 transition-colors">
  <svg className="w-4 h-4 text-white/40" fill="none" stroke="currentColor" viewBox="0 0 24 24">
  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
  </svg>
@@ -614,7 +618,7 @@ const ChatWindow = ({ chat, onBack, onSelectChat }) => {
  )}
 
  {/* Messages Area */}
- <div className="flex-1 relative overflow-hidden bg-black/40">
+ <div className="flex-1 relative overflow-hidden bg-[#0A0A0A]">
  {/* Scrollable Messages Content */}
  <div className="absolute inset-0 overflow-y-auto overflow-x-hidden custom-scrollbar z-0 flex flex-col px-4 py-4 space-y-1">
  {isLoading ? (
@@ -625,160 +629,29 @@ const ChatWindow = ({ chat, onBack, onSelectChat }) => {
  ? messages.filter(m => m.content.toLowerCase().includes(messageSearchQuery.toLowerCase()))
  : messages;
 
- if (chat.isCommunity) {
- const childGroups = chatData?.chats?.filter(c => 
- (c.parentCommunity === chat._id || c.parentCommunity?._id === chat._id) && !c.isCommunity
- ) || [];
 
- const announcementGroup = childGroups.find(g => g.isAnnouncementGroup || g.chatName === "Announcements");
- const regularGroups = childGroups.filter(g => !g.isAnnouncementGroup && g.chatName !== "Announcements");
 
- const myId = user?._id || user?.id || user?.userId;
- const adminId = chat.groupAdmin?.user?._id || chat.groupAdmin?.user || chat.groupAdmin || chat.createdBy?.user?._id || chat.createdBy?.user || chat.createdBy;
- const isAdmin = myId && adminId && String(myId) === String(adminId);
- const isActuallyAdmin = isAdmin || chat.groupAdmins?.some(admin => {
-   const aid = (admin.user?._id || admin.user)?.toString();
-   return aid === myId?.toString();
- });
- const canMessage = !chat.adminOnlyMessages || isActuallyAdmin;
-
- return (
- <div className="flex-1 flex flex-col px-6 pt-5 pb-8 animate-fade-in">
- {/* Dashboard Header */}
- <div className="flex flex-col items-center text-center mb-10">
- <div className="w-24 h-24 rounded-[8px] bg-[#BFF367]/10 flex items-center justify-center mb-4 border border-[#BFF367]/20 shadow-[0_0_40px_-10px_rgba(85,222,232,0.2)]">
- <Globe size={48} className="text-[#BFF367]" />
- </div>
- <h2 className="text-xl font-black text-white uppercase tracking-tight">{chat.chatName}</h2>
- <p className="community-copy text-white/40 mt-1.5 max-w-md">{chat.description || "Welcome to our community! Add groups below to get started."}</p>
- </div>
-
- {/* Groups Section */}
- <div className="max-w-2xl mx-auto w-full space-y-3">
- <div className="flex items-center justify-between px-2">
- <h3 className="text-[10px] font-black text-[#BFF367] uppercase">Groups in this community</h3>
- <span className="text-[10px] font-black text-white/20 uppercase tracking-[0.2em]">{childGroups.length} Groups</span>
- </div>
-
- <div className="grid gap-3">
- {/* Add Group Action */}
- <button 
- onClick={() => setIsAddGroupToCommunityOpen(true)}
- className="w-full flex items-center gap-4 p-4 bg-white/[0.03] border border-white/5 rounded-[8px] hover:bg-[#BFF367]/10 hover:border-[#BFF367]/30 transition-all group"
- >
- <div className="w-12 h-12 rounded-[8px] bg-[#BFF367] text-black flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform">
- <Plus size={24} />
- </div>
- <div className="text-left">
- <p className="chat-heading text-white font-bold text-sm">Add group</p>
- <p className="community-copy text-white/40 mt-0.5">Create or add existing groups to this community</p>
- </div>
- </button>
-
- {/* Announcement Group */}
- {announcementGroup ? (
- <button 
- onClick={() => onSelectChat && onSelectChat(announcementGroup)}
- className="w-full flex items-center gap-4 p-4 bg-white/[0.03] border border-white/5 rounded-[8px] hover:bg-white/[0.05] transition-all"
- >
- <div className="w-12 h-12 rounded-[8px] bg-white/5 flex items-center justify-center">
- <MessageSquare size={20} className="text-[#BFF367]" />
- </div>
- <div className="text-left flex-1">
- <div className="flex justify-between">
- <p className="chat-heading text-white font-bold text-sm">Announcements</p>
- <span className="text-[10px] bg-[#BFF367]/20 text-[#BFF367] px-2 py-0.5 rounded font-black uppercase">System</span>
- </div>
- <p className="community-copy text-white/40 mt-0.5">Only admins can post messages here</p>
- </div>
- </button>
- ) : (
- <div className="w-full flex items-center gap-4 p-4 bg-white/[0.03] border border-white/5 rounded-[8px] cursor-default opacity-80">
- <div className="w-12 h-12 rounded-[8px] bg-white/5 flex items-center justify-center">
- <MessageSquare size={20} className="text-[#BFF367]" />
- </div>
- <div className="text-left flex-1">
- <div className="flex justify-between">
- <p className="chat-heading text-white font-bold text-sm">Announcements</p>
- <span className="text-[10px] bg-[#BFF367]/20 text-[#BFF367] px-2 py-0.5 rounded font-black uppercase">System</span>
- </div>
- <p className="community-copy text-white/40 mt-0.5">Only admins can post messages here</p>
- </div>
- </div>
- )}
-
- {/* Render Sub-groups */}
- {regularGroups.map((group) => (
- <button 
- key={group._id}
- onClick={() => onSelectChat && onSelectChat(group)}
- className="w-full flex items-center gap-4 p-4 bg-white/[0.02] border border-transparent hover:border-white/10 hover:bg-white/[0.04] rounded-[8px] transition-all"
- >
- <div className="w-12 h-12 rounded-[8px] bg-white/5 flex items-center justify-center">
- <Users size={20} className="text-white/20" />
- </div>
- <div className="text-left">
- <p className="chat-heading text-white font-bold text-sm">{group.chatName}</p>
- <p className="community-copy text-white/40 mt-0.5">{group.users?.length || 0} Members</p>
- </div>
- </button>
- ))}
- </div>
-
- <div className="pt-4 text-center">
- <p className="community-copy text-white/10 font-bold uppercase leading-relaxed">
- Groups added to the community will appear here.<br/>Community members can join these groups.
- </p>
- </div>
-
- {/* Community Members Section */}
- <div className="max-w-2xl mx-auto w-full pt-7 pb-16 space-y-4">
- <div className="flex items-center justify-between px-2">
- <h3 className="text-[10px] font-black text-[#BFF367] uppercase">Community Members</h3>
- <span className="text-[10px] font-black text-white/20 uppercase tracking-[0.2em]">{chat.users?.length || 0} Members</span>
- </div>
- 
- <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
- {chat.users?.map((u, i) => {
- const member = u.user;
- if (!member) return null;
- const isMemberAdmin = chat.groupAdmins?.some(admin => (admin.user?._id || admin.user)?.toString() === member._id?.toString()) || 
- String(member._id) === String(chat.groupAdmin?.user?._id || chat.groupAdmin?.user || chat.groupAdmin || chat.createdBy?.user?._id || chat.createdBy?.user || chat.createdBy);
- 
- return (
- <div key={`member-${member._id}-${i}`} className="flex items-center gap-3 p-3 bg-white/[0.02] border border-white/5 rounded-[8px]">
- <img 
- src={member.profilePicture || `https://ui-avatars.com/api/?name=${member.name}&background=random`} 
- className="w-10 h-10 rounded-full object-cover border border-white/10" 
- alt="" 
- />
- <div className="flex-1 min-w-0">
- <p className="chat-heading text-white font-bold text-sm truncate">{member.name}</p>
- <div className="flex items-center gap-2">
- <p className="chat-subheading text-white/30 truncate">@{member.username || "user"}</p>
- {isMemberAdmin && (
- <span className="text-[8px] bg-[#BFF367]/20 text-[#BFF367] px-1.5 py-0.5 rounded font-black uppercase tracking-wider">Admin</span>
- )}
- </div>
- </div>
- </div>
- );
- })}
- </div>
- </div>
- </div>
- </div>
- );
- }
-
- if (messageSearchQuery.trim() && filteredMessages.length === 0) {
- return (
- <div className="flex flex-col items-center justify-center h-full text-white/40 mt-10">
- <svg className="w-12 h-12 mb-3 opacity-20" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
- <p className="chat-subheading">No messages found for "{messageSearchQuery}"</p>
- </div>
- );
- }
+ if (filteredMessages.length === 0) {
+    if (messageSearchQuery.trim()) {
+      return (
+        <div className="flex flex-col items-center justify-center h-full text-white/40 mt-10">
+          <svg className="w-12 h-12 mb-3 opacity-20" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
+          <p className="chat-subheading">No messages found for "{messageSearchQuery}"</p>
+        </div>
+      );
+    }
+    return (
+      <div className="flex flex-col items-center justify-center h-full text-white/40 mt-10">
+        <div className="w-16 h-16 rounded-full bg-white/[0.03] border border-white/5 flex items-center justify-center mb-4">
+          <svg className="w-8 h-8 opacity-20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+          </svg>
+        </div>
+        <p className="chat-subheading text-white/20">No messages yet.</p>
+        <p className="text-[11px] text-white/10 mt-1">Start the conversation!</p>
+      </div>
+    );
+  }
 
  return filteredMessages.map((m, i) => {
  const senderId = getSenderId(m);
@@ -912,8 +785,7 @@ const ChatWindow = ({ chat, onBack, onSelectChat }) => {
  </div>
 
  {/* Input Area */}
- {!chat.isCommunity && (
-  (() => {
+ {(() => {
     const myId = (user?._id || user?.id || user?.userId)?.toString();
     
     // Check if user is an admin of the current group
@@ -952,8 +824,8 @@ const ChatWindow = ({ chat, onBack, onSelectChat }) => {
     const canMessage = isAnnouncement ? (isAdmin || isParentCommunityAdmin) : (!chat.adminOnlyMessages || isAdmin || isParentCommunityAdmin);
 
     return canMessage ? (
-      <form onSubmit={handleSendMessage} className="p-3 bg-black/60 border-t border-white/10 z-10 relative">
-        <div className="flex items-center gap-2 bg-white/[0.04] border border-white/10 rounded-[8px] px-4 py-1 focus-within:border-[#BFF367]/40 transition-all">
+      <form onSubmit={handleSendMessage} className="p-3 bg-[#0A0A0A] border-t border-white/5 z-10 relative">
+        <div className="flex items-center gap-2 bg-white/[0.04] border border-white/5 rounded-[8px] px-4 py-1 focus-within:border-[#BFF367]/40 transition-all">
           <input
             type="text"
             value={message}
@@ -973,14 +845,14 @@ const ChatWindow = ({ chat, onBack, onSelectChat }) => {
         </div>
       </form>
     ) : (
-      <div className="p-6 bg-black/60 border-t border-white/10 text-center relative z-10">
+      <div className="p-6 bg-[#0A0A0A] border-t border-white/5 text-center relative z-10">
         <p className="text-xs text-[#BFF367]/60 font-bold uppercase tracking-widest">
           Only admins can send messages to this group
         </p>
       </div>
     );
   })()
- )}
+  }
 
  {isGroupInfoOpen && (
  <GroupInfoModal 
@@ -1000,8 +872,8 @@ const ChatWindow = ({ chat, onBack, onSelectChat }) => {
 
  {showDeleteOptions && (
  <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
- <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setShowDeleteOptions(false)} />
- <div className="bg-[#1e1e1e] border border-white/10 rounded-[8px] p-6 w-full max-w-sm relative z-10 shadow-2xl">
+ <div className="absolute inset-0 bg-[#0A0A0A] backdrop-blur-sm" onClick={() => setShowDeleteOptions(false)} />
+ <div className="bg-[#1e1e1e] border border-white/5 rounded-[8px] p-6 w-full max-w-sm relative z-10 shadow-2xl">
  <h3 className="text-white text-lg font-bold mb-4">Delete messages?</h3>
  <p className="chat-subheading text-white/60 mb-6">
  Delete {selectedMessages.length} selected message{selectedMessages.length > 1 ? 's' : ''}?

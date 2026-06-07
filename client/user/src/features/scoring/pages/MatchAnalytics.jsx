@@ -34,6 +34,7 @@ import useCricketScoring from '../hooks/useCricketScoring';
 import { motion } from 'framer-motion';
 import toast from 'react-hot-toast';
 import BallByBallHistory from '../components/BallByBallHistory';
+import GlobalBackButton from '@/shared/components/GlobalBackButton';
 
 // ─── Team badge rendering component ────────────────────────────────────────────
 const TeamBadge = ({ team, fallbackName, size = 'md' }) => {
@@ -527,9 +528,7 @@ const MatchAnalytics = () => {
 
     return (
       <div className="min-h-screen bg-black text-white flex flex-col items-center justify-center p-6">
-        <button onClick={() => navigate(-1)} className="absolute top-6 left-6 p-2 hover:bg-white/5 rounded-full transition-colors text-gray-400 hover:text-white">
-          <ArrowLeft size={24} />
-        </button>
+        <GlobalBackButton />
         
         <div className="w-full max-w-2xl bg-black/60 backdrop-blur-xl border border-white/10 rounded-[8px] p-10 text-center space-y-8 relative overflow-hidden">
           {/* Background elements */}
@@ -787,12 +786,7 @@ const MatchAnalytics = () => {
       {/* Header */}
       <div className="sticky top-0 z-50 bg-black/80 backdrop-blur-xl border-b border-white/5 p-3 sm:p-4">
         <div className="max-w-7xl mx-auto flex items-center gap-2 sm:gap-4">
-          <button 
-            onClick={() => navigate(-1)}
-            className="p-2 -ml-2 hover:bg-white/5 rounded-full transition-colors text-gray-400 hover:text-white shrink-0"
-          >
-            <ArrowLeft size={20} />
-          </button>
+          <GlobalBackButton />
           <div className="flex-1 flex flex-col justify-center min-w-0">
             <h2 className="text-base sm:text-lg font-black uppercase tracking-tighter text-white truncate">Match Performance</h2>
             <div className="flex items-center gap-2">

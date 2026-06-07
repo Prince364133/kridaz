@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import axiosInstance from "@hooks/useAxiosInstance";
 
-const useOwnerReviews = () => {
+const useVenueOwnerReviews = () => {
   const [turfs, setTurfs] = useState([]);
   const [selectedTurf, setSelectedTurf] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -26,4 +26,4 @@ const useOwnerReviews = () => {
   return { turfs, selectedTurf, setSelectedTurf, loading, error };
 };
 
-export default useOwnerReviews;
+export default useVenueOwnerReviews;

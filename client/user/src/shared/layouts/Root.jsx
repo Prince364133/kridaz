@@ -42,7 +42,11 @@ const Root = () => {
   const isReelsPage = location.pathname.startsWith('/reels') || location.pathname.startsWith('/shorts') || searchParams.get('tab') === 'shots';
   const isNewPostPage = location.pathname.startsWith('/new-post') || location.pathname.startsWith('/create-post') || location.pathname.startsWith('/create-story');
   const isTeamsPage = location.pathname.startsWith('/my-teams');
-  const hideNav = isReelsPage || location.pathname.startsWith('/messages') || isNewPostPage;
+  const isMessagesPage = location.pathname.startsWith('/messages');
+  const isChatOpen = isMessagesPage && searchParams.get('chatId') !== null;
+  const isProfile = location.pathname.startsWith('/profile');
+  const isBookingHistory = location.pathname.startsWith('/booking-history');
+  const hideNav = isReelsPage || isNewPostPage || isChatOpen;
   const isHome = location.pathname === "/" || location.pathname === "/community";
   const isSingleVenue = location.pathname.startsWith("/venue/");
   const isVenue = (location.pathname.startsWith("/venue") || location.pathname === "/venues") && !isSingleVenue;
@@ -98,12 +102,12 @@ const Root = () => {
           <main className={`flex-grow ${
             isReelsPage || isNewPostPage
               ? 'pb-0' 
-              : location.pathname.startsWith('/messages') || isTeamsPage
+              : isTeamsPage || isMessagesPage
                 ? 'pb-0' 
                 : 'pb-20 lg:pb-28'
-          } transition-all duration-300 min-w-0 flex justify-center ${isNewPostPage || isTeamsPage ? 'py-0' : 'py-6'}`}>
+          } transition-all duration-300 min-w-0 flex justify-center ${isNewPostPage || isTeamsPage || isMessagesPage || isProfile || isBookingHistory ? 'py-0' : 'py-6'}`}>
             
-            <div className={`w-full ${isNewPostPage || isTeamsPage ? 'max-w-none px-0' : (useRestrictedWidth && showRightSidebar) ? 'max-w-[495px]' : 'px-4 md:px-8 max-w-none'} flex flex-col justify-between`}>
+            <div className={`w-full ${isNewPostPage || isTeamsPage || isMessagesPage || isProfile || isBookingHistory ? 'max-w-none px-0' : (useRestrictedWidth && showRightSidebar) ? 'max-w-[495px]' : 'px-4 md:px-8 max-w-none'} flex flex-col justify-between`}>
               <div className="min-h-full">
                 <Outlet />
               </div>

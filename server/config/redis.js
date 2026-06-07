@@ -212,6 +212,12 @@ class MockRedis {
     return 1;
   }
 
+  async rpop(key) {
+    const list = this.lists.get(key);
+    if (!list || list.length === 0) return null;
+    return list.pop();
+  }
+
   async lpush(key, ...values) {
     if (!this.lists.has(key)) {
       this.lists.set(key, []);

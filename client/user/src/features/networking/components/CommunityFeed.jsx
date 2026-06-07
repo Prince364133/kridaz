@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useSelector } from "react-redux";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { ChevronDown, Loader2 } from "lucide-react";
@@ -8,10 +8,70 @@ import { useSocket } from "@context/SocketContext";
 import PostItem from "./PostItem";
 import ShareModal from "./ShareModal";
 import ReportModal from "./ReportModal";
+import DeleteConfirmModal from "./DeleteConfirmModal";
 import toast from "react-hot-toast";
-import { AnimatePresence } from "framer-motion";
+import { AnimatePresence, motion } from "framer-motion";
+import PostDetailModal from "./PostDetailModal";
 
 const HEADING_STYLE = { fontFamily: "'Open Sans', sans-serif" };
+
+const CustomDropdown = ({ value, options, onChange, placeholder = "Select" }) => {
+  const [isOpen, setIsOpen] = useState(false);
+  const dropdownRef = useRef(null);
+
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+        setIsOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  const selectedOption = options.find(opt => opt.value === value) || { label: placeholder, value: "" };
+
+  return (
+    <div className="relative min-w-[140px]" ref={dropdownRef}>
+      <div
+        className="w-full bg-[#111] border border-white/10 rounded-[8px] py-2.5 px-3 sm:px-4 text-white text-[11px] sm:text-[12px] font-bold focus:outline-none hover:border-[#BFF367]/50 transition-all cursor-pointer hover:bg-[#1A1A1A] flex items-center justify-between gap-3 shadow-sm"
+        onClick={() => setIsOpen(!isOpen)}
+      >
+        <span className="truncate">{selectedOption.label}</span>
+        <ChevronDown size={14} className={`text-white/40 transition-transform duration-200 shrink-0 ${isOpen ? "rotate-180" : ""}`} />
+      </div>
+      
+      <AnimatePresence>
+        {isOpen && (
+          <motion.div 
+            initial={{ opacity: 0, y: -5 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -5 }}
+            transition={{ duration: 0.15 }}
+            className="absolute top-[calc(100%+6px)] left-0 w-full min-w-[160px] bg-[#121212] border border-white/10 rounded-[8px] shadow-2xl overflow-hidden z-50 py-1.5"
+          >
+            {options.map((opt) => (
+              <div
+                key={opt.value}
+                className={`px-4 py-2.5 text-[12px] font-bold cursor-pointer transition-colors ${
+                  value === opt.value
+                    ? "bg-[#BFF367]/10 text-[#BFF367]"
+                    : "text-white/70 hover:bg-white/5 hover:text-white"
+                }`}
+                onClick={() => {
+                  onChange(opt.value);
+                  setIsOpen(false);
+                }}
+              >
+                {opt.label}
+              </div>
+            ))}
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
+  );
+};
 
 const CommunityFeed = ({ user, isLoggedIn, isAdmin, gateInteraction, activeFilter, handleSetActiveFilter, activeSportFilter, setActiveSportFilter, debouncedSearchQuery, children }) => {
   const navigate = useNavigate();
@@ -38,6 +98,8 @@ const CommunityFeed = ({ user, isLoggedIn, isAdmin, gateInteraction, activeFilte
   const [playersLoading, setPlayersLoading] = useState(false);
   const [sharePostId, setSharePostId] = useState(null);
   const [reportPostId, setReportPostId] = useState(null);
+  const [deletePostId, setDeletePostId] = useState(null);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   // Check URL params for creating a post (e.g. from Team Profile share)
   useEffect(() => {
@@ -314,14 +376,22 @@ const CommunityFeed = ({ user, isLoggedIn, isAdmin, gateInteraction, activeFilte
   };
 
   // Handle post card deletion callbacks
-  const handleDeletePost = async (postId) => {
-    if (!window.confirm("Are you sure you want to delete this post?")) return;
+  const handleDeletePost = (postId) => {
+    setDeletePostId(postId);
+  };
+
+  const confirmDeletePost = async () => {
+    if (!deletePostId) return;
+    setIsDeleting(true);
     try {
-      await deletePost(postId).unwrap();
+      await deletePost(deletePostId).unwrap();
       toast.success("Post deleted");
-      setLoadedPosts((prev) => prev.filter((p) => (p._id || p.id) !== postId));
+      setLoadedPosts((prev) => prev.filter((p) => (p._id || p.id) !== deletePostId));
     } catch (error) {
       toast.error(error?.data?.message || "Failed to delete post");
+    } finally {
+      setIsDeleting(false);
+      setDeletePostId(null);
     }
   };
 
@@ -334,43 +404,24 @@ const CommunityFeed = ({ user, isLoggedIn, isAdmin, gateInteraction, activeFilte
       {!debouncedSearchQuery.trim() && (
         <div className="mb-6">
           {/* Unified View Filters Dropdowns */}
-          <div className="grid grid-cols-2 md:flex gap-2 items-center w-full pb-1">
+          <div className="grid grid-cols-2 md:flex gap-3 items-center w-full pb-1">
             {/* Post Type Filter */}
-            <div className="relative min-w-0">
-              <select
-                className="w-full bg-[#111] border border-white/10 rounded-[8px] py-2 pl-2 pr-5 sm:pl-4 sm:pr-8 text-white text-[10px] sm:text-[11px] font-bold focus:outline-none focus:border-[#BFF367]/50 transition-all appearance-none cursor-pointer hover:bg-[#1A1A1A] truncate"
-                value={activeFilter}
-                onChange={(e) => handleSetActiveFilter(e.target.value)}
-              >
-                {["All", "Following", "Highlights", "Match Moments", "Announcements"].map((filter) => (
-                  <option key={filter} value={filter} className="bg-neutral-900 text-white">
-                    {filter}
-                  </option>
-                ))}
-              </select>
-              <div className="pointer-events-none absolute right-2 sm:right-3 top-1/2 -translate-y-1/2 text-white/40">
-                <ChevronDown size={12} />
-              </div>
-            </div>
+            <CustomDropdown 
+              value={activeFilter}
+              onChange={handleSetActiveFilter}
+              options={["All", "Following", "Highlights", "Match Moments", "Announcements"].map(f => ({ label: f, value: f }))}
+            />
 
             {/* Sport Category Filter */}
-            <div className="relative min-w-0">
-              <select
-                className="w-full bg-[#111] border border-white/10 rounded-[8px] py-2 pl-2 pr-5 sm:pl-4 sm:pr-8 text-white text-[10px] sm:text-[11px] font-bold focus:outline-none focus:border-[#BFF367]/50 transition-all appearance-none cursor-pointer hover:bg-[#1A1A1A] truncate"
-                value={activeSportFilter}
-                onChange={(e) => setActiveSportFilter(e.target.value)}
-              >
-                <option value="" className="bg-neutral-900 text-white">All Categories</option>
-                {["Cricket", "Football", "Rugby", "Baseball", "Hockey", "Athletics"].map((s) => (
-                  <option key={s} value={s.toLowerCase()} className="bg-neutral-900 text-white">
-                    {s}
-                  </option>
-                ))}
-              </select>
-              <div className="pointer-events-none absolute right-2 sm:right-3 top-1/2 -translate-y-1/2 text-white/40">
-                <ChevronDown size={12} />
-              </div>
-            </div>
+            <CustomDropdown 
+              value={activeSportFilter}
+              onChange={setActiveSportFilter}
+              placeholder="All Categories"
+              options={[
+                { label: "All Categories", value: "" },
+                ...["Cricket", "Football", "Rugby", "Baseball", "Hockey", "Athletics"].map(s => ({ label: s, value: s.toLowerCase() }))
+              ]}
+            />
           </div>
         </div>
       )}
@@ -479,11 +530,35 @@ const CommunityFeed = ({ user, isLoggedIn, isAdmin, gateInteraction, activeFilte
       )}
 
       <AnimatePresence>
+        {searchParams.get("post") && (
+          <PostDetailModal
+            postId={searchParams.get("post")}
+            onClose={() => {
+              const newParams = new URLSearchParams(searchParams);
+              newParams.delete("post");
+              setSearchParams(newParams, { replace: true });
+            }}
+            user={user}
+            isAdmin={isAdmin}
+            gateInteraction={gateInteraction}
+            onUpdatePost={handleUpdatePost}
+            onDeletePost={handleDeletePost}
+            onSharePost={(id) => setSharePostId(id)}
+            onReportPost={(id) => setReportPostId(id)}
+          />
+        )}
         {sharePostId && (
           <ShareModal postId={sharePostId} onClose={() => setSharePostId(null)} />
         )}
         {reportPostId && (
           <ReportModal postId={reportPostId} onClose={() => setReportPostId(null)} />
+        )}
+        {deletePostId && (
+          <DeleteConfirmModal 
+            onClose={() => setDeletePostId(null)} 
+            onConfirm={confirmDeletePost}
+            isDeleting={isDeleting}
+          />
         )}
       </AnimatePresence>
     </div>

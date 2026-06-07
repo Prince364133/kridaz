@@ -20,6 +20,8 @@ const Turf = () => {
   // Mobile Drawers
   const [isMobileFilterOpen, setIsMobileFilterOpen] = useState(false);
   const [isMobileSportsOpen, setIsMobileSportsOpen] = useState(false);
+  const [isMobileLocationOpen, setIsMobileLocationOpen] = useState(false);
+  const [locationSearchInput, setLocationSearchInput] = useState("");
 
   const { turfs, loading } = useTurfData(searchFilters);
 
@@ -110,35 +112,42 @@ const Turf = () => {
   };
 
   return (
-    <div className="min-h-screen bg-transparent text-white pb-20 overflow-x-hidden">
-      <div className="max-w-screen-2xl mx-auto px-0 md:px-6 pt-0 relative z-10">
+    <div className="min-h-screen bg-[#000000] font-sans text-[#FFFFFF] pb-20 overflow-x-hidden">
+      <div className="max-w-screen-2xl mx-auto px-4 md:px-6 pt-0 relative z-10">
 
         {/* ── Mobile Search & Filters ── */}
-        <div className="block lg:hidden mb-6 mt-6 space-y-3 px-4 md:px-0">
+        <div className="block lg:hidden mb-6 mt-6 space-y-3">
           {/* Mobile Search Bar */}
           <div className="relative">
-            <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-white/40" size={18} />
+            <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-[rgba(255,255,255,0.70)]" size={18} />
             <input 
               type="text" 
               placeholder="Search arenas..." 
-              className="w-full bg-[#111] border border-white/10 rounded-xl py-3.5 pl-11 pr-4 text-sm text-white placeholder:text-white/40 focus:outline-none focus:border-[#BFF367]/50 focus:ring-1 focus:ring-[#BFF367]/50 transition-all shadow-md"
+              className="w-full bg-[#1B1B1B] border border-[rgba(255,255,255,0.08)] rounded-[16px] py-3.5 pl-11 pr-4 text-[14px] font-[400] text-[#FFFFFF] placeholder:text-[rgba(255,255,255,0.70)] focus:outline-none focus:border-[#55DEE8] transition-all shadow-md"
             />
           </div>
           
           {/* Mobile Filter & Sports Buttons */}
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2">
+            <button 
+              onClick={() => setIsMobileLocationOpen(true)}
+              className="flex-1 bg-[#1B1B1B] border border-[rgba(255,255,255,0.08)] rounded-[16px] py-3 flex items-center justify-center gap-1.5 text-[12px] font-[600] text-[#FFFFFF] hover:bg-[#121212] transition-colors shadow-md"
+            >
+              <MapPin size={13} className="text-[#BFF367]" />
+              Location
+            </button>
             <button 
               onClick={() => setIsMobileFilterOpen(true)}
-              className="flex-1 bg-[#111] border border-white/10 rounded-xl py-3 flex items-center justify-center gap-2 text-[11px] font-black uppercase text-white hover:bg-white/5 transition-colors shadow-md"
+              className="flex-1 bg-[#1B1B1B] border border-[rgba(255,255,255,0.08)] rounded-[16px] py-3 flex items-center justify-center gap-1.5 text-[12px] font-[600] text-[#FFFFFF] hover:bg-[#121212] transition-colors shadow-md"
             >
-              <Filter size={14} className="text-[#BFF367]" />
+              <Filter size={13} className="text-[#BFF367]" />
               Filters
             </button>
             <button 
               onClick={() => setIsMobileSportsOpen(true)}
-              className="flex-1 bg-[#111] border border-white/10 rounded-xl py-3 flex items-center justify-center gap-2 text-[11px] font-black uppercase text-white hover:bg-white/5 transition-colors shadow-md"
+              className="flex-1 bg-[#1B1B1B] border border-[rgba(255,255,255,0.08)] rounded-[16px] py-3 flex items-center justify-center gap-1.5 text-[12px] font-[600] text-[#FFFFFF] hover:bg-[#121212] transition-colors shadow-md"
             >
-              <Dribbble size={14} className="text-[#BFF367]" />
+              <Dribbble size={13} className="text-[#BFF367]" />
               Sports
             </button>
           </div>
@@ -228,16 +237,16 @@ const Turf = () => {
 
       {/* ── Mobile Overlays ── */}
       {/* Backdrop */}
-      {(isMobileFilterOpen || isMobileSportsOpen) && (
+      {(isMobileFilterOpen || isMobileSportsOpen || isMobileLocationOpen) && (
         <div 
           className="fixed inset-0 bg-black/80 z-[100] lg:hidden backdrop-blur-sm transition-opacity" 
-          onClick={() => { setIsMobileFilterOpen(false); setIsMobileSportsOpen(false); }}
+          onClick={() => { setIsMobileFilterOpen(false); setIsMobileSportsOpen(false); setIsMobileLocationOpen(false); }}
         />
       )}
 
       {/* Filter Drawer */}
-      <div className={`fixed top-0 bottom-0 right-0 w-[85%] max-w-[360px] bg-[#0A0A0A] border-l border-white/10 z-[101] transform transition-transform duration-300 ease-in-out ${isMobileFilterOpen ? "translate-x-0" : "translate-x-full"} overflow-y-auto no-scrollbar pb-24`}>
-        <div className="sticky top-0 bg-[#0A0A0A]/95 backdrop-blur-md p-5 border-b border-white/10 flex items-center justify-between z-10">
+      <div className={`fixed top-0 bottom-0 right-0 w-[85%] max-w-[360px] bg-[#121212] border-l border-[rgba(255,255,255,0.08)] z-[101] transform transition-transform duration-300 ease-in-out ${isMobileFilterOpen ? "translate-x-0" : "translate-x-full"} overflow-y-auto no-scrollbar pb-24`}>
+        <div className="sticky top-0 bg-[#121212]/95 backdrop-blur-md p-5 border-b border-[rgba(255,255,255,0.08)] flex items-center justify-between z-10">
           <h3 className="text-[15px] font-black uppercase tracking-wider text-white flex items-center gap-2">
             <Filter size={16} className="text-[#BFF367]" />
             Filters
@@ -350,15 +359,15 @@ const Turf = () => {
             </div>
           </div>
 
-          <button onClick={() => setIsMobileFilterOpen(false)} className="w-full mt-6 py-4 bg-[#BFF367] text-black font-black uppercase tracking-wider rounded-xl hover:bg-white transition-colors">
+          <button onClick={() => setIsMobileFilterOpen(false)} className="w-full mt-6 py-4 bg-gradient-to-r from-[#55DEE8] to-[#BFF367] text-[#000000] font-black uppercase tracking-wider rounded-[16px] hover:opacity-90 transition-opacity">
             Apply Filters
           </button>
         </div>
       </div>
 
       {/* Sports Drawer */}
-      <div className={`fixed top-0 bottom-0 right-0 w-[85%] max-w-[360px] bg-[#0A0A0A] border-l border-white/10 z-[101] transform transition-transform duration-300 ease-in-out ${isMobileSportsOpen ? "translate-x-0" : "translate-x-full"} overflow-y-auto no-scrollbar pb-24`}>
-        <div className="sticky top-0 bg-[#0A0A0A]/95 backdrop-blur-md p-5 border-b border-white/10 flex items-center justify-between z-10">
+      <div className={`fixed top-0 bottom-0 right-0 w-[85%] max-w-[360px] bg-[#121212] border-l border-[rgba(255,255,255,0.08)] z-[101] transform transition-transform duration-300 ease-in-out ${isMobileSportsOpen ? "translate-x-0" : "translate-x-full"} overflow-y-auto no-scrollbar pb-24`}>
+        <div className="sticky top-0 bg-[#121212]/95 backdrop-blur-md p-5 border-b border-[rgba(255,255,255,0.08)] flex items-center justify-between z-10">
           <h3 className="text-[15px] font-black uppercase tracking-wider text-white flex items-center gap-2">
             <Dribbble size={16} className="text-[#BFF367]" />
             Select Sport
@@ -369,16 +378,88 @@ const Turf = () => {
         </div>
 
         <div className="p-4 space-y-1">
-          {["Football", "Cricket", "Badminton", "Tennis", "Basketball", "Swimming", "Volleyball", "Table Tennis", "Squash", "Hockey"].map((sport) => (
-            <button 
-              key={sport}
-              onClick={() => setIsMobileSportsOpen(false)}
-              className="w-full flex items-center justify-between p-4 rounded-xl hover:bg-[#111] transition-colors group"
-            >
-              <span className="text-[14px] font-bold text-gray-300 group-hover:text-[#BFF367] transition-colors">{sport}</span>
-              <ChevronRight size={16} className="text-white/20 group-hover:text-[#BFF367]" />
-            </button>
-          ))}
+          {["Football", "Cricket", "Badminton", "Tennis", "Basketball", "Swimming", "Volleyball", "Table Tennis", "Squash", "Hockey"].map((sport) => {
+            const isSelected = searchFilters.sport === sport;
+            return (
+              <button 
+                key={sport}
+                onClick={() => {
+                  dispatch(setFilters({ sport: isSelected ? "" : sport }));
+                  setIsMobileSportsOpen(false);
+                }}
+                className={`w-full flex items-center justify-between p-4 rounded-xl transition-colors group ${
+                  isSelected ? "bg-[#BFF367]/10 border border-[#BFF367]/30" : "hover:bg-[#111]"
+                }`}
+              >
+                <span className={`text-[14px] font-bold transition-colors ${
+                  isSelected ? "text-[#BFF367]" : "text-gray-300 group-hover:text-[#BFF367]"
+                }`}>
+                  {sport}
+                </span>
+                {isSelected ? (
+                  <div className="w-2 h-2 rounded-full bg-[#BFF367]" />
+                ) : (
+                  <ChevronRight size={16} className="text-white/20 group-hover:text-[#BFF367]" />
+                )}
+              </button>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* Location Drawer */}
+      <div className={`fixed top-0 bottom-0 right-0 w-[85%] max-w-[360px] bg-[#121212] border-l border-[rgba(255,255,255,0.08)] z-[101] transform transition-transform duration-300 ease-in-out ${isMobileLocationOpen ? "translate-x-0" : "translate-x-full"} overflow-y-auto no-scrollbar pb-24`}>
+        <div className="sticky top-0 bg-[#121212]/95 backdrop-blur-md p-5 border-b border-[rgba(255,255,255,0.08)] flex items-center justify-between z-10">
+          <h3 className="text-[15px] font-black uppercase tracking-wider text-white flex items-center gap-2">
+            <MapPin size={16} className="text-[#BFF367]" />
+            Select Location
+          </h3>
+          <button onClick={() => setIsMobileLocationOpen(false)} className="p-2 rounded-full hover:bg-white/10 transition-colors">
+            <X size={18} className="text-white/60 hover:text-white" />
+          </button>
+        </div>
+
+        <div className="p-5 space-y-6">
+          <div className="relative">
+            <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-[rgba(255,255,255,0.70)]" size={16} />
+            <input 
+              type="text" 
+              placeholder="Search city or area..." 
+              value={locationSearchInput}
+              onChange={(e) => setLocationSearchInput(e.target.value)}
+              className="w-full bg-[#1B1B1B] border border-[rgba(255,255,255,0.08)] rounded-[16px] py-3.5 pl-11 pr-4 text-[14px] text-[#FFFFFF] placeholder:text-[rgba(255,255,255,0.70)] focus:outline-none focus:border-[#55DEE8] transition-all shadow-md"
+            />
+          </div>
+
+          <div className="space-y-4">
+            <h5 className="text-[11px] font-black uppercase text-white/50 tracking-wider">Popular Cities</h5>
+            <div className="grid grid-cols-2 gap-3">
+              {["Delhi", "Mumbai", "Bangalore", "Hyderabad", "Pune", "Chennai"].map((city) => (
+                <button 
+                  key={city}
+                  onClick={() => {
+                    dispatch(setFilters({ city }));
+                    setIsMobileLocationOpen(false);
+                  }}
+                  className={`py-3 px-4 rounded-[12px] border flex items-center justify-center text-xs font-bold transition-all ${searchFilters.city === city ? "bg-[#BFF367]/10 border-[#BFF367] text-[#BFF367]" : "bg-[#1B1B1B] border-[rgba(255,255,255,0.08)] text-[rgba(255,255,255,0.70)] hover:border-[rgba(255,255,255,0.20)]"}`}
+                >
+                  {city}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <button 
+            onClick={() => {
+               if(locationSearchInput.trim()) {
+                 dispatch(setFilters({ city: locationSearchInput.trim() }));
+               }
+               setIsMobileLocationOpen(false);
+            }} 
+            className="w-full mt-4 py-4 bg-gradient-to-r from-[#55DEE8] to-[#BFF367] text-[#000000] font-black uppercase tracking-wider rounded-[16px] hover:opacity-90 transition-opacity"
+          >
+            Apply Location
+          </button>
         </div>
       </div>
 

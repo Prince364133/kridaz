@@ -68,7 +68,7 @@ const AddGroupToCommunityModal = ({ isOpen, onClose, communityId }) => {
               <Globe size={20} className="text-[#BFF367]" />
             </div>
             <div>
-              <h2 className="text-lg font-black text-white italic uppercase tracking-tight">Add Group</h2>
+              <h2 className="text-lg font-semibold text-white">Add Group</h2>
               <p className="text-[10px] text-white/40 font-bold uppercase tracking-widest">To Community</p>
             </div>
           </div>
@@ -81,13 +81,13 @@ const AddGroupToCommunityModal = ({ isOpen, onClose, communityId }) => {
         <div className="flex border-b border-white/5">
           <button 
             onClick={() => setActiveTab('new')}
-            className={`flex-1 py-4 text-[10px] font-black uppercase tracking-[0.2em] transition-all ${ activeTab === 'new' ? 'text-[#BFF367] border-b-2 border-[#BFF367] bg-[#BFF367]/5' : 'text-white/30 hover:text-white/60' }`}
+            className={`flex-1 py-4 text-[10px] font-bold uppercase tracking-wider transition-all ${ activeTab === 'new' ? 'text-[#BFF367] border-b-2 border-[#BFF367] bg-[#BFF367]/5' : 'text-white/30 hover:text-white/60' }`}
           >
             Create New
           </button>
           <button 
             onClick={() => setActiveTab('existing')}
-            className={`flex-1 py-4 text-[10px] font-black uppercase tracking-[0.2em] transition-all ${ activeTab === 'existing' ? 'text-[#BFF367] border-b-2 border-[#BFF367] bg-[#BFF367]/5' : 'text-white/30 hover:text-white/60' }`}
+            className={`flex-1 py-4 text-[10px] font-bold uppercase tracking-wider transition-all ${ activeTab === 'existing' ? 'text-[#BFF367] border-b-2 border-[#BFF367] bg-[#BFF367]/5' : 'text-white/30 hover:text-white/60' }`}
           >
             Add Existing
           </button>
@@ -101,7 +101,7 @@ const AddGroupToCommunityModal = ({ isOpen, onClose, communityId }) => {
                   <MessageSquare size={32} className="text-[#BFF367]" />
                 </div>
                 <div>
-                  <label className="block text-[10px] font-black text-white/40 uppercase tracking-widest mb-2 ml-1">Group Name</label>
+                  <label className="block text-xs font-semibold text-white/50 uppercase tracking-wider mb-2 ml-1">Group Name</label>
                   <input
                     type="text"
                     autoFocus
@@ -115,7 +115,7 @@ const AddGroupToCommunityModal = ({ isOpen, onClose, communityId }) => {
               <button
                 type="submit"
                 disabled={isCreating || !newGroupName.trim()}
-                className="w-full py-4 bg-[#BFF367] text-black font-black uppercase tracking-[0.2em] rounded-[8px] hover:scale-[1.02] active:scale-[0.98] transition-all disabled:opacity-30 flex items-center justify-center gap-2"
+                className="w-full py-4 bg-[#BFF367] text-black font-bold uppercase tracking-wider rounded-[8px] hover:scale-[1.02] active:scale-[0.98] transition-all disabled:opacity-30 flex items-center justify-center gap-2"
               >
                 {isCreating ? 'Creating...' : 'Create Group'} <Plus size={18} />
               </button>
@@ -171,7 +171,7 @@ const AddGroupToCommunityModal = ({ isOpen, onClose, communityId }) => {
               <button
                 onClick={handleAddExisting}
                 disabled={selectedExistingGroups.length === 0 || isAddingGroups}
-                className="w-full py-4 bg-[#BFF367] text-black font-black uppercase tracking-[0.2em] rounded-[8px] hover:scale-[1.02] active:scale-[0.98] transition-all disabled:opacity-30 flex items-center justify-center gap-2"
+                className="w-full py-4 bg-[#BFF367] text-black font-bold uppercase tracking-wider rounded-[8px] hover:scale-[1.02] active:scale-[0.98] transition-all disabled:opacity-30 flex items-center justify-center gap-2"
               >
                 {isAddingGroups ? 'Adding...' : `Add ${selectedExistingGroups.length} Group${selectedExistingGroups.length !== 1 ? 's' : ''}`}
               </button>

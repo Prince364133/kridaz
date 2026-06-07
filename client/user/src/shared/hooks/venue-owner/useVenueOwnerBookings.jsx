@@ -1,7 +1,7 @@
 import { useState, useEffect, useMemo } from "react";
 import axiosInstance from "@hooks/useAxiosInstance";
 
-const useOwnerBookings = () => {
+const useVenueOwnerBookings = () => {
   const [allBookings, setAllBookings] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -73,7 +73,8 @@ const useOwnerBookings = () => {
     setFilterDays,
     sortConfig,
     requestSort,
+    setSortConfig,
   };
 };
 
-export default useOwnerBookings;
+export default useVenueOwnerBookings;

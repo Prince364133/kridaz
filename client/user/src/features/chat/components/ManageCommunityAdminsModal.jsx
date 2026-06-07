@@ -95,7 +95,7 @@ const ManageCommunityAdminsModal = ({ isOpen, onClose, community, allChats }) =>
               <Crown size={20} className="text-[#BFF367]" />
             </div>
             <div>
-              <h2 className="text-lg font-black text-white italic uppercase tracking-tight">Manage Admins</h2>
+              <h2 className="text-lg font-semibold text-white">Manage Admins</h2>
               <p className="text-[10px] text-white/40 font-bold uppercase tracking-widest">{community.chatName}</p>
             </div>
           </div>
@@ -152,7 +152,7 @@ const ManageCommunityAdminsModal = ({ isOpen, onClose, community, allChats }) =>
                     <div className="flex items-center gap-2">
                       <p className="text-white font-bold text-sm truncate">{member?.name}</p>
                       {isAdmin && (
-                        <span className="shrink-0 text-[8px] bg-[#BFF367]/20 text-[#BFF367] px-1.5 py-0.5 rounded font-black uppercase tracking-wider">
+                        <span className="shrink-0 text-[8px] bg-[#BFF367]/20 text-[#BFF367] px-1.5 py-0.5 rounded font-bold uppercase tracking-wider">
                           Admin
                         </span>
                       )}

@@ -8,6 +8,8 @@ import axiosInstance from "@hooks/useAxiosInstance";
 import { useDispatch, useSelector } from "react-redux";
 import { login } from "@redux/slices/authSlice";
 import { Capacitor } from "@capacitor/core";
+import { auth } from "../../../config/firebase";
+import { RecaptchaVerifier, signInWithPhoneNumber } from "firebase/auth";
 
 import { useAuthModal } from "../../../context/AuthModalContext";
 
@@ -37,6 +39,21 @@ const SignUp = ({ isModal = false }) => {
   const [searchParams] = useSearchParams();
   const isLoggedIn = useSelector((state) => state.auth.isLoggedIn);
   const role = useSelector((state) => state.auth.role);
+
+  useEffect(() => {
+    if (!window.recaptchaVerifier) {
+      window.recaptchaVerifier = new RecaptchaVerifier(auth, 'recaptcha-container', {
+        'size': 'invisible'
+      });
+    }
+
+    return () => {
+      if (window.recaptchaVerifier) {
+        window.recaptchaVerifier.clear();
+        window.recaptchaVerifier = null;
+      }
+    };
+  }, []);
 
   useEffect(() => {
     if (isLoggedIn && role === "user" && !showOnboarding) {
@@ -108,27 +125,36 @@ const SignUp = ({ isModal = false }) => {
     
     setLoading(true);
     try {
-      const payload = { phone: formattedPhone };
-      const res = await axiosInstance.post('/api/user/auth/send-otp', payload);
-      toast.success(res.data.message);
-      if (res.data.otp) {
-        setSentOtp(res.data.otp);
-        if (Capacitor.isNativePlatform()) {
-          toast((t) => (
-            <div className="flex flex-col gap-1 p-1">
-              <div className="font-bold text-sm text-black flex items-center gap-1">
-                🔔 Kridaz Notification
+      if (window.recaptchaVerifier) {
+        const fullPhone = `+${formattedPhone}`;
+        const confirmationResult = await signInWithPhoneNumber(auth, fullPhone, window.recaptchaVerifier);
+        window.confirmationResult = confirmationResult;
+        toast.success("OTP sent to your phone");
+        setTimeLeft(60);
+      } else {
+        const payload = { phone: formattedPhone };
+        const res = await axiosInstance.post('/api/user/auth/send-otp', payload);
+        toast.success(res.data.message);
+        if (res.data.otp) {
+          setSentOtp(res.data.otp);
+          if (Capacitor.isNativePlatform()) {
+            toast((t) => (
+              <div className="flex flex-col gap-1 p-1">
+                <div className="font-bold text-sm text-black flex items-center gap-1">
+                  🔔 Kridaz Notification
+                </div>
+                <div className="text-xs text-gray-600">
+                  Your verification code is: <strong className="text-black text-sm">{res.data.otp}</strong>
+                </div>
               </div>
-              <div className="text-xs text-gray-600">
-                Your verification code is: <strong className="text-black text-sm">{res.data.otp}</strong>
-              </div>
-            </div>
-          ), { position: 'top-center', duration: 8000 });
+            ), { position: 'top-center', duration: 8000 });
+          }
         }
+        setTimeLeft(60);
       }
-      setTimeLeft(60);
     } catch (err) {
-      toast.error(err.response?.data?.message || "Failed to send OTP");
+      console.error(err);
+      toast.error(err.response?.data?.message || err.message || "Failed to send OTP");
       setStep(1); // Revert back if sending failed
     } finally {
       setLoading(false);
@@ -140,8 +166,14 @@ const SignUp = ({ isModal = false }) => {
     if (!otp || otp.length < 6) return toast.error("Valid 6-digit OTP required");
     
     setLoading(true);
+    let firebaseIdToken = null;
     try {
-      const payload = authMode === 'email' ? { email, otp } : { phone, otp };
+      if (authMode === 'phone' && window.confirmationResult) {
+        const result = await window.confirmationResult.confirm(otp);
+        firebaseIdToken = await result.user.getIdToken();
+      }
+
+      const payload = authMode === 'email' ? { email, otp } : { phone, otp: firebaseIdToken || otp };
       const res = await axiosInstance.post('/api/user/auth/verify-otp', payload);
       
       if (res.data.success) {
@@ -150,14 +182,15 @@ const SignUp = ({ isModal = false }) => {
           authMethod: authMode,
           email: authMode === 'email' ? email : '',
           phone: authMode === 'phone' ? phone : '',
-          otp,
+          otp: firebaseIdToken || otp,
           password: "",
           registrationToken: res.data.registrationToken
         });
         setShowOnboarding(true);
       }
     } catch (err) {
-      toast.error(err.response?.data?.message || "Invalid OTP");
+      console.error(err);
+      toast.error(err.response?.data?.message || err.message || "Invalid OTP");
     } finally {
       setLoading(false);
     }
@@ -475,9 +508,9 @@ const SignUp = ({ isModal = false }) => {
             isOpen={showOnboarding} 
             onClose={() => setShowOnboarding(false)}
             initialData={onboardingData}
-            onComplete={handleOnboardingComplete}
           />
         )}
+        <div id="recaptcha-container"></div>
       </>
     );
   }
@@ -523,6 +556,7 @@ const SignUp = ({ isModal = false }) => {
           onComplete={handleOnboardingComplete}
         />
       )}
+      <div id="recaptcha-container"></div>
     </div>
   );
 };

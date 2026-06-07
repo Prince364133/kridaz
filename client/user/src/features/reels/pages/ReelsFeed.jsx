@@ -5,6 +5,7 @@ import { ChevronLeft, Camera } from 'lucide-react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useSocket } from '@context/SocketContext';
 import { useDispatch, useSelector } from 'react-redux';
+import GlobalBackButton from '@/shared/components/GlobalBackButton';
 
 const ReelsFeed = () => {
   const navigate = useNavigate();
@@ -192,12 +193,7 @@ const ReelsFeed = () => {
     <div className="fixed inset-0 h-[100dvh] w-full bg-black overflow-hidden z-50 flex justify-center">
       {/* Header Overlay */}
       <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-[500px] p-4 pt-[env(safe-area-inset-top,16px)] flex items-center justify-between z-[60] pointer-events-none">
-        <button 
-          onClick={() => navigate(-1)} 
-          className="p-2.5 bg-black/50 rounded-full text-white pointer-events-auto backdrop-blur-md border border-white/10 active:scale-90 transition-transform shadow-lg"
-        >
-          <ChevronLeft size={22} />
-        </button>
+        <GlobalBackButton />
         <h2 className="text-white font-bold text-lg tracking-tight pointer-events-auto drop-shadow-[0_2px_8px_rgba(0,0,0,0.9)]">Shorts</h2>
         <button 
           onClick={() => navigate('/reels/upload')}

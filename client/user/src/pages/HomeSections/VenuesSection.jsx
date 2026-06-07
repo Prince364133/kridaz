@@ -1,74 +1,13 @@
 /* eslint-disable react/prop-types */
 import React, { useRef, useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { Search, ChevronRight, ChevronLeft, Star, Heart, MapPin } from "lucide-react";
+import { Search, ChevronRight, ChevronLeft, Star, Heart, MapPin, X } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import TurfCardMobile from "../../features/turf/components/TurfCardMobile";
 
 const BDR = "#2A2A2A";
 
-const VenueCard = ({ t }) => (
-  <Link 
-    to={`/venue/${t._id}`} 
-    draggable={false}
-    className="block relative w-full h-full rounded-[12px] overflow-hidden group bg-[#111] border-2 border-gray-600/60 hover:border-white/40 transition-all duration-300 shadow-lg"
-  >
-    {/* Normal Card Content */}
-    <div className="absolute inset-0 w-full h-full bg-[#111]">
-      <img 
-        src={t.images?.[0] || "https://images.unsplash.com/photo-1540747913346-19e32dc3e97e?auto=format&fit=crop&q=80"} 
-        onError={(e) => { e.target.onerror = null; e.target.src = "https://images.unsplash.com/photo-1540747913346-19e32dc3e97e?auto=format&fit=crop&q=80"; }}
-        alt={t.name}
-        draggable={false}
-        className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 pointer-events-none" 
-      />
-      
-      {/* Dark gradient at the bottom */}
-      <div className="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent opacity-90 z-0 pointer-events-none" />
-
-      {/* Heart Icon top right */}
-      <div className="absolute top-4 right-4 z-10">
-        <button className="w-10 h-10 rounded-full bg-white flex items-center justify-center hover:scale-110 transition-transform shadow-md" onClick={(e) => e.preventDefault()}>
-          <Heart size={18} className="text-gray-800" strokeWidth={2} />
-        </button>
-      </div>
-
-      {/* Bottom Details Section */}
-      <div className="absolute bottom-0 left-0 right-0 p-5 z-10 flex flex-col gap-3 pointer-events-none">
-        <div className="flex flex-col gap-1.5">
-          <div className="flex justify-between items-end gap-2">
-            <h3 className="text-[18px] font-bold text-white leading-tight line-clamp-2" style={{ fontFamily: "'Open Sans', sans-serif" }}>
-              {t.name}
-            </h3>
-          </div>
-        </div>
-
-        {/* Pills & Pricing Row */}
-        <div className="flex justify-between items-center mt-1">
-          <div className="flex flex-wrap items-center gap-2">
-            <div className="flex items-center gap-1.5 px-3 py-1.5 bg-white/20 backdrop-blur-md rounded-full border border-white/10">
-              <Star size={12} className="text-white" fill="currentColor" />
-              <span className="text-[11px] font-semibold text-white">{t.averageRating || t.rating || "4.8"}</span>
-            </div>
-            <div className="flex items-center gap-1.5 px-3 py-1.5 bg-white/20 backdrop-blur-md rounded-full border border-white/10">
-              <MapPin size={12} className="text-white" />
-              <span className="text-[11px] font-semibold text-white">{t.distance ? `${Math.round(t.distance)} km` : "1 km"} away</span>
-            </div>
-          </div>
-          
-          {t.pricePerHour && (
-            <div className="text-right shrink-0 ml-2">
-              <span className="text-[#BFF367] text-[22px] font-black tracking-tight">₹{t.pricePerHour}</span>
-              <span className="text-white/70 text-[12px] ml-1">/hr</span>
-            </div>
-          )}
-        </div>
-      </div>
-      
-    </div>
-
-    {/* Top left feature tag removed as requested */}
-  </Link>
-);
+import VenueCard from "../../features/turf/components/VenueCard";
 
 export default function VenuesSection({
   userLocation,
@@ -81,6 +20,7 @@ export default function VenuesSection({
   const navigate = useNavigate();
   const scrollRef = useRef(null);
   const [isHovered, setIsHovered] = useState(false);
+  const [selectedTurfForPopup, setSelectedTurfForPopup] = useState(null);
 
   useEffect(() => {
     let interval;
@@ -162,7 +102,7 @@ export default function VenuesSection({
             >
               {displayTurfs.slice(0, 10).map((t) => (
                 <div key={t._id} className="w-[65%] shrink-0 snap-start aspect-[1080/1350]">
-                  <VenueCard t={t} />
+                  <VenueCard t={t} onClick={() => setSelectedTurfForPopup(t)} />
                 </div>
               ))}
             </div>
@@ -170,6 +110,37 @@ export default function VenuesSection({
         </div>
       )}
 
+      {/* Modal Popup for Venue Details */}
+      <AnimatePresence>
+        {selectedTurfForPopup && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm"
+            onClick={() => setSelectedTurfForPopup(null)}
+          >
+            <motion.div
+              initial={{ opacity: 0, y: -50 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -50 }}
+              transition={{ type: "spring", damping: 25, stiffness: 300 }}
+              className="relative w-full max-w-[400px] max-h-[90vh] overflow-y-auto rounded-[24px] no-scrollbar shadow-2xl"
+              onClick={(e) => e.stopPropagation()}
+            >
+              {/* Close Button */}
+              <button 
+                className="absolute top-4 left-4 z-50 w-8 h-8 rounded-full bg-black/50 backdrop-blur-md flex items-center justify-center text-white hover:bg-black/80 transition-colors border border-white/20"
+                onClick={() => setSelectedTurfForPopup(null)}
+              >
+                <X size={18} />
+              </button>
+              
+              <TurfCardMobile turf={selectedTurfForPopup} />
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
     </section>
   );

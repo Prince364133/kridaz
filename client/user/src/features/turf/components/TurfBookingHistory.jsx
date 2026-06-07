@@ -22,7 +22,7 @@ import toast from "react-hot-toast";
 const BG = "#000000";
 const CARD = "#000000";
 const BORDER = "#2D2D2D";
-const ACCENT = "#CCFF00";
+const ACCENT = "#B3DC26";
 const MUTED = "#878C9F";
 const MUTED2 = "#999999";
 
@@ -31,7 +31,7 @@ const STATUS_META = {
  CONFIRMED: { label: "Confirmed", color: ACCENT, bg: `${ACCENT}15`, border: `${ACCENT}30` },
  CANCELLED: { label: "Cancelled", color: "#EF4444", bg: "#EF444415", border: "#EF444430" },
  COMPLETED: { label: "Completed", color: "#10B981", bg: "#10B98115", border: "#10B98130" },
- DISPUTED: { label: "Under Review", color: "#BFF367", bg: "#BFF36715", border: "#BFF36730" },
+ DISPUTED: { label: "Under Review", color: ACCENT, bg: `${ACCENT}15`, border: `${ACCENT}30` },
  PLAYING: { label: "In Progress", color: "#3B82F6", bg: "#3B82F615", border: "#3B82F630" },
 };
 
@@ -172,7 +172,7 @@ const TurfBookingHistory = () => {
   if (loading) return <TurfBookingHistorySkeleton />;
 
   return (
-    <div className="max-w-7xl mx-auto px-6 py-8 booking-history-container" style={{ fontFamily: "'Open Sans'" }}>
+    <div className="max-w-7xl mx-auto px-3 md:px-0 pt-2 pb-8 booking-history-container" style={{ fontFamily: "'Open Sans'" }}>
       <style>{`
         .booking-history-container h1,
         .booking-history-container h2,
@@ -191,12 +191,11 @@ const TurfBookingHistory = () => {
       <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
         
         {/* Header and Sub-Tabs */}
-        <div className="flex flex-col xl:flex-row xl:items-center justify-between mb-8 pb-6 border-b border-white/10 gap-6">
+        <div className="flex flex-col xl:flex-row xl:items-center justify-between mb-6 pb-4 border-b border-white/10 gap-4 px-0">
           <div className="min-w-0">
             <h2 className="text-sm sm:text-lg md:text-xl lg:text-2xl font-black uppercase tracking-tighter text-white whitespace-nowrap" style={{ fontFamily: "'Open Sans'" }}>
               Booking & Game History
             </h2>
-            <p className="text-[10px] sm:text-xs md:text-sm font-light text-gray-500 uppercase tracking-widest mt-1" style={{ fontFamily: "'Open Sans'", fontWeight: 300 }}>Manage your turf reservations, joined matches, and hired professionals</p>
           </div>
           
           <div className="flex flex-nowrap overflow-x-auto scrollbar-hide gap-2 pb-1 max-w-full shrink-0">
@@ -244,71 +243,54 @@ const TurfBookingHistory = () => {
                     const slotOver = new Date() > new Date(booking.playEndTime);
 
                     return (
-                      <div key={booking.id || booking._id} className="bg-[#111111] border border-white/5 rounded-[8px] p-4 flex flex-col md:flex-row gap-6 hover:border-[#CCFF00]/30 transition-colors group relative overflow-hidden">
+                      <div key={booking.id || booking._id} className="bg-[#121212] border border-[rgba(255,255,255,0.08)] rounded-[16px] p-4 flex flex-col md:flex-row md:items-center gap-3 md:gap-4 hover:shadow-[0px_8px_24px_rgba(179,220,38,0.15)] transition-all font-inter">
                         
-                        {/* Left Image */}
-                        <div className="w-full md:w-64 h-40 shrink-0 rounded-[8px] overflow-hidden bg-[#222]">
-                          <img src={booking.turf?.images?.[0] || 'https://images.unsplash.com/photo-1540747913346-19e32dc3e97e?auto=format&fit=crop&q=80'} onError={(e) => { e.target.onerror = null; e.target.src = 'https://images.unsplash.com/photo-1540747913346-19e32dc3e97e?auto=format&fit=crop&q=80'; }} className="w-full h-full object-cover transition-all duration-500" alt="Turf" />
-                        </div>
-
-                        {/* Content */}
-                        <div className="flex-1 flex flex-col justify-between py-2">
+                        {/* 1. Venue & Header */}
+                        <div className="flex flex-col gap-1.5 md:w-[35%]">
+                          <div className="flex items-center justify-between md:justify-start gap-2">
+                            <span className="px-1.5 py-0.5 bg-[#B3DC26] text-[#000000] rounded-[4px] text-[8px] font-black uppercase tracking-widest">{booking.turf?.sportType || 'FOOTBALL'}</span>
+                            <span className="text-[9px] font-bold text-[rgba(255,255,255,0.40)] uppercase tracking-widest">ID: #{(booking.id || booking._id)?.slice(-5).toUpperCase() || 'B7402'}</span>
+                          </div>
                           <div>
-                            <div className="flex items-center gap-3 mb-3">
-                              <span className="px-2 py-1 bg-[#CCFF00]/10 text-[#CCFF00] rounded text-[9px] font-black uppercase tracking-widest">{booking.turf?.sportType || 'FOOTBALL'}</span>
-                              <span className="text-[9px] font-bold text-gray-500 uppercase tracking-widest">BOOKING ID: #{(booking.id || booking._id)?.slice(-5).toUpperCase() || 'B7402'}</span>
+                            <h2 className="text-[14px] font-black text-[#FFFFFF] uppercase tracking-tight truncate">{booking.turf?.name || 'Decathlon Sports Arena'}</h2>
+                            <div className="flex items-center gap-1 text-[10px] font-bold text-[rgba(255,255,255,0.70)] uppercase tracking-widest mt-0.5">
+                              <MapPin size={10} className="text-[#B3DC26]" />
+                              <span className="truncate">{booking.turf?.city || 'Location'}</span>
                             </div>
-                            <h2 className="text-xl font-black text-white uppercase tracking-tight mb-4">{booking.turf?.name || 'Decathlon Sports Arena'}</h2>
-                            <div className="flex flex-wrap items-center gap-4 md:gap-6 text-[10px] font-bold text-gray-400 uppercase tracking-widest">
-                              <div className="flex items-center gap-1.5"><Clock size={12} className="text-gray-500" /> {booking.timeSlot?.formattedStartTime || '18:00'} - {booking.timeSlot?.formattedEndTime || '19:30'}</div>
-                              <div className="flex items-center gap-1.5"><Calendar size={12} className="text-gray-500" /> {booking.timeSlot?.date || '12 Oct 2026'}</div>
-                              <div className="flex items-center gap-1.5">
-                                <MapPin size={12} className="text-gray-500" /> {booking.turf?.city || 'Location'}
-                              </div>
-                            </div>
-                          </div>
-
-                          {/* Actions Row */}
-                          <div className="flex flex-wrap items-center gap-2 mt-4 opacity-100 md:opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                            <Link to={`/booking-pass/${booking.id || booking._id}`} className="px-4 py-2 rounded-[6px] bg-white/5 border border-white/10 hover:bg-[#CCFF00] hover:text-black hover:border-[#CCFF00] text-white text-[9px] font-black uppercase tracking-widest transition-colors flex items-center gap-1.5">
-                              <Ticket size={12} /> Pass
-                            </Link>
-                            <Link to={`/booking-invoice/${booking.id || booking._id}`} className="px-4 py-2 rounded-[6px] bg-white/5 border border-white/10 hover:bg-white/10 text-white text-[9px] font-black uppercase tracking-widest transition-colors flex items-center gap-1.5">
-                              <FileText size={12} /> Invoice
-                            </Link>
-                            {booking.status === "CONFIRMED" && hrs >= 72 && !slotOver && (
-                              <button onClick={() => cancelBooking(booking)} className="px-4 py-2 rounded-[6px] bg-red-500/10 border border-red-500/20 text-red-500 hover:bg-red-500 hover:text-white text-[9px] font-black uppercase tracking-widest transition-colors flex items-center gap-1.5">
-                                Cancel
-                              </button>
-                            )}
-                            {booking.status !== "CANCELLED" && booking.status !== "DISPUTED" && (
-                              <button onClick={() => setSelectedDisputeBooking(booking)} className="px-4 py-2 rounded-[6px] bg-white/5 border border-white/10 hover:border-yellow-500/50 hover:text-yellow-500 text-gray-400 text-[9px] font-black uppercase tracking-widest transition-colors flex items-center gap-1.5">
-                                Dispute
-                              </button>
-                            )}
-                            {booking.status === "COMPLETED" && (
-                              <button onClick={() => openReviewModal(booking.turf?.id || booking.turf?._id)} className="px-4 py-2 rounded-[6px] bg-white/5 border border-white/10 hover:border-[#CCFF00]/50 hover:text-[#CCFF00] text-gray-400 text-[9px] font-black uppercase tracking-widest transition-colors flex items-center gap-1.5">
-                                Review
-                              </button>
-                            )}
                           </div>
                         </div>
 
-                        {/* Right: Price & Status */}
-                        <div className="flex flex-col justify-between items-end py-2 shrink-0 mt-4 md:mt-0 border-t md:border-t-0 md:border-l border-white/5 pt-4 md:pt-0 md:pl-6">
-                          <div className="flex flex-col items-end">
-                            <span className="text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-1">Total Paid</span>
-                            <div className="text-2xl font-black text-white">₹{Number(booking.advanceAmount) || Number(booking.totalPrice) || Number(booking.turf?.pricePerHour) || '1,500'}</div>
-                            {booking.paymentType === "PARTIAL" && (
-                              <div className="text-[9px] font-bold text-yellow-500 uppercase tracking-widest mt-1">Bal: ₹{Number(booking.balanceAmount) || 0}</div>
-                            )}
-                          </div>
-                          
-                          <div className="mt-4 md:mt-0">
-                            <div className="px-4 py-1.5 rounded text-[9px] font-black uppercase tracking-widest" style={{ color: sm.color, backgroundColor: sm.bg, border: `1px solid ${sm.border}` }}>
-                              {sm.label}
+                        <div className="hidden md:block w-[1px] h-10 bg-white/10 shrink-0"></div>
+                        <div className="md:hidden h-[1px] w-full bg-white/5 my-0.5"></div>
+
+                        {/* 2. Middle: Date/Time & Price/Status container */}
+                        <div className="flex justify-between items-end md:items-center md:flex-1">
+                          {/* Date & Time */}
+                          <div className="flex flex-col justify-center gap-1">
+                            <div className="flex items-center gap-1.5 text-[10px] font-bold text-[#FFFFFF] uppercase tracking-widest">
+                              <Calendar size={12} className="text-[rgba(255,255,255,0.70)]" /> 
+                              {booking.timeSlot?.date || '12 Oct 2026'}
+                            </div>
+                            <div className="flex items-center gap-1.5 text-[10px] font-bold text-[rgba(255,255,255,0.70)] uppercase tracking-widest">
+                              <Clock size={12} className="text-[rgba(255,255,255,0.70)]" /> 
+                              {booking.timeSlot?.formattedStartTime || '18:00'} - {booking.timeSlot?.formattedEndTime || '19:30'}
                             </div>
                           </div>
+
+                          {/* Price & Status */}
+                          <div className="flex flex-col justify-center items-end gap-1 md:pr-4">
+                             <div className="text-[14px] font-black text-[#B3DC26]">₹{Number(booking.advanceAmount) || Number(booking.totalPrice) || Number(booking.turf?.pricePerHour) || '1,500'}</div>
+                             <div className="px-1.5 py-0.5 rounded-[4px] text-[8px] font-black uppercase tracking-widest" style={{ color: sm.color, backgroundColor: sm.bg, border: `1px solid ${sm.border}` }}>
+                               {sm.label}
+                             </div>
+                          </div>
+                        </div>
+
+                        {/* 3. Action */}
+                        <div className="mt-1 pt-3 border-t border-white/5 md:border-t-0 md:pt-0 md:mt-0 shrink-0">
+                           <Link to={`/booking-pass/${booking.id || booking._id}`} className="w-full md:w-auto h-[36px] px-6 rounded-[8px] bg-[#B3DC26] text-[#000000] text-[11px] font-black uppercase tracking-widest hover:bg-[#a2c921] transition-all flex items-center justify-center gap-2">
+                             <Ticket size={14} /> View Pass
+                           </Link>
                         </div>
                       </div>
                     );

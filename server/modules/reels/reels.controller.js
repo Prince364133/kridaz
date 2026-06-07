@@ -66,6 +66,13 @@ export const confirmUpload = async (req, res) => {
       }
     });
 
+    // Invalidate the cache so the new pending reel is visible
+    try {
+      await invalidateCache('reels:feed*');
+    } catch (err) {
+      logger.warn('[REELS] Failed to invalidate cache on confirm:', err);
+    }
+
     // 2. Push to transcoding queue
     await mediaQueue.add('TRANSCODE_VIDEO', { 
       mediaId: reel.id,
@@ -232,15 +239,7 @@ export const getReelsFeed = async (req, res) => {
 
     const nextCursor = reels.length > 0 ? reels[reels.length - 1].id : null;
 
-    // Generate a signed cookie for Cloudflare Edge Auth
-    const expiry = Math.floor(Date.now() / 1000) + 7200; 
-    const message = `exp=${expiry}`;
-    const signature = crypto
-      .createHmac('sha256', process.env.REELS_COOKIE_SECRET)
-      .update(message)
-      .digest('hex');
-    
-    res.cookie('cf_reel_token', `${message}&sig=${signature}`, COOKIE_SETTINGS);
+
 
     // Performance Headers
     res.setHeader('Cache-Control', 'private, no-cache, no-store, must-revalidate');
@@ -531,10 +530,7 @@ export const getRecommendedReels = async (req, res) => {
 
     const nextCursor = reelsWithCreator.length === limit ? reelsWithCreator[reelsWithCreator.length - 1].id : null;
     
-    const expiry = Math.floor(Date.now() / 1000) + 7200;
-    const message = `exp=${expiry}`;
-    const signature = crypto.createHmac('sha256', process.env.REELS_COOKIE_SECRET).update(message).digest('hex');
-    res.cookie('cf_reel_token', `${message}&sig=${signature}`, COOKIE_SETTINGS);
+
 
     res.json({ success: true, reels: reelsWithCreator, nextCursor });
   } catch (error) {

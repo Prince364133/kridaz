@@ -228,6 +228,64 @@ export const createPost = async (req, res) => {
   }
 };
 
+export const getPostById = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const post = await prisma.post.findUnique({
+      where: { id },
+      include: {
+        author: { select: { id: true, name: true, profilePicture: true, username: true } },
+        likes: { select: { id: true, name: true, profilePicture: true, username: true } },
+        _count: {
+          select: { likes: true, comments: true }
+        },
+        comments: {
+          include: {
+            user: { select: { id: true, name: true, profilePicture: true, username: true } }
+          },
+          orderBy: { createdAt: 'desc' }
+        }
+      }
+    });
+
+    if (!post) {
+      return res.status(404).json({ success: false, message: 'Post not found' });
+    }
+
+    const formattedPost = {
+      ...post,
+      adminId: post.author,
+      mediaUrl: post.mediaUrls?.[0],
+      image: post.mediaType === 'image' ? post.mediaUrls?.[0] : null,
+      videoUrl: post.mediaType === 'video' ? post.mediaUrls?.[0] : null,
+      likesCount: post._count.likes,
+      totalComments: post._count.comments,
+      comments: post.comments.map(c => ({
+        ...c,
+        userId: c.user
+      }))
+    };
+    delete formattedPost.author;
+    delete formattedPost._count;
+
+    // Check if the author has an active story
+    if (formattedPost.adminId && formattedPost.adminId.id) {
+      const activeStory = await prisma.story.findFirst({
+        where: {
+          userId: formattedPost.adminId.id,
+          expiresAt: { gt: new Date() }
+        }
+      });
+      formattedPost.adminId.hasActiveStory = !!activeStory;
+    }
+
+    res.status(200).json({ success: true, post: formattedPost });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+
 export const getPosts = async (req, res) => {
   try {
     const rawId = req.user?.id || req.admin?.id;

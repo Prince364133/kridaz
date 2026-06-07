@@ -1,8 +1,8 @@
 import React, { useState } from "react";
 import { Outlet } from "react-router-dom";
-import { OwnerSidebar, AuthenticatedNavbar } from "@components/layout";
+import { VenueOwnerSidebar, AuthenticatedNavbar } from "@components/layout";
 import ScrollToTop from "@components/common/ScrollToTop";
-import MobileBottomNav from "@user/components/layout/MobileBottomNav";
+import VenueOwnerBottomNav from "../components/layout/VenueOwnerBottomNav";
 import RootErrorBoundary from "@components/common/RootErrorBoundary";
 
 const PartnerLayout = () => {
@@ -23,7 +23,7 @@ const PartnerLayout = () => {
           onMouseLeave={() => window.innerWidth >= 1024 && setIsHovered(false)}
           className="z-50"
         >
-          <OwnerSidebar
+          <VenueOwnerSidebar
             isOpen={isOpen}
             toggleSidebar={toggleSidebar}
             isMinimized={isMinimized}
@@ -31,16 +31,16 @@ const PartnerLayout = () => {
           />
         </div>
         <main
-          className={`flex-1 overflow-x-clip transition-all duration-300 ease-in-out ${isMinimized ? "lg:ml-20" : "lg:ml-64"}`}
+          className={`flex-1 min-w-0 overflow-x-clip transition-all duration-300 ease-in-out ${isMinimized ? "lg:ml-20" : "lg:ml-64"}`}
         >
-          <div className="w-full pt-0 px-4 pb-24 lg:pt-0 lg:px-8 lg:pb-10">
+          <div className="w-full pt-6 px-4 pb-[80px] lg:pt-8 lg:px-8 lg:pb-10">
             <RootErrorBoundary>
               <Outlet />
             </RootErrorBoundary>
           </div>
         </main>
       </div>
-      <MobileBottomNav />
+      <VenueOwnerBottomNav />
     </div>
   );
 };

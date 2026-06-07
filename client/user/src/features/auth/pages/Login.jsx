@@ -11,6 +11,8 @@ import {
   ArrowRight,
   X
 } from "lucide-react";
+import { auth } from "../../../config/firebase";
+import { RecaptchaVerifier } from "firebase/auth";
 
 import { useAuthModal } from "../../../context/AuthModalContext";
 
@@ -43,7 +45,23 @@ const Login = ({ isModal = false }) => {
   const { isLoggedIn, role } = useSelector((state) => state.auth);
   
   useEffect(() => {
+    if (!window.recaptchaVerifier) {
+      window.recaptchaVerifier = new RecaptchaVerifier(auth, 'recaptcha-container', {
+        'size': 'invisible'
+      });
+    }
+
+    return () => {
+      if (window.recaptchaVerifier) {
+        window.recaptchaVerifier.clear();
+        window.recaptchaVerifier = null;
+      }
+    };
+  }, []);
+
+  useEffect(() => {
     setMounted(true);
+
     if (isLoggedIn && !showOnboarding) {
       if (isModal) {
         closeAuthModal();
@@ -254,6 +272,7 @@ const Login = ({ isModal = false }) => {
           onClose={() => setShowOnboarding(false)} 
           onComplete={() => navigate("/")}
         />
+        <div id="recaptcha-container"></div>
       </>
     );
   }
@@ -295,6 +314,7 @@ const Login = ({ isModal = false }) => {
         onClose={() => setShowOnboarding(false)} 
         onComplete={() => navigate("/")}
       />
+      <div id="recaptcha-container"></div>
     </div>
   );
 };

@@ -2,7 +2,7 @@ name: Kridaz Monorepo CI/CD
 
 on:
   push:
-    branches: [ main, version3, Production, dev_test_production ]
+    branches: [ dev_test_production ]
   workflow_dispatch:
 
 concurrency:

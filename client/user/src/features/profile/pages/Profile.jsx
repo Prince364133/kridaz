@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { Link, useParams, useSearchParams, useNavigate, useLocation } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
 import { MapPin, Clock, Zap,
-  ArrowRight, Camera, Edit2, MessageSquare, Heart, Loader2, MessageCircle, Award, Plus, TrendingUp, CheckCircle2, Crown, BarChart3, Medal, Users, Share2, Wifi, Radio
+  ArrowRight, Camera, Edit2, MessageSquare, Heart, Loader2, MessageCircle, Award, Plus, TrendingUp, CheckCircle2, Crown, BarChart3, Medal, Users, Share2, Wifi, Radio, User
 } from "lucide-react";
 import { 
   LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer 
@@ -612,8 +612,8 @@ export default function Profile() {
       <svg width="0" height="0" className="absolute">
         <defs>
           <linearGradient id="cyan-lime-gradient" x1="0%" y1="0%" x2="100%" y2="0%">
-            <stop offset="0%" stopColor="#BFF367" />
-            <stop offset="100%" stopColor="#BFF367" />
+            <stop offset="0%" stopColor="#55DEE8" />
+            <stop offset="100%" stopColor="#B3DC26" />
           </linearGradient>
         </defs>
       </svg>
@@ -650,19 +650,37 @@ export default function Profile() {
           </button>
         </div>
 
-        <div className="max-w-7xl mx-auto px-6 relative z-10 -mt-20 md:-mt-24">
-          <div className="flex flex-col items-center md:items-start gap-4">
-            <div className="relative group/avatar shrink-0 flex flex-col items-center">
+        <div className="max-w-7xl mx-auto px-2 relative z-10 -mt-20 md:-mt-24">
+          <div className="flex flex-col items-start gap-4">
+            <div className="relative group/avatar shrink-0 flex flex-col items-start">
               <div className="relative transition-all duration-300 hover:scale-105">
                 <div 
-                  className="w-32 h-32 md:w-40 md:h-40 rounded-full border-[5px] border-black bg-gradient-to-br from-[#BFF367] to-[#BFF367] p-[2px] shadow-[0_4px_25px_rgba(0,0,0,0.6),0_0_30px_rgba(191,243,103,0.2)] hover:shadow-[0_4px_30px_rgba(0,0,0,0.8),0_0_45px_rgba(191,243,103,0.5)] overflow-hidden cursor-pointer transition-all duration-500 relative"
+                  className="w-32 h-32 md:w-40 md:h-40 rounded-full border-[5px] border-black bg-gradient-to-br from-[#55DEE8] to-[#B3DC26] p-[2px] shadow-[0_4px_25px_rgba(0,0,0,0.6),0_0_30px_rgba(179,220,38,0.2)] hover:shadow-[0_4px_30px_rgba(0,0,0,0.8),0_0_45px_rgba(179,220,38,0.5)] overflow-hidden cursor-pointer transition-all duration-500 relative"
                   onClick={handleAvatarClick}
                 >
-                  {profileUser?.profilePicture ? (
-                    <img src={profileUser.profilePicture} alt="" className="w-full h-full rounded-full object-cover" />
+                  {profileUser?.profilePicture || profileUser?.profileImage ? (
+                    <>
+                      <img 
+                        src={profileUser.profilePicture || profileUser.profileImage} 
+                        alt="" 
+                        className="w-full h-full rounded-full object-cover" 
+                        onError={(e) => {
+                          e.target.style.display = "none";
+                          if (e.target.nextElementSibling) {
+                            e.target.nextElementSibling.style.display = "flex";
+                          }
+                        }}
+                      />
+                      <div 
+                        className="w-full h-full rounded-full items-center justify-center bg-zinc-900"
+                        style={{ display: "none" }}
+                      >
+                        <User size={48} strokeWidth={1.5} stroke="url(#cyan-lime-gradient)" />
+                      </div>
+                    </>
                   ) : (
-                    <div className="w-full h-full rounded-full flex items-center justify-center bg-zinc-900 text-[#BFF367] text-4xl font-black">
-                      {profileUser?.name?.[0]}
+                    <div className="w-full h-full rounded-full flex items-center justify-center bg-zinc-900">
+                      <User size={48} strokeWidth={1.5} stroke="url(#cyan-lime-gradient)" />
                     </div>
                   )}
                   {isOwnProfile && (
@@ -675,7 +693,7 @@ export default function Profile() {
                 {isOwnProfile && (
                   <button 
                     onClick={() => setIsEditModalOpen(true)}
-                    className="absolute -top-1 right-2 w-9 h-9 bg-gradient-to-br from-[#BFF367] to-[#BFF367] rounded-full border-[4px] border-black flex items-center justify-center text-black hover:scale-110 transition-all shadow-lg z-20"
+                    className="absolute -top-1 right-2 w-9 h-9 bg-gradient-to-br from-[#55DEE8] to-[#B3DC26] rounded-full border-[4px] border-black flex items-center justify-center text-black hover:scale-110 transition-all shadow-lg z-20"
                   >
                     <Edit2 size={16} strokeWidth={3} />
                   </button>
@@ -690,27 +708,23 @@ export default function Profile() {
               </div>
             </div>
 
-            <div className="w-full space-y-2 flex flex-col items-center md:items-start text-center md:text-left">
+            <div className="w-full space-y-2 flex flex-col items-start text-left">
               <div>
-                <div className="flex items-center justify-center md:justify-start gap-2 flex-wrap">
+                <div className="flex items-center justify-start gap-2 flex-wrap">
                   <h1 className="text-3xl md:text-5xl font-black text-white tracking-tighter uppercase" style={HEADING_STYLE}>
-                    {profileUser?.name || "Player Name"}
+                    {profileUser?.name || ""}
                   </h1>
-                  <CheckCircle2 className="w-6 h-6 text-[#BFF367]" fill="currentColor" />
                 </div>
-                {profileUser?.username && (
+                {(profileUser?.username || profileUser?.interests?.length > 0) && (
                   <p className="text-sm font-bold text-gray-500 tracking-tight mt-0.5" style={SUBHEADING_STYLE}>
-                    @{profileUser.username}
-                  </p>
-                )}
-                {profileUser?.role && (
-                  <p className="text-lg font-bold text-gray-400 uppercase tracking-tight mt-1" style={SUBHEADING_STYLE}>
-                    {profileUser?.role} • {profileUser?.interests?.[0] || "Sports"}
+                    {profileUser?.username ? `@${profileUser.username}` : ""}
+                    {profileUser?.username && profileUser?.interests?.[0] ? " • " : ""}
+                    {profileUser?.interests?.[0] || ""}
                   </p>
                 )}
               </div>
 
-              <div className="flex flex-wrap items-center justify-center md:justify-start gap-4 text-gray-400 font-bold uppercase tracking-widest text-[10px] md:text-xs">
+              <div className="flex flex-wrap items-center justify-start gap-4 text-gray-400 font-bold uppercase tracking-widest text-[10px] md:text-xs">
                 <button 
                   onClick={() => {
                     setActiveProfileTab("connections");
@@ -732,32 +746,45 @@ export default function Profile() {
                 </button>
               </div>
 
-              <div className="flex items-center justify-center md:justify-start gap-1.5 text-gray-400 font-bold uppercase tracking-widest text-[10px] md:text-xs">
-                <MapPin className="w-3.5 h-3.5 text-[#BFF367]" />
-                <span>
-                  {(() => {
-                    const loc = profileUser?.city || "Manchester";
-                    const parts = loc.split(",").map(p => p.trim());
-                    if (parts.length > 2) {
-                      return `${parts[0]}, ${parts[parts.length - 1]}`;
-                    }
-                    return loc;
-                  })()}
-                </span>
-              </div>
+              {(profileUser?.city || profileUser?.location) && (
+                <div className="flex items-center justify-start gap-1.5 text-gray-400 font-bold uppercase tracking-widest text-[10px] md:text-xs">
+                  <MapPin className="w-3.5 h-3.5 text-[#BFF367]" />
+                  <span>
+                    {(() => {
+                      const loc = profileUser?.city || profileUser?.location || "";
+                      const parts = loc.split(",").map(p => p.trim());
+                      if (parts.length > 2) {
+                        return `${parts[0]}, ${parts[parts.length - 1]}`;
+                      }
+                      return loc;
+                    })()}
+                  </span>
+                </div>
+              )}
 
-              <div className="flex flex-wrap justify-center md:justify-start gap-2 pt-2">
+              <div className="flex flex-wrap justify-start gap-2 pt-2">
                 {isOwnProfile ? (
                   <>
                   </>
                 ) : (
                   <>
-                    <button onClick={() => navigate(`/messages?userId=${targetUserId}`)} className="px-4 py-2.5 bg-white/5 text-white rounded-[8px] font-black uppercase tracking-wider text-[11px] hover:bg-white/10 transition-all backdrop-blur-md border border-white/10 flex items-center gap-2">
+                    <button 
+                      onClick={() => navigate(`/messages?userId=${targetUserId}`)} 
+                      className="px-5 py-2.5 bg-[#1B1B1B]/80 text-[#FFFFFF] rounded-[8px] font-[600] text-[12px] hover:brightness-110 transition-all backdrop-blur-md border border-[rgba(255,255,255,0.08)] flex items-center gap-2"
+                      style={{ fontFamily: "'Inter', sans-serif" }}
+                    >
                       <MessageCircle size={14} />
                       Message
                     </button>
-                    <button onClick={() => gateInteraction(handleFollowToggle)} className={`px-4 py-2.5 rounded-[8px] font-black uppercase tracking-wider text-[11px] transition-all flex items-center gap-2 ${followingIds.includes(targetUserId) ? 'bg-white/10 text-white/40' : 'bg-white text-black hover:scale-105'}`}>
-                      <Heart size={14} fill={followingIds.includes(targetUserId) ? "currentColor" : "none"} />
+                    <button 
+                      onClick={() => gateInteraction(handleFollowToggle)} 
+                      className={`px-5 py-2.5 rounded-[8px] font-[600] text-[12px] transition-all flex items-center gap-2 active:scale-[0.98] ${
+                        followingIds.includes(targetUserId) 
+                          ? 'text-[#FFFFFF] bg-[#1B1B1B]/80 backdrop-blur-md border border-[rgba(255,255,255,0.08)] hover:brightness-110' 
+                          : 'text-[#000000] bg-gradient-to-r from-[#55DEE8] to-[#B3DC26] shadow-[0px_8px_24px_rgba(179,220,38,0.15)] hover:scale-[1.02] border-none'
+                      }`}
+                      style={{ fontFamily: "'Inter', sans-serif" }}
+                    >
                       {followingIds.includes(targetUserId) ? "Following" : "Follow"}
                     </button>
                   </>
@@ -768,7 +795,7 @@ export default function Profile() {
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-4 mt-8">
+      <div className="max-w-7xl mx-auto px-1 mt-8">
         <>
           {/* Short Bio Section */}
           {profileUser?.bio ? (

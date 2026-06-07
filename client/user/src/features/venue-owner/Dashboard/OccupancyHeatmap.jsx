@@ -55,17 +55,17 @@ const OccupancyHeatmap = () => {
   };
 
   return (
-    <div className="bg-[#000000] p-6 rounded-[8px] border border-[#2D2D2D] shadow-[var(--shadow-2)]">
+    <div className="bg-[#121212] p-6 rounded-[8px] border border-white/10 hover:shadow-[0px_8px_24px_rgba(85,222,232,0.10)] transition-shadow">
       <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 mb-6">
         <div>
-          <h2 className="text-[14px] font-black text-white uppercase tracking-tighter whitespace-nowrap" style={{ fontFamily: "'Open Sans', sans-serif" }}>Weekly Occupancy Calendar</h2>
-          <p className="text-[10px] font-normal text-[#878C9F] uppercase tracking-widest mt-1">Real-time weekly booking density</p>
+          <h2 className="text-[16px] font-bold text-white tracking-tighter whitespace-nowrap font-inter">Weekly Occupancy Calendar</h2>
+          <p className="text-[12px] font-normal text-white/70 tracking-widest mt-1 font-inter">Real-time weekly booking density</p>
         </div>
         <div className="flex items-center gap-4">
           <select 
             value={selectedTurf} 
             onChange={(e) => setSelectedTurf(e.target.value)}
-            className="bg-[#151617] border border-[#2D2D2D] text-white text-[7px] font-black uppercase tracking-widest rounded-[4px] px-1.5 py-0.5 focus:outline-none focus:border-[#BFF367]/50 transition-all cursor-pointer hover:border-[#BFF367]/30"
+            className="bg-[#121212] border border-white/10 text-white text-[12px] font-bold tracking-widest rounded-[8px] px-2 py-1 focus:outline-none focus:border-[#55DEE8] transition-all cursor-pointer hover:border-[#55DEE8]/50"
           >
             <option value="" disabled>Select Facility</option>
             {turfs.map(turf => (
@@ -127,19 +127,19 @@ const OccupancyHeatmap = () => {
       {/* Detail Modal */}
       {selectedSlot && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-in fade-in duration-300">
-          <div className="bg-[#151617] border border-[#2D2D2D] rounded-[12px] w-full max-w-lg overflow-hidden shadow-2xl">
-            <div className="p-6 border-b border-[#2D2D2D] flex items-center justify-between bg-black/40">
+          <div className="bg-[#1B1B1B] border border-white/10 rounded-[8px] w-full max-w-lg overflow-hidden shadow-[0px_4px_16px_rgba(0,0,0,0.4)]">
+            <div className="p-6 border-b border-white/10 flex items-center justify-between">
               <div>
-                <h3 className="text-xl font-black font-inter text-white uppercase tracking-tight">
+                <h3 className="text-xl font-bold font-inter text-white tracking-tight">
                   {days[selectedSlot.day]} @ {selectedSlot.hour === 0 ? '12 AM' : selectedSlot.hour < 12 ? `${selectedSlot.hour} AM` : selectedSlot.hour === 12 ? '12 PM' : `${selectedSlot.hour-12} PM`}
                 </h3>
-                <p className="text-sm text-[#BFF367] font-medium uppercase tracking-widest mt-1">
+                <p className="text-sm text-[#BFF367] font-medium tracking-widest mt-1">
                   {selectedSlot.count} ACTIVE BOOKINGS
                 </p>
               </div>
               <button 
                 onClick={() => setSelectedSlot(null)}
-                className="p-2 hover:bg-[#2D2D2D] rounded-full text-[#999999] hover:text-white transition-all"
+                className="p-2 hover:bg-[#121212] rounded-full text-white/70 hover:text-white transition-all"
               >
                 <X size={20} />
               </button>
@@ -148,24 +148,24 @@ const OccupancyHeatmap = () => {
             <div className="max-h-[60vh] overflow-y-auto p-6 space-y-4 no-scrollbar">
               {selectedSlot.details.length > 0 ? (
                 selectedSlot.details.map((b, idx) => (
-                  <div key={idx} className="bg-[#000000] p-5 rounded-[8px] border border-[#2D2D2D] hover:border-[#BFF367]/30 transition-all group">
+                  <div key={idx} className="bg-[#121212] p-5 rounded-[8px] border border-white/10 hover:border-[#55DEE8]/50 transition-all group">
                     <div className="flex items-center justify-between mb-4">
                        <div className="flex items-center gap-3">
-                          <div className="w-10 h-10 rounded-[6px] bg-[#BFF367] flex items-center justify-center text-black font-black text-lg">
+                           <div className="w-10 h-10 rounded-[8px] bg-[#BFF367] flex items-center justify-center text-black font-bold text-lg">
                              {b.user?.[0] || 'G'}
                           </div>
                           <div>
-                             <h4 className="text-white font-bold uppercase tracking-tight group-hover:text-[#BFF367] transition-colors">{b.user || 'Guest'}</h4>
-                             <p className="text-[10px] text-[#999999] uppercase tracking-widest">{b.turf}</p>
+                             <h4 className="text-white font-bold tracking-tight group-hover:text-[#55DEE8] transition-colors">{b.user || 'Guest'}</h4>
+                             <p className="text-[12px] text-white/70 tracking-widest">{b.turf}</p>
                           </div>
                        </div>
                        <div className="text-right">
-                          <p className="text-[10px] text-[#878C9F] uppercase font-bold tracking-widest">Amount</p>
-                          <p className="text-white font-black">Rs {b.amount}</p>
+                          <p className="text-[12px] text-white/70 font-medium tracking-widest">Amount</p>
+                          <p className="text-white font-bold">Rs {b.amount}</p>
                        </div>
                     </div>
 
-                    <div className="grid grid-cols-2 gap-4 pt-4 border-t border-[#2D2D2D]">
+                    <div className="grid grid-cols-2 gap-4 pt-4 border-t border-white/10">
                        <div className="space-y-2">
                           <div className="flex items-center gap-2 text-[#999999]">
                              <Phone size={12} className="text-[#BFF367]" />
@@ -198,8 +198,8 @@ const OccupancyHeatmap = () => {
               )}
             </div>
             
-            <div className="p-4 bg-black/60 border-t border-[#2D2D2D]">
-               <p className="text-[9px] text-[#878C9F] text-center uppercase tracking-[0.2em] font-medium">Vault Secure Booking Intelligence</p>
+            <div className="p-4 bg-black/60 border-t border-white/10">
+               <p className="text-[12px] text-white/70 text-center tracking-[0.2em] font-medium font-inter">Vault Secure Booking Intelligence</p>
             </div>
           </div>
         </div>

@@ -28,10 +28,10 @@ import NearbyPlayersMap from "@components/map/NearbyPlayersMap";
 import { useSocket } from "@context/SocketContext";
 import { haversineMeters } from "@utils/geoUtils";
 
-const PRI = "#BFF367";
-const GRAD = "linear-gradient(90deg, #BFF367 0%, #BFF367 100%)";
-const HEADING_STYLE = { fontFamily: '"Outfit", sans-serif' };
-const SUBHEADING_STYLE = { fontFamily: "'Inter 28pt Light', sans-serif", fontWeight: 300 };
+const PRI = "#B3DC26";
+const GRAD = "linear-gradient(90deg, #55DEE8 0%, #B3DC26 100%)";
+const HEADING_STYLE = { fontFamily: "'Inter', sans-serif" };
+const SUBHEADING_STYLE = { fontFamily: "'Inter', sans-serif", fontWeight: 400 };
 const SNAP_STATES = { COLLAPSED: 0, HALF: 33, EXPANDED: 85 };
 
 
@@ -48,8 +48,7 @@ const PlayerCard = ({ player, followingIds = [], handleFollowToggle, handleAvata
       .slice(0, 2) || "??";
 
   const city = player.city ? player.city.split(",")[0].trim() : "Nearby";
-  const country = player.country || "India";
-  const locationText = `${city}, ${country}`;
+  const locationText = city;
   const primarySport = player.preferredSport || (player.sportTypes && player.sportTypes[0]) || (player.interests && player.interests[0]) || "Athlete";
 
   return (
@@ -58,69 +57,65 @@ const PlayerCard = ({ player, followingIds = [], handleFollowToggle, handleAvata
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true }}
       transition={{ duration: 0.25 }}
-      className="relative rounded-[16px] p-[1px] bg-white/5 transition-all duration-500 group hover:bg-gradient-to-b hover:from-[#BFF367]/30 hover:to-transparent hover:shadow-[0_15px_30px_rgba(0,0,0,0.4)] h-full"
+      onClick={() => navigate(`/profile/${playerId}`)}
+      className="relative rounded-[16px] border border-[rgba(255,255,255,0.08)] bg-[#1A1A1A] overflow-hidden transition-all duration-500 group hover:border-[#B3DC26]/50 hover:shadow-[0px_8px_24px_rgba(85,222,232,0.10)] h-56 cursor-pointer"
     >
-      <div className="relative bg-[#121212] rounded-[15px] p-3 flex flex-col items-center text-center h-full">
-        {/* Circular Profile Image Container */}
-        <div
-          className="relative w-16 h-16 md:w-20 md:h-20 rounded-full overflow-hidden mb-3 border-2 border-white/10 group-hover:border-[#BFF367] transition-all duration-300 shadow-inner cursor-pointer"
-          onClick={() => handleAvatarClick(player)}
-        >
-          <div className="w-full h-full bg-[#1A1A1A] flex items-center justify-center">
-            {player.profilePicture || player.profileImage ? (
-              <img
-                src={player.profilePicture || player.profileImage}
-                alt={player.name}
-                className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
-                onError={(e) => {
-                  e.target.style.display = "none";
-                  e.target.nextElementSibling.style.display = "flex";
-                }}
-              />
-            ) : null}
-            <div
-              className="relative z-10 flex items-center justify-center w-full h-full bg-gradient-to-br from-[#1a1a1a] to-[#0a0a0a]"
-              style={{
-                display: player.profilePicture || player.profileImage ? "none" : "flex",
-              }}
-            >
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#BFF367] to-[#BFF367] font-black text-xl md:text-2xl tracking-tighter opacity-70 group-hover:opacity-100 transition-opacity duration-500">
-                {initials}
-              </span>
-            </div>
-          </div>
-        </div>
+      {/* Background Image or Initials */}
+      {player.profilePicture || player.profileImage ? (
+        <img
+          src={player.profilePicture || player.profileImage}
+          alt={player.name}
+          className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-110 grayscale-[20%] group-hover:grayscale-0"
+          onError={(e) => {
+            e.target.style.display = "none";
+            e.target.nextElementSibling.style.display = "flex";
+          }}
+        />
+      ) : null}
+      <div
+        className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-[#1a1a1a] to-[#000000]"
+        style={{
+          display: player.profilePicture || player.profileImage ? "none" : "flex",
+        }}
+      >
+        <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#55DEE8] to-[#B3DC26] font-inter font-[700] text-4xl opacity-50">
+          {initials}
+        </span>
+      </div>
 
+      {/* Gradient Overlay for text readability */}
+      <div className="absolute inset-0 bg-gradient-to-t from-[#000000] via-[#000000]/60 to-transparent" />
+
+      {/* Primary Sport badge - Top Right */}
+      <div
+        className="absolute top-2 right-2 px-1.5 py-0.5 rounded-full text-[9px] font-[700] font-inter text-[#000000] bg-gradient-to-r from-[#55DEE8] to-[#B3DC26] z-10"
+      >
+        {primarySport}
+      </div>
+      
+      {/* Bottom Content */}
+      <div className="absolute bottom-0 left-0 right-0 p-3 flex flex-col z-10">
         {/* Player Name */}
-        <div onClick={() => navigate(`/profile/${playerId}`)} className="w-full cursor-pointer">
-          <h3 className="text-white font-bold text-xs md:text-sm tracking-tight group-hover:text-[#BFF367] transition-colors line-clamp-1 mb-1 font-open-sans">
-            {player.name || "Anonymous"}
-          </h3>
-        </div>
-
-        {/* Location: City and Country */}
-        <p className="text-[#888] text-[9px] md:text-[10px] font-medium line-clamp-1 mb-2">
+        <h3 className="text-[#FFFFFF] text-[14px] font-[600] leading-[20px] line-clamp-1 mb-0.5 font-inter">
+          {player.name || "Anonymous"}
+        </h3>
+        
+        {/* Location: City */}
+        <p className="text-[rgba(255,255,255,0.70)] text-[11px] font-[400] leading-[14px] line-clamp-1 mb-3 font-inter">
           {locationText}
         </p>
 
-        {/* Primary Sport badge */}
-        <div className="mb-3">
-          <span className="inline-block px-2 py-0.5 rounded-full bg-[#BFF367]/10 text-[#BFF367] text-[8px] md:text-[9px] font-black uppercase tracking-wider border border-[#BFF367]/20">
-            {primarySport}
-          </span>
-        </div>
-
         {/* Follow / Message Row */}
-        <div className="w-full mt-auto flex items-center gap-1.5">
+        <div className="w-full flex items-center gap-1.5">
           <button
             onClick={(e) => {
               e.stopPropagation();
               handleFollowToggle(playerId);
             }}
-            className={`flex-1 py-1.5 rounded-lg text-[9px] font-black uppercase tracking-widest transition-all active:scale-95 text-center ${
+            className={`flex-1 h-7 rounded-[8px] text-[10px] font-[600] leading-[12px] font-inter transition-all active:scale-[0.98] text-center ${
               isFollowing
-                ? "text-white bg-white/5 border border-white/10 hover:bg-white/10"
-                : "text-black bg-[#BFF367] hover:bg-[#BFF367]/90 shadow-sm"
+                ? "text-[#FFFFFF] bg-[#1B1B1B]/80 backdrop-blur-md border border-[rgba(255,255,255,0.08)] hover:brightness-110"
+                : "text-[#000000] bg-gradient-to-r from-[#55DEE8] to-[#B3DC26] shadow-[0px_8px_24px_rgba(179,220,38,0.15)] hover:scale-[1.02] border-none"
             }`}
           >
             {isFollowing ? "Following" : "Follow"}
@@ -131,7 +126,7 @@ const PlayerCard = ({ player, followingIds = [], handleFollowToggle, handleAvata
               e.stopPropagation();
               gateInteraction(() => navigate(`/messages?userId=${playerId}`));
             }}
-            className="w-8 h-8 rounded-lg text-white bg-white/5 border border-white/10 hover:bg-white/10 active:scale-95 transition-all flex items-center justify-center shrink-0"
+            className="w-7 h-7 rounded-[8px] text-[#FFFFFF] bg-[#1B1B1B]/80 backdrop-blur-md border border-[rgba(255,255,255,0.08)] hover:brightness-110 active:scale-[0.98] transition-all flex items-center justify-center shrink-0"
             title="Message"
           >
             <MessageCircle size={12} className="shrink-0" />
@@ -159,28 +154,19 @@ const TeamCard = ({ team, navigate }) => {
       whileHover={{ y: -4 }}
       transition={{ duration: 0.35, ease: 'easeOut' }}
       onClick={() => navigate(`/team/${team._id}`)}
-      className="relative bg-[#0D0D0D] rounded-2xl border border-white/[0.07] overflow-hidden flex flex-col cursor-pointer group"
-      style={{ boxShadow: '0 8px 32px rgba(0,0,0,0.6)' }}
+      className="relative bg-[#121212] rounded-[16px] border border-[rgba(255,255,255,0.08)] overflow-hidden flex flex-col cursor-pointer group hover:shadow-[0px_8px_24px_rgba(85,222,232,0.10)] transition-shadow duration-500"
     >
       {/* ── Banner ── */}
-      <div className="h-28 relative overflow-hidden">
+      <div className="h-16 relative overflow-hidden">
         <img
           src={banner}
           alt=""
           className="w-full h-full object-cover scale-105 group-hover:scale-110 transition-transform duration-700 grayscale-[40%] group-hover:grayscale-0"
         />
-        {/* deep gradient so content below is legible */}
-        <div className="absolute inset-0 bg-gradient-to-t from-[#0D0D0D] via-[#0D0D0D]/60 to-transparent" />
-
-        {/* Verified pill – top-right */}
-        <div className="absolute top-3 right-3 flex items-center gap-1 bg-black/50 backdrop-blur-md px-2 py-1 rounded-full border border-white/10">
-          <ShieldCheck size={9} className="text-[#BFF367]" />
-          <span className="text-[7px] font-black uppercase tracking-widest text-white/80">Verified</span>
-        </div>
 
         {/* Sport chip – top-left */}
         <div
-          className="absolute top-3 left-3 px-2 py-1 rounded-full text-[7px] font-black uppercase tracking-widest text-black"
+          className="absolute top-2 left-2 px-1.5 py-0.5 rounded-full text-[9px] font-[700] font-inter text-[#000000]"
           style={{ background: GRAD }}
         >
           {team.sportType || 'Sport'}
@@ -188,87 +174,71 @@ const TeamCard = ({ team, navigate }) => {
       </div>
 
       {/* ── Avatar row ── */}
-      <div className="relative px-4 -mt-6 flex items-end mb-3">
+      <div className="relative px-3 -mt-5 flex items-end mb-2">
         {/* Avatar */}
         <div className="relative">
           <div
-            className="w-12 h-12 rounded-xl border-2 border-[#0D0D0D] overflow-hidden bg-[#111] flex items-center justify-center"
-            style={{ boxShadow: '0 0 0 2px #BFF367, 0 0 16px rgba(191,243,103,0.35)' }}
+            className="w-10 h-10 rounded-full border border-[#121212] overflow-hidden bg-[#1B1B1B] flex items-center justify-center"
+            style={{ boxShadow: '0 0 0 2px #B3DC26, 0 0 16px rgba(179,220,38,0.35)' }}
           >
             {team.logo ? (
               <img src={team.logo} alt="" className="w-full h-full object-cover" />
             ) : (
-              <span className="text-[#BFF367] font-black text-lg leading-none">
+              <span className="text-[#B3DC26] font-inter font-[700] text-sm leading-none">
                 {team.name?.charAt(0).toUpperCase()}
               </span>
             )}
           </div>
-          {/* Online dot */}
-          <div className="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-[#BFF367] rounded-full border-2 border-[#0D0D0D]" />
         </div>
       </div>
 
       {/* ── Body ── */}
-      <div className="flex-1 px-4 pb-4 flex flex-col gap-3">
+      <div className="flex-1 px-3 pb-3 flex flex-col gap-2.5">
 
         {/* Name + Location */}
         <div>
           <h3
-            className="text-sm font-black text-white uppercase tracking-tight leading-tight line-clamp-1"
-            style={HEADING_STYLE}
+            className="text-[#FFFFFF] text-[13px] font-[600] leading-[18px] font-inter line-clamp-1"
           >
             {team.name}
           </h3>
-          <p className="text-[9px] font-semibold text-white/30 mt-0.5 flex items-center gap-1">
-            <MapPin size={8} className="text-[#BFF367]" />
-            {team.city || 'Global'}
+          <p className="text-[rgba(255,255,255,0.70)] text-[11px] font-[400] leading-[14px] font-inter mt-0.5 flex items-center gap-1">
+            <MapPin size={10} className="text-[#B3DC26]" />
+            {team.city || 'N/A'}
           </p>
         </div>
 
         {/* Stats inline row */}
-        <div className="flex items-center gap-2 text-[10px] font-bold text-white/40">
-          <Users size={10} className="text-[#BFF367] shrink-0" />
-          <span><span className="text-white font-black">{team.memberCount || 1}</span> Members</span>
+        <div className="flex items-center gap-1.5 text-[10px] font-[500] text-[rgba(255,255,255,0.60)] font-inter">
+          <span><span className="text-[#FFFFFF] font-[600]">{team.memberCount || 1}</span> Members</span>
           <span className="text-white/15">·</span>
-          <Target size={10} className="text-[#BFF367] shrink-0" />
-          <span><span className="text-white font-black">{team.matchesPlayed || 0}</span> Matches</span>
+          <span><span className="text-[#FFFFFF] font-[600]">{team.matchesPlayed || 0}</span> Matches</span>
         </div>
 
         {/* Action Buttons */}
-        <div className="grid grid-cols-2 gap-2 mt-auto">
+        <div className="grid grid-cols-2 gap-1.5 mt-auto">
           <Link
             to={`/team/${team._id}`}
             onClick={e => e.stopPropagation()}
-            className="h-9 text-black rounded-xl font-black uppercase tracking-widest text-[9px] flex items-center justify-center gap-1.5 active:scale-95 transition-all"
-            style={{ background: GRAD, boxShadow: '0 4px 14px rgba(191,243,103,0.25)' }}
+            className="h-6 rounded-[6px] font-inter text-[9px] font-[600] leading-[12px] text-[#000000] bg-gradient-to-r from-[#55DEE8] to-[#B3DC26] shadow-[0px_8px_24px_rgba(179,220,38,0.15)] flex items-center justify-center gap-1 active:scale-[0.98] hover:scale-[1.02] transition-all"
           >
-            <UserPlus size={12} strokeWidth={3} />
+            <UserPlus size={10} strokeWidth={2} />
             Join
           </Link>
           <Link
             to={`/team/${team._id}`}
             onClick={e => e.stopPropagation()}
-            className="h-9 bg-white/[0.04] border border-white/10 text-white/70 rounded-xl font-black uppercase tracking-widest text-[9px] flex items-center justify-center gap-1.5 hover:bg-white/10 hover:text-white transition-all active:scale-95"
+            className="h-6 rounded-[6px] font-inter text-[9px] font-[600] leading-[12px] bg-[#1B1B1B] text-[#FFFFFF] border border-[rgba(255,255,255,0.08)] flex items-center justify-center gap-1 hover:brightness-110 active:scale-[0.98] transition-all"
           >
-            <Swords size={12} />
+            <Swords size={10} />
             Challenge
           </Link>
         </div>
-
-        {/* Team Pass link */}
-        <Link
-          to={`/team-pass/${team._id}`}
-          onClick={e => e.stopPropagation()}
-          className="flex items-center justify-center gap-1 text-white/20 hover:text-[#BFF367] text-[8px] font-black uppercase tracking-[0.2em] transition-all group/pass"
-        >
-          <span>View Team Pass</span>
-          <ChevronRight size={10} className="group-hover/pass:translate-x-0.5 transition-transform" />
-        </Link>
       </div>
 
       {/* Subtle glow border on hover */}
-      <div className="absolute inset-0 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none"
-        style={{ boxShadow: 'inset 0 0 0 1px rgba(191,243,103,0.2)' }}
+      <div className="absolute inset-0 rounded-[16px] opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none"
+        style={{ boxShadow: 'inset 0 0 0 1px rgba(179,220,38,0.2)' }}
       />
     </motion.div>
   );
@@ -601,7 +571,8 @@ const FindPlayers = () => {
             lng: p.lng,
             distanceKm: p.distanceKm,
             city: p.city,
-            sportTypes: p.sportTypes
+            sportTypes: p.sportTypes,
+            lastSeen: p.lastSeen
           }))
           .filter(p => p.lat != null && p.lng != null);
 
@@ -828,9 +799,9 @@ const FindPlayers = () => {
     const element = document.getElementById(`player-card-${id}`);
     if (element) {
       element.scrollIntoView({ behavior: "smooth", block: "center" });
-      element.classList.add("ring-2", "ring-[#BFF367]", "ring-offset-4", "ring-offset-black");
+      element.classList.add("ring-2", "ring-[#B3DC26]", "ring-offset-4", "ring-offset-black");
       setTimeout(() => {
-        element.classList.remove("ring-2", "ring-[#BFF367]", "ring-offset-4", "ring-offset-black");
+        element.classList.remove("ring-2", "ring-[#B3DC26]", "ring-offset-4", "ring-offset-black");
       }, 3000);
     }
   };
@@ -861,7 +832,7 @@ const FindPlayers = () => {
           <motion.div 
             animate={{ height: `${SNAP_STATES[snapState]}vh` }}
             transition={{ type: "spring", damping: 25, stiffness: 150 }}
-            className="relative w-full bg-[#0a0a0a] border-b border-[#BFF367]/30 overflow-hidden lg:hidden"
+            className="relative w-full bg-[#000000] border-b border-[#B3DC26]/30 overflow-hidden lg:hidden"
           >
             <AnimatePresence>
               {snapState !== "COLLAPSED" && (
@@ -882,13 +853,13 @@ const FindPlayers = () => {
                   {/* HEADER STATUS BAR */}
                   <div className="absolute top-4 left-4 z-[1000] flex items-center gap-2 pointer-events-auto">
                     <div className="flex items-center gap-1.5 bg-black/60 backdrop-blur-xl border border-white/10 p-1.5 px-2.5 rounded-[8px] shadow-2xl">
-                      <Users size={14} className="text-[#BFF367]" />
-                      <span className="text-[#BFF367] text-[12px] font-black">{allNearbyPlayers.length}</span>
+                      <Users size={14} className="text-[#B3DC26]" />
+                      <span className="text-[#B3DC26] text-[12px] font-black">{allNearbyPlayers.length}</span>
                     </div>
 
                     <button 
                       onClick={toggleLocationSharing}
-                      className={`flex items-center justify-center p-1.5 w-8 h-8 rounded-[8px] border transition-all duration-300 backdrop-blur-xl shadow-2xl ${ isLocationSharing ? "bg-[#BFF367]/20 border-[#BFF367]/30 text-[#BFF367]" : "bg-red-500/10 border-red-500/20 text-red-500" }`}
+                      className={`flex items-center justify-center p-1.5 w-8 h-8 rounded-[8px] border transition-all duration-300 backdrop-blur-xl shadow-2xl ${ isLocationSharing ? "bg-[#B3DC26]/20 border-[#B3DC26]/30 text-[#B3DC26]" : "bg-red-500/10 border-red-500/20 text-red-500" }`}
                     >
                       {isLocationSharing ? <Eye size={16} /> : <EyeOff size={16} />}
                     </button>
@@ -896,18 +867,18 @@ const FindPlayers = () => {
 
                   {/* LOADING SKELETON */}
                   {!userLocation && !locationError && (
-                    <div className="absolute inset-0 z-[2000] bg-[#0A0A0A] flex flex-col items-center justify-center">
+                    <div className="absolute inset-0 z-[2000] bg-[#000000] flex flex-col items-center justify-center">
                       <div className="w-full h-full relative opacity-20">
                         <div className="absolute inset-0" style={{ 
-                            backgroundImage: 'radial-gradient(#BFF367 1px, transparent 1px)', 
+                            backgroundImage: 'radial-gradient(#B3DC26 1px, transparent 1px)', 
                             backgroundSize: '40px 40px' 
                         }} />
                       </div>
                       <div className="absolute flex flex-col items-center gap-4">
                         <div className="relative">
-                          <div className="w-16 h-16 border-2 border-[#BFF367]/20 rounded-full animate-ping absolute inset-0" />
-                          <div className="w-16 h-16 border-2 border-[#BFF367] rounded-full flex items-center justify-center bg-black">
-                            <MapPin className="text-[#BFF367] animate-bounce" size={24} />
+                          <div className="w-16 h-16 border-2 border-[#B3DC26]/20 rounded-full animate-ping absolute inset-0" />
+                          <div className="w-16 h-16 border-2 border-[#B3DC26] rounded-full flex items-center justify-center bg-black">
+                            <MapPin className="text-[#B3DC26] animate-bounce" size={24} />
                           </div>
                         </div>
                         <div className="text-center">
@@ -920,7 +891,7 @@ const FindPlayers = () => {
 
                   {/* ERROR STATE */}
                   {locationError && (
-                    <div className="absolute inset-0 z-[2000] bg-[#0A0A0A]/90 backdrop-blur-md flex flex-col items-center justify-center p-8 text-center">
+                    <div className="absolute inset-0 z-[2000] bg-[#000000]/90 backdrop-blur-md flex flex-col items-center justify-center p-8 text-center">
                       <div className="w-16 h-16 bg-red-500/20 border border-red-500/30 rounded-[8px] flex items-center justify-center mb-4">
                         <AlertCircle className="text-red-500" size={32} />
                       </div>
@@ -930,7 +901,7 @@ const FindPlayers = () => {
                       </p>
                       <button 
                         onClick={() => window.location.reload()}
-                        className="px-8 py-3 bg-white/5 border border-white/10 rounded-[8px] text-[10px] font-black uppercase tracking-widest text-white hover:bg-white/10 transition-all"
+                        className="px-8 py-3 bg-[rgba(255,255,255,0.08)] border border-[rgba(255,255,255,0.08)] rounded-[16px] text-[12px] font-[600] font-inter uppercase text-[#FFFFFF] hover:brightness-110 transition-all"
                       >
                         Retry Connection
                       </button>
@@ -945,7 +916,7 @@ const FindPlayers = () => {
                         exit={{ opacity: 0 }}
                         className="absolute inset-0 z-[1500] bg-black/40 backdrop-blur-sm flex items-center justify-center"
                       >
-                        <Loader2 className="text-[#BFF367] animate-spin" size={32} />
+                        <Loader2 className="text-[#B3DC26] animate-spin" size={32} />
                       </motion.div>
                     )}
                   </AnimatePresence>
@@ -962,9 +933,9 @@ const FindPlayers = () => {
                             e.stopPropagation();
                             setSelectedRadius(Number(e.target.value));
                           }}
-                          className="flex-1 h-1 bg-white/20 rounded-lg appearance-none cursor-pointer accent-[#BFF367]"
+                          className="flex-1 h-1 bg-white/20 rounded-lg appearance-none cursor-pointer accent-[#B3DC26]"
                         />
-                        <span className="text-[#BFF367] text-[10px] font-black min-w-[40px] text-right">{selectedRadius} KM</span>
+                        <span className="text-[#B3DC26] text-[10px] font-black min-w-[40px] text-right">{selectedRadius} KM</span>
                     </div>
                   </div>
                 </motion.div>
@@ -980,8 +951,8 @@ const FindPlayers = () => {
             onDragEnd={handleDragEnd}
             className="w-full h-10 flex flex-col items-center justify-center cursor-grab active:cursor-grabbing bg-black z-50 group border-b border-white/5 lg:hidden"
           >
-            <div className="w-12 h-1.5 bg-white/10 rounded-full group-hover:bg-[#BFF367]/40 transition-colors" />
-            <div className="text-[8px] font-bold text-white/10 uppercase tracking-[0.3em] mt-1 group-hover:text-[#BFF367]/40 transition-colors">
+            <div className="w-12 h-1.5 bg-white/10 rounded-full group-hover:bg-[#B3DC26]/40 transition-colors" />
+            <div className="text-[8px] font-bold text-white/10 uppercase tracking-[0.3em] mt-1 group-hover:text-[#B3DC26]/40 transition-colors">
                 Slide to Discover
             </div>
           </motion.div>
@@ -989,38 +960,38 @@ const FindPlayers = () => {
       )}
 
       {/* BOTTOM PANEL: Feed */}
-      <div className={`flex-1 ${activeTab === "players" ? "overflow-y-auto no-scrollbar pb-24 pt-6" : "pb-12 pt-2"} px-4 md:px-8 bg-black`}>
+      <div className={`flex-1 ${activeTab === "players" ? "overflow-y-auto no-scrollbar pb-24 pt-6 px-4 md:px-8" : "pb-12 pt-2 px-1 md:px-2"} bg-black`}>
         <div className={`max-w-6xl mx-auto space-y-6 ${activeTab === "players" ? "mt-6" : "mt-2"}`}>
           
           {/* Tab Switcher */}
-          <div className="flex items-center gap-4 border-b border-white/5 pb-1">
+          <div className="flex items-center gap-4 border-b border-[rgba(255,255,255,0.08)] pb-1">
             <button 
               onClick={() => setActiveTab("players")}
-              className={`pb-4 px-2 text-[10px] md:text-xs font-black uppercase tracking-[0.2em] transition-all relative ${activeTab === "players" ? "text-[#BFF367]" : "text-white/20 hover:text-white/40"}`}
+              className={`pb-4 px-2 text-[12px] font-[600] font-inter uppercase transition-all relative ${activeTab === "players" ? "text-[#B3DC26]" : "text-[rgba(255,255,255,0.70)] hover:text-[#FFFFFF]"}`}
             >
               Players
-              {activeTab === "players" && <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-[#BFF367]" />}
+              {activeTab === "players" && <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-[#B3DC26]" />}
             </button>
             <button 
               onClick={() => setActiveTab("teams")}
-              className={`pb-4 px-2 text-[10px] md:text-xs font-black uppercase tracking-[0.2em] transition-all relative ${activeTab === "teams" ? "text-[#BFF367]" : "text-white/20 hover:text-white/40"}`}
+              className={`pb-4 px-2 text-[12px] font-[600] font-inter uppercase transition-all relative ${activeTab === "teams" ? "text-[#B3DC26]" : "text-[rgba(255,255,255,0.70)] hover:text-[#FFFFFF]"}`}
             >
               Teams
-              {activeTab === "teams" && <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-[#BFF367]" />}
+              {activeTab === "teams" && <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-[#B3DC26]" />}
             </button>
           </div>
 
           {/* Compact Header Row */}
-          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white/[0.02] border border-white/5 rounded-[8px] p-3 md:p-4">
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-[#121212] border border-[rgba(255,255,255,0.08)] rounded-[16px] p-3 md:p-4">
             <div className="flex items-center gap-4 flex-1">
               <div className="relative flex-1 max-w-md group">
-                <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-white/20 group-focus-within:text-[#BFF367] transition-colors" size={16} />
+                <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-[rgba(255,255,255,0.40)] group-focus-within:text-[#B3DC26] transition-colors" size={16} />
                 <input 
                   type="text" 
                   value={searchQuery}
                   onChange={handleSearch}
                   placeholder="SEARCH..."
-                  className="w-full bg-white/[0.03] hover:bg-white/[0.05] border border-white/10 focus:border-[#BFF367]/50 rounded-[8px] h-10 pl-11 pr-4 text-white text-[10px] md:text-xs placeholder:text-white/20 outline-none transition-all uppercase tracking-widest font-bold"
+                  className="w-full bg-[#1B1B1B] border border-[rgba(255,255,255,0.08)] focus:border-[#B3DC26]/50 rounded-[16px] h-10 pl-11 pr-4 text-[#FFFFFF] text-[12px] font-[400] font-inter placeholder-[rgba(255,255,255,0.40)] outline-none transition-all uppercase tracking-widest"
                 />
               </div>
             </div>
@@ -1029,90 +1000,90 @@ const FindPlayers = () => {
               <select 
                 value={filters.sport}
                 onChange={(e) => handleFilterChange("sport", e.target.value)}
-                className="bg-transparent px-3 py-1.5 text-[9px] md:text-[10px] font-bold uppercase tracking-widest text-white/60 focus:text-[#BFF367] outline-none cursor-pointer hover:text-white transition-all"
+                className="bg-transparent px-3 py-1.5 text-[12px] font-[400] font-inter text-[rgba(255,255,255,0.70)] focus:text-[#B3DC26] outline-none cursor-pointer hover:text-[#FFFFFF] transition-all uppercase"
               >
-                <option value="" className="bg-[#0a0a0a] text-white">All Sports</option>
-                {sports.map(s => <option key={s} value={s} className="bg-[#0a0a0a] text-white">{s}</option>)}
+                <option value="" className="bg-[#121212] text-[#FFFFFF]">All Sports</option>
+                {sports.map(s => <option key={s} value={s} className="bg-[#121212] text-[#FFFFFF]">{s}</option>)}
               </select>
               
               {/* PC View Filters (Hidden on Mobile/Tab) */}
               <div className="hidden lg:flex items-center gap-2">
                 <div className="relative group">
-                  <MapPin className="absolute left-2.5 top-1/2 -translate-y-1/2 text-white/20 group-focus-within:text-[#BFF367]" size={10} />
+                  <MapPin className="absolute left-2.5 top-1/2 -translate-y-1/2 text-white/20 group-focus-within:text-[#B3DC26]" size={10} />
                   <select 
                     value={filters.state || ""}
                     onChange={(e) => {
                       handleFilterChange("state", e.target.value);
                       handleFilterChange("city", "");
                     }}
-                    className="bg-transparent pl-7 pr-3 py-1.5 text-[9px] md:text-[10px] font-bold uppercase tracking-widest text-white/60 focus:text-[#BFF367] outline-none w-24 md:w-28 cursor-pointer hover:text-white transition-all appearance-none"
+                    className="bg-transparent pl-7 pr-3 py-1.5 text-[12px] font-[400] font-inter text-[rgba(255,255,255,0.70)] focus:text-[#B3DC26] outline-none w-24 md:w-28 cursor-pointer hover:text-[#FFFFFF] transition-all appearance-none uppercase"
                   >
-                    <option value="" className="bg-[#0a0a0a] text-white">STATE...</option>
-                    {statesList.map(s => <option key={s} value={s} className="bg-[#0a0a0a] text-white">{s}</option>)}
+                    <option value="" className="bg-[#121212] text-[#FFFFFF]">STATE...</option>
+                    {statesList.map(s => <option key={s} value={s} className="bg-[#121212] text-[#FFFFFF]">{s}</option>)}
                   </select>
                 </div>
                 <div className="relative group">
-                  <MapPin className="absolute left-2.5 top-1/2 -translate-y-1/2 text-white/20 group-focus-within:text-[#BFF367]" size={10} />
+                  <MapPin className="absolute left-2.5 top-1/2 -translate-y-1/2 text-white/20 group-focus-within:text-[#B3DC26]" size={10} />
                   <select 
                     value={filters.city || ""}
                     onChange={(e) => handleFilterChange("city", e.target.value)}
-                    className="bg-transparent pl-7 pr-3 py-1.5 text-[9px] md:text-[10px] font-bold uppercase tracking-widest text-white/60 focus:text-[#BFF367] outline-none w-24 md:w-28 cursor-pointer hover:text-white transition-all appearance-none"
+                    className="bg-transparent pl-7 pr-3 py-1.5 text-[12px] font-[400] font-inter text-[rgba(255,255,255,0.70)] focus:text-[#B3DC26] outline-none w-24 md:w-28 cursor-pointer hover:text-[#FFFFFF] transition-all appearance-none uppercase"
                     disabled={!filters.state}
                   >
-                    <option value="" className="bg-[#0a0a0a] text-white">CITY...</option>
-                    {citiesList.map(c => <option key={c} value={c} className="bg-[#0a0a0a] text-white">{c}</option>)}
+                    <option value="" className="bg-[#121212] text-[#FFFFFF]">CITY...</option>
+                    {citiesList.map(c => <option key={c} value={c} className="bg-[#121212] text-[#FFFFFF]">{c}</option>)}
                   </select>
                 </div>
                 <div className="relative group">
-                  <Navigation className="absolute left-2.5 top-1/2 -translate-y-1/2 text-white/20 group-focus-within:text-[#BFF367]" size={10} />
+                  <Navigation className="absolute left-2.5 top-1/2 -translate-y-1/2 text-white/20 group-focus-within:text-[#B3DC26]" size={10} />
                   <select 
                     value={selectedRadius}
                     onChange={(e) => setSelectedRadius(Number(e.target.value))}
-                    className="bg-transparent pl-7 pr-3 py-1.5 text-[9px] md:text-[10px] font-bold uppercase tracking-widest text-white/60 focus:text-[#BFF367] outline-none cursor-pointer hover:text-white transition-all appearance-none w-24 md:w-28"
+                    className="bg-transparent pl-7 pr-3 py-1.5 text-[12px] font-[400] font-inter text-[rgba(255,255,255,0.70)] focus:text-[#B3DC26] outline-none cursor-pointer hover:text-[#FFFFFF] transition-all appearance-none w-24 md:w-28 uppercase"
                   >
-                    <option value="5" className="bg-[#0a0a0a] text-white">5 KM</option>
-                    <option value="10" className="bg-[#0a0a0a] text-white">10 KM</option>
-                    <option value="20" className="bg-[#0a0a0a] text-white">20 KM</option>
-                    <option value="50" className="bg-[#0a0a0a] text-white">50 KM</option>
-                    <option value="100" className="bg-[#0a0a0a] text-white">100 KM</option>
+                    <option value="5" className="bg-[#121212] text-[#FFFFFF]">5 KM</option>
+                    <option value="10" className="bg-[#121212] text-[#FFFFFF]">10 KM</option>
+                    <option value="20" className="bg-[#121212] text-[#FFFFFF]">20 KM</option>
+                    <option value="50" className="bg-[#121212] text-[#FFFFFF]">50 KM</option>
+                    <option value="100" className="bg-[#121212] text-[#FFFFFF]">100 KM</option>
                   </select>
                 </div>
               </div>
 
               {/* Mobile/Tab Location Filters */}
               <div className="relative group lg:hidden">
-                <MapPin className="absolute left-2.5 top-1/2 -translate-y-1/2 text-white/20 group-focus-within:text-[#BFF367]" size={10} />
+                <MapPin className="absolute left-2.5 top-1/2 -translate-y-1/2 text-white/20 group-focus-within:text-[#B3DC26]" size={10} />
                 <select
                   value={filters.state || ""}
                   onChange={(e) => {
                     handleFilterChange("state", e.target.value);
                     handleFilterChange("city", "");
                   }}
-                  className="bg-transparent pl-7 pr-3 py-1.5 text-[9px] md:text-[10px] font-bold uppercase tracking-widest text-white/60 focus:text-[#BFF367] outline-none w-24 md:w-28 cursor-pointer hover:text-white transition-all appearance-none"
+                  className="bg-transparent pl-7 pr-3 py-1.5 text-[12px] font-[400] font-inter text-[rgba(255,255,255,0.70)] focus:text-[#B3DC26] outline-none w-24 md:w-28 cursor-pointer hover:text-[#FFFFFF] transition-all appearance-none uppercase"
                 >
-                  <option value="" className="bg-[#0a0a0a] text-white">STATE...</option>
-                  {statesList.map(s => <option key={s} value={s} className="bg-[#0a0a0a] text-white">{s}</option>)}
+                  <option value="" className="bg-[#121212] text-[#FFFFFF]">STATE...</option>
+                  {statesList.map(s => <option key={s} value={s} className="bg-[#121212] text-[#FFFFFF]">{s}</option>)}
                 </select>
               </div>
               <div className="relative group lg:hidden">
-                <MapPin className="absolute left-2.5 top-1/2 -translate-y-1/2 text-white/20 group-focus-within:text-[#BFF367]" size={10} />
+                <MapPin className="absolute left-2.5 top-1/2 -translate-y-1/2 text-white/20 group-focus-within:text-[#B3DC26]" size={10} />
                 <select
                   value={filters.city || ""}
                   onChange={(e) => handleFilterChange("city", e.target.value)}
                   disabled={!filters.state}
-                  className="bg-transparent pl-7 pr-3 py-1.5 text-[9px] md:text-[10px] font-bold uppercase tracking-widest text-white/60 focus:text-[#BFF367] outline-none w-24 md:w-28 cursor-pointer hover:text-white transition-all appearance-none disabled:opacity-40"
+                  className="bg-transparent pl-7 pr-3 py-1.5 text-[12px] font-[400] font-inter text-[rgba(255,255,255,0.70)] focus:text-[#B3DC26] outline-none w-24 md:w-28 cursor-pointer hover:text-[#FFFFFF] transition-all appearance-none disabled:opacity-40 uppercase"
                 >
-                  <option value="" className="bg-[#0a0a0a] text-white">CITY...</option>
-                  {citiesList.map(c => <option key={c} value={c} className="bg-[#0a0a0a] text-white">{c}</option>)}
+                  <option value="" className="bg-[#121212] text-[#FFFFFF]">CITY...</option>
+                  {citiesList.map(c => <option key={c} value={c} className="bg-[#121212] text-[#FFFFFF]">{c}</option>)}
                 </select>
               </div>
 
               {activeTab === "players" && (
                 <button 
                   onClick={() => setShowNearbyOnly(!showNearbyOnly)}
-                  className={`flex items-center gap-2 px-3 py-1.5 rounded-[6px] border transition-all text-[9px] font-black uppercase tracking-widest ${ showNearbyOnly ? "bg-[#BFF367] border-[#BFF367] text-black shadow-[0_0_15px_rgba(191,243,103,0.4)]" : "bg-transparent border-transparent text-white/60 hover:text-white" }`}
+                  className={`flex items-center gap-2 px-3 h-10 rounded-[16px] transition-all text-[12px] font-[600] font-inter uppercase ${ showNearbyOnly ? "bg-gradient-to-r from-[#55DEE8] to-[#B3DC26] text-[#000000] shadow-[0px_8px_24px_rgba(179,220,38,0.15)] border-none" : "bg-[#1B1B1B] text-[#FFFFFF] border border-[rgba(255,255,255,0.08)] hover:brightness-110" }`}
                 >
-                  <Navigation size={10} className={showNearbyOnly ? "animate-pulse" : ""} />
+                  <Navigation size={14} className={showNearbyOnly ? "animate-pulse" : ""} />
                   Nearby
                 </button>
               )}
@@ -1126,7 +1097,7 @@ const FindPlayers = () => {
                 {[...Array(10)].map((_, i) => (
                   <div
                     key={i}
-                    className="w-full aspect-[3/4] rounded-[16px] border border-white/5 animate-pulse bg-white/5"
+                    className="w-full aspect-[3/4] rounded-[16px] border border-[rgba(255,255,255,0.08)] animate-pulse bg-[#121212]"
                   />
                 ))}
               </div>
@@ -1135,7 +1106,7 @@ const FindPlayers = () => {
                 {[...Array(6)].map((_, i) => (
                   <div
                     key={i}
-                    className="w-full h-64 rounded-2xl border border-white/5 animate-pulse bg-white/5"
+                    className="w-full h-64 rounded-[16px] border border-[rgba(255,255,255,0.08)] animate-pulse bg-[#121212]"
                   />
                 ))}
               </div>
@@ -1163,10 +1134,10 @@ const FindPlayers = () => {
                 ))
               ) : (
                 <div className="col-span-full py-20 text-center">
-                  <div className="w-16 h-16 bg-white/5 rounded-full flex items-center justify-center mx-auto mb-4 border border-white/10 text-gray-500">
+                  <div className="w-16 h-16 bg-[#121212] rounded-full flex items-center justify-center mx-auto mb-4 border border-[rgba(255,255,255,0.08)] text-gray-500">
                     <Users size={32} />
                   </div>
-                  <p className="text-gray-400 font-bold uppercase tracking-widest text-xs">No teams found</p>
+                  <p className="text-[rgba(255,255,255,0.70)] font-[600] uppercase font-inter text-[12px]">No teams found</p>
                 </div>
               )}
             </div>

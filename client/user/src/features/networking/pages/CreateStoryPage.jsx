@@ -7,6 +7,7 @@ import { useLazyGetStoryUploadUrlQuery, useConfirmStoryUploadMutation } from "@r
 import { startUpload } from "@redux/slices/mediaUploadSlice";
 import { uploadFileToR2 } from "@utils/mediaUpload";
 import toast from "react-hot-toast";
+import GlobalBackButton from '@/shared/components/GlobalBackButton';
 
 const HEADING_STYLE = { fontFamily: "'Open Sans', sans-serif" };
 const SUBHEADING_STYLE = { fontFamily: "'Inter 28pt Light', sans-serif", fontWeight: 300 };
@@ -150,12 +151,7 @@ const CreateStoryPage = () => {
       {/* Header */}
       <div className="relative px-5 py-4 border-b border-white/5 flex items-center justify-between gap-4 bg-black/40 backdrop-blur-md z-10">
         <div className="flex items-center gap-3">
-          <button 
-            onClick={() => navigate(-1)}
-            className="p-2 -ml-2 rounded-full text-white/70 hover:text-white transition-colors cursor-pointer"
-          >
-            <X size={24} />
-          </button>
+          <GlobalBackButton />
           <div>
             <h3 className="font-black text-lg text-white tracking-wide uppercase" style={HEADING_STYLE}>Create Story</h3>
             <p className="text-xs text-neutral-500 font-medium tracking-tight mt-0.5" style={SUBHEADING_STYLE}>

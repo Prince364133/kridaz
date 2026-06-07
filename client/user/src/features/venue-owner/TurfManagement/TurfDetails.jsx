@@ -6,9 +6,10 @@ import {
   CheckCircle2, AlertCircle, Trash2, Edit2, Star, Zap, X, Activity,
   ChevronLeft, ChevronRight, FileText, Navigation, User
 } from "lucide-react";
-import useTurfDetails from "@hooks/owner/useTurfDetails";
+import useTurfDetails from "@hooks/venue-owner/useTurfDetails";
 import DashboardSkeleton from "../Dashboard/DashboardSkeleton";
 import toast from "react-hot-toast";
+import GlobalBackButton from '@/shared/components/GlobalBackButton';
 
 // Booking Information Popup
 const BookingModal = ({ slot, onClose }) => {
@@ -18,7 +19,7 @@ const BookingModal = ({ slot, onClose }) => {
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 animate-in fade-in duration-200">
       <div className="absolute inset-0 bg-black/90 backdrop-blur-md" onClick={onClose} />
-      <div className="relative bg-[#000000] border border-[#2D2D2D] rounded-[12px] w-full max-w-md overflow-hidden shadow-2xl animate-in zoom-in-95 duration-300">
+      <div className="relative bg-[#000000] border border-white/5 rounded-[8px] w-full max-w-md overflow-hidden shadow-2xl animate-in zoom-in-95 duration-300">
         {/* Header */}
         <div className="p-8 pb-4 flex justify-between items-start">
           <div>
@@ -27,7 +28,7 @@ const BookingModal = ({ slot, onClose }) => {
               {startTime} - {endTime}
             </h3>
           </div>
-          <button onClick={onClose} className="p-2 hover:bg-[#111] rounded-[8px] transition-colors border border-transparent hover:border-[#2D2D2D]">
+          <button onClick={onClose} className="p-2 hover:bg-[#111] rounded-[8px] transition-colors border border-transparent hover:border-white/5">
             <X size={18} className="text-[#878C9F]" />
           </button>
         </div>
@@ -35,7 +36,7 @@ const BookingModal = ({ slot, onClose }) => {
         <div className="p-8 pt-0 space-y-8">
           {isBooked ? (
             <>
-              <div className="flex items-center gap-4 p-6 bg-[#111111] border border-[#2D2D2D] rounded-[8px]">
+              <div className="flex items-center gap-4 p-6 bg-[#121212] border border-white/5 rounded-[8px]">
                 <div className="w-14 h-14 rounded-[8px] bg-[#2D2D2D] border border-[#404040] flex items-center justify-center overflow-hidden shrink-0">
                   {bookingDetails.user?.profileImage ? (
                     <img src={bookingDetails.user.profileImage} className="w-full h-full object-cover" />
@@ -61,7 +62,7 @@ const BookingModal = ({ slot, onClose }) => {
               <div className="space-y-3">
                 <p className="text-[10px] font-bold text-[#878C9F] uppercase tracking-[2px] px-1">Contact Intelligence</p>
                 <div className="grid grid-cols-1 gap-2">
-                  <a href={(bookingDetails.user?.email || bookingDetails.guestDetails?.email) ? `mailto:${bookingDetails.user?.email || bookingDetails.guestDetails?.email}` : "#"} className="flex items-center justify-between p-4 bg-[#111111] hover:bg-[#1A1A1A] rounded-[8px] border border-[#2D2D2D] transition-all group">
+                  <a href={(bookingDetails.user?.email || bookingDetails.guestDetails?.email) ? `mailto:${bookingDetails.user?.email || bookingDetails.guestDetails?.email}` : "#"} className="flex items-center justify-between p-4 bg-[#111111] hover:bg-[#1A1A1A] rounded-[8px] border border-white/5 transition-all group">
                     <div className="flex items-center gap-3">
                       <div className="w-8 h-8 bg-[#2D2D2D] rounded-[4px] flex items-center justify-center text-[#878C9F] group-hover:text-[#BFF367]">
                         <Mail size={12} />
@@ -70,7 +71,7 @@ const BookingModal = ({ slot, onClose }) => {
                     </div>
                     <ChevronRight size={14} className="text-[#2D2D2D]" />
                   </a>
-                  <a href={(bookingDetails.user?.phoneNumber || bookingDetails.guestDetails?.phone) ? `tel:${bookingDetails.user?.phoneNumber || bookingDetails.guestDetails?.phone}` : "#"} className="flex items-center justify-between p-4 bg-[#111111] hover:bg-[#1A1A1A] rounded-[8px] border border-[#2D2D2D] transition-all group">
+                  <a href={(bookingDetails.user?.phoneNumber || bookingDetails.guestDetails?.phone) ? `tel:${bookingDetails.user?.phoneNumber || bookingDetails.guestDetails?.phone}` : "#"} className="flex items-center justify-between p-4 bg-[#111111] hover:bg-[#1A1A1A] rounded-[8px] border border-white/5 transition-all group">
                     <div className="flex items-center gap-3">
                       <div className="w-8 h-8 bg-[#2D2D2D] rounded-[4px] flex items-center justify-center text-[#878C9F] group-hover:text-[#BFF367]">
                         <Phone size={12} />
@@ -82,7 +83,7 @@ const BookingModal = ({ slot, onClose }) => {
                 </div>
               </div>
 
-              <div className="flex justify-between items-center p-6 bg-[#111111] rounded-[8px] border border-[#2D2D2D]">
+              <div className="flex justify-between items-center p-6 bg-[#111111] rounded-[8px] border border-white/5">
                 <div className="flex flex-col">
                   <span className="text-[10px] font-bold text-[#878C9F] uppercase tracking-widest">Revenue Impact</span>
                   <span className="text-[8px] text-[#444] font-bold uppercase">Settled via Platform</span>
@@ -91,7 +92,7 @@ const BookingModal = ({ slot, onClose }) => {
               </div>
             </>
           ) : (
-            <div className="py-12 text-center space-y-4 bg-[#111] rounded-[8px] border border-dashed border-[#2D2D2D]">
+            <div className="py-12 text-center space-y-4 bg-[#111] rounded-[8px] border border-dashed border-white/5">
               <div className="w-16 h-16 bg-[#2D2D2D] rounded-full flex items-center justify-center mx-auto">
                 <Zap size={24} className="#2D2D2D" />
               </div>
@@ -155,7 +156,7 @@ export default function TurfDetails() {
       <AlertCircle className="text-red-500 mb-6" size={48} />
       <h2 className="text-2xl font-bold text-white mb-2 uppercase tracking-tight font-['Open_Sans']">Error Synchronizing Data</h2>
       <p className="text-[#878C9F] mb-8 max-w-md">{error || "Connection failure to server intelligence roster."}</p>
-      <button onClick={() => navigate(-1)} className="px-8 py-3 bg-[#BFF367] text-black font-bold uppercase tracking-widest rounded-[8px] text-[11px]">Revert to Inventory</button>
+      <GlobalBackButton />
     </div>
   );
 
@@ -164,7 +165,7 @@ export default function TurfDetails() {
       <Zap size={48} className="text-[#2D2D2D] mb-6" />
       <h2 className="text-2xl font-bold text-white mb-2 uppercase tracking-tight font-['Open_Sans']">Arena Missing</h2>
       <p className="text-[#878C9F] mb-8">We couldn't retrieve the operational metrics for this facility.</p>
-      <button onClick={() => navigate(-1)} className="px-8 py-3 bg-[#BFF367] text-black font-bold uppercase tracking-widest rounded-[8px] text-[11px]">Revert to Inventory</button>
+      <GlobalBackButton />
     </div>
   );
 
@@ -221,19 +222,13 @@ export default function TurfDetails() {
       {/* Navigation & Header */}
       <div className="flex flex-col gap-8">
         <div className="flex items-center gap-4">
-          <button 
-            onClick={() => navigate(-1)}
-            className="w-10 h-10 flex items-center justify-center bg-[#111] border border-[#2D2D2D] text-[#878C9F] hover:text-[#BFF367] hover:border-[#BFF367]/40 rounded-full transition-all group"
-            title="Back to Roster"
-          >
-            <ArrowLeft size={18} className="group-hover:-translate-x-0.5 transition-transform" />
-          </button>
+          <GlobalBackButton />
           <div className="h-px flex-1 bg-[#2D2D2D]/50" />
         </div>
 
-        <div className="flex flex-col lg:flex-row justify-between items-start lg:items-end gap-8 pb-8 border-b border-[#2D2D2D]">
+        <div className="flex flex-col lg:flex-row justify-between items-start lg:items-end gap-8 pb-8 border-b border-white/5">
           <div className="flex flex-col md:flex-row gap-8 items-start">
-             <div className="w-32 h-32 rounded-[8px] overflow-hidden border border-[#2D2D2D] shrink-0 shadow-2xl relative">
+             <div className="w-32 h-32 rounded-[8px] overflow-hidden border border-white/5 shrink-0 shadow-2xl relative">
                 <img src={pending.image || turf.image} alt={turf.name} className="w-full h-full object-cover opacity-80" />
                 {pending.image && <div className="absolute top-2 right-2 p-1 bg-amber-500 rounded-full animate-pulse" title="New Image Pending" />}
                 <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
@@ -254,7 +249,7 @@ export default function TurfDetails() {
                        <div className={`w-1.5 h-1.5 rounded-full animate-pulse ${ turf.status === 'approved' ? 'bg-[#BFF367]' : turf.status === 'rejected' ? 'bg-red-500' : 'bg-amber-500' }`} />
                        <span className="text-[9px] font-bold uppercase tracking-widest">{turf.status}</span>
                     </div>
-                   <div className="px-3 py-1 bg-[#111] border border-[#2D2D2D] rounded-[4px] flex items-center gap-2">
+                   <div className="px-3 py-1 bg-[#111] border border-white/5 rounded-[4px] flex items-center gap-2">
                       <Star size={12} className="text-[#BFF367] fill-[#BFF367]" />
                       <span className="text-[10px] font-bold text-white font-['Open_Sans']">{turf.avgRating?.toFixed(1) || "NEW"}</span>
                    </div>
@@ -267,7 +262,7 @@ export default function TurfDetails() {
                       </div>
                       {pending.location && (
                          <p className="text-amber-500/80 text-[8px] font-bold lowercase tracking-widest flex items-center gap-2 pl-5">
-                            GåÆ {pending.location} <PendingBadge label="Loc" />
+                            Gï¿½ï¿½ {pending.location} <PendingBadge label="Loc" />
                          </p>
                       )}
                    </div>
@@ -278,7 +273,7 @@ export default function TurfDetails() {
                       </div>
                       {(pending.openTime || pending.closeTime) && (
                          <p className="text-amber-500/80 text-[8px] font-bold lowercase tracking-widest flex items-center gap-2 pl-5">
-                            GåÆ {pending.openTime || turf.openTime} - {pending.closeTime || turf.closeTime} <PendingBadge label="Time" />
+                            Gï¿½ï¿½ {pending.openTime || turf.openTime} - {pending.closeTime || turf.closeTime} <PendingBadge label="Time" />
                          </p>
                       )}
                    </div>
@@ -289,7 +284,7 @@ export default function TurfDetails() {
                       </div>
                       {pending.pricePerHour && (
                          <p className="text-amber-500/80 text-[8px] font-bold lowercase tracking-widest flex items-center gap-2 pl-5">
-                            GåÆ Rs {pending.pricePerHour}/hr <PendingBadge label="Price" />
+                            Gï¿½ï¿½ Rs {pending.pricePerHour}/hr <PendingBadge label="Price" />
                          </p>
                       )}
                    </div>
@@ -307,14 +302,14 @@ export default function TurfDetails() {
           <div className="flex flex-wrap gap-3">
              <button 
                 onClick={handleToggleVisibility}
-                className={`px-6 py-2.5 border rounded-[8px] font-bold uppercase text-[10px] tracking-widest transition-all flex items-center gap-2 ${ turf.isActive ? "bg-[#BFF367]/5 border-[#BFF367]/20 text-[#BFF367] hover:bg-[#BFF367]/10" : "bg-black border-[#2D2D2D] text-[#444] hover:text-white" }`}
+                className={`px-6 py-2.5 border rounded-[8px] font-bold uppercase text-[10px] tracking-widest transition-all flex items-center gap-2 ${ turf.isActive ? "bg-[#BFF367]/5 border-[#BFF367]/20 text-[#BFF367] hover:bg-[#BFF367]/10" : "bg-black border-white/5 text-[#444] hover:text-white" }`}
              >
                 <Zap size={14} className={turf.isActive ? "fill-[#BFF367]" : ""} />
                 {turf.isActive ? "Visible" : "Hidden"}
              </button>
              <button 
                 onClick={() => navigate(`/venue-owner/edit-turf/${id}`)}
-                className={`px-6 py-2.5 border rounded-[8px] font-bold uppercase text-[10px] tracking-widest transition-all flex items-center gap-2 ${ turf.status === 'rejected' ? "bg-red-500 text-white border-red-500 hover:bg-red-600 shadow-[0_5px_15px_rgba(239,68,68,0.2)]" : "bg-[#111111] border-[#2D2D2D] text-[#878C9F] hover:text-white" }`}
+                className={`px-6 py-2.5 border rounded-[8px] font-bold uppercase text-[10px] tracking-widest transition-all flex items-center gap-2 ${ turf.status === 'rejected' ? "bg-red-500 text-white border-red-500 hover:bg-red-600 shadow-[0_5px_15px_rgba(239,68,68,0.2)]" : "bg-[#111111] border-white/5 text-[#878C9F] hover:text-white" }`}
              >
                 <Edit2 size={14} />
                 {turf.status === 'rejected' ? "Review & Re-apply" : "Edit Arena"}
@@ -333,7 +328,7 @@ export default function TurfDetails() {
       {/* Media Intelligence & Operational Footage */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
          {/* Gallery Scroller */}
-         <div className="lg:col-span-7 bg-[#000000] border border-[#2D2D2D] rounded-[8px] p-6 space-y-6 overflow-hidden">
+         <div className="lg:col-span-7 bg-[#121212] border border-white/5 rounded-[8px] p-6 space-y-6 overflow-hidden">
             <div className="flex items-center justify-between">
                <div className="flex items-center gap-2">
                   <div className="w-1 h-3 bg-[#BFF367] rounded-full" />
@@ -345,7 +340,7 @@ export default function TurfDetails() {
                       const el = document.getElementById('gallery-scroll');
                       el.scrollBy({ left: -300, behavior: 'smooth' });
                     }}
-                    className="w-8 h-8 flex items-center justify-center bg-[#111] border border-[#2D2D2D] rounded-full text-[#878C9F] hover:text-[#BFF367] hover:border-[#BFF367]/40 transition-all"
+                    className="w-8 h-8 flex items-center justify-center bg-[#111] border border-white/5 rounded-full text-[#878C9F] hover:text-[#BFF367] hover:border-[#BFF367]/40 transition-all"
                   >
                     <ChevronLeft size={16} />
                   </button>
@@ -354,7 +349,7 @@ export default function TurfDetails() {
                       const el = document.getElementById('gallery-scroll');
                       el.scrollBy({ left: 300, behavior: 'smooth' });
                     }}
-                    className="w-8 h-8 flex items-center justify-center bg-[#111] border border-[#2D2D2D] rounded-full text-[#878C9F] hover:text-[#BFF367] hover:border-[#BFF367]/40 transition-all"
+                    className="w-8 h-8 flex items-center justify-center bg-[#111] border border-white/5 rounded-full text-[#878C9F] hover:text-[#BFF367] hover:border-[#BFF367]/40 transition-all"
                   >
                     <ChevronRight size={16} />
                   </button>
@@ -366,7 +361,7 @@ export default function TurfDetails() {
               className="flex gap-4 overflow-x-auto custom-scrollbar pb-4 snap-x"
             >
                {(turf.images || [turf.image]).map((img, i) => (
-                  <div key={i} className="min-w-[280px] h-[180px] rounded-[6px] border border-[#2D2D2D] overflow-hidden relative group/img snap-start">
+                  <div key={i} className="min-w-[280px] h-[180px] rounded-[6px] border border-white/5 overflow-hidden relative group/img snap-start">
                      <img src={img} className="w-full h-full object-cover opacity-80 group-hover/img:opacity-100 transition-opacity" />
                      <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent" />
                   </div>
@@ -384,14 +379,14 @@ export default function TurfDetails() {
          </div>
 
          {/* Video Intelligence */}
-         <div className="lg:col-span-5 bg-[#000000] border border-[#2D2D2D] rounded-[8px] p-6 space-y-6">
+         <div className="lg:col-span-5 bg-[#121212] border border-white/5 rounded-[8px] p-6 space-y-6">
             <div className="flex items-center gap-2">
                <div className="w-1 h-3 bg-red-600 rounded-full animate-pulse" />
                <p className="text-[10px] font-bold text-[#878C9F] uppercase tracking-[2px]">Operational Footage (YouTube)</p>
             </div>
             
             {(pending.youtubeUrl || turf.youtubeUrl) ? (
-               <div className={`relative aspect-video rounded-[6px] overflow-hidden border ${pending.youtubeUrl ? 'border-amber-500/40' : 'border-[#2D2D2D]'}`}>
+               <div className={`relative aspect-video rounded-[6px] overflow-hidden border ${pending.youtubeUrl ? 'border-amber-500/40' : 'border-white/5'}`}>
                   {pending.youtubeUrl && (
                      <div className="absolute top-3 right-3 z-10">
                         <PendingBadge label="Stream Update" />
@@ -409,7 +404,7 @@ export default function TurfDetails() {
                   ></iframe>
                </div>
             ) : (
-               <div className="aspect-video bg-[#050505] rounded-[6px] border border-dashed border-[#2D2D2D] flex flex-col items-center justify-center text-center p-8">
+               <div className="aspect-video bg-[#050505] rounded-[6px] border border-dashed border-white/5 flex flex-col items-center justify-center text-center p-8">
                   <Activity size={32} className="text-[#2D2D2D] mb-4" />
                   <p className="text-[10px] font-bold text-[#444] uppercase tracking-widest leading-relaxed">No telemetry broadcast configured for this facility.</p>
                </div>
@@ -421,7 +416,7 @@ export default function TurfDetails() {
       <div className="grid grid-cols-1 xl:grid-cols-12 gap-8">
          {/* Live Stats */}
          <div className="xl:col-span-4 grid grid-cols-2 gap-4">
-            <div className="p-6 bg-[#000000] border border-[#2D2D2D] rounded-[8px] flex flex-col justify-between min-h-[140px] relative overflow-hidden group">
+            <div className="p-6 bg-[#121212] border border-white/5 rounded-[8px] flex flex-col justify-between min-h-[140px] relative overflow-hidden group">
                <div className="absolute top-0 right-0 p-4 opacity-10 text-[#BFF367] group-hover:opacity-20 transition-opacity">
                   <Activity size={40} />
                </div>
@@ -433,7 +428,7 @@ export default function TurfDetails() {
                   <p className="text-[9px] text-[#BFF367] font-bold uppercase tracking-widest mt-1">Live Occupancy</p>
                </div>
             </div>
-            <div className="p-6 bg-[#000000] border border-[#2D2D2D] rounded-[8px] flex flex-col justify-between min-h-[140px] relative overflow-hidden group">
+            <div className="p-6 bg-[#121212] border border-white/5 rounded-[8px] flex flex-col justify-between min-h-[140px] relative overflow-hidden group">
                <div className="absolute top-0 right-0 p-4 opacity-10 text-[#BFF367] group-hover:opacity-20 transition-opacity">
                   <Zap size={40} />
                </div>
@@ -442,7 +437,7 @@ export default function TurfDetails() {
                   <h4 className="text-3xl font-bold text-white font-['Open_Sans'] uppercase flex items-baseline gap-2">
                     Rs {filteredBookings.filter(s => s.isBooked).reduce((acc, b) => acc + (b.bookingDetails?.totalPrice || 0), 0)}
                     {pending.pricePerHour && (
-                       <span className="text-amber-500 text-sm font-bold opacity-80">GåÆ Rs {pending.pricePerHour}/hr <PendingBadge label="Rate" /></span>
+                       <span className="text-amber-500 text-sm font-bold opacity-80">Gï¿½ï¿½ Rs {pending.pricePerHour}/hr <PendingBadge label="Rate" /></span>
                     )}
                   </h4>
                   <p className="text-[9px] text-[#BFF367] font-bold uppercase tracking-widest mt-1">Daily Yield</p>
@@ -452,7 +447,7 @@ export default function TurfDetails() {
 
          {/* Consolidated Intelligence */}
          <div className="xl:col-span-8 space-y-8">
-            <div className="p-6 bg-[#000000] border border-[#2D2D2D] rounded-[8px] flex flex-col md:flex-row gap-8">
+            <div className="p-6 bg-[#121212] border border-white/5 rounded-[8px] flex flex-col md:flex-row gap-8">
               <div className="flex-1 space-y-4">
                  <div className="flex items-center gap-2">
                     <div className="w-1 h-3 bg-[#BFF367] rounded-full" />
@@ -466,7 +461,7 @@ export default function TurfDetails() {
                        </p>
                        <div className="flex flex-wrap gap-2">
                           {(pending.groundTypes || turf.groundTypes || []).map((ground, i) => (
-                             <span key={i} className={`px-2 py-1 border rounded-[4px] text-[9px] font-bold uppercase tracking-wider snap-start ${ pending.groundTypes ? 'bg-amber-500/5 border-amber-500/20 text-amber-500' : 'bg-[#111] border-[#2D2D2D] text-white' }`}>
+                             <span key={i} className={`px-2 py-1 border rounded-[4px] text-[9px] font-bold uppercase tracking-wider snap-start ${ pending.groundTypes ? 'bg-amber-500/5 border-amber-500/20 text-amber-500' : 'bg-[#111] border-white/5 text-white' }`}>
                                 {ground}
                              </span>
                           ))}
@@ -497,7 +492,7 @@ export default function TurfDetails() {
                  </div>
                  <div className="flex flex-wrap gap-2">
                     {(pending.sportTypes || turf.sportTypes || []).map((sport, i) => (
-                       <div key={i} className={`flex items-center gap-3 border p-3 rounded-[6px] w-full group/sport transition-colors ${ pending.sportTypes ? 'bg-amber-500/5 border-amber-500/20' : 'bg-[#111] border-[#2D2D2D] hover:border-[#BFF367]/40' }`}>
+                       <div key={i} className={`flex items-center gap-3 border p-3 rounded-[6px] w-full group/sport transition-colors ${ pending.sportTypes ? 'bg-amber-500/5 border-amber-500/20' : 'bg-[#111] border-white/5 hover:border-[#BFF367]/40' }`}>
                           <div className={`w-2 h-2 rounded-full transition-colors ${ pending.sportTypes ? 'bg-amber-500 animate-pulse' : 'bg-[#BFF367]/20 group-hover/sport:bg-[#BFF367]' }`} />
                           <span className={`text-[11px] font-bold uppercase tracking-wider ${ pending.sportTypes ? 'text-amber-500' : 'text-white' }`}>{sport}</span>
                           {pending.sportTypes && <div className="ml-auto"><PendingBadge label="Add" /></div>}
@@ -508,7 +503,7 @@ export default function TurfDetails() {
             </div>
 
             {/* Description & Policies */}
-            <div className="p-6 bg-[#000000] border border-[#2D2D2D] rounded-[8px] space-y-6">
+            <div className="p-6 bg-[#121212] border border-white/5 rounded-[8px] space-y-6">
                <div className="flex items-center gap-2">
                   <div className="w-1 h-3 bg-[#BFF367] rounded-full" />
                   <p className="text-[10px] font-bold text-[#878C9F] uppercase tracking-[2px]">Documentation & Policies</p>
@@ -543,7 +538,7 @@ export default function TurfDetails() {
                        {pending.policies && <PendingBadge />}
                     </h4>
                     <div className="relative">
-                      <p className={`text-[12px] text-white/70 leading-relaxed font-inter italic border-l-2 border-[#2D2D2D] pl-4 ${!isPolicyExpanded ? 'line-clamp-2' : ''}`}>
+                      <p className={`text-[12px] text-white/70 leading-relaxed font-inter italic border-l-2 border-white/5 pl-4 ${!isPolicyExpanded ? 'line-clamp-2' : ''}`}>
                          {pending.policies || turf.policies || "No specific policies documented."}
                       </p>
                       {(pending.policies || turf.policies || "No specific policies documented.")?.length > 150 && (
@@ -561,7 +556,7 @@ export default function TurfDetails() {
 
             {/* Support Network: Location, Owner, Managers */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-               <div className="p-6 bg-[#000000] border border-[#2D2D2D] rounded-[8px] space-y-6">
+               <div className="p-6 bg-[#121212] border border-white/5 rounded-[8px] space-y-6">
                   <div className="flex items-center gap-2">
                      <div className="w-1 h-3 bg-[#BFF367] rounded-full" />
                      <p className="text-[10px] font-bold text-[#878C9F] uppercase tracking-[2px]">Location Data</p>
@@ -583,7 +578,7 @@ export default function TurfDetails() {
                           href={turf.mapUrl} 
                           target="_blank" 
                           rel="noreferrer"
-                          className="flex items-center justify-center gap-2 w-full py-3 bg-[#111111] hover:bg-[#BFF367]/10 text-[#BFF367] border border-[#2D2D2D] hover:border-[#BFF367]/30 rounded-[8px] text-[10px] font-bold uppercase tracking-widest transition-all"
+                          className="flex items-center justify-center gap-2 w-full py-3 bg-[#111111] hover:bg-[#BFF367]/10 text-[#BFF367] border border-white/5 hover:border-[#BFF367]/30 rounded-[8px] text-[10px] font-bold uppercase tracking-widest transition-all"
                         >
                            <Navigation size={14} /> Get Directions
                         </a>
@@ -591,7 +586,7 @@ export default function TurfDetails() {
                   </div>
                </div>
 
-               <div className="p-6 bg-[#000000] border border-[#2D2D2D] rounded-[8px] space-y-6">
+               <div className="p-6 bg-[#121212] border border-white/5 rounded-[8px] space-y-6">
                   <div className="flex items-center justify-between">
                      <div className="flex items-center gap-2">
                         <div className="w-1 h-3 bg-[#BFF367] rounded-full" />
@@ -602,8 +597,8 @@ export default function TurfDetails() {
                   <div className="space-y-4">
                      {/* Owner Record */}
                      {turf.owner && (
-                        <div className="flex gap-3 items-center p-3 rounded-[6px] bg-[#111111] border border-[#2D2D2D]">
-                           <div className="w-8 h-8 rounded-full bg-white/5 border border-[#2D2D2D] flex items-center justify-center shrink-0">
+                        <div className="flex gap-3 items-center p-3 rounded-[6px] bg-[#111111] border border-white/5">
+                           <div className="w-8 h-8 rounded-full bg-white/5 border border-white/5 flex items-center justify-center shrink-0">
                               <User size={14} className="text-[#878C9F]" />
                            </div>
                            <div className="flex flex-col">
@@ -622,7 +617,7 @@ export default function TurfDetails() {
                         <div className="space-y-2">
                            <h4 className="text-[9px] font-bold text-[#444] uppercase tracking-widest mb-2 pl-1">Venue Managers</h4>
                            {turf.managerContacts.map((manager, i) => (
-                              <div key={i} className="flex items-center justify-between p-2 pl-3 rounded-[4px] border border-dashed border-[#2D2D2D] hover:border-[#BFF367]/30 transition-colors">
+                              <div key={i} className="flex items-center justify-between p-2 pl-3 rounded-[4px] border border-dashed border-white/5 hover:border-[#BFF367]/30 transition-colors">
                                  <div className="flex flex-col">
                                     <span className="text-[11px] font-bold text-white uppercase">{manager.name}</span>
                                     <span className="text-[10px] text-[#878C9F] font-mono">{manager.phone}</span>
@@ -654,7 +649,7 @@ export default function TurfDetails() {
                   <button
                     key={date}
                     onClick={() => setSelectedDate(date)}
-                    className={`w-full p-5 rounded-[8px] border text-left transition-all duration-300 flex justify-between items-center ${ selectedDate === date ? "bg-[#BFF367] border-[#BFF367] text-black shadow-[0_10px_20px_rgba(204,255,0,0.15)]" : "bg-[#000000] border-[#2D2D2D] text-[#878C9F] hover:border-[#BFF367]/40" }`}
+                    className={`w-full p-5 rounded-[8px] border text-left transition-all duration-300 flex justify-between items-center ${ selectedDate === date ? "bg-[#BFF367] border-[#BFF367] text-black shadow-[0_10px_20px_rgba(204,255,0,0.15)]" : "bg-[#000000] border-white/5 text-[#878C9F] hover:border-[#BFF367]/40" }`}
                   >
                     <div className="flex flex-col">
                        <span className="text-[11px] font-bold uppercase tracking-[1px]">
@@ -668,7 +663,7 @@ export default function TurfDetails() {
                   </button>
                 ))
               ) : (
-                <div className="p-8 text-center bg-[#111] border border-dashed border-[#2D2D2D] rounded-[8px]">
+                <div className="p-8 text-center bg-[#111] border border-dashed border-white/5 rounded-[8px]">
                    <p className="text-[10px] font-bold text-[#444] uppercase tracking-widest">No Active Slots</p>
                 </div>
               )}
@@ -680,11 +675,11 @@ export default function TurfDetails() {
            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-6">
               <h3 className="text-[11px] font-bold uppercase tracking-[3px] text-[#878C9F] flex items-center gap-3">
                  <Clock size={14} className="text-[#BFF367]" />
-                 Slot Manifest <span className="ml-4 px-3 py-1 bg-[#111111] rounded-[4px] border border-[#2D2D2D] text-[10px] text-[#BFF367]">{displaySlots.filter(s => s.isActive).length} Active Units</span>
+                 Slot Manifest <span className="ml-4 px-3 py-1 bg-[#111111] rounded-[4px] border border-white/5 text-[10px] text-[#BFF367]">{displaySlots.filter(s => s.isActive).length} Active Units</span>
               </h3>
               <div className="flex flex-wrap gap-6">
                  <div className="flex items-center gap-2.5">
-                    <div className="w-2 h-2 rounded-full bg-[#111] border border-[#2D2D2D]" />
+                    <div className="w-2 h-2 rounded-full bg-[#111] border border-white/5" />
                     <span className="text-[10px] font-bold text-[#444] uppercase tracking-widest">Inactive</span>
                  </div>
                  <div className="flex items-center gap-2.5">
@@ -705,7 +700,7 @@ export default function TurfDetails() {
                     key={slot._id} 
                     onClick={() => slot.isBooked && setSelectedSlot(slot)}
                     disabled={!slot.isActive}
-                    className={`relative overflow-hidden p-6 rounded-[8px] border transition-all duration-500 group text-left flex flex-col justify-between min-h-[160px] ${ !slot.isActive ? "bg-[#050505] border-[#1A1A1A] opacity-40 cursor-not-allowed" : slot.isBooked ? "bg-[#BFF367]/5 border-[#BFF367]/30 shadow-[0_0_20px_rgba(204,255,0,0.05)] cursor-pointer hover:border-[#BFF367]/60" : "bg-[#000000] border-[#2D2D2D] hover:border-[#BFF367]/40 cursor-default" }`}
+                    className={`relative overflow-hidden p-6 rounded-[8px] border transition-all duration-500 group text-left flex flex-col justify-between min-h-[160px] ${ !slot.isActive ? "bg-[#050505] border-[#1A1A1A] opacity-40 cursor-not-allowed" : slot.isBooked ? "bg-[#BFF367]/5 border-[#BFF367]/30 shadow-[0_0_20px_rgba(204,255,0,0.05)] cursor-pointer hover:border-[#BFF367]/60" : "bg-[#000000] border-white/5 hover:border-[#BFF367]/40 cursor-default" }`}
                   >
                     <div className="flex justify-between items-start">
                        <div className="space-y-1">
@@ -718,7 +713,7 @@ export default function TurfDetails() {
                           </p>
                        </div>
                        {slot.isActive && (
-                         <div className={`px-2 py-0.5 rounded-[3px] text-[8px] font-bold uppercase tracking-widest border ${ slot.isBooked ? "bg-[#BFF367] border-[#BFF367] text-black" : "bg-[#111] border-[#2D2D2D] text-[#878C9F]" }`}>
+                         <div className={`px-2 py-0.5 rounded-[3px] text-[8px] font-bold uppercase tracking-widest border ${ slot.isBooked ? "bg-[#BFF367] border-[#BFF367] text-black" : "bg-[#111] border-white/5 text-[#878C9F]" }`}>
                            {slot.isBooked ? "Booked" : "Open"}
                          </div>
                        )}
@@ -727,7 +722,7 @@ export default function TurfDetails() {
                     <div className="relative z-10">
                       {slot.isBooked ? (
                         <div className="flex items-center gap-4">
-                           <div className="w-10 h-10 rounded-[6px] bg-[#111] border border-[#2D2D2D] flex items-center justify-center overflow-hidden">
+                           <div className="w-10 h-10 rounded-[6px] bg-[#111] border border-white/5 flex items-center justify-center overflow-hidden">
                               {slot.bookingDetails.user?.profileImage ? (
                                 <img src={slot.bookingDetails.user.profileImage} className="w-full h-full object-cover" />
                               ) : (
@@ -758,8 +753,8 @@ export default function TurfDetails() {
                   </button>
                 ))
               ) : (
-                <div className="col-span-full py-32 bg-[#000000] border border-dashed border-[#2D2D2D] rounded-[8px] flex flex-col items-center justify-center text-center">
-                   <div className="w-16 h-16 bg-[#111] rounded-full flex items-center justify-center mb-6 border border-[#2D2D2D]">
+                <div className="col-span-full py-32 bg-[#000000] border border-dashed border-white/5 rounded-[8px] flex flex-col items-center justify-center text-center">
+                   <div className="w-16 h-16 bg-[#111] rounded-full flex items-center justify-center mb-6 border border-white/5">
                       <Zap size={24} className="text-[#2D2D2D]" />
                    </div>
                    <h4 className="text-xl font-bold text-white uppercase tracking-tight mb-2 font-['Open_Sans']">Zero Operational Data</h4>

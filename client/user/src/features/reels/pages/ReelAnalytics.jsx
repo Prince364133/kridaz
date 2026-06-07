@@ -2,6 +2,7 @@ import React from 'react';
 import { useGetCreatorAnalyticsQuery } from '@redux/api/reelsApi';
 import { ChevronLeft, TrendingUp, Play, ThumbsUp, MessageCircle, Share2 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import GlobalBackButton from '@/shared/components/GlobalBackButton';
 
 const ReelAnalytics = () => {
   const navigate = useNavigate();
@@ -14,9 +15,7 @@ const ReelAnalytics = () => {
   return (
     <div className="min-h-screen bg-black text-white p-6">
       <div className="flex items-center gap-4 mb-8">
-        <button onClick={() => navigate(-1)} className="p-1">
-          <ChevronLeft size={28} />
-        </button>
+        <GlobalBackButton />
         <h1 className="text-2xl font-bold">Creator Dashboard</h1>
       </div>
 

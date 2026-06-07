@@ -5,6 +5,7 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import { motion } from 'framer-motion';
 import { startUpload } from '@redux/slices/mediaUploadSlice';
+import GlobalBackButton from '@/shared/components/GlobalBackButton';
 
 const UploadReel = () => {
   const navigate = useNavigate();
@@ -137,9 +138,7 @@ const UploadReel = () => {
         >
           {/* Minimal Header */}
           <div className="absolute top-0 left-0 right-0 p-4 flex items-center justify-between z-10">
-            <button onClick={() => navigate(-1)} className="p-2 bg-white/10 hover:bg-white/20 rounded-full transition-colors backdrop-blur-md border border-white/10">
-              <X size={24} />
-            </button>
+            <GlobalBackButton />
             <h1 className="text-sm font-bold tracking-widest uppercase">New Reel</h1>
             <div className="w-10" /> {/* Spacer */}
           </div>
@@ -169,9 +168,7 @@ const UploadReel = () => {
           
           {/* Header overlay */}
           <div className="absolute top-0 left-0 right-0 p-4 flex items-center justify-between z-20 bg-gradient-to-b from-black/60 to-transparent">
-            <button onClick={() => navigate(-1)} className="p-2 bg-black/40 backdrop-blur-md hover:bg-black/60 rounded-full transition-colors border border-white/10">
-              <ChevronLeft size={24} />
-            </button>
+            <GlobalBackButton />
           </div>
 
           {/* Bottom Sheet Overlay */}

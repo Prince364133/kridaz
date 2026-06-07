@@ -12,13 +12,13 @@ export const getShareLink = (localUrl) => {
   
   if (!localUrl) return prodBase;
 
-  // If inside native Android/iOS context or using localhost schema
-  if (Capacitor.isNativePlatform() || localUrl.includes('localhost') || localUrl.startsWith('http://localhost') || localUrl.startsWith('https://localhost')) {
+  // Only override with prodBase if running as a Native App (Android/iOS)
+  // Otherwise, if they are on localhost or a Vercel preview URL, keep their current URL.
+  if (Capacitor.isNativePlatform()) {
     try {
       const parsed = new URL(localUrl);
       return `${prodBase}${parsed.pathname}${parsed.search}${parsed.hash}`;
     } catch (e) {
-      // Fallback in case of string parsing failures
       if (localUrl.startsWith('/')) {
         return `${prodBase}${localUrl}`;
       }
