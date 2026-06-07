@@ -262,7 +262,7 @@ const Navbar = () => {
       </div>
 
       {/* ACTIONS (Moved outside nav to prevent dropdown clipping) */}
-      <div className={`flex items-center gap-2 sm:gap-4 fixed right-4 sm:right-6 z-[100] transition-all duration-300 ${ scrollDirection === "down" && window.innerWidth < 1024 ? "-translate-y-full top-[-100px]" : "translate-y-0 top-4" }`}>
+      <div className={`${isMessagesPage ? 'hidden lg:flex' : 'flex'} items-center gap-2 sm:gap-4 fixed right-4 sm:right-6 z-[100] transition-all duration-300 ${ scrollDirection === "down" && window.innerWidth < 1024 ? "-translate-y-full top-[-100px]" : "translate-y-0 top-4" }`}>
         {!isLoggedIn ? (
           <>
             <Link
