@@ -6,16 +6,17 @@ import { searchLocations } from "@utils/locationService";
 import { closeLocationSidebar, setUserLocation, setLocationStatus } from "@redux/slices/uiSlice";
 import { motion, AnimatePresence } from "framer-motion";
 
-const POPULAR_AREAS = [
-  "Mylapore",
-  "Velachery",
-  "Thoraipakkam",
-  "Sholinganallur",
-  "Ramapuram",
-  "Porur",
-  "Nungambakkam",
-  "Nolambur"
-];
+const POPULAR_AREAS_BY_CITY = {
+  "Chennai": ["Mylapore", "Velachery", "Thoraipakkam", "Sholinganallur", "Ramapuram", "Porur", "Nungambakkam", "Nolambur"],
+  "Hyderabad": ["Banjara Hills", "Jubilee Hills", "HITEC City", "Gachibowli", "Madhapur", "Kondapur", "Kukatpally", "Begumpet"],
+  "Bengaluru": ["Koramangala", "Indiranagar", "Whitefield", "Jayanagar", "HSR Layout", "Malleswaram", "Marathahalli", "BTM Layout"],
+  "Bangalore": ["Koramangala", "Indiranagar", "Whitefield", "Jayanagar", "HSR Layout", "Malleswaram", "Marathahalli", "BTM Layout"],
+  "Mumbai": ["Andheri", "Bandra", "Juhu", "Colaba", "Worli", "Powai", "Borivali", "Goregaon"],
+  "New Delhi": ["Connaught Place", "Hauz Khas", "Saket", "Vasant Kunj", "Dwarka", "Rohini", "Karol Bagh", "Lajpat Nagar"],
+  "Delhi": ["Connaught Place", "Hauz Khas", "Saket", "Vasant Kunj", "Dwarka", "Rohini", "Karol Bagh", "Lajpat Nagar"],
+  "Pune": ["Koregaon Park", "Kalyani Nagar", "Viman Nagar", "Hinjewadi", "Baner", "Wakad", "Kothrud", "Magarpatta"],
+  "Kolkata": ["Salt Lake", "New Town", "Ballygunge", "Park Street", "Alipore", "Dum Dum", "Jadavpur", "Gariahat"],
+};
 
 const LocationSidebar = () => {
   const dispatch = useDispatch();
@@ -27,6 +28,35 @@ const LocationSidebar = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [searchResults, setSearchResults] = useState([]);
   const [isSearching, setIsSearching] = useState(false);
+
+  const currentCity = userLocation?.city || "Chennai";
+  
+  const getPopularAreas = (city) => {
+    if (!city) return { name: "Chennai", areas: POPULAR_AREAS_BY_CITY["Chennai"] };
+    
+    const match = Object.keys(POPULAR_AREAS_BY_CITY).find(key => 
+      city.toLowerCase().includes(key.toLowerCase()) || 
+      key.toLowerCase().includes(city.toLowerCase())
+    );
+    
+    if (match) return { name: match, areas: POPULAR_AREAS_BY_CITY[match] };
+    
+    return {
+      name: city,
+      areas: [
+        `${city} Central`,
+        `North ${city}`,
+        `South ${city}`,
+        `${city} East`,
+        `${city} West`,
+        `Downtown ${city}`,
+        `Old ${city}`,
+        `New ${city}`
+      ]
+    };
+  };
+
+  const { name: displayCityName, areas: currentPopularAreas } = getPopularAreas(currentCity);
 
   useEffect(() => {
     if (searchQuery.length < 3) {
@@ -121,7 +151,7 @@ const LocationSidebar = () => {
   };
 
   const handleSelectArea = (area) => {
-    dispatch(setUserLocation({ lat: null, lng: null, city: area, state: "Tamil Nadu" }));
+    dispatch(setUserLocation({ lat: null, lng: null, city: area, state: userLocation?.state || "" }));
     dispatch(setLocationStatus("granted"));
     handleClose();
   };
@@ -225,10 +255,10 @@ const LocationSidebar = () => {
           {searchQuery.length < 3 && (
             <div className="flex flex-col">
             <h3 className="text-[12px] font-bold text-white/50 uppercase tracking-[0.1em] mb-4">
-              Popular Areas in Chennai
+              Popular Areas in {displayCityName}
             </h3>
             <div className="flex flex-col gap-2">
-              {POPULAR_AREAS.map((area) => (
+              {currentPopularAreas.map((area) => (
                 <button
                   key={area}
                   onClick={() => handleSelectArea(area)}
