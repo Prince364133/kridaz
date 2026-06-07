@@ -54,7 +54,7 @@ const Messages = () => {
   };
 
   return (
-    <div className="h-[calc(100dvh-64px)] sm:h-[calc(100dvh-80px)] lg:h-[calc(100dvh-80px)] flex bg-[#1A1A1A] overflow-hidden">
+    <div className="h-[calc(100dvh-64px)] sm:h-[calc(100dvh-80px)] lg:h-[calc(100dvh-80px)] flex bg-black overflow-hidden">
       {/* Sidebar - hidden on mobile when a chat is selected */}
       <div className={`${selectedChat ? 'hidden md:block' : 'block'} w-full md:w-[340px] h-full shrink-0`}>
         <ChatSidebar 
