@@ -11,7 +11,7 @@ concurrency:
 
 env:
   REGISTRY: ghcr.io
-  IMAGE_NAME_PREFIX: ${{ github.repository }}
+  IMAGE_NAME_PREFIX: prince364133/kridaz
 
 jobs:
   build-and-push-images:
