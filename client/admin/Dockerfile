@@ -9,6 +9,7 @@ COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
 COPY packages/common/package.json ./packages/common/
 COPY packages/shared-constants/package.json ./packages/shared-constants/
 COPY client/admin/package.json ./client/admin/
+COPY client/user/package.json ./client/user/
 RUN pnpm install --frozen-lockfile
 
 # --- Stage 3: Builder ---
@@ -16,6 +17,7 @@ FROM deps AS builder
 COPY packages/common ./packages/common
 COPY packages/shared-constants ./packages/shared-constants
 COPY client/admin ./client/admin
+COPY client/user ./client/user
 
 # Build internal dependencies
 RUN pnpm --filter @kridaz/common build
