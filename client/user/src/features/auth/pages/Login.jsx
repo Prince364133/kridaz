@@ -37,7 +37,8 @@ const Login = ({ isModal = false }) => {
     accountNotFound,
     googleLoading,
     timeLeft,
-    handleSendOtp
+    handleSendOtp,
+    isPhoneAuth
   } = useLoginForm();
   const [mounted, setMounted] = useState(false);
   const dispatch = useDispatch();
@@ -127,25 +128,36 @@ const Login = ({ isModal = false }) => {
                       </div>
                     )}
 
-                    <div className="flex flex-col items-center mt-8 space-y-4">
-                      {timeLeft > 0 ? (
-                        <p className="text-white/80 text-sm">
-                          You can resend the code in <span className="text-[#A2F86D]">{timeLeft}</span> seconds
-                        </p>
-                      ) : (
-                        <p className="text-white/80 text-sm">
-                          Didn't receive the code?
-                        </p>
-                      )}
-                      <button
-                        type="button"
-                        disabled={timeLeft > 0 || loading}
-                        onClick={handleSendOtp}
-                        className={`text-2xl font-medium transition-colors ${timeLeft > 0 ? 'text-white/40 cursor-not-allowed' : 'text-[#A2F86D] hover:text-[#b4fc87]'}`}
-                      >
-                        Resend Code
-                      </button>
-                    </div>
+                      <div className="flex flex-col items-center mt-8 space-y-4">
+                        {timeLeft > 0 ? (
+                          <p className="text-white/80 text-sm">
+                            You can resend the code in <span className="text-[#A2F86D]">{timeLeft}</span> seconds
+                          </p>
+                        ) : (
+                          <p className="text-white/80 text-sm">
+                            Didn't receive the code?
+                          </p>
+                        )}
+                        <button
+                          type="button"
+                          disabled={timeLeft > 0 || loading}
+                          onClick={() => handleSendOtp(false)}
+                          className={`text-2xl font-medium transition-colors ${timeLeft > 0 ? 'text-white/40 cursor-not-allowed' : 'text-[#A2F86D] hover:text-[#b4fc87]'}`}
+                        >
+                          Resend Code
+                        </button>
+
+                        {isPhoneAuth && (
+                          <button
+                            type="button"
+                            disabled={loading}
+                            onClick={() => handleSendOtp(true)}
+                            className={`text-lg font-medium transition-colors text-white/60 hover:text-white pt-2`}
+                          >
+                            Get OTP via SMS
+                          </button>
+                        )}
+                      </div>
 
                   </div>
                   

@@ -16,7 +16,16 @@ const registerSchema = z.object({
   email: z.string().min(1, "Enter your email").regex(/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/, "Enter a valid email"),
   phone: z.string().min(1, "Enter your phone number").regex(/^[0-9]{10}$/, "Enter a valid 10-digit phone number"),
   gender: z.string().min(1, "Select your gender"),
-  dob: z.string().min(1, "Date of Birth is required"),
+  dob: z.string().min(1, "Date of Birth is required").refine((val) => {
+    const dob = new Date(val);
+    const today = new Date();
+    let age = today.getFullYear() - dob.getFullYear();
+    const m = today.getMonth() - dob.getMonth();
+    if (m < 0 || (m === 0 && today.getDate() < dob.getDate())) {
+      age--;
+    }
+    return age >= 18;
+  }, "You must be at least 18 years old"),
   address: z.string().min(1, "Address is required"),
   city: z.string().min(1, "City is required"),
   state: z.string().min(1, "State is required"),

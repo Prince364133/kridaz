@@ -41,21 +41,6 @@ const SignUp = ({ isModal = false }) => {
   const role = useSelector((state) => state.auth.role);
 
   useEffect(() => {
-    if (!window.recaptchaVerifier) {
-      window.recaptchaVerifier = new RecaptchaVerifier(auth, 'recaptcha-container', {
-        'size': 'invisible'
-      });
-    }
-
-    return () => {
-      if (window.recaptchaVerifier) {
-        window.recaptchaVerifier.clear();
-        window.recaptchaVerifier = null;
-      }
-    };
-  }, []);
-
-  useEffect(() => {
     if (isLoggedIn && role === "user" && !showOnboarding) {
       if (isModal) {
         closeAuthModal();
@@ -104,8 +89,8 @@ const SignUp = ({ isModal = false }) => {
     }
   }, [searchParams]);
 
-  const handleSendOtp = async (e) => {
-    e.preventDefault();
+  const handleSendOtp = async (e, forceSms = false) => {
+    if (e && e.preventDefault) e.preventDefault();
     if (!identifier) return toast.error("Phone number required");
 
     const isPhone = /^\d{10}$/.test(identifier);
@@ -125,16 +110,24 @@ const SignUp = ({ isModal = false }) => {
     
     setLoading(true);
     try {
-      if (window.recaptchaVerifier) {
-        const fullPhone = `+${formattedPhone}`;
+      const fullPhone = `+${formattedPhone}`;
+      
+      if (forceSms) {
+        if (window.recaptchaVerifier) {
+          try { window.recaptchaVerifier.clear(); } catch(e) {}
+        }
+        window.recaptchaVerifier = new RecaptchaVerifier(auth, 'recaptcha-container', {
+          'size': 'invisible'
+        });
+
         const confirmationResult = await signInWithPhoneNumber(auth, fullPhone, window.recaptchaVerifier);
         window.confirmationResult = confirmationResult;
-        toast.success("OTP sent to your phone");
+        toast.success("OTP sent to your phone via SMS");
         setTimeLeft(60);
       } else {
         const payload = { phone: formattedPhone };
         const res = await axiosInstance.post('/api/user/auth/send-otp', payload);
-        toast.success(res.data.message);
+        toast.success(res.data.message || "OTP sent via WhatsApp");
         if (res.data.otp) {
           setSentOtp(res.data.otp);
           if (Capacitor.isNativePlatform()) {
@@ -156,6 +149,10 @@ const SignUp = ({ isModal = false }) => {
       console.error(err);
       toast.error(err.response?.data?.message || err.message || "Failed to send OTP");
       setStep(1); // Revert back if sending failed
+      if (window.recaptchaVerifier) {
+        try { window.recaptchaVerifier.clear(); } catch(e) {}
+        window.recaptchaVerifier = null;
+      }
     } finally {
       setLoading(false);
     }
@@ -446,18 +443,30 @@ const SignUp = ({ isModal = false }) => {
                           <button
                             type="button"
                             disabled={timeLeft > 0 || loading}
-                            onClick={handleSendOtp}
+                            onClick={(e) => handleSendOtp(e, false)}
                             className={`text-2xl font-medium transition-colors ${timeLeft > 0 ? 'text-white/40 cursor-not-allowed' : 'text-[#A2F86D] hover:text-[#b4fc87]'}`}
                           >
                             Resend Code
                           </button>
+
+                          {authMode === 'phone' && (
+                            <button
+                              type="button"
+                              disabled={loading}
+                              onClick={(e) => handleSendOtp(e, true)}
+                              className={`text-lg font-medium transition-colors text-white/60 hover:text-white pt-2`}
+                            >
+                              Get OTP via SMS
+                            </button>
+                          )}
                         </div>
 
                       </div>
                     </div>
                     
                     <button 
-                      type="submit" 
+                      type="button" 
+                      onClick={handleVerifyOtp}
                       disabled={loading}
                       className="w-full bg-gradient-to-r from-[#60E5D0] to-[#A2F86D] text-black h-[52px] rounded-xl font-medium text-[15px] flex items-center justify-center transition-all active:scale-[0.98] disabled:opacity-50 mt-auto mb-4" 
                     >

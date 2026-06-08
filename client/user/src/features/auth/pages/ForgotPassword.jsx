@@ -17,20 +17,6 @@ const ForgotPassword = () => {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [loading, setLoading] = useState(false);
 
-  useEffect(() => {
-    if (!window.recaptchaVerifier) {
-      window.recaptchaVerifier = new RecaptchaVerifier(auth, 'recaptcha-container', {
-        'size': 'invisible'
-      });
-    }
-
-    return () => {
-      if (window.recaptchaVerifier) {
-        window.recaptchaVerifier.clear();
-        window.recaptchaVerifier = null;
-      }
-    };
-  }, []);
 
   useEffect(() => {
     if (isLoggedIn) {
@@ -54,6 +40,14 @@ const ForgotPassword = () => {
       if (res.data.success) {
         if (res.data.requiresOtp) {
           const phoneNum = email.startsWith('+') ? email : `+91${email}`;
+          
+          if (window.recaptchaVerifier) {
+            try { window.recaptchaVerifier.clear(); } catch(e) {}
+          }
+          window.recaptchaVerifier = new RecaptchaVerifier(auth, 'recaptcha-container', {
+            'size': 'invisible'
+          });
+
           if (window.recaptchaVerifier) {
             try {
               const confirmationResult = await signInWithPhoneNumber(auth, phoneNum, window.recaptchaVerifier);
@@ -63,6 +57,10 @@ const ForgotPassword = () => {
             } catch (fbError) {
               console.error("Firebase send error:", fbError);
               toast.error(fbError.message || "Failed to send SMS via Firebase");
+              if (window.recaptchaVerifier) {
+                try { window.recaptchaVerifier.clear(); } catch(e) {}
+                window.recaptchaVerifier = null;
+              }
             }
           } else {
             toast.error("Recaptcha not initialized");

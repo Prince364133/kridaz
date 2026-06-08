@@ -9,7 +9,7 @@ import {login} from "@redux/slices/authSlice";
 import { useNavigate } from "react-router-dom";
 import { Capacitor } from "@capacitor/core";
 import { auth } from "../../../config/firebase";
-import { signInWithPhoneNumber } from "firebase/auth";
+import { signInWithPhoneNumber, RecaptchaVerifier } from "firebase/auth";
 
 const loginSchema = z.object({
   email: z.string().min(1, "Enter your email or phone number").refine((value) => {
@@ -27,6 +27,7 @@ const useLoginForm = () => {
   const [sentOtp, setSentOtp] = useState("");
   const [accountNotFound, setAccountNotFound] = useState(false);
   const [timeLeft, setTimeLeft] = useState(60);
+  const [isPhoneAuth, setIsPhoneAuth] = useState(false);
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
@@ -67,7 +68,7 @@ const useLoginForm = () => {
     }
   };
 
-  const handleLoginStep1 = async () => {
+  const handleLoginStep1 = async (forceSms = false) => {
     const isValid = await trigger(["email", "password"]);
     if (!isValid) return;
 
@@ -87,25 +88,46 @@ const useLoginForm = () => {
       }
 
       if (result.requiresOtp) {
-        // Handle Phone OTP with Firebase
         const isPhone = /^[0-9]{10}$/.test(email) || email.startsWith('+');
+        setIsPhoneAuth(isPhone);
         if (isPhone) {
           const phoneNum = email.startsWith('+') ? email : `+91${email}`;
-          if (window.recaptchaVerifier) {
-            try {
-              const confirmationResult = await signInWithPhoneNumber(auth, phoneNum, window.recaptchaVerifier);
-              window.confirmationResult = confirmationResult;
-              toast.success("OTP sent to your phone");
-            } catch (fbError) {
-              console.error("Firebase send error:", fbError);
-              toast.error(fbError.message || "Failed to send SMS via Firebase");
-              setLoading(false);
-              return;
+          
+          if (forceSms) {
+            if (window.recaptchaVerifier) {
+              try { window.recaptchaVerifier.clear(); } catch(e) {}
             }
+            window.recaptchaVerifier = new RecaptchaVerifier(auth, 'recaptcha-container', {
+              'size': 'invisible'
+            });
+
+            const confirmationResult = await signInWithPhoneNumber(auth, phoneNum, window.recaptchaVerifier);
+            window.confirmationResult = confirmationResult;
+            toast.success("OTP sent to your phone via SMS");
+            setShowOtpInput(true);
+            setTimeLeft(60);
           } else {
-            toast.error("Recaptcha not initialized");
-            setLoading(false);
-            return;
+            // Default to WhatsApp
+            const payload = { phone: email.startsWith('+') ? email.replace('+', '') : email };
+            const otpRes = await axiosInstance.post('/api/user/auth/send-otp', payload);
+            toast.success(otpRes.data.message || "OTP sent via WhatsApp");
+            if (otpRes.data.otp) {
+              setSentOtp(otpRes.data.otp);
+              if (Capacitor.isNativePlatform()) {
+                toast((t) => (
+                  <div className="flex flex-col gap-1 p-1">
+                    <div className="font-bold text-sm text-black flex items-center gap-1">
+                      🔔 Kridaz Notification
+                    </div>
+                    <div className="text-xs text-gray-600">
+                      Your verification code is: <strong className="text-black text-sm">{otpRes.data.otp}</strong>
+                    </div>
+                  </div>
+                ), { position: 'top-center', duration: 8000 });
+              }
+            }
+            setShowOtpInput(true);
+            setTimeLeft(60);
           }
         } else {
           // Email OTP
@@ -125,11 +147,9 @@ const useLoginForm = () => {
             }
           }
           toast.success("OTP sent to your email");
+          setShowOtpInput(true);
+          setTimeLeft(60);
         }
-
-        setShowOtpInput(true);
-        setLoading(false);
-        setTimeLeft(60);
         return;
       }
     } catch (err) {
@@ -239,7 +259,8 @@ const useLoginForm = () => {
     accountNotFound,
     setAccountNotFound,
     timeLeft,
-    handleSendOtp: handleLoginStep1
+    handleSendOtp: handleLoginStep1,
+    isPhoneAuth
   };
 };
 
