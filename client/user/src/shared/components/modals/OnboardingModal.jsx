@@ -34,7 +34,7 @@ const CustomSelect = ({ value, onChange, options, placeholder }) => {
   return (
     <div className="relative flex-1" ref={dropdownRef}>
       <div 
-        className="w-full bg-[#222222] border border-transparent rounded-[10px] py-4 px-4 text-white hover:border-white/20 outline-none transition-all cursor-pointer flex justify-between items-center"
+        className="w-full bg-[#121212] border border-white/[0.08] rounded-[16px] py-4 px-4 text-white hover:border-[#55DEE8] outline-none transition-all cursor-pointer flex justify-between items-center"
         onClick={() => setIsOpen(!isOpen)}
       >
         <span className={value ? "text-white" : "text-white/40"}>
@@ -43,11 +43,11 @@ const CustomSelect = ({ value, onChange, options, placeholder }) => {
         <ChevronDown size={16} className={`text-white/40 transition-transform ${isOpen ? "rotate-180" : ""}`} />
       </div>
       {isOpen && (
-        <div className="absolute top-full left-0 right-0 mt-2 bg-[#1A1A1A] border border-[#333333] rounded-[10px] max-h-[220px] overflow-y-auto z-[999] shadow-xl custom-scrollbar animate-in fade-in zoom-in-95 duration-200">
+        <div className="absolute top-full left-0 right-0 mt-2 bg-[#1B1B1B] border border-white/[0.08] rounded-[16px] max-h-[220px] overflow-y-auto z-[999] shadow-xl custom-scrollbar animate-in fade-in zoom-in-95 duration-200">
           {options.map((opt) => (
             <div 
               key={opt.value}
-              className={`px-4 py-3 cursor-pointer transition-colors text-sm ${value === opt.value ? 'bg-[#BFF367]/10 text-[#BFF367] font-bold' : 'text-white/80 hover:bg-white/5 hover:text-white'}`}
+              className={`px-4 py-3 cursor-pointer transition-colors text-sm ${value === opt.value ? 'bg-[#B3DC26] text-[#000000] font-bold' : 'text-white/80 hover:bg-white/5 hover:text-white'}`}
               onClick={() => { onChange(opt.value); setIsOpen(false); }}
             >
               {opt.label}
@@ -179,32 +179,41 @@ const OnboardingModal = ({ isOpen, onClose, initialData, onComplete }) => {
     }
   }, [isOpen, initialData]);
 
-  useEffect(() => {
-    if (isOpen && needsPhoneVerification && !window.recaptchaVerifier) {
-      window.recaptchaVerifier = new RecaptchaVerifier(auth, 'recaptcha-container', {
-        'size': 'invisible'
-      });
-    }
-  }, [isOpen, needsPhoneVerification]);
-
-  const handleSendPhoneOtp = async () => {
+  const handleSendPhoneOtp = async (forceSms = false) => {
     if (!formData.phone || formData.phone.length < 10) {
       return toast.error("Please enter a valid 10-digit phone number");
     }
     setSendingPhoneOtp(true);
     try {
       const formattedPhone = formData.phone.startsWith('+') ? formData.phone : `+91${formData.phone}`;
-      if (window.recaptchaVerifier) {
-        const confirmationResult = await signInWithPhoneNumber(auth, formattedPhone, window.recaptchaVerifier);
-        window.confirmationResult = confirmationResult;
+      
+      if (!forceSms) {
+        const endpoint = "/api/user/auth/send-otp";
+        await axiosInstance.post(endpoint, { phone: formData.phone });
         setPhoneOtpSent(true);
-        toast.success("Verification OTP sent successfully!");
-      } else {
-        toast.error("Recaptcha not initialized");
+        toast.success("WhatsApp OTP sent successfully!");
+        setSendingPhoneOtp(false);
+        return;
       }
+
+      if (window.recaptchaVerifier) {
+        try { window.recaptchaVerifier.clear(); } catch (e) {}
+      }
+      window.recaptchaVerifier = new RecaptchaVerifier(auth, 'recaptcha-container', {
+        'size': 'invisible'
+      });
+
+      const confirmationResult = await signInWithPhoneNumber(auth, formattedPhone, window.recaptchaVerifier);
+      window.confirmationResult = confirmationResult;
+      setPhoneOtpSent(true);
+      toast.success("SMS OTP sent successfully!");
     } catch (error) {
-      console.error("Firebase send error:", error);
+      console.error("OTP send error:", error);
       toast.error(error.message || "Failed to send verification OTP");
+      if (window.recaptchaVerifier) {
+        try { window.recaptchaVerifier.clear(); } catch(e) {}
+        window.recaptchaVerifier = null;
+      }
     } finally {
       setSendingPhoneOtp(false);
     }
@@ -250,6 +259,18 @@ const OnboardingModal = ({ isOpen, onClose, initialData, onComplete }) => {
     if (step === 1) {
       if (!formData.firstName) return toast.error("Please enter your first name");
       if (!formData.dob) return toast.error("Please select your date of birth");
+
+      const dob = new Date(formData.dob);
+      const today = new Date();
+      let age = today.getFullYear() - dob.getFullYear();
+      const m = today.getMonth() - dob.getMonth();
+      if (m < 0 || (m === 0 && today.getDate() < dob.getDate())) {
+        age--;
+      }
+      
+      if (age < 18) {
+        return toast.error("You must be at least 18 years old to proceed");
+      }
     } else if (step === 2) {
       if (!formData.gender) return toast.error("Please select your gender");
     } else if (step === 3) {
@@ -410,7 +431,7 @@ const OnboardingModal = ({ isOpen, onClose, initialData, onComplete }) => {
 
   return (
     <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-in fade-in duration-300">
-      <div className="w-full max-w-[900px] h-[580px] max-h-[90vh] bg-[#161616] flex relative animate-in slide-in-from-bottom-8 duration-500 ease-out rounded-2xl border border-white/10 shadow-2xl overflow-hidden">
+      <div className="w-full max-w-[900px] h-[580px] max-h-[90vh] bg-[#1B1B1B] flex relative animate-in slide-in-from-bottom-8 duration-500 ease-out rounded-[20px] border border-white/[0.08] shadow-[0px_4px_16px_rgba(0,0,0,0.4)] overflow-hidden">
         
         {/* Left Side: Image Holder */}
         <div className="hidden md:block w-1/2 relative bg-black">
@@ -423,12 +444,12 @@ const OnboardingModal = ({ isOpen, onClose, initialData, onComplete }) => {
         </div>
 
         {/* Right Side: Form Area */}
-        <div className="w-full md:w-1/2 flex flex-col relative bg-[#161616]">
+        <div className="w-full md:w-1/2 flex flex-col relative bg-[#1B1B1B]">
           {/* Progress Bar (Hidden for step 1 to match design) */}
           {step > 1 && (
             <div className="flex h-1.5 bg-[#000000] absolute top-0 left-0 right-0 overflow-hidden z-20">
               <div 
-                className="bg-[#BFF367] transition-all duration-500 shadow-[0_0_10px_#BFF367]" 
+                className="bg-[#B3DC26] transition-all duration-500" 
                 style={{ width: `${(step / 4) * 100}%` }}
               />
             </div>
@@ -475,7 +496,7 @@ const OnboardingModal = ({ isOpen, onClose, initialData, onComplete }) => {
                 <div className="flex justify-center mb-3 mt-0">
                   <div 
                     onClick={() => fileInputRef.current?.click()}
-                    className="w-[80px] h-[80px] rounded-full bg-[#222222] flex items-center justify-center relative cursor-pointer border border-transparent hover:border-[#BFF367]/50 transition-colors group shadow-lg overflow-hidden"
+                    className="w-[80px] h-[80px] rounded-full bg-[#121212] flex items-center justify-center relative cursor-pointer border border-white/[0.08] hover:border-[#55DEE8] transition-colors group shadow-[0px_4px_16px_rgba(0,0,0,0.4)] overflow-hidden"
                   >
                     {previewImage ? (
                       <img src={previewImage} alt="Profile" className="w-full h-full object-cover" />
@@ -506,7 +527,7 @@ const OnboardingModal = ({ isOpen, onClose, initialData, onComplete }) => {
                       type="text"
                       value={formData.firstName}
                       onChange={(e) => setFormData({...formData, firstName: e.target.value})}
-                      className="w-full bg-[#222222] border border-transparent rounded-[10px] py-3 px-4 text-white focus:border-white/20 outline-none transition-all text-sm"
+                      className="w-full bg-[#121212] border border-white/[0.08] rounded-[16px] py-3 px-4 text-white focus:border-[#55DEE8] outline-none transition-all text-sm"
                     />
                   </label>
                   <label className="block">
@@ -515,7 +536,7 @@ const OnboardingModal = ({ isOpen, onClose, initialData, onComplete }) => {
                       type="text"
                       value={formData.lastName}
                       onChange={(e) => setFormData({...formData, lastName: e.target.value})}
-                      className="w-full bg-[#222222] border border-transparent rounded-[10px] py-3 px-4 text-white focus:border-white/20 outline-none transition-all text-sm"
+                      className="w-full bg-[#121212] border border-white/[0.08] rounded-[16px] py-3 px-4 text-white focus:border-[#55DEE8] outline-none transition-all text-sm"
                     />
                   </label>
                 </div>
@@ -550,8 +571,8 @@ const OnboardingModal = ({ isOpen, onClose, initialData, onComplete }) => {
               <div className="flex justify-center gap-5 animate-in slide-in-from-bottom-8 duration-300 mt-6">
                 <button
                   onClick={() => setFormData({...formData, gender: "Male"})}
-                  className={`w-[158px] h-[228px] shrink-0 rounded-[16px] border-[1.5px] transition-all duration-300 relative overflow-hidden flex flex-col pt-5 ${
-                    formData.gender === "Male" ? "border-white bg-[#161616]" : "border-[#2D2D2D] bg-[#111111]"
+                  className={`w-[158px] h-[228px] shrink-0 rounded-[16px] border transition-all duration-300 relative overflow-hidden flex flex-col pt-5 ${
+                    formData.gender === "Male" ? "border-white bg-[#1B1B1B]" : "border-white/[0.08] bg-[#121212]"
                   }`}
                 >
                   <span className="text-white font-medium text-[15px] relative z-10 mb-2">Male</span>
@@ -566,8 +587,8 @@ const OnboardingModal = ({ isOpen, onClose, initialData, onComplete }) => {
 
                 <button
                   onClick={() => setFormData({...formData, gender: "Female"})}
-                  className={`w-[158px] h-[228px] shrink-0 rounded-[16px] border-[1.5px] transition-all duration-300 relative overflow-hidden flex flex-col pt-5 ${
-                    formData.gender === "Female" ? "border-white bg-[#161616]" : "border-[#2D2D2D] bg-[#111111]"
+                  className={`w-[158px] h-[228px] shrink-0 rounded-[16px] border transition-all duration-300 relative overflow-hidden flex flex-col pt-5 ${
+                    formData.gender === "Female" ? "border-white bg-[#1B1B1B]" : "border-white/[0.08] bg-[#121212]"
                   }`}
                 >
                   <span className="text-white font-medium text-[15px] relative z-10 mb-2">Female</span>
@@ -589,44 +610,25 @@ const OnboardingModal = ({ isOpen, onClose, initialData, onComplete }) => {
                   <div className="grid grid-cols-2 gap-4">
                     {sports.map((sport) => {
                       const isSelected = formData.sportTypes.includes(sport.name);
+                      const isPrimary = isSelected && formData.sportTypes[0] === sport.name;
                       return (
                         <button
                           key={sport.name}
                           onClick={() => toggleSport(sport.name)}
-                          className={`group relative w-full aspect-[4/5] rounded-[16px] transition-all duration-300 overflow-hidden ${ isSelected ? "scale-[1.02] z-10" : "border-[1.5px] border-[#2D2D2D] opacity-60 hover:opacity-100 hover:border-[#444]" }`}
+                          className={`group relative w-full aspect-[4/5] rounded-[16px] transition-all duration-300 overflow-hidden ${ isSelected ? "scale-[1.02] z-10" : "border border-white/[0.08] opacity-60 hover:opacity-100 hover:border-white/[0.2]" }`}
                         >
                           {isSelected && (
                             <svg className="absolute inset-0 w-full h-full z-20 pointer-events-none">
-                              {/* Faint solid border */}
+                              {/* Solid border without animation */}
                               <rect 
                                 x="1" y="1" 
                                 width="calc(100% - 2px)" height="calc(100% - 2px)" 
                                 rx="15" 
                                 fill="none" 
-                                stroke="#BFF367" 
-                                strokeWidth="2" 
-                                opacity="0.2"
+                                stroke="#B3DC26" 
+                                strokeWidth={isPrimary ? "3" : "2"} 
+                                opacity={isPrimary ? "1" : "0.6"}
                               />
-                              {/* Traveling highlight border */}
-                              <rect 
-                                x="1" y="1" 
-                                width="calc(100% - 2px)" height="calc(100% - 2px)" 
-                                rx="15" 
-                                fill="none" 
-                                stroke="#BFF367" 
-                                strokeWidth="3" 
-                                pathLength="100"
-                                strokeDasharray="30 70" 
-                                strokeLinecap="round"
-                              >
-                                <animate 
-                                  attributeName="stroke-dashoffset" 
-                                  values="100;0" 
-                                  dur="2.5s" 
-                                  calcMode="linear"
-                                  repeatCount="indefinite" 
-                                />
-                              </rect>
                             </svg>
                           )}
                           
@@ -637,10 +639,21 @@ const OnboardingModal = ({ isOpen, onClose, initialData, onComplete }) => {
                               className={`absolute inset-0 w-full h-full object-cover transition-transform duration-500 ${isSelected ? "scale-105" : "group-hover:scale-110"}`} 
                             />
                             
-                            {/* Gradient Overlay for Text Visibility */}
-                            <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent pointer-events-none" />
+                            <div className={`absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent transition-opacity duration-300 ${isSelected ? "opacity-100" : "opacity-80 group-hover:opacity-100"}`} />
                             
-                            <span className="relative z-10 mb-3 font-black text-white text-[13px] tracking-widest uppercase text-center w-full">{sport.name}</span>
+                            <div className="absolute inset-x-0 bottom-0 p-3 z-30">
+                            <div className="flex items-center gap-2 mb-1">
+                              <div className={`w-5 h-5 rounded-full flex items-center justify-center border transition-all ${isSelected ? "bg-[#B3DC26] border-[#B3DC26] text-black" : "border-white/30 text-white"}`}>
+                                {isSelected ? <Check size={12} strokeWidth={3} /> : <div className="w-1.5 h-1.5 rounded-full bg-white/30" />}
+                              </div>
+                              <span className={`text-[13px] font-bold tracking-wide transition-colors ${isSelected ? "text-[#B3DC26]" : "text-white"}`}>{sport.name}</span>
+                            </div>
+                            
+                            {isPrimary && (
+                              <div className="bg-[#B3DC26]/20 text-[#B3DC26] text-[9px] font-bold uppercase tracking-wider py-0.5 px-2 rounded-full w-fit mt-1 border border-[#B3DC26]/30">
+                                Primary
+                              </div>
+                            )}
                           </div>
                         </button>
                       );
@@ -665,21 +678,21 @@ const OnboardingModal = ({ isOpen, onClose, initialData, onComplete }) => {
                         onChange={(e) => setFormData({...formData, location: e.target.value})}
                         onFocus={() => setShowSuggestions(locationSuggestions.length > 0)}
                         placeholder="Select your location"
-                        className="w-full bg-[#222222] border border-transparent rounded-[10px] py-4 pl-12 pr-4 text-white focus:border-white/20 outline-none transition-all placeholder-white/20"
+                        className="w-full bg-[#121212] border border-white/[0.08] rounded-[16px] py-4 pl-12 pr-4 text-white focus:border-[#55DEE8] outline-none transition-all placeholder-white/40"
                       />
                       {isSearchingLocation && (
                         <div className="absolute right-4 top-1/2 -translate-y-1/2">
-                          <Loader2 className="w-4 h-4 text-[#BFF367] animate-spin" />
+                          <Loader2 className="w-4 h-4 text-[#B3DC26] animate-spin" />
                         </div>
                       )}
                       {showSuggestions && locationSuggestions.length > 0 && (
-                        <div className="absolute top-full left-0 right-0 mt-2 bg-[#222222] border border-white/10 rounded-[10px] overflow-hidden z-[110] shadow-2xl max-h-[160px] overflow-y-auto custom-scrollbar">
+                        <div className="absolute top-full left-0 right-0 mt-2 bg-[#1B1B1B] border border-white/[0.08] rounded-[16px] overflow-hidden z-[110] shadow-[0px_4px_16px_rgba(0,0,0,0.4)] max-h-[160px] overflow-y-auto custom-scrollbar">
                           {locationSuggestions.map((suggestion, idx) => (
                             <button
                               type="button"
                               key={idx}
                               onClick={() => handleSelectLocation(suggestion)}
-                              className="w-full px-4 py-3 text-left hover:bg-[#BFF367]/10 text-white/80 hover:text-white border-b border-white/5 last:border-0 transition-colors flex flex-col gap-0.5"
+                              className="w-full px-4 py-3 text-left hover:bg-white/5 text-white/80 hover:text-white border-b border-white/[0.08] last:border-0 transition-colors flex flex-col gap-0.5"
                             >
                               <span className="text-sm font-bold">{suggestion.city || suggestion.display_name.split(',')[0]}</span>
                               <span className="text-[10px] text-white/40 truncate">{suggestion.display_name}</span>
@@ -697,7 +710,7 @@ const OnboardingModal = ({ isOpen, onClose, initialData, onComplete }) => {
                         type="email"
                         value={formData.email}
                         onChange={(e) => setFormData({...formData, email: e.target.value})}
-                        className="w-full bg-[#222222] border border-transparent rounded-[10px] py-4 px-4 text-white focus:border-white/20 outline-none transition-all"
+                        className="w-full bg-[#121212] border border-white/[0.08] rounded-[16px] py-4 px-4 text-white focus:border-[#55DEE8] outline-none transition-all"
                       />
                     </label>
                   )}
@@ -719,19 +732,29 @@ const OnboardingModal = ({ isOpen, onClose, initialData, onComplete }) => {
                                 setIsPhoneVerified(false);
                               }
                             }}
-                            className="w-full bg-[#222222] border border-transparent rounded-[10px] py-4 px-4 text-white focus:border-white/20 outline-none transition-all disabled:opacity-60 disabled:cursor-not-allowed"
+                            className="w-full bg-[#121212] border border-white/[0.08] rounded-[16px] py-4 px-4 text-white focus:border-[#55DEE8] outline-none transition-all disabled:opacity-60 disabled:cursor-not-allowed"
                           />
                         </div>
                         
                         {needsPhoneVerification && !isPhoneVerified && (
-                          <button
-                            type="button"
-                            onClick={handleSendPhoneOtp}
-                            disabled={sendingPhoneOtp || !formData.phone || formData.phone.length < 10}
-                            className="px-4 bg-[#BFF367]/10 hover:bg-[#BFF367]/20 border border-[#BFF367]/30 rounded-[8px] font-bold text-xs uppercase tracking-wider text-[#BFF367] transition-all disabled:opacity-40 disabled:cursor-not-allowed whitespace-nowrap animate-pulse"
-                          >
-                            {sendingPhoneOtp ? <Loader2 className="animate-spin w-4 h-4" /> : (phoneOtpSent ? "Resend" : "Get OTP")}
-                          </button>
+                          <div className="flex flex-col gap-2">
+                            <button
+                              type="button"
+                              onClick={() => handleSendPhoneOtp(false)}
+                              disabled={sendingPhoneOtp || !formData.phone || formData.phone.length < 10}
+                              className="px-4 py-2 bg-[linear-gradient(90deg,#55DEE8_0%,#B3DC26_100%)] rounded-[16px] font-bold text-xs uppercase tracking-wider text-[#000000] shadow-[0px_8px_24px_rgba(179,220,38,0.15)] transition-all disabled:opacity-40 disabled:cursor-not-allowed whitespace-nowrap h-full max-h-[44px] flex items-center justify-center"
+                            >
+                              {sendingPhoneOtp ? <Loader2 className="animate-spin w-4 h-4 mx-auto" /> : (phoneOtpSent ? "Resend" : "Get OTP")}
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => handleSendPhoneOtp(true)}
+                              disabled={sendingPhoneOtp || !formData.phone || formData.phone.length < 10}
+                              className="px-4 py-1.5 bg-[#1B1B1B] border border-white/[0.08] rounded-[16px] font-bold text-[10px] uppercase tracking-wider text-white transition-all disabled:opacity-40 disabled:cursor-not-allowed whitespace-nowrap"
+                            >
+                              Get OTP via SMS
+                            </button>
+                          </div>
                         )}
 
                         {needsPhoneVerification && isPhoneVerified && (
@@ -752,13 +775,13 @@ const OnboardingModal = ({ isOpen, onClose, initialData, onComplete }) => {
                               value={phoneOtp}
                               onChange={(e) => setPhoneOtp(e.target.value.replace(/\D/g, ''))}
                               placeholder="Enter 6-digit OTP"
-                              className="flex-1 bg-white/[0.03] border border-[#2D2D2D] rounded-[8px] py-3 px-4 text-white placeholder:text-white/10 focus:border-[#BFF367] focus:ring-1 focus:ring-[#BFF367] outline-none transition-all text-center tracking-widest font-black"
+                              className="flex-1 bg-[#121212] border border-white/[0.08] rounded-[16px] py-3 px-4 text-white placeholder:text-white/40 focus:border-[#55DEE8] outline-none transition-all text-center tracking-widest font-black"
                             />
                             <button
                               type="button"
                               onClick={handleVerifyPhoneOtp}
                               disabled={verifyingPhoneOtp || phoneOtp.length < 6}
-                              className="px-6 bg-[#BFF367] hover:scale-[1.02] active:scale-[0.98] rounded-[8px] font-black text-xs uppercase tracking-wider text-black transition-all disabled:opacity-40 disabled:scale-100"
+                              className="px-6 bg-[linear-gradient(90deg,#55DEE8_0%,#B3DC26_100%)] rounded-[16px] font-black text-xs uppercase tracking-wider text-[#000000] shadow-[0px_8px_24px_rgba(179,220,38,0.15)] transition-all disabled:opacity-40 disabled:scale-100"
                             >
                               {verifyingPhoneOtp ? <Loader2 className="animate-spin w-4 h-4" /> : "Verify"}
                             </button>
@@ -775,7 +798,7 @@ const OnboardingModal = ({ isOpen, onClose, initialData, onComplete }) => {
                       value={formData.password}
                       onChange={(e) => setFormData({...formData, password: e.target.value})}
                       placeholder="Must be at least 6 characters"
-                      className="w-full bg-[#222222] border border-transparent rounded-[10px] py-4 px-4 text-white focus:border-white/20 outline-none transition-all"
+                      className="w-full bg-[#121212] border border-white/[0.08] rounded-[16px] py-4 px-4 text-white focus:border-[#55DEE8] outline-none transition-all"
                     />
                   </label>
                 </div>
@@ -784,12 +807,12 @@ const OnboardingModal = ({ isOpen, onClose, initialData, onComplete }) => {
           </div>
 
           {/* Footer Actions */}
-          <div className="flex gap-4 pt-4 mt-auto shrink-0 z-10 bg-[#161616]">
-            <div className="flex w-full h-[52px] gap-4">
+          <div className="flex gap-4 pt-4 mt-auto shrink-0 z-10 bg-[#1B1B1B]">
+            <div className="flex w-full h-[58px] gap-4">
               {step > 1 && (
                 <button
                   onClick={handleBack}
-                  className="w-[110px] shrink-0 bg-[#000000] hover:bg-white/10 text-white h-full rounded-[10px] font-black uppercase tracking-widest text-xs flex items-center justify-center gap-2 transition-all border border-[#2D2D2D]"
+                  className="w-[110px] shrink-0 bg-[#1B1B1B] text-white h-full rounded-[16px] font-bold uppercase tracking-widest text-xs flex items-center justify-center gap-2 transition-all border border-white/[0.08]"
                 >
                   <ChevronLeft size={16} />
                   BACK
@@ -799,7 +822,7 @@ const OnboardingModal = ({ isOpen, onClose, initialData, onComplete }) => {
               {step < 4 ? (
                 <button
                   onClick={handleNext}
-                  className="flex-1 bg-gradient-to-r from-[#60E5D0] to-[#A2F86D] text-black h-full rounded-[10px] font-medium text-[15px] flex items-center justify-center transition-all active:scale-[0.98] disabled:opacity-50"
+                  className="flex-1 bg-[linear-gradient(90deg,#55DEE8_0%,#B3DC26_100%)] shadow-[0px_8px_24px_rgba(179,220,38,0.15)] text-[#000000] h-full rounded-[16px] font-bold text-[18px] flex items-center justify-center transition-all disabled:opacity-40"
                 >
                 CONTINUE
               </button>
@@ -807,13 +830,13 @@ const OnboardingModal = ({ isOpen, onClose, initialData, onComplete }) => {
               <button
                 onClick={handleSubmit}
                 disabled={loading || formData.sportTypes.length === 0}
-                className="flex-1 bg-gradient-to-r from-[#60E5D0] to-[#A2F86D] text-black h-full rounded-[10px] font-medium text-[15px] flex items-center justify-center gap-2 transition-all active:scale-[0.98] disabled:opacity-50"
+                className="flex-1 bg-[linear-gradient(90deg,#55DEE8_0%,#B3DC26_100%)] shadow-[0px_8px_24px_rgba(179,220,38,0.15)] text-[#000000] h-full rounded-[16px] font-bold text-[18px] flex items-center justify-center gap-2 transition-all disabled:opacity-40"
               >
                 {loading ? (
-                  <Loader2 className="animate-spin" size={20} />
+                  <Loader2 className="animate-spin text-[#000000]" size={20} />
                 ) : (
                   <>
-                    <Trophy size={18} />
+                    <Trophy size={18} className="text-[#000000]" />
                     ENTER THE ARENA
                   </>
                 )}
