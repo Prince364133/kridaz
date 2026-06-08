@@ -21,7 +21,7 @@ export default function DashboardHero() {
           <img
             src="/3d_map_location.svg"
             alt="Leaderboard Map Icon"
-            className="w-[85%] h-[85%] object-contain pointer-events-none transform group-hover:scale-110 transition-all duration-300 z-10"
+            className="w-[90%] h-[90%] object-contain pointer-events-none transform group-hover:scale-110 transition-all duration-300 z-10"
           />
         </div>
         <div className="h-[28px] flex items-start justify-center">
@@ -48,7 +48,7 @@ export default function DashboardHero() {
           <img
             src="/3d_scoreboard_v2.png"
             alt="Scorer Icon"
-            className="w-[85%] h-[85%] object-contain pointer-events-none transform group-hover:scale-110 transition-all duration-300 z-10"
+            className="w-[95%] h-[95%] object-contain pointer-events-none transform group-hover:scale-110 transition-all duration-300 z-10"
           />
         </div>
         <div className="h-[28px] flex items-start justify-center">
@@ -74,7 +74,7 @@ export default function DashboardHero() {
           <img
             src="/3d_whistle.svg"
             alt="Host & Join Games Whistle Icon"
-            className="w-[85%] h-[85%] object-contain pointer-events-none transform group-hover:scale-110 transition-all duration-300 z-10"
+            className="w-[95%] h-[95%] object-contain pointer-events-none transform group-hover:scale-110 transition-all duration-300 z-10"
           />
         </div>
         <div className="h-[28px] flex items-start justify-center">
@@ -100,7 +100,7 @@ export default function DashboardHero() {
           <img
             src="/3d_professional_v2.png"
             alt="Pros Icon"
-            className="w-[85%] h-[85%] object-contain pointer-events-none transform group-hover:scale-110 transition-all duration-300 z-10"
+            className="w-[80%] h-[80%] object-contain pointer-events-none transform group-hover:scale-110 transition-all duration-300 z-10"
           />
         </div>
         <div className="h-[28px] flex items-start justify-center">

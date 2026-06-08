@@ -96,7 +96,7 @@ const Root = () => {
       {/* Collapsible Left Navigation (Previous Layout Navbar) */}
       {!isReelsPage && !isNewPostPage && <Navbar />}
 
-      <div className="flex flex-1 justify-center w-full relative lg:pl-28 xl:pl-40">
+      <div className="flex flex-1 justify-center w-full relative lg:pl-36 xl:pl-48">
         <div className={`flex w-full ${useRestrictedWidth ? 'max-w-[860px]' : 'max-w-none'} justify-between relative`}>
           {/* Main Content Area - Centered alongside the right sidebar on desktop */}
           <main className={`flex-grow ${

@@ -251,12 +251,12 @@ const Navbar = () => {
       </nav>
 
       {/* Floating Left Dock for Desktop */}
-      <div className={`hidden lg:block fixed top-1/2 -translate-y-1/2 z-[100] transition-all duration-300 ${
+      <div className={`hidden lg:block fixed top-[120px] z-[100] transition-all duration-300 ${
         useRestrictedWidth 
           ? "left-6 lg:left-[max(16px,calc(50vw-454px))] xl:left-[max(24px,calc(50vw-430px))]" 
           : "left-6"
       }`}>
-        <Dock items={dockItems} direction="vertical" panelHeight={64} baseItemSize={50} magnification={75} />
+        <Dock items={dockItems} direction="vertical" panelHeight={80} baseItemSize={60} magnification={85} />
       </div>
 
       {/* ACTIONS (Moved outside nav to prevent dropdown clipping) */}
