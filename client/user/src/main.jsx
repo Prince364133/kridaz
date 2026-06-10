@@ -29,8 +29,8 @@ if (import.meta.env.VITE_SENTRY_DSN) {
 
 const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID;
 
-
 import { AuthModalProvider } from "./context/AuthModalContext";
+
 
 ReactDOM.createRoot(document.getElementById("root")).render(
   <React.StrictMode>
