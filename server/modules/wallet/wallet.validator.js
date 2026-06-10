@@ -3,6 +3,7 @@ import { z } from "zod";
 export const createTopupSchema = z.object({
   body: z.object({
     amount: z.number().positive("Amount must be greater than 0"),
+    couponCode: z.string().optional(),
   }),
 });
 

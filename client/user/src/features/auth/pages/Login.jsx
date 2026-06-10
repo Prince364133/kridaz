@@ -12,14 +12,27 @@ import {
   X
 } from "lucide-react";
 
-
 import { useAuthModal } from "../../../context/AuthModalContext";
+import { fetchCountryCodes } from "@utils/locationService";
 
 const SUBHEADING_STYLE = { fontFamily: "'Inter 28pt Light', sans-serif", fontWeight: 300 };
 
 const Login = ({ isModal = false }) => {
   const navigate = useNavigate();
   const { closeAuthModal, toggleView } = useAuthModal();
+  const [countryCode, setCountryCode] = useState("+91");
+  const [countryCodeOptions, setCountryCodeOptions] = useState([]);
+
+  useEffect(() => {
+    const loadCountryCodes = async () => {
+      const codes = await fetchCountryCodes();
+      if (codes && codes.length > 0) {
+        setCountryCodeOptions(codes.filter(c => c.dial_code !== '+91'));
+      }
+    };
+    loadCountryCodes();
+  }, []);
+
   const { 
     register, 
     handleSubmit, 
@@ -36,13 +49,17 @@ const Login = ({ isModal = false }) => {
     googleLoading,
     timeLeft,
     handleSendOtp,
-    isPhoneAuth
-  } = useLoginForm();
+    isPhoneAuth,
+    watch
+  } = useLoginForm(countryCode);
+
+  const emailValue = watch("email");
+  const isPhoneInput = /^\d+$/.test(emailValue || '');
+
   const [mounted, setMounted] = useState(false);
   const dispatch = useDispatch();
 
   const { isLoggedIn, role } = useSelector((state) => state.auth);
-  
 
   useEffect(() => {
     setMounted(true);
@@ -147,18 +164,34 @@ const Login = ({ isModal = false }) => {
                         <label className="text-[11px] font-semibold tracking-widest text-white/60 uppercase mb-2 block">
                           Email or Phone No
                         </label>
-                        <input
-                          {...register("email")}
-                          type="text"
-                          onChange={(e) => {
-                            const val = e.target.value;
-                            if (/^\d+$/.test(val)) {
-                              e.target.value = val.slice(0, 10);
-                            }
-                            register("email").onChange(e);
-                          }}
-                          className="w-full bg-white/10 backdrop-blur-[12.5px] shadow-[-13px_43px_18px_rgba(0,0,0,0.01),-7px_24px_15px_rgba(0,0,0,0.04),-3px_11px_11px_rgba(0,0,0,0.07),-1px_3px_6px_rgba(0,0,0,0.08)] border border-transparent focus:border-white/20 rounded-[10px] h-14 px-4 text-white text-sm outline-none transition-all focus:bg-white/20"
-                        />
+                        <div className="relative flex gap-2">
+                          {isPhoneInput && (
+                            <select
+                              value={countryCode}
+                              onChange={(e) => setCountryCode(e.target.value)}
+                              className="bg-white/10 backdrop-blur-[12.5px] shadow-[-13px_43px_18px_rgba(0,0,0,0.01),-7px_24px_15px_rgba(0,0,0,0.04),-3px_11px_11px_rgba(0,0,0,0.07),-1px_3px_6px_rgba(0,0,0,0.08)] border border-transparent focus:border-white/20 rounded-[10px] h-14 px-2 text-white text-sm outline-none transition-all cursor-pointer w-[100px] appearance-none text-center animate-fade-in"
+                            >
+                              <option value="+91" className="text-black">IN (+91)</option>
+                              {countryCodeOptions.map((c, i) => (
+                                <option key={i} value={c.dial_code} className="text-black">{c.code} ({c.dial_code})</option>
+                              ))}
+                            </select>
+                          )}
+                          <div className="relative flex-1">
+                            <input
+                              {...register("email")}
+                              type="text"
+                              onChange={(e) => {
+                                const val = e.target.value;
+                                if (/^\d+$/.test(val)) {
+                                  e.target.value = val.slice(0, 10);
+                                }
+                                register("email").onChange(e);
+                              }}
+                              className="w-full bg-white/10 backdrop-blur-[12.5px] shadow-[-13px_43px_18px_rgba(0,0,0,0.01),-7px_24px_15px_rgba(0,0,0,0.04),-3px_11px_11px_rgba(0,0,0,0.07),-1px_3px_6px_rgba(0,0,0,0.08)] border border-transparent focus:border-white/20 rounded-[10px] h-14 px-4 text-white text-sm outline-none transition-all focus:bg-white/20"
+                            />
+                          </div>
+                        </div>
                         {errors.email && <p className="text-xs text-red-500 mt-1 ml-1">{errors.email.message}</p>}
                       </div>
 

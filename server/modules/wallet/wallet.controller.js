@@ -5,10 +5,61 @@ import NotificationService from "../../services/notification.service.js";
 import WalletService from "../../services/wallet.service.js";
 import logger from "../../utils/logger.js";
 
+export const validateCoupon = async (req, res) => {
+  try {
+    const { code, amount } = req.body;
+    
+    if (!code || !amount) {
+      return res.status(400).json({ success: false, message: "Coupon code and amount are required" });
+    }
+
+    const coupon = await prisma.coupon.findUnique({
+      where: { code: code.toUpperCase() }
+    });
+
+    if (!coupon) {
+      return res.status(404).json({ success: false, message: "Invalid coupon code" });
+    }
+
+    if (!coupon.isActive) {
+      return res.status(400).json({ success: false, message: "This coupon is no longer active" });
+    }
+
+    if (new Date(coupon.validUntil) < new Date()) {
+      return res.status(400).json({ success: false, message: "This coupon has expired" });
+    }
+
+    if (coupon.usageLimit > 0 && coupon.timesUsed >= coupon.usageLimit) {
+      return res.status(400).json({ success: false, message: "Coupon usage limit reached" });
+    }
+
+    let discount = 0;
+    if (coupon.discountType === "PERCENTAGE") {
+      discount = (Number(amount) * Number(coupon.discountValue)) / 100;
+    } else {
+      discount = Number(coupon.discountValue);
+    }
+
+    discount = Math.min(discount, Number(amount));
+    const payableAmount = Number(amount) - discount;
+
+    return res.status(200).json({
+      success: true,
+      message: "Coupon applied successfully",
+      discount,
+      payableAmount,
+      couponId: coupon.id
+    });
+  } catch (error) {
+    logger.error("Error in validateCoupon:", error);
+    return res.status(500).json({ success: false, message: error.message });
+  }
+};
+
 export const createTopupOrder = async (req, res) => {
   const userId = req.user.id || req.user.user;
   try {
-    const { amount } = req.body; // Amount in INR
+    const { amount, couponCode } = req.body; // Amount in INR
 
     if (!amount) {
       return res.status(400).json({ message: "Top-up amount is required" });
@@ -25,8 +76,74 @@ export const createTopupOrder = async (req, res) => {
       return res.status(400).json({ message: `Maximum top-up amount is Rs ${maxTopup.toLocaleString('en-IN')}` });
     }
 
+    let payableAmount = Number(amount);
+    let couponId = null;
+
+    if (couponCode) {
+      const coupon = await prisma.coupon.findUnique({
+        where: { code: couponCode.toUpperCase() }
+      });
+
+      if (coupon && coupon.isActive && new Date(coupon.validUntil) > new Date() && (coupon.usageLimit === 0 || coupon.timesUsed < coupon.usageLimit)) {
+        let discount = 0;
+        if (coupon.discountType === "PERCENTAGE") {
+          discount = (Number(amount) * Number(coupon.discountValue)) / 100;
+        } else {
+          discount = Number(coupon.discountValue);
+        }
+        discount = Math.min(discount, Number(amount));
+        payableAmount = Number(amount) - discount;
+        couponId = coupon.id;
+      } else {
+        return res.status(400).json({ message: "Invalid or expired coupon code" });
+      }
+    }
+
+    if (payableAmount === 0) {
+      // 100% discount, bypass Razorpay entirely and just credit the wallet.
+      const newBalance = await prisma.$transaction(async (tx) => {
+        const balance = await WalletService.credit(
+          userId,
+          "user",
+          Number(amount),
+          tx
+        );
+        
+        await tx.walletTransaction.create({
+          data: {
+            userId: userId,
+            amount: Number(amount),
+            payableAmount: 0,
+            couponId: couponId,
+            type: "TOPUP",
+            status: "SUCCESS",
+            description: "Wallet Top-up (100% Discount)",
+            razorpayOrderId: null,
+          }
+        });
+
+        if (couponId) {
+          await tx.coupon.update({
+            where: { id: couponId },
+            data: { timesUsed: { increment: 1 } }
+          });
+        }
+
+        return balance;
+      });
+
+      return res.status(200).json({ 
+        order: null, 
+        payableAmount: 0, 
+        message: "Wallet topped up successfully", 
+        balance: newBalance 
+      });
+    }
+
+    if (payableAmount < 1) payableAmount = 1;
+
     const options = {
-      amount: Math.round(Number(amount) * 100), // Razorpay takes amount in paise
+      amount: Math.round(payableAmount * 100), // Razorpay takes amount in paise
       currency: "INR",
       receipt: `topup_${Date.now()}`,
     };
@@ -38,6 +155,8 @@ export const createTopupOrder = async (req, res) => {
       data: {
         userId: userId,
         amount: Number(amount),
+        payableAmount: payableAmount,
+        couponId: couponId,
         type: "TOPUP",
         status: "PENDING",
         description: "Wallet Top-up",
@@ -45,7 +164,7 @@ export const createTopupOrder = async (req, res) => {
       }
     });
 
-    return res.status(200).json({ order });
+    return res.status(200).json({ order, payableAmount });
   } catch (error) {
     logger.error("Error in createTopupOrder:", error);
     return res.status(500).json({ message: error.message });
@@ -74,12 +193,24 @@ export const verifyTopup = async (req, res) => {
     const transaction = await prisma.walletTransaction.findFirst({
       where: {
         razorpayOrderId: razorpay_order_id,
-        status: "PENDING",
       }
     });
 
     if (!transaction) {
       return res.status(404).json({ success: false, message: "Transaction record not found" });
+    }
+
+    if (transaction.status === "SUCCESS") {
+      const account = await WalletService.getWallet(userId, "user");
+      return res.status(200).json({
+        success: true,
+        message: "Wallet topped up successfully",
+        balance: account.balance,
+      });
+    }
+
+    if (transaction.status !== "PENDING") {
+      return res.status(400).json({ success: false, message: "Transaction cannot be verified" });
     }
 
     const account = await WalletService.getAccountProfile(
@@ -93,6 +224,10 @@ export const verifyTopup = async (req, res) => {
 
     // Atomic wallet credit and status update inside Prisma transaction
     const newBalance = await prisma.$transaction(async (tx) => {
+      // Check again to avoid race conditions with webhooks
+      const currentTx = await tx.walletTransaction.findUnique({ where: { id: transaction.id }});
+      if (currentTx.status !== "PENDING") return null;
+
       const balance = await WalletService.credit(
         req.user.id,
         "user", // Force role to "user" so top-ups ALWAYS go to the User Wallet
@@ -109,8 +244,24 @@ export const verifyTopup = async (req, res) => {
         }
       });
 
+      if (transaction.couponId) {
+        await tx.coupon.update({
+          where: { id: transaction.couponId },
+          data: { timesUsed: { increment: 1 } }
+        });
+      }
+
       return balance;
     });
+
+    if (newBalance === null) {
+      const account = await WalletService.getWallet(userId, "user");
+      return res.status(200).json({
+        success: true,
+        message: "Wallet topped up successfully",
+        balance: account.balance,
+      });
+    }
 
     return res.status(200).json({
       success: true,
@@ -193,6 +344,13 @@ export const checkPaymentStatus = async (req, res) => {
               razorpayPaymentId: successfulPayment.id
             }
           });
+
+          if (transaction.couponId) {
+            await tx.coupon.update({
+              where: { id: transaction.couponId },
+              data: { timesUsed: { increment: 1 } }
+            });
+          }
 
           return balance;
         });

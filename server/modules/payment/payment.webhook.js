@@ -3,6 +3,7 @@ import crypto from "crypto";
 import { prisma } from "../../config/prisma.js";
 import logger from "../../utils/logger.js";
 import { paymentTotal, paymentSuccessTotal, walletTopupTotal, bookingConfirmedTotal } from "../../utils/metrics.js";
+import { WalletService } from "../wallet/wallet.service.js";
 
 /**
  * Handle Razorpay Webhooks
@@ -85,29 +86,13 @@ async function handlePaymentCaptured(payment) {
     }) : null;
     if (user || owner) {
       await prisma.$transaction(async tx => {
-        if (user) {
-          await tx.user.update({
-            where: {
-              id: user.id
-            },
-            data: {
-              walletBalance: {
-                increment: transaction.amount
-              }
-            }
-          });
-        } else {
-          await tx.ownerProfile.update({
-            where: {
-              id: owner.id
-            },
-            data: {
-              walletBalance: {
-                increment: transaction.amount
-              }
-            }
-          });
-        }
+        await WalletService.credit(
+          transaction.userId,
+          user ? "user" : "venue_owner",
+          transaction.amount,
+          tx
+        );
+
         await tx.walletTransaction.update({
           where: {
             id: transaction.id
@@ -117,6 +102,13 @@ async function handlePaymentCaptured(payment) {
             razorpayPaymentId: payment_id
           }
         });
+
+        if (transaction.couponId) {
+          await tx.coupon.update({
+            where: { id: transaction.couponId },
+            data: { timesUsed: { increment: 1 } }
+          });
+        }
       });
       logger.info(`[WEBHOOK] Wallet topped up for ${user?.name || owner?.businessName}`);
       paymentTotal.inc({

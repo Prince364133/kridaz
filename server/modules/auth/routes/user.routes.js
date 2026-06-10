@@ -1,4 +1,4 @@
-﻿import express from "express";
+import express from "express";
 import { 
   registerUser, 
   login,
@@ -72,7 +72,7 @@ router.post("/register", authLimiter, validate(userRegisterSchema), registerUser
  *     summary: Login Step 1 - Password verification
  *     tags: [Auth]
  */
-router.post("/login-step1", otpLimiter, validate(loginStep1Schema), loginStep1);
+router.post("/login-step1", validate(loginStep1Schema), loginStep1);
 
 /**
  * @swagger

@@ -106,7 +106,7 @@ export const otpLimiter = rateLimit({
   legacyHeaders: false,
   store: createRedisStoreWithBreaker('rl:otp'),
   message: { success: false, code: 'RATE_LIMITED', message: 'Too many OTP requests. Please wait a while.' },
-  skip: (req) => isTestOrDev,
+  skip: (req) => process.env.NODE_ENV === 'test',
 });
 
 /**

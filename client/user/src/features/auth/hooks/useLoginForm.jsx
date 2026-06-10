@@ -18,7 +18,7 @@ const loginSchema = z.object({
   password: z.string().min(1, "Enter your password").min(6, "Password must be at least 6 characters long"),
 });
 
-const useLoginForm = () => {
+const useLoginForm = (countryCode = '+91') => {
   const [loading, setLoading] = useState(false);
   const [googleLoading, setGoogleLoading] = useState(false);
   const [showOtpInput, setShowOtpInput] = useState(false);
@@ -33,6 +33,7 @@ const useLoginForm = () => {
     handleSubmit,
     getValues,
     trigger,
+    watch,
     formState: { errors },
   } = useForm({
     resolver: zodResolver(loginSchema),
@@ -72,7 +73,14 @@ const useLoginForm = () => {
     setLoading(true);
     setAccountNotFound(false); // Reset on new attempt
     try {
-      const { email, password } = getValues();
+      let { email, password } = getValues();
+      
+      const isPhoneInput = /^[0-9]{10}$/.test(email);
+      if (isPhoneInput) {
+        const cleanCountryCode = countryCode.replace('+', '');
+        email = cleanCountryCode + email;
+      }
+
       const response = await axiosInstance.post("/api/user/auth/login-step1", { email, password });
       const result = response.data;
 
@@ -85,11 +93,9 @@ const useLoginForm = () => {
       }
 
       if (result.requiresOtp) {
-        const isPhone = /^[0-9]{10}$/.test(email) || email.startsWith('+');
-        setIsPhoneAuth(isPhone);
-        if (isPhone) {
-          const phoneNum = email.startsWith('+') ? email : `+91${email}`;
-          
+        const isPhoneCheck = /^[0-9]+$/.test(email) || email.startsWith('+');
+        setIsPhoneAuth(isPhoneCheck);
+        if (isPhoneCheck) {
           if (forceSms) {
             const payload = { phone: email.startsWith('+') ? email.replace('+', '') : email, deliveryMethod: 'sms' };
             const otpRes = await axiosInstance.post('/api/user/auth/send-otp', payload);
@@ -97,7 +103,6 @@ const useLoginForm = () => {
             setShowOtpInput(true);
             setTimeLeft(60);
           } else {
-            // Default to WhatsApp
             const payload = { phone: email.startsWith('+') ? email.replace('+', '') : email };
             const otpRes = await axiosInstance.post('/api/user/auth/send-otp', payload);
             toast.success(otpRes.data.message || "OTP sent via WhatsApp");
@@ -153,8 +158,12 @@ const useLoginForm = () => {
   const handleVerifyOtp = async (data) => {
     setLoading(true);
     try {
-      const { email } = getValues();
-      const isPhone = /^[0-9]{10}$/.test(email) || email.startsWith('+');
+      let { email } = getValues();
+      const isPhoneInput = /^[0-9]{10}$/.test(email);
+      if (isPhoneInput) {
+        const cleanCountryCode = countryCode.replace('+', '');
+        email = cleanCountryCode + email;
+      }
 
       const payload = { 
         email, 
@@ -230,7 +239,8 @@ const useLoginForm = () => {
     setAccountNotFound,
     timeLeft,
     handleSendOtp: handleLoginStep1,
-    isPhoneAuth
+    isPhoneAuth,
+    watch
   };
 };
 

@@ -26,14 +26,17 @@ const worker = new Worker(
         case "SEND_OTP": {
           const { phone, email, otp, type, phoneTemplate, emailSubject, emailHtml, deliveryMethod } = data;
           
+          logger.info(`[Notification Worker - SEND_OTP] Start sending OTP to ${phone || email} at ${new Date().toISOString()}`);
           const promises = [];
           if (email && emailSubject && emailHtml) {
             promises.push(generateEmail(email, emailSubject, emailHtml));
           }
           if (phone) {
             if (deliveryMethod === 'sms') {
+              logger.info(`[Notification Worker - SEND_OTP] Initiating SMS delivery for ${phone}`);
               promises.push(sendSMSMessage(phone, otp));
             } else {
+              logger.info(`[Notification Worker - SEND_OTP] Initiating WhatsApp delivery for ${phone}`);
               const waPromise = async () => {
                 let waSuccess = false;
                 if (phoneTemplate) {
@@ -44,14 +47,17 @@ const worker = new Worker(
                 
                 // Best Industry Practice: Fallback to SMS if WhatsApp API fails
                 if (!waSuccess) {
-                  logger.warn(`[OTP] WhatsApp delivery failed for ${phone}. Falling back to SMS.`);
+                  logger.warn(`[OTP - FALLBACK] WhatsApp delivery failed for ${phone}. Falling back to SMS at ${new Date().toISOString()}.`);
                   await sendSMSMessage(phone, otp);
+                } else {
+                  logger.info(`[OTP] WhatsApp delivery successful for ${phone} at ${new Date().toISOString()}.`);
                 }
               };
               promises.push(waPromise());
             }
           }
           await Promise.all(promises);
+          logger.info(`[Notification Worker - SEND_OTP] Completed sending OTP to ${phone || email} at ${new Date().toISOString()}`);
           break;
         }
 

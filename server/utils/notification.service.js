@@ -74,6 +74,8 @@ export const sendWhatsAppMessage = async (phone, message, templateName = null, p
       ? "https://api.msg91.com/api/v5/whatsapp/whatsapp-outbound-message/bulk/"
       : "https://api.msg91.com/api/v5/whatsapp/whatsapp-outbound-message/";
 
+    logger.info(`[WhatsApp Service] Sending request to MSG91 at ${new Date().toISOString()} for ${formattedPhone}`);
+    const startTime = Date.now();
     const response = await axios.post(apiUrl, payload, {
       headers: { 
         "authkey": authKey,
@@ -81,6 +83,7 @@ export const sendWhatsAppMessage = async (phone, message, templateName = null, p
       }
     });
 
+    logger.info(`[WhatsApp Service] Received response from MSG91 in ${Date.now() - startTime}ms. Status: ${response.data.status}`);
     return response.data.status === "success";
   } catch (error) {
     logger.error(`[WhatsApp Service] Error: ${error.response?.data?.message || error.message}`);
@@ -100,8 +103,12 @@ export const sendSMSMessage = async (phone, otp) => {
     if (formattedPhone.length === 10) formattedPhone = "91" + formattedPhone;
 
     const url = `https://control.msg91.com/api/v5/otp?authkey=${authKey}&mobile=${formattedPhone}&otp=${otp}`;
+    
+    logger.info(`[SMS Service] Sending request to MSG91 at ${new Date().toISOString()} for ${formattedPhone}`);
+    const startTime = Date.now();
     const response = await axios.post(url);
     
+    logger.info(`[SMS Service] Received response from MSG91 in ${Date.now() - startTime}ms. Type: ${response.data.type}`);
     return response.data.type === "success";
   } catch (error) {
     logger.error(`[SMS Service] Error: ${error.response?.data?.message || error.message}`);

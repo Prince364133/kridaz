@@ -14,7 +14,7 @@ model User {
   password                String
   role                    Role                          @default(USER)
   name                    String
-  phone                   String?
+  phone                   String?                       @unique
   profilePicture          String?
   city                    String?
   state                   String?
@@ -403,12 +403,16 @@ model WalletTransaction {
   createdAt         DateTime @default(now())
   updatedAt         DateTime @updatedAt
   walletId          String?
+  payableAmount     Decimal? @db.Decimal(12, 2)
+  couponId          String?
   booking           Booking? @relation(fields: [bookingId], references: [id])
   user              User     @relation(fields: [userId], references: [id])
   wallet            Wallet?  @relation(fields: [walletId], references: [id])
+  coupon            Coupon?  @relation(fields: [couponId], references: [id])
 
   @@index([userId, createdAt])
   @@index([razorpayOrderId])
+  @@index([couponId])
 }
 
 model Review {
@@ -984,9 +988,10 @@ model Coupon {
   isActive      Boolean       @default(true)
   createdAt     DateTime      @default(now())
   updatedAt     DateTime      @updatedAt
-  owner         OwnerProfile? @relation(fields: [ownerId], references: [id])
-  turf          Turf?         @relation(fields: [turfId], references: [id])
+  owner         OwnerProfile?       @relation(fields: [ownerId], references: [id])
+  turf          Turf?               @relation(fields: [turfId], references: [id])
   hostedGames   HostedGame[]
+  transactions  WalletTransaction[]
 }
 
 model FeatureFlag {

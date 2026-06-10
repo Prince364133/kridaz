@@ -1,4 +1,4 @@
-﻿import express from "express";
+import express from "express";
 import { 
   registerOwner, 
   login,
@@ -60,7 +60,7 @@ router.post("/send-otp", otpLimiter, validate(sendOtpSchema), sendOtp);
  *     summary: Owner Login Step 1
  *     tags: [Owner Auth]
  */
-router.post("/login-step1", otpLimiter, validate(loginStep1Schema), loginStep1);
+router.post("/login-step1", validate(loginStep1Schema), loginStep1);
 
 /**
  * @swagger

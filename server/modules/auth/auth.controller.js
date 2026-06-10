@@ -235,22 +235,26 @@ export const sendOtp = asyncHandler(async (req, res) => {
     });
   }
 
+  // Check if it's signup and user already exists
+  if (req.body.type === "signup") {
+    const existingUser = await prisma.user.findFirst({
+      where: {
+        OR: conditions
+      }
+    });
+    if (existingUser) {
+      return res.status(400).json({
+        success: false,
+        message: "Email or Phone already registered"
+      });
+    }
+  }
+
   // ── SECURITY BLOOM ─────────────────────────────────────────────────────
   if (email && (await isOtpBlacklisted(email)) || phone && (await isOtpBlacklisted(phone))) {
     return res.status(429).json({
       success: false,
       message: "Too many attempts. Please try again later."
-    });
-  }
-  const existingUser = await prisma.user.findFirst({
-    where: {
-      OR: conditions
-    }
-  });
-  if (existingUser) {
-    return res.status(400).json({
-      success: false,
-      message: "Email or Phone already registered"
     });
   }
   const emailOtp = email ? generateOTP() : null;
@@ -339,7 +343,7 @@ export const verifyOtp = asyncHandler(async (req, res) => {
     if (!otpRecord) {
       return res.status(400).json({
         success: false,
-        message: "Invalid verification code"
+        message: "OTP is wrong"
       });
     }
   }
@@ -716,6 +720,7 @@ export const registerOwner = asyncHandler(async (req, res) => {
       message: "Email or Phone already registered"
     });
   }
+
   try {
     await claimRegistrationToken(registrationToken);
   } catch (err) {
@@ -2305,7 +2310,6 @@ export const verifyPhoneOtp = asyncHandler(async (req, res) => {
   if (!firebaseVerified) {
     otpRecord = await prisma.oTP.findFirst({
       where: {
-        email,
         phone,
         phoneOtp: otp
       }
@@ -2313,7 +2317,7 @@ export const verifyPhoneOtp = asyncHandler(async (req, res) => {
     if (!otpRecord) {
       return res.status(400).json({
         success: false,
-        message: "Invalid verification code"
+        message: "OTP is wrong"
       });
     }
     if (otpRecord.expiresAt < new Date()) {

@@ -6,6 +6,7 @@ import { ChevronLeft, X } from "lucide-react";
 import toast from "react-hot-toast";
 import axiosInstance from "@hooks/useAxiosInstance";
 import { useDispatch, useSelector } from "react-redux";
+import { searchLocations, fetchCountryCodes } from "@utils/locationService";
 import { login } from "@redux/slices/authSlice";
 import { Capacitor } from "@capacitor/core";
 
@@ -16,8 +17,20 @@ const SUBHEADING_STYLE = { fontFamily: "'Inter 28pt Light', sans-serif", fontWei
 const SignUp = ({ isModal = false }) => {
   const { closeAuthModal, toggleView } = useAuthModal();
   const [mounted, setMounted] = useState(false);
+  const [step, setStep] = useState(1);
   const [authMode, setAuthMode] = useState('unified'); // 'unified', 'email', 'phone'
-  const [step, setStep] = useState(1); // 1: Input, 2: OTP, 3: Password
+  const [countryCodeOptions, setCountryCodeOptions] = useState([]);
+
+  useEffect(() => {
+    const loadCountryCodes = async () => {
+      const codes = await fetchCountryCodes();
+      if (codes && codes.length > 0) {
+        setCountryCodeOptions(codes.filter(c => c.dial_code !== '+91'));
+      }
+    };
+    loadCountryCodes();
+  }, []);
+  
   const [timeLeft, setTimeLeft] = useState(60);
   
   const [countryCode, setCountryCode] = useState("+91");
@@ -110,12 +123,12 @@ const SignUp = ({ isModal = false }) => {
       const fullPhone = `+${formattedPhone}`;
       
       if (forceSms) {
-        const payload = { phone: formattedPhone, deliveryMethod: 'sms' };
+        const payload = { phone: formattedPhone, deliveryMethod: 'sms', type: 'signup' };
         const res = await axiosInstance.post('/api/user/auth/send-otp', payload);
         toast.success(res.data.message || "OTP sent via SMS");
         setTimeLeft(60);
       } else {
-        const payload = { phone: formattedPhone };
+        const payload = { phone: formattedPhone, type: 'signup' };
         const res = await axiosInstance.post('/api/user/auth/send-otp', payload);
         toast.success(res.data.message || "OTP sent via WhatsApp");
         if (Capacitor.isNativePlatform()) {
@@ -290,13 +303,12 @@ const SignUp = ({ isModal = false }) => {
                           <select
                             value={countryCode}
                             onChange={(e) => setCountryCode(e.target.value)}
-                            className="bg-white/10 backdrop-blur-[12.5px] shadow-[-13px_43px_18px_rgba(0,0,0,0.01),-7px_24px_15px_rgba(0,0,0,0.04),-3px_11px_11px_rgba(0,0,0,0.07),-1px_3px_6px_rgba(0,0,0,0.08)] border border-transparent focus:border-white/20 rounded-[10px] h-14 px-2 text-white text-sm outline-none transition-all cursor-pointer w-20 appearance-none text-center"
+                            className="bg-white/10 backdrop-blur-[12.5px] shadow-[-13px_43px_18px_rgba(0,0,0,0.01),-7px_24px_15px_rgba(0,0,0,0.04),-3px_11px_11px_rgba(0,0,0,0.07),-1px_3px_6px_rgba(0,0,0,0.08)] border border-transparent focus:border-white/20 rounded-[10px] h-14 px-2 text-white text-sm outline-none transition-all cursor-pointer w-[100px] appearance-none text-center"
                           >
-                            <option value="+91" className="text-black">+91</option>
-                            <option value="+1" className="text-black">+1</option>
-                            <option value="+44" className="text-black">+44</option>
-                            <option value="+61" className="text-black">+61</option>
-                            <option value="+971" className="text-black">+971</option>
+                            <option value="+91" className="text-black">IN (+91)</option>
+                            {countryCodeOptions.map((c, i) => (
+                              <option key={i} value={c.dial_code} className="text-black">{c.code} ({c.dial_code})</option>
+                            ))}
                           </select>
                           <div className="relative flex-1">
                             <input 

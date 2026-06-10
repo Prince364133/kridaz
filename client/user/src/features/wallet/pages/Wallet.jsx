@@ -17,7 +17,52 @@ const WalletPage = () => {
   const [transactions, setTransactions] = useState([]);
   const [loading, setLoading] = useState(true);
   const [topupAmount, setTopupAmount] = useState("");
+  const [couponCode, setCouponCode] = useState("");
+  const [discountAmount, setDiscountAmount] = useState(0);
+  const [payableAmount, setPayableAmount] = useState(0);
+  const [isCouponValid, setIsCouponValid] = useState(false);
+  const [isValidatingCoupon, setIsValidatingCoupon] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
+
+  useEffect(() => {
+    if (!topupAmount || isNaN(topupAmount) || topupAmount <= 0) {
+      setDiscountAmount(0);
+      setPayableAmount(0);
+      setIsCouponValid(false);
+    } else {
+      setPayableAmount(topupAmount);
+      setIsCouponValid(false);
+      setDiscountAmount(0);
+    }
+  }, [topupAmount]);
+
+  const handleValidateCoupon = async () => {
+    if (!couponCode) return;
+    if (!topupAmount || isNaN(topupAmount) || topupAmount <= 0) {
+      toast.error("Please enter a top-up amount first");
+      return;
+    }
+    try {
+      setIsValidatingCoupon(true);
+      const { data } = await axiosInstance.post("/api/user/wallet/topup/validate-coupon", {
+        code: couponCode,
+        amount: Number(topupAmount)
+      });
+      if (data.success) {
+        setIsCouponValid(true);
+        setDiscountAmount(data.discount);
+        setPayableAmount(data.payableAmount);
+        toast.success(data.message);
+      }
+    } catch (error) {
+      setIsCouponValid(false);
+      setDiscountAmount(0);
+      setPayableAmount(topupAmount);
+      toast.error(error.response?.data?.message || "Invalid coupon code");
+    } finally {
+      setIsValidatingCoupon(false);
+    }
+  };
 
   useEffect(() => {
     fetchWalletData();
@@ -52,7 +97,18 @@ const WalletPage = () => {
       setIsProcessing(true);
       const { data } = await axiosInstance.post("/api/user/wallet/topup/create-order", {
         amount: Number(topupAmount),
+        couponCode: isCouponValid ? couponCode : undefined,
       });
+
+      if (data.payableAmount === 0) {
+        toast.success("Wallet topped up successfully!");
+        setTopupAmount("");
+        setCouponCode("");
+        setIsCouponValid(false);
+        fetchWalletData();
+        setIsProcessing(false);
+        return;
+      }
 
       const options = {
         key: import.meta.env.VITE_RAZORPAY_KEY_ID,
@@ -186,6 +242,40 @@ const WalletPage = () => {
                     </button>
                   ))}
                 </div>
+                <div className="relative">
+                  <input
+                    type="text"
+                    value={couponCode}
+                    onChange={(e) => setCouponCode(e.target.value)}
+                    placeholder="Have a coupon code?"
+                    className="w-full bg-[#000000] border border-white/10 rounded-[16px] py-2 pl-4 pr-24 text-sm font-bold focus:border-[#BFF367] focus:ring-1 focus:ring-[#BFF367] transition-all outline-none text-white font-inter"
+                  />
+                  <button
+                    onClick={handleValidateCoupon}
+                    disabled={isValidatingCoupon || !couponCode}
+                    className="absolute right-2 top-1/2 -translate-y-1/2 bg-[#1B1B1B] text-[#BFF367] px-3 py-1 rounded-[12px] text-xs font-bold uppercase disabled:opacity-50"
+                  >
+                    {isValidatingCoupon ? <Loader2 className="w-4 h-4 animate-spin" /> : "Apply"}
+                  </button>
+                </div>
+                
+                {isCouponValid && (
+                  <div className="bg-[#1B1B1B] p-3 rounded-[12px] text-xs font-inter space-y-1">
+                    <div className="flex justify-between text-white/70">
+                      <span>Top-up Amount</span>
+                      <span>₹{topupAmount}</span>
+                    </div>
+                    <div className="flex justify-between text-[#BFF367]">
+                      <span>Discount</span>
+                      <span>-₹{discountAmount}</span>
+                    </div>
+                    <div className="flex justify-between text-white font-bold pt-1 border-t border-white/10">
+                      <span>Amount to Pay</span>
+                      <span>₹{payableAmount}</span>
+                    </div>
+                  </div>
+                )}
+
                 <button
                   onClick={handleTopup}
                   disabled={isProcessing}

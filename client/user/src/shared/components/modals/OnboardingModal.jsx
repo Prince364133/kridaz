@@ -4,7 +4,7 @@ import axiosInstance from "@hooks/useAxiosInstance";
 import toast from "react-hot-toast";
 import { useDispatch } from "react-redux";
 import { updateUser, login } from "@redux/slices/authSlice";
-import { searchLocations } from "@utils/locationService";
+import { searchLocations, fetchCountryCodes } from "@utils/locationService";
 
 const getNameFromEmail = (email) => {
   if (!email) return "";
@@ -61,6 +61,17 @@ const OnboardingModal = ({ isOpen, onClose, initialData, onComplete }) => {
   const dispatch = useDispatch();
   const [step, setStep] = useState(1);
   const [loading, setLoading] = useState(false);
+  const [countryCodeOptions, setCountryCodeOptions] = useState([]);
+
+  useEffect(() => {
+    const loadCountryCodes = async () => {
+      const codes = await fetchCountryCodes();
+      if (codes && codes.length > 0) {
+        setCountryCodeOptions(codes.filter(c => c.dial_code !== '+91'));
+      }
+    };
+    loadCountryCodes();
+  }, []);
   
   // Phone verification state
   const [phoneOtpSent, setPhoneOtpSent] = useState(false);
@@ -69,6 +80,14 @@ const OnboardingModal = ({ isOpen, onClose, initialData, onComplete }) => {
   const [sendingPhoneOtp, setSendingPhoneOtp] = useState(false);
   const [verifyingPhoneOtp, setVerifyingPhoneOtp] = useState(false);
   const [phoneRegistrationToken, setPhoneRegistrationToken] = useState("");
+  const [timeLeft, setTimeLeft] = useState(0);
+
+  useEffect(() => {
+    if (timeLeft > 0) {
+      const timerId = setTimeout(() => setTimeLeft(timeLeft - 1), 1000);
+      return () => clearTimeout(timerId);
+    }
+  }, [timeLeft]);
 
   const [previewImage, setPreviewImage] = useState(null);
   const fileInputRef = useRef(null);
@@ -88,6 +107,7 @@ const OnboardingModal = ({ isOpen, onClose, initialData, onComplete }) => {
     sportTypes: [],
     password: "",
     otp: "",
+    countryCode: "+91",
   });
 
   const [dobDay, setDobDay] = useState("");
@@ -183,13 +203,15 @@ const OnboardingModal = ({ isOpen, onClose, initialData, onComplete }) => {
     }
     setSendingPhoneOtp(true);
     try {
+      const formattedPhone = formData.phone.startsWith('+') ? formData.phone : formData.countryCode + formData.phone;
       const endpoint = "/api/user/auth/send-otp";
-      await axiosInstance.post(endpoint, { phone: formData.phone, deliveryMethod: forceSms ? 'sms' : 'whatsapp' });
+      await axiosInstance.post(endpoint, { phone: formattedPhone, deliveryMethod: forceSms ? 'sms' : 'whatsapp', type: 'signup' });
       setPhoneOtpSent(true);
+      setTimeLeft(60);
       toast.success(forceSms ? "SMS OTP sent successfully!" : "WhatsApp OTP sent successfully!");
     } catch (error) {
       console.error("OTP send error:", error);
-      toast.error(error.message || "Failed to send verification OTP");
+      toast.error(error.response?.data?.message || error.message || "Failed to send verification OTP");
     } finally {
       setSendingPhoneOtp(false);
     }
@@ -201,13 +223,14 @@ const OnboardingModal = ({ isOpen, onClose, initialData, onComplete }) => {
     }
     setVerifyingPhoneOtp(true);
     try {
+      const formattedPhone = formData.phone.startsWith('+') ? formData.phone : formData.countryCode + formData.phone;
       const endpoint = isGoogle 
         ? "/api/user/auth/verify-phone-otp" 
         : "/api/user/auth/verify-otp";
 
       const payload = isGoogle 
-        ? { phone: formData.phone, otp: phoneOtp }
-        : { email: formData.email, phone: formData.phone, otp: phoneOtp };
+        ? { phone: formattedPhone, otp: phoneOtp }
+        : { email: formData.email, phone: formattedPhone, otp: phoneOtp };
 
       const res = await axiosInstance.post(endpoint, payload);
       if (res.data.success) {
@@ -690,6 +713,17 @@ const OnboardingModal = ({ isOpen, onClose, initialData, onComplete }) => {
                     <label className="block">
                       <span className="text-[11px] font-semibold text-white/60 uppercase tracking-widest mb-2 block">Phone Number</span>
                       <div className="relative flex gap-2">
+                        <select
+                          value={formData.countryCode}
+                          onChange={(e) => setFormData({...formData, countryCode: e.target.value})}
+                          disabled={isPhoneVerified}
+                          className="bg-[#121212] border border-white/[0.08] rounded-[16px] py-4 px-3 text-white focus:border-[#55DEE8] outline-none transition-all w-[100px] text-sm appearance-none cursor-pointer"
+                        >
+                          <option value="+91">IN (+91)</option>
+                          {countryCodeOptions.map((c, i) => (
+                            <option key={i} value={c.dial_code}>{c.code} ({c.dial_code})</option>
+                          ))}
+                        </select>
                         <div className="relative flex-1">
                           <input
                             type="tel"
@@ -712,10 +746,10 @@ const OnboardingModal = ({ isOpen, onClose, initialData, onComplete }) => {
                             <button
                               type="button"
                               onClick={() => handleSendPhoneOtp(false)}
-                              disabled={sendingPhoneOtp || !formData.phone || formData.phone.length < 10}
+                              disabled={sendingPhoneOtp || !formData.phone || formData.phone.length < 10 || timeLeft > 0}
                               className="px-4 py-2 bg-[linear-gradient(90deg,#55DEE8_0%,#B3DC26_100%)] rounded-[16px] font-bold text-xs uppercase tracking-wider text-[#000000] shadow-[0px_8px_24px_rgba(179,220,38,0.15)] transition-all disabled:opacity-40 disabled:cursor-not-allowed whitespace-nowrap h-full max-h-[44px] flex items-center justify-center"
                             >
-                              {sendingPhoneOtp ? <Loader2 className="animate-spin w-4 h-4 mx-auto" /> : (phoneOtpSent ? "Resend" : "Get OTP")}
+                              {sendingPhoneOtp ? <Loader2 className="animate-spin w-4 h-4 mx-auto" /> : (timeLeft > 0 ? `Resend in ${timeLeft}s` : (phoneOtpSent ? "Resend" : "Get OTP"))}
                             </button>
                           </div>
                         )}

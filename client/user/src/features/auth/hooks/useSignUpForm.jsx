@@ -69,6 +69,14 @@ const useSignUpForm = (predefinedRole = "user") => {
   const [showOnboarding, setShowOnboarding] = useState(false);
   const [onboardingUser, setOnboardingUser] = useState(null);
   const [currentStep, setCurrentStep] = useState(1);
+  const [timeLeft, setTimeLeft] = useState(0);
+
+  useEffect(() => {
+    if (timeLeft > 0) {
+      const timerId = setTimeout(() => setTimeLeft(timeLeft - 1), 1000);
+      return () => clearTimeout(timerId);
+    }
+  }, [timeLeft]);
 
   // Determine API base path based on role
   const apiPath = predefinedRole === "user" ? "/api/user/auth" : "/api/owner/auth";
@@ -136,9 +144,10 @@ const useSignUpForm = (predefinedRole = "user") => {
     try {
       const { email, phone } = getValues();
       
-      const response = await axiosInstance.post(`${apiPath}/send-otp`, { email, phone });
+      const response = await axiosInstance.post(`${apiPath}/send-otp`, { email, phone, type: "signup" });
       toast.success(response.data.message || "OTPs sent successfully");
       setShowOtpInput(true);
+      setTimeLeft(60);
     } catch (error) {
       if (error.response) {
         toast.error(error.response?.data?.message || "Failed to send OTP");
@@ -282,10 +291,9 @@ const useSignUpForm = (predefinedRole = "user") => {
     setCurrentStep,
     user,
     role,
-    navigate
+    navigate,
+    timeLeft,
   };
 };
 
 export default useSignUpForm;
-
-

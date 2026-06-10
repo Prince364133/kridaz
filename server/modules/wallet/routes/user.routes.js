@@ -5,6 +5,7 @@ import {
   getWalletData,
   checkPaymentStatus,
   cancelReservation,
+  validateCoupon,
 } from "../wallet.controller.js";
 import verifyToken from "../../../middleware/jwt/user.middleware.js";
 import { validate } from "../../../middleware/validate.middleware.js";
@@ -36,6 +37,11 @@ router.use(verifyToken);
  *       - BearerAuth: []
  */
 router.get("/data", getWalletData);
+
+/**
+ *       - BearerAuth: []
+ */
+router.post("/topup/validate-coupon", validateCoupon);
 
 /**
  * @swagger

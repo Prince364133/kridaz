@@ -2,6 +2,16 @@ import axios from 'axios';
 
 const BASE_URL = 'https://countriesnow.space/api/v0.1/countries';
 
+export const fetchCountryCodes = async () => {
+  try {
+    const response = await axios.get(`${BASE_URL}/codes`);
+    return response.data.data;
+  } catch (error) {
+    console.error("Error fetching country codes:", error);
+    return [];
+  }
+};
+
 export const fetchStates = async () => {
   try {
     const response = await axios.post(`${BASE_URL}/states`, {

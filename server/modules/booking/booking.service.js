@@ -228,9 +228,9 @@ export const verifyBookingPayment = async (userId, paymentData) => {
   const gstAmountCalc = Math.round(totalPrice * (gstPercentage / (100 + gstPercentage)));
   const baseAmount = totalPrice - gstAmountCalc;
   const platformFee = Math.round(baseAmount * (platformFeePercentage / 100));
-  const ownerRevenue = baseAmount - platformFee;
-
-  // Overlap Guard is moved inside the transaction to prevent race conditions
+  
+  const amountPaidOnline = advanceAmount || totalPrice;
+  const ownerRevenue = amountPaidOnline - platformFee - gstAmountCalc;
 
   // Create booking transaction
   const booking = await prisma.$transaction(async (tx) => {
@@ -287,10 +287,9 @@ export const verifyBookingPayment = async (userId, paymentData) => {
       }
     });
 
-    const amountPaidOnline = advanceAmount || totalPrice;
     await tx.ownerProfile.update({
       where: { id: turf.owner.id },
-      data: { pendingBalance: { increment: amountPaidOnline } }
+      data: { pendingBalance: { increment: ownerRevenue } }
     });
 
     return newBooking;
@@ -409,11 +408,12 @@ export const processWalletBooking = async (userId, bookingData) => {
   const platformFeePercentage = Number(settings.platformFeePercentage || 5);
   
   const finalPrice = originalPrice;
+  const amountToDeduct = bodyPaymentType === "PARTIAL" && bodyAdvanceAmount ? bodyAdvanceAmount : finalPrice;
+
   const gstAmountCalc = Math.round(finalPrice * (gstPercentage / (100 + gstPercentage)));
   const baseAmount = finalPrice - gstAmountCalc;
   const platformFee = Math.round(baseAmount * (platformFeePercentage / 100));
-  const ownerRevenue = baseAmount - platformFee;
-  const amountToDeduct = bodyPaymentType === "PARTIAL" && bodyAdvanceAmount ? bodyAdvanceAmount : finalPrice;
+  const ownerRevenue = amountToDeduct - platformFee - gstAmountCalc;
 
   const wallet = await WalletService.getWallet(userId, "user");
 
@@ -491,7 +491,7 @@ export const processWalletBooking = async (userId, bookingData) => {
     // Update Owner pending balance
     await tx.ownerProfile.update({
       where: { id: turf.owner.id },
-      data: { pendingBalance: { increment: amountToDeduct } }
+      data: { pendingBalance: { increment: ownerRevenue } }
     });
 
     // Update Coupon usage
@@ -993,11 +993,10 @@ export const processBookingCancellation = async (userId, bookingId) => {
     }
 
     // 3. Update Owner Balance
-    const amountToDeduct = booking.paidAmount || booking.totalPrice;
     if (booking.turf?.owner) {
       await tx.ownerProfile.update({
         where: { id: booking.turf.owner.id },
-        data: { pendingBalance: { decrement: amountToDeduct } }
+        data: { pendingBalance: { decrement: booking.ownerRevenue } }
       });
     }
 

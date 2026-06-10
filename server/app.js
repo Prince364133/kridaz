@@ -113,7 +113,7 @@ app.use('/api', globalLimiter);
 
 // Auth routes â€” user
 app.use('/api/user/auth/send-otp', otpLimiter);
-app.use('/api/user/auth/login-step1', otpLimiter);
+app.use('/api/user/auth/login-step1', authLimiter);
 app.use('/api/user/auth/login', authLimiter);
 app.use('/api/user/auth/register', authLimiter);
 app.use('/api/user/auth/google-auth', authLimiter); // Google Auth usually handles its own bot protection
@@ -123,7 +123,7 @@ app.use('/api/user/auth/refresh', refreshLimiter);
 
 // Auth routes â€” owner
 app.use('/api/owner/auth/send-otp', otpLimiter);
-app.use('/api/owner/auth/login-step1', otpLimiter);
+app.use('/api/owner/auth/login-step1', authLimiter);
 app.use('/api/owner/auth/login', authLimiter);
 app.use('/api/owner/auth/register', authLimiter);
 app.use('/api/owner/auth/google-auth', authLimiter);
