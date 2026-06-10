@@ -1,8 +1,9 @@
 import { useState, useEffect } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { createPortal } from "react-dom";
-import { ArrowLeft, Crosshair, MapPin, ArrowRight } from "lucide-react";
-import { closeLocationSidebar, setUserLocation, setLocationStatus } from "@redux/slices/uiSlice";
+import { ArrowLeft, Crosshair, MapPin, ArrowRight, Search, Loader2 } from "lucide-react";
+import { searchLocations } from "../../utils/locationService.js";
+import { closeLocationSidebar, setUserLocation, setLocationStatus } from "../../../redux/slices/uiSlice.js";
 import { motion, AnimatePresence } from "framer-motion";
 
 const POPULAR_AREAS = [
@@ -23,6 +24,39 @@ const LocationSidebar = () => {
   
   const [isDetecting, setIsDetecting] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [searchResults, setSearchResults] = useState([]);
+  const [isSearching, setIsSearching] = useState(false);
+
+  useEffect(() => {
+    if (searchQuery.length < 3) {
+      setSearchResults([]);
+      setIsSearching(false);
+      return;
+    }
+    
+    const debounceTimer = setTimeout(async () => {
+      setIsSearching(true);
+      try {
+        const results = await searchLocations(searchQuery);
+        setSearchResults(results);
+      } catch (err) {
+        console.error(err);
+      } finally {
+        setIsSearching(false);
+      }
+    }, 500);
+    
+    return () => clearTimeout(debounceTimer);
+  }, [searchQuery]);
+
+  const handleSelectResult = (result) => {
+    dispatch(setUserLocation({ lat: null, lng: null, city: result.city || result.suburb || result.display_name.split(",")[0], state: result.state }));
+    dispatch(setLocationStatus("granted"));
+    setSearchQuery("");
+    setSearchResults([]);
+    handleClose();
+  };
 
   useEffect(() => {
     const checkMobile = () => setIsMobile(window.innerWidth < 640);
@@ -125,6 +159,52 @@ const LocationSidebar = () => {
 
         <div className="flex-1 overflow-y-auto p-5 pt-2 flex flex-col gap-8 no-scrollbar">
           
+          {/* Search Bar */}
+          <div className="relative">
+            <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-white/40" size={18} />
+            <input
+              type="text"
+              placeholder="Search for a city or area..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-full bg-[#242424] border border-white/10 rounded-xl py-3 pl-12 pr-4 text-white placeholder:text-white/30 focus:outline-none focus:border-[#BFF367]/50 transition-colors"
+            />
+            {isSearching && (
+              <Loader2 className="absolute right-4 top-1/2 -translate-y-1/2 text-[#BFF367] animate-spin" size={18} />
+            )}
+          </div>
+
+          {/* Search Results */}
+          {searchQuery.length >= 3 && (
+            <div className="flex flex-col gap-2">
+              {isSearching ? (
+                <div className="text-white/40 text-sm text-center py-4">Searching locations...</div>
+              ) : searchResults.length > 0 ? (
+                searchResults.map((result, idx) => (
+                  <button
+                    key={idx}
+                    onClick={() => handleSelectResult(result)}
+                    className="w-full flex items-center gap-4 p-3 rounded-xl hover:bg-white/5 transition-colors text-left border border-white/5"
+                  >
+                    <div className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center shrink-0">
+                      <MapPin size={18} className="text-[#BFF367]" />
+                    </div>
+                    <div className="flex flex-col overflow-hidden">
+                      <span className="text-[14px] font-bold text-white/90 truncate">
+                        {result.city || result.suburb || result.display_name.split(",")[0]}
+                      </span>
+                      <span className="text-[11px] text-white/40 truncate">
+                        {result.display_name}
+                      </span>
+                    </div>
+                  </button>
+                ))
+              ) : (
+                <div className="text-white/40 text-sm text-center py-4">No locations found</div>
+              )}
+            </div>
+          )}
+
           {/* Current Location Button */}
           <button
             onClick={handleDetectLocation}
@@ -140,7 +220,8 @@ const LocationSidebar = () => {
           </button>
 
           {/* Popular Areas Section */}
-          <div className="flex flex-col">
+          {searchQuery.length < 3 && (
+            <div className="flex flex-col">
             <h3 className="text-[12px] font-bold text-white/50 uppercase tracking-[0.1em] mb-4">
               Popular Areas in Chennai
             </h3>
@@ -161,6 +242,7 @@ const LocationSidebar = () => {
               ))}
             </div>
           </div>
+          )}
         </div>
       </motion.div>
     </div>

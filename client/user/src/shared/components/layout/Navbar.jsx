@@ -227,7 +227,15 @@ const Navbar = () => {
       </nav>
 
       {/* ACTIONS (Moved outside nav to prevent dropdown clipping) */}
-      <div className={`flex items-center gap-2 sm:gap-4 fixed right-4 sm:right-6 z-[100] transition-all duration-300 ${ scrollDirection === "down" && window.innerWidth < 1024 ? "-translate-y-full top-[-100px]" : "translate-y-0 top-4" }`}>
+      <div className={`flex items-center gap-2 sm:gap-4 fixed right-4 sm:right-6 z-[100] transition-all duration-300 lg:left-64 lg:right-0 lg:top-0 lg:px-8 lg:py-4 lg:bg-[#050505]/95 lg:backdrop-blur-xl lg:border-b lg:border-white/5 lg:justify-end ${ scrollDirection === "down" && window.innerWidth < 1024 ? "-translate-y-full top-[-100px]" : "translate-y-0 top-4 lg:top-0" }`}>
+        <Link 
+          to="/landing" 
+          target="_blank" 
+          rel="noopener noreferrer"
+          className="hidden sm:flex items-center gap-2 text-sm font-semibold text-white/60 hover:text-[#BFF367] transition-all"
+        >
+          View Website
+        </Link>
         {!isLoggedIn ? (
           <>
             <Link

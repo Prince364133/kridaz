@@ -1,4 +1,4 @@
-import UserHome from "@user/pages/Home";
+import UserHome from "../../../pages/Home.jsx";
 
 const RootRedirect = () => {
   // Users always land on the home page.

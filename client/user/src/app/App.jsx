@@ -2,9 +2,9 @@ import { useEffect, useState, useRef } from "react";
 import { RouterProvider } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import router from "./router";
-import { logout, restoreAuth } from "@redux/slices/authSlice";
-import { setUserLocation, setLocationStatus } from "@redux/slices/uiSlice";
-import axiosInstance from "@hooks/useAxiosInstance";
+import { logout, restoreAuth } from "../redux/slices/authSlice.js";
+import { setUserLocation, setLocationStatus } from "../redux/slices/uiSlice.js";
+import axiosInstance from "../infrastructure/axios.js";
 
 // Simple JWT decoder (no verification, just payload extraction)
 const decodeToken = (token) => {
@@ -31,15 +31,15 @@ const getCookie = (name) => {
   return null;
 };
 
-import { SocketProvider } from "@context/SocketContext";
+import { SocketProvider } from "../context/SocketContext.jsx";
 import { GoogleOAuthProvider } from "@react-oauth/google";
 import { Toaster } from "react-hot-toast";
-import { RootErrorBoundary } from "@components/common";
+import { RootErrorBoundary } from "../shared/components/common/index.jsx";
 
-import { reelsApi } from "@redux/api/reelsApi";
-import { usePushNotifications } from "@hooks/usePushNotifications";
-import { useWebPushNotifications } from "@hooks/useWebPushNotifications";
-import { useOTAUpdate } from "@hooks/useOTAUpdate";
+import { reelsApi } from "../redux/api/reelsApi.js";
+import { usePushNotifications } from "../shared/hooks/usePushNotifications.js";
+import { useWebPushNotifications } from "../shared/hooks/useWebPushNotifications.js";
+import { useOTAUpdate } from "../shared/hooks/useOTAUpdate.js";
 
 import { ObservabilityProvider } from "./ObservabilityProvider";
 import LocationSidebar from "../shared/components/modals/LocationSidebar";

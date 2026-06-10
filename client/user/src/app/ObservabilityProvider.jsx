@@ -1,6 +1,6 @@
 import { useEffect } from "react";
 import { onLCP, onINP, onCLS } from "web-vitals";
-import axiosInstance from "@hooks/useAxiosInstance";
+import axiosInstance from "../infrastructure/axios.js";
 
 function sendToBackend(metric) {
   const body = JSON.stringify({
