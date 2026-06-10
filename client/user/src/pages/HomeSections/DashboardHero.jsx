@@ -4,7 +4,7 @@ import { Link } from "react-router-dom";
 
 export default function DashboardHero() {
   return (
-    <div className="flex overflow-x-auto gap-3 md:gap-4 mb-2 w-full pb-2 snap-x snap-mandatory [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
+    <div className="flex overflow-x-auto gap-3 md:gap-4 mb-0 w-full pb-0 snap-x snap-mandatory [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
       {/* Leaderboard / Players Nearby */}
       <Link
         to="/players"

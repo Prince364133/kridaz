@@ -248,7 +248,7 @@ const Community = ({ children, onSearchActive }) => {
               <ReelsView gateInteraction={gateInteraction} onBack={() => handleSetActiveFilter("All")} />
             ) : (
               <>
-                <div className="mb-4">
+                <div className="mb-1">
                   <StoriesSection user={user} isLoggedIn={isLoggedIn} isAdmin={isAdmin} gateInteraction={gateInteraction} />
                 </div>
 

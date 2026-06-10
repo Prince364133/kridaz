@@ -146,7 +146,7 @@ const Navbar = () => {
           ${ scrollDirection === "down" && window.innerWidth < 1024 ? "-translate-y-full" : "translate-y-0" }
         `}>
           <div className="flex justify-center">
-            <div className="relative w-full max-w-full h-16 sm:h-20 border-b border-white/10 flex items-center justify-between px-2 sm:px-4">
+            <div className="relative w-full max-w-full h-[88px] sm:h-[104px] border-b border-white/10 flex items-center justify-between px-2 sm:px-4 pt-6 sm:pt-8">
             {/* Logo & Mobile Location Section */}
             <div className="flex flex-col items-start justify-center w-full overflow-hidden">
               {isLoggedIn ? (
@@ -221,7 +221,7 @@ const Navbar = () => {
 
 
       {/* ACTIONS (Moved outside nav to prevent dropdown clipping) */}
-      <div className={`flex items-center gap-2 sm:gap-4 fixed right-4 sm:right-6 z-[100] transition-all duration-300 ${ scrollDirection === "down" && window.innerWidth < 1024 ? "-translate-y-full top-[-100px]" : "translate-y-0 top-4" }`}>
+      <div className={`flex items-center gap-2 sm:gap-4 fixed right-4 sm:right-6 z-[100] transition-all duration-300 ${ scrollDirection === "down" && window.innerWidth < 1024 ? "-translate-y-full top-[-100px]" : "translate-y-0 top-8 sm:top-10" }`}>
         {!isLoggedIn ? (
           <>
             <Link

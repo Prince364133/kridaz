@@ -81,7 +81,7 @@ export const AdBannerSection = ({ banners = [] }) => {
   const isVideo = !!currentBanner.videoUrl;
 
   return (
-    <section className="relative w-full overflow-hidden bg-black py-1 md:py-2">
+    <section className="relative w-full overflow-hidden bg-black py-0">
       <div className="w-full px-1 md:px-2">
         <div className="relative group aspect-[16/9] rounded-[8px] md:rounded-[8px] overflow-hidden border border-white/10 shadow-2xl">
 

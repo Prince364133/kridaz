@@ -24,40 +24,7 @@ const Root = () => {
   const [showOnboarding, setShowOnboarding] = useState(false);
   const [isDesktop, setIsDesktop] = useState(window.innerWidth >= 1024);
   const iframeRef = useRef(null);
-  const [leftWidth, setLeftWidth] = useState(450);
-  const [isResizing, setIsResizing] = useState(false);
 
-  useEffect(() => {
-    const handleMouseMove = (e) => {
-      if (!isResizing) return;
-      // constrain between 320px and 50% of window width
-      const newWidth = Math.max(320, Math.min(e.clientX, window.innerWidth / 2));
-      setLeftWidth(newWidth);
-    };
-    
-    const handleMouseUp = () => {
-      setIsResizing(false);
-    };
-
-    if (isResizing) {
-      document.addEventListener("mousemove", handleMouseMove);
-      document.addEventListener("mouseup", handleMouseUp);
-      document.body.style.userSelect = "none";
-      if (iframeRef.current) iframeRef.current.style.pointerEvents = "none";
-    } else {
-      document.removeEventListener("mousemove", handleMouseMove);
-      document.removeEventListener("mouseup", handleMouseUp);
-      document.body.style.userSelect = "";
-      if (iframeRef.current) iframeRef.current.style.pointerEvents = "";
-    }
-
-    return () => {
-      document.removeEventListener("mousemove", handleMouseMove);
-      document.removeEventListener("mouseup", handleMouseUp);
-      document.body.style.userSelect = "";
-      if (iframeRef.current) iframeRef.current.style.pointerEvents = "";
-    };
-  }, [isResizing]);
 
   useEffect(() => {
     const media = window.matchMedia("(min-width: 1024px)");
@@ -198,23 +165,63 @@ const Root = () => {
         <BackgroundUploadManager />
 
         {/* Left Side: Mobile View Container */}
-        <div style={{ width: leftWidth, minWidth: leftWidth }} className="h-full border-r border-white/5 bg-[#050505] relative z-20 flex-shrink-0">
-          {/* Iframe rendering the mobile app */}
-          <iframe
-            ref={iframeRef}
-            src={location.pathname + location.search}
-            className="w-full h-full border-none bg-[#050505]"
-            onLoad={handleIframeLoad}
-          />
+        <div className="w-[40%] min-w-[40%] h-full border-r border-white/5 bg-[#050505] relative z-20 flex-shrink-0 flex items-center justify-center p-6 md:p-8 pl-24 md:pl-32 lg:pl-40 pt-16">
+          
+          <div 
+            className="relative h-full shadow-2xl mx-auto bg-transparent" 
+            style={{ 
+              maxWidth: 'min(550px, 100%)',
+              maxHeight: '1130px',
+              aspectRatio: '443/913', 
+              containerType: 'inline-size', 
+              transform: 'translateZ(0)', 
+              isolation: 'isolate' 
+            }}
+          >
+            {/* "Experience the app live!" Decorative Text */}
+            <div className="absolute top-1/2 -translate-y-[50%] right-[100%] mr-8 md:mr-12 flex flex-col items-center pointer-events-none opacity-90 z-50 whitespace-nowrap">
+              <div className="font-['Caveat',cursive] text-base md:text-lg font-bold text-center leading-snug tracking-wider -rotate-6">
+                <div className="text-[#BFF367]">Experience</div>
+                <div className="text-white/90">the app</div>
+                <div className="text-[#BFF367]">live!</div>
+              </div>
+              <svg width="35" height="35" viewBox="0 0 50 50" fill="none" xmlns="http://www.w3.org/2000/svg" className="ml-8 mt-1">
+                <path d="M5 5 C 15 25, 25 35, 45 40" stroke="#BFF367" strokeWidth="2.5" strokeLinecap="round" fill="none"/>
+                <path d="M35 30 L 46 41 L 32 45" stroke="#BFF367" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" fill="none"/>
+              </svg>
+            </div>
+
+            {/* The Screen (exactly aligned to the SVG inner hole) */}
+            <div 
+              className="absolute overflow-hidden bg-[#050505] z-0" 
+              style={{ 
+                top: '0.657%', 
+                bottom: '0.657%', 
+                left: '2.5%', 
+                right: '2.5%', 
+                borderRadius: '13cqw' 
+              }}
+            >
+              <iframe
+                ref={iframeRef}
+                src={location.pathname + location.search}
+                className="w-full h-full border-none bg-[#050505]"
+                style={{ borderRadius: 'inherit' }}
+                onLoad={handleIframeLoad}
+              />
+            </div>
+            
+            {/* Detailed Top-Most Frame Overlay */}
+            <img 
+              src="/mobile-frame-top.svg" 
+              alt="Device Frame Overlay" 
+              className="absolute inset-0 w-full h-full object-fill pointer-events-none z-50"
+            />
+          </div>
+
         </div>
 
-        {/* Resizer Handle */}
-        <div 
-          className="w-2 cursor-col-resize hover:bg-[#BFF367]/20 active:bg-[#BFF367]/40 h-full z-30 flex flex-col items-center justify-center -ml-1 transition-colors group relative"
-          onMouseDown={() => setIsResizing(true)}
-        >
-          <div className="w-[2px] h-8 bg-white/20 group-hover:bg-[#BFF367] rounded-full transition-colors" />
-        </div>
+
 
         {/* Right Side: Landing Page (Full height, scrollable) */}
         <div className="flex-1 h-full overflow-y-auto bg-[#050505] relative z-10 min-w-0">

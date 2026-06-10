@@ -238,7 +238,7 @@ export default function Home() {
       <div className="md:px-0 w-full mt-0 mb-4">
         <Community onSearchActive={setIsCommunitySearchActive}>
           {/* -- DASHBOARD HERO -- */}
-          <div className="!mt-2 w-[100%] max-w-[100vw] overflow-x-hidden md:w-auto relative mb-6">
+          <div className="!mt-1 w-[100%] max-w-[100vw] overflow-x-hidden md:w-auto relative mb-0">
             <DashboardHero
               user={user}
               userLocation={userLocation}
@@ -343,7 +343,7 @@ export default function Home() {
 
           {/* -- UPCOMING BOOKINGS -- */}
           {isLoggedIn && (loadingBookings || upcomingBookingsList.length > 0) && (
-            <div className="!mt-4 px-2">
+            <div className="!mt-2 px-2">
               <div className="flex items-center justify-between mb-3">
                 <h4 className="text-[11px] font-black uppercase text-white/40 tracking-widest">Upcoming Bookings</h4>
                 <div className="flex items-center gap-1.5">
