@@ -571,6 +571,7 @@ export const initializeScoringSession = async (finalMatchId, finalBattingTeam, u
         timerState: "RUNNING",
         timerLastStartedAt: new Date(),
         oversPerInnings: hostedGame.oversPerInnings,
+        slowOverRateConfig: hostedGame.slowOverRateConfig || null,
         tossWinner: tossWinner,
         tossDecision: tossDecision,
         innings: {
@@ -1832,7 +1833,8 @@ export const createScoringMatch = async (userId, matchData) => {
     location,
     customDays,
     customOversPerDay,
-    matchDateTime
+    matchDateTime,
+    slowOverRateConfig
   } = matchData;
 
   // Determine match duration in days based on format
@@ -1936,6 +1938,7 @@ export const createScoringMatch = async (userId, matchData) => {
       time: matchDateTime ? new Date(matchDateTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : new Date().toTimeString().split(' ')[0],
       scheduledStartAt: matchDateTime ? new Date(matchDateTime) : null,
       oversPerInnings: format === 'T20' ? 20 : format === 'ODI' ? 50 : format === 'T10' ? 10 : format === 'CUSTOM' ? resolvedOversPerDay : 20,
+      slowOverRateConfig: slowOverRateConfig || null,
       teams: {
         create: [
           {

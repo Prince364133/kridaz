@@ -486,6 +486,9 @@ model HostedGame {
   commentaryLanguage    String  @default("en")
   commentaryStyle       String  @default("professional")
 
+  // Slow Over Rate Config (Tournament/Match override)
+  slowOverRateConfig    Json?
+
   // New fields for Scoring Match
   name              String?
   format            String?
@@ -610,6 +613,7 @@ model CricketMatch {
   // scoring.utils.js → DEFAULT_HOUSE_RULES.
   houseRules           Json?
   matchOfficials       Json?
+  slowOverRateConfig   Json?
   createdAt            DateTime          @default(now())
   updatedAt            DateTime          @updatedAt
   game                 HostedGame        @relation(fields: [gameId], references: [id], onDelete: Cascade)

@@ -7,7 +7,8 @@ import { motion, AnimatePresence, useMotionValue, animate } from 'framer-motion'
 import {
   X, ChevronRight, ChevronLeft, Shield, Video, Users, Trophy,
   Search, Check, MapPin, UserCheck, SkipForward, Loader2,
-  Swords, Phone, MessageCircle, UserPlus, Plus, Eye, EyeOff, CheckSquare, Mic, Star, Heart
+  Swords, Phone, MessageCircle, UserPlus, Plus, Eye, EyeOff, CheckSquare, Mic, Star, Heart,
+  ClipboardList, Radio, Info, Zap
 } from 'lucide-react';
 import { useSetupScoringMatchMutation } from '@redux/api/scoringApi';
 import {
@@ -68,8 +69,7 @@ const PITCH_TYPES = [
 ];
 
 const STEPS = [
-  { id: 1, label: 'Match Setup' },
-  { id: 2, label: 'Playing XIs' },
+  { id: 1, label: 'Match Setup' }
 ];
 
 // ─── Field/Select components ─────────────────────────────────────────────────
@@ -220,11 +220,12 @@ const StartScoringModal = ({ isOpen, onClose, onSuccess, initialData }) => {
     customDays: 1,
     customOversPerDay: 20,
     powerPlayOvers: 6,
-    powerPlayMapping: [],
+    powerPlayMapping: [1, 2, 3, 4, 5, 6],
     location: '',
     matchDateTime: '',
     pitchType: 'TURF',
     matchTiming: 'DAY',
+    slowOverRateEnabled: false,
   });
 
   useEffect(() => {
@@ -315,6 +316,7 @@ const StartScoringModal = ({ isOpen, onClose, onSuccess, initialData }) => {
 
   // Custom Date/Time Picker popup state
   const [showDatePickerPopup, setShowDatePickerPopup] = useState(false);
+  const [showTimeStep, setShowTimeStep] = useState(false);
   const [calendarMonth, setCalendarMonth] = useState(new Date().getMonth());
   const [calendarYear, setCalendarYear] = useState(new Date().getFullYear());
   const [tempDate, setTempDate] = useState(null);
@@ -345,6 +347,7 @@ const StartScoringModal = ({ isOpen, onClose, onSuccess, initialData }) => {
     
     setCalendarMonth(activeDate.getMonth());
     setCalendarYear(activeDate.getFullYear());
+    setShowTimeStep(false);
     setShowDatePickerPopup(true);
   };
 
@@ -928,6 +931,7 @@ const StartScoringModal = ({ isOpen, onClose, onSuccess, initialData }) => {
     try {
       const payload = {
         ...formData,
+        slowOverRateConfig: formData.slowOverRateEnabled ? { enabled: true, penaltyType: 'ONE_FIELDER_INSIDE_CIRCLE' } : { enabled: false },
         matchName: formData.matchName || `${getTeamName(formData.teamAId)} vs ${getTeamName(formData.teamBId)}`,
         teamAData: { name: getTeamName(formData.teamAId) },
         teamBData: { name: getTeamName(formData.teamBId) },
@@ -949,9 +953,7 @@ const StartScoringModal = ({ isOpen, onClose, onSuccess, initialData }) => {
   // ─── Step Validation ─────────────────────────────────────────────────────────
   const canGoNext = () => {
     switch (step) {
-      case 1: return true;
-      case 2: return !!formData.teamAId && !!formData.teamBId && formData.teamAId !== formData.teamBId && formData.teamAPlayers.length > 0 && formData.teamBPlayers.length > 0;
-
+      case 1: return !!formData.teamAId && !!formData.teamBId && formData.teamAId !== formData.teamBId && formData.teamAPlayers.length > 0 && formData.teamBPlayers.length > 0;
       default: return true;
     }
   };
@@ -1387,30 +1389,33 @@ const StartScoringModal = ({ isOpen, onClose, onSuccess, initialData }) => {
 
           <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-[#121212] scrollbar-hide">
             {/* Calendar Month Header */}
-            <div className="flex items-center justify-between">
-              <span className="text-sm font-black text-white uppercase tracking-widest">
-                {months[calendarMonth]} {calendarYear}
-              </span>
-              <div className="flex gap-2">
-                <button
-                  type="button"
-                  onClick={handlePrevMonth}
-                  disabled={isPrevMonthDisabled()}
-                  className="p-1.5 bg-white/5 hover:bg-white/10 rounded-full text-white disabled:opacity-20 disabled:cursor-not-allowed transition-colors"
-                >
-                  <ChevronLeft size={16} />
-                </button>
-                <button
-                  type="button"
-                  onClick={handleNextMonth}
-                  className="p-1.5 bg-white/5 hover:bg-white/10 rounded-full text-white transition-colors"
-                >
-                  <ChevronRight size={16} />
-                </button>
+            {!showTimeStep && (
+              <div className="flex items-center justify-between">
+                <span className="text-sm font-black text-white uppercase tracking-widest">
+                  {months[calendarMonth]} {calendarYear}
+                </span>
+                <div className="flex gap-2">
+                  <button
+                    type="button"
+                    onClick={handlePrevMonth}
+                    disabled={isPrevMonthDisabled()}
+                    className="p-1.5 bg-white/5 hover:bg-white/10 rounded-full text-white disabled:opacity-20 disabled:cursor-not-allowed transition-colors"
+                  >
+                    <ChevronLeft size={16} />
+                  </button>
+                  <button
+                    type="button"
+                    onClick={handleNextMonth}
+                    className="p-1.5 bg-white/5 hover:bg-white/10 rounded-full text-white transition-colors"
+                  >
+                    <ChevronRight size={16} />
+                  </button>
+                </div>
               </div>
-            </div>
+            )}
 
             {/* Calendar Grid */}
+            {!showTimeStep && (
             <div>
               <div className="grid grid-cols-7 gap-1 text-center text-[10px] font-bold text-white/30 uppercase tracking-widest mb-2">
                 {['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'].map(day => (
@@ -1450,6 +1455,7 @@ const StartScoringModal = ({ isOpen, onClose, onSuccess, initialData }) => {
                           setTempMinute(m >= 60 ? 55 : m);
                           setTempPeriod(period);
                         }
+                        setShowTimeStep(true);
                       }}
                       className={`py-2 text-xs font-bold rounded-[12px] transition-all ${
                         isSelected 
@@ -1465,86 +1471,90 @@ const StartScoringModal = ({ isOpen, onClose, onSuccess, initialData }) => {
                 })}
               </div>
             </div>
+            )}
 
             {/* Time Picker */}
-            <div className="border-t border-white/10 pt-5 space-y-4">
-              <span className="text-[10px] font-black text-white/40 uppercase tracking-widest block">
-                Select Time
-              </span>
-              
-              <div className="flex gap-4">
-                <div className="flex-1 space-y-2">
-                  <label className="text-[9px] font-bold text-white/40 uppercase tracking-widest">Hour</label>
-                  <select
-                    value={tempHour}
-                    onChange={e => setTempHour(parseInt(e.target.value))}
-                    className="w-full bg-[#121212] border border-white/10 rounded-[12px] px-3 py-2 text-white focus:outline-none focus:ring-1 focus:ring-[#55DEE8]/30 focus:border-[#55DEE8]/30 text-xs font-bold form-select-custom"
-                  >
-                    {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12].map(h => {
-                      const isDisabled = isPastTime(h, tempMinute, tempPeriod);
-                      return (
-                        <option key={h} value={h} disabled={isDisabled}>
-                          {String(h).padStart(2, '0')}
-                        </option>
+            {showTimeStep && (
+              <div className="pt-4 space-y-4 pb-8">
+                <span className="text-[10px] font-black text-white/40 uppercase tracking-widest block text-center">
+                  Select Time
+                </span>
+                
+                <input
+                  type="time"
+                  value={`${String(tempPeriod === 'PM' && tempHour !== 12 ? tempHour + 12 : tempPeriod === 'AM' && tempHour === 12 ? 0 : tempHour).padStart(2, '0')}:${String(tempMinute).padStart(2, '0')}`}
+                  onChange={(e) => {
+                    const val = e.target.value;
+                    if (val) {
+                      const [h, m] = val.split(':').map(Number);
+                      let period = h >= 12 ? 'PM' : 'AM';
+                      let hour12 = h % 12;
+                      if (hour12 === 0) hour12 = 12;
+                      
+                      setTempHour(hour12);
+                      setTempMinute(m);
+                      setTempPeriod(period);
+                      
+                      const finalDate = new Date(
+                        tempDate.getFullYear(),
+                        tempDate.getMonth(),
+                        tempDate.getDate(),
+                        h,
+                        m
                       );
-                    })}
-                  </select>
-                </div>
-
-                <div className="flex-1 space-y-2">
-                  <label className="text-[9px] font-bold text-white/40 uppercase tracking-widest">Minute</label>
-                  <select
-                    value={tempMinute}
-                    onChange={e => setTempMinute(parseInt(e.target.value))}
-                    className="w-full bg-[#121212] border border-white/10 rounded-[12px] px-3 py-2 text-white focus:outline-none focus:ring-1 focus:ring-[#55DEE8]/30 focus:border-[#55DEE8]/30 text-xs font-bold form-select-custom"
-                  >
-                    {[0, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55].map(m => {
-                      const isDisabled = isPastTime(tempHour, m, tempPeriod);
-                      return (
-                        <option key={m} value={m} disabled={isDisabled}>
-                          {String(m).padStart(2, '0')}
-                        </option>
-                      );
-                    })}
-                  </select>
-                </div>
-
-                <div className="w-24 space-y-2">
-                  <label className="text-[9px] font-bold text-white/40 uppercase tracking-widest">Period</label>
-                  <select
-                    value={tempPeriod}
-                    onChange={e => setTempPeriod(e.target.value)}
-                    className="w-full bg-[#121212] border border-white/10 rounded-[12px] px-3 py-2 text-white focus:outline-none focus:ring-1 focus:ring-[#55DEE8]/30 focus:border-[#55DEE8]/30 text-xs font-bold form-select-custom"
-                  >
-                    {['AM', 'PM'].map(p => {
-                      const isDisabled = isPastTime(tempHour, tempMinute, p);
-                      return (
-                        <option key={p} value={p} disabled={isDisabled}>
-                          {p}
-                        </option>
-                      );
-                    })}
-                  </select>
-                </div>
+                      
+                      const pad = (num) => String(num).padStart(2, '0');
+                      const formatted = `${finalDate.getFullYear()}-${pad(finalDate.getMonth() + 1)}-${pad(finalDate.getDate())}T${pad(finalDate.getHours())}:${pad(finalDate.getMinutes())}`;
+                      
+                      setFormData(f => ({ ...f, matchDateTime: formatted }));
+                      setTimeout(() => setShowDatePickerPopup(false), 300);
+                    }
+                  }}
+                  className="w-full bg-[#121212] border border-[#55DEE8]/30 rounded-[12px] px-4 py-8 text-white focus:outline-none focus:ring-1 focus:ring-[#55DEE8]/50 text-center text-4xl font-black tracking-widest style-time-input"
+                />
+                
+                <style dangerouslySetInnerHTML={{__html: `
+                  .style-time-input::-webkit-calendar-picker-indicator {
+                    filter: invert(1);
+                    opacity: 0.5;
+                    cursor: pointer;
+                    height: 100%;
+                    width: 100%;
+                    position: absolute;
+                    top: 0;
+                    left: 0;
+                  }
+                  .style-time-input {
+                    position: relative;
+                  }
+                `}} />
               </div>
-            </div>
+            )}
 
             <div className="flex gap-3 pt-2 flex-shrink-0">
               <button
                 type="button"
-                onClick={() => setShowDatePickerPopup(false)}
+                onClick={() => {
+                  if (showTimeStep) {
+                    setShowTimeStep(false);
+                  } else {
+                    setShowDatePickerPopup(false);
+                  }
+                }}
                 className="px-6 py-2.5 rounded-[12px] border border-white/10 text-white font-bold hover:bg-white/5 hover:border-white/20 transition-all flex items-center justify-center gap-2 text-xs uppercase tracking-widest"
               >
                 <ChevronLeft size={14} /> Back
               </button>
-              <button
-                type="button"
-                onClick={applyDatePicker}
-                disabled={!tempDate}
-                className="flex-1 py-2.5 bg-gradient-to-r from-[#55DEE8] to-[#BFF367] text-black font-black rounded-[12px] uppercase tracking-widest text-xs hover:opacity-90 hover:scale-[1.02] transition-all flex items-center justify-center gap-2 shadow-lg shadow-[#55DEE8]/10"
-              >
-                Apply Date & Time
-              </button>
+              {!showTimeStep && (
+                <button
+                  type="button"
+                  onClick={() => setShowTimeStep(true)}
+                  disabled={!tempDate}
+                  className="flex-1 py-2.5 bg-gradient-to-r from-[#55DEE8] to-[#BFF367] text-black font-black rounded-[12px] uppercase tracking-widest text-xs hover:opacity-90 hover:scale-[1.02] transition-all flex items-center justify-center gap-2 shadow-lg shadow-[#55DEE8]/10 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  Confirm Date
+                </button>
+              )}
             </div>
           </div>
         </motion.div>
@@ -1636,8 +1646,29 @@ const StartScoringModal = ({ isOpen, onClose, onSuccess, initialData }) => {
               </div>
             </div>
 
+            {/* Slow Over-Rate Penalty */}
+            <div className="space-y-2 pt-4 border-t border-white/5">
+              <div className="flex justify-between items-center">
+                <label className="text-[10px] font-black text-white/40 uppercase tracking-widest block">
+                  Slow Over-Rate Penalty
+                </label>
+                <div 
+                  className={`w-10 h-5 rounded-full relative cursor-pointer transition-colors ${formData.slowOverRateEnabled ? 'bg-[#BFF367]' : 'bg-white/10'}`}
+                  onClick={() => setFormData(f => ({ ...f, slowOverRateEnabled: !f.slowOverRateEnabled }))}
+                >
+                  <motion.div 
+                    layout
+                    className={`absolute top-0.5 w-4 h-4 rounded-full bg-[#121212] shadow-sm ${formData.slowOverRateEnabled ? 'right-0.5' : 'left-0.5'}`}
+                  />
+                </div>
+              </div>
+              <p className="text-[11px] text-white/40 leading-snug">
+                If enabled, a penalty of one extra fielder inside the circle will be applied if the bowling team is behind schedule.
+              </p>
+            </div>
+
             {/* Power Play Overs Mapping */}
-            <div className="space-y-2 pt-2 border-t border-white/5">
+            <div className="space-y-2 pt-4 border-t border-white/5">
               <div className="flex justify-between items-end">
                 <label className="text-[10px] font-black text-white/40 uppercase tracking-widest block">
                   Power Play Overs Mapping
@@ -2101,7 +2132,6 @@ const StartScoringModal = ({ isOpen, onClose, onSuccess, initialData }) => {
       case 1:
         return (
           <div className="space-y-4 pt-2 pb-2">
-            {/* Max Members */}
             <TouchSliderWheel
               label="Max Members per Team"
               value={formData.maxMembers || 11}
@@ -2109,6 +2139,88 @@ const StartScoringModal = ({ isOpen, onClose, onSuccess, initialData }) => {
               max={15}
               onChange={val => setFormData(f => ({ ...f, maxMembers: val }))}
             />
+
+            {/* Teams & Members Selection Card */}
+            <div className="bg-white/[0.02] border border-white/5 rounded-2xl p-3 mt-6 mb-6">
+              <div className="mb-3 px-1">
+                <span className="text-[10px] font-black text-white/40 uppercase tracking-widest">
+                  Select Teams & Members
+                </span>
+              </div>
+              
+              <div className="flex items-stretch gap-2 relative z-10">
+                {/* Team A */}
+                <div 
+                  className="flex-1 bg-white/[0.02] border border-white/5 hover:border-white/10 rounded-xl p-3 flex items-center gap-3 cursor-pointer transition-all"
+                  onClick={() => {
+                    setXiTab('A');
+                    if (!formData.teamAId) {
+                      setSelectingTeam('A');
+                    } else {
+                      setStep(2);
+                    }
+                  }}
+                >
+                  <div className="w-[42px] h-[42px] rounded-full bg-[#121212] border border-white/10 flex items-center justify-center overflow-hidden flex-shrink-0 shadow-lg">
+                    {formData.teamAId ? (
+                      teamADetails?.team?.logo ? (
+                        <img src={teamADetails.team.logo} alt="Team A" className="w-full h-full object-cover" />
+                      ) : (
+                        <span className="text-lg font-black text-[#BFF367]">{getTeamName(formData.teamAId).charAt(0)}</span>
+                      )
+                    ) : (
+                      <span className="text-lg font-black text-[#BFF367]">A</span>
+                    )}
+                  </div>
+                  <div className="flex flex-col overflow-hidden">
+                    <span className="text-white font-bold text-[11px] truncate tracking-wider uppercase">
+                      {getTeamName(formData.teamAId) || 'SELECT TEAM A'}
+                    </span>
+                    <span className="text-white/40 text-[10px] mt-0.5 tracking-wide">
+                      <span className="text-[#BFF367]">{formData.teamAPlayers.length}/{formData.maxMembers}</span> Players
+                    </span>
+                  </div>
+                </div>
+
+                {/* VS Badge */}
+                <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-7 h-7 rounded-full bg-[#0a0a0a] border border-white/10 flex items-center justify-center z-20 shadow-xl">
+                  <span className="text-white text-[9px] font-black">VS</span>
+                </div>
+
+                {/* Team B */}
+                <div 
+                  className="flex-1 bg-white/[0.02] border border-white/5 hover:border-white/10 rounded-xl p-3 flex items-center gap-3 cursor-pointer transition-all"
+                  onClick={() => {
+                    setXiTab('B');
+                    if (!formData.teamBId) {
+                      setSelectingTeam('B');
+                    } else {
+                      setStep(2);
+                    }
+                  }}
+                >
+                  <div className="w-[42px] h-[42px] rounded-full bg-[#121212] border border-white/10 flex items-center justify-center overflow-hidden flex-shrink-0 shadow-lg">
+                    {formData.teamBId ? (
+                      teamBDetails?.team?.logo ? (
+                        <img src={teamBDetails.team.logo} alt="Team B" className="w-full h-full object-cover" />
+                      ) : (
+                        <span className="text-lg font-black text-[#BFF367]">{getTeamName(formData.teamBId).charAt(0)}</span>
+                      )
+                    ) : (
+                      <span className="text-lg font-black text-[#BFF367]">B</span>
+                    )}
+                  </div>
+                  <div className="flex flex-col overflow-hidden">
+                    <span className="text-white font-bold text-[11px] truncate tracking-wider uppercase">
+                      {getTeamName(formData.teamBId) || 'SELECT TEAM B'}
+                    </span>
+                    <span className="text-white/40 text-[10px] mt-0.5 tracking-wide">
+                      <span className="text-[#BFF367]">{formData.teamBPlayers.length}/{formData.maxMembers}</span> Players
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </div>
 
             <div className="grid grid-cols-2 gap-4">
               {/* Match Format */}
@@ -2124,7 +2236,12 @@ const StartScoringModal = ({ isOpen, onClose, onSuccess, initialData }) => {
                     let defaultPowerPlay = 6;
                     if (format === 'T10') defaultPowerPlay = 3;
                     if (format === 'ODI') defaultPowerPlay = 10;
-                    setFormData(f => ({ ...f, format, powerPlayOvers: defaultPowerPlay }));
+                    setFormData(f => ({ 
+                      ...f, 
+                      format, 
+                      powerPlayOvers: defaultPowerPlay,
+                      powerPlayMapping: Array.from({ length: defaultPowerPlay }, (_, i) => i + 1)
+                    }));
                   }}
                   className={selectClass}
                 >
@@ -2198,38 +2315,162 @@ const StartScoringModal = ({ isOpen, onClose, onSuccess, initialData }) => {
               </div>
             )}
 
-            {/* Add Venue */}
-            <div className="space-y-1">
-              <label className={labelClass}>
-                Venue
-              </label>
-              <button
-                type="button"
-                onClick={() => setShowVenuePopup(true)}
-                className="w-full bg-[#121212] border border-white/10 rounded-[12px] pl-12 pr-4 py-3 text-white text-left focus:outline-none focus:border-[#55DEE8]/30 transition-all text-sm font-semibold relative flex items-center min-h-[42px] hover:border-white/20 hover:scale-[1.005] transition-all"
-              >
-                <MapPin className="absolute left-4 text-white/40 text-[18px]" size={18} />
-                <span className="block truncate">
-                  {formData.customVenue ? formData.customVenue : formData.venueId ? (groundsData?.grounds?.find(g => g.id === formData.venueId)?.name || 'Venue Selected') : 'Add Venue'}
-                </span>
-              </button>
+            {/* Venue & Power Play */}
+            <div className="grid grid-cols-2 gap-4 mt-6 mb-6">
+              {/* Venue Card */}
+              <div className="bg-white/[0.02] border border-white/5 rounded-2xl p-3 flex flex-col justify-between">
+                <div className="mb-3 px-1">
+                  <span className="text-[10px] font-black text-white/40 uppercase tracking-widest">
+                    VENUE
+                  </span>
+                </div>
+                
+                <button
+                  type="button"
+                  onClick={() => setShowVenuePopup(true)}
+                  className="w-full bg-[#121212] border border-white/5 hover:border-white/20 rounded-xl px-3 py-2.5 text-white text-left focus:outline-none transition-all flex items-center justify-between min-h-[42px]"
+                >
+                  <span className="text-[11px] font-semibold text-white/80 truncate">
+                    {formData.customVenue ? formData.customVenue : formData.venueId ? (groundsData?.grounds?.find(g => g.id === formData.venueId)?.name || 'Sports Venue') : 'Select Venue'}
+                  </span>
+                  <ChevronRight size={14} className="text-white/40" />
+                </button>
+              </div>
+
+              {/* Power Play Overs Card */}
+              <div className="bg-white/[0.02] border border-white/5 rounded-2xl p-3 flex flex-col justify-between">
+                <div className="mb-3 px-1">
+                  <span className="text-[10px] font-black text-white/40 uppercase tracking-widest flex items-center gap-1">
+                    POWER PLAY OVERS
+                    <Info size={12} className="text-white/40" />
+                  </span>
+                </div>
+                
+                <div className="w-full bg-[#121212] border border-white/5 rounded-xl flex items-stretch overflow-hidden min-h-[42px]">
+                  {(formData.format === 'T10' ? [1, 2, 3, 4, 5] : formData.format === 'ODI' ? [8, 9, 10, 11, 12] : [4, 5, 6, 7, 8]).map((over) => {
+                    const isSelected = formData.powerPlayOvers === over;
+                    return (
+                      <button
+                        key={over}
+                        type="button"
+                        onClick={() => setFormData(f => ({ 
+                          ...f, 
+                          powerPlayOvers: over,
+                          powerPlayMapping: Array.from({ length: over }, (_, i) => i + 1)
+                        }))}
+                        className={`flex-1 flex items-center justify-center text-[12px] font-black transition-all ${
+                          isSelected 
+                            ? 'bg-[#BFF367] text-black shadow-inner z-10' 
+                            : 'text-white/40 hover:bg-white/5 hover:text-white border-r border-white/5 last:border-0'
+                        }`}
+                      >
+                        {over}
+                      </button>
+                    );
+                  })}
+                </div>
+                {formData.powerPlayMapping && formData.powerPlayMapping.length > 0 && (
+                  <div className="mt-2 text-[10px] text-white/40 font-semibold px-1">
+                    Mapped Overs: {
+                      (() => {
+                        const m = [...formData.powerPlayMapping].sort((a, b) => a - b);
+                        if (m.length === 0) return 'None';
+                        if (m[m.length - 1] === m.length && m[0] === 1) {
+                          return `1 to ${m.length}`;
+                        }
+                        return m.join(', ');
+                      })()
+                    }
+                  </div>
+                )}
+              </div>
             </div>
 
-            {/* Add Professional */}
-            <div className="space-y-1">
-              <label className={labelClass}>
-                Professional
-              </label>
-              <button
-                type="button"
-                onClick={() => setShowProfessionalsPopup(true)}
-                className="w-full bg-[#121212] border border-white/10 rounded-[12px] pl-12 pr-4 py-3 text-white text-left focus:outline-none focus:border-[#55DEE8]/30 transition-all text-sm font-semibold relative flex items-center min-h-[42px] hover:border-white/20 hover:scale-[1.005] transition-all"
-              >
-                <UserCheck className="absolute left-4 text-white/40 text-[18px]" size={18} />
-                <span className="block truncate">
-                  {formData.professionals.length > 0 || (formData.customProfessionals && formData.customProfessionals.length > 0) ? `${formData.professionals.length + (formData.customProfessionals?.length || 0)} Professional(s) Added` : 'Add Professional'}
+            {/* Match Officials */}
+            <div className="space-y-3 mt-6 mb-2">
+              <div className="px-1">
+                <span className="text-[10px] font-black text-white/40 uppercase tracking-widest">
+                  Match Officials <span className="normal-case tracking-normal">(Optional)</span>
                 </span>
-              </button>
+              </div>
+              
+              <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-hide snap-x">
+                {/* Umpires */}
+                <div className="min-w-[110px] flex-1 bg-[#121212] border border-white/5 rounded-xl py-2 px-3 flex flex-col items-center gap-1.5 snap-start relative">
+                  <div className="absolute inset-0 bg-[#55DEE8]/5 rounded-xl opacity-0 hover:opacity-100 transition-opacity" />
+                  <div className="text-[#55DEE8] relative z-10">
+                    <UserCheck size={24} strokeWidth={1.5} />
+                  </div>
+                  <div className="text-center relative z-10 mb-1">
+                    <div className="text-white text-[10px] font-bold tracking-widest uppercase mt-1">Umpires</div>
+                  </div>
+                  <button 
+                    type="button"
+                    onClick={() => { setProRoleFilter('UMPIRE'); setShowProfessionalsPopup(true); }}
+                    className="w-full py-1.5 rounded-lg border border-[#55DEE8]/30 hover:bg-[#55DEE8]/10 text-[#55DEE8] text-[10px] font-bold tracking-wider transition-colors mt-2 relative z-10"
+                  >
+                    ADD
+                  </button>
+                </div>
+
+                {/* Scorer */}
+                <div className="min-w-[110px] flex-1 bg-[#121212] border border-white/5 rounded-xl py-2 px-3 flex flex-col items-center gap-1.5 snap-start relative">
+                  <div className="absolute inset-0 bg-[#BFF367]/5 rounded-xl opacity-0 hover:opacity-100 transition-opacity" />
+                  <div className="text-[#BFF367] relative z-10">
+                    <ClipboardList size={24} strokeWidth={1.5} />
+                  </div>
+                  <div className="text-center relative z-10 mb-1">
+                    <div className="text-white text-[10px] font-bold tracking-widest uppercase mt-1">Scorer</div>
+                  </div>
+                  <button 
+                    type="button"
+                    onClick={() => { setProRoleFilter('SCORER'); setShowProfessionalsPopup(true); }}
+                    className="w-full py-1.5 rounded-lg border border-[#BFF367]/30 hover:bg-[#BFF367]/10 text-[#BFF367] text-[10px] font-bold tracking-wider transition-colors mt-2 relative z-10"
+                  >
+                    ADD
+                  </button>
+                </div>
+
+                {/* Streamer */}
+                <div className="min-w-[110px] flex-1 bg-[#121212] border border-white/5 rounded-xl py-2 px-3 flex flex-col items-center gap-1.5 snap-start relative">
+                  <div className="absolute inset-0 bg-[#A855F7]/5 rounded-xl opacity-0 hover:opacity-100 transition-opacity" />
+                  <div className="text-[#A855F7] relative z-10">
+                    <Radio size={24} strokeWidth={1.5} />
+                  </div>
+                  <div className="text-center relative z-10 mb-1">
+                    <div className="text-white text-[10px] font-bold tracking-widest uppercase mt-1">Streamer</div>
+                  </div>
+                  <button 
+                    type="button"
+                    onClick={() => { setProRoleFilter('STREAMER'); setShowProfessionalsPopup(true); }}
+                    className="w-full py-1.5 rounded-lg border border-[#A855F7]/30 hover:bg-[#A855F7]/10 text-[#A855F7] text-[10px] font-bold tracking-wider transition-colors mt-2 relative z-10"
+                  >
+                    ADD
+                  </button>
+                </div>
+
+                {/* Commentator */}
+                <div className="min-w-[110px] flex-1 bg-[#121212] border border-white/5 rounded-xl py-2 px-3 flex flex-col items-center gap-1.5 snap-start relative">
+                  <div className="absolute inset-0 bg-[#EC4899]/5 rounded-xl opacity-0 hover:opacity-100 transition-opacity" />
+                  <div className="text-[#EC4899] relative z-10">
+                    <Mic size={24} strokeWidth={1.5} />
+                  </div>
+                  <div className="text-center relative z-10 mb-1">
+                    <div className="text-white text-[10px] font-bold tracking-widest uppercase mt-1">Commentator</div>
+                  </div>
+                  <button 
+                    type="button"
+                    onClick={() => { setProRoleFilter('COMMENTATOR'); setShowProfessionalsPopup(true); }}
+                    className="w-full py-1.5 rounded-lg border border-[#EC4899]/30 hover:bg-[#EC4899]/10 text-[#EC4899] text-[10px] font-bold tracking-wider transition-colors mt-2 relative z-10"
+                  >
+                    ADD
+                  </button>
+                </div>
+              </div>
+              <div className="flex items-center gap-2 text-white/30 px-1 mt-1">
+                <Info size={12} className="flex-shrink-0" />
+                <span className="text-[10px]">You can add officials from your contacts or enter mobile numbers.</span>
+              </div>
             </div>
 
             <div className="space-y-1">
@@ -2245,22 +2486,6 @@ const StartScoringModal = ({ isOpen, onClose, onSuccess, initialData }) => {
               </button>
             </div>
 
-
-            {/* Match Name */}
-            <div className="space-y-1 mt-2">
-              <label htmlFor="matchName" className={labelClass}>
-                Match Name
-              </label>
-              <input
-                id="matchName"
-                type="text"
-                autoComplete="off"
-                value={formData.matchName}
-                onChange={e => setFormData(f => ({ ...f, matchName: e.target.value }))}
-                className={inputClass}
-                placeholder="e.g. Weekend Championship Final (Optional)"
-              />
-            </div>
 
 
           </div>
@@ -2933,7 +3158,8 @@ const StartScoringModal = ({ isOpen, onClose, onSuccess, initialData }) => {
                           {value: '', label: 'All Roles'},
                           {value: 'UMPIRE', label: 'Umpire'},
                           {value: 'SCORER', label: 'Scorer'},
-                          {value: 'COMMENTATOR', label: 'Commentator'}
+                          {value: 'COMMENTATOR', label: 'Commentator'},
+                          {value: 'STREAMER', label: 'Streamer'}
                         ]}
                       />
                     </div>

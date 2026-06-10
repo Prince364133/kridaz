@@ -557,6 +557,15 @@ const ScoringApp = () => {
             </div>
           )}
 
+          {matchData?.slowOverRateConfig?.enabled && score.overs === oversPerInnings - 1 && (
+            <div className="p-4 mt-4 bg-yellow-500/10 border border-yellow-500/30 rounded-[8px] flex items-center gap-3.5 shadow-lg">
+              <AlertCircle className="text-yellow-500 shrink-0" size={20} />
+              <div className="text-left">
+                <p className="text-[10px] font-black uppercase tracking-widest text-yellow-500">Slow Over-Rate Penalty Check</p>
+                <p className="text-xs text-neutral-400 font-medium mt-0.5">If the bowling team is behind schedule, 1 extra fielder must be brought inside the 30-yard circle for this final over.</p>
+              </div>
+            </div>
+          )}
 
           {needsInningsSetup && !needsMatchStart && !isFirstInningsComplete && (
             <button

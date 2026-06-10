@@ -69,6 +69,7 @@ export const setupScoringGameSchema = z.object({
     youtubeLiveUrl: z.string().url().optional().nullable().or(z.literal('')),
     customDays: z.number().int().min(1).max(10).optional(),
     customOversPerDay: z.number().int().min(1).max(100).optional(),
+    slowOverRateConfig: z.any().optional(),
   })
 });
 
