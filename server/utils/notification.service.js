@@ -47,7 +47,7 @@ export const sendWhatsAppMessage = async (phone, message, templateName = null, p
           type: "template",
           template: {
             name: templateName,
-            language: { code: "en", policy: "deterministic" },
+            language: { code: process.env.MSG91_WHATSAPP_LANG || "en", policy: "deterministic" },
             namespace: process.env.MSG91_WHATSAPP_NAMESPACE || "24b8b902_4d4e_4da1_86f9_5160683abccb",
             to_and_components: [
               {
@@ -84,6 +84,27 @@ export const sendWhatsAppMessage = async (phone, message, templateName = null, p
     return response.data.status === "success";
   } catch (error) {
     logger.error(`[WhatsApp Service] Error: ${error.response?.data?.message || error.message}`);
+    return false;
+  }
+};
+
+export const sendSMSMessage = async (phone, otp) => {
+  try {
+    const authKey = process.env.MSG91_AUTH_KEY;
+    if (!authKey) {
+      logger.warn("[SMS Service] MSG91_AUTH_KEY not set, using mock.");
+      return true;
+    }
+
+    let formattedPhone = phone.replace(/\D/g, "");
+    if (formattedPhone.length === 10) formattedPhone = "91" + formattedPhone;
+
+    const url = `https://control.msg91.com/api/v5/otp?authkey=${authKey}&mobile=${formattedPhone}&otp=${otp}`;
+    const response = await axios.post(url);
+    
+    return response.data.type === "success";
+  } catch (error) {
+    logger.error(`[SMS Service] Error: ${error.response?.data?.message || error.message}`);
     return false;
   }
 };

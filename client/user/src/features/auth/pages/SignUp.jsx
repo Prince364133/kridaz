@@ -8,8 +8,6 @@ import axiosInstance from "@hooks/useAxiosInstance";
 import { useDispatch, useSelector } from "react-redux";
 import { login } from "@redux/slices/authSlice";
 import { Capacitor } from "@capacitor/core";
-import { auth } from "../../../config/firebase";
-import { RecaptchaVerifier, signInWithPhoneNumber } from "firebase/auth";
 
 import { useAuthModal } from "../../../context/AuthModalContext";
 
@@ -17,7 +15,6 @@ const SUBHEADING_STYLE = { fontFamily: "'Inter 28pt Light', sans-serif", fontWei
 
 const SignUp = ({ isModal = false }) => {
   const { closeAuthModal, toggleView } = useAuthModal();
-  const [sentOtp, setSentOtp] = useState("");
   const [mounted, setMounted] = useState(false);
   const [authMode, setAuthMode] = useState('unified'); // 'unified', 'email', 'phone'
   const [step, setStep] = useState(1); // 1: Input, 2: OTP, 3: Password
@@ -113,35 +110,25 @@ const SignUp = ({ isModal = false }) => {
       const fullPhone = `+${formattedPhone}`;
       
       if (forceSms) {
-        if (window.recaptchaVerifier) {
-          try { window.recaptchaVerifier.clear(); } catch(e) {}
-        }
-        window.recaptchaVerifier = new RecaptchaVerifier(auth, 'recaptcha-container', {
-          'size': 'invisible'
-        });
-
-        const confirmationResult = await signInWithPhoneNumber(auth, fullPhone, window.recaptchaVerifier);
-        window.confirmationResult = confirmationResult;
-        toast.success("OTP sent to your phone via SMS");
+        const payload = { phone: formattedPhone, deliveryMethod: 'sms' };
+        const res = await axiosInstance.post('/api/user/auth/send-otp', payload);
+        toast.success(res.data.message || "OTP sent via SMS");
         setTimeLeft(60);
       } else {
         const payload = { phone: formattedPhone };
         const res = await axiosInstance.post('/api/user/auth/send-otp', payload);
         toast.success(res.data.message || "OTP sent via WhatsApp");
-        if (res.data.otp) {
-          setSentOtp(res.data.otp);
-          if (Capacitor.isNativePlatform()) {
-            toast((t) => (
-              <div className="flex flex-col gap-1 p-1">
-                <div className="font-bold text-sm text-black flex items-center gap-1">
-                  🔔 Kridaz Notification
-                </div>
-                <div className="text-xs text-gray-600">
-                  Your verification code is: <strong className="text-black text-sm">{res.data.otp}</strong>
-                </div>
+        if (Capacitor.isNativePlatform()) {
+          toast((t) => (
+            <div className="flex flex-col gap-1 p-1">
+              <div className="font-bold text-sm text-black flex items-center gap-1">
+                🔔 Kridaz Notification
               </div>
-            ), { position: 'top-center', duration: 8000 });
-          }
+              <div className="text-xs text-gray-600">
+                OTP sent to your device. Please enter it below.
+              </div>
+            </div>
+          ), { position: 'top-center', duration: 8000 });
         }
         setTimeLeft(60);
       }
@@ -149,10 +136,6 @@ const SignUp = ({ isModal = false }) => {
       console.error(err);
       toast.error(err.response?.data?.message || err.message || "Failed to send OTP");
       setStep(1); // Revert back if sending failed
-      if (window.recaptchaVerifier) {
-        try { window.recaptchaVerifier.clear(); } catch(e) {}
-        window.recaptchaVerifier = null;
-      }
     } finally {
       setLoading(false);
     }
@@ -163,14 +146,8 @@ const SignUp = ({ isModal = false }) => {
     if (!otp || otp.length < 6) return toast.error("Valid 6-digit OTP required");
     
     setLoading(true);
-    let firebaseIdToken = null;
     try {
-      if (authMode === 'phone' && window.confirmationResult) {
-        const result = await window.confirmationResult.confirm(otp);
-        firebaseIdToken = await result.user.getIdToken();
-      }
-
-      const payload = authMode === 'email' ? { email, otp } : { phone, otp: firebaseIdToken || otp };
+      const payload = authMode === 'email' ? { email, otp } : { phone, otp };
       const res = await axiosInstance.post('/api/user/auth/verify-otp', payload);
       
       if (res.data.success) {
@@ -179,7 +156,7 @@ const SignUp = ({ isModal = false }) => {
           authMethod: authMode,
           email: authMode === 'email' ? email : '',
           phone: authMode === 'phone' ? phone : '',
-          otp: firebaseIdToken || otp,
+          otp: otp,
           password: "",
           registrationToken: res.data.registrationToken
         });
@@ -423,12 +400,7 @@ const SignUp = ({ isModal = false }) => {
                             />
                           ))}
                         </div>
-                        {!Capacitor.isNativePlatform() && sentOtp && (
-                          <div className="bg-white/10 backdrop-blur-[12.5px] shadow-[-13px_43px_18px_rgba(0,0,0,0.01),-7px_24px_15px_rgba(0,0,0,0.04),-3px_11px_11px_rgba(0,0,0,0.07),-1px_3px_6px_rgba(0,0,0,0.08)] border border-transparent rounded-[10px] p-3 mt-4 text-center">
-                            <p className="text-xs text-white/60">Developer Message</p>
-                            <p className="text-sm text-[#A2F86D] font-mono mt-1">Your OTP code is: <strong>{sentOtp}</strong></p>
-                          </div>
-                        )}
+                        
                         
                         <div className="flex flex-col items-center mt-8 space-y-4">
                           {timeLeft > 0 ? (
@@ -448,17 +420,6 @@ const SignUp = ({ isModal = false }) => {
                           >
                             Resend Code
                           </button>
-
-                          {authMode === 'phone' && (
-                            <button
-                              type="button"
-                              disabled={loading}
-                              onClick={(e) => handleSendOtp(e, true)}
-                              className={`text-lg font-medium transition-colors text-white/60 hover:text-white pt-2`}
-                            >
-                              Get OTP via SMS
-                            </button>
-                          )}
                         </div>
 
                       </div>

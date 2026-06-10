@@ -402,13 +402,13 @@ const GlobalSearch = () => {
               {groundsLoading ? (
                 <div className="flex gap-4 overflow-x-auto no-scrollbar pb-4">
                   {[1, 2, 3].map(i => (
-                    <div key={i} className="min-w-[200px] h-[260px] rounded-2xl bg-white/5 animate-pulse shrink-0 border border-white/5" />
+                    <div key={i} className="min-w-[240px] w-[240px] h-[320px] rounded-2xl bg-white/5 animate-pulse shrink-0 border border-white/5" />
                   ))}
                 </div>
               ) : popularGrounds.length > 0 ? (
                 <div className="flex gap-4 overflow-x-auto no-scrollbar pb-4 snap-x">
                   {popularGrounds.map(ground => (
-                    <div key={ground._id} className="min-w-[160px] w-[160px] h-[220px] shrink-0 snap-start">
+                    <div key={ground._id} className="min-w-[240px] w-[240px] h-[320px] shrink-0 snap-start">
                       <VenueCard t={ground} onClick={() => navigate(`/venue/${ground._id || ground.id}`)} />
                     </div>
                   ))}

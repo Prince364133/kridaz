@@ -46,8 +46,8 @@ const editTurfSchema = z.object({
     .or(z.literal(""))
     .nullable()
     .optional(),
-  openTime: z.date({ required_error: "Open time is required", invalid_type_error: "Open time is required" }),
-  closeTime: z.date({ required_error: "Close time is required", invalid_type_error: "Close time is required" }),
+  openTime: z.string().regex(/^([01]\d|2[0-3]):([0-5]\d)$/, "Open time is required"),
+  closeTime: z.string().regex(/^([01]\d|2[0-3]):([0-5]\d)$/, "Close time is required"),
   sportTypes: z
     .array(z.string())
     .min(1, "At least one sport type is required"),
@@ -101,9 +101,10 @@ const editTurfSchema = z.object({
   message: "Number of weeks is required",
   path: ["slotsConfigWeeks"],
 }).refine((data) => {
-  return data.closeTime > data.openTime;
+  if (!data.openTime || !data.closeTime) return true;
+  return true;
 }, {
-  message: "Close time must be after open time",
+  message: "Close time must be valid",
   path: ["closeTime"],
 });
 
@@ -129,8 +130,8 @@ export default function useEditTurf(turfId) {
       sportTypes: [],
       groundTypes: [],
       facilities: [],
-      openTime: null,
-      closeTime: null,
+      openTime: "",
+      closeTime: "",
       youtubeUrl: "",
       slotDuration: 60,
       breakTime: 0,
@@ -164,7 +165,7 @@ export default function useEditTurf(turfId) {
         const parsed = JSON.parse(savedDraft);
         Object.keys(parsed).forEach((key) => {
           if (key === "openTime" || key === "closeTime") {
-            if (parsed[key]) setValue(key, new Date(parsed[key]));
+            if (parsed[key]) setValue(key, parsed[key]);
           } else {
             setValue(key, parsed[key]);
           }
@@ -257,28 +258,25 @@ export default function useEditTurf(turfId) {
         setFacilities(turfData.facilities || []);
 
         if (turfData.openTime) {
-            try {
+          // If the backend returns "hh:mm aa" format like "02:30 PM", we need to convert it to "HH:mm"
+          try {
+             if (turfData.openTime.includes("AM") || turfData.openTime.includes("PM")) {
                 const parsedOpen = parse(turfData.openTime, "hh:mm aa", new Date());
-                if (isValid(parsedOpen)) {
-                    setValue("openTime", parsedOpen);
-                } else {
-                    console.warn("Invalid openTime from DB:", turfData.openTime);
-                }
-            } catch (e) {
-                console.error("Error parsing openTime:", e);
-            }
+                if (isValid(parsedOpen)) setValue("openTime", format(parsedOpen, "HH:mm"));
+             } else {
+                setValue("openTime", turfData.openTime.substring(0, 5)); // Just in case it's ISO or other string
+             }
+          } catch(e) {}
         }
         if (turfData.closeTime) {
-            try {
+          try {
+             if (turfData.closeTime.includes("AM") || turfData.closeTime.includes("PM")) {
                 const parsedClose = parse(turfData.closeTime, "hh:mm aa", new Date());
-                if (isValid(parsedClose)) {
-                    setValue("closeTime", parsedClose);
-                } else {
-                    console.warn("Invalid closeTime from DB:", turfData.closeTime);
-                }
-            } catch (e) {
-                console.error("Error parsing closeTime:", e);
-            }
+                if (isValid(parsedClose)) setValue("closeTime", format(parsedClose, "HH:mm"));
+             } else {
+                setValue("closeTime", turfData.closeTime.substring(0, 5));
+             }
+          } catch(e) {}
         }
 
         if (turfData.slotDuration) setValue("slotDuration", turfData.slotDuration);
@@ -381,10 +379,11 @@ export default function useEditTurf(turfId) {
   const pricePerHour = watch("pricePerHour") || 0;
 
   useEffect(() => {
-    if (openTime && isValid(openTime) && closeTime && isValid(closeTime) && slotDuration) {
+    if (openTime && closeTime && slotDuration) {
       const slots = [];
-      let current = new Date(openTime);
-      let end = new Date(closeTime);
+      const today = new Date().toISOString().split('T')[0];
+      let current = new Date(`${today}T${openTime}`);
+      let end = new Date(`${today}T${closeTime}`);
       
       if (end <= current) {
         end.setDate(end.getDate() + 1);
@@ -440,9 +439,9 @@ export default function useEditTurf(turfId) {
           });
         }
       } else if (key === "openTime" || key === "closeTime") {
-        if (data[key] instanceof Date) {
-          formData.append(key, format(data[key], "hh:mm aa"));
-        }
+        const today = new Date().toISOString().split('T')[0];
+        const dateObj = new Date(`${today}T${data[key]}`);
+        formData.append(key, format(dateObj, "hh:mm aa"));
       } else if (key === "sportTypes" || key === "groundTypes" || key === "facilities") {
         if (Array.isArray(data[key])) {
           data[key].forEach((item) => {

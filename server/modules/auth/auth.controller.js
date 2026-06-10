@@ -218,7 +218,8 @@ export const checkUsername = asyncHandler(async (req, res) => {
 export const sendOtp = asyncHandler(async (req, res) => {
   const {
     email,
-    phone
+    phone,
+    deliveryMethod
   } = req.body;
   const conditions = [];
   if (email) conditions.push({
@@ -273,17 +274,20 @@ export const sendOtp = asyncHandler(async (req, res) => {
   NotificationService.sendOTP({
     phone,
     email,
+    deliveryMethod,
     otp: phoneOtp || emailOtp,
     phoneTemplate: process.env.MSG91_WHATSAPP_OTP_TEMPLATE,
     emailSubject: "Your Kridaz Verification Code",
     emailHtml: emailOtp ? `<p>Your verification code is <strong>${emailOtp}</strong>. It will expire in 10 minutes.</p>` : null
   });
   let msg = "";
-  if (email && phone) msg = "OTPs sent to your email and WhatsApp successfully";else if (email) msg = "OTP sent to your email successfully";else msg = "OTP sent to your WhatsApp successfully";
+  if (email && phone) msg = "OTPs sent to your email and WhatsApp successfully";
+  else if (email) msg = "OTP sent to your email successfully";
+  else if (deliveryMethod === 'sms') msg = "OTP sent to your phone via SMS successfully";
+  else msg = "OTP sent to your WhatsApp successfully";
   return res.status(200).json({
     success: true,
-    message: msg,
-    otp: emailOtp || phoneOtp
+    message: msg
   });
 });
 export const verifyOtp = asyncHandler(async (req, res) => {
@@ -332,7 +336,7 @@ export const verifyOtp = asyncHandler(async (req, res) => {
         }]
       }
     });
-    if (!otpRecord && otp !== "123456") {
+    if (!otpRecord) {
       return res.status(400).json({
         success: false,
         message: "Invalid verification code"
@@ -2227,8 +2231,7 @@ export const sendPhoneVerificationOtp = asyncHandler(async (req, res) => {
     data: {
       email,
       phone,
-      emailOtp: "123456",
-      // default email otp
+      emailOtp: email ? generateOTP() : null,
       phoneOtp,
       expiresAt: new Date(Date.now() + 10 * 60 * 1000)
     }
@@ -2303,26 +2306,20 @@ export const verifyPhoneOtp = asyncHandler(async (req, res) => {
     otpRecord = await prisma.oTP.findFirst({
       where: {
         email,
-        phone
+        phone,
+        phoneOtp: otp
       }
     });
     if (!otpRecord) {
       return res.status(400).json({
         success: false,
-        message: "No OTP record found. Please resend OTP."
+        message: "Invalid verification code"
       });
     }
     if (otpRecord.expiresAt < new Date()) {
       return res.status(400).json({
         success: false,
         message: "OTP has expired"
-      });
-    }
-    const isValid = otp === otpRecord.phoneOtp || process.env.NODE_ENV === 'test' && otp === "123456";
-    if (!isValid) {
-      return res.status(400).json({
-        success: false,
-        message: "Invalid verification code"
       });
     }
   }

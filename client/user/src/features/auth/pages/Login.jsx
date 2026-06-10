@@ -11,8 +11,7 @@ import {
   ArrowRight,
   X
 } from "lucide-react";
-import { auth } from "../../../config/firebase";
-import { RecaptchaVerifier } from "firebase/auth";
+
 
 import { useAuthModal } from "../../../context/AuthModalContext";
 
@@ -28,7 +27,6 @@ const Login = ({ isModal = false }) => {
     onSubmit, 
     loading,
     showOtpInput,
-    sentOtp,
     handleGoogleSuccess,
     handleGoogleError,
     showOnboarding,
@@ -45,20 +43,6 @@ const Login = ({ isModal = false }) => {
 
   const { isLoggedIn, role } = useSelector((state) => state.auth);
   
-  useEffect(() => {
-    if (!window.recaptchaVerifier) {
-      window.recaptchaVerifier = new RecaptchaVerifier(auth, 'recaptcha-container', {
-        'size': 'invisible'
-      });
-    }
-
-    return () => {
-      if (window.recaptchaVerifier) {
-        window.recaptchaVerifier.clear();
-        window.recaptchaVerifier = null;
-      }
-    };
-  }, []);
 
   useEffect(() => {
     setMounted(true);
@@ -121,12 +105,7 @@ const Login = ({ isModal = false }) => {
                       />
                     </div>
                     {errors.otp && <p className="text-xs text-red-500 mt-1 ml-1 text-center">{errors.otp.message}</p>}
-                    {!Capacitor.isNativePlatform() && sentOtp && (
-                      <div className="bg-white/10 backdrop-blur-[12.5px] shadow-[-13px_43px_18px_rgba(0,0,0,0.01),-7px_24px_15px_rgba(0,0,0,0.04),-3px_11px_11px_rgba(0,0,0,0.07),-1px_3px_6px_rgba(0,0,0,0.08)] border border-transparent rounded-[10px] p-3 mt-4 text-center">
-                        <p className="text-xs text-white/60">Developer Message</p>
-                        <p className="text-sm text-[#A2F86D] font-mono mt-1">Your OTP code is: <strong>{sentOtp}</strong></p>
-                      </div>
-                    )}
+                    
 
                       <div className="flex flex-col items-center mt-8 space-y-4">
                         {timeLeft > 0 ? (
@@ -146,17 +125,6 @@ const Login = ({ isModal = false }) => {
                         >
                           Resend Code
                         </button>
-
-                        {isPhoneAuth && (
-                          <button
-                            type="button"
-                            disabled={loading}
-                            onClick={() => handleSendOtp(true)}
-                            className={`text-lg font-medium transition-colors text-white/60 hover:text-white pt-2`}
-                          >
-                            Get OTP via SMS
-                          </button>
-                        )}
                       </div>
 
                   </div>
@@ -284,7 +252,6 @@ const Login = ({ isModal = false }) => {
           onClose={() => setShowOnboarding(false)} 
           onComplete={() => navigate("/")}
         />
-        <div id="recaptcha-container"></div>
       </>
     );
   }
@@ -326,7 +293,6 @@ const Login = ({ isModal = false }) => {
         onClose={() => setShowOnboarding(false)} 
         onComplete={() => navigate("/")}
       />
-      <div id="recaptcha-container"></div>
     </div>
   );
 };

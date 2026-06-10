@@ -8,8 +8,6 @@ import { useDispatch } from "react-redux";
 import {login} from "@redux/slices/authSlice";
 import { useNavigate } from "react-router-dom";
 import { Capacitor } from "@capacitor/core";
-import { auth } from "../../../config/firebase";
-import { signInWithPhoneNumber, RecaptchaVerifier } from "firebase/auth";
 
 const loginSchema = z.object({
   email: z.string().min(1, "Enter your email or phone number").refine((value) => {
@@ -24,7 +22,6 @@ const useLoginForm = () => {
   const [loading, setLoading] = useState(false);
   const [googleLoading, setGoogleLoading] = useState(false);
   const [showOtpInput, setShowOtpInput] = useState(false);
-  const [sentOtp, setSentOtp] = useState("");
   const [accountNotFound, setAccountNotFound] = useState(false);
   const [timeLeft, setTimeLeft] = useState(60);
   const [isPhoneAuth, setIsPhoneAuth] = useState(false);
@@ -94,16 +91,9 @@ const useLoginForm = () => {
           const phoneNum = email.startsWith('+') ? email : `+91${email}`;
           
           if (forceSms) {
-            if (window.recaptchaVerifier) {
-              try { window.recaptchaVerifier.clear(); } catch(e) {}
-            }
-            window.recaptchaVerifier = new RecaptchaVerifier(auth, 'recaptcha-container', {
-              'size': 'invisible'
-            });
-
-            const confirmationResult = await signInWithPhoneNumber(auth, phoneNum, window.recaptchaVerifier);
-            window.confirmationResult = confirmationResult;
-            toast.success("OTP sent to your phone via SMS");
+            const payload = { phone: email.startsWith('+') ? email.replace('+', '') : email, deliveryMethod: 'sms' };
+            const otpRes = await axiosInstance.post('/api/user/auth/send-otp', payload);
+            toast.success(otpRes.data.message || "OTP sent via SMS");
             setShowOtpInput(true);
             setTimeLeft(60);
           } else {
@@ -111,28 +101,6 @@ const useLoginForm = () => {
             const payload = { phone: email.startsWith('+') ? email.replace('+', '') : email };
             const otpRes = await axiosInstance.post('/api/user/auth/send-otp', payload);
             toast.success(otpRes.data.message || "OTP sent via WhatsApp");
-            if (otpRes.data.otp) {
-              setSentOtp(otpRes.data.otp);
-              if (Capacitor.isNativePlatform()) {
-                toast((t) => (
-                  <div className="flex flex-col gap-1 p-1">
-                    <div className="font-bold text-sm text-black flex items-center gap-1">
-                      🔔 Kridaz Notification
-                    </div>
-                    <div className="text-xs text-gray-600">
-                      Your verification code is: <strong className="text-black text-sm">{otpRes.data.otp}</strong>
-                    </div>
-                  </div>
-                ), { position: 'top-center', duration: 8000 });
-              }
-            }
-            setShowOtpInput(true);
-            setTimeLeft(60);
-          }
-        } else {
-          // Email OTP
-          if (result.otp) {
-            setSentOtp(result.otp);
             if (Capacitor.isNativePlatform()) {
               toast((t) => (
                 <div className="flex flex-col gap-1 p-1">
@@ -140,11 +108,27 @@ const useLoginForm = () => {
                     🔔 Kridaz Notification
                   </div>
                   <div className="text-xs text-gray-600">
-                    Your verification code is: <strong className="text-black text-sm">{result.otp}</strong>
+                    OTP sent to your device. Please enter it below.
                   </div>
                 </div>
               ), { position: 'top-center', duration: 8000 });
             }
+            setShowOtpInput(true);
+            setTimeLeft(60);
+          }
+        } else {
+          // Email OTP
+          if (Capacitor.isNativePlatform()) {
+            toast((t) => (
+              <div className="flex flex-col gap-1 p-1">
+                <div className="font-bold text-sm text-black flex items-center gap-1">
+                  🔔 Kridaz Notification
+                </div>
+                <div className="text-xs text-gray-600">
+                  OTP sent to your email. Please enter it below.
+                </div>
+              </div>
+            ), { position: 'top-center', duration: 8000 });
           }
           toast.success("OTP sent to your email");
           setShowOtpInput(true);
@@ -168,26 +152,13 @@ const useLoginForm = () => {
 
   const handleVerifyOtp = async (data) => {
     setLoading(true);
-    let firebaseIdToken = null;
     try {
       const { email } = getValues();
       const isPhone = /^[0-9]{10}$/.test(email) || email.startsWith('+');
 
-      if (isPhone && window.confirmationResult) {
-        try {
-          const result = await window.confirmationResult.confirm(data.otp);
-          firebaseIdToken = await result.user.getIdToken();
-        } catch (err) {
-          console.error("Firebase OTP confirmation error:", err);
-          toast.error("Invalid verification code");
-          setLoading(false);
-          return;
-        }
-      }
-
       const payload = { 
         email, 
-        otp: firebaseIdToken || data.otp, 
+        otp: data.otp, 
         password: data.password 
       };
 
@@ -253,7 +224,6 @@ const useLoginForm = () => {
     loading,
     googleLoading,
     showOtpInput,
-    sentOtp,
     handleGoogleSuccess,
     handleGoogleError,
     accountNotFound,

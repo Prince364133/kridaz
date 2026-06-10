@@ -66,8 +66,8 @@ const EditTurfForm = ({ turf, onSave, onCancel, turfId }) => {
 
   const InputWrapper = ({ label, icon: Icon, children, error }) => (
     <div className="space-y-2">
-      <label className="flex items-center gap-2 text-[8px] md:text-[10px] font-bold text-[#878C9F] uppercase tracking-[1px] md:tracking-[2px] ml-1">
-        {Icon && <Icon size={12} className="text-[#BFF367]/60" />}
+      <label className="flex items-center gap-2 text-[8px] md:text-[10px] font-bold text-white/70 uppercase tracking-[1px] md:tracking-[2px] ml-1">
+        {Icon && <Icon size={12} className="text-[#B3DC26]/60" />}
         {label}
       </label>
       {children}
@@ -76,15 +76,15 @@ const EditTurfForm = ({ turf, onSave, onCancel, turfId }) => {
   );
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="bg-[#000000] border-none md:border md:border-white/5 rounded-[8px] overflow-hidden md:shadow-2xl animate-fade-in">
+    <form onSubmit={handleSubmit(onSubmit)} className="bg-[#000000] border-none md:border md:border-white/10 rounded-[16px] overflow-hidden md:shadow-2xl animate-fade-in">
       <div className="px-2 py-4 md:p-6 lg:p-8 space-y-8">
-        <header className="flex items-center justify-between border-b border-white/5 pb-6">
+        <header className="flex items-center justify-between border-b border-white/10 pb-6">
           <div className="flex items-center gap-3">
              <h2 className="text-2xl font-bold font-['Open_Sans'] text-white uppercase tracking-tight">Edit Arena Identity</h2>
           </div>
-          <div className="bg-[#BFF367]/10 border border-[#BFF367]/20 px-3 py-1 rounded-[4px] flex items-center gap-2">
-            <ShieldCheck size={12} className="text-[#BFF367]" />
-            <span className="text-[10px] font-bold text-[#BFF367] uppercase tracking-widest">Admin Control</span>
+          <div className="bg-[#B3DC26]/10 border border-[#B3DC26]/20 px-3 py-1 rounded-[16px] flex items-center gap-2">
+            <ShieldCheck size={12} className="text-[#B3DC26]" />
+            <span className="text-[10px] font-bold text-[#B3DC26] uppercase tracking-widest">Admin Control</span>
           </div>
         </header>
 
@@ -95,7 +95,7 @@ const EditTurfForm = ({ turf, onSave, onCancel, turfId }) => {
                 type="text"
                 {...register('name')}
                 placeholder="E.g. Wembley Pro"
-                className={`w-full bg-[#050505] border rounded-[6px] md:rounded-[8px] px-3 md:px-4 py-2 md:py-3 text-[10px] md:text-sm text-white placeholder-[#333] focus:outline-none transition-all ${ errors.name ? 'border-red-500/50 bg-red-500/5' : 'border-white/5 focus:border-[#BFF367]/50' }`}
+                className={`w-full bg-[#050505] border rounded-[16px] md:rounded-[16px] px-3 md:px-4 py-2 md:py-3 text-[10px] md:text-sm text-white placeholder-[#333] focus:outline-none transition-all ${ errors.name ? 'border-red-500/50 bg-red-500/5' : 'border-white/10 focus:border-[#B3DC26]/50' }`}
               />
             </InputWrapper>
 
@@ -104,7 +104,7 @@ const EditTurfForm = ({ turf, onSave, onCancel, turfId }) => {
                 {...register('description')}
                 placeholder="Describe the atmosphere and facilities..."
                 rows={4}
-                className={`w-full bg-[#050505] border rounded-[6px] md:rounded-[8px] px-3 md:px-4 py-2 md:py-3 text-[10px] md:text-sm text-white placeholder-[#333] focus:outline-none transition-all resize-none ${ errors.description ? 'border-red-500/50 bg-red-500/5' : 'border-white/5 focus:border-[#BFF367]/50' }`}
+                className={`w-full bg-[#050505] border rounded-[16px] md:rounded-[16px] px-3 md:px-4 py-2 md:py-3 text-[10px] md:text-sm text-white placeholder-[#333] focus:outline-none transition-all resize-none ${ errors.description ? 'border-red-500/50 bg-red-500/5' : 'border-white/10 focus:border-[#B3DC26]/50' }`}
               ></textarea>
             </InputWrapper>
 
@@ -114,7 +114,7 @@ const EditTurfForm = ({ turf, onSave, onCancel, turfId }) => {
                 maxLength={1000}
                 placeholder="Rules, cancellation terms, safety... (Min 200 chars)"
                 rows={6}
-                className={`w-full bg-[#050505] border rounded-[6px] md:rounded-[8px] px-3 md:px-4 py-2 md:py-3 text-[10px] md:text-sm text-white placeholder-[#333] focus:outline-none transition-all resize-none ${ errors.policies ? 'border-red-500/50 bg-red-500/5' : 'border-white/5 focus:border-[#BFF367]/50' }`}
+                className={`w-full bg-[#050505] border rounded-[16px] md:rounded-[16px] px-3 md:px-4 py-2 md:py-3 text-[10px] md:text-sm text-white placeholder-[#333] focus:outline-none transition-all resize-none ${ errors.policies ? 'border-red-500/50 bg-red-500/5' : 'border-white/10 focus:border-[#B3DC26]/50' }`}
               ></textarea>
               {!errors.policies && (
                 <p className="text-[9px] font-bold text-[#444] uppercase tracking-widest ml-1 mt-1">
@@ -129,7 +129,7 @@ const EditTurfForm = ({ turf, onSave, onCancel, turfId }) => {
                   type="number"
                   {...register('pricePerHour', { valueAsNumber: true })}
                   placeholder="2500"
-                  className={`w-full bg-[#050505] border rounded-[6px] md:rounded-[8px] px-3 md:px-4 py-2 md:py-3 text-[10px] md:text-sm text-white placeholder-[#333] focus:outline-none transition-all ${ errors.pricePerHour ? 'border-red-500/50 bg-red-500/5' : 'border-white/5 focus:border-[#BFF367]/50' }`}
+                  className={`w-full bg-[#050505] border rounded-[16px] md:rounded-[16px] px-3 md:px-4 py-2 md:py-3 text-[10px] md:text-sm text-white placeholder-[#333] focus:outline-none transition-all ${ errors.pricePerHour ? 'border-red-500/50 bg-red-500/5' : 'border-white/10 focus:border-[#B3DC26]/50' }`}
                 />
               </InputWrapper>
 
@@ -138,7 +138,7 @@ const EditTurfForm = ({ turf, onSave, onCancel, turfId }) => {
                   type="text"
                   {...register('location')}
                   placeholder="City, State"
-                  className={`w-full bg-[#050505] border rounded-[6px] md:rounded-[8px] px-3 md:px-4 py-2 md:py-3 text-[10px] md:text-sm text-white placeholder-[#333] focus:outline-none transition-all ${ errors.location ? 'border-red-500/50 bg-red-500/5' : 'border-white/5 focus:border-[#BFF367]/50' }`}
+                  className={`w-full bg-[#050505] border rounded-[16px] md:rounded-[16px] px-3 md:px-4 py-2 md:py-3 text-[10px] md:text-sm text-white placeholder-[#333] focus:outline-none transition-all ${ errors.location ? 'border-red-500/50 bg-red-500/5' : 'border-white/10 focus:border-[#B3DC26]/50' }`}
                 />
               </InputWrapper>
             </div>
@@ -148,10 +148,10 @@ const EditTurfForm = ({ turf, onSave, onCancel, turfId }) => {
             {/* Dynamic Attributes */}
             <div className="grid grid-cols-1 gap-6">
                <InputWrapper label="Sport Arsenal" icon={Activity}>
-                  <div className="flex flex-wrap gap-2 mb-3 min-h-[40px] p-3 bg-[#050505] border border-white/5 rounded-[8px]">
+                  <div className="flex flex-wrap gap-2 mb-3 min-h-[40px] p-3 bg-[#050505] border border-white/10 rounded-[16px]">
                     {watch('sportTypes')?.length > 0 ? (
                       watch('sportTypes').map((sport) => (
-                        <span key={sport} className="px-2 md:px-3 py-1 bg-[#BFF367]/10 text-[#BFF367] border border-[#BFF367]/20 rounded-[6px] text-[10px] font-bold uppercase tracking-wider flex items-center gap-2 group/tag animate-scale-in">
+                        <span key={sport} className="px-2 md:px-3 py-1 bg-[#B3DC26]/10 text-[#B3DC26] border border-[#B3DC26]/20 rounded-[16px] text-[10px] font-bold uppercase tracking-wider flex items-center gap-2 group/tag animate-scale-in">
                           {sport}
                           <button type="button" onClick={() => setValue('sportTypes', watch('sportTypes').filter(s => s !== sport))} className="hover:text-white transition-colors">
                             <X size={10} />
@@ -163,7 +163,7 @@ const EditTurfForm = ({ turf, onSave, onCancel, turfId }) => {
                     )}
                   </div>
                   <select 
-                    className="w-full bg-[#050505] border border-white/5 rounded-[8px] px-4 py-3 text-xs text-[#878C9F] focus:outline-none focus:border-[#BFF367]/50 transition-all appearance-none cursor-pointer"
+                    className="w-full bg-[#050505] border border-white/10 rounded-[16px] px-4 py-3 text-xs text-white/70 focus:outline-none focus:border-[#B3DC26]/50 transition-all appearance-none cursor-pointer"
                     onChange={(e) => {
                       const val = e.target.value;
                       const current = watch('sportTypes') || [];
@@ -180,12 +180,12 @@ const EditTurfForm = ({ turf, onSave, onCancel, turfId }) => {
 
                <div className="grid grid-cols-2 gap-6">
                  <InputWrapper label="Ground DNA" icon={Tag}>
-                    <div className="flex flex-wrap gap-2 mb-3 min-h-[40px] p-3 bg-[#050505] border border-white/5 rounded-[8px]">
+                    <div className="flex flex-wrap gap-2 mb-3 min-h-[40px] p-3 bg-[#050505] border border-white/10 rounded-[16px]">
                       {watch('groundTypes')?.length > 0 ? (
                         watch('groundTypes').map((ground) => (
-                          <span key={ground} className="px-2 md:px-3 py-1 bg-white/5 text-white border border-white/10 rounded-[6px] text-[10px] font-bold uppercase tracking-wider flex items-center gap-2 group/tag animate-scale-in">
+                          <span key={ground} className="px-2 md:px-3 py-1 bg-white/5 text-white border border-white/10 rounded-[16px] text-[10px] font-bold uppercase tracking-wider flex items-center gap-2 group/tag animate-scale-in">
                             {ground}
-                            <button type="button" onClick={() => setValue('groundTypes', watch('groundTypes').filter(g => g !== ground))} className="hover:text-[#BFF367] transition-colors">
+                            <button type="button" onClick={() => setValue('groundTypes', watch('groundTypes').filter(g => g !== ground))} className="hover:text-[#B3DC26] transition-colors">
                               <X size={10} />
                             </button>
                           </span>
@@ -195,7 +195,7 @@ const EditTurfForm = ({ turf, onSave, onCancel, turfId }) => {
                       )}
                     </div>
                     <select 
-                      className="w-full bg-[#050505] border border-white/5 rounded-[8px] px-4 py-3 text-xs text-[#878C9F] focus:outline-none focus:border-[#BFF367]/50 transition-all appearance-none cursor-pointer"
+                      className="w-full bg-[#050505] border border-white/10 rounded-[16px] px-4 py-3 text-xs text-white/70 focus:outline-none focus:border-[#B3DC26]/50 transition-all appearance-none cursor-pointer"
                       onChange={(e) => {
                         const val = e.target.value;
                         const current = watch('groundTypes') || [];
@@ -211,10 +211,10 @@ const EditTurfForm = ({ turf, onSave, onCancel, turfId }) => {
                  </InputWrapper>
 
                  <InputWrapper label="Amenities" icon={Activity}>
-                    <div className="flex flex-wrap gap-2 mb-3 min-h-[40px] p-3 bg-[#050505] border border-white/5 rounded-[8px]">
+                    <div className="flex flex-wrap gap-2 mb-3 min-h-[40px] p-3 bg-[#050505] border border-white/10 rounded-[16px]">
                       {watch('facilities')?.length > 0 ? (
                         watch('facilities').map((facility) => (
-                          <span key={facility} className="px-2 md:px-3 py-1 bg-[#1A1A1A] text-[#878C9F] border border-white/5 rounded-[6px] text-[10px] font-bold uppercase tracking-wider flex items-center gap-2 group/tag animate-scale-in">
+                          <span key={facility} className="px-2 md:px-3 py-1 bg-[#1B1B1B] text-white/70 border border-white/10 rounded-[16px] text-[10px] font-bold uppercase tracking-wider flex items-center gap-2 group/tag animate-scale-in">
                             {facility}
                             <button type="button" onClick={() => setValue('facilities', watch('facilities').filter(f => f !== facility))} className="hover:text-white transition-colors">
                               <X size={10} />
@@ -226,7 +226,7 @@ const EditTurfForm = ({ turf, onSave, onCancel, turfId }) => {
                       )}
                     </div>
                     <select 
-                      className="w-full bg-[#050505] border border-white/5 rounded-[8px] px-4 py-3 text-xs text-[#878C9F] focus:outline-none focus:border-[#BFF367]/50 transition-all appearance-none cursor-pointer"
+                      className="w-full bg-[#050505] border border-white/10 rounded-[16px] px-4 py-3 text-xs text-white/70 focus:outline-none focus:border-[#B3DC26]/50 transition-all appearance-none cursor-pointer"
                       onChange={(e) => {
                         const val = e.target.value;
                         const current = watch('facilities') || [];
@@ -258,7 +258,7 @@ const EditTurfForm = ({ turf, onSave, onCancel, turfId }) => {
                       timeIntervals={60}
                       timeCaption="Time"
                       dateFormat="h:mm aa"
-                      className={`w-full bg-[#050505] border rounded-[6px] md:rounded-[8px] px-3 md:px-4 py-2 md:py-3 text-[10px] md:text-sm text-white focus:outline-none transition-all ${ errors.openTime ? 'border-red-500/50 bg-red-500/5' : 'border-white/5 focus:border-[#BFF367]/50' }`}
+                      className={`w-full bg-[#050505] border rounded-[16px] md:rounded-[16px] px-3 md:px-4 py-2 md:py-3 text-[10px] md:text-sm text-white focus:outline-none transition-all ${ errors.openTime ? 'border-red-500/50 bg-red-500/5' : 'border-white/10 focus:border-[#B3DC26]/50' }`}
                       filterTime={filterPassedTime}
                     />
                   )}
@@ -278,7 +278,7 @@ const EditTurfForm = ({ turf, onSave, onCancel, turfId }) => {
                       timeIntervals={60}
                       timeCaption="Time"
                       dateFormat="h:mm aa"
-                      className={`w-full bg-[#050505] border rounded-[6px] md:rounded-[8px] px-3 md:px-4 py-2 md:py-3 text-[10px] md:text-sm text-white focus:outline-none transition-all ${ errors.closeTime ? 'border-red-500/50 bg-red-500/5' : 'border-white/5 focus:border-[#BFF367]/50' }`}
+                      className={`w-full bg-[#050505] border rounded-[16px] md:rounded-[16px] px-3 md:px-4 py-2 md:py-3 text-[10px] md:text-sm text-white focus:outline-none transition-all ${ errors.closeTime ? 'border-red-500/50 bg-red-500/5' : 'border-white/10 focus:border-[#B3DC26]/50' }`}
                       filterTime={filterCloseTime}
                       disabled={!getValues('openTime')}
                     />
@@ -289,18 +289,18 @@ const EditTurfForm = ({ turf, onSave, onCancel, turfId }) => {
           </div>
         </div>
 
-        <footer className="flex flex-col sm:flex-row justify-end items-center gap-4 pt-8 border-t border-white/5">
+        <footer className="flex flex-col sm:flex-row justify-end items-center gap-4 pt-8 border-t border-white/10">
           <button 
             type="button" 
             onClick={onCancel}
-            className="w-full sm:w-auto px-8 py-3 bg-[#111] border border-white/5 text-[#878C9F] font-bold uppercase text-[11px] tracking-widest rounded-[8px] hover:text-white transition-all flex items-center justify-center gap-2"
+            className="w-full sm:w-auto px-8 py-3 bg-[#1B1B1B] border border-white/10 text-white/70 font-bold uppercase text-[11px] tracking-widest rounded-[16px] hover:text-white transition-all flex items-center justify-center gap-2"
           >
             <X size={14} />
             Discard Changes
           </button>
           <button 
             type="submit" 
-            className="w-full sm:w-auto px-10 py-3 bg-[#BFF367] text-black font-bold uppercase text-[11px] tracking-widest rounded-[8px] hover:bg-[#B3FF00] transition-all flex items-center justify-center gap-2 shadow-[0_10px_20px_rgba(204,255,0,0.1)]"
+            className="w-full sm:w-auto px-10 py-3 bg-gradient-to-r from-[#55DEE8] to-[#B3DC26] shadow-[0_8px_24px_rgba(179,220,38,0.15)] border-none text-black font-bold uppercase text-[11px] tracking-widest rounded-[16px] hover:opacity-90 transition-all flex items-center justify-center gap-2 "
           >
             <Save size={14} />
             Commit Deployment

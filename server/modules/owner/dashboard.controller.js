@@ -6,6 +6,7 @@ import logger from "../../utils/logger.js";
 export const getDashboardData = async (req, res) => {
   const userId = req.user.id;
   const role = req.user.role;
+  const { venueId } = req.query;
   logger.info(`[DASHBOARD_OWNER] Fetching data for ${role} (ID: ${userId})`);
 
   // Redirect based on role
@@ -26,7 +27,12 @@ export const getDashboardData = async (req, res) => {
       return res.status(404).json({ success: false, message: "Owner profile not found" });
     }
 
-    const turfIds = ownerProfile.turfs.map(t => t.id);
+    let turfIds = ownerProfile.turfs.map(t => t.id);
+    
+    // Filter by specific venue if requested
+    if (venueId && turfIds.includes(venueId)) {
+      turfIds = [venueId];
+    }
     
     if (turfIds.length === 0) {
       return res.json({
@@ -169,6 +175,7 @@ export const getDashboardData = async (req, res) => {
       totalRevenue: Number(revenueData._sum.ownerRevenue || 0),
       settlementRevenue: Number(revenueData._sum.paidAmount || 0),
       totalTurfs: ownerProfile.turfs.length,
+      turfsList: ownerProfile.turfs.map(t => ({ id: t.id, name: t.name })),
       revenueTrendWeek,
       revenueTrendMonth,
       revenueByVenue,

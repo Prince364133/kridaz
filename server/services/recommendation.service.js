@@ -46,7 +46,6 @@ export const getGroundRecommendations = async (userId, lat, lng, limit = 15) => 
           status: 'approved'
         },
         orderBy: [
-          { rating: 'desc' },
           { createdAt: 'desc' }
         ],
         take: parseInt(limit)

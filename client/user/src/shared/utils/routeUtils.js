@@ -36,8 +36,8 @@ export const isProfessionalRole = (role) => {
 export const getDynamicProfileRoute = (user, role) => {
   if (!user) return "/profile";
 
-  if (isProfessionalRole(role) && user.ownerProfile?.id) {
-    return `/professionals/${user.ownerProfile.id}`;
+  if (isProfessionalRole(role) && (user._id || user.id)) {
+    return `/profile/${user._id || user.id}`;
   }
 
   return "/profile";

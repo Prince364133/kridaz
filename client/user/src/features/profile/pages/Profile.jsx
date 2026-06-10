@@ -2,7 +2,8 @@ import { useState, useEffect } from "react";
 import { Link, useParams, useSearchParams, useNavigate, useLocation } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
 import { MapPin, Clock, Zap,
-  ArrowRight, Camera, Edit2, MessageSquare, Heart, Loader2, MessageCircle, Award, Plus, TrendingUp, CheckCircle2, Crown, BarChart3, Medal, Users, Share2, Wifi, Radio, User
+  ArrowRight, Camera, Edit2, MessageSquare, Heart, Loader2, MessageCircle, Award, Plus, TrendingUp, CheckCircle2, Crown, BarChart3, Medal, Users, Share2, Wifi, Radio, User, UserPlus, ChevronLeft,
+  Globe, Layers, Tv, Building, Layout, Eye, Play, Shield, ShieldCheck, Star
 } from "lucide-react";
 import { 
   LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer 
@@ -404,20 +405,17 @@ export default function Profile() {
   const [userPosts, setUserPosts] = useState([]);
   const [loadingPosts, setLoadingPosts] = useState(false);
   const [activeProfileTab, setActiveProfileTab] = useState("matches");
+  const [isBioExpanded, setIsBioExpanded] = useState(false);
+  const [proReviews, setProReviews] = useState([]);
   
   const { isUserOnline } = useSocket();
   const isOwnProfile = !userId || (currentUser && (userId === currentUser.id || userId === currentUser._id));
   const targetUserId = isOwnProfile ? (currentUser?.id || currentUser?._id) : userId;
 
+  // Redirect removed: Allow professionals to view their own profile with full data here.
   useEffect(() => {
-    // Redirect professionals away from their own generic profile to their showcase
-    if (isOwnProfile && currentUser && isProfessionalRole(currentUser?.role) && currentUser?.ownerProfile?.id) {
-      const targetRoute = getDynamicProfileRoute(currentUser, currentUser.role);
-      if (location.pathname === "/profile" || location.pathname === "/profile/") {
-        navigate(targetRoute, { replace: true });
-      }
-    }
-  }, [isOwnProfile, currentUser, navigate]);
+    if (isOwnProfile && currentUser) setProfileUser(currentUser);
+  }, [currentUser, isOwnProfile]);
 
   const [profileUser, setProfileUser] = useState(isOwnProfile ? currentUser : null);
   const [loadingProfile, setLoadingProfile] = useState(!isOwnProfile);
@@ -461,7 +459,7 @@ export default function Profile() {
     }
   })();
 
-  const profileTabs = [
+  const baseProfileTabs = [
     { id: "matches", label: "Matches" },
     { id: "stats", label: "Stats" },
     { id: "badges", label: "Badges" },
@@ -469,6 +467,17 @@ export default function Profile() {
     { id: "posts", label: "Posts" },
     { id: "connections", label: "Connections" }
   ];
+
+  const professionalTabs = [
+    { id: "overview", label: "Overview" },
+    { id: "gallery", label: "Gallery" },
+    { id: "certificates", label: "Certificates" },
+    { id: "reviews", label: "Reviews" },
+  ];
+
+  const profileTabs = isProfessionalRole(profileUser?.role) 
+    ? [...professionalTabs, ...baseProfileTabs] 
+    : baseProfileTabs;
 
   const handlePlayerFollowToggle = async (player) => {
     const isFollowing = followingIds.includes(player.id);
@@ -487,6 +496,26 @@ export default function Profile() {
   };
 
 
+
+  const [grounds, setGrounds] = useState([]);
+
+  useEffect(() => {
+    const fetchGrounds = async () => {
+      try {
+        const res = await axiosInstance.get("/api/user/turf/all");
+        if (res.data && res.data.turfs) {
+          setGrounds(res.data.turfs.map(t => ({
+            id: t.id,
+            name: t.name,
+            city: t.city
+          })));
+        }
+      } catch (err) {
+        console.error("Error fetching grounds:", err);
+      }
+    };
+    fetchGrounds();
+  }, []);
 
   const [userStories, setUserStories] = useState([]);
   const [viewingStoryGroup, setViewingStoryGroup] = useState(null);
@@ -519,8 +548,64 @@ export default function Profile() {
           axiosInstance.get(`/api/user/community/user-posts/${targetUserId}`).catch(() => ({ data: { success: false } }))
         ]);
         if (res.data.success) {
-          setProfileUser(res.data.profile);
-          if (isOwnProfile) dispatch(updateUser(res.data.profile));
+          let profileData = res.data.profile;
+
+          if (isProfessionalRole(profileData.role) && profileData.ownerProfile) {
+            try {
+              const professional = profileData.ownerProfile;
+              const reviews = professional.reviews || [];
+
+              const parseField = (fieldVal) => {
+                if (!fieldVal) return [];
+                if (typeof fieldVal === "string") {
+                  try { return JSON.parse(fieldVal); } catch { return [fieldVal]; }
+                }
+                return fieldVal;
+              };
+
+              const parsedCertifications = parseField(professional.certifications).map(cert => {
+                if (typeof cert === "string") {
+                  try { return JSON.parse(cert); } catch { return { title: cert, description: "", image: null }; }
+                }
+                return cert;
+              });
+
+              const parsedPortfolio = parseField(professional.portfolio).map(item => {
+                if (typeof item === "string") {
+                  try { return JSON.parse(item); } catch { return { mediaType: "image", mediaUrl: item, title: "", description: "" }; }
+                }
+                return item;
+              });
+
+              const parsedStructuredAchievements = parseField(professional.structuredAchievements).map(ach => {
+                if (typeof ach === "string") {
+                  try { return JSON.parse(ach); } catch { return { title: ach, description: "" }; }
+                }
+                return ach;
+              });
+
+              profileData.ownerProfile = {
+                ...professional,
+                availabilityMode: professional.businessDetails?.availabilityMode || professional.availabilityMode,
+                availabilityTimings: professional.businessDetails?.availabilityTimings || professional.availabilityTimings,
+                preferredLocations: professional.businessDetails?.preferredLocations || { grounds: [], customLocations: [] },
+                certifications: parsedCertifications,
+                portfolio: parsedPortfolio,
+                structuredAchievements: parsedStructuredAchievements,
+                role: profileData.role,
+                name: profileData.name,
+                profilePicture: profileData.profilePicture,
+                isOnline: profileData.isOnline
+              };
+
+              setProReviews(reviews);
+            } catch (err) {
+              console.error("Failed to parse professional details", err);
+            }
+          }
+
+          setProfileUser(profileData);
+          if (isOwnProfile) dispatch(updateUser(profileData));
         }
         if (postsRes.data.success) {
           setUserPosts(postsRes.data.posts || []);
@@ -605,6 +690,8 @@ export default function Profile() {
 
   if (loadingProfile) return <div className="min-h-screen bg-black flex items-center justify-center"><Loader2 className="w-8 h-8 text-[#BFF367] animate-spin" /></div>;
 
+  const pro = profileUser?.ownerProfile || profileUser || {};
+
   return (
     <div className="min-h-screen bg-black text-white pb-24 overflow-x-hidden">
       
@@ -641,16 +728,24 @@ export default function Profile() {
             </div>
           )}
 
+          {/* Back Navigation Button */}
+          <button 
+            onClick={() => navigate(-1)}
+            className="absolute top-6 left-6 z-30 p-2 md:p-3 bg-black/40 backdrop-blur-md border border-white/10 hover:border-white/20 text-white rounded-[8px] hover:scale-105 active:scale-95 transition-all shadow-lg flex items-center justify-center"
+          >
+            <ChevronLeft size={20} className="text-white" />
+          </button>
+
           {/* Share button at top right corner */}
           <button 
             onClick={handleShare}
-            className="absolute top-6 right-6 p-3 bg-black/40 backdrop-blur-md border border-white/10 hover:border-white/20 text-white rounded-[8px] hover:scale-105 active:scale-95 transition-all shadow-lg flex items-center justify-center z-30"
+            className="absolute top-6 right-6 p-2 md:p-3 bg-black/40 backdrop-blur-md border border-white/10 hover:border-white/20 text-white rounded-[8px] hover:scale-105 active:scale-95 transition-all shadow-lg flex items-center justify-center z-30"
           >
-            <Share2 size={18} className="text-white" />
+            <Share2 size={20} className="text-white" />
           </button>
         </div>
 
-        <div className="max-w-7xl mx-auto px-2 relative z-10 -mt-20 md:-mt-24">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 md:px-8 relative z-10 -mt-20 md:-mt-24">
           <div className="flex flex-col items-start gap-4">
             <div className="relative group/avatar shrink-0 flex flex-col items-start">
               <div className="relative transition-all duration-300 hover:scale-105">
@@ -708,48 +803,85 @@ export default function Profile() {
               </div>
             </div>
 
-            <div className="w-full space-y-2 flex flex-col items-start text-left">
-              <div>
-                <div className="flex items-center justify-start gap-2 flex-wrap">
-                  <h1 className="text-3xl md:text-5xl font-black text-white tracking-tighter uppercase" style={HEADING_STYLE}>
+            <div className="flex-1 w-full flex flex-col justify-end pt-2 md:pt-4">
+              <div className="flex flex-col mb-3">
+                <div className="flex items-center gap-3 flex-wrap mb-1">
+                  <h1 className="text-2xl md:text-[34px] leading-tight font-black text-white tracking-tight" style={HEADING_STYLE}>
                     {profileUser?.name || ""}
                   </h1>
                 </div>
-                {(profileUser?.username || profileUser?.interests?.length > 0) && (
-                  <p className="text-sm font-bold text-gray-500 tracking-tight mt-0.5" style={SUBHEADING_STYLE}>
-                    {profileUser?.username ? `@${profileUser.username}` : ""}
-                    {profileUser?.username && profileUser?.interests?.[0] ? " • " : ""}
-                    {profileUser?.interests?.[0] || ""}
+                
+                <div className="flex flex-wrap items-center gap-2 md:gap-3 mb-3">
+                  <p className="text-[#BFF367] text-xs md:text-sm font-sans font-bold">
+                    @{profileUser?.username || "not_specified"}
                   </p>
-                )}
+                  <span className="flex items-center gap-1.5 px-2 py-0.5 rounded-full border border-[#BFF367]/30 bg-black/50 text-[#BFF367] text-[9px] font-black tracking-widest uppercase backdrop-blur-md shrink-0">
+                    <svg className="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 14a1 1 0 011-1h16a1 1 0 011 1v2a1 1 0 01-1 1H4a1 1 0 01-1-1v-2z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 13V5a2 2 0 012-2h4a2 2 0 012 2v8" /></svg>
+                    {profileUser?.role === 'USER' ? 'PLAYER' : profileUser?.role || 'PLAYER'}
+                  </span>
+                  {profileUser?.sportTypes && profileUser.sportTypes.length > 0 && (
+                    <span className="flex items-center gap-1.5 px-2 py-0.5 rounded-full border border-[#55DEE8]/30 bg-black/50 text-[#55DEE8] text-[9px] font-black tracking-widest uppercase backdrop-blur-md shrink-0">
+                      <svg className="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="10" strokeWidth="2" /><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" strokeWidth="2" /><path d="M2 12h20" strokeWidth="2" /></svg>
+                      {profileUser.sportTypes[0]}
+                    </span>
+                  )}
+                  {profileUser?.interests?.[0] && (
+                    <span className="flex items-center gap-1.5 px-2 py-0.5 rounded-full border border-white/10 bg-white/[0.05] text-white/90 text-[9px] font-black tracking-widest uppercase backdrop-blur-md shrink-0">
+                      <span className="w-1.5 h-1.5 rounded-full bg-red-600 shadow-[0_0_4px_rgba(220,38,38,0.8)]" />
+                      {profileUser.interests[0]}
+                    </span>
+                  )}
+                </div>
+
+                <div className="flex flex-wrap items-center gap-4 text-xs text-white/90 font-sans font-bold mb-5">
+                  <button 
+                    onClick={() => {
+                      setActiveProfileTab("connections");
+                      setConnectionsActiveTab("followers");
+                    }}
+                    className="flex items-center gap-1.5 hover:text-[#BFF367] transition-colors focus:outline-none"
+                  >
+                    <Users size={14} className="text-[#BFF367]" /> {profileUser?.followers?.length || 0} Followers
+                  </button>
+                  <button 
+                    onClick={() => {
+                      setActiveProfileTab("connections");
+                      setConnectionsActiveTab("following");
+                    }}
+                    className="flex items-center gap-1.5 hover:text-[#BFF367] transition-colors focus:outline-none"
+                  >
+                    <UserPlus size={14} className="text-[#BFF367]" /> {profileUser?.following?.length || 0} Following
+                  </button>
+
+                  {!isOwnProfile && (
+                    <div className="flex items-center gap-2 ml-2">
+                      <button 
+                        onClick={() => gateInteraction(handleFollowToggle)} 
+                        className={`px-6 py-1.5 text-[10px] md:text-xs font-black uppercase tracking-widest rounded-[14px] transition-all flex items-center justify-center gap-2 ${
+                          followingIds.includes(targetUserId) 
+                            ? 'bg-neutral-800 text-white border border-white/10 hover:bg-neutral-700' 
+                            : 'bg-white text-black hover:bg-neutral-200 shadow-[0_0_15px_rgba(255,255,255,0.15)]'
+                        }`}
+                        style={{ fontFamily: "'Inter', sans-serif" }}
+                      >
+                        <UserPlus size={14} strokeWidth={2.5} /> {followingIds.includes(targetUserId) ? "Following" : "Follow"}
+                      </button>
+                      <button 
+                        onClick={() => navigate(`/messages?userId=${targetUserId}`)} 
+                        className="p-1.5 bg-[#1B1B1B]/80 text-[#FFFFFF] rounded-full border border-white/10 hover:bg-neutral-800 transition-all backdrop-blur-md flex items-center justify-center"
+                        title="Message"
+                      >
+                        <MessageCircle size={16} />
+                      </button>
+                    </div>
+                  )}
+                </div>
               </div>
 
-              <div className="flex flex-wrap items-center justify-start gap-4 text-gray-400 font-bold uppercase tracking-widest text-[10px] md:text-xs">
-                <button 
-                  onClick={() => {
-                    setActiveProfileTab("connections");
-                    setConnectionsActiveTab("followers");
-                  }}
-                  className="flex items-center gap-1.5 hover:text-white transition-colors focus:outline-none"
-                >
-                  <span className="text-[#BFF367]">{profileUser?.followers?.length || 0}</span> Followers
-                </button>
-                <span className="w-1 h-1 bg-zinc-700 rounded-full" />
-                <button 
-                  onClick={() => {
-                    setActiveProfileTab("connections");
-                    setConnectionsActiveTab("following");
-                  }}
-                  className="flex items-center gap-1.5 hover:text-white transition-colors focus:outline-none"
-                >
-                  <span className="text-[#BFF367]">{profileUser?.following?.length || 0}</span> Following
-                </button>
-              </div>
-
-              {(profileUser?.city || profileUser?.location) && (
-                <div className="flex items-center justify-start gap-1.5 text-gray-400 font-bold uppercase tracking-widest text-[10px] md:text-xs">
-                  <MapPin className="w-3.5 h-3.5 text-[#BFF367]" />
-                  <span>
+              <div className="flex flex-wrap items-center gap-5 text-xs text-white/80 font-sans font-medium">
+                {(profileUser?.city || profileUser?.location) && (
+                  <span className="flex items-center gap-1.5">
+                    <MapPin size={14} className="text-white" /> 
                     {(() => {
                       const loc = profileUser?.city || profileUser?.location || "";
                       const parts = loc.split(",").map(p => p.trim());
@@ -759,52 +891,74 @@ export default function Profile() {
                       return loc;
                     })()}
                   </span>
-                </div>
-              )}
-
-              <div className="flex flex-wrap justify-start gap-2 pt-2">
-                {isOwnProfile ? (
+                )}
+                {isProfessionalRole(profileUser?.role) && (
                   <>
-                  </>
-                ) : (
-                  <>
-                    <button 
-                      onClick={() => navigate(`/messages?userId=${targetUserId}`)} 
-                      className="px-5 py-2.5 bg-[#1B1B1B]/80 text-[#FFFFFF] rounded-[8px] font-[600] text-[12px] hover:brightness-110 transition-all backdrop-blur-md border border-[rgba(255,255,255,0.08)] flex items-center gap-2"
-                      style={{ fontFamily: "'Inter', sans-serif" }}
-                    >
-                      <MessageCircle size={14} />
-                      Message
-                    </button>
-                    <button 
-                      onClick={() => gateInteraction(handleFollowToggle)} 
-                      className={`px-5 py-2.5 rounded-[8px] font-[600] text-[12px] transition-all flex items-center gap-2 active:scale-[0.98] ${
-                        followingIds.includes(targetUserId) 
-                          ? 'text-[#FFFFFF] bg-[#1B1B1B]/80 backdrop-blur-md border border-[rgba(255,255,255,0.08)] hover:brightness-110' 
-                          : 'text-[#000000] bg-gradient-to-r from-[#55DEE8] to-[#B3DC26] shadow-[0px_8px_24px_rgba(179,220,38,0.15)] hover:scale-[1.02] border-none'
-                      }`}
-                      style={{ fontFamily: "'Inter', sans-serif" }}
-                    >
-                      {followingIds.includes(targetUserId) ? "Following" : "Follow"}
-                    </button>
+                    <span className="flex items-center gap-1.5"><Star size={14} className="fill-white text-white" /> {pro.rating > 0 ? pro.rating.toFixed(1) : "Not Specified"} ({pro.numReviews || 0} reviews)</span>
+                    <span className="flex items-center gap-1.5"><Award size={14} className="text-white" /> {pro.experience ? (/^\d+$/.test(pro.experience.trim()) ? `${pro.experience.trim()} Years of Experience` : pro.experience) : "Not Specified"}</span>
                   </>
                 )}
               </div>
             </div>
+
+            {/* Bottom Row: Specialization + Bio (Professional Only) */}
+            {isProfessionalRole(profileUser?.role) && (
+              <div className="mt-8 flex flex-col w-full">
+                {pro.specialization && (
+                  <div className="mb-4">
+                    <span className="text-[11px] font-black text-white/50 uppercase tracking-[0.15em] block mb-2">Specialization</span>
+                    <div className="inline-flex max-w-full items-start gap-2 px-4 py-1.5 bg-white/[0.02] border border-white/5 rounded-2xl backdrop-blur-sm">
+                      <svg className="w-3.5 h-3.5 text-white shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 10l-2 1m0 0l-1-1m1 1v4m-4 0h8" /></svg>
+                      <span className="text-xs font-semibold text-white/90 tracking-wide break-words whitespace-pre-wrap">{pro.specialization}</span>
+                    </div>
+                  </div>
+                )}
+
+                <div className="flex flex-col xl:flex-row xl:items-start justify-between gap-6 mt-1 w-full overflow-hidden">
+                  <div className="max-w-2xl">
+                    <p className={`text-white/60 leading-relaxed text-xs font-sans break-words whitespace-pre-wrap ${!isBioExpanded ? 'line-clamp-4' : ''}`}>
+                      {pro.bio || profileUser?.bio || "Not Specified"}
+                    </p>
+                    {(pro.bio || profileUser?.bio) && (pro.bio || profileUser?.bio).length > 150 && (
+                      <button 
+                        onClick={() => setIsBioExpanded(!isBioExpanded)}
+                        className="mt-2 text-[#BFF367] text-xs font-bold hover:underline transition-colors"
+                      >
+                        {isBioExpanded ? "Read less" : "Read more"}
+                      </button>
+                    )}
+                  </div>
+
+                  <div className="flex flex-wrap items-center gap-2.5 shrink-0">
+                    {/* Sport Tags */}
+                    {pro.gameTypes?.map((sport, i) => (
+                      <div key={i} className="flex items-center gap-2 px-3 py-1.5 bg-white/[0.03] border border-white/5 rounded-full backdrop-blur-sm ml-1">
+                        {sport.toLowerCase() === 'cricket' ? (
+                          <div className="w-2 h-2 rounded-full bg-red-600 shadow-[0_0_8px_rgba(220,38,38,0.8)]"></div>
+                        ) : (
+                          <svg className="w-3 h-3 text-white/80" fill="currentColor" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="2" fill="none"/><path stroke="currentColor" strokeWidth="2" d="M12 2a10 10 0 000 20m0-20a10 10 0 010 20"/></svg>
+                        )}
+                        <span className="text-[10px] font-bold text-white/80">{sport}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-1 mt-8">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 md:px-8 mt-8">
         <>
           {/* Short Bio Section */}
-          {profileUser?.bio ? (
+          {!isProfessionalRole(profileUser?.role) && profileUser?.bio ? (
             <div className="mb-6 px-2">
               <p className="text-sm text-gray-300 leading-relaxed font-bold italic">
                 "{profileUser.bio}"
               </p>
             </div>
-          ) : isOwnProfile ? (
+          ) : !isProfessionalRole(profileUser?.role) && isOwnProfile ? (
             <div className="mb-6 px-2">
               <p className="text-xs text-gray-500 leading-relaxed font-bold uppercase tracking-widest">
                 No bio added yet. Click the edit icon to add your short sports bio!
@@ -830,6 +984,467 @@ export default function Profile() {
 
             {/* Tab Contents */}
             <div className="space-y-6">
+              {/* OVERVIEW TAB */}
+              {activeProfileTab === "overview" && (() => {
+                const pro = profileUser?.ownerProfile || profileUser || {};
+                let languagesList = [];
+                if (typeof pro.languages === "string") {
+                  languagesList = pro.languages.split(",").map(l => l.trim()).filter(Boolean);
+                } else if (Array.isArray(pro.languages)) {
+                  languagesList = pro.languages;
+                }
+                const reviews = profileUser?.reviews || [];
+                return (
+                <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 animate-in fade-in duration-300">
+                  <div className="lg:col-span-8 space-y-6">
+                  {/* Availability, Timeline & General Info */}
+                  <div className="bg-[#1A1A1A] rounded-xl border border-white/5 p-8 grid grid-cols-1 md:grid-cols-2 gap-8 shadow-xl">
+                    <div className="space-y-5">
+                      <h3 style={HEADING_STYLE} className="font-sans text-xs font-bold uppercase tracking-wider text-white flex items-center gap-2 border-b border-white/5 pb-3">
+                        <Clock size={14} className="text-white" /> Schedule & Timings
+                      </h3>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 font-sans">
+                        <div className="bg-white/[0.02] border border-white/5 rounded-lg p-3.5 transition-all hover:bg-white/[0.04]">
+                          <span className="text-white/40 uppercase text-[9px] tracking-wider font-bold block mb-1.5">Engagement Mode</span>
+                          <span className="font-bold text-sm text-white capitalize block tracking-tight">
+                            {pro.availabilityMode ? (pro.availabilityMode === 'Both' ? 'Hybrid (Online & Physical)' : pro.availabilityMode === 'Offline' ? 'Physical Only' : pro.availabilityMode === 'Online' ? 'Remote Only' : pro.availabilityMode) : 'Not Specified'}
+                          </span>
+                        </div>
+                        {pro.availabilityTimings && (
+                          <div className="bg-white/[0.02] border border-white/5 rounded-lg p-3.5 transition-all hover:bg-white/[0.04]">
+                            <span className="text-white/40 uppercase text-[9px] tracking-wider font-bold block mb-1.5">Operation Timings</span>
+                            <span className="font-bold text-sm text-white block tracking-tight">{pro.availabilityTimings}</span>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+
+                    <div className="space-y-5">
+                      <h3 style={HEADING_STYLE} className="font-sans text-xs font-bold uppercase tracking-wider text-white flex items-center gap-2 border-b border-white/5 pb-3">
+                        <Globe size={14} className="text-white" /> Languages & Communication
+                      </h3>
+                      <div className="flex flex-wrap gap-2.5 pt-1">
+                        {languagesList.map(lang => (
+                          <span key={lang} className="px-3.5 py-1.5 rounded-full bg-[#B3DC26]/10 text-[#B3DC26] border border-[#B3DC26]/20 text-[10px] font-bold uppercase tracking-wider flex items-center gap-1.5 shadow-sm">
+                            <div className="w-1.5 h-1.5 rounded-full bg-[#B3DC26] opacity-80" />
+                            {lang}
+                          </span>
+                        ))}
+                        {languagesList.length === 0 && (
+                          <p className="text-xs text-white/40 italic">No specific languages logged.</p>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Role-conditioned specific specs */}
+                  {((pro.role?.toLowerCase().includes("streamer")) || 
+                    (pro.role?.toLowerCase().includes("commentator")) || 
+                    (pro.role?.toLowerCase().includes("scorer")) || 
+                    (pro.role?.toLowerCase().includes("umpire")) || 
+                    (pro.matchesCovered || pro.matchFormats?.length > 0)) && (
+                    <div className="bg-[#1A1A1A] rounded-xl border border-white/5 p-8 space-y-6 shadow-xl">
+                      <h3 style={HEADING_STYLE} className="font-sans text-xs font-bold uppercase tracking-wider text-white flex items-center gap-2 border-b border-white/5 pb-3">
+                        <Layers size={14} className="text-white" /> Operational Specifications & Services
+                      </h3>
+
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        {/* Metric Badges */}
+                        {(pro.matchesCovered || pro.matchFormats?.length > 0) && (
+                          <div className="space-y-4 bg-black/40 border border-white/5 rounded-lg p-5">
+                            {pro.matchesCovered && (
+                              <div>
+                                <span className="text-[8px] font-black text-neutral-500 uppercase tracking-widest block mb-1">Total Matches Covered</span>
+                                <span className="text-base font-black text-white uppercase tracking-tight">{pro.matchesCovered}</span>
+                              </div>
+                            )}
+                            {pro.matchFormats?.length > 0 && (
+                              <div>
+                                <span className="text-[8px] font-black text-neutral-500 uppercase tracking-widest block mb-1.5">Match Formats Supported</span>
+                                <div className="flex flex-wrap gap-1">
+                                  {pro.matchFormats.map(fmt => (
+                                    <span key={fmt} className="px-2 py-0.5 bg-[#B3DC26]/10 text-[#B3DC26] text-[8px] font-black uppercase tracking-wider rounded border border-[#B3DC26]/20">{fmt}</span>
+                                  ))}
+                                </div>
+                              </div>
+                            )}
+                          </div>
+                        )}
+
+                        {/* Streamers Specification details */}
+                        {pro.role?.toLowerCase().includes("streamer") && (
+                          <div className="space-y-3 bg-black/40 border border-white/5 rounded-lg p-5">
+                            <p className="text-[9px] font-black text-neutral-500 uppercase tracking-widest flex items-center gap-1.5 border-b border-white/5 pb-1.5"><Tv size={12} /> Live Broadcasting specs</p>
+                            <div className="space-y-1.5 text-xs">
+                              <div className="flex justify-between">
+                                <span className="text-white/40">Max Quality:</span>
+                                <span className="font-bold text-white uppercase">{pro.streamQuality || "Not Specified"}</span>
+                              </div>
+                              <div className="flex justify-between">
+                                <span className="text-white/40">Cameras Supported:</span>
+                                <span className="font-bold text-white">{pro.camerasSupported != null ? `${pro.camerasSupported} Camera(s)` : "Not Specified"}</span>
+                              </div>
+                            </div>
+                            {pro.streamPlatforms?.length > 0 && (
+                              <div className="pt-2 border-t border-white/5">
+                                <span className="text-[8px] font-black text-neutral-500 uppercase tracking-widest block mb-1.5">Stream Platforms</span>
+                                <div className="flex flex-wrap gap-1">
+                                  {pro.streamPlatforms.map(sp => (
+                                    <span key={sp} className="px-2 py-0.5 bg-neutral-900 border border-white/5 text-[8px] font-bold uppercase rounded">{sp}</span>
+                                  ))}
+                                </div>
+                              </div>
+                            )}
+                          </div>
+                        )}
+
+                        {/* Commentator Specification details */}
+                        {pro.role?.toLowerCase().includes("commentator") && (
+                          <div className="space-y-3 bg-black/40 border border-white/5 rounded-lg p-5">
+                            <p className="text-[9px] font-black text-neutral-500 uppercase tracking-widest flex items-center gap-1.5 border-b border-white/5 pb-1.5">Broadcast Features</p>
+                            <div className="space-y-2 text-xs">
+                              <div className="flex justify-between">
+                                <span className="text-white/40">Live Commentary Support:</span>
+                                <span className="font-bold text-white uppercase">{pro.liveCommentarySupported ? "🟢 Enabled" : "🔴 Disabled"}</span>
+                              </div>
+                              <div className="flex justify-between">
+                                <span className="text-white/40">Panel Discussion Support:</span>
+                                <span className="font-bold text-white uppercase">{pro.panelDiscussionEnabled ? "🟢 Enabled" : "🔴 Disabled"}</span>
+                              </div>
+                            </div>
+                          </div>
+                        )}
+
+                        {/* Scorer / Umpire Specification details */}
+                        {(pro.role?.toLowerCase().includes("scorer") || pro.role?.toLowerCase().includes("umpire")) && (
+                          <div className="space-y-3 bg-black/40 border border-white/5 rounded-lg p-5">
+                            <p className="text-[9px] font-black text-neutral-500 uppercase tracking-widest flex items-center gap-1.5 border-b border-white/5 pb-1.5">Digital Scoring</p>
+                            <div className="space-y-2 text-xs">
+                              <div className="flex justify-between">
+                                <span className="text-white/40">Live Kridaz App Scoring:</span>
+                                <span className="font-bold text-[#B3DC26] uppercase">{pro.liveScoringSupport ? "🟢 Supported" : "🔴 Independent"}</span>
+                              </div>
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* SERVICE AREAS & LOCATIONS */}
+                  <div className="bg-[#1A1A1A] rounded-xl border border-white/5 p-8 space-y-6 shadow-xl">
+                    <h3 style={HEADING_STYLE} className="font-sans text-xs font-bold uppercase tracking-wider text-white flex items-center gap-2">
+                      <MapPin size={14} className="text-white" /> Service Area Coverage
+                    </h3>
+                    
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                      {/* Platform Venues */}
+                      <div className="bg-black/30 border border-white/5 rounded-lg p-5 space-y-3">
+                        <p className="text-[9px] font-black text-neutral-500 uppercase tracking-widest flex items-center gap-1.5">
+                          <Building size={12} /> Active Platform Grounds
+                        </p>
+                        <div className="flex flex-wrap gap-1.5">
+                          {pro.preferredLocations?.grounds?.map(groundId => {
+                            const gObj = grounds.find(g => g.id === groundId);
+                            if (!gObj) return null;
+                            return (
+                              <span key={groundId} className="px-2.5 py-1 bg-[#111] border border-white/5 rounded text-[8px] font-black uppercase tracking-wider text-white">
+                                {gObj.name} ({gObj.city})
+                              </span>
+                            );
+                          })}
+                          {(!pro.preferredLocations?.grounds || pro.preferredLocations.grounds.length === 0) && (
+                            <p className="text-xs text-white/30 italic">No specific active turf linked.</p>
+                          )}
+                        </div>
+                      </div>
+
+                      {/* Custom Cities */}
+                      <div className="bg-black/30 border border-white/5 rounded-lg p-5 space-y-3">
+                        <p className="text-[9px] font-black text-neutral-500 uppercase tracking-widest flex items-center gap-1.5">
+                          <Globe size={12} /> Covered Cities & States
+                        </p>
+                        <div className="space-y-3">
+                          {pro.preferredLocations?.customLocations?.map((item, idx) => (
+                            <div key={idx} className="text-xs font-sans">
+                              <span className="font-bold text-[#B3DC26] uppercase tracking-wider block text-[9px]">{item.state}:</span>
+                              <span className="text-white/60 leading-normal">{item.cities.join(", ")}</span>
+                            </div>
+                          ))}
+                          {(!pro.preferredLocations?.customLocations || pro.preferredLocations.customLocations.length === 0) && (
+                            <p className="text-xs text-white/30 italic">No custom city boundaries configured.</p>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  </div>
+
+                  {/* Right Column: Matchmaking CTA Card */}
+                  <div className="lg:col-span-4">
+                    <div className="sticky top-24 space-y-6">
+                      
+                      {/* Matchmaking Action Card */}
+                      <div className="bg-[#1A1A1A] rounded-xl p-6 sm:p-8 border border-white/10 shadow-2xl space-y-6">
+                        <div className="flex items-center gap-3 justify-between">
+                          <h2 style={HEADING_STYLE} className="text-lg font-black uppercase text-white">Hire Professional</h2>
+                          <span className={`px-2.5 py-1 rounded-[6px] text-[9px] font-black uppercase tracking-wider ${
+                            pro.isOnline 
+                              ? "bg-green-500/10 text-green-400 border border-green-500/20 animate-pulse" 
+                              : "bg-red-500/10 text-red-400 border border-red-500/20"
+                          }`}>
+                            {pro.isOnline ? "🟢 Online" : "🔴 Offline"}
+                          </span>
+                        </div>
+
+                        <p className="text-xs text-white/50 leading-relaxed font-sans">
+                          BookMySportz professionals are hired through our live, on-demand matchmaking search. This matches you with the nearest active verified professional in real-time.
+                        </p>
+
+                        <div className="bg-black/40 border border-white/5 rounded-lg p-4 font-sans text-xs space-y-3">
+                          <div className="flex justify-between">
+                            <span className="text-white/40">Hourly/Match Rate:</span>
+                            <span className="text-[#B3DC26] font-black">₹{pro.price > 0 ? pro.price : "Not Set"}</span>
+                          </div>
+                          <div className="flex justify-between">
+                            <span className="text-white/40">Professional Role:</span>
+                            <span className="text-white font-bold capitalize">{pro.role}</span>
+                          </div>
+
+                        </div>
+
+                        <button 
+                          onClick={() => navigate(`/professionals?role=${pro.role}`)}
+                          className="w-full bg-gradient-to-r from-[#B3DC26] to-[#B3DC26] text-black py-4 rounded-lg font-black text-xs uppercase tracking-widest hover:opacity-90 active:scale-95 transition-all shadow-lg"
+                        >
+                          ⚡ Request Matching Now
+                        </button>
+                      </div>
+
+                      
+                      {/* Connect & Socials Card */}
+                      <div className="bg-[#1A1A1A] rounded-xl p-6 sm:p-8 border border-white/10 shadow-2xl space-y-5">
+                        <h3 style={HEADING_STYLE} className="font-sans text-sm font-bold text-white uppercase tracking-wider">Connect & Socials</h3>
+                        <div className="flex flex-wrap items-center gap-3">
+                          {/* Social Buttons */}
+                          {pro.linkedin && (
+                            <a href={pro.linkedin} target="_blank" rel="noreferrer" className="w-8 h-8 rounded-lg bg-[#0077B5]/10 border border-[#0077B5]/30 flex items-center justify-center text-[#0077B5] hover:bg-[#0077B5]/20 transition-colors backdrop-blur-sm">
+                              <svg className="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24"><path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z"/></svg>
+                            </a>
+                          )}
+                          {pro.instagram && (
+                            <a href={pro.instagram} target="_blank" rel="noreferrer" className="w-8 h-8 rounded-lg bg-[#E1306C]/10 border border-[#E1306C]/30 flex items-center justify-center text-[#E1306C] hover:bg-[#E1306C]/20 transition-colors backdrop-blur-sm">
+                              <svg className="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg>
+                            </a>
+                          )}
+                          {pro.youtube && (
+                            <a href={pro.youtube} target="_blank" rel="noreferrer" className="w-8 h-8 rounded-lg bg-[#FF0000]/10 border border-[#FF0000]/30 flex items-center justify-center text-[#FF0000] hover:bg-[#FF0000]/20 transition-colors backdrop-blur-sm">
+                              <svg className="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24"><path d="M19.615 3.184c-3.604-.246-11.631-.245-15.23 0-3.897.266-4.356 2.62-4.385 8.816.029 6.185.484 8.549 4.385 8.816 3.6.245 11.626.246 15.23 0 3.897-.266 4.356-2.62 4.385-8.816-.029-6.185-.484-8.549-4.385-8.816zm-10.615 12.816v-8l8 3.993-8 4.007z"/></svg>
+                            </a>
+                          )}
+                          <button 
+                            onClick={() => navigate(`/messages?userId=${pro.userId || profileUser?._id}`)}
+                            className="ml-auto px-4 py-1.5 rounded-lg border border-[#B3DC26]/40 bg-[#B3DC26]/10 text-[#B3DC26] text-[10px] font-black uppercase tracking-wider hover:bg-[#B3DC26]/20 transition-all flex items-center gap-2"
+                          >
+                            <MessageSquare size={14} /> Chat Now
+                          </button>
+                          {(!pro.linkedin && !pro.instagram && !pro.youtube) && (
+                            <p className="text-xs text-white/50 font-sans italic w-full mt-2">No social profiles linked.</p>
+                          )}
+                        </div>
+                      </div>
+
+                      {/* Reviews Card */}
+                      <div className="bg-[#1A1A1A] rounded-xl p-6 border border-white/5 shadow-lg">
+                        <h3 style={HEADING_STYLE} className="font-sans text-sm font-bold text-white mb-6 uppercase tracking-wider">Recent Reviews</h3>
+                        {proReviews.length === 0 ? (
+                          <p className="text-xs text-white/40 pb-2 font-sans italic">No reviews yet.</p>
+                        ) : (
+                          <div className="space-y-6 font-sans">
+                            {proReviews.slice(0, 4).map((review, i) => (
+                              <div key={i} className="flex items-start gap-4">
+                                <div className="w-8 h-8 rounded-full bg-neutral-900 overflow-hidden shrink-0 border border-white/5">
+                                  {review.user?.profilePicture || review.authorImage ? (
+                                    <img src={review.user?.profilePicture || review.authorImage} className="w-full h-full object-cover" />
+                                  ) : (
+                                    <div className="w-full h-full flex items-center justify-center bg-neutral-900 text-white/30 text-[10px] font-bold uppercase">
+                                      {(review.user?.name || review.authorName)?.slice(0,2) || "?"}
+                                    </div>
+                                  )}
+                                </div>
+                                <div className="flex-1">
+                                  <div className="flex items-center gap-1.5 mb-1 justify-between">
+                                    <span className="text-[10px] text-white/70 font-bold capitalize">{(review.user?.name || review.authorName)?.toLowerCase()}</span>
+                                    <div className="flex items-center text-[#B3DC26] text-[8px] font-bold">
+                                      <Star size={8} className="fill-white mr-0.5 text-white" />
+                                      {review.rating > 0 ? review.rating.toFixed(1) : "Not Specified"}
+                                    </div>
+                                  </div>
+                                  <p className="text-xs text-white/50 leading-relaxed line-clamp-3">
+                                    {review.comment || review.content || "No comment provided."}
+                                  </p>
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                );
+              })()}
+
+              {/* GALLERY TAB */}
+              {activeProfileTab === "gallery" && (() => {
+                const pro = profileUser?.ownerProfile || profileUser || {};
+                return (
+                <div className="space-y-6 animate-in fade-in duration-300">
+                  <div className="bg-[#1A1A1A] rounded-xl border border-white/5 p-8 space-y-6 shadow-xl min-h-[400px]">
+                    <div className="border-b border-white/5 pb-4">
+                      <h3 style={HEADING_STYLE} className="font-sans text-xs font-bold uppercase tracking-wider text-white flex items-center gap-2">
+                        <Layout size={14} className="text-white" /> Gallery
+                      </h3>
+                    </div>
+
+                    {pro.portfolio?.length > 0 ? (
+                      <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                        {pro.portfolio.map((item, idx) => (
+                          <div key={idx} className="bg-white/[0.02] border border-white/5 rounded-lg overflow-hidden group hover:border-white/10 transition-all">
+                            <div className="aspect-video relative overflow-hidden bg-neutral-900 border-b border-white/5 flex items-center justify-center">
+                              {item.mediaType === 'image' ? (
+                                <>
+                                  <img src={item.mediaUrl} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" alt="Gallery item" />
+                                  <button className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center text-white">
+                                    <Eye size={18} />
+                                  </button>
+                                </>
+                              ) : (
+                                <div className="w-full h-full bg-[#111] flex flex-col items-center justify-center gap-2 cursor-pointer hover:bg-[#151515] transition-colors">
+                                  <Play size={24} className="text-white" />
+                                  <span className="text-[7px] font-black text-neutral-600 uppercase tracking-[0.3em]">Motion Media</span>
+                                </div>
+                              )}
+                            </div>
+                            <div className="p-3.5 space-y-1">
+                              <h4 className="text-[11px] font-black text-white uppercase tracking-tight line-clamp-1">{item.title || "Gallery Item"}</h4>
+                              <p className="text-[9px] text-neutral-500 font-medium leading-relaxed line-clamp-2">{item.description}</p>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <div className="py-20 flex flex-col items-center justify-center space-y-3 text-neutral-600">
+                        <Layout size={36} />
+                        <span className="text-[8px] font-black uppercase tracking-[0.4em]">No media portfolio showcases uploaded yet</span>
+                      </div>
+                    )}
+                  </div>
+                </div>
+                );
+              })()}
+
+              {/* CERTIFICATES TAB */}
+              {activeProfileTab === "certificates" && (() => {
+                const pro = profileUser?.ownerProfile || profileUser || {};
+                return (
+                <div className="space-y-6 animate-in fade-in duration-300">
+                  <div className="bg-[#1A1A1A] rounded-xl border border-white/5 p-8 shadow-xl">
+                    <h3 style={HEADING_STYLE} className="font-sans text-xs font-bold uppercase tracking-wider text-white mb-6 flex items-center gap-2">
+                      <Shield size={14} className="text-white" /> Verified Certifications Stack
+                    </h3>
+                    
+                    <div className="grid grid-cols-2 md:grid-cols-2 gap-5">
+                      {pro.certifications?.length > 0 ? pro.certifications.map((cert, i) => (
+                        <div key={i} className="rounded-xl bg-black/40 border border-white/5 hover:border-white/10 transition-all group overflow-hidden cursor-pointer">
+                          {/* Certificate Image */}
+                          <div className="aspect-[16/9] relative overflow-hidden bg-neutral-900 border-b border-white/5 flex items-center justify-center">
+                            {cert.image ? (
+                              <>
+                                <img src={cert.image} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" alt={cert.title} />
+                                <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end justify-center pb-3">
+                                  <span className="text-[8px] font-black text-[#B3DC26] uppercase tracking-[0.25em] flex items-center gap-1.5">
+                                    <Eye size={12} /> View Certificate
+                                  </span>
+                                </div>
+                              </>
+                            ) : (
+                              <div className="w-full h-full flex flex-col items-center justify-center gap-2">
+                                <Shield className="text-neutral-700" size={32} />
+                                <span className="text-[7px] font-black text-neutral-700 uppercase tracking-[0.3em]">No Image</span>
+                              </div>
+                            )}
+                          </div>
+                          {/* Certificate Info */}
+                          <div className="p-4 space-y-2">
+                            <h4 className="text-[11px] font-black text-white uppercase tracking-tight line-clamp-1">{cert.title}</h4>
+                            <p className="text-[10px] text-white/50 leading-relaxed font-sans line-clamp-2">{cert.description}</p>
+                          </div>
+                        </div>
+                      )) : (
+                        <div className="col-span-full py-14 bg-black/20 rounded-lg border border-dashed border-white/5 flex flex-col items-center justify-center space-y-3">
+                          <Shield size={28} className="text-neutral-800" />
+                          <p className="text-[9px] font-black text-neutral-600 uppercase tracking-widest">No verified certifications loaded yet</p>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </div>
+                );
+              })()}
+
+              {/* REVIEWS TAB */}
+              {activeProfileTab === "reviews" && (() => {
+                const pro = profileUser?.ownerProfile || profileUser || {};
+                const reviews = proReviews;
+                return (
+                <div className="space-y-6 animate-in fade-in duration-300">
+                  <div className="bg-[#1A1A1A] rounded-xl border border-white/5 p-8 shadow-xl min-h-[400px]">
+                    <h3 style={HEADING_STYLE} className="font-sans text-xs font-bold uppercase tracking-wider text-white mb-6 flex items-center gap-2 border-b border-white/5 pb-3">
+                      <Star size={14} className="text-white fill-white" /> Customer Ratings & Reviews
+                    </h3>
+
+                    {reviews.length === 0 ? (
+                      <div className="py-20 flex flex-col items-center justify-center space-y-3 text-neutral-650">
+                        <Star size={36} />
+                        <span className="text-[8px] font-black uppercase tracking-[0.4em]">No customer ratings recorded yet</span>
+                      </div>
+                    ) : (
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 font-sans">
+                        {reviews.map((review, i) => (
+                          <div key={i} className="p-5 bg-white/[0.02] border border-white/5 rounded-xl space-y-3 flex flex-col justify-between">
+                            <div className="space-y-2">
+                              <div className="flex items-center gap-3">
+                                <div className="w-10 h-10 rounded-full bg-neutral-900 overflow-hidden shrink-0 border border-white/5">
+                                  {review.user?.profilePicture || review.authorImage ? (
+                                    <img src={review.user?.profilePicture || review.authorImage} className="w-full h-full object-cover" alt="Reviewer" />
+                                  ) : (
+                                    <div className="w-full h-full flex items-center justify-center bg-neutral-900 text-white/30 text-[11px] font-black uppercase">
+                                      {(review.user?.name || review.authorName)?.slice(0, 2) || "?"}
+                                    </div>
+                                  )}
+                                </div>
+                                <div>
+                                  <span className="text-[10px] text-white/70 font-bold capitalize block">{(review.user?.name || review.authorName)?.toLowerCase()}</span>
+                                  <div className="flex items-center text-[#B3DC26] text-[8px] font-black mt-0.5">
+                                    <Star size={10} className="fill-white mr-1 text-white" />
+                                    {review.rating > 0 ? review.rating.toFixed(1) : "Not Specified"}
+                                  </div>
+                                </div>
+                              </div>
+                              <p className="text-xs text-white/60 leading-relaxed font-sans pt-1">
+                                {review.comment || review.content || "No comment provided."}
+                              </p>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                </div>
+                );
+              })()}
+
               {/* MATCHES TAB */}
               {activeProfileTab === "matches" && (
                 <div className="space-y-6 animate-in fade-in duration-300">

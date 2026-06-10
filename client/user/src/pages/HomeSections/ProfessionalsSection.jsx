@@ -96,9 +96,9 @@ export default function ProfessionalsSection({
           ) : (
             professionals.slice(0, 8).map((pro) => (
               <div
-                key={pro._id}
+                key={pro._id || pro.id}
                 className="group cursor-pointer"
-                onClick={() => navigate(`/professionals/${pro._id}`)}
+                onClick={() => navigate(`/profile/${pro.userId || pro.id || pro._id}`)}
               >
                 <div className="relative bg-[#121212] rounded-[8px] p-1.5 border border-white/5 transition-all duration-500 hover:border-[#BFF367]/20 hover:shadow-[0_15px_30px_rgba(0,0,0,0.4)]">
                   {/* Compact Profile Image Section */}
@@ -206,7 +206,7 @@ export default function ProfessionalsSection({
                       <button
                         onClick={(e) => {
                           e.stopPropagation();
-                          navigate(`/professionals/${pro._id}`);
+                          navigate(`/profile/${pro.userId || pro.id || pro._id}`);
                         }}
                         className="px-4 py-2 rounded-[8px] font-black text-[9px] uppercase tracking-wider transition-all duration-300 text-black hover:scale-105 shadow-[0_0_15px_rgba(85,222,232,0.3)]"
                         style={{ background: GRAD }}

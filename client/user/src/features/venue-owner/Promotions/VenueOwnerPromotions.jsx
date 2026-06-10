@@ -101,16 +101,16 @@ export default function VenueOwnerPromotions() {
       <div className="px-1 lg:px-3 lg:pt-2 lg:pb-3 space-y-8 animate-fade-in pt-0 pb-4 h-full relative">
       
       {/* Header */}
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 relative z-10 border-b border-white/5 pb-6">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 relative z-10 border-b border-white/10 pb-6">
         <div>
           <div className="flex items-center gap-3">
              <h2 className="text-[20px] sm:text-[24px] lg:text-[32px] mt-2 sm:mt-0 font-bold font-['Open_Sans'] tracking-tight uppercase whitespace-nowrap">Promotion Engine</h2>
           </div>
-          <p className="text-[#878C9F] font-inter text-[20px] mt-1">Generate and monitor discount campaigns</p>
+          <p className="text-white/70 font-inter text-[20px] mt-1">Generate and monitor discount campaigns</p>
         </div>
         <button 
           onClick={() => setIsModalOpen(true)}
-          className="flex items-center justify-center gap-2 px-4 py-2 bg-[#BFF367] hover:bg-[#b3ff00] text-black rounded-[8px] text-[13px] font-bold uppercase tracking-widest transition-all w-full md:w-auto shadow-[0_0_15px_rgba(204,255,0,0.15)] font-inter"
+          className="flex items-center justify-center gap-2 px-4 py-2 bg-gradient-to-r from-[#55DEE8] to-[#B3DC26] shadow-[0_8px_24px_rgba(179,220,38,0.15)] border-none hover:opacity-90 text-black rounded-[16px] text-[13px] font-bold uppercase tracking-widest transition-all w-full md:w-auto shadow-[0_0_15px_rgba(204,255,0,0.15)] font-inter"
         >
           <Plus size={18} />
           Create Promotion
@@ -119,29 +119,29 @@ export default function VenueOwnerPromotions() {
 
       {/* Top Metrics */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 lg:gap-5">
-        <div className="bg-[#121212] border border-white/5 rounded-[8px] p-5 flex flex-col relative overflow-hidden shadow-[var(--shadow-2)] hover:border-[#BFF367]/30 transition-all duration-500">
-          <div className="w-10 h-10 bg-[#2D2D2D]/50 rounded-full flex items-center justify-center mb-4 text-[#878C9F] group-hover:text-white transition-colors">
+        <div className="bg-[#121212] border border-white/10 rounded-[16px] p-5 flex flex-col relative overflow-hidden shadow-[var(--shadow-2)] hover:border-[#B3DC26]/30 transition-all duration-500">
+          <div className="w-10 h-10 bg-[#1B1B1B]/50 rounded-full flex items-center justify-center mb-4 text-white/70 group-hover:text-white transition-colors">
              <CheckCircle2 size={20} />
           </div>
-          <p className="text-[12px] font-normal text-[#878C9F] uppercase tracking-[0.5px] mb-1">Active Campaigns</p>
-          <h3 className="text-2xl font-semibold text-[#BFF367] tracking-tight">
+          <p className="text-[12px] font-normal text-white/70 uppercase tracking-[0.5px] mb-1">Active Campaigns</p>
+          <h3 className="text-2xl font-semibold text-[#B3DC26] tracking-tight">
              {isLoading ? "..." : activeCount}
           </h3>
         </div>
-        <div className="bg-[#121212] border border-white/5 rounded-[8px] p-5 flex flex-col relative overflow-hidden shadow-[var(--shadow-2)] hover:border-[#BFF367]/30 transition-all duration-500">
-          <div className="w-10 h-10 bg-[#2D2D2D]/50 rounded-full flex items-center justify-center mb-4 text-[#878C9F] group-hover:text-white transition-colors">
+        <div className="bg-[#121212] border border-white/10 rounded-[16px] p-5 flex flex-col relative overflow-hidden shadow-[var(--shadow-2)] hover:border-[#B3DC26]/30 transition-all duration-500">
+          <div className="w-10 h-10 bg-[#1B1B1B]/50 rounded-full flex items-center justify-center mb-4 text-white/70 group-hover:text-white transition-colors">
              <Tag size={20} />
           </div>
-          <p className="text-[12px] font-normal text-[#878C9F] uppercase tracking-[0.5px] mb-1">Total Codes Issued</p>
+          <p className="text-[12px] font-normal text-white/70 uppercase tracking-[0.5px] mb-1">Total Codes Issued</p>
           <h3 className="text-2xl font-semibold text-white tracking-tight">
              {isLoading ? "..." : promotions.length}
           </h3>
         </div>
-        <div className="bg-[#121212] border border-white/5 rounded-[8px] p-5 flex flex-col relative overflow-hidden shadow-[var(--shadow-2)] hover:border-[#BFF367]/30 transition-all duration-500">
-          <div className="w-10 h-10 bg-[#2D2D2D]/50 rounded-full flex items-center justify-center mb-4 text-[#878C9F] group-hover:text-white transition-colors">
+        <div className="bg-[#121212] border border-white/10 rounded-[16px] p-5 flex flex-col relative overflow-hidden shadow-[var(--shadow-2)] hover:border-[#B3DC26]/30 transition-all duration-500">
+          <div className="w-10 h-10 bg-[#1B1B1B]/50 rounded-full flex items-center justify-center mb-4 text-white/70 group-hover:text-white transition-colors">
              <Clock size={20} />
           </div>
-          <p className="text-[12px] font-normal text-[#878C9F] uppercase tracking-[0.5px] mb-1">Redemptions</p>
+          <p className="text-[12px] font-normal text-white/70 uppercase tracking-[0.5px] mb-1">Redemptions</p>
           <h3 className="text-2xl font-semibold text-white tracking-tight">
              {isLoading ? "..." : totalRedemptions}
           </h3>
@@ -149,14 +149,14 @@ export default function VenueOwnerPromotions() {
       </div>
 
       {/* Promotions Table */}
-      <div className="bg-[#121212] border border-white/5 rounded-[8px] overflow-hidden shadow-[var(--shadow-2)]">
-        <div className="p-4 border-b border-white/5 flex items-center gap-4">
+      <div className="bg-[#121212] border border-white/10 rounded-[16px] overflow-hidden shadow-[var(--shadow-2)]">
+        <div className="p-4 border-b border-white/10 flex items-center gap-4">
           <div className="relative flex-1 max-w-md">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-[#878C9F]" size={16} />
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-white/70" size={16} />
             <input
               type="text"
               placeholder="Search campaigns..."
-              className="w-full bg-[#1A1A1A] border border-white/5 text-white pl-10 pr-4 py-2 rounded-[8px] text-[13px] focus:outline-none focus:border-[#BFF367]/50 transition-colors font-inter"
+              className="w-full bg-[#1B1B1B] border border-white/10 text-white pl-10 pr-4 py-2 rounded-[16px] text-[13px] focus:outline-none focus:border-[#B3DC26]/50 transition-colors font-inter"
             />
           </div>
         </div>
@@ -164,42 +164,42 @@ export default function VenueOwnerPromotions() {
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse">
             <thead>
-              <tr className="bg-[#1A1A1A] border-b border-white/5">
-                <th className="px-6 py-4 text-[10px] font-bold text-[#878C9F] uppercase tracking-widest">Code</th>
-                <th className="px-6 py-4 text-[10px] font-bold text-[#878C9F] uppercase tracking-widest">Ground</th>
-                <th className="px-6 py-4 text-[10px] font-bold text-[#878C9F] uppercase tracking-widest">Discount</th>
-                <th className="px-6 py-4 text-[10px] font-bold text-[#878C9F] uppercase tracking-widest">Usage</th>
-                <th className="px-6 py-4 text-[10px] font-bold text-[#878C9F] uppercase tracking-widest">Validity</th>
-                <th className="px-6 py-4 text-[10px] font-bold text-[#878C9F] uppercase tracking-widest">Status</th>
-                <th className="px-6 py-4 text-[10px] font-bold text-[#878C9F] uppercase tracking-widest text-right">Actions</th>
+              <tr className="bg-[#1B1B1B] border-b border-white/10">
+                <th className="px-6 py-4 text-[10px] font-bold text-white/70 uppercase tracking-widest">Code</th>
+                <th className="px-6 py-4 text-[10px] font-bold text-white/70 uppercase tracking-widest">Ground</th>
+                <th className="px-6 py-4 text-[10px] font-bold text-white/70 uppercase tracking-widest">Discount</th>
+                <th className="px-6 py-4 text-[10px] font-bold text-white/70 uppercase tracking-widest">Usage</th>
+                <th className="px-6 py-4 text-[10px] font-bold text-white/70 uppercase tracking-widest">Validity</th>
+                <th className="px-6 py-4 text-[10px] font-bold text-white/70 uppercase tracking-widest">Status</th>
+                <th className="px-6 py-4 text-[10px] font-bold text-white/70 uppercase tracking-widest text-right">Actions</th>
               </tr>
             </thead>
             <tbody>
               {isLoading ? (
-                 <tr><td colSpan="7" className="text-center py-8 text-[#878C9F]">Loading campaigns...</td></tr>
+                 <tr><td colSpan="7" className="text-center py-8 text-white/70">Loading campaigns...</td></tr>
               ) : promotions.map((promo) => (
-                <tr key={promo._id} className="border-b border-white/5 hover:bg-[#1A1A1A]/50 transition-colors">
+                <tr key={promo._id} className="border-b border-white/10 hover:bg-[#1B1B1B]/50 transition-colors">
                   <td className="px-6 py-4">
-                    <span className="inline-flex items-center gap-2 px-3 py-1 bg-[#2D2D2D] rounded-[4px] text-sm font-bold tracking-wider text-white">
+                    <span className="inline-flex items-center gap-2 px-3 py-1 bg-[#1B1B1B] rounded-[16px] text-sm font-bold tracking-wider text-white">
                       {promo.code}
                     </span>
                   </td>
                   <td className="px-6 py-4">
-                    <span className="text-xs text-[#878C9F]">{promo.turfName || "All Grounds"}</span>
+                    <span className="text-xs text-white/70">{promo.turfName || "All Grounds"}</span>
                   </td>
                   <td className="px-6 py-4">
-                    <div className="flex items-center gap-1.5 text-sm font-bold text-[#BFF367]">
+                    <div className="flex items-center gap-1.5 text-sm font-bold text-[#B3DC26]">
                       {promo.discountType === 'PERCENTAGE' ? <Percent size={14} /> : <IndianRupee size={14} />}
                       {promo.discountValue}{promo.discountType === 'PERCENTAGE' ? '%' : ' OFF'}
                     </div>
                   </td>
                   <td className="px-6 py-4">
                     <div className="flex flex-col gap-1">
-                       <span className="text-sm font-bold text-white">{promo.timesUsed} <span className="text-[#878C9F] text-xs font-normal">redemptions</span></span>
+                       <span className="text-sm font-bold text-white">{promo.timesUsed} <span className="text-white/70 text-xs font-normal">redemptions</span></span>
                        {promo.usageLimit > 0 && (
-                         <div className="w-24 h-1.5 bg-[#2D2D2D] rounded-full overflow-hidden">
+                         <div className="w-24 h-1.5 bg-[#1B1B1B] rounded-full overflow-hidden">
                             <div 
-                              className={`h-full ${promo.timesUsed >= promo.usageLimit ? 'bg-red-500' : 'bg-[#BFF367]'}`} 
+                              className={`h-full ${promo.timesUsed >= promo.usageLimit ? 'bg-red-500' : 'bg-[#B3DC26]'}`} 
                               style={{ width: `${Math.min((promo.timesUsed / promo.usageLimit) * 100, 100)}%` }} 
                             />
                          </div>
@@ -207,7 +207,7 @@ export default function VenueOwnerPromotions() {
                     </div>
                   </td>
                   <td className="px-6 py-4">
-                    <div className="flex items-center gap-2 text-sm text-[#878C9F]">
+                    <div className="flex items-center gap-2 text-sm text-white/70">
                        <Calendar size={14} />
                        {new Date(promo.validUntil).toLocaleDateString()}
                     </div>
@@ -215,7 +215,7 @@ export default function VenueOwnerPromotions() {
                   <td className="px-6 py-4">
                     <button 
                       onClick={() => toggleStatus(promo._id)}
-                      className={`px-2.5 py-1 text-[9px] font-bold uppercase tracking-wider rounded-[4px] border transition-colors ${ promo.isActive ? "bg-[#BFF367]/10 text-[#BFF367] border-[#BFF367]/20 hover:bg-[#BFF367]/20" : "bg-red-500/10 text-red-500 border-red-500/20 hover:bg-red-500/20" }`}
+                      className={`px-2.5 py-1 text-[9px] font-bold uppercase tracking-wider rounded-[16px] border transition-colors ${ promo.isActive ? "bg-[#B3DC26]/10 text-[#B3DC26] border-[#B3DC26]/20 hover:bg-[#B3DC26]/20" : "bg-red-500/10 text-red-500 border-red-500/20 hover:bg-red-500/20" }`}
                     >
                       {promo.isActive ? 'ACTIVE' : 'INACTIVE'}
                     </button>
@@ -223,7 +223,7 @@ export default function VenueOwnerPromotions() {
                   <td className="px-6 py-4 text-right">
                     <button 
                       onClick={() => deletePromo(promo._id)}
-                      className="p-2 text-[#878C9F] hover:text-red-500 hover:bg-red-500/10 rounded-[6px] transition-all"
+                      className="p-2 text-white/70 hover:text-red-500 hover:bg-red-500/10 rounded-[16px] transition-all"
                       title="Delete Campaign"
                     >
                       <Trash2 size={16} />
@@ -236,7 +236,7 @@ export default function VenueOwnerPromotions() {
                   <td colSpan="7" className="px-6 py-12 text-center">
                     <div className="flex flex-col items-center justify-center">
                       <Tag size={32} className="text-[#333] mb-3" />
-                      <p className="text-[10px] font-bold text-[#878C9F] uppercase tracking-widest">No Active Campaigns</p>
+                      <p className="text-[10px] font-bold text-white/70 uppercase tracking-widest">No Active Campaigns</p>
                     </div>
                   </td>
                 </tr>
@@ -249,15 +249,15 @@ export default function VenueOwnerPromotions() {
       {/* Create Promotion Modal */}
       {isModalOpen && (
         <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-fade-in">
-          <div className="bg-[#121212] border border-white/5 rounded-[8px] w-full max-w-md overflow-hidden shadow-[var(--shadow-2)]">
-            <div className="p-6 border-b border-white/5 flex justify-between items-center bg-[#1A1A1A]">
+          <div className="bg-[#121212] border border-white/10 rounded-[16px] w-full max-w-md overflow-hidden shadow-[var(--shadow-2)]">
+            <div className="p-6 border-b border-white/10 flex justify-between items-center bg-[#1B1B1B]">
               <h2 className="text-lg font-bold font-['Open_Sans'] uppercase tracking-tight text-white flex items-center gap-2">
-                <Tag size={18} className="text-[#BFF367]" />
+                <Tag size={18} className="text-[#B3DC26]" />
                 Initialize Campaign
               </h2>
               <button 
                 onClick={() => setIsModalOpen(false)}
-                className="text-[#878C9F] hover:text-[#BFF367] transition-colors"
+                className="text-white/70 hover:text-[#B3DC26] transition-colors"
               >
                 <XCircle size={20} />
               </button>
@@ -265,23 +265,23 @@ export default function VenueOwnerPromotions() {
             
             <form onSubmit={handleCreatePromo} className="p-6 space-y-5">
               <div>
-                <label className="block text-[10px] font-bold text-[#878C9F] uppercase tracking-widest mb-2">Promo Code</label>
+                <label className="block text-[10px] font-bold text-white/70 uppercase tracking-widest mb-2">Promo Code</label>
                 <input 
                   type="text" 
                   required
                   value={newPromo.code}
                   onChange={(e) => setNewPromo({...newPromo, code: e.target.value.toUpperCase()})}
-                  className="w-full bg-[#1A1A1A] border border-white/5 text-white px-4 py-2.5 rounded-[6px] text-sm focus:outline-none focus:border-[#BFF367]/50 uppercase"
+                  className="w-full bg-[#1B1B1B] border border-white/10 text-white px-4 py-2.5 rounded-[16px] text-sm focus:outline-none focus:border-[#B3DC26]/50 uppercase"
                   placeholder="e.g. SUMMER25"
                 />
               </div>
 
               <div>
-                <label className="block text-[10px] font-bold text-[#878C9F] uppercase tracking-widest mb-2">Target Ground</label>
+                <label className="block text-[10px] font-bold text-white/70 uppercase tracking-widest mb-2">Target Ground</label>
                 <select 
                   value={newPromo.turfId}
                   onChange={(e) => setNewPromo({...newPromo, turfId: e.target.value})}
-                  className="w-full bg-[#1A1A1A] border border-white/5 text-white px-4 py-2.5 rounded-[6px] text-sm focus:outline-none focus:border-[#BFF367]/50"
+                  className="w-full bg-[#1B1B1B] border border-white/10 text-white px-4 py-2.5 rounded-[16px] text-sm focus:outline-none focus:border-[#B3DC26]/50"
                 >
                   <option value="all">Universal (All My Grounds)</option>
                   {turfs.map(t => (
@@ -292,25 +292,25 @@ export default function VenueOwnerPromotions() {
               
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-[10px] font-bold text-[#878C9F] uppercase tracking-widest mb-2">Type</label>
+                  <label className="block text-[10px] font-bold text-white/70 uppercase tracking-widest mb-2">Type</label>
                   <select 
                     value={newPromo.type}
                     onChange={(e) => setNewPromo({...newPromo, type: e.target.value})}
-                    className="w-full bg-[#1A1A1A] border border-white/5 text-white px-4 py-2.5 rounded-[6px] text-sm focus:outline-none focus:border-[#BFF367]/50"
+                    className="w-full bg-[#1B1B1B] border border-white/10 text-white px-4 py-2.5 rounded-[16px] text-sm focus:outline-none focus:border-[#B3DC26]/50"
                   >
                     <option value="PERCENTAGE">Percentage (%)</option>
                     <option value="FLAT">Flat Amount (Rs)</option>
                   </select>
                 </div>
                 <div>
-                  <label className="block text-[10px] font-bold text-[#878C9F] uppercase tracking-widest mb-2">Value</label>
+                  <label className="block text-[10px] font-bold text-white/70 uppercase tracking-widest mb-2">Value</label>
                   <input 
                     type="number" 
                     required
                     min="1"
                     value={newPromo.value}
                     onChange={(e) => setNewPromo({...newPromo, value: e.target.value})}
-                    className="w-full bg-[#1A1A1A] border border-white/5 text-white px-4 py-2.5 rounded-[6px] text-sm focus:outline-none focus:border-[#BFF367]/50"
+                    className="w-full bg-[#1B1B1B] border border-white/10 text-white px-4 py-2.5 rounded-[16px] text-sm focus:outline-none focus:border-[#B3DC26]/50"
                     placeholder="e.g. 25"
                   />
                 </div>
@@ -318,42 +318,42 @@ export default function VenueOwnerPromotions() {
 
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-[10px] font-bold text-[#878C9F] uppercase tracking-widest mb-2">Valid Until</label>
+                  <label className="block text-[10px] font-bold text-white/70 uppercase tracking-widest mb-2">Valid Until</label>
                   <input 
                     type="date" 
                     required
                     min={new Date().toISOString().split('T')[0]}
                     value={newPromo.validUntil}
                     onChange={(e) => setNewPromo({...newPromo, validUntil: e.target.value})}
-                    className="w-full bg-[#1A1A1A] border border-white/5 text-[#878C9F] px-4 py-2.5 rounded-[6px] text-sm focus:outline-none focus:border-[#BFF367]/50 [color-scheme:dark]"
+                    className="w-full bg-[#1B1B1B] border border-white/10 text-white/70 px-4 py-2.5 rounded-[16px] text-sm focus:outline-none focus:border-[#B3DC26]/50 [color-scheme:dark]"
                   />
                 </div>
                 <div>
-                  <label className="block text-[10px] font-bold text-[#878C9F] uppercase tracking-widest mb-2">Usage Limit (Opt)</label>
+                  <label className="block text-[10px] font-bold text-white/70 uppercase tracking-widest mb-2">Usage Limit (Opt)</label>
                   <input 
                     type="number" 
                     min="1"
                     value={newPromo.usageLimit}
                     onChange={(e) => setNewPromo({...newPromo, usageLimit: e.target.value})}
-                    className="w-full bg-[#1A1A1A] border border-white/5 text-white px-4 py-2.5 rounded-[6px] text-sm focus:outline-none focus:border-[#BFF367]/50"
+                    className="w-full bg-[#1B1B1B] border border-white/10 text-white px-4 py-2.5 rounded-[16px] text-sm focus:outline-none focus:border-[#B3DC26]/50"
                     placeholder="Unlimited"
                   />
                 </div>
               </div>
 
-              <div className="pt-4 border-t border-white/5 flex gap-3">
+              <div className="pt-4 border-t border-white/10 flex gap-3">
                 <button 
                   type="button"
                   onClick={() => setIsModalOpen(false)}
                   disabled={isSubmitting}
-                  className="flex-1 px-4 py-2.5 bg-[#1A1A1A] border border-white/5 text-white rounded-[8px] text-[13px] uppercase tracking-widest font-bold hover:bg-[#2D2D2D] transition-colors"
+                  className="flex-1 px-4 py-2.5 bg-[#1B1B1B] border border-white/10 text-white rounded-[16px] text-[13px] uppercase tracking-widest font-bold hover:bg-[#1B1B1B] transition-colors"
                 >
                   Cancel
                 </button>
                 <button 
                   type="submit"
                   disabled={isSubmitting}
-                  className="flex-1 px-4 py-2.5 bg-[#BFF367] text-black rounded-[8px] text-[13px] uppercase tracking-widest font-bold hover:bg-[#b3ff00] transition-colors shadow-[0_0_15px_rgba(204,255,0,0.15)] disabled:opacity-50"
+                  className="flex-1 px-4 py-2.5 bg-gradient-to-r from-[#55DEE8] to-[#B3DC26] shadow-[0_8px_24px_rgba(179,220,38,0.15)] border-none text-black rounded-[16px] text-[13px] uppercase tracking-widest font-bold hover:opacity-90 transition-colors shadow-[0_0_15px_rgba(204,255,0,0.15)] disabled:opacity-50"
                 >
                   {isSubmitting ? "Deploying..." : "Deploy Campaign"}
                 </button>

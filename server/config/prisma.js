@@ -12,7 +12,7 @@ dotenv.config();
 /**
  * Sensitive fields that should be encrypted/decrypted
  */
-const SENSITIVE_FIELDS = ['youtubeAccessToken', 'youtubeRefreshToken', 'facebookAccessToken'];
+const SENSITIVE_FIELDS = [];
 
 /**
  * Helper to process socialAccounts JSON array
@@ -85,18 +85,6 @@ const prisma = basePrisma.$extends({
   },
   result: {
     user: {
-      youtubeAccessToken: {
-        needs: { youtubeAccessToken: true },
-        compute(user) { return decrypt(user.youtubeAccessToken); },
-      },
-      youtubeRefreshToken: {
-        needs: { youtubeRefreshToken: true },
-        compute(user) { return decrypt(user.youtubeRefreshToken); },
-      },
-      facebookAccessToken: {
-        needs: { facebookAccessToken: true },
-        compute(user) { return decrypt(user.facebookAccessToken); },
-      },
       socialAccounts: {
         needs: { socialAccounts: true },
         compute(user) { return processSocialAccounts(user.socialAccounts, 'decrypt'); },

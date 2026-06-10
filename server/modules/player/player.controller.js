@@ -333,7 +333,18 @@ export const getPlayerProfile = async (req, res) => {
     let user = await prisma.user.findUnique({
       where: { id: targetId },
       include: { 
-        ownerProfile: true,
+        ownerProfile: {
+          include: {
+            reviews: {
+              include: {
+                user: {
+                  select: { id: true, name: true, profilePicture: true }
+                }
+              },
+              orderBy: { createdAt: "desc" }
+            }
+          }
+        },
         profile: true
       }
     });
@@ -341,7 +352,24 @@ export const getPlayerProfile = async (req, res) => {
     if (!user) {
       const owner = await prisma.ownerProfile.findUnique({
         where: { id: targetId },
-        include: { user: { include: { ownerProfile: true } } }
+        include: { 
+          user: { 
+            include: { 
+              ownerProfile: {
+                include: {
+                  reviews: {
+                    include: {
+                      user: {
+                        select: { id: true, name: true, profilePicture: true }
+                      }
+                    },
+                    orderBy: { createdAt: "desc" }
+                  }
+                }
+              }
+            } 
+          } 
+        }
       });
       if (owner?.user) {
         user = owner.user;
@@ -508,7 +536,8 @@ export const getPlayerProfile = async (req, res) => {
         followersList: network?.followers || [],
         followingList: network?.following || [],
         wallet: wallet,
-        createdAt: user.createdAt
+        createdAt: user.createdAt,
+        ownerProfile: ownerDoc
       }
     });
   } catch (error) {

@@ -5,8 +5,6 @@ import toast from "react-hot-toast";
 import { useDispatch } from "react-redux";
 import { updateUser, login } from "@redux/slices/authSlice";
 import { searchLocations } from "@utils/locationService";
-import { auth } from "../../../config/firebase";
-import { RecaptchaVerifier, signInWithPhoneNumber } from "firebase/auth";
 
 const getNameFromEmail = (email) => {
   if (!email) return "";
@@ -185,35 +183,13 @@ const OnboardingModal = ({ isOpen, onClose, initialData, onComplete }) => {
     }
     setSendingPhoneOtp(true);
     try {
-      const formattedPhone = formData.phone.startsWith('+') ? formData.phone : `+91${formData.phone}`;
-      
-      if (!forceSms) {
-        const endpoint = "/api/user/auth/send-otp";
-        await axiosInstance.post(endpoint, { phone: formData.phone });
-        setPhoneOtpSent(true);
-        toast.success("WhatsApp OTP sent successfully!");
-        setSendingPhoneOtp(false);
-        return;
-      }
-
-      if (window.recaptchaVerifier) {
-        try { window.recaptchaVerifier.clear(); } catch (e) {}
-      }
-      window.recaptchaVerifier = new RecaptchaVerifier(auth, 'recaptcha-container', {
-        'size': 'invisible'
-      });
-
-      const confirmationResult = await signInWithPhoneNumber(auth, formattedPhone, window.recaptchaVerifier);
-      window.confirmationResult = confirmationResult;
+      const endpoint = "/api/user/auth/send-otp";
+      await axiosInstance.post(endpoint, { phone: formData.phone, deliveryMethod: forceSms ? 'sms' : 'whatsapp' });
       setPhoneOtpSent(true);
-      toast.success("SMS OTP sent successfully!");
+      toast.success(forceSms ? "SMS OTP sent successfully!" : "WhatsApp OTP sent successfully!");
     } catch (error) {
       console.error("OTP send error:", error);
       toast.error(error.message || "Failed to send verification OTP");
-      if (window.recaptchaVerifier) {
-        try { window.recaptchaVerifier.clear(); } catch(e) {}
-        window.recaptchaVerifier = null;
-      }
     } finally {
       setSendingPhoneOtp(false);
     }
@@ -224,20 +200,14 @@ const OnboardingModal = ({ isOpen, onClose, initialData, onComplete }) => {
       return toast.error("Please enter the 6-digit OTP");
     }
     setVerifyingPhoneOtp(true);
-    let firebaseIdToken = null;
     try {
-      if (window.confirmationResult) {
-        const result = await window.confirmationResult.confirm(phoneOtp);
-        firebaseIdToken = await result.user.getIdToken();
-      }
-
       const endpoint = isGoogle 
         ? "/api/user/auth/verify-phone-otp" 
         : "/api/user/auth/verify-otp";
 
       const payload = isGoogle 
-        ? { phone: formData.phone, otp: firebaseIdToken || phoneOtp }
-        : { email: formData.email, phone: formData.phone, otp: firebaseIdToken || phoneOtp };
+        ? { phone: formData.phone, otp: phoneOtp }
+        : { email: formData.email, phone: formData.phone, otp: phoneOtp };
 
       const res = await axiosInstance.post(endpoint, payload);
       if (res.data.success) {
@@ -248,7 +218,7 @@ const OnboardingModal = ({ isOpen, onClose, initialData, onComplete }) => {
         toast.success("Phone number verified successfully!");
       }
     } catch (error) {
-      console.error("Firebase OTP confirmation error:", error);
+      console.error("OTP verification error:", error);
       toast.error(error.response?.data?.message || error.message || "Invalid OTP");
     } finally {
       setVerifyingPhoneOtp(false);
@@ -655,6 +625,7 @@ const OnboardingModal = ({ isOpen, onClose, initialData, onComplete }) => {
                               </div>
                             )}
                           </div>
+                          </div>
                         </button>
                       );
                     })}
@@ -745,14 +716,6 @@ const OnboardingModal = ({ isOpen, onClose, initialData, onComplete }) => {
                               className="px-4 py-2 bg-[linear-gradient(90deg,#55DEE8_0%,#B3DC26_100%)] rounded-[16px] font-bold text-xs uppercase tracking-wider text-[#000000] shadow-[0px_8px_24px_rgba(179,220,38,0.15)] transition-all disabled:opacity-40 disabled:cursor-not-allowed whitespace-nowrap h-full max-h-[44px] flex items-center justify-center"
                             >
                               {sendingPhoneOtp ? <Loader2 className="animate-spin w-4 h-4 mx-auto" /> : (phoneOtpSent ? "Resend" : "Get OTP")}
-                            </button>
-                            <button
-                              type="button"
-                              onClick={() => handleSendPhoneOtp(true)}
-                              disabled={sendingPhoneOtp || !formData.phone || formData.phone.length < 10}
-                              className="px-4 py-1.5 bg-[#1B1B1B] border border-white/[0.08] rounded-[16px] font-bold text-[10px] uppercase tracking-wider text-white transition-all disabled:opacity-40 disabled:cursor-not-allowed whitespace-nowrap"
-                            >
-                              Get OTP via SMS
                             </button>
                           </div>
                         )}
@@ -846,7 +809,6 @@ const OnboardingModal = ({ isOpen, onClose, initialData, onComplete }) => {
           </div>
         </div>
       </div>
-      <div id="recaptcha-container"></div>
     </div>
   </div>
   );

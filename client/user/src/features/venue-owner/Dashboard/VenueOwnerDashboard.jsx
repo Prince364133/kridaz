@@ -36,10 +36,11 @@ import OccupancyHeatmap from "./OccupancyHeatmap";
 import PeakHoursChart from "./PeakHoursChart";
 
 const VenueOwnerDashboard = () => {
-  const { dashboardData, loading, error } = useVenueOwnerDashboard();
+  const [selectedVenue, setSelectedVenue] = useState("");
+  const { dashboardData, loading, error } = useVenueOwnerDashboard(selectedVenue);
   const { role, user } = useSelector((state) => state.auth);
   const isScorer = role?.toLowerCase().includes("scorer");
-  const themeColor = isScorer ? "#BFF367" : "#BFF367";
+  const themeColor = isScorer ? "#B3DC26" : "#B3DC26";
   const dashboardTitle = isScorer ? "SCORER Dashboard" : "Dashboard Overview";
 
   const [timeFilter, setTimeFilter] = useState("Month");
@@ -61,7 +62,7 @@ const VenueOwnerDashboard = () => {
         <p className="font-bold text-xl uppercase tracking-wider text-red-500">Connection Interrupted</p>
         <button
           onClick={() => window.location.reload()}
-          className="mt-6 px-8 py-3 border border-red-500/50 text-red-500 font-bold uppercase rounded-[8px] hover:bg-red-500/10 transition-all"
+          className="mt-6 px-8 py-3 border border-red-500/50 text-red-500 font-bold uppercase rounded-[16px] hover:bg-red-500/10 transition-all"
         >
           Try Again
         </button>
@@ -130,8 +131,27 @@ const VenueOwnerDashboard = () => {
 
 
 
+          {/* Facility Selector */}
+          <div className="flex items-center justify-between">
+            <h1 className="text-xl lg:text-2xl font-black text-white uppercase tracking-widest">{dashboardTitle}</h1>
+            {finalData.turfsList && finalData.turfsList.length > 0 && (
+              <select
+                value={selectedVenue}
+                onChange={(e) => setSelectedVenue(e.target.value)}
+                className="bg-[#121212] border border-white/10 text-white text-xs md:text-sm font-bold uppercase tracking-wider rounded-[16px] px-4 py-2 outline-none focus:border-[#B3DC26]/50 transition-colors"
+              >
+                <option value="">All Facilities</option>
+                {finalData.turfsList.map((turf) => (
+                  <option key={turf.id} value={turf.id}>
+                    {turf.name}
+                  </option>
+                ))}
+              </select>
+            )}
+          </div>
+
           {/* Stats Grid – 3 Cards */}
-          <div className="grid grid-cols-3 gap-y-6 gap-x-2 lg:gap-x-8 py-6 md:py-8 border-y border-white/[0.08] relative">
+          <div className="grid grid-cols-3 gap-y-6 gap-x-2 lg:gap-x-8 py-6 md:py-8 border-y border-white/[0.08] relative mt-6">
             <StatsCard title="Total Bookings" value={totalBookings} icon={Calendar} themeColor={themeColor} />
             <StatsCard title="Total Revenue" value={totalRevenue} prefix="Rs " icon={TrendingUp} themeColor={themeColor} />
             <StatsCard title="Utilization Rate" value={utilization} suffix="%" icon={Activity} themeColor={themeColor} />
@@ -146,10 +166,10 @@ const VenueOwnerDashboard = () => {
               <div className="space-y-6 lg:space-y-8 h-full flex flex-col">
 
                 {/* Live Feed */}
-                <div className="bg-[#121212] p-4 lg:p-6 rounded-[8px] lg:rounded-[8px] border border-white/10 shadow-sm hover:shadow-[0px_8px_24px_rgba(85,222,232,0.10)] transition-shadow flex-1">
+                <div className="bg-[#121212] p-4 lg:p-6 rounded-[16px] lg:rounded-[16px] border border-white/10 shadow-sm hover:shadow-[0px_8px_24px_rgba(85,222,232,0.10)] transition-shadow flex-1">
                   <div className="flex items-center justify-between mb-4 lg:mb-6">
                     <h2 className="text-[13px] lg:text-[16px] font-bold text-white tracking-wider font-inter">Live Feed</h2>
-                    <div className="flex items-center gap-1.5 px-2 py-0.5 rounded-[8px] text-[10px] font-medium tracking-widest animate-pulse border"
+                    <div className="flex items-center gap-1.5 px-2 py-0.5 rounded-[16px] text-[10px] font-medium tracking-widest animate-pulse border"
                          style={{ backgroundColor: `${themeColor}1A`, color: themeColor, borderColor: `${themeColor}33` }}>
                       <span className="w-1 h-1 rounded-full" style={{ backgroundColor: themeColor }} /> Live
                     </div>
@@ -159,7 +179,7 @@ const VenueOwnerDashboard = () => {
                     <div className="space-y-4 lg:space-y-6">
                       {recentBookings.slice(0, 3).map((booking, i) => (
                         <div key={i} className="flex gap-3 lg:gap-4 group cursor-pointer">
-                          <div className="mt-1 p-1.5 lg:p-2 rounded-[6px] bg-[#2D2D2D] group-hover:scale-110 transition-transform shrink-0 h-fit" style={{ color: themeColor }}>
+                          <div className="mt-1 p-1.5 lg:p-2 rounded-[16px] bg-[#1B1B1B] group-hover:scale-110 transition-transform shrink-0 h-fit" style={{ color: themeColor }}>
                             <CheckCircle2 size={12} className="lg:w-3.5 lg:h-3.5" />
                           </div>
                           <div className="min-w-0">
@@ -169,7 +189,7 @@ const VenueOwnerDashboard = () => {
                             <p className="text-[9px] lg:text-[12px] text-[#999999] mt-0.5 truncate">
                               {booking?.user?.name || booking?.guestDetails?.name || "Guest"} booked {booking?.turf?.name || "a ground"}
                             </p>
-                            <p className="text-[8px] lg:text-[10px] font-medium text-[#878C9F] uppercase mt-1 flex items-center gap-1">
+                            <p className="text-[8px] lg:text-[10px] font-medium text-white/70 uppercase mt-1 flex items-center gap-1">
                               <Clock size={8} className="lg:w-[10px] lg:h-[10px]" /> Rs {booking?.totalPrice || 0}
                             </p>
                           </div>
@@ -179,12 +199,12 @@ const VenueOwnerDashboard = () => {
                   ) : (
                     <div className="flex flex-col items-center justify-center py-6 lg:py-10 text-center gap-2 lg:gap-3 opacity-40">
                       <Zap size={24} className="lg:w-8 lg:h-8 text-gray-600" />
-                      <p className="text-[8px] lg:text-[10px] font-black uppercase tracking-[0.2em] text-gray-500">No activity yet</p>
+                      <p className="text-[8px] lg:text-[10px] font-black uppercase tracking-[0.2em] text-white/70">No activity yet</p>
                       <p className="text-[8px] lg:text-[10px] text-gray-600">Live events will appear here</p>
                     </div>
                   )}
 
-                  <Link to="/venue-owner/bookings" className="w-full mt-6 lg:mt-8 py-2 lg:py-3 bg-[#1B1B1B] border border-white/10 hover:text-white text-white text-[10px] lg:text-[14px] font-bold tracking-widest rounded-[8px] lg:rounded-[8px] transition-all font-inter flex items-center justify-center">
+                  <Link to="/venue-owner/bookings" className="w-full mt-6 lg:mt-8 py-2 lg:py-3 bg-[#1B1B1B] border border-white/10 hover:text-white text-white text-[10px] lg:text-[14px] font-bold tracking-widest rounded-[16px] lg:rounded-[16px] transition-all font-inter flex items-center justify-center">
                     View Full Activity History
                   </Link>
                 </div>
@@ -201,12 +221,12 @@ const VenueOwnerDashboard = () => {
                 title="Booking Performance"
                 subtitle="Revenue trends over time"
                 action={
-                  <div className="flex items-center gap-2 bg-[#2D2D2D] p-1 rounded-[6px]">
+                  <div className="flex items-center gap-2 bg-[#1B1B1B] p-1 rounded-[16px]">
                     {["Weekly", "Monthly"].map((filter) => (
                       <button
                         key={filter}
                         onClick={() => setRevenueFilter(filter === "Weekly" ? "Week" : "Month")}
-                        className={`px-4 py-1.5 rounded-[4px] text-[11px] font-normal uppercase tracking-wider transition-all font-inter ${ (revenueFilter === "Week" && filter === "Weekly") || (revenueFilter === "Month" && filter === "Monthly") ? "bg-gradient-to-r from-[#BFF367] to-[#BFF367] text-black" : "text-[#999999] hover:text-[#FFFFFF]" }`}
+                        className={`px-4 py-1.5 rounded-[16px] text-[11px] font-normal uppercase tracking-wider transition-all font-inter ${ (revenueFilter === "Week" && filter === "Weekly") || (revenueFilter === "Month" && filter === "Monthly") ? "bg-gradient-to-r from-[#BFF367] to-[#BFF367] text-black" : "text-[#999999] hover:text-[#FFFFFF]" }`}
                       >
                         {filter}
                       </button>
@@ -293,7 +313,7 @@ const VenueOwnerDashboard = () => {
 // ┌── Empty State Helper ──┐
 const EmptyState = ({ height, icon: Icon, message, sub }) => (
   <div
-    className="flex flex-col items-center justify-center gap-3 text-center rounded-[8px] border border-dashed border-white/10"
+    className="flex flex-col items-center justify-center gap-3 text-center rounded-[16px] border border-dashed border-white/10"
     style={{ height }}
   >
     <Icon size={32} className="text-white/20" />
@@ -315,14 +335,14 @@ const StatsCard = ({ title, value, prefix = "", suffix = "", icon: Icon, themeCo
           <CountUp end={Number(value) || 0} duration={2} separator="," decimals={(Number(value) || 0) % 1 === 0 ? 0 : 1} />
           {suffix && <span className="text-[10px] md:text-sm text-white/40 font-medium">{suffix}</span>}
         </div>
-        <h3 className="text-[8px] md:text-[11px] font-medium text-[#878C9F] uppercase tracking-[1.5px] font-inter mt-1">{title}</h3>
+        <h3 className="text-[8px] md:text-[11px] font-medium text-white/70 uppercase tracking-[1.5px] font-inter mt-1">{title}</h3>
       </div>
     </div>
   );
 };
 
 const ChartCard = ({ title, subtitle, children, action, className = "h-full" }) => (
-  <div className={`bg-[#121212] p-4 lg:p-8 rounded-[8px] lg:rounded-[8px] border border-white/10 hover:shadow-[0px_8px_24px_rgba(85,222,232,0.10)] transition-shadow relative overflow-hidden group flex flex-col ${className}`}>
+  <div className={`bg-[#121212] p-4 lg:p-8 rounded-[16px] lg:rounded-[16px] border border-white/10 hover:shadow-[0px_8px_24px_rgba(85,222,232,0.10)] transition-shadow relative overflow-hidden group flex flex-col ${className}`}>
     <div className="flex flex-col gap-1.5 md:gap-2 mb-4 lg:mb-6 relative z-10 shrink-0">
       <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-2">
         <div>

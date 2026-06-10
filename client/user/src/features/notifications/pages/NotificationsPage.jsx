@@ -12,7 +12,7 @@ import { formatDistanceToNow } from "date-fns";
 import useNotifications from "@hooks/shared/useNotifications";
 import GlobalBackButton from '@/shared/components/GlobalBackButton';
 
-const PRI = "#BFF367";
+const PRI = "#B3DC26";
 const HEADING_STYLE = { fontFamily: "'Open Sans', sans-serif" };
 const SUBHEADING_STYLE = { fontFamily: "'Inter 28pt Light', sans-serif", fontWeight: 300 };
 
@@ -23,7 +23,7 @@ const SUBHEADING_STYLE = { fontFamily: "'Inter 28pt Light', sans-serif", fontWei
 const NOTIF_CONFIG = {
   FOLLOW: {
     icon: Users,
-    color: "#BFF367",
+    color: "#B3DC26",
     bgColor: "rgba(191,243,103,0.08)",
     getRoute: (notif) => `/profile/${notif.metadata?.senderId || ""}`,
   },
@@ -35,7 +35,7 @@ const NOTIF_CONFIG = {
   },
   BOOKING: {
     icon: Calendar,
-    color: "#BFF367",
+    color: "#B3DC26",
     bgColor: "rgba(85,222,232,0.08)",
     getRoute: (notif) => notif.link || `/booking-pass/${notif.metadata?.bookingId || ""}`,
   },
@@ -59,7 +59,7 @@ const NOTIF_CONFIG = {
   },
   REVIEW: {
     icon: Star,
-    color: "#BFF367",
+    color: "#B3DC26",
     bgColor: "rgba(251,191,36,0.08)",
     getRoute: (notif) => notif.link || "/profile",
   },
@@ -77,25 +77,25 @@ const NOTIF_CONFIG = {
   },
   GAME_JOIN_REQUEST: {
     icon: Zap,
-    color: "#BFF367",
+    color: "#B3DC26",
     bgColor: "rgba(191,243,103,0.08)",
     getRoute: (notif) => notif.link || "/booking-history?subTab=games",
   },
   TEAM_INVITE: {
     icon: Users,
-    color: "#BFF367",
+    color: "#B3DC26",
     bgColor: "rgba(85,222,232,0.08)",
     getRoute: (notif) => notif.link || "/profile?tab=connections",
   },
   TEAM_JOIN_REQUEST: {
     icon: Users,
-    color: "#BFF367",
+    color: "#B3DC26",
     bgColor: "rgba(85,222,232,0.08)",
     getRoute: (notif) => notif.link || "/profile?tab=connections",
   },
   TEAM_JOIN_ACCEPTED: {
     icon: ShieldCheck,
-    color: "#BFF367",
+    color: "#B3DC26",
     bgColor: "rgba(191,243,103,0.08)",
     getRoute: (notif) => notif.link || "/profile?tab=connections",
   },
@@ -113,7 +113,7 @@ const NOTIF_CONFIG = {
   },
   OPPONENT_ACCEPTED: {
     icon: Trophy,
-    color: "#BFF367",
+    color: "#B3DC26",
     bgColor: "rgba(191,243,103,0.08)",
     getRoute: (notif) => notif.link || "/profile?tab=connections",
   },
@@ -127,7 +127,7 @@ const NOTIF_CONFIG = {
 
 const DEFAULT_CONFIG = {
   icon: Bell,
-  color: "#BFF367",
+  color: "#B3DC26",
   bgColor: "rgba(191,243,103,0.08)",
   getRoute: (notif) => notif.link || "/",
 };
@@ -198,8 +198,8 @@ const NotificationsPage = () => {
           <div className="flex items-center gap-2">
             {unreadCount > 0 && (
               <button
-                onClick={markAllAsRead}
-                className="flex items-center gap-1.5 px-3 py-2 rounded-[16px] bg-[#BFF367]/10 border border-[#BFF367]/20 text-[#BFF367] text-[10px] font-black uppercase tracking-widest hover:bg-[#BFF367]/20 transition-all"
+                onClick={markAllRead}
+                className="flex items-center gap-1.5 px-3 py-2 rounded-[16px] bg-[#B3DC26]/10 border border-[#B3DC26]/20 text-[#B3DC26] text-[10px] font-black uppercase tracking-widest hover:bg-[#B3DC26]/20 transition-all"
               >
                 <CheckCheck size={14} />
                 <span className="hidden sm:inline">Read All</span>
@@ -223,7 +223,7 @@ const NotificationsPage = () => {
             <button
               key={filter}
               onClick={() => setActiveFilter(filter)}
-              className={`px-4 py-2 rounded-[16px] text-[10px] font-black uppercase tracking-widest transition-all border ${ activeFilter === filter ? "bg-[#BFF367]/10 border-[#BFF367]/30 text-[#BFF367]" : "bg-white/[0.02] border-white/5 text-white/40 hover:text-white/60 hover:border-white/10" }`}
+              className={`px-4 py-2 rounded-[16px] text-[10px] font-black uppercase tracking-widest transition-all border ${ activeFilter === filter ? "bg-[#B3DC26]/10 border-[#B3DC26]/30 text-[#B3DC26]" : "bg-white/[0.02] border-white/5 text-white/40 hover:text-white/60 hover:border-white/10" }`}
             >
               {filter === "all" ? "All" : `Unread (${unreadCount})`}
             </button>
@@ -233,7 +233,7 @@ const NotificationsPage = () => {
         {/* ── Notification List ────────────────────────────────────── */}
         {loading ? (
           <div className="flex flex-col items-center justify-center py-32 gap-4">
-            <Loader2 size={36} className="text-[#BFF367] animate-spin" />
+            <Loader2 size={36} className="text-[#B3DC26] animate-spin" />
             <p className="text-[10px] font-black text-white/20 uppercase tracking-widest">
               Loading notifications…
             </p>
@@ -275,7 +275,7 @@ const NotificationsPage = () => {
                   >
                     {/* Unread indicator */}
                     {!notif.isRead && (
-                      <div className="absolute top-4 right-4 w-2.5 h-2.5 rounded-full bg-[#BFF367] shadow-[0_0_8px_rgba(191,243,103,0.5)]" />
+                      <div className="absolute top-4 right-4 w-2.5 h-2.5 rounded-full bg-[#B3DC26] shadow-[0_0_8px_rgba(179,220,38,0.5)]" />
                     )}
 
                     {/* Icon */}
@@ -295,7 +295,7 @@ const NotificationsPage = () => {
                     <div className="flex-1 min-w-0">
                       <div className="flex items-start justify-between gap-3">
                         <h4
-                          className={`text-[13px] font-bold leading-tight transition-colors ${ notif.isRead ? "text-white/40" : "text-white group-hover:text-[#BFF367]" }`}
+                          className={`text-[13px] font-bold leading-tight transition-colors ${ notif.isRead ? "text-white/40" : "text-white group-hover:text-[#B3DC26]" }`}
                           style={SUBHEADING_STYLE}
                         >
                           {notif.title}

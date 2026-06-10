@@ -62,6 +62,7 @@ export const getAllProfessionals = async (req, res) => {
 
     const mappedProfessionals = professionals.map(prof => ({
       id: prof.id,
+      userId: prof.user?.id,
       name: prof.user?.name || "",
       role: prof.user?.role || "",
       city: prof.user?.city || "",

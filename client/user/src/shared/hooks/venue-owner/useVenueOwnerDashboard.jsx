@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import axiosInstance from "@hooks/useAxiosInstance";
 
-const useVenueOwnerDashboard = () => {
+const useVenueOwnerDashboard = (venueId = null) => {
   const [dashboardData, setDashboardData] = useState({
     totalBookings: 0,
     totalReviews: 0,
@@ -20,7 +20,9 @@ const useVenueOwnerDashboard = () => {
     const fetchDashboardData = async () => {
       try {
         setLoading(true);
-        const response = await axiosInstance.get("/api/owner/dashboard");
+        const response = await axiosInstance.get("/api/owner/dashboard", {
+          params: venueId ? { venueId } : {}
+        });
         setDashboardData(response.data);
         setLoading(false);
       } catch (err) {
@@ -31,7 +33,7 @@ const useVenueOwnerDashboard = () => {
     };
 
     fetchDashboardData();
-  }, []);
+  }, [venueId]);
 
   return { dashboardData, loading, error };
 };

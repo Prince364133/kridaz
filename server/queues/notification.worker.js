@@ -5,7 +5,8 @@ import {
   sendWhatsAppMessage, 
   notifyNewGame, 
   sendCustomPlayerInvite, 
-  sendCustomUmpireInvite 
+  sendCustomUmpireInvite,
+  sendSMSMessage
 } from "../utils/notification.service.js";
 import generateEmail from "../utils/generateEmail.js";
 import { notifyAdmins } from "../utils/notificationHelper.js";
@@ -23,17 +24,31 @@ const worker = new Worker(
     try {
       switch (name) {
         case "SEND_OTP": {
-          const { phone, email, otp, type, phoneTemplate, emailSubject, emailHtml } = data;
+          const { phone, email, otp, type, phoneTemplate, emailSubject, emailHtml, deliveryMethod } = data;
           
           const promises = [];
           if (email && emailSubject && emailHtml) {
             promises.push(generateEmail(email, emailSubject, emailHtml));
           }
           if (phone) {
-            if (phoneTemplate) {
-              promises.push(sendWhatsAppMessage(phone, "", phoneTemplate, [otp]));
+            if (deliveryMethod === 'sms') {
+              promises.push(sendSMSMessage(phone, otp));
             } else {
-              promises.push(sendWhatsAppMessage(phone, `Your Kridaz verification code is: ${otp}`));
+              const waPromise = async () => {
+                let waSuccess = false;
+                if (phoneTemplate) {
+                  waSuccess = await sendWhatsAppMessage(phone, "", phoneTemplate, [otp]);
+                } else {
+                  waSuccess = await sendWhatsAppMessage(phone, `Your Kridaz verification code is: ${otp}`);
+                }
+                
+                // Best Industry Practice: Fallback to SMS if WhatsApp API fails
+                if (!waSuccess) {
+                  logger.warn(`[OTP] WhatsApp delivery failed for ${phone}. Falling back to SMS.`);
+                  await sendSMSMessage(phone, otp);
+                }
+              };
+              promises.push(waPromise());
             }
           }
           await Promise.all(promises);

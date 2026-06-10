@@ -33,11 +33,9 @@ import GlobalBackButton from '@/shared/components/GlobalBackButton';
 const AuthenticatedNavbar = ({ toggleSidebar }) => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const [showNotifications, setShowNotifications] = useState(false);
   const [showProfileMenu, setShowProfileMenu] = useState(false);
   const [showMobileMenu, setShowMobileMenu] = useState(false);
   const [isManualBookingOpen, setIsManualBookingOpen] = useState(false);
-  const notificationRef = useRef(null);
   const profileRef = useRef(null);
   const mobileMenuRef = useRef(null);
   const location = useLocation();
@@ -72,9 +70,6 @@ const AuthenticatedNavbar = ({ toggleSidebar }) => {
 
   useEffect(() => {
     const handleClickOutside = (event) => {
-      if (notificationRef.current && !notificationRef.current.contains(event.target)) {
-        setShowNotifications(false);
-      }
       if (profileRef.current && !profileRef.current.contains(event.target)) {
         setShowProfileMenu(false);
       }
@@ -175,7 +170,6 @@ const AuthenticatedNavbar = ({ toggleSidebar }) => {
     if (notif.link) {
       navigate(notif.link);
     }
-    setShowNotifications(false);
   };
 
   return (
@@ -236,71 +230,17 @@ const AuthenticatedNavbar = ({ toggleSidebar }) => {
             </Link>
           )}
 
-          <div className="relative" ref={notificationRef}>
+          <div className="relative">
             <button 
-              onClick={() => setShowNotifications(!showNotifications)}
-              className={`p-2.5 rounded-[8px] transition-all duration-300 relative border ${ showNotifications ? "" : "bg-[#0d0d0d] text-[#999999] border-white/5 hover:border-white/10" }`}
-              style={{ 
-                backgroundColor: showNotifications ? themeColor : undefined, 
-                color: showNotifications ? '#000' : undefined,
-                borderColor: showNotifications ? themeColor : undefined 
+              onClick={() => {
+                 navigate(`${getBasePath()}/notifications`);
+                 setShowMobileMenu(false);
               }}
+              className="p-2.5 rounded-[8px] transition-all duration-300 relative border bg-[#0d0d0d] text-[#999999] border-white/5 hover:border-white/10 hover:text-white"
             >
               <Bell size={20} />
-              {unreadCount > 0 && <span className="absolute top-1 right-1 w-2.5 h-2.5 bg-red-500 rounded-full border-2 border-black" />}
+              {unreadCount > 0 && <span className="absolute top-1 right-1 w-2.5 h-2.5 bg-[#B3DC26] rounded-full border-2 border-black" />}
             </button>
-
-            {showNotifications && (
-              <div className="absolute right-0 mt-4 w-80 sm:w-96 bg-[#000000] border border-white/10 rounded-lg shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-200">
-                <div className="p-5 border-b border-white/5 flex items-center justify-between bg-white/[0.02]">
-                   <div className="flex items-center gap-2">
-                      <h3 className="font-black text-white tracking-widest text-[10px] uppercase">Notification Vault</h3>
-                      {unreadCount > 0 && <span className="text-[9px] font-black px-2 py-0.5 rounded-full" style={{ backgroundColor: themeColor, color: '#000' }}>{unreadCount}</span>}
-                   </div>
-                  <div className="flex gap-4">
-                     <button onClick={markAllRead} className="text-[9px] font-black uppercase tracking-widest hover:opacity-80 transition-all" style={{ color: themeColor }}>
-                        Mark All
-                     </button>
-                     <button onClick={clearAll} className="text-[9px] font-black uppercase tracking-widest text-red-500 hover:text-red-400 transition-colors">
-                        Clear
-                     </button>
-                  </div>
-                </div>
-                <div className="max-h-[400px] overflow-y-auto no-scrollbar">
-                  {notifications.length > 0 ? (
-                    notifications.map((notif) => (
-                      <div 
-                        key={notif.id || notif._id} 
-                        onClick={() => handleNotificationClick(notif)}
-                        className={`p-5 border-b border-white/5 transition-colors cursor-pointer group ${notif.isRead ? 'opacity-60' : 'bg-white/[0.02]'}`}
-                      >
-                        <div className="flex gap-4">
-                           <div className="mt-0.5 p-2 rounded-[8px] border border-white/5 flex items-center justify-center shrink-0" style={{ backgroundColor: notif.isRead ? 'rgba(255,255,255,0.05)' : themeColor + '1A', color: notif.isRead ? '#555' : themeColor }}>
-                             {getNotificationIcon(notif.type)}
-                           </div>
-                           <div className="flex-1 space-y-1">
-                             <div className="flex justify-between items-start">
-                               <h4 className={`text-[12px] font-black transition-colors uppercase tracking-tight ${notif.isRead ? 'text-gray-500' : 'text-white'}`} style={{ '--hover-color': themeColor }}>
-                                 {notif.title}
-                               </h4>
-                               <span className="text-[9px] text-neutral-600 font-bold flex items-center gap-1 uppercase">
-                                  {formatDistanceToNow(new Date(notif.createdAt), { addSuffix: true }).replace('about ', '')}
-                               </span>
-                             </div>
-                             <p className={`text-[11px] leading-relaxed font-medium ${notif.isRead ? 'text-gray-600' : 'text-neutral-400'}`}>{notif.message}</p>
-                           </div>
-                        </div>
-                      </div>
-                    ))
-                  ) : (
-                    <div className="p-16 text-center flex flex-col items-center gap-4">
-                      <div className="w-20 h-20 rounded-full bg-white/[0.02] border border-dashed border-white/10 flex items-center justify-center text-neutral-800"><Bell size={40} /></div>
-                      <p className="text-[10px] text-neutral-600 font-black tracking-widest uppercase">Vault is empty</p>
-                    </div>
-                  )}
-                </div>
-              </div>
-            )}
           </div>
 
           <div className="h-8 w-[1px] bg-white/5 mx-1 hidden sm:block" />

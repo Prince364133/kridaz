@@ -461,7 +461,7 @@ export default function FindProfessionals() {
                 transition={{ duration: 0.25 }}
                 key={pro.id || pro._id}
                 className="relative rounded-[16px] border border-[rgba(255,255,255,0.08)] bg-[#1A1A1A] overflow-hidden transition-all duration-500 group hover:border-[#B3DC26]/50 hover:shadow-[0px_8px_24px_rgba(85,222,232,0.10)] h-56 cursor-pointer"
-                onClick={() => navigate(`/professionals/${pro.id || pro._id}`)}
+                onClick={() => navigate(`/profile/${pro.userId || pro.id || pro._id}`)}
               >
                 {/* Background Image or Initials */}
                 {(pro.image || pro.profilePicture) ? (

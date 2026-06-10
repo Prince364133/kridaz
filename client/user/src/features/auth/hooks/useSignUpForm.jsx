@@ -7,8 +7,6 @@ import toast from "react-hot-toast";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { login } from "@redux/slices/authSlice";
-import { auth } from "../../../config/firebase";
-import { signInWithPhoneNumber } from "firebase/auth";
 
 const registerSchema = z.object({
   name: z.string().min(1, "Name is required"),
@@ -138,25 +136,9 @@ const useSignUpForm = (predefinedRole = "user") => {
     try {
       const { email, phone } = getValues();
       
-      // Use Firebase Phone Auth if a phone number is provided and recaptcha is ready
-      if (phone && window.recaptchaVerifier) {
-        try {
-          // Assuming India for now as per test code, though could be dynamic
-          const formattedPhone = phone.startsWith('+') ? phone : `+91${phone}`;
-          const confirmationResult = await signInWithPhoneNumber(auth, formattedPhone, window.recaptchaVerifier);
-          window.confirmationResult = confirmationResult;
-          toast.success("OTP sent to your phone");
-          setShowOtpInput(true);
-        } catch (fbError) {
-          console.error("Firebase send error:", fbError);
-          toast.error(fbError.message || "Failed to send SMS via Firebase");
-        }
-      } else {
-        // Fallback to backend for email or if no recaptcha
-        const response = await axiosInstance.post(`${apiPath}/send-otp`, { email, phone });
-        toast.success(response.data.message || "OTPs sent successfully");
-        setShowOtpInput(true);
-      }
+      const response = await axiosInstance.post(`${apiPath}/send-otp`, { email, phone });
+      toast.success(response.data.message || "OTPs sent successfully");
+      setShowOtpInput(true);
     } catch (error) {
       if (error.response) {
         toast.error(error.response?.data?.message || "Failed to send OTP");
@@ -180,26 +162,10 @@ const useSignUpForm = (predefinedRole = "user") => {
 
     setLoading(true);
     
-    let firebaseIdToken = null;
-    if (window.confirmationResult && data.otp) {
-      try {
-        const result = await window.confirmationResult.confirm(data.otp);
-        firebaseIdToken = await result.user.getIdToken();
-      } catch (err) {
-        console.error("Firebase OTP confirmation error:", err);
-        toast.error("Invalid verification code");
-        setLoading(false);
-        return;
-      }
-    }
-
     const inviteToken = localStorage.getItem("pendingInvite");
     const umpireInvite = localStorage.getItem("umpireInvite");
     const payload = { ...data, role: predefinedRole, inviteToken, umpireInvite };
-    
-    if (firebaseIdToken) {
-      payload.otp = firebaseIdToken; // Send Firebase token instead of 6-digit OTP
-    }
+
 
     try {
       const response = await axiosInstance.post(`${apiPath}/register`, payload);
