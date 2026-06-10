@@ -62,7 +62,6 @@ export default defineConfig(({ mode }) => {
       dedupe: ["react", "react-dom"],
       alias: {
         "@app": path.resolve(__dirname, "./src/app"),
-        "@": path.resolve(__dirname, "./src"),
         "@components": path.resolve(__dirname, "./src/shared/components"),
         "@hooks/useAxiosInstance": path.resolve(__dirname, "./src/infrastructure/axios.js"),
         "@user/hooks/useAxiosInstance": path.resolve(__dirname, "./src/infrastructure/axios.js"),
@@ -83,6 +82,7 @@ export default defineConfig(({ mode }) => {
         "@user/utils": path.resolve(__dirname, "./src/shared/utils"),
         "@user/services": path.resolve(__dirname, "./src/shared/services"),
         "@user": path.resolve(__dirname, "./src"),
+        "@": path.resolve(__dirname, "./src"),
       },
     },
     server: {

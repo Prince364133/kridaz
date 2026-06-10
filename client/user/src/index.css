@@ -1,5 +1,6 @@
 @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Dancing+Script:wght@700&family=Inter:wght@400;500;600;700;800;900&family=Space+Mono&family=Bayon&family=Open+Sans:wght@300;400;500;600;700;800&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600;700;800&family=Inter:wght@400;500;600;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap');
 
 @import "tailwindcss/base";
 @import "tailwindcss/components";
@@ -204,6 +205,10 @@ h2, h3, .font-display {
 
 .font-inter {
   font-family: "Inter" !important;
+}
+
+.font-poppins {
+  font-family: "Poppins", sans-serif !important;
 }
 
 .messages-page h1,
@@ -543,6 +548,18 @@ select option:active {
   animation: marquee 10s linear infinite;
 }
 
+@keyframes x-slider {
+  0% {
+    transform: translateX(0%);
+  }
+  100% {
+    transform: translateX(calc(-50% - 1.25rem));
+  }
+}
+.animate-x-slider {
+  animation: x-slider 30s linear infinite;
+}
+
 /* ── Utility Classes ─────────────────────────────────────────────── */
 .text-primary  { color: var(--primary) !important; }
 .bg-primary    { background-color: var(--primary) !important; }
@@ -637,4 +654,14 @@ select option:active {
 
 .force-open-sans, .force-open-sans * {
   font-family: 'Open Sans', sans-serif !important;
+}
+
+/* Landing Page Specific Scrollbar - Hidden but still scrolls */
+.landing-scrollbar {
+  -ms-overflow-style: none !important;  /* IE and Edge */
+  scrollbar-width: none !important;  /* Firefox */
+}
+
+.landing-scrollbar::-webkit-scrollbar {
+  display: none !important; /* Chrome, Safari and Opera */
 }

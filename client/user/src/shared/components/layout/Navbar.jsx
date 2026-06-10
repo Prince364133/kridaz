@@ -1,7 +1,7 @@
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { getDynamicProfileRoute } from "@utils/routeUtils";
 import { useSelector, useDispatch } from "react-redux";
-import { User, Users, X, LogOut, Activity, ShieldCheck, Zap, ArrowRight, Clock, Trophy, Target, MessageCircle, MapPin, Bell, UserSearch, Search, Plus, Bookmark, FileText, Home, Briefcase, ChevronDown, Award, Mail, HelpCircle } from "lucide-react";
+import { User, Users, X, LogOut, Activity, ShieldCheck, Zap, ArrowRight, Clock, Trophy, Target, MessageCircle, MapPin, Bell, UserSearch, Search, Plus, Bookmark, FileText, Home, Briefcase, ChevronDown, Award, Mail, HelpCircle, Share2 } from "lucide-react";
 import { useState, useCallback } from "react";
 import { createPortal } from "react-dom";
 import { logout } from "@redux/slices/authSlice";
@@ -10,7 +10,28 @@ import toast from "react-hot-toast";
 import axiosInstance from "@hooks/useAxiosInstance";
 import useNotifications from "@hooks/shared/useNotifications";
 import { useScrollDirection } from "@hooks/useScrollDirection.js";
-import Dock from "./Dock";
+
+import { Liquid } from "../ui/button-1";
+
+const LIQUID_COLORS = {
+  color1: '#FFFFFF',
+  color2: '#1E10C5',
+  color3: '#9089E2',
+  color4: '#FCFCFE',
+  color5: '#F9F9FD',
+  color6: '#B2B8E7',
+  color7: '#0E2DCB',
+  color8: '#0017E9',
+  color9: '#4743EF',
+  color10: '#7D7BF4',
+  color11: '#0B06FC',
+  color12: '#C5C1EA',
+  color13: '#1403DE',
+  color14: '#B6BAF6',
+  color15: '#C1BEEB',
+  color16: '#290ECB',
+  color17: '#3F4CC0',
+};
 
 /**
  * NotificationBadge — Shows unread notification count as a red dot/badge.
@@ -39,6 +60,7 @@ const Navbar = () => {
   const { scrollDirection, scrolled: isScrolled } = useScrollDirection();
 
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [isInviteHovered, setIsInviteHovered] = useState(false);
 
   const geoLoading = locationStatus === "detecting";
   const geoLabel = userLocation 
@@ -104,61 +126,7 @@ const Navbar = () => {
     { name: "Business", path: "#", icon: Briefcase },
   ];
 
-  const dockItems = isPartnerPortal ? [
-    { 
-      icon: <MapPin size={22} className={location.pathname === "/business/venue" ? "text-[#BFF367]" : ""} />, 
-      label: "Venues", 
-      onClick: () => navigate("/business/venue"),
-      className: location.pathname === "/business/venue" ? "active-dock-item" : ""
-    },
-    { 
-      icon: <Briefcase size={22} className={location.pathname === "/business/professional" ? "text-[#BFF367]" : ""} />, 
-      label: "Pros", 
-      onClick: () => navigate("/business/professional"),
-      className: location.pathname === "/business/professional" ? "active-dock-item" : ""
-    },
-  ] : [
-    { 
-      icon: <Home size={22} className={location.pathname === "/" ? "text-[#BFF367]" : ""} />, 
-      label: "Home", 
-      onClick: () => navigate("/"),
-      className: location.pathname === "/" ? "active-dock-item" : ""
-    },
-    { 
-      icon: <MapPin size={22} className={location.pathname === "/venues" ? "text-[#BFF367]" : ""} />, 
-      label: "Venues", 
-      onClick: () => navigate("/venues"),
-      className: location.pathname === "/venues" ? "active-dock-item" : ""
-    },
-    { 
-      icon: <Award size={22} className={location.pathname === "/professionals" ? "text-[#BFF367]" : ""} />, 
-      label: "Pros", 
-      onClick: () => navigate("/professionals"),
-      className: location.pathname === "/professionals" ? "active-dock-item" : ""
-    },
-    { 
-      icon: <Target size={22} className={location.pathname === "/join-games" ? "text-[#BFF367]" : ""} />, 
-      label: "Join Games", 
-      onClick: () => navigate("/join-games"),
-      className: location.pathname === "/join-games" ? "active-dock-item" : ""
-    },
-    { 
-      icon: <Users size={22} className={location.pathname === "/players" ? "text-[#BFF367]" : ""} />, 
-      label: "Players", 
-      onClick: () => navigate("/players"),
-      className: location.pathname === "/players" ? "active-dock-item" : ""
-    },
-    { 
-      icon: <Briefcase size={22} className={location.pathname.startsWith("/business") ? "text-[#BFF367]" : ""} />, 
-      label: "Business", 
-      onClick: () => {},
-      subItems: [
-        { label: "Register as Pro", onClick: () => navigate("/business/professional") },
-        { label: "Host Venue", onClick: () => navigate("/business/venue") }
-      ],
-      className: location.pathname.startsWith("/business") ? "active-dock-item" : ""
-    },
-  ];
+
 
   const searchParams = new URLSearchParams(location.search);
   const isHome = location.pathname === "/" || location.pathname === "/community";
@@ -250,14 +218,7 @@ const Navbar = () => {
         </div>
       </nav>
 
-      {/* Floating Left Dock for Desktop */}
-      <div className={`hidden lg:block fixed top-[120px] z-[100] transition-all duration-300 ${
-        useRestrictedWidth 
-          ? "left-6 lg:left-[max(16px,calc(50vw-454px))] xl:left-[max(24px,calc(50vw-430px))]" 
-          : "left-6"
-      }`}>
-        <Dock items={dockItems} direction="vertical" panelHeight={80} baseItemSize={60} magnification={85} />
-      </div>
+
 
       {/* ACTIONS (Moved outside nav to prevent dropdown clipping) */}
       <div className={`flex items-center gap-2 sm:gap-4 fixed right-4 sm:right-6 z-[100] transition-all duration-300 ${ scrollDirection === "down" && window.innerWidth < 1024 ? "-translate-y-full top-[-100px]" : "translate-y-0 top-4" }`}>
@@ -548,6 +509,39 @@ const Navbar = () => {
                           <ShieldCheck size={18} className="text-white/40" />
                           <span className="text-sm font-semibold">Privacy Policy</span>
                         </Link>
+                        
+                        <div className="w-full mt-2 flex justify-center" onClick={() => setIsSidebarOpen(false)}>
+                          <Link
+                            to="/wallet"
+                            className="relative inline-block w-full h-[3.5em] group dark:bg-black bg-white dark:border-white border-black border rounded-xl overflow-visible">
+                            
+                            {/* Inner container */}
+                            <div className="relative w-full h-full overflow-hidden rounded-xl">
+                              <span className="absolute inset-0 rounded-xl bg-[#d9d9d9]"></span>
+                              <span className="absolute inset-0 rounded-xl bg-black"></span>
+                              <Liquid isHovered={isInviteHovered} colors={LIQUID_COLORS} />
+                              
+                              {[1, 2, 3, 4, 5].map((i) => (
+                                <span
+                                  key={i}
+                                  className={`absolute inset-0 rounded-xl border-solid border-[3px] border-gradient-to-b from-transparent to-white mix-blend-overlay filter ${i <= 2 ? 'blur-[3px]' : i === 3 ? 'blur-[5px]' : 'blur-[4px]'}`}></span>
+                              ))}
+                              <span className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-[40%] w-[70.8%] h-[42.85%] rounded-xl filter blur-[15px] bg-[#006]"></span>
+                            </div>
+                            
+                            {/* Button Content */}
+                            <div
+                              className="absolute inset-0 rounded-xl bg-transparent cursor-pointer flex items-center justify-between px-5"
+                              onMouseEnter={() => setIsInviteHovered(true)}
+                              onMouseLeave={() => setIsInviteHovered(false)}>
+                              <span className="flex items-center gap-3">
+                                <Share2 size={18} className="group-hover:text-yellow-400 text-white flex-shrink-0 transition-colors" />
+                                <span className="group-hover:text-yellow-400 text-white text-[14px] font-black tracking-wide whitespace-nowrap transition-colors uppercase">Invite & Earn</span>
+                              </span>
+                              <span className="group-hover:text-yellow-400 text-white/80 font-bold text-[10px] uppercase tracking-widest transition-colors">Get ₹100 / Friend</span>
+                            </div>
+                          </Link>
+                        </div>
                       </div>
                     </div>
 

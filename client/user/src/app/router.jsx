@@ -76,6 +76,7 @@ const SavedPage              = lazy(() => import("@features/saved/pages/SavedPag
 const NewPostLanding         = lazy(() => import("@user/pages/NewPost/NewPostLanding"));
 const CreatePostPage         = lazy(() => import("@features/networking/pages/CreatePostPage"));
 const CreateStoryPage        = lazy(() => import("@features/networking/pages/CreateStoryPage"));
+const LandingPage            = lazy(() => import("@user/pages/LandingPage"));
 
 
 // â”€â”€ Lazy: Business Landing Pages â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
@@ -253,6 +254,9 @@ const router = createBrowserRouter([
       { path: "new-post",           element: <ProtectedRoute><S><NewPostLanding /></S></ProtectedRoute> },
       { path: "create-post",        element: <ProtectedRoute><S><CreatePostPage /></S></ProtectedRoute> },
       { path: "create-story",       element: <ProtectedRoute><S><CreateStoryPage /></S></ProtectedRoute> },
+
+      // Landing Page (PR #68)
+      { path: "landing",            element: <S><LandingPage /></S> },
 
       // Business Landings
       { path: "business/venue",     element: <S><UserVenueOwnerLanding /></S> },

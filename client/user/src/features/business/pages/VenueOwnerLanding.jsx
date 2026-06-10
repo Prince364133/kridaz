@@ -5,6 +5,14 @@ import { useSelector } from "react-redux";
 import axiosInstance from "@hooks/useAxiosInstance.js";
 import toast from "react-hot-toast";
 import ScrollToTop from "@components/common/ScrollToTop";
+import streamlinedDesktop from "../../../assets/streamlined-desktop.png";
+import streamlinedMobile from "../../../assets/streamlined-mobile.png";
+import insightsDesktop from "../../../assets/insights-desktop.png";
+import insightsMobile from "../../../assets/insights-mobile.png";
+import financesDesktop from "../../../assets/finances-desktop.png";
+import financesMobile from "../../../assets/finances-mobile.png";
+import reachDesktop from "../../../assets/reach-desktop.png";
+import reachMobile from "../../../assets/reach-mobile.png";
 
 const GRADIENT = "linear-gradient(90deg, #BFF367 0%, #BFF367 100%)";
 
@@ -107,10 +115,10 @@ export default function VenueOwnerLanding() {
       data.append("phone", user?.phone || "");
       data.append("role", "venu_owners");
       
-      data.append("documents", aadharFront, `aadhar_front_${aadharFront.name}`);
-      data.append("documents", aadharBack, `aadhar_back_${aadharBack.name}`);
-      data.append("documents", panFront, `pan_front_${panFront.name}`);
-      data.append("documents", panBack, `pan_back_${panBack.name}`);
+      data.append("documents", aadharFront);
+      data.append("documents", aadharBack);
+      data.append("documents", panFront);
+      data.append("documents", panBack);
 
       const response = await axiosInstance.post("/api/user/auth/upgrade-request", data, {
         headers: { "Content-Type": "multipart/form-data" }
@@ -160,147 +168,339 @@ export default function VenueOwnerLanding() {
   };
 
   return (
-    <div className="relative min-h-screen text-white bg-[#121414] font-inter overflow-hidden pb-20 lg:pb-0">
+    <div className="relative min-h-screen text-white bg-[#121414] font-sans overflow-x-clip pb-20 lg:pb-0">
       <ScrollToTop />
       
       {/* ── Hero Section ── */}
-      <section className="relative pt-12 md:pt-16 pb-20 md:pb-32 overflow-hidden bg-black">
-        {/* Atmospheric Glow Background */}
-        <div className="absolute top-0 left-1/2 w-[400px] h-[400px] md:w-[600px] md:h-[600px] rounded-full blur-[100px] md:blur-[120px] -translate-y-1/2 -translate-x-1/2 pointer-events-none"
-             style={{ backgroundColor: "rgba(191,243,103,0.06)" }}></div>
+      <section className="relative w-full min-h-[100vh] flex flex-col justify-start md:justify-center pt-28 md:pt-32 pb-16 md:pb-24 overflow-hidden bg-[#0A0A0A]">
+        {/* Background Image */}
+        <div className="absolute inset-0 z-0">
+          <img src="/venue-hero-desktop.png" alt="Hero Background Desktop" className="hidden md:block w-full h-full object-cover object-center opacity-100" />
+          <img src="/venue-hero-mobile.png" alt="Hero Background Mobile" className="block md:hidden w-full h-full object-cover object-top opacity-100" />
+        </div>
              
-        <div className="max-w-7xl mx-auto px-5 md:px-6 relative z-10">
-          <div className="text-center flex flex-col items-center max-w-4xl mx-auto">
-            {/* Pill */}
-            <div className="inline-flex items-center gap-2 px-3 py-1.5 border border-[#BFF367]/30 bg-[#BFF367]/10 rounded-full mb-6 md:mb-8">
-              <span className="text-[#BFF367] text-[9px] md:text-[10px] uppercase tracking-widest font-black">For Venue Owners & Partners</span>
+        <div className="w-full px-4 md:px-8 lg:px-12 relative z-10 mt-10 md:mt-0">
+          <div className="flex flex-col md:flex-row items-center w-full">
+            <div className="w-full md:w-[55%] lg:w-[50%] xl:w-[45%] text-center md:text-left">
+              <h1 className="text-[32px] md:text-[60px] lg:text-[80px] font-black tracking-tight leading-[1.05] font-poppins font-medium normal-case text-white mb-6 drop-shadow-2xl">
+                Digitize Your Sports Club <br className="hidden lg:block"/>
+                at <span className="text-[#BFF367]">0% Commission</span>
+              </h1>
+              <div className="flex justify-center md:justify-start w-full mt-8 md:mt-12">
+                {renderActionButton("hero")}
+              </div>
             </div>
-
-            {/* Title */}
-            <h1 
-              className="text-4xl md:text-[64px] leading-[1.1] font-black uppercase tracking-tight mb-6 md:mb-8 w-full"
-              style={{ fontFamily: "'Open Sans', sans-serif" }}
-            >
-              <span className="text-white block md:inline">Grow Your Venue.</span><br className="hidden md:block" />
-              <span className="text-[#BFF367] block md:inline mt-1 md:mt-0">Maximize Every Slot.</span>
-            </h1>
-
-            {/* Paragraph */}
-            <p className="text-white/70 text-sm md:text-lg mb-10 md:mb-12 max-w-2xl font-medium leading-relaxed px-2 md:px-0">
-              Kridaz helps you automate bookings, manage operations, and connect with thousands of players looking for venues like yours.
-            </p>
-
-            {/* Features Row */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8 md:gap-10 mb-12 md:mb-16 border-t border-white/10 pt-10 md:pt-12 w-full">
-              {benefits.map((b, i) => (
-                <div key={i} className="flex flex-row md:flex-row items-center md:items-start gap-4 md:gap-5 group text-left">
-                  <div className="w-12 h-12 md:w-12 md:h-12 shrink-0 rounded-[10px] md:rounded-[12px] flex items-center justify-center border border-[#BFF367]/20 bg-gradient-to-b from-[#262626] to-[#1A1A1A]">
-                    <b.icon className="w-5 h-5 md:w-5 md:h-5 text-[#BFF367]" />
-                  </div>
-                  <div>
-                    <h3 className="text-white text-xs md:text-sm font-black mb-1 md:mb-2 uppercase tracking-wide" style={{ fontFamily: "'Open Sans', sans-serif" }}>{b.title}</h3>
-                    <p className="text-white/50 text-xs md:text-xs leading-relaxed">{b.desc}</p>
-                  </div>
-                </div>
-              ))}
-            </div>
-
-            {/* Buttons */}
-            <div className="flex flex-row items-center justify-center gap-4 md:gap-6 w-full md:w-auto mt-2">
-              {renderActionButton("hero")}
-              {!hasExistingRole && !hasPendingApplication && (
-              <button className="flex items-center gap-2 md:gap-3 group shrink-0">
-                <div className="w-10 h-10 md:w-12 md:h-12 rounded-full border border-white/20 flex items-center justify-center bg-white/5 transition-all group-hover:bg-white/10 group-hover:scale-110 shrink-0">
-                  <Play className="w-3 h-3 md:w-4 md:h-4 text-white fill-white" />
-                </div>
-                <div className="text-left hidden sm:block">
-                  <div className="text-white font-black uppercase tracking-widest text-[10px] md:text-[11px]">Watch Demo</div>
-                  <div className="text-white/50 text-[9px] md:text-[10px] mt-0.5 font-medium">See how it works</div>
-                </div>
-                <div className="text-left sm:hidden">
-                   <div className="text-white font-black uppercase tracking-widest text-[10px]">Demo</div>
-                </div>
-              </button>
-              )}
-            </div>
+            {/* Empty space for the background mockup to show through on the right */}
+            <div className="w-full md:w-[45%] lg:w-[50%] xl:w-[55%] hidden md:block"></div>
           </div>
         </div>
       </section>
 
-      {/* ── Bento Grid Stats Section ── */}
-      <section className="py-16 md:py-24 bg-[#0c0f0f]">
-        <div className="max-w-5xl mx-auto px-5 md:px-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-5 md:gap-6">
-            
-            {/* Large Feature Card */}
-            <div className="bg-gradient-to-b from-[#262626] to-[#1A1A1A] border border-[#262626] p-6 md:p-8 rounded-[16px] relative overflow-hidden group flex flex-col justify-between">
-              <div className="relative z-10">
-                <span className="text-[#BFF367] font-black text-[10px] md:text-xs tracking-widest uppercase mb-2 md:mb-3 block">Command Center</span>
-                <h2 className="text-2xl md:text-4xl font-black text-white mb-3 md:mb-4 tracking-tight" style={{ fontFamily: "'Open Sans', sans-serif" }}>Total Control Over Your Facility</h2>
-                <p className="text-white/70 text-sm max-w-sm mb-6 md:mb-8 leading-relaxed">
-                  Monitor every court, every trainer, and every booking from a single, unified interface designed for high-performance management.
-                </p>
-                
-                <div className="space-y-3 md:space-y-4 max-w-sm">
-                  <div className="flex justify-between text-[10px] md:text-xs font-black text-white/70 tracking-widest">
-                    <span>PEAK CAPACITY</span>
-                    <span>94%</span>
-                  </div>
-                  <div className="h-2.5 md:h-3 w-full bg-white/5 rounded-full overflow-hidden flex">
-                     <div className="h-full bg-[#BFF367] w-[94%]" style={{ backgroundImage: "repeating-linear-gradient(90deg, transparent, transparent 4px, #121414 4px, #121414 6px)" }}></div>
-                  </div>
-                </div>
-              </div>
-              
-              {/* decorative bg */}
-              <div className="absolute right-0 bottom-0 w-full md:w-1/2 h-1/2 md:h-full opacity-10 md:opacity-20 pointer-events-none grayscale group-hover:grayscale-0 transition-all duration-700 mt-10 md:mt-0">
-                 <img src="https://images.unsplash.com/photo-1540747913346-19e32dc3e97e?auto=format&fit=crop&w=800&q=80" onError={(e) => { e.target.onerror = null; e.target.src = 'https://images.unsplash.com/photo-1540747913346-19e32dc3e97e?auto=format&fit=crop&w=800&q=80'; }} alt="Stadium" className="w-full h-full object-cover" />
-              </div>
-            </div>
 
-            {/* Small Data Card */}
-            <div className="bg-gradient-to-b from-[#262626] to-[#1A1A1A] border border-[#BFF367]/20 p-6 md:p-8 rounded-[16px] flex flex-col justify-between group">
-               <div>
-                  <Zap className="w-8 h-8 md:w-8 md:h-8 text-[#BFF367] fill-[#BFF367] mb-4 md:mb-5 drop-shadow-[0_0_15px_rgba(191,243,103,0.5)] group-hover:scale-110 transition-transform" />
-                  <h3 className="text-white text-xl md:text-2xl font-black mb-2 md:mb-3 uppercase tracking-tight" style={{ fontFamily: "'Open Sans', sans-serif" }}>Lightning Fast Onboarding</h3>
-                  <p className="text-white/70 text-xs md:text-sm leading-relaxed">
-                    Get your venue listed and start receiving automated bookings in under 15 minutes. Our system integrates with your existing workflow seamlessly.
-                  </p>
-               </div>
-               <div className="mt-5 md:mt-6 pt-5 md:pt-6 border-t border-white/5">
-                  <div className="flex items-center gap-3 md:gap-4">
-                     <div className="flex -space-x-2 md:-space-x-3">
-                        <img src="https://i.pravatar.cc/100?img=12" className="w-8 h-8 md:w-10 md:h-10 rounded-full border-2 border-[#1A1A1A] object-cover" alt="User" />
-                        <img src="https://i.pravatar.cc/100?img=33" className="w-8 h-8 md:w-10 md:h-10 rounded-full border-2 border-[#1A1A1A] object-cover" alt="User" />
-                        <img src="https://i.pravatar.cc/100?img=47" className="w-8 h-8 md:w-10 md:h-10 rounded-full border-2 border-[#1A1A1A] object-cover" alt="User" />
-                     </div>
-                     <span className="text-[10px] md:text-xs font-black text-white/70 tracking-wide">+2k Venue Owners</span>
-                  </div>
-               </div>
-            </div>
-
-          </div>
-        </div>
-      </section>
-
-      {/* ── CTA Final Section ── */}
-      <section className="py-16 md:py-24 relative overflow-hidden bg-black">
-        <div className="max-w-2xl mx-auto px-5 md:px-6 text-center relative z-10">
-          <h2 className="text-2xl md:text-4xl font-black text-white mb-4 md:mb-6 tracking-tight leading-tight" style={{ fontFamily: "'Open Sans', sans-serif" }}>Ready to Scale Your Sports Business?</h2>
-          <p className="text-white/70 text-xs md:text-base max-w-xl mx-auto mb-8 md:mb-10">
-            Join the fastest-growing network of sports venues and turn your operation into a well-oiled machine.
-          </p>
-          
-          <div className="flex flex-col sm:flex-row justify-center gap-4 md:gap-6 w-full px-4 md:px-0">
-             {renderActionButton("cta")}
-             <button className="border border-white/20 text-white px-6 py-3 md:px-8 md:py-3.5 font-black text-[11px] md:text-sm rounded-[8px] hover:bg-white/5 transition-colors">
-               Contact Sales
-             </button>
-          </div>
-        </div>
+      {/* ── Stacking Features Section (Full Bleed) ── */}
+      <section className="relative w-full">
         
-        {/* Grid Pattern Background */}
-        <div className="absolute inset-0 opacity-[0.03] pointer-events-none" style={{ backgroundImage: "radial-gradient(circle, #BFF367 1px, transparent 1px)", backgroundSize: "40px 40px" }}></div>
+        {/* Feature 1 */}
+        <div className="sticky top-0 w-full min-h-[100vh] bg-[#050505] flex items-center overflow-hidden z-[1] border-t border-white/5 shadow-[0_-20px_50px_rgba(0,0,0,0.5)] rounded-t-[35px] relative">
+          {/* Background Image */}
+          <img src={streamlinedDesktop} alt="Streamlined Operations Desktop" className="hidden lg:block absolute inset-0 w-full h-full object-cover z-0" />
+          <img src={streamlinedMobile} alt="Streamlined Operations Mobile" className="block lg:hidden absolute inset-0 w-full h-full object-cover z-0" />
+          
+          {/* Text Content */}
+          <div className="relative z-10 w-full p-6 md:p-16 lg:p-24 flex flex-col justify-start lg:justify-center items-center lg:items-start text-center lg:text-left space-y-4 md:space-y-6 mt-[-40vh] lg:mt-0">
+            <h2 className="text-[28px] md:text-4xl font-black tracking-tight leading-[1.05] font-poppins font-medium normal-case text-white">Streamlined Operations</h2>
+            <p className="text-white/60 text-[13px] md:text-lg lg:text-xl leading-relaxed max-w-xl">
+              Take complete control with intuitive slot bookings and centralized staff management.
+            </p>
+          </div>
+        </div>
+
+        {/* Feature 2 */}
+        <div className="sticky top-0 w-full min-h-[100vh] bg-[#080808] flex items-center overflow-hidden z-[2] border-t border-white/5 shadow-[0_-20px_50px_rgba(0,0,0,0.5)] rounded-t-[35px] relative">
+          <img src={insightsDesktop} alt="Actionable Insights Desktop" className="hidden lg:block absolute inset-0 w-full h-full object-cover z-0" />
+          <img src={insightsMobile} alt="Actionable Insights Mobile" className="block lg:hidden absolute inset-0 w-full h-full object-cover z-0" />
+          
+          <div className="relative z-10 w-full p-6 md:p-16 lg:p-24 flex flex-col justify-start lg:justify-center items-center lg:items-end text-center lg:text-right space-y-4 md:space-y-6 mt-[-40vh] lg:mt-0">
+            <h2 className="text-[28px] md:text-4xl font-black tracking-tight leading-[1.05] font-poppins font-medium normal-case text-white">Actionable Insights</h2>
+            <p className="text-white/60 text-[13px] md:text-lg lg:text-xl leading-relaxed max-w-xl">
+              Leverage real-time data to track booking patterns, analyze engagement, and visualize revenue.
+            </p>
+          </div>
+        </div>
+
+        {/* Feature 3 */}
+        <div className="sticky top-0 w-full min-h-[100vh] bg-[#0a0a0a] flex items-center overflow-hidden z-[3] border-t border-white/5 shadow-[0_-20px_50px_rgba(0,0,0,0.5)] rounded-t-[35px] relative">
+          <img src={financesDesktop} alt="Automated Finances Desktop" className="hidden lg:block absolute inset-0 w-full h-full object-cover z-0" />
+          <img src={financesMobile} alt="Automated Finances Mobile" className="block lg:hidden absolute inset-0 w-full h-full object-cover z-0" />
+          
+          <div className="relative z-10 w-full p-6 md:p-16 lg:p-24 flex flex-col justify-start lg:justify-center items-center lg:items-start text-center lg:text-left space-y-4 md:space-y-6 mt-[-40vh] lg:mt-0">
+            <h2 className="text-[28px] md:text-4xl font-black tracking-tight leading-[1.05] font-poppins font-medium normal-case text-white">Automated Finances</h2>
+            <p className="text-white/60 text-[13px] md:text-lg lg:text-xl leading-relaxed max-w-xl">
+              Automate invoicing, track payments, and instantly export comprehensive financial reports.
+            </p>
+          </div>
+        </div>
+
+        {/* Feature 4 */}
+        <div className="sticky top-0 w-full min-h-[100vh] bg-[#0d0d0d] flex items-center overflow-hidden z-[4] border-t border-white/5 shadow-[0_-20px_50px_rgba(0,0,0,0.5)] rounded-t-[35px] relative">
+          <img src={reachDesktop} alt="Expand Your Reach Desktop" className="hidden lg:block absolute inset-0 w-full h-full object-cover z-0" />
+          <img src={reachMobile} alt="Expand Your Reach Mobile" className="block lg:hidden absolute inset-0 w-full h-full object-cover z-0" />
+          
+          <div className="relative z-10 w-full p-6 md:p-16 lg:p-24 flex flex-col justify-start lg:justify-center items-center lg:items-end text-center lg:text-right space-y-4 md:space-y-6 mt-[-40vh] lg:mt-0">
+            <h2 className="text-[28px] md:text-4xl font-black tracking-tight leading-[1.05] font-poppins font-medium normal-case text-white">Expand Your Reach</h2>
+            <p className="text-white/60 text-[13px] md:text-lg lg:text-xl leading-relaxed max-w-xl">
+              Instantly showcase your courts to a hyper-engaged local community actively searching for games.
+            </p>
+          </div>
+        </div>
+
+      </section>
+
+      {/* ── Empower Your Business Grid ── */}
+      <section className="py-16 md:py-24 bg-[#0A0A0A] border-t border-white/5">
+        <div className="w-full px-2 md:px-4 lg:px-8">
+          <h2 className="text-[20px] md:text-4xl font-black tracking-tight leading-[1.05] font-poppins font-medium normal-case text-white text-center mb-16 md:mb-20">
+            Empower Your Business
+            <span className="text-[#BFF367] block mt-2 md:mt-4">with Kridaz</span>
+          </h2>
+          
+          {/* Horizontal Slider Container */}
+          <div className="flex overflow-x-auto gap-6 pb-12 snap-x scrollbar-hide -mx-4 px-4 md:-mx-8 md:px-8">
+            
+            {/* Card 1 */}
+            <div className="flex-none w-[280px] md:w-[350px] h-[450px] rounded-[24px] overflow-hidden flex flex-col group snap-center cursor-pointer border border-white/10 hover:border-[#BFF367]/30 transition-colors">
+              <div className="flex-1 bg-[#111] p-8 flex flex-col justify-between relative">
+                <div>
+                  <span className="text-[#BFF367] text-[10px] font-bold tracking-widest uppercase mb-4 block">FINANCE</span>
+                  <h3 className="text-white text-2xl md:text-3xl font-poppins font-medium leading-[1.2]">
+                    Zero-Commission Bookings
+                  </h3>
+                  <p className="text-white/50 text-sm mt-4 font-sans leading-relaxed">Keep 100% of your earnings. We never take a cut from your facility bookings.</p>
+                </div>
+
+              </div>
+              <div className="h-[80px] w-full bg-[#050505] relative overflow-hidden">
+                <img src="https://images.unsplash.com/photo-1557683316-973673baf926?auto=format&fit=crop&w=500&q=80" alt="Finance" className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700 opacity-70" />
+              </div>
+            </div>
+
+            {/* Card 2 */}
+            <div className="flex-none w-[280px] md:w-[350px] h-[450px] rounded-[24px] overflow-hidden flex flex-col group snap-center cursor-pointer border border-white/10 hover:border-[#BFF367]/30 transition-colors">
+              <div className="flex-1 bg-[#111] p-8 flex flex-col justify-between relative">
+                <div>
+                  <span className="text-[#BFF367] text-[10px] font-bold tracking-widest uppercase mb-4 block">OPERATIONS</span>
+                  <h3 className="text-white text-2xl md:text-3xl font-poppins font-medium leading-[1.2]">
+                    Dynamic Pricing
+                  </h3>
+                  <p className="text-white/50 text-sm mt-4 font-sans leading-relaxed">Automatically adjust rates for peak hours, weekends, or special local events.</p>
+                </div>
+
+              </div>
+              <div className="h-[80px] w-full bg-[#050505] relative overflow-hidden">
+                <img src="https://images.unsplash.com/photo-1557682250-33bd709cbe85?auto=format&fit=crop&w=500&q=80" alt="Pricing" className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700 opacity-70" />
+              </div>
+            </div>
+
+            {/* Card 3 */}
+            <div className="flex-none w-[280px] md:w-[350px] h-[450px] rounded-[24px] overflow-hidden flex flex-col group snap-center cursor-pointer border border-white/10 hover:border-[#BFF367]/30 transition-colors">
+              <div className="flex-1 bg-[#111] p-8 flex flex-col justify-between relative">
+                <div>
+                  <span className="text-[#BFF367] text-[10px] font-bold tracking-widest uppercase mb-4 block">MANAGEMENT</span>
+                  <h3 className="text-white text-2xl md:text-3xl font-poppins font-medium leading-[1.2]">
+                    Staff Roles & Access
+                  </h3>
+                  <p className="text-white/50 text-sm mt-4 font-sans leading-relaxed">Grant specific dashboard permissions to managers, accounts, and ground staff.</p>
+                </div>
+
+              </div>
+              <div className="h-[80px] w-full bg-[#050505] relative overflow-hidden">
+                <img src="https://images.unsplash.com/photo-1557672172-298e090bd0f1?auto=format&fit=crop&w=500&q=80" alt="Management" className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700 opacity-70" />
+              </div>
+            </div>
+
+            {/* Card 4 */}
+            <div className="flex-none w-[280px] md:w-[350px] h-[450px] rounded-[24px] overflow-hidden flex flex-col group snap-center cursor-pointer border border-white/10 hover:border-[#BFF367]/30 transition-colors">
+              <div className="flex-1 bg-[#111] p-8 flex flex-col justify-between relative">
+                <div>
+                  <span className="text-[#BFF367] text-[10px] font-bold tracking-widest uppercase mb-4 block">TECHNOLOGY</span>
+                  <h3 className="text-white text-2xl md:text-3xl font-poppins font-medium leading-[1.2]">
+                    Live Syncing
+                  </h3>
+                  <p className="text-white/50 text-sm mt-4 font-sans leading-relaxed">Prevent double-bookings with instant, real-time availability updates.</p>
+                </div>
+
+              </div>
+              <div className="h-[80px] w-full bg-[#050505] relative overflow-hidden">
+                <img src="https://images.unsplash.com/photo-1557683311-eac922347aa1?auto=format&fit=crop&w=500&q=80" alt="Tech" className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700 opacity-70" />
+              </div>
+            </div>
+
+            {/* Card 5 */}
+            <div className="flex-none w-[280px] md:w-[350px] h-[450px] rounded-[24px] overflow-hidden flex flex-col group snap-center cursor-pointer border border-white/10 hover:border-[#BFF367]/30 transition-colors">
+              <div className="flex-1 bg-[#111] p-8 flex flex-col justify-between relative">
+                <div>
+                  <span className="text-[#BFF367] text-[10px] font-bold tracking-widest uppercase mb-4 block">PAYMENTS</span>
+                  <h3 className="text-white text-2xl md:text-3xl font-poppins font-medium leading-[1.2]">
+                    Instant Payouts
+                  </h3>
+                  <p className="text-white/50 text-sm mt-4 font-sans leading-relaxed">Get your earnings transferred directly to your bank account instantly.</p>
+                </div>
+
+              </div>
+              <div className="h-[80px] w-full bg-[#050505] relative overflow-hidden">
+                <img src="https://images.unsplash.com/photo-1550859492-d5da9d8e45f3?auto=format&fit=crop&w=500&q=80" alt="Payments" className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700 opacity-70" />
+              </div>
+            </div>
+
+            {/* Card 6 */}
+            <div className="flex-none w-[280px] md:w-[350px] h-[450px] rounded-[24px] overflow-hidden flex flex-col group snap-center cursor-pointer border border-white/10 hover:border-[#BFF367]/30 transition-colors">
+              <div className="flex-1 bg-[#111] p-8 flex flex-col justify-between relative">
+                <div>
+                  <span className="text-[#BFF367] text-[10px] font-bold tracking-widest uppercase mb-4 block">DATA</span>
+                  <h3 className="text-white text-2xl md:text-3xl font-poppins font-medium leading-[1.2]">
+                    Revenue Analytics
+                  </h3>
+                  <p className="text-white/50 text-sm mt-4 font-sans leading-relaxed">Track your daily, weekly, and monthly financial growth in one dashboard.</p>
+                </div>
+
+              </div>
+              <div className="h-[80px] w-full bg-[#050505] relative overflow-hidden">
+                <img src="https://images.unsplash.com/photo-1614850523459-c2f4c699c52e?auto=format&fit=crop&w=500&q=80" alt="Data" className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700 opacity-70" />
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </section>
+
+      {/* ── Testimonials ── */}
+      <section className="py-16 md:py-24 bg-[#050505]">
+        <div className="w-full px-2 md:px-4 lg:px-8 max-w-7xl mx-auto">
+          
+          <div className="text-center mb-16 md:mb-20">
+            <h2 className="text-[20px] md:text-4xl font-black tracking-tight leading-[1.05] font-poppins font-medium normal-case text-white">
+              What Our Customers Say
+            </h2>
+          </div>
+
+          <div className="columns-1 md:columns-2 lg:columns-3 gap-6">
+            
+            {/* Card 1 */}
+            <div className="bg-[#111] p-8 rounded-2xl border border-white/5 break-inside-avoid mb-6">
+              <div className="flex gap-1 mb-6">
+                {[...Array(5)].map((_, i) => (
+                  <svg key={i} className="w-4 h-4 text-[#FBBF24]" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" /></svg>
+                ))}
+              </div>
+              <p className="text-white/80 text-sm leading-relaxed mb-8">
+                "We never needed to do much marketing as we started getting bookings from Day 1, thanks to the visibility and convenience of Kridaz. Their platform simplifies booking management, staff management, and payment collection."
+              </p>
+              <div className="flex items-center gap-4">
+                <img src="https://ui-avatars.com/api/?name=Imran+Patel&background=222&color=fff" alt="Imran Patel" className="w-10 h-10 rounded-full" />
+                <div>
+                  <p className="text-white font-bold text-sm">Imran Patel</p>
+                  <p className="text-white/50 text-xs">The Willingdon Sports Club</p>
+                </div>
+              </div>
+            </div>
+
+            {/* Card 2 */}
+            <div className="bg-[#111] p-8 rounded-2xl border border-white/5 break-inside-avoid mb-6">
+              <div className="flex gap-1 mb-6">
+                {[...Array(5)].map((_, i) => (
+                  <svg key={i} className="w-4 h-4 text-[#FBBF24]" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" /></svg>
+                ))}
+              </div>
+              <p className="text-white/80 text-sm leading-relaxed mb-8">
+                "Kridaz has been a game-changer for managing our five venues with multiple courts. From automating bookings to streamlining invoicing, accounting, and payment collection, it has simplified operations that would’ve required a large team otherwise."
+              </p>
+              <div className="flex items-center gap-4">
+                <img src="https://ui-avatars.com/api/?name=Rehan+Sumar&background=222&color=BFF367" alt="Rehan Sumar" className="w-10 h-10 rounded-full" />
+                <div>
+                  <p className="text-white font-bold text-sm">Rehan Sumar</p>
+                  <p className="text-white/50 text-xs">Founder | VPadel</p>
+                </div>
+              </div>
+            </div>
+
+            {/* Card 3 */}
+            <div className="bg-[#111] p-8 rounded-2xl border border-white/5 break-inside-avoid mb-6">
+              <div className="flex gap-1 mb-6">
+                {[...Array(5)].map((_, i) => (
+                  <svg key={i} className="w-4 h-4 text-[#FBBF24]" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" /></svg>
+                ))}
+              </div>
+              <p className="text-white/80 text-sm leading-relaxed mb-8">
+                "Managing 18 facilities across with sports like Football, Box Cricket & Pickleball would have been overwhelming if we weren’t using Kridaz. Its seamless automation for bookings, lead generation, and payment collection has really helped to streamline our operations."
+              </p>
+              <div className="flex items-center gap-4">
+                <img src="https://ui-avatars.com/api/?name=Samir+Sahni&background=222&color=fff" alt="Samir Sahni" className="w-10 h-10 rounded-full" />
+                <div>
+                  <p className="text-white font-bold text-sm">Samir Sahni</p>
+                  <p className="text-white/50 text-xs">CEO | Claygrounds</p>
+                </div>
+              </div>
+            </div>
+
+            {/* Card 4 */}
+            <div className="bg-[#111] p-8 rounded-2xl border border-white/5 break-inside-avoid mb-6 hidden md:block">
+              <div className="flex gap-1 mb-6">
+                {[...Array(5)].map((_, i) => (
+                  <svg key={i} className="w-4 h-4 text-[#FBBF24]" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" /></svg>
+                ))}
+              </div>
+              <p className="text-white/80 text-sm leading-relaxed mb-8">
+                "Our revenue literally doubled after we switched to Kridaz. The dynamic pricing alone helps us maximize court utilization on weekends. I can't imagine running my venue without this platform now."
+              </p>
+              <div className="flex items-center gap-4">
+                <img src="https://ui-avatars.com/api/?name=Arjun+Reddy&background=222&color=BFF367" alt="Arjun Reddy" className="w-10 h-10 rounded-full" />
+                <div>
+                  <p className="text-white font-bold text-sm">Arjun Reddy</p>
+                  <p className="text-white/50 text-xs">Manager | Smash Arena</p>
+                </div>
+              </div>
+            </div>
+
+            {/* Card 5 */}
+            <div className="bg-[#111] p-8 rounded-2xl border border-white/5 break-inside-avoid mb-6 hidden lg:block">
+              <div className="flex gap-1 mb-6">
+                {[...Array(5)].map((_, i) => (
+                  <svg key={i} className="w-4 h-4 text-[#FBBF24]" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" /></svg>
+                ))}
+              </div>
+              <p className="text-white/80 text-sm leading-relaxed mb-8">
+                "The live cross-platform syncing is flawless. We used to struggle with double bookings all the time, but now it's completely automated. Staff roles also make it super easy to let my team handle operations."
+              </p>
+              <div className="flex items-center gap-4">
+                <img src="https://ui-avatars.com/api/?name=Priya+Sharma&background=222&color=fff" alt="Priya Sharma" className="w-10 h-10 rounded-full" />
+                <div>
+                  <p className="text-white font-bold text-sm">Priya Sharma</p>
+                  <p className="text-white/50 text-xs">Director | Elite Sports</p>
+                </div>
+              </div>
+            </div>
+
+            {/* Card 6 */}
+            <div className="bg-[#111] p-8 rounded-2xl border border-white/5 break-inside-avoid mb-6 hidden lg:block">
+              <div className="flex gap-1 mb-6">
+                {[...Array(5)].map((_, i) => (
+                  <svg key={i} className="w-4 h-4 text-[#FBBF24]" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" /></svg>
+                ))}
+              </div>
+              <p className="text-white/80 text-sm leading-relaxed mb-8">
+                "Instant payouts mean we never have cash flow issues. The platform is robust, the analytics dashboard gives us exactly the data we need, and the support team is incredible."
+              </p>
+              <div className="flex items-center gap-4">
+                <img src="https://ui-avatars.com/api/?name=Karan+Mehta&background=222&color=BFF367" alt="Karan Mehta" className="w-10 h-10 rounded-full" />
+                <div>
+                  <p className="text-white font-bold text-sm">Karan Mehta</p>
+                  <p className="text-white/50 text-xs">Owner | Turf City</p>
+                </div>
+              </div>
+            </div>
+
+          </div>
+        </div>
       </section>
 
       {/* ── Document Verification Modal ── */}
@@ -313,7 +513,7 @@ export default function VenueOwnerLanding() {
             >
               <X size={24} />
             </button>
-            <h2 className="text-2xl font-bold mb-8 uppercase tracking-wider text-white text-center" style={{ fontFamily: "'Open Sans'" }}>Document Verification</h2>
+            <h2 className="text-[20px] md:text-4xl font-black tracking-tight leading-[1.05] font-poppins font-medium normal-case text-white text-center mb-8">Document Verification</h2>
             
             <form className="space-y-6 mt-4" onSubmit={handleDocumentSubmit}>
               

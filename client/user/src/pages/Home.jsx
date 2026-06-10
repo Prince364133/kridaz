@@ -1,6 +1,6 @@
 /* eslint-disable no-restricted-imports */
-import React, { useState, useEffect } from "react";
-import { useNavigate, useSearchParams } from "react-router-dom";
+import React, { useState, useEffect, useRef } from "react";
+import { useNavigate, useSearchParams, Link } from "react-router-dom";
 import { useMemo } from "react";
 import axiosInstance from "@hooks/useAxiosInstance";
 import { useSelector, useDispatch } from "react-redux";
@@ -21,6 +21,9 @@ import { useGetFeaturesFlagsQuery, useGetMarketingContentQuery } from "@redux/ap
 import { useGetStatesListQuery, useGetCitiesListQuery } from "@redux/api/locationApi";
 import { useListGamesQuery } from "@redux/api/gamesApi";
 import { useGetProfessionalsListQuery } from "@redux/api/professionalApi";
+import { useGetUserBookingsQuery } from "@redux/api/userApi";
+import { useGetMyScoringGamesQuery } from "@redux/api/scoringApi";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 
 export default function Home() {
   const navigate = useNavigate();
@@ -29,6 +32,9 @@ export default function Home() {
   const [searchParams] = useSearchParams();
   const activeReel = searchParams.get('reel');
   const [showInterestsModal, setShowInterestsModal] = useState(false);
+  const bookingsScrollRef = useRef(null);
+  const liveMatchesScrollRef = useRef(null);
+  const { isLoggedIn } = useSelector((state) => state.auth);
 
   useEffect(() => {
     if (activeReel) {
@@ -72,6 +78,42 @@ export default function Home() {
 
   const { data: reelsFeedResp } = useGetReelsFeedQuery();
   const reelsFeed = reelsFeedResp?.reels || [];
+
+  // Upcoming Bookings
+  const { data: bookingsData, isLoading: loadingBookings } = useGetUserBookingsQuery(
+    undefined,
+    { skip: !isLoggedIn }
+  );
+  const upcomingBookingsList = (bookingsData || []).filter((booking) => {
+    const bookingDate = new Date(booking.date || booking.timeSlot?.date || booking.createdAt);
+    bookingDate.setHours(0, 0, 0, 0);
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    return bookingDate >= today;
+  });
+
+  const scrollBookings = (direction) => {
+    if (bookingsScrollRef.current) {
+      const scrollAmount = 180;
+      bookingsScrollRef.current.scrollBy({ left: direction === 'left' ? -scrollAmount : scrollAmount, behavior: 'smooth' });
+    }
+  };
+
+  // Live Matches
+  const { data: scoringGamesData, isLoading: loadingScoringGames } = useGetMyScoringGamesQuery(
+    undefined,
+    { skip: !isLoggedIn }
+  );
+  
+  const scoringGames = scoringGamesData?.games || (Array.isArray(scoringGamesData) ? scoringGamesData : []);
+  const liveNetworkMatches = scoringGames.filter(game => game.status === "LIVE" || game.status === "ONGOING" || game.status === "live");
+
+  const scrollLiveMatches = (direction) => {
+    if (liveMatchesScrollRef.current) {
+      const scrollAmount = liveMatchesScrollRef.current.clientWidth;
+      liveMatchesScrollRef.current.scrollBy({ left: direction === 'left' ? -scrollAmount : scrollAmount, behavior: 'smooth' });
+    }
+  };
 
   const userLocation = useSelector((state) => state.ui.userLocation);
   const locationStatus = useSelector((state) => state.ui.locationStatus);
@@ -193,15 +235,174 @@ export default function Home() {
   return (
 
     <div className="bg-[#050505] min-h-screen text-white font-sans w-full max-w-[100vw] overflow-x-clip pt-0 pb-16 lg:pb-0">
-      <div className="px-2 md:px-0 w-full mt-0 mb-4">
+      <div className="md:px-0 w-full mt-0 mb-4">
         <Community onSearchActive={setIsCommunitySearchActive}>
-          {/* -- HERO DASHBOARD -- */}
-          <DashboardHero user={user} />
+          {/* -- DASHBOARD HERO -- */}
+          <div className="!mt-2 w-[100%] max-w-[100vw] overflow-x-hidden md:w-auto relative mb-6">
+            <DashboardHero
+              user={user}
+              userLocation={userLocation}
+              locationStatus={locationStatus}
+              marketingContent={marketingContent}
+              isLoggedIn={isLoggedIn}
+            />
+          </div>
+
+          {/* -- LIVE MATCHES -- */}
+          {isLoggedIn && (loadingScoringGames || liveNetworkMatches.length > 0) && (
+            <div className="!mt-2 px-2">
+              <div className="flex items-center justify-between px-1 mb-3">
+                <h4 className="text-[11px] font-black uppercase text-white/40 tracking-widest">Live Now</h4>
+                <div className="flex items-center gap-1.5">
+                  <button 
+                    onClick={() => scrollLiveMatches('left')}
+                    className="p-1 rounded-full bg-white/5 border border-white/5 hover:bg-[#E83441]/20 hover:border-[#E83441]/50 text-white hover:text-[#E83441] transition-all"
+                  >
+                    <ChevronLeft size={14} />
+                  </button>
+                  <button 
+                    onClick={() => scrollLiveMatches('right')}
+                    className="p-1 rounded-full bg-white/5 border border-white/5 hover:bg-[#E83441]/20 hover:border-[#E83441]/50 text-white hover:text-[#E83441] transition-all"
+                  >
+                    <ChevronRight size={14} />
+                  </button>
+                </div>
+              </div>
+              
+              <div 
+                ref={liveMatchesScrollRef}
+                className="flex overflow-x-auto no-scrollbar snap-x snap-mandatory scroll-smooth gap-3"
+              >
+                {loadingScoringGames ? (
+                  <div className="w-full py-4 flex justify-center items-center">
+                    <div className="w-4 h-4 border-2 border-[#E83441] border-t-transparent rounded-full animate-spin"></div>
+                  </div>
+                ) : (
+                  liveNetworkMatches.map((match) => {
+                    const teamA = match.teamA || (Array.isArray(match.teams) ? match.teams.find(t => t.teamKey === 'teamA') : match.teams?.teamA) || {};
+                    const teamB = match.teamB || (Array.isArray(match.teams) ? match.teams.find(t => t.teamKey === 'teamB') : match.teams?.teamB) || {};
+                    return (
+                      <Link key={match._id || match.id} to={`/match/live/${match._id || match.id}`} className="min-w-full md:min-w-[320px] shrink-0 snap-start block bg-gradient-to-br from-[#E83441]/20 via-[#0B0B0C] to-[#0B0B0C] border border-[#E83441]/20 rounded-xl p-4 hover:border-[#E83441]/40 transition-all duration-300 shadow-[0_4px_20px_rgba(0,0,0,0.4)] backdrop-blur-sm group relative">
+                        {/* Top section: Status & Info */}
+                        <div className="flex justify-between items-start mb-4">
+                          <div className="flex gap-3 items-center">
+                            <div className="bg-[#E83441] text-white text-[9px] font-black uppercase px-2 py-0.5 rounded-[4px] tracking-widest shadow-[0_0_10px_rgba(232,52,65,0.4)]">
+                              LIVE
+                            </div>
+                            <div>
+                              <h5 className="text-[12px] font-bold text-white leading-none">{match.venue || "Kridaz Arena"}</h5>
+                              <p className="text-[10px] text-white/50 mt-1 font-medium">{match.sportType || match.gameType || "Match"}</p>
+                            </div>
+                          </div>
+                          <div className="text-[10px] font-medium text-right leading-tight">
+                            <span className="text-[#BFF367]">Overs: {match.overs || 0}</span><br/>
+                            {match.target && <span className="text-white/40 text-[9px]">Target: {match.target}</span>}
+                          </div>
+                        </div>
+                        
+                        {/* Bottom section: Scoreboard */}
+                        <div className="flex flex-col gap-2.5 relative pr-6">
+                          {/* Team 1 */}
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-2">
+                              <div className={`w-6 h-6 rounded bg-[#111] border border-white/10 flex items-center justify-center shrink-0`}>
+                                {teamA.logo ? <img src={teamA.logo} alt="A" className="w-full h-full object-cover rounded" /> : <span className={`text-[10px] font-black text-white`}>{(teamA.name || "A").substring(0,2)}</span>}
+                              </div>
+                              <span className="text-[11px] font-bold text-white/60">{teamA.name || "Team A"}</span>
+                            </div>
+                            <div className="text-[14px] font-black text-white/60 font-mono tracking-tight">
+                              {teamA.score || "0"} <span className="text-[9px] font-medium text-white/40 ml-0.5">({teamA.oversPlayed || "0.0"})</span>
+                            </div>
+                          </div>
+                          
+                          {/* Team 2 (Batting) */}
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-2">
+                              <div className={`w-6 h-6 rounded bg-yellow-500/20 border border-white/10 flex items-center justify-center shrink-0`}>
+                                {teamB.logo ? <img src={teamB.logo} alt="B" className="w-full h-full object-cover rounded" /> : <span className={`text-[10px] font-black text-yellow-500`}>{(teamB.name || "B").substring(0,2)}</span>}
+                              </div>
+                              <span className="text-[11px] font-bold text-white">{teamB.name || "Team B"}</span>
+                            </div>
+                            <div className="text-[14px] font-black text-white font-mono tracking-tight shadow-[#BFF367]">
+                              {teamB.score || "0"} <span className="text-[9px] font-medium text-white/60 ml-0.5">({teamB.oversPlayed || "0.0"})</span>
+                            </div>
+                          </div>
+                        </div>
+                      </Link>
+                    );
+                  })
+                )}
+              </div>
+            </div>
+          )}
 
           {/* -- AD BANNERS -- */}
           <div className="!mt-0">
             <AdBannerSection banners={marketingContent?.banners || []} />
           </div>
+
+          {/* -- UPCOMING BOOKINGS -- */}
+          {isLoggedIn && (loadingBookings || upcomingBookingsList.length > 0) && (
+            <div className="!mt-4 px-2">
+              <div className="flex items-center justify-between mb-3">
+                <h4 className="text-[11px] font-black uppercase text-white/40 tracking-widest">Upcoming Bookings</h4>
+                <div className="flex items-center gap-1.5">
+                  <button onClick={() => scrollBookings('left')} className="p-1 rounded-full bg-white/5 border border-white/5 hover:bg-white/10 hover:border-[#BFF367]/50 text-white hover:text-[#BFF367] transition-all">
+                    <ChevronLeft size={14} />
+                  </button>
+                  <button onClick={() => scrollBookings('right')} className="p-1 rounded-full bg-white/5 border border-white/5 hover:bg-white/10 hover:border-[#BFF367]/50 text-white hover:text-[#BFF367] transition-all">
+                    <ChevronRight size={14} />
+                  </button>
+                </div>
+              </div>
+              <div ref={bookingsScrollRef} className="flex gap-3 overflow-x-auto no-scrollbar pb-2 scroll-smooth">
+                {loadingBookings ? (
+                  <div className="w-full py-4 flex justify-center items-center">
+                    <div className="w-4 h-4 border-2 border-[#BFF367] border-t-transparent rounded-full animate-spin"></div>
+                  </div>
+                ) : (
+                  upcomingBookingsList.map((booking) => {
+                    const dateObj = new Date(booking.date || booking.bookingDate || booking.timeSlot?.date || Date.now());
+                    const dayStr = dateObj.getDate().toString().padStart(2, '0');
+                    const monthStr = dateObj.toLocaleString('en-US', { month: 'short' }).toUpperCase();
+                    let startTime = booking.timeSlot?.formattedStartTime || booking.startTime || "Slot";
+                    if (booking.startTime && booking.startTime.includes('T')) {
+                      startTime = new Date(booking.startTime).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+                    } else if (booking.playStartTime) {
+                      startTime = new Date(booking.playStartTime).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+                    }
+                    const turfName = booking.turf?.name || booking.turfName || booking.customVenue || "Confirmed Venue";
+                    const turfAddress = booking.turf?.address || booking.turf?.city || booking.turfCity || booking.city || booking.location || "View Details";
+                    const turfImage = booking.turf?.images?.[0] || booking.turfImage || "/default-turf.jpg";
+                    return (
+                      <Link key={booking._id || booking.id} to={`/booking-pass/${booking.id || booking._id}`} className="min-w-[145px] w-[145px] flex flex-col rounded-xl border border-gray-600/60 bg-[#070708] overflow-hidden group shrink-0 shadow-sm transition-all hover:border-[#BFF367]/50">
+                        <div className="relative w-full aspect-[4/5] overflow-hidden bg-white/5">
+                          <img src={turfImage} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" onError={(e) => { e.target.onerror = null; e.target.src = "https://images.unsplash.com/photo-1540747913346-19e32dc3e97e?auto=format&fit=crop&q=80"; }} alt={turfName} />
+                          <div className="absolute bottom-0 left-0 right-0 bg-[#E81E73] p-1 px-2">
+                            <p className="text-[9px] font-bold text-white text-center">Booked • {startTime}</p>
+                          </div>
+                        </div>
+                        <div className="flex gap-2 p-2">
+                          <div className="bg-[#2A2D34] rounded-lg p-1 w-[36px] h-[40px] flex flex-col items-center justify-center shrink-0 border border-white/5">
+                            <span className="text-[11px] font-black text-white leading-none">{dayStr}</span>
+                            <span className="text-[7px] font-bold text-[#BFF367] leading-none mt-1 uppercase">{monthStr}</span>
+                          </div>
+                          <div className="flex-1 min-w-0 flex flex-col justify-center">
+                            <h5 className="text-[10px] font-bold text-white leading-tight group-hover:text-[#BFF367] transition-colors line-clamp-2">{turfName}</h5>
+                            <p className="text-[8px] text-white/50 truncate mt-0.5 font-medium">{turfAddress}</p>
+                          </div>
+                        </div>
+                      </Link>
+                    );
+                  })
+                )}
+              </div>
+            </div>
+          )}
+
+
+
+
 
           {/* -- FIND YOUR ARENA -- */}
           <div className="!mt-0">
@@ -223,6 +424,17 @@ export default function Home() {
               followingIds={followingIds}
               handleFollowToggle={handleFollowToggle}
             />
+          </div>
+
+          {/* -- HOST YOUR VENUE CTA -- */}
+          <div className="!mt-4 px-2">
+            <Link to="/business/venue" className="relative block overflow-hidden rounded-2xl w-full aspect-video shadow-[0_4px_20px_rgba(0,0,0,0.5)] group border border-white/[0.05] hover:border-[#BFF367]/50 transition-all duration-300">
+              <div className="absolute inset-0 bg-cover bg-center group-hover:scale-105 transition-transform duration-700" style={{ backgroundImage: "url('/host-venue-bg-custom-2.png')" }} />
+              <div className="relative z-10 w-[45%] h-full p-4 flex flex-col justify-center gap-1.5 pl-5">
+                <h3 className="text-[16px] leading-tight font-black text-white uppercase drop-shadow-lg">Host Your Venue</h3>
+                <p className="text-[9px] font-medium text-white/90 leading-snug drop-shadow-md">Partner with us to list your turf and manage bookings seamlessly.</p>
+              </div>
+            </Link>
           </div>
 
           {/* -- SOCIAL ARENA -- */}
