@@ -5,6 +5,7 @@ import { createUniqueTeamCode } from "./team.service.js";
 import { updateGeoPoint } from "../../utils/geo.util.js";
 import logger from "../../utils/logger.js";
 import generateQRCode from "../../utils/generateQRCode.js";
+import { sanitizeUser } from "../../utils/sanitizeUser.js";
 const mapTeamUserAvatar = (team) => {
   if (!team) return null;
   const formatted = { ...team };
@@ -21,11 +22,11 @@ const mapTeamUserAvatar = (team) => {
       const formattedMember = { ...m };
       formattedMember._id = m.id;
       if (formattedMember.user) {
-        formattedMember.user = {
+        formattedMember.user = sanitizeUser({
           ...formattedMember.user,
           _id: formattedMember.user.id,
           avatar: formattedMember.user.profilePicture || null
-        };
+        });
         // Flatten user fields to the root of the member object for frontend backwards compatibility
         formattedMember.username = formattedMember.user.username || formattedMember.user.name;
         formattedMember.profilePic = formattedMember.user.profilePicture || formattedMember.user.avatar || null;

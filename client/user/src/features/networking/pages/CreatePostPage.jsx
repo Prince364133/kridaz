@@ -40,8 +40,9 @@ const CreatePostPage = () => {
       setTitle(editingPost.title || "");
       setContent(editingPost.content || "");
       setSport(editingPost.sport || "");
-      setImage(null);
-      setImagePreview(editingPost.image || editingPost.imageUrl || editingPost.mediaUrl || null);
+      setMediaFiles([]);
+      const media = editingPost.image || editingPost.imageUrl || editingPost.mediaUrl;
+      setMediaPreviews(media ? [media] : []);
     } else {
       setTitle("");
       setContent("");

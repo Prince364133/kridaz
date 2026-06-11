@@ -16,6 +16,7 @@ model User {
   name                    String
   phone                   String?                       @unique
   profilePicture          String?
+  bannerPicture           String?
   city                    String?
   state                   String?
   latitude                Decimal?                      @db.Decimal(10, 8)

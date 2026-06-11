@@ -451,13 +451,13 @@ export const getPlayerProfile = async (req, res) => {
         where: {
           isLive: true,
           scoringStatus: { in: ["LIVE", "PAUSED"] },
-          teams: {
-            some: {
-              slots: {
-                some: { userId: user.id }
-              }
-            }
-          }
+          OR: [
+            { hostId: user.id },
+            { scorerId: user.id },
+            { umpireId: user.id },
+            { streamerId: user.id },
+            { teams: { some: { slots: { some: { userId: user.id } } } } }
+          ]
         },
         select: {
           id: true,
@@ -655,8 +655,6 @@ const NEARBY_PLAYER_FIELDS = {
   sportTypes: true,
   interests: true,
   lastSeen: true,
-  latitude: true,
-  longitude: true,
 };
 
 export const getNearbyPlayers = async (req, res) => {

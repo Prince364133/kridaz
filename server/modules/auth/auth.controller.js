@@ -63,7 +63,7 @@ const issueTokens = async (res, userId, token) => {
   };
 };
 const generateOTP = () => {
-  return Math.floor(100000 + Math.random() * 900000).toString();
+  return crypto.randomInt(100000, 1000000).toString();
 };
 
 /**
@@ -1150,6 +1150,15 @@ export const googleAuth = asyncHandler(async (req, res) => {
     });
     payload = ticket.getPayload();
   } else if (accessToken) {
+    try {
+      const tokenInfo = await client.getTokenInfo(accessToken);
+      if (tokenInfo.aud !== process.env.GOOGLE_CLIENT_ID && tokenInfo.azp !== process.env.GOOGLE_CLIENT_ID) {
+        return res.status(401).json({ success: false, message: "Invalid token audience (Confused Deputy Prevention)" });
+      }
+    } catch (err) {
+      logger.error("Google token info verification failed:", err);
+      return res.status(401).json({ success: false, message: "Invalid Google access token" });
+    }
     const response = await fetch(`https://www.googleapis.com/oauth2/v3/userinfo`, {
       headers: {
         Authorization: `Bearer ${accessToken}`
@@ -1978,6 +1987,68 @@ export const updateProfilePicture = asyncHandler(async (req, res) => {
     })
   });
 });
+
+// Update Banner Picture
+export const updateBannerPicture = asyncHandler(async (req, res) => {
+  if (!req.file) {
+    return res.status(400).json({
+      success: false,
+      message: "No image file provided"
+    });
+  }
+  const decoded = req.user || req.owner;
+  if (!decoded) {
+    return res.status(401).json({
+      success: false,
+      message: "Unauthorized"
+    });
+  }
+  const { id } = decoded;
+
+  let user = await prisma.user.findUnique({
+    where: { id },
+    include: { ownerProfile: true }
+  });
+  if (!user) {
+    return res.status(404).json({
+      success: false,
+      message: "Account not found"
+    });
+  }
+
+  const bannerPictureUrl = await uploadToCloudinary(req.file.buffer, `kridaz/banners/${user.role}`);
+
+  await prisma.user.update({
+    where: { id: user.id },
+    data: { bannerPicture: bannerPictureUrl }
+  });
+  
+  if (user.ownerProfile) {
+    await prisma.ownerProfile.update({
+      where: { id: user.ownerProfile.id },
+      data: { bannerUrl: bannerPictureUrl }
+    });
+  }
+
+  const io = getIO();
+  if (io) {
+    io.emit(SOCKET.USER_PROFILE_UPDATED, {
+      userId: user.id,
+      bannerPicture: bannerPictureUrl
+    });
+  }
+  
+  return res.status(200).json({
+    success: true,
+    message: "Banner picture updated successfully",
+    bannerPicture: bannerPictureUrl,
+    user: sanitizeUser({
+      ...user,
+      bannerPicture: bannerPictureUrl
+    })
+  });
+});
+
 export const updateInterests = asyncHandler(async (req, res) => {
   const {
     sportTypes
@@ -2360,7 +2431,7 @@ export const forgotPasswordOtp = asyncHandler(async (req, res) => {
       message: 'User not found'
     });
   }
-  const emailOtp = Math.floor(100000 + Math.random() * 900000).toString();
+  const emailOtp = crypto.randomInt(100000, 1000000).toString();
   const isPhone = !searchIdentifier.includes('@');
 
   // Upsert OTP
@@ -2398,7 +2469,6 @@ export const forgotPasswordOtp = asyncHandler(async (req, res) => {
     return res.status(200).json({
       success: true,
       message: 'OTP sent to your email',
-      otp: emailOtp,
       ...(process.env.NODE_ENV === 'development' || process.env.NODE_ENV === 'test' ? {
         testOtp: {
           email: emailOtp
@@ -2473,16 +2543,7 @@ export const resetPassword = asyncHandler(async (req, res) => {
       password: hashedPassword
     }
   });
-  if (user.ownerProfile) {
-    await prisma.ownerProfile.update({
-      where: {
-        id: user.ownerProfile.id
-      },
-      data: {
-        password: hashedPassword
-      }
-    });
-  }
+
   await prisma.oTP.deleteMany({
     where: {
       OR: [{

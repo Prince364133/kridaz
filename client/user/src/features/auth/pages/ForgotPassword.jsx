@@ -4,6 +4,7 @@ import { ArrowLeft, Mail, KeyRound, ShieldCheck, ArrowRight, CheckCircle2 } from
 import axiosInstance from "@hooks/useAxiosInstance";
 import toast from "react-hot-toast";
 import { Capacitor } from "@capacitor/core";
+import { useSelector } from "react-redux";
 
 
 const ForgotPassword = () => {
@@ -14,7 +15,7 @@ const ForgotPassword = () => {
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [loading, setLoading] = useState(false);
-
+  const { isLoggedIn } = useSelector((state) => state.auth);
 
   useEffect(() => {
     if (isLoggedIn) {

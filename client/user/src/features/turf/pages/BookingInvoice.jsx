@@ -81,7 +81,7 @@ const BookingInvoice = () => {
             title={`Invoice ${id}`}
           >
             <div className="flex flex-col items-center justify-center h-full p-6 text-center bg-gray-100">
-              <p className="text-gray-600 mb-4 text-sm font-medium">Your browser doesn't support inline PDF viewing.</p>
+              <p className="text-gray-600 mb-4 text-sm font-medium">Your browser doesn&apos;t support inline PDF viewing.</p>
               <a href={invoiceDownloadUrl} target="_blank" rel="noopener noreferrer" className="bg-[#BFF367] text-black px-6 py-3 rounded-full font-bold text-xs uppercase tracking-widest">
                 Download PDF to View
               </a>

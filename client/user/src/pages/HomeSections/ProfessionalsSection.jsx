@@ -1,7 +1,7 @@
-/* eslint-disable react/prop-types */
+ 
 import React from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { Star, Shield, Video, Activity, Award, Check } from "lucide-react";
+import { Star, Shield, Video, Activity, Award, Check, ChevronRight } from "lucide-react";
 
 const GRAD = "linear-gradient(90deg, #BFF367 0%, #BFF367 100%)";
 

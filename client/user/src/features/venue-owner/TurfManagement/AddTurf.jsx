@@ -127,7 +127,7 @@ const AddTurf = () => {
         if (watchedImages.length > 0) {
             return Array.from(watchedImages).map(file => URL.createObjectURL(file));
         }
-    } catch(e) {}
+    } catch(e) { /* ignore */ }
     return [];
   }, [watchedImages]);
 

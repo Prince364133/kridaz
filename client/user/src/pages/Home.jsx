@@ -253,20 +253,6 @@ export default function Home() {
             <div className="!mt-2 px-2">
               <div className="flex items-center justify-between px-1 mb-3">
                 <h4 className="text-[11px] font-black uppercase text-white/40 tracking-widest">Live Now</h4>
-                <div className="flex items-center gap-1.5">
-                  <button 
-                    onClick={() => scrollLiveMatches('left')}
-                    className="p-1 rounded-full bg-white/5 border border-white/5 hover:bg-[#E83441]/20 hover:border-[#E83441]/50 text-white hover:text-[#E83441] transition-all"
-                  >
-                    <ChevronLeft size={14} />
-                  </button>
-                  <button 
-                    onClick={() => scrollLiveMatches('right')}
-                    className="p-1 rounded-full bg-white/5 border border-white/5 hover:bg-[#E83441]/20 hover:border-[#E83441]/50 text-white hover:text-[#E83441] transition-all"
-                  >
-                    <ChevronRight size={14} />
-                  </button>
-                </div>
               </div>
               
               <div 
@@ -346,14 +332,6 @@ export default function Home() {
             <div className="!mt-2 px-2">
               <div className="flex items-center justify-between mb-3">
                 <h4 className="text-[11px] font-black uppercase text-white/40 tracking-widest">Upcoming Bookings</h4>
-                <div className="flex items-center gap-1.5">
-                  <button onClick={() => scrollBookings('left')} className="p-1 rounded-full bg-white/5 border border-white/5 hover:bg-white/10 hover:border-[#BFF367]/50 text-white hover:text-[#BFF367] transition-all">
-                    <ChevronLeft size={14} />
-                  </button>
-                  <button onClick={() => scrollBookings('right')} className="p-1 rounded-full bg-white/5 border border-white/5 hover:bg-white/10 hover:border-[#BFF367]/50 text-white hover:text-[#BFF367] transition-all">
-                    <ChevronRight size={14} />
-                  </button>
-                </div>
               </div>
               <div ref={bookingsScrollRef} className="flex gap-3 overflow-x-auto no-scrollbar pb-2 scroll-smooth">
                 {loadingBookings ? (

@@ -337,10 +337,9 @@ const ChatSidebar = ({ onSelectChat, selectedChatId, onCreateGroup, onCreateComm
 
   return (
     <div className="w-full md:w-[340px] h-full border-r border-white/5 bg-black flex flex-col overflow-hidden">
-      <div className="p-5 border-b border-white/5 flex justify-between items-center bg-[#0A0A0A]">
+      <div className="p-3 border-b border-white/5 flex justify-between items-center bg-[#0A0A0A]">
         <div>
-          <h2 className="text-xl font-bold text-white tracking-wide uppercase font-sans">Messages</h2>
-          <p className="chat-subheading text-white/40 font-bold uppercase mt-0.5">Inbox & Groups</p>
+          <h2 className="text-xs font-bold text-white/50 tracking-widest uppercase font-sans">Messages</h2>
         </div>
         <div className="relative" ref={addMenuRef}>
           <button 
@@ -390,7 +389,7 @@ const ChatSidebar = ({ onSelectChat, selectedChatId, onCreateGroup, onCreateComm
         </div>
       </div>
 
-      <div className="flex-1 overflow-y-auto custom-scrollbar">
+      <div className="flex-1 overflow-y-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
 
         {/* Invitations Section */}
         {invitations.length > 0 && (
@@ -431,7 +430,7 @@ const ChatSidebar = ({ onSelectChat, selectedChatId, onCreateGroup, onCreateComm
         )}
 
         {/* All Chats Section */}
-        <div className="px-4 py-3 space-y-2.5">
+        <div className="px-2 py-3 space-y-2.5">
           {chats.filter(chat => !chat.parentCommunity)
             .sort((a, b) => {
               const myId = user?._id || user?.id || user?.userId;

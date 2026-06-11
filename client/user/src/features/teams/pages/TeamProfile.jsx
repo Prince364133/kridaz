@@ -1,4 +1,4 @@
-﻿import React, { useState } from 'react';
+import React, { useState } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import {
@@ -16,8 +16,7 @@ import {
 } from '@redux/api/teamApi';
 import toast from 'react-hot-toast';
 import useLoginOnDemand from '@hooks/useLoginOnDemand';
-import StartScoringModal from '@features/scoring/components/StartScoringModal';
-import ScoringMatchCard from '@features/scoring/components/ScoringMatchCard';
+import { StartScoringModal, ScoringMatchCard } from '@features/scoring';
 import { useGetMyScoringGamesQuery } from '@redux/api/scoringApi';
 
 const PRI = "#BFF367";

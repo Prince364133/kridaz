@@ -1,5 +1,5 @@
 import { prisma } from "../../config/prisma.js";
-import razorpay from "../../config/razorpay.js";
+import razorpay, { createOrder } from "../../config/razorpay.js";
 import crypto from "crypto";
 import NotificationService from "../../services/notification.service.js";
 import WalletService from "../../services/wallet.service.js";
@@ -52,7 +52,7 @@ export const validateCoupon = async (req, res) => {
     });
   } catch (error) {
     logger.error("Error in validateCoupon:", error);
-    return res.status(500).json({ success: false, message: error.message });
+    return res.status(500).json({ success: false, message: "Could not validate coupon." });
   }
 };
 
@@ -148,7 +148,7 @@ export const createTopupOrder = async (req, res) => {
       receipt: `topup_${Date.now()}`,
     };
 
-    const order = await razorpay.orders.create(options);
+    const order = await createOrder.fire(options);
 
     // Create a pending transaction
     await prisma.walletTransaction.create({
@@ -167,7 +167,7 @@ export const createTopupOrder = async (req, res) => {
     return res.status(200).json({ order, payableAmount });
   } catch (error) {
     logger.error("Error in createTopupOrder:", error);
-    return res.status(500).json({ message: error.message });
+    return res.status(500).json({ success: false, message: "Could not create top-up order." });
   }
 };
 
@@ -270,7 +270,7 @@ export const verifyTopup = async (req, res) => {
     });
   } catch (error) {
     logger.error("Error in verifyTopup:", error);
-    return res.status(500).json({ success: false, message: error.message });
+    return res.status(500).json({ success: false, message: "Could not verify top-up payment." });
   }
 };
 
@@ -303,7 +303,7 @@ export const getWalletData = async (req, res) => {
       transactions: transactions,
     });
   } catch (error) {
-    return res.status(500).json({ message: error.message });
+    return res.status(500).json({ success: false, message: "Could not retrieve wallet data." });
   }
 };
 
@@ -364,7 +364,7 @@ export const checkPaymentStatus = async (req, res) => {
     return res.status(200).json({ success: false, message: "No successful payment found for this order." });
   } catch (error) {
     logger.error("Error in checkPaymentStatus:", error);
-    return res.status(500).json({ message: error.message });
+    return res.status(500).json({ success: false, message: "Could not check payment status." });
   }
 };
 
@@ -422,7 +422,7 @@ export const requestWithdrawal = async (req, res) => {
     });
   } catch (error) {
     logger.error("Error in requestWithdrawal:", error);
-    return res.status(500).json({ message: error.message });
+    return res.status(500).json({ success: false, message: "Could not process withdrawal request." });
   }
 };
 
@@ -448,7 +448,7 @@ export const getOwnerWithdrawals = async (req, res) => {
       requests: requests 
     });
   } catch (error) {
-    return res.status(500).json({ message: error.message });
+    return res.status(500).json({ success: false, message: "Could not retrieve withdrawals." });
   }
 };
 

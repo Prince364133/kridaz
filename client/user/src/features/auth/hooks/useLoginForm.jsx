@@ -5,7 +5,7 @@ import { useState, useEffect } from "react";
 import axiosInstance from "@hooks/useAxiosInstance";
 import toast from "react-hot-toast";
 import { useDispatch } from "react-redux";
-import {login} from "@redux/slices/authSlice";
+import { login, logout } from "@redux/slices/authSlice";
 import { useNavigate } from "react-router-dom";
 import { Capacitor } from "@capacitor/core";
 

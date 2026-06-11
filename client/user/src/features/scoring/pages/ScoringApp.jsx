@@ -6,17 +6,17 @@ import { ChevronLeft, Settings, History, Users, Zap, CheckCircle2, AlertCircle, 
 import toast from 'react-hot-toast';
 import { useSelector } from 'react-redux';
 import useCricketScoring from '../hooks/useCricketScoring';
-import BallByBallHistory from '@features/scoring/components/BallByBallHistory';
-import InningsSetupModal from '@features/scoring/components/InningsSetupModal';
-import WicketModal from '@features/scoring/components/WicketModal';
-import ExtraRunsModal from '@features/scoring/components/ExtraRunsModal';
-import SelectBowlerModal from '@features/scoring/components/SelectBowlerModal';
-import TossModal from '@features/scoring/components/TossModal';
+import BallByBallHistory from '../components/BallByBallHistory';
+import InningsSetupModal from '../components/InningsSetupModal';
+import WicketModal from '../components/WicketModal';
+import ExtraRunsModal from '../components/ExtraRunsModal';
+import SelectBowlerModal from '../components/SelectBowlerModal';
+import TossModal from '../components/TossModal';
 import { io } from 'socket.io-client';
 import axiosInstance from '@hooks/useAxiosInstance';
 import ScoringPasswordModal from '../components/ScoringPasswordModal';
 import CustomRunsModal from '../components/CustomRunsModal';
-import TickerThemeStoreModal from '@features/scoring/components/TickerThemeStoreModal';
+import TickerThemeStoreModal from '../components/TickerThemeStoreModal';
 import VisualWagonWheelModal from '../components/VisualWagonWheelModal';
 import PenaltyModal from '../components/PenaltyModal';
 import EndMatchModal from '../components/EndMatchModal';
@@ -156,6 +156,7 @@ const ScoringApp = () => {
     setPowerplayOvers,
     toggleTimer,
     addPenalty,
+    advanceToNextInnings,
     fetchMatchReport,
     refresh
   } = useCricketScoring(matchId);

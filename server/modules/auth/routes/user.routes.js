@@ -12,6 +12,7 @@ import {
   refreshToken,
   updateProfile,
   updateProfilePicture,
+  updateBannerPicture,
   checkUsername,
   generateRecoveryTokens,
   loginWithRecoveryToken,
@@ -165,6 +166,7 @@ router.post("/logout-all", userAuth, logoutAll);
  */
 router.put("/updateProfile", userAuth, updateProfile);
 router.post("/profile-picture", userAuth, upload.single("profilePicture"), updateProfilePicture);
+router.post("/banner-picture", userAuth, upload.single("bannerPicture"), updateBannerPicture);
 router.post("/send-phone-verification-otp", userAuth, sendPhoneVerificationOtp);
 router.post("/verify-phone-otp", userAuth, verifyPhoneOtp);
 
@@ -194,4 +196,5 @@ router.post("/upgrade-request", userAuth, upload.array("documents", 10), upgrade
 router.post("/forgot-password-otp", forgotPasswordOtp);
 router.post("/reset-password", resetPassword);
 
+// Triggering restart for banner upload fix
 export default router;

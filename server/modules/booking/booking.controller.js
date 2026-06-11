@@ -67,7 +67,7 @@ export const getBookingById = asyncHandler(async (req, res) => {
  * Returns all bookings made by the logged-in user.
  */
 export const getUserBookings = asyncHandler(async (req, res) => {
-  const userId = req.query.userId || req.user.id;
+  const userId = req.user.id;
   const bookings = await bookingService.findBookingsByUserDetailed(userId);
   return res.status(200).json(bookings);
 });

@@ -9,7 +9,7 @@ import { searchLocations, fetchCountryCodes } from "@utils/locationService";
 const getNameFromEmail = (email) => {
   if (!email) return "";
   const prefix = email.split("@")[0];
-  const clean = prefix.replace(/[0-9]/g, "").replace(/[\._\-]/g, " ").trim();
+  const clean = prefix.replace(/[0-9]/g, "").replace(/[._-]/g, " ").trim();
   return clean
     .map(w => w.charAt(0).toUpperCase() + w.slice(1))
     .join(" ");

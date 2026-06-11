@@ -276,7 +276,7 @@ const TurfDetails = () => {
                   let endHoursStr = String(endHours).padStart(2, '0');
                   let minutesStr = minutes.replace(/[^0-9]/g, '');
                   displayTime = `${hours.toString().padStart(2, '0')}:${minutesStr} - ${endHoursStr}:${minutesStr}`;
-                } catch (e) { }
+                } catch (e) { /* ignore */ }
               }
 
               return (

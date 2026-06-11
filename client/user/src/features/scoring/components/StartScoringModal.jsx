@@ -244,7 +244,7 @@ const StartScoringModal = ({ isOpen, onClose, onSuccess, initialData }) => {
         try {
           const d = new Date(initialData.date);
           mDateTime = `${d.toISOString().split('T')[0]}T${initialData.time}`;
-        } catch(e) {}
+        } catch(e) { /* ignore invalid date */ }
       }
 
       const extractPlayers = (teamObj) => {

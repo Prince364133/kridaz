@@ -187,9 +187,9 @@ const Turf = () => {
             <p className="text-gray-600">Try adjusting your filters or search keywords.</p>
             <button
               onClick={() =>
-                setSearchFilters(
+                dispatch(setFilters(
                   userLocation ? { lat: userLocation.lat, lng: userLocation.lng } : {}
-                )
+                ))
               }
               className="mt-8 px-10 py-3 border border-white/10 rounded-[6px] text-[10px] font-black uppercase tracking-widest hover:bg-white hover:text-black transition-all"
             >

@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
 import { ArrowLeft, Loader2, PlaySquare } from "lucide-react";
 import { useGetReelsFeedQuery } from "@redux/api/reelsApi";
-import ReelItem from "@features/reels/components/ReelItem";
+import { ReelItem } from "@features/reels";
 
 const ReelsView = ({ gateInteraction, onBack }) => {
   const navigate = useNavigate();

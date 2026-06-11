@@ -13,7 +13,7 @@
 
 import { prisma } from "../../config/prisma.js";
 import { BadRequestError, NotFoundError, ForbiddenError } from "@kridaz/common";
-import razorpay from "../../config/razorpay.js";
+import razorpay, { createOrder } from "../../config/razorpay.js";
 import crypto from "crypto";
 import generateQRCode from "../../utils/generateQRCode.js";
 import adjustTime from "../../utils/adjustTime.js";
@@ -150,7 +150,7 @@ export const createRazorpayOrder = async (userId, totalPrice) => {
     receipt: `receipt${Date.now()}`,
   };
 
-  const order = await razorpay.orders.create(options);
+  const order = await createOrder.fire(options);
   return { order, user };
 };
 

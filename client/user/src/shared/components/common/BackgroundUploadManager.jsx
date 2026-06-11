@@ -149,34 +149,34 @@ const BackgroundUploadManager = () => {
           initial={{ y: 50, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
           exit={{ y: 50, opacity: 0 }}
-          className="bg-zinc-900 border border-white/10 rounded-[8px] p-4 shadow-2xl max-w-md mx-auto pointer-events-auto flex items-center gap-4"
+          className="bg-[#111] border border-white/10 rounded-[8px] p-2 shadow-2xl max-w-sm mx-auto pointer-events-auto flex items-center gap-3"
         >
           {/* Preview Thumbnail (Optimistic) */}
-          <div className="w-12 h-16 bg-white/5 rounded-lg overflow-hidden flex-shrink-0 border border-white/5">
+          <div className="w-8 h-10 bg-white/5 rounded-md overflow-hidden flex-shrink-0 border border-white/5">
             {activeUpload.previewUrl ? (
               <video src={activeUpload.previewUrl} className="w-full h-full object-cover" muted />
             ) : (
               <div className="w-full h-full flex items-center justify-center">
-                <Loader2 size={20} className="animate-spin text-gray-500" />
+                <Loader2 size={14} className="animate-spin text-gray-500" />
               </div>
             )}
           </div>
 
           <div className="flex-1 min-w-0">
             <div className="flex items-center justify-between mb-1">
-              <p className="text-sm font-bold text-white truncate">
+              <p className="text-xs font-bold text-white truncate">
                 {status === 'uploading' && `Uploading ${type === 'community' ? 'Post' : type === 'story' ? 'Story' : 'Reel'}...`}
                 {status === 'finalizing' && 'Finalizing...'}
                 {status === 'success' && 'Shared Successfully!'}
                 {status === 'error' && 'Upload Failed'}
               </p>
-              <span className="text-xs font-medium text-gray-400">
+              <span className="text-[10px] font-medium text-gray-400">
                 {status === 'uploading' && `${progress}%`}
               </span>
             </div>
 
             {/* Progress Bar */}
-            <div className="w-full h-1.5 bg-white/10 rounded-full overflow-hidden">
+            <div className="w-full h-1 bg-white/10 rounded-full overflow-hidden">
               <motion.div 
                 className={`h-full ${status === 'error' ? 'bg-red-500' : 'bg-[#BFF367]'}`}
                 initial={{ width: 0 }}
@@ -186,25 +186,25 @@ const BackgroundUploadManager = () => {
             </div>
             
             {status !== 'success' && status !== 'error' && (
-              <p className="text-[10px] text-transparent bg-clip-text bg-gradient-to-r from-[#BFF367] to-[#BFF367] mt-2 flex items-center gap-1">
-                <AlertTriangle size={10} />
+              <p className="text-[9px] text-transparent bg-clip-text bg-gradient-to-r from-[#BFF367] to-[#BFF367] mt-1 flex items-center gap-1">
+                <AlertTriangle size={8} />
                 Do not close or refresh the app
               </p>
             )}
             
             {status === 'error' && (
-              <p className="text-[10px] text-red-500 mt-1 truncate">{error}</p>
+              <p className="text-[9px] text-red-500 mt-0.5 truncate">{error}</p>
             )}
           </div>
 
-          <div className="flex-shrink-0">
+          <div className="flex-shrink-0 pr-1">
             {status === 'uploading' || status === 'finalizing' ? (
-              <Loader2 size={24} className="animate-spin text-[#BFF367]" />
+              <Loader2 size={16} className="animate-spin text-[#BFF367]" />
             ) : status === 'success' ? (
-              <CheckCircle size={24} className="text-[#BFF367]" />
+              <CheckCircle size={16} className="text-[#BFF367]" />
             ) : (
               <button onClick={() => dispatch(clearUpload())}>
-                <XCircle size={24} className="text-red-500" />
+                <XCircle size={16} className="text-red-500" />
               </button>
             )}
           </div>

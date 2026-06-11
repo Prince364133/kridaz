@@ -428,8 +428,8 @@ const CommunityFeed = ({ user, isLoggedIn, isAdmin, gateInteraction, activeFilte
 
       {/* Players Matching Section */}
       {debouncedSearchQuery.trim() !== "" && (
-        <div className="flex flex-col gap-3 bg-[#0A0A0A] border border-white/5 rounded-[8px] p-5">
-          <div className="flex items-center justify-between mb-1">
+        <div className="flex flex-col gap-3 py-4">
+          <div className="flex items-center justify-between mb-1 px-2 md:px-0">
             <h3 className="text-xs font-black uppercase tracking-widest text-[#BFF367]" style={HEADING_STYLE}>
               PLAYERS MATCHING "{debouncedSearchQuery}"
             </h3>
@@ -442,7 +442,7 @@ const CommunityFeed = ({ user, isLoggedIn, isAdmin, gateInteraction, activeFilte
             </div>
           ) : (
             <div
-              className="grid grid-rows-2 grid-flow-col gap-4 overflow-x-auto pb-3 scrollbar-thin scrollbar-thumb-white/10 hover:scrollbar-thumb-white/20 scroll-smooth"
+              className="grid grid-rows-2 grid-flow-col gap-4 overflow-x-auto pb-1 no-scrollbar scroll-smooth px-2 md:px-0"
               style={{ maxHeight: "240px", minHeight: loadedPlayers.length > 1 ? "180px" : "90px" }}
               onScroll={handlePlayersHorizontalScroll}
             >

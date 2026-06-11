@@ -11,3 +11,4 @@ export {
   MyJoinedGames,
   JoinGameDetails
 };
+export { default as GameCard } from "./components/GameCard.jsx";

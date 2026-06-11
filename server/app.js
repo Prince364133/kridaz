@@ -92,7 +92,10 @@ app.use(
 
 import { register } from "./utils/metrics.js";
 
-app.get("/metrics", async (req, res) => {
+app.get("/metrics", async (req, res, next) => {
+  if (req.headers.authorization !== `Bearer ${process.env.METRICS_SECRET}`) {
+    return res.status(401).end("Unauthorized");
+  }
   try {
     res.set("Content-Type", register.contentType);
     res.end(await register.metrics());

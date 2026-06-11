@@ -165,7 +165,7 @@ const Root = () => {
         <BackgroundUploadManager />
 
         {/* Left Side: Mobile View Container */}
-        <div className="w-[40%] min-w-[40%] h-full border-r border-white/5 bg-[#050505] relative z-20 flex-shrink-0 flex items-center justify-center p-6 md:p-8 pl-24 md:pl-32 lg:pl-40 pt-16">
+        <div className="w-1/2 xl:w-[45%] 2xl:w-[40%] h-full border-r border-white/5 bg-[#050505] relative z-20 flex-shrink-0 flex items-center justify-center p-4 sm:p-6 md:p-8 lg:p-12 xl:p-16 2xl:pl-24 pt-16">
           
           <div 
             className="relative h-full shadow-2xl mx-auto bg-transparent" 
@@ -179,7 +179,7 @@ const Root = () => {
             }}
           >
             {/* "Experience the app live!" Decorative Text */}
-            <div className="absolute top-1/2 -translate-y-[50%] right-[100%] mr-8 md:mr-12 flex flex-col items-center pointer-events-none opacity-90 z-50 whitespace-nowrap">
+            <div className="hidden xl:flex absolute top-1/2 -translate-y-[50%] right-[100%] mr-8 md:mr-12 flex-col items-center pointer-events-none opacity-90 z-50 whitespace-nowrap">
               <div className="font-['Caveat',cursive] text-base md:text-lg font-bold text-center leading-snug tracking-wider -rotate-6">
                 <div className="text-[#BFF367]">Experience</div>
                 <div className="text-white/90">the app</div>

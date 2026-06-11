@@ -73,7 +73,7 @@ const NewPostLanding = () => {
       streamRef.current.getTracks().forEach(track => {
         track.stop();
         // Also fire stop event manually just in case
-        try { track.enabled = false; } catch(e) {}
+        try { track.enabled = false; } catch(e) { /* ignore */ }
       });
       streamRef.current = null;
     }
@@ -81,7 +81,7 @@ const NewPostLanding = () => {
       const tracks = videoRef.current.srcObject.getTracks();
       tracks.forEach(track => {
         track.stop();
-        try { track.enabled = false; } catch(e) {}
+        try { track.enabled = false; } catch(e) { /* ignore */ }
       });
       videoRef.current.srcObject = null;
     }

@@ -4,7 +4,7 @@ import axiosInstance from "@hooks/useAxiosInstance";
 import {
   Users, Trophy, MapPin, User, Calendar, Download,
   ShieldCheck, Share2, Zap, UserPlus, AlertOctagon,
-  QrCode as QrIcon, Mail, Info, Target
+  QrCode as QrIcon, Mail, Info, Target, Loader2
 } from "lucide-react";
 import { format, parseISO } from "date-fns";
 import toast from "react-hot-toast";

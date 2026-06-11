@@ -919,7 +919,7 @@ export default function Profile() {
                     <p className={`text-white/60 leading-relaxed text-xs font-sans break-words whitespace-pre-wrap ${!isBioExpanded ? 'line-clamp-4' : ''}`}>
                       {pro.bio || profileUser?.bio || "Not Specified"}
                     </p>
-                    {(pro.bio || profileUser?.bio) && (pro.bio || profileUser?.bio).length > 150 && (
+                    {(pro.bio || profileUser?.bio) && (pro.bio || profileUser?.bio)?.length > 150 && (
                       <button 
                         onClick={() => setIsBioExpanded(!isBioExpanded)}
                         className="mt-2 text-[#BFF367] text-xs font-bold hover:underline transition-colors"
@@ -1450,17 +1450,17 @@ export default function Profile() {
                 <div className="space-y-6 animate-in fade-in duration-300">
                   {/* Live Playing Matches Section */}
                   {profileUser?.liveMatches && profileUser.liveMatches.length > 0 && (
-                    <div className="relative overflow-hidden rounded-[8px] border border-[#BFF367]/30 bg-gradient-to-br from-[#BFF367]/10 via-black/80 to-[#BFF367]/5 backdrop-blur-md p-5">
+                    <div className="relative overflow-hidden rounded-[8px] border border-[#BFF367]/30 bg-gradient-to-br from-[#BFF367]/10 via-black/80 to-[#BFF367]/5 backdrop-blur-md p-2.5">
                       <div className="absolute inset-0 rounded-[8px] bg-gradient-to-r from-[#BFF367]/5 to-[#BFF367]/5 animate-pulse pointer-events-none" />
-                      <h3 className="text-xs font-black uppercase tracking-wider text-[#BFF367] mb-4 flex items-center gap-2 relative z-10">
+                      <h3 className="text-[10px] font-black uppercase tracking-wider text-[#BFF367] mb-2 flex items-center gap-1.5 relative z-10">
                         <span className="relative flex items-center justify-center">
-                          <span className="absolute w-4 h-4 rounded-full bg-[#BFF367]/30 animate-ping" />
-                          <Wifi className="w-4 h-4 relative" />
+                          <span className="absolute w-3 h-3 rounded-full bg-[#BFF367]/30 animate-ping" />
+                          <Wifi className="w-3 h-3 relative" />
                         </span>
                         Live Now — Playing a Match
                       </h3>
 
-                      <div className="space-y-3 relative z-10">
+                      <div className="space-y-1.5 relative z-10">
                         {profileUser.liveMatches.map((match) => {
                           const teamA = match.teams?.[0]?.name || 'TBD';
                           const teamB = match.teams?.[1]?.name || 'TBD';
@@ -1489,32 +1489,32 @@ export default function Profile() {
                             <Link
                               key={match.id}
                               to={`/analytics/${match.id}`}
-                              className="group flex items-center justify-between gap-4 bg-black/50 border border-[#BFF367]/20 hover:border-[#BFF367]/60 rounded-[8px] px-5 py-4 transition-all duration-300 hover:bg-black/70 hover:shadow-[0_0_20px_rgba(85,222,232,0.15)]"
+                              className="group flex items-center justify-between gap-2 bg-black/50 border border-[#BFF367]/20 hover:border-[#BFF367]/60 rounded-[8px] px-2.5 py-2 transition-all duration-300 hover:bg-black/70 hover:shadow-[0_0_20px_rgba(85,222,232,0.15)]"
                             >
                               <div className="flex-1 min-w-0">
-                                <div className="flex items-center gap-2 mb-1.5">
-                                  <span className="text-sm font-black text-white truncate tracking-tight" style={HEADING_STYLE}>
+                                <div className="flex items-center gap-2 mb-1">
+                                  <span className="text-xs font-black text-white truncate tracking-tight" style={HEADING_STYLE}>
                                     {teamA}
                                   </span>
-                                  <span className="text-[10px] font-black text-[#BFF367] px-1.5 py-0.5 bg-[#BFF367]/10 rounded-md border border-[#BFF367]/20 shrink-0">
+                                  <span className="text-[9px] font-black text-[#BFF367] px-1 py-0.5 bg-[#BFF367]/10 rounded border border-[#BFF367]/20 shrink-0">
                                     VS
                                   </span>
-                                  <span className="text-sm font-black text-white truncate tracking-tight" style={HEADING_STYLE}>
+                                  <span className="text-xs font-black text-white truncate tracking-tight" style={HEADING_STYLE}>
                                     {teamB}
                                   </span>
                                 </div>
 
-                                <div className="flex items-center gap-3 flex-wrap">
-                                  <span className="px-2 py-0.5 rounded-[6px] bg-[#BFF367]/10 border border-[#BFF367]/20 text-[#BFF367] text-[9px] font-black uppercase tracking-widest">
+                                <div className="flex items-center gap-2 flex-wrap">
+                                  <span className="px-1.5 py-0.5 rounded bg-[#BFF367]/10 border border-[#BFF367]/20 text-[#BFF367] text-[9px] font-black uppercase tracking-widest">
                                     {matchFormat}
                                   </span>
                                   <span className="flex items-center gap-1 text-[9px] font-bold text-gray-500 uppercase tracking-widest">
-                                    <MapPin size={9} className="text-[#BFF367]" />
+                                    <MapPin size={10} className="text-[#BFF367]" />
                                     {location}
                                   </span>
                                   {minutesLive !== null && (
                                     <span className="flex items-center gap-1 text-[9px] font-bold text-gray-600 uppercase tracking-widest">
-                                      <Clock size={9} />
+                                      <Clock size={10} />
                                       {minutesLive < 1 ? 'Just started' : `${minutesLive}m live`}
                                     </span>
                                   )}
@@ -1522,7 +1522,7 @@ export default function Profile() {
                               </div>
 
                               <div className="flex items-center gap-2 shrink-0">
-                                <div className="px-3 py-1.5 bg-gradient-to-r from-[#BFF367] to-[#BFF367] text-black text-[9px] font-black uppercase tracking-widest rounded-[8px] flex items-center gap-1.5 group-hover:scale-105 transition-transform">
+                                <div className="px-2 py-1 bg-gradient-to-r from-[#BFF367] to-[#BFF367] text-black text-[9px] font-black uppercase tracking-widest rounded-[4px] flex items-center gap-1 group-hover:scale-105 transition-transform">
                                   <Radio size={10} strokeWidth={2.5} />
                                   Watch Live
                                 </div>

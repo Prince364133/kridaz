@@ -3,7 +3,7 @@ import crypto from "crypto";
 import { prisma } from "../../config/prisma.js";
 import logger from "../../utils/logger.js";
 import { paymentTotal, paymentSuccessTotal, walletTopupTotal, bookingConfirmedTotal } from "../../utils/metrics.js";
-import { WalletService } from "../wallet/wallet.service.js";
+import WalletService from "../../services/wallet.service.js";
 
 /**
  * Handle Razorpay Webhooks
@@ -12,6 +12,10 @@ import { WalletService } from "../wallet/wallet.service.js";
  */
 export const handleRazorpayWebhook = asyncHandler(async (req, res) => {
   const secret = process.env.RAZORPAY_WEBHOOK_SECRET;
+  if (!secret) {
+    logger.error("[WEBHOOK] Missing RAZORPAY_WEBHOOK_SECRET in environment");
+    return res.status(500).json({ status: "error", message: "Webhook secret not configured" });
+  }
   const signature = req.headers["x-razorpay-signature"];
   // 1. Verify Signature
   const shasum = crypto.createHmac("sha256", secret);

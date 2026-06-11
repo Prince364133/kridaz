@@ -266,7 +266,9 @@ export default function useEditTurf(turfId) {
              } else {
                 setValue("openTime", turfData.openTime.substring(0, 5)); // Just in case it's ISO or other string
              }
-          } catch(e) {}
+          } catch(e) {
+            // Ignore parsing errors
+          }
         }
         if (turfData.closeTime) {
           try {
@@ -276,7 +278,9 @@ export default function useEditTurf(turfId) {
              } else {
                 setValue("closeTime", turfData.closeTime.substring(0, 5));
              }
-          } catch(e) {}
+          } catch(e) {
+            // Ignore parsing errors
+          }
         }
 
         if (turfData.slotDuration) setValue("slotDuration", turfData.slotDuration);

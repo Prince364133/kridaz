@@ -5,8 +5,8 @@ import { useLazySearchPlayersQuery } from "@redux/api/teamApi";
 import { useLazyGetCommunityFeedQuery, useGetCommunityFeedQuery } from "@redux/api/communityApi";
 import { useGetGroundsQuery } from "@redux/api/gamesApi";
 import axiosInstance from "@hooks/useAxiosInstance";
-import VenueCard from "../features/turf/components/VenueCard";
-import GameCard from "../features/games/components/GameCard";
+import { VenueCard } from "../features/turf";
+import { GameCard } from "../features/games";
 
 const HEADING_STYLE = { fontFamily: "'Open Sans', sans-serif" };
 
@@ -272,7 +272,7 @@ const GlobalSearch = () => {
               <div className="flex flex-col gap-3 bg-[#0A0A0A] border border-white/5 rounded-[8px] p-5">
                 <div className="flex items-center justify-between mb-1">
                   <h3 className="text-xs font-black uppercase tracking-widest text-[#BFF367]" style={HEADING_STYLE}>
-                    PLAYERS MATCHING "{debouncedQuery}"
+                    PLAYERS MATCHING &quot;{debouncedQuery}&quot;
                   </h3>
                   {playersLoading && <Loader2 size={16} className="text-[#BFF367] animate-spin" />}
                 </div>
@@ -324,7 +324,7 @@ const GlobalSearch = () => {
               <div className="flex flex-col gap-3 bg-[#0A0A0A] border border-white/5 rounded-[8px] p-5">
                 <div className="flex items-center justify-between mb-1">
                   <h3 className="text-xs font-black uppercase tracking-widest text-[#BFF367]" style={HEADING_STYLE}>
-                    VENUES MATCHING "{debouncedQuery}"
+                    VENUES MATCHING &quot;{debouncedQuery}&quot;
                   </h3>
                   {loadingVenues && <Loader2 size={16} className="text-[#BFF367] animate-spin" />}
                 </div>
@@ -350,7 +350,7 @@ const GlobalSearch = () => {
               <div className="flex flex-col gap-3 bg-[#0A0A0A] border border-white/5 rounded-[8px] p-5">
                 <div className="flex items-center justify-between mb-1">
                   <h3 className="text-xs font-black uppercase tracking-widest text-[#BFF367]" style={HEADING_STYLE}>
-                    GAMES MATCHING "{debouncedQuery}"
+                    GAMES MATCHING &quot;{debouncedQuery}&quot;
                   </h3>
                   {loadingGames && <Loader2 size={16} className="text-[#BFF367] animate-spin" />}
                 </div>
@@ -372,7 +372,7 @@ const GlobalSearch = () => {
               <div className="flex flex-col gap-3 bg-[#0A0A0A] border border-white/5 rounded-[8px] p-5">
                 <div className="flex items-center justify-between mb-1">
                   <h3 className="text-xs font-black uppercase tracking-widest text-[#BFF367]" style={HEADING_STYLE}>
-                    POSTS MATCHING "{debouncedQuery}"
+                    POSTS MATCHING &quot;{debouncedQuery}&quot;
                   </h3>
                   {postsLoading && <Loader2 size={16} className="text-[#BFF367] animate-spin" />}
                 </div>

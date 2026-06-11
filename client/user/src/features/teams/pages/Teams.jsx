@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react';
-import TeamSidebar from '@features/teams/components/TeamSidebar';
-import TeamDetails from '@features/teams/components/TeamDetails';
-import CreateTeamModal from '@features/teams/components/CreateTeamModal';
-import InviteMemberModal from '@features/teams/components/InviteMemberModal';
+import TeamSidebar from '../components/TeamSidebar';
+import TeamDetails from '../components/TeamDetails';
+import CreateTeamModal from '../components/CreateTeamModal';
+import InviteMemberModal from '../components/InviteMemberModal';
 import { useSearchParams } from 'react-router-dom';
 import { useGetMyTeamsQuery } from '@redux/api/teamApi';
 

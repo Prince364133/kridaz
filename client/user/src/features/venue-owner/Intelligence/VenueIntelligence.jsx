@@ -78,7 +78,7 @@ export default function VenueIntelligence() {
           <div className="flex items-center gap-3">
              <h2 className="text-[20px] sm:text-[24px] lg:text-[32px] mt-2 sm:mt-0 font-bold font-['Open_Sans'] tracking-tight uppercase leading-none whitespace-nowrap">Venue Intelligence</h2>
           </div>
-          <p className="text-white/70 font-inter font-light text-[14px] md:text-[20px] mt-2">Deep dive into your facility's operational and financial metrics.</p>
+          <p className="text-white/70 font-inter font-light text-[14px] md:text-[20px] mt-2">Deep dive into your facility&apos;s operational and financial metrics.</p>
         </div>
       </div>
 

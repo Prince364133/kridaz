@@ -445,7 +445,7 @@ const MatchAnalytics = () => {
         if (!r.ok) return;
         const d = await r.json();
         if (d.success && d.data) setLiveScore(d.data);
-      } catch (_) {}
+      } catch (_) { /* ignore */ }
     };
 
     fetchScore();

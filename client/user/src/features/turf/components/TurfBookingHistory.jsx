@@ -395,7 +395,7 @@ const TurfBookingHistory = () => {
                     <Zap size={24} />
                   </div>
                   <h2 className="text-lg font-black text-white uppercase tracking-tight">No Joined Games</h2>
-                  <p className="text-[10px] font-bold text-gray-500 uppercase tracking-widest mt-2">You haven't joined any match lobbies or training games yet.</p>
+                  <p className="text-[10px] font-bold text-gray-500 uppercase tracking-widest mt-2">You haven&apos;t joined any match lobbies or training games yet.</p>
                 </div>
               ) : (
                 joinedGames.map((game) => {
@@ -618,7 +618,7 @@ const TurfBookingHistory = () => {
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         {onDemandBookings.map((booking) => {
                           const pro = booking.professional?.user;
-                          const plainOtp = localStorage.getItem(`otp_${booking.id}`);
+                          const plainOtp = null; // localStorage OTP removed per security audit
                           const getInitials = (name) => name?.split(" ").map(w => w[0]).join("").toUpperCase().slice(0, 2) || "??";
 
                           return (
@@ -777,7 +777,7 @@ const TurfBookingHistory = () => {
                                     </div>
                                     {booking.message && (
                                       <p className="text-[10px] text-gray-500 italic mt-3 border-l-2 border-white/10 pl-2 leading-relaxed">
-                                        "{booking.message}"
+                                        &quot;{booking.message}&quot;
                                       </p>
                                     )}
                                   </div>

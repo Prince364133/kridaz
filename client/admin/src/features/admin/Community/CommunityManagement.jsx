@@ -174,7 +174,7 @@ const CommunityManagement = () => {
                   )}
 
                   {activeTab === "stories" && item.mediaUrl && (
-                    <p className="text-[11px] text-white/40 leading-relaxed line-clamp-2 italic">"{item.content || "No caption"}"</p>
+                    <p className="text-[11px] text-white/40 leading-relaxed line-clamp-2 italic">&quot;{item.content || "No caption"}&quot;</p>
                   )}
                 </div>
 

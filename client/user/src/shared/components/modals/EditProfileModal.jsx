@@ -18,6 +18,7 @@ export default function EditProfileModal({ isOpen, onClose, user }) {
   });
   const [loading, setLoading] = useState(false);
   const [uploading, setUploading] = useState(false);
+  const [bannerUploading, setBannerUploading] = useState(false);
   const [locationSuggestions, setLocationSuggestions] = useState([]);
   const [isSearchingLocation, setIsSearchingLocation] = useState(false);
   const [showSuggestions, setShowSuggestions] = useState(false);
@@ -145,6 +146,33 @@ export default function EditProfileModal({ isOpen, onClose, user }) {
     }
   };
 
+  const handleBannerUpload = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    if (!file.type.startsWith('image/')) {
+      toast.error("Please upload an image file");
+      return;
+    }
+
+    const formData = new FormData();
+    formData.append("bannerPicture", file);
+
+    setBannerUploading(true);
+    try {
+      const response = await axiosInstance.post("/api/user/auth/banner-picture", formData, {
+        headers: { "Content-Type": "multipart/form-data" }
+      });
+      
+      dispatch(updateUser({ bannerPicture: response.data.bannerPicture }));
+      toast.success("Banner picture updated!");
+    } catch (error) {
+      toast.error(error.response?.data?.message || "Failed to upload banner");
+    } finally {
+      setBannerUploading(false);
+    }
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
@@ -205,8 +233,40 @@ export default function EditProfileModal({ isOpen, onClose, user }) {
         </div>
 
         {/* Content Form - Spaced out nicely and highly compact */}
-        <form onSubmit={handleSubmit} className="p-6 space-y-4 max-h-[85vh] overflow-y-auto custom-scrollbar">
+        <form onSubmit={handleSubmit} className="py-6 px-0 space-y-4 max-h-[85vh] overflow-y-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
           
+          {/* Banner Upload */}
+          <div className="flex flex-col">
+            <label className="text-[9px] font-black uppercase tracking-[0.2em] text-white/30 mb-1.5 ml-1">Banner Image</label>
+            <div className="relative group w-full h-24 md:h-32 rounded-[8px] bg-gradient-to-br from-[#BFF367]/5 to-[#BFF367]/5 border border-white/10 overflow-hidden flex items-center justify-center hover:border-[#BFF367]/30 transition-all">
+              {user?.bannerPicture || user?.ownerProfile?.bannerUrl ? (
+                <img src={user.bannerPicture || user.ownerProfile.bannerUrl} alt="Banner" className="w-full h-full object-cover" />
+              ) : (
+                <span className="text-white/20 text-[10px] font-bold uppercase tracking-wider">No Banner</span>
+              )}
+              {bannerUploading && (
+                <div className="absolute inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-10">
+                  <Loader2 size={20} className="animate-spin text-[#BFF367]" />
+                </div>
+              )}
+              <label 
+                htmlFor="modal-banner-upload" 
+                className="absolute inset-0 flex flex-col items-center justify-center bg-black/50 opacity-0 group-hover:opacity-100 cursor-pointer transition-opacity z-20"
+              >
+                <Camera size={20} className="text-[#BFF367] mb-1.5" />
+                <span className="text-[#BFF367] text-[9px] font-bold uppercase tracking-widest">Change Banner</span>
+                <input 
+                  type="file" 
+                  id="modal-banner-upload" 
+                  className="hidden" 
+                  accept="image/*" 
+                  onChange={handleBannerUpload} 
+                  disabled={bannerUploading} 
+                />
+              </label>
+            </div>
+          </div>
+
           {/* Top Section: Avatar & Details side-by-side */}
           <div className="flex flex-col md:flex-row gap-5">
             {/* Left Box: Profile Picture */}

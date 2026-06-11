@@ -620,7 +620,7 @@ const ChatWindow = ({ chat, onBack, onSelectChat }) => {
  {/* Messages Area */}
  <div className="flex-1 relative overflow-hidden bg-[#0A0A0A]">
  {/* Scrollable Messages Content */}
- <div className="absolute inset-0 overflow-y-auto overflow-x-hidden custom-scrollbar z-0 flex flex-col px-4 py-4 space-y-1">
+ <div className="absolute inset-0 overflow-y-auto overflow-x-hidden [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] z-0 flex flex-col px-2 py-4 space-y-1">
  {isLoading ? (
  <div className="flex justify-center py-10"><div className="animate-spin rounded-full h-8 w-8 border-t-2 border-[#BFF367]"></div></div>
  ) : (

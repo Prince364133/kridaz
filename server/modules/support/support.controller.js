@@ -1,6 +1,7 @@
 import { prisma } from "../../config/prisma.js";
 import { logAdminAction } from "../../utils/auditLogger.js";
 import NotificationService from "../../services/notification.service.js";
+import { sanitizeUser } from "../../utils/sanitizeUser.js";
 
 // --- Support Ticket Controllers ---
 
@@ -33,6 +34,8 @@ export const updateTicketStatus = async (req, res) => {
       }
     });
     if (!ticket) return res.status(404).json({ message: "Ticket not found" });
+    
+    ticket.user = sanitizeUser(ticket.user);
 
     const updatedTicket = await prisma.supportTicket.update({
       where: { id: ticketId },
@@ -81,6 +84,8 @@ export const replyToTicket = async (req, res) => {
       include: { user: true }
     });
     if (!ticket) return res.status(404).json({ message: "Ticket not found" });
+    
+    ticket.user = sanitizeUser(ticket.user);
 
     const [reply] = await prisma.$transaction([
       prisma.ticketReply.create({

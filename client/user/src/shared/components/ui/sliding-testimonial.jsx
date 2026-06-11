@@ -60,7 +60,7 @@ const FUITestimonialWithSlide = () => {
                         return (
                             <div key={indx} className="border-[1.2px] flex flex-col bg-[#111] border-white/10 rounded-3xl shrink-0 grow-0 w-[350px] md:w-[450px] h-full group hover:border-[#BFF367]/30 transition-colors">
                                 <p className="px-8 py-8 text-pretty text-lg md:text-xl font-medium text-white/80 italic leading-relaxed">
-                                    "{testimonial.description}"
+                                    &quot;{testimonial.description}&quot;
                                 </p>
                                 <div className="border-t-[1.2px] w-full flex gap-1 overflow-hidden border-white/5 mt-auto">
                                     <div className="w-3/4 flex gap-4 items-center px-6 py-4">

@@ -1,13 +1,12 @@
-/* eslint-disable react/prop-types */
+ 
 import React, { useRef, useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Search, ChevronRight, ChevronLeft, Star, Heart, MapPin, X } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
-import TurfCardMobile from "../../features/turf/components/TurfCardMobile";
+import { TurfCardMobile, VenueCard } from "../../features/turf";
 
 const BDR = "#2A2A2A";
 
-import VenueCard from "../../features/turf/components/VenueCard";
 
 export default function VenuesSection({
   userLocation,

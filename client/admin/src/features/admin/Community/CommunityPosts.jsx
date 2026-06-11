@@ -62,7 +62,7 @@ const CommunityPosts = () => {
                   <img src={report.post.image} alt="Reported post" className="w-full h-full object-cover opacity-60" />
                 ) : (
                   <div className="text-white/20 text-sm italic p-4 text-center">
-                    "{report.post?.content || "No content"}"
+                    &quot;{report.post?.content || "No content"}&quot;
                   </div>
                 )}
                 <div className="absolute top-3 right-3 bg-red-500/20 text-red-500 text-[10px] font-bold px-2 py-1 rounded-[4px] backdrop-blur-md border border-red-500/20">
@@ -75,7 +75,7 @@ const CommunityPosts = () => {
                 <div>
                   <h4 className="text-sm font-bold text-white mb-1">Reason</h4>
                   <p className="text-[13px] text-white/60 bg-white/5 p-3 rounded-[6px] border border-white/5">
-                    "{report.reason}"
+                    &quot;{report.reason}&quot;
                   </p>
                 </div>
 

@@ -151,7 +151,7 @@ const DisputeManager = () => {
                               </span>
                            </div>
                            <p className="text-gray-400 text-sm leading-relaxed max-w-2xl italic border-l-2 border-orange-500/30 pl-4">
-                              "{selectedDispute.description}"
+                              &quot;{selectedDispute.description}&quot;
                            </p>
                         </div>
 

@@ -46,7 +46,7 @@ const Reviews = ({ turfId }) => {
  <div className="relative">
  <Quote className="absolute -top-2 -left-2 w-8 h-8 text-[#BFF367]/5 opacity-20" />
  <p className="text-zinc-300 text-sm leading-relaxed relative z-10">
- "{review.comment}"
+ &quot;{review.comment}&quot;
  </p>
  </div>
  </div>

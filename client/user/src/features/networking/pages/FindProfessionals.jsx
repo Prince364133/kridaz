@@ -112,7 +112,7 @@ export default function FindProfessionals() {
       const handleMatchConfirmed = (data) => {
         toast.success(`Match Confirmed! ${data.professionalName} is assigned.`);
         if (data.otp && data.bookingId) {
-          localStorage.setItem(`otp_${data.bookingId}`, data.otp);
+          // localStorage OTP removed per security audit
         }
         refetchBookings();
       };
@@ -347,10 +347,10 @@ export default function FindProfessionals() {
   };
 
   return (
-    <div className="min-h-screen bg-black text-white px-1 md:px-2 pt-6 pb-20 font-sans">
+    <div className="min-h-screen bg-black text-white px-1 md:px-2 pt-2 pb-20 font-sans">
 
       {/* Search & Filters */}
-      <div className="max-w-7xl mx-auto mb-8">
+      <div className="max-w-7xl mx-auto mb-6">
         <div className="max-w-7xl mx-auto">
           <form onSubmit={handleSearch} className="relative mb-6" ref={filterMenuRef}>
             <div className="flex items-center rounded-full border border-white/10 bg-[#262626] shadow-lg transition-colors focus-within:border-[#BFF367]/70 hover:bg-[#303030]">
@@ -431,10 +431,13 @@ export default function FindProfessionals() {
           </form>
 
           {/* Ads Space */}
-          <div className="w-full h-[180px] sm:h-[240px] rounded-xl overflow-hidden mb-8 relative cursor-pointer group bg-[#111]">
-            <img src="/banner-1.png" alt="Advertisement" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 opacity-80" onError={(e) => { e.target.onerror = null; e.target.src = 'https://images.unsplash.com/photo-1593341646782-e0b495cff86d?q=80&w=1200&auto=format&fit=crop'; }} />
-            <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent flex flex-col justify-end p-6">
-              <h3 className="text-white font-bold text-2xl sm:text-3xl max-w-[250px] leading-tight">20% Off Coaching Packages</h3>
+          <div className="px-2 md:px-0">
+            <div className="w-full h-[180px] sm:h-[240px] rounded-[16px] overflow-hidden mb-6 relative cursor-pointer group bg-[#111] shadow-[0px_8px_24px_rgba(179,220,38,0.15)] border border-[rgba(255,255,255,0.08)]">
+              <img src="/pro-banner.png" alt="Pro Training" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 opacity-90" />
+              <div className="absolute inset-0 bg-gradient-to-t from-[#000000]/90 via-[#000000]/40 to-transparent flex flex-col justify-end p-6">
+                <span className="text-[#BFF367] text-[10px] font-black uppercase tracking-[0.2em] mb-1">Elite Training</span>
+                <h3 className="text-white font-black text-2xl sm:text-3xl max-w-[280px] leading-tight tracking-tight" style={{ fontFamily: "'Open Sans', sans-serif" }}>ELEVATE YOUR GAME</h3>
+              </div>
             </div>
           </div>
 
@@ -446,10 +449,14 @@ export default function FindProfessionals() {
             ))}
           </div>
         ) : professionals.length === 0 ? (
-          <div className="text-center py-20 border border-dashed border-neutral-800 rounded-[8px]">
-            <Users size={48} className="mx-auto text-neutral-800 mb-4" />
-            <h3 className="text-xl font-bold uppercase tracking-widest text-[#BFF367] mb-2">No professionals found</h3>
-            <p className="text-white/40 text-xs">Try adjusting your filters or location parameters</p>
+          <div className="mx-2 md:mx-0 text-center py-12 px-4 border border-[rgba(255,255,255,0.08)] rounded-[16px] bg-[#111] relative overflow-hidden shadow-2xl">
+            <div className="relative z-10 flex flex-col items-center">
+              <img src="/empty-pros.png" alt="No Professionals Found" className="w-full max-w-[200px] h-[140px] object-cover mb-6 border border-white/5 rounded-2xl" />
+              <h3 className="text-lg font-black uppercase tracking-[0.1em] text-[#BFF367] mb-2">Your Next Coach is Waiting</h3>
+              <p className="text-white/50 text-[13px] max-w-[280px] leading-relaxed">
+                We couldn't find any professionals matching your exact search. Adjust your location or filters to connect with elite trainers!
+              </p>
+            </div>
           </div>
         ) : (
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3">
@@ -530,9 +537,9 @@ export default function FindProfessionals() {
             }
             setShowMatchModal(true);
           }}
-          className="fixed bottom-24 md:bottom-8 left-1/2 -translate-x-1/2 z-[60] flex items-center gap-2.5 px-6 py-3.5 rounded-full bg-gradient-to-r from-[#BFF367] to-[#BFF367] text-black font-black text-xs uppercase tracking-widest shadow-[0_8px_32px_rgba(85,222,232,0.3)] hover:shadow-[0_8px_40px_rgba(85,222,232,0.5)] hover:scale-105 active:scale-95 transition-all duration-300 group"
+          className="fixed bottom-24 md:bottom-8 left-1/2 -translate-x-1/2 z-[60] flex items-center gap-1.5 px-4 py-2.5 rounded-full bg-gradient-to-r from-[#BFF367] to-[#BFF367] text-black font-black text-[10px] uppercase tracking-widest shadow-[0_8px_32px_rgba(85,222,232,0.3)] hover:shadow-[0_8px_40px_rgba(85,222,232,0.5)] hover:scale-105 active:scale-95 transition-all duration-300 group"
         >
-          <Zap size={16} className="group-hover:animate-pulse" />
+          <Zap size={14} className="group-hover:animate-pulse" />
           Find Pro's
         </button>
       )}

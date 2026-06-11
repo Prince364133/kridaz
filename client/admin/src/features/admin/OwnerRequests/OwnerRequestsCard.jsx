@@ -82,7 +82,7 @@ const OwnerRequestsCard = ({ request, onAccept, onReject, onReconsider, onViewDe
         {isRejected && request.rejectionReason && (
           <div className="mt-4 p-3 bg-red-500/5 border border-red-500/10 rounded-[6px]">
             <p className="text-[8px] font-bold text-red-500 uppercase tracking-widest mb-1">Rejection Basis</p>
-            <p className="text-[11px] text-gray-400 italic">"{request.rejectionReason}"</p>
+            <p className="text-[11px] text-gray-400 italic">&quot;{request.rejectionReason}&quot;</p>
           </div>
         )}
       </div>

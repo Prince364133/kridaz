@@ -151,7 +151,7 @@ const ProfessionalDisputeManager = () => {
                               </span>
                            </div>
                            <p className="text-gray-400 text-sm leading-relaxed max-w-2xl italic border-l-2 border-orange-500/30 pl-4">
-                              "{selectedDispute.description}"
+                              &quot;{selectedDispute.description}&quot;
                            </p>
                         </div>
 
@@ -203,17 +203,17 @@ const ProfessionalDisputeManager = () => {
                            </div>
                            <div>
                               <p className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-500">Professional Profile</p>
-                              <h3 className="text-lg font-bold truncate">{selecteddispute.onDemandBooking?.professional?.businessName}</h3>
+                              <h3 className="text-lg font-bold truncate">{selectedDispute.onDemandBooking?.professional?.businessName}</h3>
                            </div>
                         </div>
                         <div className="space-y-4">
                            <div className="flex items-center justify-between p-3 bg-white/5 rounded-[8px] border border-white/5">
                               <span className="text-xs text-gray-500 font-bold uppercase flex items-center gap-2"><User size={12}/> Owner</span>
-                              <span className="text-xs font-bold text-white truncate">{selecteddispute.owner?.businessName}</span>
+                              <span className="text-xs font-bold text-white truncate">{selectedDispute.owner?.businessName}</span>
                            </div>
                            <div className="flex items-center justify-between p-3 bg-white/5 rounded-[8px] border border-white/5">
                               <span className="text-xs text-gray-500 font-bold uppercase flex items-center gap-2"><Phone size={12}/> Contact</span>
-                              <span className="text-xs font-bold text-white">{selecteddispute.owner?.phone || "N/A"}</span>
+                              <span className="text-xs font-bold text-white">{selectedDispute.owner?.phone || "N/A"}</span>
                            </div>
                         </div>
                      </div>
@@ -227,20 +227,20 @@ const ProfessionalDisputeManager = () => {
                            <div className="space-y-4">
                               <div className="flex justify-between items-center text-sm">
                                  <span className="text-gray-400 font-bold uppercase text-[10px]">Total Blocked Amount</span>
-                                 <span className="font-bold">₹{selecteddispute.onDemandBooking?.blockedAmount}</span>
+                                 <span className="font-bold">₹{selectedDispute.onDemandBooking?.blockedAmount}</span>
                               </div>
                               <div className="flex justify-between items-center text-sm">
                                  <span className="text-gray-400 font-bold uppercase text-[10px]">Professional Revenue</span>
-                                 <span className="font-bold text-orange-400">₹{selecteddispute.onDemandBooking?.blockedAmount}</span>
+                                 <span className="font-bold text-orange-400">₹{selectedDispute.onDemandBooking?.blockedAmount}</span>
                               </div>
                               <div className="h-px bg-white/5 my-2" />
                               <div className="flex justify-between items-center text-sm">
                                  <span className="text-gray-400 font-bold uppercase text-[10px]">Play Date</span>
-                                 <span className="font-bold text-[11px]">{selecteddispute.onDemandBooking?.bookingDate ? new Date(selectedDispute.bookingDetails.playDate).toLocaleDateString() : "N/A"}</span>
+                                 <span className="font-bold text-[11px]">{selectedDispute.onDemandBooking?.bookingDate ? new Date(selectedDispute.bookingDetails.playDate).toLocaleDateString() : "N/A"}</span>
                               </div>
                               <div className="flex justify-between items-center text-sm">
                                  <span className="text-gray-400 font-bold uppercase text-[10px]">Slot Time</span>
-                                 <span className="font-bold text-[11px]">{selecteddispute.onDemandBooking?.startTime}</span>
+                                 <span className="font-bold text-[11px]">{selectedDispute.onDemandBooking?.startTime}</span>
                               </div>
                            </div>
                         </div>
@@ -391,7 +391,7 @@ const ProfessionalDisputeManager = () => {
                        className="w-full bg-[#0a0a0a] border border-white/10 rounded-[8px] pl-8 pr-4 py-4 text-white focus:outline-none focus:border-orange-500 transition-all font-bold"
                      />
                   </div>
-                  <p className="text-[9px] text-gray-600 mt-2 font-bold uppercase italic">* Remaining ₹{selecteddispute.onDemandBooking?.blockedAmount - (parseFloat(partialAmount) || 0)} will be released to owner.</p>
+                  <p className="text-[9px] text-gray-600 mt-2 font-bold uppercase italic">* Remaining ₹{selectedDispute.onDemandBooking?.blockedAmount - (parseFloat(partialAmount) || 0)} will be released to owner.</p>
                 </div>
               )}
 

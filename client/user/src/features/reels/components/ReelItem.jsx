@@ -39,6 +39,7 @@ const ReelItem = ({ reel, isVisible }) => {
   const [showReportModal, setShowReportModal] = useState(false);
   const [reportReason, setReportReason] = useState('');
   const [localComments, setLocalComments] = useState(null); // null = not yet loaded
+  const isLikingRef = React.useRef(false);
 
   // Sync props to state if props change (e.g. from parent feed queries or websocket events)
   React.useEffect(() => {
@@ -93,6 +94,8 @@ const ReelItem = ({ reel, isVisible }) => {
   };
 
   const handleLike = async () => {
+    if (isLikingRef.current) return;
+    
     const wasLiked = isLiked;
     // Optimistic update
     setIsLiked(!wasLiked);
@@ -103,6 +106,7 @@ const ReelItem = ({ reel, isVisible }) => {
       setTimeout(() => setShowHeartAnim(false), 800);
     }
 
+    isLikingRef.current = true;
     try {
       await interact({ reelId: reel.id || reel._id, type: wasLiked ? 'UNLIKE' : 'LIKE' }).unwrap();
     } catch {
@@ -110,6 +114,8 @@ const ReelItem = ({ reel, isVisible }) => {
       setIsLiked(wasLiked);
       setLocalLikeCount(prev => wasLiked ? prev + 1 : Math.max(0, prev - 1));
       toast.error('Failed to update like');
+    } finally {
+      isLikingRef.current = false;
     }
   };
 

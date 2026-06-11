@@ -164,7 +164,7 @@ export const communityApi = baseApi.injectEndpoints({
               })
             );
           }
-        } catch (err) {}
+        } catch (err) { /* ignore */ }
       }
     }),
     getUserStories: builder.query({

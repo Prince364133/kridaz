@@ -111,7 +111,7 @@ const VerificationDetailModal = ({ request, onClose, onAccept, onReject, isProce
                   <h4 className="text-[9px] font-black text-red-500 uppercase tracking-widest flex items-center gap-2">
                     <AlertTriangle size={12} /> Access Denied Reason
                   </h4>
-                  <p className="text-[11px] text-gray-400 italic">"{request.rejectionReason}"</p>
+                  <p className="text-[11px] text-gray-400 italic">&quot;{request.rejectionReason}&quot;</p>
                 </section>
               )}
             </div>

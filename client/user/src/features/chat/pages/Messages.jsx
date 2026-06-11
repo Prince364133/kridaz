@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import ChatSidebar from '@features/chat/components/ChatSidebar';
-import ChatWindow from '@features/chat/components/ChatWindow';
-import CreateGroupModal from '@features/chat/components/CreateGroupModal';
-import CreateCommunityModal from '@features/chat/components/CreateCommunityModal';
+import ChatSidebar from '../components/ChatSidebar';
+import ChatWindow from '../components/ChatWindow';
+import CreateGroupModal from '../components/CreateGroupModal';
+import CreateCommunityModal from '../components/CreateCommunityModal';
 import { useSearchParams, useNavigate, useLocation } from 'react-router-dom';
 import { useGetChatsQuery, useAccessChatMutation } from '@redux/api/chatApi';
 

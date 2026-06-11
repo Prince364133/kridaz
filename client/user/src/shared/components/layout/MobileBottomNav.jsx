@@ -201,9 +201,9 @@ const MobileBottomNav = () => {
           <div className="relative z-[60] flex items-center justify-center">
             <button
               onClick={handleToggle}
-              className={`relative flex items-center justify-center w-14 h-14 rounded-full text-black transition-all duration-700 shadow-[0_0_20px_rgba(191,243,103,0.2)] border-[4px] border-black/80 ${isMenuOpen ? "bg-[#aade55] rotate-[135deg]" : "bg-[#BFF367] rotate-0 hover:scale-105"}`}
+              className={`relative flex items-center justify-center w-11 h-11 rounded-full text-black transition-all duration-700 shadow-[0_0_20px_rgba(191,243,103,0.2)] border-[3px] border-black/80 ${isMenuOpen ? "bg-[#aade55] rotate-[135deg]" : "bg-[#BFF367] rotate-0 hover:scale-105"}`}
             >
-              <Plus size={26} strokeWidth={3.5} />
+              <Plus size={20} strokeWidth={3.5} />
             </button>
           </div>
         </div>
@@ -221,13 +221,10 @@ const MobileBottomNav = () => {
                 key={item.name}
                 to={item.path}
                 onClick={handleClose}
-                className={`relative z-10 flex-1 flex flex-col items-center justify-center gap-1 py-3
+                className={`relative z-10 flex-1 flex flex-col items-center justify-center py-4
                   ${isActive ? "text-[#BFF367]" : "text-white/40 hover:text-white/60"}`}
               >
-                <item.icon size={22} strokeWidth={isActive ? 2.5 : 2} />
-                <span className={`text-[9px] font-bold uppercase tracking-widest whitespace-nowrap ${isActive ? "opacity-100" : "opacity-60"}`}>
-                  {item.name}
-                </span>
+                <item.icon size={24} strokeWidth={isActive ? 2.5 : 2} />
               </Link>
             );
           })}

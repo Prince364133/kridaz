@@ -144,7 +144,7 @@ const VenueOwnerReviews = () => {
                           </div>
                         </div>
                         <p className="text-white/70 text-sm leading-relaxed mb-4">
-                          "{review.comment}"
+                          &quot;{review.comment}&quot;
                         </p>
                         <div className="flex justify-end border-t border-white/10 pt-3">
                            <button className="text-[10px] font-bold text-white/70 uppercase tracking-widest hover:text-[#B3DC26] flex items-center gap-1.5 transition-colors">

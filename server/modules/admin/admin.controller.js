@@ -3,6 +3,8 @@ import { prisma } from "../../config/prisma.js";
 import { logAdminAction } from "../../utils/auditLogger.js";
 import NotificationService from "../../services/notification.service.js";
 import logger from "../../utils/logger.js";
+import argon2 from "argon2";
+import crypto from "crypto";
 
 /**
  * Helper to perform cascade deletion of all user-related data.
@@ -584,7 +586,7 @@ export const approveOwnerRequest = async (req, res) => {
               username: ownerRequest.email.split('@')[0] + '_' + Math.random().toString(36).substring(2, 7),
               name: ownerRequest.name,
               phone: ownerRequest.phone,
-              password: 'defaultHashedPassword', // Placeholder since password can be updated later/via recovery
+              password: await argon2.hash(crypto.randomBytes(32).toString('hex')), // Secure random placeholder since password can be updated later/via recovery
               role: roleToSet,
               isVerified: true
             }

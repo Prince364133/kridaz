@@ -2,6 +2,17 @@ import { prisma } from "../config/prisma.js";
 import generateEmail from "./generateEmail.js";
 import axios from "axios";
 import logger from "./logger.js";
+import { createCircuitBreaker } from "./circuitBreaker.js";
+
+// --- Circuit Breakers for external MSG91 API calls ---
+const msg91WhatsAppBreaker = createCircuitBreaker(
+  (url, payload, headers) => axios.post(url, payload, { headers }),
+  { name: "MSG91_WhatsApp", timeout: 15_000 }
+);
+const msg91SmsBreaker = createCircuitBreaker(
+  (url) => axios.post(url),
+  { name: "MSG91_SMS", timeout: 15_000 }
+);
 
 // MSG91 WhatsApp Service
 export const sendWhatsAppMessage = async (phone, message, templateName = null, params = []) => {
@@ -76,11 +87,9 @@ export const sendWhatsAppMessage = async (phone, message, templateName = null, p
 
     logger.info(`[WhatsApp Service] Sending request to MSG91 at ${new Date().toISOString()} for ${formattedPhone}`);
     const startTime = Date.now();
-    const response = await axios.post(apiUrl, payload, {
-      headers: { 
-        "authkey": authKey,
-        "Content-Type": "application/json"
-      }
+    const response = await msg91WhatsAppBreaker.fire(apiUrl, payload, {
+      "authkey": authKey,
+      "Content-Type": "application/json"
     });
 
     logger.info(`[WhatsApp Service] Received response from MSG91 in ${Date.now() - startTime}ms. Status: ${response.data.status}`);
@@ -106,7 +115,7 @@ export const sendSMSMessage = async (phone, otp) => {
     
     logger.info(`[SMS Service] Sending request to MSG91 at ${new Date().toISOString()} for ${formattedPhone}`);
     const startTime = Date.now();
-    const response = await axios.post(url);
+    const response = await msg91SmsBreaker.fire(url);
     
     logger.info(`[SMS Service] Received response from MSG91 in ${Date.now() - startTime}ms. Type: ${response.data.type}`);
     return response.data.type === "success";

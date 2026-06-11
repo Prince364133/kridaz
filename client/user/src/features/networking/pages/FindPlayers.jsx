@@ -22,7 +22,7 @@ import {
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import toast from "react-hot-toast";
-import StoryViewer from "@features/networking/components/StoryViewer";
+import StoryViewer from "../components/StoryViewer";
 import useLoginOnDemand from "@hooks/useLoginOnDemand";
 import NearbyPlayersMap from "@components/map/NearbyPlayersMap";
 import { useSocket } from "@context/SocketContext";
@@ -298,7 +298,7 @@ const FindPlayers = () => {
   const [userLocation, setUserLocation] = useState(() => {
     const cached = localStorage.getItem("kridaz_guest_location");
     if (cached) {
-      try { return JSON.parse(cached); } catch(e) {}
+      try { return JSON.parse(cached); } catch(e) { /* ignore */ }
     }
     return null;
   });

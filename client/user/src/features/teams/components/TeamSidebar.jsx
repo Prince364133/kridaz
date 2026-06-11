@@ -4,7 +4,7 @@ import { useGetMyScoringGamesQuery } from '@redux/api/scoringApi';
 import { Plus, Users, Search, ChevronRight } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import AddOpponentModal from './AddOpponentModal';
-import StartScoringModal from '@features/scoring/components/StartScoringModal';
+import { StartScoringModal } from '@features/scoring';
 import { useLocation, useNavigate } from 'react-router-dom';
 
 const TeamSidebar = ({ onSelectTeam, selectedTeamId, onCreateTeam }) => {

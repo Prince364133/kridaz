@@ -13,3 +13,5 @@ export { default as ExtraRunsModal } from './components/ExtraRunsModal';
 export { default as InningsSetupModal } from './components/InningsSetupModal';
 export { default as WicketModal } from './components/WicketModal';
 export { default as BallByBallHistory } from './components/BallByBallHistory';
+export { default as StartScoringModal } from './components/StartScoringModal';
+export { default as ScoringMatchCard } from './components/ScoringMatchCard';

@@ -65,7 +65,7 @@ const SPORT_DEFAULTS = {
     { role: "Player", count: 2 }
   ]
 };
-﻿const SPORT_ICONS = {
+const SPORT_ICONS = {
   "Cricket": (
     <svg viewBox="0 0 100 100" className="w-10 h-10 text-white" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
       <path d="M25 75 L65 35 M30 80 L70 40 M30 80 A5 5 0 0 1 25 75" />

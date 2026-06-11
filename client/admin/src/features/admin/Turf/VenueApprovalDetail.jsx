@@ -134,7 +134,7 @@ const VenueApprovalDetail = () => {
               </div>
               <div className="relative">
                 <p className={`text-gray-400 text-xl leading-relaxed font-medium italic ${!isDescExpanded ? 'line-clamp-2' : ''}`}>
-                  "{turf.description || "No description provided for this venue."}"
+                  &quot;{turf.description || "No description provided for this venue."}&quot;
                 </p>
                 {(turf.description || "No description provided for this venue.")?.length > 150 && (
                   <button 

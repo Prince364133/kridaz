@@ -52,7 +52,7 @@ const ProfessionalDetailsPage = () => {
       <div className="min-h-screen bg-[#000000] flex flex-col items-center justify-center p-6 text-center space-y-4">
         <div className="text-red-500 mb-4"><Shield size={48} /></div>
         <h2 className="text-2xl font-bold text-white uppercase tracking-wider">Profile Not Found</h2>
-        <p className="text-gray-500">The requested professional could not be found or you don't have access.</p>
+        <p className="text-gray-500">The requested professional could not be found or you don&apos;t have access.</p>
         <button 
           onClick={() => navigate(-1)}
           className="mt-6 px-6 py-2 bg-[#CCFF00] text-black font-bold uppercase rounded-[6px] hover:bg-[#65a30d] transition-colors"
@@ -345,7 +345,7 @@ const ProfessionalDetailsPage = () => {
                   <div className="bg-white/5 border border-dashed border-white/20 rounded-[8px] p-16 text-center">
                     <Calendar size={64} className="mx-auto text-gray-700 mb-6" />
                     <p className="text-white font-bold text-2xl tracking-wide mb-2">No Match History</p>
-                    <p className="text-gray-500 text-lg">This professional hasn't officiated any matches yet.</p>
+                    <p className="text-gray-500 text-lg">This professional hasn&apos;t officiated any matches yet.</p>
                   </div>
                 ) : (
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
