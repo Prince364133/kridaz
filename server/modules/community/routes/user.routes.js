@@ -45,16 +45,6 @@ router.get('/', optionalAuth, getPosts);
 
 /**
  * @swagger
- * /community/{id}:
- *   get:
- *     summary: Get a specific community post
- *     tags: [Community]
- */
-router.get('/:id', getPostById);
-
-
-/**
- * @swagger
  * /community/stats:
  *   get:
  *     summary: Get community statistics
@@ -80,8 +70,7 @@ router.get('/user-posts/:targetUserId?', getUserPosts);
  */
 router.get('/user-stories/:targetUserId?', getUserStories);
 
-// ── Authenticated Routes ────────────────────────────────────────────────────
-router.use(userAuth);
+// ── Specific Authenticated GET/POST Routes (Must be before /:id) ────────────
 
 /**
  * @swagger
@@ -92,7 +81,43 @@ router.use(userAuth);
  *     security:
  *       - BearerAuth: []
  */
-router.get('/my-activity', getMyActivity);
+router.get('/my-activity', userAuth, getMyActivity);
+
+/**
+ * @swagger
+ * /community/upload-url:
+ *   get:
+ *     summary: Get pre-signed upload URL
+ *     tags: [Community]
+ *     security:
+ *       - BearerAuth: []
+ */
+router.get('/upload-url', userAuth, validate(getUploadUrlSchema), getUploadUrl);
+
+/**
+ * @swagger
+ * /community/confirm-post:
+ *   post:
+ *     summary: Confirm post after upload
+ *     tags: [Community]
+ *     security:
+ *       - BearerAuth: []
+ */
+router.post('/confirm-post', userAuth, validate(confirmPostSchema), confirmPost);
+
+// ── Generic Public Route ────────────────────────────────────────────────────
+
+/**
+ * @swagger
+ * /community/{id}:
+ *   get:
+ *     summary: Get a specific community post
+ *     tags: [Community]
+ */
+router.get('/:id', getPostById);
+
+// ── Authenticated Routes (For generic /:id methods and others) ──────────────
+router.use(userAuth);
 
 /**
  * @swagger
@@ -132,28 +157,6 @@ router.post('/:id/comment', validate(commentSchema), addComment);
  */
 router.put('/:id/comment/:commentId', validate(commentSchema), updateComment);
 router.delete('/:id/comment/:commentId', deleteComment);
-
-/**
- * @swagger
- * /community/upload-url:
- *   get:
- *     summary: Get pre-signed upload URL
- *     tags: [Community]
- *     security:
- *       - BearerAuth: []
- */
-router.get('/upload-url', validate(getUploadUrlSchema), getUploadUrl);
-
-/**
- * @swagger
- * /community/confirm-post:
- *   post:
- *     summary: Confirm post after upload
- *     tags: [Community]
- *     security:
- *       - BearerAuth: []
- */
-router.post('/confirm-post', validate(confirmPostSchema), confirmPost);
 
 /**
  * @swagger

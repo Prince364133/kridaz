@@ -45,6 +45,17 @@ jobs:
             ${{ env.REGISTRY }}/${{ env.IMAGE_NAME_PREFIX }}-backend:latest
             ${{ env.REGISTRY }}/${{ env.IMAGE_NAME_PREFIX }}-backend:${{ github.sha }}
 
+      - name: Inject User Web Environment Variables
+        run: |
+          cat <<EOF > client/user/.env.production
+          VITE_API_URL=https://api.kridaz.com/
+          VITE_USER_URL=https://kridaz.vercel.app,https://www.kridaz.com
+          VITE_GOOGLE_CLIENT_ID=615790581143-k4g37kb3krcfnh1p64aodd2qa3le5q96.apps.googleusercontent.com
+          VITE_RAZORPAY_KEY_ID=rzp_live_SweOO8CAlfwtzg
+          VITE_REELS_CDN_URL=https://pub-cc243bd179ab45ee94097baeca380dd4.r2.dev
+          VITE_TURNSTILE_SITE_KEY=0x4AAAAAADTyPk2TuxnL09q7
+          EOF
+
       - name: Build and push User Frontend
         uses: docker/build-push-action@v5
         with:
@@ -54,6 +65,12 @@ jobs:
           tags: |
             ${{ env.REGISTRY }}/${{ env.IMAGE_NAME_PREFIX }}-user-web:latest
             ${{ env.REGISTRY }}/${{ env.IMAGE_NAME_PREFIX }}-user-web:${{ github.sha }}
+
+      - name: Inject Admin Web Environment Variables
+        run: |
+          cat <<EOF > client/admin/.env.production
+          VITE_API_URL=https://api.kridaz.com/
+          EOF
 
       - name: Build and push Admin Frontend
         uses: docker/build-push-action@v5
