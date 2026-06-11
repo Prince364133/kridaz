@@ -101,6 +101,7 @@ export const confirmPost = async (req, res) => {
 
     res.status(201).json({ success: true, post: formattedPost });
   } catch (error) {
+    console.error('[CONFIRM_POST_ERROR]', error);
     res.status(500).json({ success: false, message: error.message });
   }
 };
