@@ -443,7 +443,7 @@ export default function FindProfessionals() {
 
         {/* Grid Content */}
         {loading ? (
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 xl:grid-cols-6 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 gap-3 px-4">
             {[...Array(12)].map((_, i) => (
               <div key={i} className="aspect-[1/1.3] rounded-[8px] bg-white/5 border border-white/5 animate-pulse" />
             ))}
@@ -459,7 +459,7 @@ export default function FindProfessionals() {
             </div>
           </div>
         ) : (
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 px-4">
             {professionals.map((pro) => (
               <motion.div
                 initial={{ opacity: 0, y: 10 }}
@@ -467,7 +467,7 @@ export default function FindProfessionals() {
                 viewport={{ once: true }}
                 transition={{ duration: 0.25 }}
                 key={pro.id || pro._id}
-                className="relative rounded-[16px] border border-[rgba(255,255,255,0.08)] bg-[#1A1A1A] overflow-hidden transition-all duration-500 group hover:border-[#B3DC26]/50 hover:shadow-[0px_8px_24px_rgba(85,222,232,0.10)] h-56 cursor-pointer"
+                className="relative rounded-[16px] border border-[rgba(255,255,255,0.08)] bg-[#1A1A1A] overflow-hidden transition-all duration-500 group hover:border-[#B3DC26]/50 hover:shadow-[0px_8px_24px_rgba(85,222,232,0.10)] h-80 cursor-pointer"
                 onClick={() => navigate(`/profile/${pro.userId || pro.id || pro._id}`)}
               >
                 {/* Background Image or Initials */}

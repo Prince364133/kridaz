@@ -786,6 +786,23 @@ export const registerOwner = asyncHandler(async (req, res) => {
     if (phone) {
       await migrateCustomInvitesForUser(tx, user.id, phone);
     }
+
+    // 4. Create OwnerRequest for verification center
+    if (professionalRoles.includes(role) || ["OWNER", "VENU_OWNERS", "VENUE_OWNERS", "VENUE_OWNER"].includes(role?.toUpperCase())) {
+      await tx.ownerRequest.create({
+        data: {
+          userId: user.id,
+          name: user.name,
+          email: user.email || `${user.id}@noemail.com`,
+          phone: user.phone || "",
+          role: role === "venu_owners" ? "venue_owner" : (role || "venue_owner"),
+          businessDetails: { businessName: businessName || name || "Independent Partner" },
+          documents: [],
+          status: "pending"
+        }
+      });
+    }
+
     return {
       user,
       owner
@@ -1252,6 +1269,20 @@ export const googleAuth = asyncHandler(async (req, res) => {
           }
         });
         ownerProfileId = owner.id;
+
+        // Create OwnerRequest for verification center
+        await tx.ownerRequest.create({
+          data: {
+            userId: newUser.id,
+            name: newUser.name,
+            email: newUser.email || `${newUser.id}@noemail.com`,
+            phone: newUser.phone || "",
+            role: requestedRole === "venu_owners" ? "venue_owner" : (requestedRole || "venue_owner"),
+            businessDetails: { businessName: name || "Independent Partner" },
+            documents: [],
+            status: "pending"
+          }
+        });
       }
 
       // Create Transaction Record for Welcome Bonus
