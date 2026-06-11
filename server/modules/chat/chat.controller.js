@@ -1,6 +1,7 @@
 import { prisma } from "../../config/prisma.js";
 import { uploadToCloudinary } from "../../utils/cloudinary.js";
 import { getIO } from "../../config/socket.js";
+import { canDirectMessage } from "../../utils/dmGate.js";
 
 import logger from "../../utils/logger.js";
 import { SOCKET } from "@kridaz/shared-constants/socketEvents";
@@ -60,6 +61,21 @@ export const accessChat = async (req, res) => {
   const targetParticipant = onModel === "Owner"
     ? { ownerId: userId, userId: null, onModel: "Owner" }
     : { userId: userId, ownerId: null, onModel: "User" };
+
+  // DM gate — only for User↔User (Owner↔User flows are business conversations
+  // routed via a separate path). Blocks always apply; allowDM applies unless
+  // the sender is an Owner. Runs before the dedupe registry write so a denied
+  // call never spawns an in-flight promise.
+  if (onModel !== "Owner" && currentParticipant.userId) {
+    const gate = await canDirectMessage({
+      senderUserId: currentParticipant.userId,
+      targetUserId: userId,
+      senderIsOwner: currentParticipant.onModel === "Owner",
+    });
+    if (!gate.ok) {
+      return res.status(gate.status).json({ success: false, code: gate.code, message: gate.message });
+    }
+  }
 
   const key = getCreationKey(
     currentParticipant.userId,

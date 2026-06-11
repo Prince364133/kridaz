@@ -67,7 +67,6 @@ describe("Team Module API Integration Tests", () => {
         }).catch(() => {});
         await prisma.refreshToken.deleteMany({ where: { userId: user.id } }).catch(() => {});
         await prisma.wallet.deleteMany({ where: { userId: user.id } }).catch(() => {});
-        await prisma.userProfile.deleteMany({ where: { userId: user.id } }).catch(() => {});
         await prisma.user.delete({ where: { id: user.id } }).catch(() => {});
       }
       await prisma.oTP.deleteMany({ where: { email } }).catch(() => {});
@@ -158,7 +157,6 @@ describe("Team Module API Integration Tests", () => {
         }).catch(() => {});
         await prisma.refreshToken.deleteMany({ where: { userId: user.id } }).catch(() => {});
         await prisma.wallet.deleteMany({ where: { userId: user.id } }).catch(() => {});
-        await prisma.userProfile.deleteMany({ where: { userId: user.id } }).catch(() => {});
         await prisma.user.delete({ where: { id: user.id } }).catch(() => {});
       }
       await prisma.oTP.deleteMany({ where: { email } }).catch(() => {});
