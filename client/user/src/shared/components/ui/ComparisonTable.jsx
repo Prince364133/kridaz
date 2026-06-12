@@ -1,85 +1,70 @@
 import React from 'react';
-import { Check, X } from 'lucide-react';
+import { MapPin, Activity, MessageSquare, Video, MonitorPlay } from 'lucide-react';
+import { BentoItem } from './bento-item';
 
 const ComparisonTable = () => {
-  const features = [
-    { name: "Venue & Ground Booking", others: true, us: true },
-    { name: "Live Game Scoring", others: false, us: true },
-    { name: "Player Profiles & Stats", others: false, us: true },
-    { name: "Social Community & Posts", others: false, us: true },
-    { name: "Secure Matchmaking", others: false, us: true },
-    { name: "Pro Registration & Hiring", others: false, us: true },
-    { name: "Global Sports Networking", others: false, us: true },
-    { name: "Secure Payments", others: true, us: true },
-  ];
-
   return (
-    <section className="relative w-full max-w-[800px] mx-auto px-6 pt-16 md:pt-24 pb-8 md:pb-12">
+    <section className="relative w-full max-w-[1000px] mx-auto px-4 md:px-6 pb-4">
       {/* Header */}
-      <div className="mb-8 max-w-[800px] mx-auto">
-        <h2 className="text-[20px] md:text-4xl font-black tracking-tight leading-[1.05] mb-4 font-poppins font-medium normal-case">
-          What <span className="text-[#BFF367]">Makes Us Different.</span>
+      <div className="mb-6 md:mb-8 w-full text-left">
+        <h2 className="text-[36px] font-medium tracking-tight leading-[1.05] font-poppins normal-case text-white">
+          One app. <span className="text-[#BFF367]">Everything you need</span>
         </h2>
       </div>
 
-      {/* Table Container */}
-      <div className="w-full rounded-2xl border border-white/10 bg-[#0A0A0A]/80 backdrop-blur-md overflow-hidden flex flex-col">
-        {/* Table Header */}
-        <div className="grid border-b border-white/10 bg-white/5" style={{ gridTemplateColumns: '1.2fr 1fr 1fr' }}>
-          <div className="p-4 md:p-6 text-sm md:text-base font-semibold text-white/70">
-            Features
-          </div>
-          <div className="p-4 md:p-6 text-sm md:text-base font-semibold text-white/70 text-center border-l border-white/10">
-            Others
-          </div>
-          <div className="p-4 md:p-6 text-sm md:text-base font-bold text-[#BFF367] text-center border-l border-white/10 bg-[#BFF367]/5">
-            Kridaz
-          </div>
-        </div>
-
-        {/* Table Rows */}
-        <div className="flex flex-col">
-          {features.map((feature, idx) => (
-            <div 
-              key={idx} 
-              className={`grid transition-colors hover:bg-white/[0.02] ${
-                idx !== features.length - 1 ? 'border-b border-white/10' : ''
-              }`}
-              style={{ gridTemplateColumns: '1.2fr 1fr 1fr' }}
-            >
-              <div className="p-4 md:p-6 text-xs md:text-sm font-normal text-white flex items-center">
-                {feature.name}
-              </div>
-              <div className="p-4 md:p-6 flex items-center justify-center border-l border-white/10">
-                {feature.others ? (
-                  <Check className="w-5 h-5 text-white/50" />
-                ) : (
-                  <X className="w-5 h-5 text-white/20" />
-                )}
-              </div>
-              <div className="p-4 md:p-6 flex items-center justify-center border-l border-white/10 bg-[#BFF367]/5">
-                {feature.us ? (
-                  <Check className="w-5 h-5 text-[#BFF367]" />
-                ) : (
-                  <X className="w-5 h-5 text-white/20" />
-                )}
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
-
-      {/* Footer Text */}
-      <div className="flex items-center justify-center mt-16 gap-6 w-full max-w-[600px] mx-auto">
-        {/* Left fading line */}
-        <div className="flex-1 h-[1px] bg-gradient-to-r from-transparent to-white/20" />
+      {/* 5-Card Bento Grid */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-3 md:gap-4">
         
-        <h3 className="text-sm md:text-base font-medium tracking-[0.15em] uppercase text-white/80 font-poppins whitespace-nowrap">
-          One app. <span className="text-[#BFF367]">Everything you need</span>
-        </h3>
+        {/* Card 1: Spans 2 columns on desktop */}
+        <BentoItem className="fluid-glass rounded-2xl p-5 md:p-6 md:col-span-2 flex flex-col justify-end min-h-[140px] md:min-h-[160px] border border-white/10 hover:border-[#BFF367]/50 hover:shadow-[0_10px_30px_-10px_rgba(191,243,103,0.15)] group overflow-hidden relative">
+          <div className="absolute top-0 right-0 w-48 h-48 bg-[#BFF367]/5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/3 group-hover:bg-[#BFF367]/10 transition-colors duration-500" />
+          <div className="relative z-10 pointer-events-none" style={{ transform: 'translateZ(30px)' }}>
+            <MapPin className="text-[#BFF367] w-6 h-6 mb-3 group-hover:scale-110 group-hover:-rotate-3 transition-transform duration-300" />
+            <h3 className="text-lg font-bold text-white mb-1 font-poppins">Venue & Ground Booking</h3>
+            <p className="text-white/70 text-xs max-w-xs leading-relaxed">Find, compare, and book premium sports venues near you instantly with real-time availability.</p>
+          </div>
+        </BentoItem>
         
-        {/* Right fading line */}
-        <div className="flex-1 h-[1px] bg-gradient-to-l from-transparent to-white/20" />
+        {/* Card 2: 1 column */}
+        <BentoItem className="fluid-glass rounded-2xl p-5 md:p-6 flex flex-col justify-end min-h-[140px] md:min-h-[160px] border border-white/10 hover:border-[#BFF367]/50 hover:shadow-[0_10px_30px_-10px_rgba(191,243,103,0.15)] group overflow-hidden relative">
+          <div className="absolute top-0 right-0 w-32 h-32 bg-[#BFF367]/5 rounded-full blur-2xl -translate-y-1/2 translate-x-1/3 group-hover:bg-[#BFF367]/10 transition-colors duration-500" />
+          <div className="relative z-10 pointer-events-none" style={{ transform: 'translateZ(30px)' }}>
+            <Activity className="text-[#BFF367] w-6 h-6 mb-3 group-hover:scale-110 group-hover:rotate-3 transition-transform duration-300" />
+            <h3 className="text-base font-bold text-white mb-1 font-poppins">Live Game Scoring</h3>
+            <p className="text-white/70 text-xs leading-relaxed">Track matches with professional-grade live scoring tools.</p>
+          </div>
+        </BentoItem>
+
+        {/* Card 3: 1 column */}
+        <BentoItem className="fluid-glass rounded-2xl p-5 md:p-6 flex flex-col justify-end min-h-[140px] md:min-h-[160px] border border-white/10 hover:border-[#BFF367]/50 hover:shadow-[0_10px_30px_-10px_rgba(191,243,103,0.15)] group overflow-hidden relative">
+          <div className="absolute top-0 right-0 w-32 h-32 bg-[#BFF367]/5 rounded-full blur-2xl -translate-y-1/2 translate-x-1/3 group-hover:bg-[#BFF367]/10 transition-colors duration-500" />
+          <div className="relative z-10 pointer-events-none" style={{ transform: 'translateZ(30px)' }}>
+            <MessageSquare className="text-[#BFF367] w-6 h-6 mb-3 group-hover:scale-110 group-hover:-rotate-3 transition-transform duration-300" />
+            <h3 className="text-base font-bold text-white mb-1 font-poppins">Community Feed</h3>
+            <p className="text-white/70 text-xs leading-relaxed">Share moments, highlights, and interact with sports enthusiasts.</p>
+          </div>
+        </BentoItem>
+
+        {/* Card 4: 1 column */}
+        <BentoItem className="fluid-glass rounded-2xl p-5 md:p-6 flex flex-col justify-end min-h-[140px] md:min-h-[160px] border border-white/10 hover:border-[#BFF367]/50 hover:shadow-[0_10px_30px_-10px_rgba(191,243,103,0.15)] group overflow-hidden relative">
+          <div className="absolute top-0 right-0 w-32 h-32 bg-[#BFF367]/5 rounded-full blur-2xl -translate-y-1/2 translate-x-1/3 group-hover:bg-[#BFF367]/10 transition-colors duration-500" />
+          <div className="relative z-10 pointer-events-none" style={{ transform: 'translateZ(30px)' }}>
+            <Video className="text-[#BFF367] w-6 h-6 mb-3 group-hover:scale-110 group-hover:rotate-3 transition-transform duration-300" />
+            <h3 className="text-base font-bold text-white mb-1 font-poppins">Live Streams</h3>
+            <p className="text-white/70 text-xs leading-relaxed">Broadcast your matches live to friends and fans in real-time.</p>
+          </div>
+        </BentoItem>
+
+        {/* Card 5: 1 column */}
+        <BentoItem className="fluid-glass rounded-2xl p-5 md:p-6 flex flex-col justify-end min-h-[140px] md:min-h-[160px] border border-white/10 hover:border-[#BFF367]/50 hover:shadow-[0_10px_30px_-10px_rgba(191,243,103,0.15)] group overflow-hidden relative">
+          <div className="absolute top-0 right-0 w-32 h-32 bg-[#BFF367]/5 rounded-full blur-2xl -translate-y-1/2 translate-x-1/3 group-hover:bg-[#BFF367]/10 transition-colors duration-500" />
+          <div className="relative z-10 pointer-events-none" style={{ transform: 'translateZ(30px)' }}>
+            <MonitorPlay className="text-[#BFF367] w-6 h-6 mb-3 group-hover:scale-110 group-hover:-rotate-3 transition-transform duration-300" />
+            <h3 className="text-base font-bold text-white mb-1 font-poppins">Scoring Tickers</h3>
+            <p className="text-white/70 text-xs leading-relaxed">Overlay professional cricket scoring tickers directly onto your live streams.</p>
+          </div>
+        </BentoItem>
+
       </div>
     </section>
   );
