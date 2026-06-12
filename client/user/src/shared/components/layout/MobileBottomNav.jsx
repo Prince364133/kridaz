@@ -1,113 +1,82 @@
 import React, { useState } from "react";
-import { Link, useLocation } from "react-router-dom";
-import { Home, Search, Users, UserSearch, Trophy, Plus, PenSquare, Gamepad2, Award, MessageCircle, History, Wallet, Bookmark, Bell, Swords } from "lucide-react";
+import { Link, useLocation, useNavigate } from "react-router-dom";
+import { Home, Search, Users, UserSearch, Trophy, Plus, PenSquare, MessageCircle, History, Gamepad2, Award, Wallet, Bookmark, Bell, Swords, Settings, Map, HelpCircle, Activity, Calendar, Store } from "lucide-react";
 import { useSelector } from "react-redux";
-import { getDynamicProfileRoute } from "@utils/routeUtils";
 
 const MobileBottomNav = () => {
   const location = useLocation();
-  const { isLoggedIn, role, user } = useSelector((state) => state.auth);
+  const navigate = useNavigate();
+  const { isLoggedIn } = useSelector((state) => state.auth);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [wheelRotation, setWheelRotation] = useState(0);
-  const [isDragging, setIsDragging] = useState(false);
-  const touchStartY = React.useRef(null);
-  const touchStartX = React.useRef(null);
-  const hasSwiped = React.useRef(false);
+  
+  // Custom Icons State
+  const [customIcons, setCustomIcons] = useState([null, null, null, null, null]);
+  const [showIconSelector, setShowIconSelector] = useState(false);
+  const [selectedSlotIndex, setSelectedSlotIndex] = useState(null);
 
-  const handleTouchStart = (e) => {
-    touchStartY.current = e.touches[0].clientY;
-    touchStartX.current = e.touches[0].clientX;
-    hasSwiped.current = false;
-    setIsDragging(true);
-  };
-
-  const handleTouchMove = (e) => {
-    if (touchStartY.current === null || touchStartX.current === null) return;
-    const currentY = e.touches[0].clientY;
-    const currentX = e.touches[0].clientX;
-    handleDragMove(currentX, currentY);
-  };
-
-  const handleTouchEnd = () => {
-    touchStartY.current = null;
-    touchStartX.current = null;
-    setIsDragging(false);
-  };
-
-  const handleMouseDown = (e) => {
-    touchStartY.current = e.clientY;
-    touchStartX.current = e.clientX;
-    hasSwiped.current = false;
-    setIsDragging(true);
-  };
-
-  const handleMouseMove = (e) => {
-    if (touchStartY.current === null || touchStartX.current === null) return;
-    handleDragMove(e.clientX, e.clientY);
-  };
-
-  const handleMouseUp = () => {
-    touchStartY.current = null;
-    touchStartX.current = null;
-    setIsDragging(false);
-  };
-
-  const handleDragMove = (currentX, currentY) => {
-    const deltaY = currentY - touchStartY.current;
-    const deltaX = currentX - touchStartX.current;
-    
-    if (Math.abs(deltaY) > 5 || Math.abs(deltaX) > 5) {
-      hasSwiped.current = true;
-    }
-    
-    const delta = deltaY + deltaX; 
-    setWheelRotation(prev => {
-      let newRot = prev + delta * 0.4;
-      return Math.max(-210, Math.min(newRot, 0));
-    });
-    
-    touchStartY.current = currentY;
-    touchStartX.current = currentX;
-  };
-
-  const handleWheel = (e) => {
-    setWheelRotation(prev => {
-      let newRot = prev + e.deltaY * 0.1;
-      return Math.max(-210, Math.min(newRot, 0));
-    });
-  };
+  const availableCustomIcons = [
+    { title: "Hosted Games", path: "/my-hosted-games", icon: Swords },
+    { title: "Professionals", path: "/professionals", icon: Award },
+    { title: "Wallet", path: "/wallet", icon: Wallet },
+    { title: "Saved Items", path: "/saved", icon: Bookmark },
+    { title: "Notifications", path: "/notifications", icon: Bell },
+    { title: "Start Scoring", path: "/my-teams", state: { openStartScoringModal: true }, icon: Gamepad2 },
+    { title: "Find Venues", path: "/venues", icon: Map }
+  ];
 
   const handleToggle = () => {
-    setIsMenuOpen(prev => {
-      if (!prev) setWheelRotation(0);
-      return !prev;
-    });
+    if (isMenuOpen) {
+      navigate('/search');
+      handleClose();
+    } else {
+      setIsMenuOpen(true);
+    }
   };
 
   const handleClose = () => {
     setIsMenuOpen(false);
-    setTimeout(() => setWheelRotation(0), 300);
+    setShowIconSelector(false);
+  };
+
+  const handleEmptyIconClick = (e, index) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setSelectedSlotIndex(index);
+    setShowIconSelector(true);
+  };
+
+  const handleSelectIcon = (selectedIcon) => {
+    setCustomIcons(prev => {
+      const newIcons = [...prev];
+      newIcons[selectedSlotIndex] = selectedIcon;
+      return newIcons;
+    });
+    setShowIconSelector(false);
+  };
+
+  const handleRemoveIcon = (e, index) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setCustomIcons(prev => {
+      const newIcons = [...prev];
+      newIcons[index] = null;
+      return newIcons;
+    });
   };
 
   const navItems = [
     { name: "Home", path: "/", icon: Home },
-    { name: "Venues", path: "/venues", icon: Search },
-    { name: "Messages", path: "/messages", icon: MessageCircle },
+    { name: "Venues", path: "/venues", icon: Map },
     { name: "Players", path: "/players", icon: UserSearch },
     { name: "My Teams", path: "/my-teams", icon: Users },
   ];
 
-  const floatingItems = [
-    { title: "Search", path: "/search", icon: Search, size: "w-14 h-14", isSpecial: true },
-    { title: "Create Post", path: "/new-post", icon: PenSquare, size: "w-12 h-12", isSpecial: false },
-    { title: "Join Game", path: "/join-games", icon: Trophy, size: "w-12 h-12", isSpecial: false },
-    { title: "Hosted Games", path: "/hosted-games", icon: Swords, size: "w-12 h-12", isSpecial: false },
-    { title: "Professionals", path: "/professionals", icon: Award, size: "w-12 h-12", isSpecial: false },
-    { title: "Bookings", path: "/booking-history", icon: History, size: "w-12 h-12", isSpecial: false },
-    { title: "My Teams", path: "/my-teams", state: { openStartScoringModal: true }, icon: Gamepad2, size: "w-12 h-12", isSpecial: false },
-    { title: "Wallet", path: "/wallet", icon: Wallet, size: "w-12 h-12", isSpecial: false },
-    { title: "Saved Items", path: "/saved", icon: Bookmark, size: "w-12 h-12", isSpecial: false },
-    { title: "Notifications", path: "/notifications", icon: Bell, size: "w-12 h-12", isSpecial: false },
+  const popupItems = [
+    { title: "Messages", path: "/messages", icon: MessageCircle, isSpecial: false },
+    { title: "Create Post", path: "/new-post", icon: PenSquare, isSpecial: false },
+    { title: "Join Game", path: "/join-games", icon: Trophy, isSpecial: false },
+    { title: "Hosted Games", path: "/hosted-games", icon: Swords, isSpecial: false },
+    { title: "Saved", path: "/saved", icon: Bookmark, isSpecial: false },
   ];
 
   // Filter items based on login status and role
@@ -122,114 +91,215 @@ const MobileBottomNav = () => {
 
   return (
     <>
-      {/* Full Screen Blur Overlay */}
+      {/* Transparent Click-away Overlay (No Masking) */}
       {isMenuOpen && (
         <div 
-          className={`lg:hidden fixed inset-0 z-[90] bg-black/40 backdrop-blur-md pointer-events-auto ${isDragging ? 'cursor-grabbing' : 'cursor-grab'}`}
-          onClick={(e) => {
-            if (!hasSwiped.current) handleClose();
-          }}
-          onTouchStart={handleTouchStart}
-          onTouchMove={handleTouchMove}
-          onTouchEnd={handleTouchEnd}
-          onMouseDown={handleMouseDown}
-          onMouseMove={handleMouseMove}
-          onMouseUp={handleMouseUp}
-          onMouseLeave={handleMouseUp}
-          onWheel={handleWheel}
+          className="lg:hidden fixed inset-0 z-[90] pointer-events-auto"
+          onClick={handleClose}
         />
       )}
 
-      {/* Fixed Bottom Nav Bar */}
+      {/* Floating Bottom Nav Container */}
       <div 
-        className="lg:hidden fixed left-0 right-0 z-[100] flex justify-center items-end"
+        className="lg:hidden fixed left-4 right-4 z-[100] h-[60px] flex flex-col justify-end pointer-events-none mb-4"
         style={{ bottom: 'env(safe-area-inset-bottom)' }}
       >
-        {/* Floating Actions Container (Bottom Right) */}
-        <div className="absolute right-4 bottom-[80px] flex justify-center items-center">
-          
-          {/* Dynamic Scrollable Wheel */}
-          {floatingItems.map((item, i) => {
-            const baseAngle = 90 + i * 22.5;
-            const currentAngle = baseAngle + wheelRotation;
-            const rad = currentAngle * Math.PI / 180;
-            const radius = 145;
-            
-            const x = isMenuOpen ? radius * Math.cos(rad) : 0;
-            const y = isMenuOpen ? -radius * Math.sin(rad) : 0;
-            
-            let opacity = 0;
-            if (isMenuOpen) {
-              if (currentAngle >= 85 && currentAngle <= 185) {
-                opacity = 1;
-              } else if (currentAngle >= 65 && currentAngle < 85) {
-                opacity = (currentAngle - 65) / 20;
-              } else if (currentAngle > 185 && currentAngle <= 205) {
-                opacity = (205 - currentAngle) / 20;
-              }
-            }
-
-            const pointerEvents = (isMenuOpen && opacity > 0.5) ? "auto" : "none";
-
-            return (
-              <div 
-                key={i}
-                className="absolute z-50 ease-out"
-                style={{
-                  transform: `translate(${x}px, ${y}px) scale(${isMenuOpen ? 1 : 0})`,
-                  opacity,
-                  pointerEvents,
-                  transitionProperty: 'all',
-                  transitionDuration: isDragging ? '0ms' : '200ms',
-                  transitionDelay: (isMenuOpen && wheelRotation === 0 && !isDragging) ? `${100 + i * 25}ms` : '0ms'
-                }}
-              >
-                <Link 
-                  to={item.path} 
-                  state={item.state} 
-                  onClick={handleClose} 
-                  title={item.title} 
-                  className={`${item.size} rounded-full bg-[#1A1A1A] ${item.isSpecial ? "border-2 border-[#BFF367] shadow-[0_0_15px_rgba(191,243,103,0.3)]" : "border border-[#BFF367]/30 shadow-xl"} text-[#BFF367] flex items-center justify-center hover:bg-[#222] transition-colors`}
-                >
-                  <item.icon size={item.isSpecial ? 26 : 22} strokeWidth={item.isSpecial ? 2.5 : 2} />
-                </Link>
+        
+        {/* Second Navbar (Custom Icons) */}
+        <div 
+          className={`absolute left-0 right-0 flex justify-center z-30 transition-all duration-300 ease-in-out ${
+            isMenuOpen 
+              ? "bottom-[125px] opacity-100 pointer-events-auto translate-y-0" 
+              : "bottom-[30px] opacity-0 pointer-events-none translate-y-4"
+          }`}
+        >
+          <div className="bg-[#1A1A1A]/80 backdrop-blur-2xl border border-white/10 rounded-full px-4 py-1.5 flex items-center gap-1.5 md:gap-2 shadow-[0_10px_40px_rgba(0,0,0,0.5)]">
+            {customIcons.map((item, i) => (
+              <div key={`custom-${i}`} className="relative">
+                {item ? (
+                  <div className="relative flex items-center justify-center group">
+                    <Link 
+                      to={item.path}
+                      state={item.state}
+                      onClick={handleClose}
+                      className="flex items-center justify-center"
+                      title={item.title}
+                    >
+                      <div className="w-8 h-8 md:w-9 md:h-9 rounded-[12px] flex items-center justify-center transition-all duration-300 transform group-hover:scale-110 bg-[#BFF367] text-black shadow-[0_0_15px_rgba(191,243,103,0.3)]">
+                        <item.icon size={16} strokeWidth={2.5} />
+                      </div>
+                    </Link>
+                    {/* Tiny edit button to remove/change */}
+                    <button 
+                      onClick={(e) => handleRemoveIcon(e, i)}
+                      className="absolute -top-1.5 -right-1.5 w-4 h-4 rounded-full bg-[#1A1A1A] border border-white/20 text-white/50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity hover:text-[#BFF367] z-10 cursor-pointer"
+                    >
+                      <PenSquare size={8} strokeWidth={2.5} />
+                    </button>
+                  </div>
+                ) : (
+                  <button 
+                    onClick={(e) => handleEmptyIconClick(e, i)}
+                    className="w-8 h-8 md:w-9 md:h-9 rounded-[12px] flex items-center justify-center transition-all duration-300 border border-dashed border-white/20 text-white/30 hover:border-white/50 hover:text-white/70 hover:bg-white/5"
+                    title="Add Custom Shortcut"
+                  >
+                    <Plus size={14} strokeWidth={2.5} />
+                  </button>
+                )}
               </div>
-            );
-          })}
-
-          {/* Floating + Button */}
-          <div className="relative z-[60] flex items-center justify-center">
-            <button
-              onClick={handleToggle}
-              className={`relative flex items-center justify-center w-11 h-11 rounded-full text-black transition-all duration-700 shadow-[0_0_20px_rgba(191,243,103,0.2)] border-[3px] border-black/80 ${isMenuOpen ? "bg-[#aade55] rotate-[135deg]" : "bg-[#BFF367] rotate-0 hover:scale-105"}`}
-            >
-              <Plus size={20} strokeWidth={3.5} />
-            </button>
+            ))}
           </div>
         </div>
 
-        {/* Bottom Bar */}
-        <div className="relative flex items-center justify-center gap-0 w-full">
-          {/* Background Bar */}
-          <div className="absolute inset-0 bg-black/60 backdrop-blur-xl rounded-t-3xl border-t border-l border-r border-white/10 shadow-[0_-4px_32px_rgba(0,0,0,0.5)]" />
-
-          {/* All Nav Items */}
-          {visibleItems.map((item) => {
-            const isActive = location.pathname === item.path;
-            return (
-              <Link
-                key={item.name}
+        {/* Primary Popup Navbar (5 Pre-defined Icons) */}
+        <div 
+          className={`absolute left-0 right-0 flex justify-center z-40 transition-all duration-300 ease-in-out ${
+            isMenuOpen 
+              ? "bottom-[70px] opacity-100 pointer-events-auto translate-y-0" 
+              : "bottom-[30px] opacity-0 pointer-events-none translate-y-4"
+          }`}
+        >
+          {/* Adjusted padding/width for middle navbar */}
+          <div className="bg-[#1A1A1A]/80 backdrop-blur-2xl border border-white/10 rounded-full px-5 py-1.5 flex items-center gap-2 md:gap-2.5 shadow-[0_10px_40px_rgba(0,0,0,0.5)]">
+            {popupItems.map((item, i) => (
+              <Link 
+                key={`primary-${i}`}
                 to={item.path}
+                state={item.state}
                 onClick={handleClose}
-                className={`relative z-10 flex-1 flex flex-col items-center justify-center py-4
-                  ${isActive ? "text-[#BFF367]" : "text-white/40 hover:text-white/60"}`}
+                className="flex items-center justify-center group"
+                title={item.title}
               >
-                <item.icon size={24} strokeWidth={isActive ? 2.5 : 2} />
+                <div className={`w-9 h-9 md:w-10 md:h-10 rounded-full flex items-center justify-center transition-all duration-300 transform group-hover:scale-125 ${
+                  item.isSpecial 
+                    ? "bg-[#BFF367]/20 text-[#BFF367] border border-[#BFF367]/40 group-hover:bg-[#BFF367] group-hover:text-black shadow-[0_0_15px_rgba(191,243,103,0.2)]" 
+                    : "bg-white/5 text-white/70 border border-white/5 group-hover:bg-white/20 group-hover:text-white group-hover:border-white/20"
+                }`}>
+                  <item.icon size={18} strokeWidth={2.5} />
+                </div>
               </Link>
-            );
-          })}
+            ))}
+          </div>
+        </div>
+
+        {/* Main Floating Bar */}
+        <div className="relative w-full h-[60px] flex items-center justify-between px-2 pb-0 pointer-events-auto rounded-full z-50 transition-all duration-300">
+          {/* Glass Background */}
+          <div className="absolute inset-0 bg-[#050505]/70 backdrop-blur-2xl rounded-full border border-white/10 shadow-[0_8px_32px_rgba(0,0,0,0.5)] z-0" />
+
+          {/* Left Nav Items */}
+          <div className="relative z-10 flex-1 flex justify-around items-center h-full">
+            {leftItems.map((item) => {
+              const isActive = location.pathname === item.path;
+              return (
+                <Link
+                  key={item.name}
+                  to={item.path}
+                  onClick={handleClose}
+                  className="flex flex-col items-center justify-center p-2 transition-colors group"
+                >
+                  <div className={`relative flex items-center justify-center transition-all duration-300 ${
+                    isActive 
+                      ? "w-11 h-11 bg-[#BFF367]/20 text-[#BFF367] rounded-full shadow-[0_0_15px_rgba(191,243,103,0.2)]" 
+                      : "w-11 h-11 text-white/40 group-hover:text-white/80 group-hover:bg-white/10 group-hover:scale-110 rounded-full"
+                  }`}>
+                    <item.icon size={22} strokeWidth={isActive ? 2.5 : 2} />
+                  </div>
+                </Link>
+              );
+            })}
+          </div>
+
+          {/* Center Floating Actions Container */}
+          <div className="relative z-50 flex justify-center items-center w-[60px] h-full">
+            <div className="absolute bottom-[14px] flex justify-center items-center">
+              
+              {/* Floating + Button */}
+              <button
+                onClick={handleToggle}
+                className={`relative flex items-center justify-center w-[44px] h-[44px] rounded-full text-black transition-all duration-500 shadow-[0_0_20px_rgba(191,243,103,0.3)] border-[3px] border-[#050505] ${
+                  isMenuOpen ? "bg-[#aade55]" : "bg-[#BFF367] hover:scale-105"
+                }`}
+              >
+                <Plus 
+                  size={22} 
+                  strokeWidth={3.5} 
+                  className={`absolute transition-all duration-300 ease-in-out ${isMenuOpen ? "opacity-0 scale-50 rotate-90" : "opacity-100 scale-100 rotate-0"}`} 
+                />
+                <Search 
+                  size={20} 
+                  strokeWidth={3} 
+                  className={`absolute transition-all duration-300 ease-in-out ${isMenuOpen ? "opacity-100 scale-100 rotate-0" : "opacity-0 scale-50 -rotate-90"}`} 
+                />
+              </button>
+            </div>
+          </div>
+
+          {/* Right Nav Items */}
+          <div className="relative z-10 flex-1 flex justify-around items-center h-full">
+            {rightItems.map((item) => {
+              const isActive = location.pathname === item.path;
+              return (
+                <Link
+                  key={item.name}
+                  to={item.path}
+                  onClick={handleClose}
+                  className="flex flex-col items-center justify-center p-2 transition-colors group"
+                >
+                  <div className={`relative flex items-center justify-center transition-all duration-300 ${
+                    isActive 
+                      ? "w-11 h-11 bg-[#BFF367]/20 text-[#BFF367] rounded-full shadow-[0_0_15px_rgba(191,243,103,0.2)]" 
+                      : "w-11 h-11 text-white/40 group-hover:text-white/80 group-hover:bg-white/10 group-hover:scale-110 rounded-full"
+                  }`}>
+                    <item.icon size={22} strokeWidth={isActive ? 2.5 : 2} />
+                  </div>
+                </Link>
+              );
+            })}
+          </div>
         </div>
       </div>
+
+      {/* Icon Selector Modal */}
+      {showIconSelector && (
+        <div className="lg:hidden fixed inset-0 z-[110] flex items-center justify-center px-4">
+          <div 
+            className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+            onClick={() => setShowIconSelector(false)}
+          />
+          <div className="relative w-full max-w-[320px] bg-[#111] border border-white/10 rounded-[20px] p-4 shadow-2xl animate-in fade-in zoom-in-95 duration-200">
+            <h3 className="text-white font-black text-sm mb-3 text-center uppercase tracking-wider">Add Custom Shortcut</h3>
+            <div className="grid grid-cols-4 gap-2">
+              {availableCustomIcons.map((iconOpt, idx) => {
+                const isSelected = customIcons.some(item => item && item.title === iconOpt.title);
+                return (
+                  <button
+                    key={idx}
+                    onClick={() => handleSelectIcon(iconOpt)}
+                    disabled={isSelected}
+                    className={`flex flex-col items-center justify-center gap-1.5 p-2 rounded-[12px] transition-all group ${
+                      isSelected 
+                        ? "bg-[#BFF367]/10 border border-[#BFF367]/50 text-[#BFF367] opacity-60 cursor-not-allowed" 
+                        : "bg-white/5 border border-white/5 hover:bg-[#BFF367]/10 hover:border-[#BFF367]/30 hover:text-[#BFF367] text-white/70"
+                    }`}
+                  >
+                    <div className="relative">
+                      <iconOpt.icon size={18} strokeWidth={2} className={`${isSelected ? "" : "group-hover:scale-110"} transition-transform`} />
+                    </div>
+                    <span className="text-[8px] font-medium text-center leading-[1.1]">{iconOpt.title}</span>
+                  </button>
+                );
+              })}
+            </div>
+            <button 
+              onClick={() => setShowIconSelector(false)}
+              className="mt-4 w-full py-2.5 rounded-full bg-white/10 text-white font-bold text-xs hover:bg-white/20 transition-colors"
+            >
+              Cancel
+            </button>
+          </div>
+        </div>
+      )}
     </>
   );
 };

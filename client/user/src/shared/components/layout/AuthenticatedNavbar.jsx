@@ -184,9 +184,7 @@ const AuthenticatedNavbar = ({ toggleSidebar }) => {
               <Menu size={24} />
             </button>
           )}
-          {(isProfessionalDashboard || isVenueOwner) && (
-            <GlobalBackButton />
-          )}
+
           <Link to="/" className="flex items-center gap-4 group">
             <div className="w-20 h-10 sm:w-32 sm:h-12 bg-transparent flex items-center justify-center overflow-hidden">
                <img src="/logo.png" alt="Kridaz Logo" className="w-full h-full object-contain" />
@@ -246,7 +244,7 @@ const AuthenticatedNavbar = ({ toggleSidebar }) => {
           <div className="h-8 w-[1px] bg-white/5 mx-1 hidden sm:block" />
 
           {isProfessionalDashboard && (
-            <div className="relative">
+            <div className="hidden md:flex relative">
               <Link 
                 to={`/professional/${role}/support`}
                 className="flex items-center justify-center p-2.5 bg-[#0d0d0d] border border-white/5 hover:border-[#BFF367]/30 rounded-[8px] hover:bg-[#BFF367]/10 hover:text-[#BFF367] text-[#999999] transition-all duration-300"
@@ -288,7 +286,6 @@ const AuthenticatedNavbar = ({ toggleSidebar }) => {
                 <div className="flex flex-col p-2 gap-1">
                   {isVenueOwner && (
                     <>
-
                       <button 
                         onClick={() => { setShowMobileMenu(false); setIsManualBookingOpen(true); }}
                         className="flex items-center gap-3 px-3 py-3 rounded-lg text-xs font-bold text-black transition-colors"
@@ -307,18 +304,27 @@ const AuthenticatedNavbar = ({ toggleSidebar }) => {
                       </Link>
                     </>
                   )}
+
+                  {isProfessionalDashboard && (
+                    <Link 
+                      to={`/professional/${role}/support`}
+                      onClick={() => setShowMobileMenu(false)}
+                      className="flex items-center gap-3 px-3 py-3 rounded-lg text-xs font-bold text-white hover:bg-white/5 transition-colors"
+                    >
+                      <HelpCircle size={16} />
+                      Docs & Support
+                    </Link>
+                  )}
                   
                   <div className="h-[1px] bg-white/10 my-1"></div>
 
-                  {!isProfessionalDashboard && (
-                    <button 
-                      onClick={() => { setShowMobileMenu(false); handleLogout(); }}
-                      className="flex items-center gap-3 px-3 py-3 rounded-lg text-xs font-bold text-red-500 hover:bg-red-500/10 transition-colors"
-                    >
-                      <LogOut size={16} />
-                      Logout
-                    </button>
-                  )}
+                  <button 
+                    onClick={() => { setShowMobileMenu(false); handleLogout(); }}
+                    className="flex items-center gap-3 px-3 py-3 rounded-lg text-xs font-bold text-red-500 hover:bg-red-500/10 transition-colors"
+                  >
+                    <LogOut size={16} />
+                    Logout
+                  </button>
                 </div>
               </div>
             )}

@@ -433,16 +433,16 @@ const NewPostLanding = () => {
           {/* Upload Button */}
           <button 
             onClick={handleGalleryUpload}
-            className={`absolute transition-all duration-300 flex items-center justify-center gap-2 hover:bg-white/10 bg-black/60 backdrop-blur-md border border-white/20 rounded-full shadow-xl left-6 px-4 py-2`}
+            className={`absolute transition-all duration-300 flex items-center justify-center gap-1 hover:bg-white/10 bg-black/60 backdrop-blur-md border border-white/20 rounded-full shadow-xl left-4 px-2.5 py-1 z-10`}
           >
-            <div className={`w-8 h-8 rounded-full bg-[#BFF367]/10 flex items-center justify-center`}>
+            <div className={`w-6 h-6 rounded-full bg-[#BFF367]/10 flex items-center justify-center`}>
               {activeTab === "Reel" ? (
-                <Video size={16} className="text-[#BFF367]" />
+                <Video size={12} className="text-[#BFF367]" />
               ) : (
-                <ImageIcon size={16} className="text-[#BFF367]" />
+                <ImageIcon size={12} className="text-[#BFF367]" />
               )}
             </div>
-            <span className="text-[11px] font-bold text-white tracking-wide uppercase">Upload</span>
+            <span className="text-[9px] font-bold text-white tracking-wide uppercase pr-0.5">Upload</span>
           </button>
 
           {/* Capture Button */}
@@ -450,7 +450,7 @@ const NewPostLanding = () => {
              onPointerDown={handlePointerDown}
              onPointerUp={handlePointerUp}
              onPointerLeave={handlePointerUp} // Safety to stop if finger slides off
-             className={`w-20 h-20 rounded-full border-[4px] flex items-center justify-center transition-all duration-300 ${isRecording ? 'border-red-500/50 scale-110' : 'border-white/50 hover:scale-105 active:scale-95'}`}
+             className={`w-20 h-20 rounded-full border-[4px] flex items-center justify-center transition-all duration-300 z-20 ${isRecording ? 'border-red-500/50 scale-110' : 'border-white/50 hover:scale-105 active:scale-95'}`}
           >
             <div className={`w-16 h-16 rounded-full flex items-center justify-center shadow-[0_0_30px_rgba(255,255,255,0.3)] transition-all duration-300 ${isRecording ? 'bg-red-500 scale-75 rounded-[12px]' : 'bg-white'}`}>
               {!isRecording && <div className="w-14 h-14 border-[2px] border-black/10 rounded-full" />}
@@ -460,9 +460,9 @@ const NewPostLanding = () => {
           {/* Flip Camera Button */}
           <button 
             onClick={toggleCamera}
-            className={`absolute transition-all duration-300 flex items-center justify-center w-12 h-12 hover:bg-white/10 bg-black/60 backdrop-blur-md border border-white/20 rounded-full shadow-xl right-6`}
+            className={`absolute transition-all duration-300 flex items-center justify-center w-11 h-11 hover:bg-white/10 bg-black/60 backdrop-blur-md border border-white/20 rounded-full shadow-xl right-4 z-10`}
           >
-            <SwitchCamera size={22} className="text-white" />
+            <SwitchCamera size={20} className="text-white" />
           </button>
         </div>
       </div>

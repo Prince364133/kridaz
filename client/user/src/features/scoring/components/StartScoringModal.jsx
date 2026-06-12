@@ -2148,10 +2148,10 @@ const StartScoringModal = ({ isOpen, onClose, onSuccess, initialData }) => {
                 </span>
               </div>
               
-              <div className="flex items-stretch gap-2 relative z-10">
+              <div className="grid grid-cols-2 gap-2 relative z-10">
                 {/* Team A */}
                 <div 
-                  className="flex-1 bg-white/[0.02] border border-white/5 hover:border-white/10 rounded-xl p-3 flex items-center gap-3 cursor-pointer transition-all"
+                  className="min-w-0 bg-white/[0.02] border border-white/5 hover:border-white/10 rounded-xl p-2.5 sm:p-3 flex items-center gap-2 sm:gap-3 cursor-pointer transition-all"
                   onClick={() => {
                     setXiTab('A');
                     if (!formData.teamAId) {
@@ -2161,35 +2161,35 @@ const StartScoringModal = ({ isOpen, onClose, onSuccess, initialData }) => {
                     }
                   }}
                 >
-                  <div className="w-[42px] h-[42px] rounded-full bg-[#121212] border border-white/10 flex items-center justify-center overflow-hidden flex-shrink-0 shadow-lg">
+                  <div className="w-[36px] h-[36px] sm:w-[42px] sm:h-[42px] rounded-full bg-[#121212] border border-white/10 flex items-center justify-center overflow-hidden flex-shrink-0 shadow-lg">
                     {formData.teamAId ? (
                       teamADetails?.team?.logo ? (
                         <img src={teamADetails.team.logo} alt="Team A" className="w-full h-full object-cover" />
                       ) : (
-                        <span className="text-lg font-black text-[#BFF367]">{getTeamName(formData.teamAId).charAt(0)}</span>
+                        <span className="text-base sm:text-lg font-black text-[#BFF367]">{getTeamName(formData.teamAId).charAt(0)}</span>
                       )
                     ) : (
-                      <span className="text-lg font-black text-[#BFF367]">A</span>
+                      <span className="text-base sm:text-lg font-black text-[#BFF367]">A</span>
                     )}
                   </div>
-                  <div className="flex flex-col overflow-hidden">
-                    <span className="text-white font-bold text-[11px] truncate tracking-wider uppercase">
+                  <div className="flex flex-col min-w-0 flex-1">
+                    <span className="text-white font-bold text-[10px] sm:text-[11px] truncate tracking-wider uppercase">
                       {getTeamName(formData.teamAId) || 'SELECT TEAM A'}
                     </span>
-                    <span className="text-white/40 text-[10px] mt-0.5 tracking-wide">
+                    <span className="text-white/40 text-[9px] sm:text-[10px] mt-0.5 tracking-wide truncate">
                       <span className="text-[#BFF367]">{formData.teamAPlayers.length}/{formData.maxMembers}</span> Players
                     </span>
                   </div>
                 </div>
 
                 {/* VS Badge */}
-                <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-7 h-7 rounded-full bg-[#0a0a0a] border border-white/10 flex items-center justify-center z-20 shadow-xl">
-                  <span className="text-white text-[9px] font-black">VS</span>
+                <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-6 h-6 sm:w-7 sm:h-7 rounded-full bg-[#0a0a0a] border border-white/10 flex items-center justify-center z-20 shadow-xl">
+                  <span className="text-white text-[8px] sm:text-[9px] font-black">VS</span>
                 </div>
 
                 {/* Team B */}
                 <div 
-                  className="flex-1 bg-white/[0.02] border border-white/5 hover:border-white/10 rounded-xl p-3 flex items-center gap-3 cursor-pointer transition-all"
+                  className="min-w-0 bg-white/[0.02] border border-white/5 hover:border-white/10 rounded-xl p-2.5 sm:p-3 flex items-center gap-2 sm:gap-3 cursor-pointer transition-all"
                   onClick={() => {
                     setXiTab('B');
                     if (!formData.teamBId) {
@@ -2199,22 +2199,22 @@ const StartScoringModal = ({ isOpen, onClose, onSuccess, initialData }) => {
                     }
                   }}
                 >
-                  <div className="w-[42px] h-[42px] rounded-full bg-[#121212] border border-white/10 flex items-center justify-center overflow-hidden flex-shrink-0 shadow-lg">
+                  <div className="w-[36px] h-[36px] sm:w-[42px] sm:h-[42px] rounded-full bg-[#121212] border border-white/10 flex items-center justify-center overflow-hidden flex-shrink-0 shadow-lg">
                     {formData.teamBId ? (
                       teamBDetails?.team?.logo ? (
                         <img src={teamBDetails.team.logo} alt="Team B" className="w-full h-full object-cover" />
                       ) : (
-                        <span className="text-lg font-black text-[#BFF367]">{getTeamName(formData.teamBId).charAt(0)}</span>
+                        <span className="text-base sm:text-lg font-black text-[#BFF367]">{getTeamName(formData.teamBId).charAt(0)}</span>
                       )
                     ) : (
-                      <span className="text-lg font-black text-[#BFF367]">B</span>
+                      <span className="text-base sm:text-lg font-black text-[#BFF367]">B</span>
                     )}
                   </div>
-                  <div className="flex flex-col overflow-hidden">
-                    <span className="text-white font-bold text-[11px] truncate tracking-wider uppercase">
+                  <div className="flex flex-col min-w-0 flex-1">
+                    <span className="text-white font-bold text-[10px] sm:text-[11px] truncate tracking-wider uppercase">
                       {getTeamName(formData.teamBId) || 'SELECT TEAM B'}
                     </span>
-                    <span className="text-white/40 text-[10px] mt-0.5 tracking-wide">
+                    <span className="text-white/40 text-[9px] sm:text-[10px] mt-0.5 tracking-wide truncate">
                       <span className="text-[#BFF367]">{formData.teamBPlayers.length}/{formData.maxMembers}</span> Players
                     </span>
                   </div>
@@ -2316,37 +2316,31 @@ const StartScoringModal = ({ isOpen, onClose, onSuccess, initialData }) => {
             )}
 
             {/* Venue & Power Play */}
-            <div className="grid grid-cols-2 gap-4 mt-6 mb-6">
-              {/* Venue Card */}
-              <div className="bg-white/[0.02] border border-white/5 rounded-2xl p-3 flex flex-col justify-between">
-                <div className="mb-3 px-1">
-                  <span className="text-[10px] font-black text-white/40 uppercase tracking-widest">
-                    VENUE
-                  </span>
-                </div>
-                
+            <div className="grid grid-cols-2 gap-4 mt-4 mb-6">
+              {/* Venue */}
+              <div className="space-y-1">
+                <label className={labelClass}>
+                  VENUE
+                </label>
                 <button
                   type="button"
                   onClick={() => setShowVenuePopup(true)}
-                  className="w-full bg-[#121212] border border-white/5 hover:border-white/20 rounded-xl px-3 py-2.5 text-white text-left focus:outline-none transition-all flex items-center justify-between min-h-[42px]"
+                  className="w-full bg-[#121212] border border-white/10 rounded-[12px] px-4 py-2.5 text-left text-white focus:outline-none focus:border-[#55DEE8]/30 transition-all text-sm font-semibold flex items-center justify-between"
                 >
-                  <span className="text-[11px] font-semibold text-white/80 truncate">
+                  <span className="flex-1 min-w-0 block truncate text-white mr-2 text-left">
                     {formData.customVenue ? formData.customVenue : formData.venueId ? (groundsData?.grounds?.find(g => g.id === formData.venueId)?.name || 'Sports Venue') : 'Select Venue'}
                   </span>
-                  <ChevronRight size={14} className="text-white/40" />
+                  <ChevronRight size={14} className="text-white/40 flex-shrink-0" />
                 </button>
               </div>
 
-              {/* Power Play Overs Card */}
-              <div className="bg-white/[0.02] border border-white/5 rounded-2xl p-3 flex flex-col justify-between">
-                <div className="mb-3 px-1">
-                  <span className="text-[10px] font-black text-white/40 uppercase tracking-widest flex items-center gap-1">
-                    POWER PLAY OVERS
-                    <Info size={12} className="text-white/40" />
-                  </span>
-                </div>
-                
-                <div className="w-full bg-[#121212] border border-white/5 rounded-xl flex items-stretch overflow-hidden min-h-[42px]">
+              {/* Power Play Overs */}
+              <div className="space-y-1">
+                <label className={`${labelClass} flex items-center gap-1`}>
+                  POWER PLAY OVERS
+                  <Info size={12} className="text-white/40" />
+                </label>
+                <div className="w-full bg-[#121212] border border-white/10 rounded-[12px] flex items-stretch overflow-hidden h-[42px]">
                   {(formData.format === 'T10' ? [1, 2, 3, 4, 5] : formData.format === 'ODI' ? [8, 9, 10, 11, 12] : [4, 5, 6, 7, 8]).map((over) => {
                     const isSelected = formData.powerPlayOvers === over;
                     return (
@@ -2370,7 +2364,7 @@ const StartScoringModal = ({ isOpen, onClose, onSuccess, initialData }) => {
                   })}
                 </div>
                 {formData.powerPlayMapping && formData.powerPlayMapping.length > 0 && (
-                  <div className="mt-2 text-[10px] text-white/40 font-semibold px-1">
+                  <div className="mt-1 text-[10px] text-white/40 font-semibold">
                     Mapped Overs: {
                       (() => {
                         const m = [...formData.powerPlayMapping].sort((a, b) => a - b);
