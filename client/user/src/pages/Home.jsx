@@ -324,7 +324,7 @@ export default function Home() {
 
           {/* -- AD BANNERS -- */}
           <div className="!mt-0">
-            <AdBannerSection banners={marketingContent?.banners || []} />
+            <AdBannerSection banners={(marketingContent?.banners || []).filter(b => b.type !== "PROMOTION")} />
           </div>
 
           {/* -- UPCOMING BOOKINGS -- */}
@@ -404,16 +404,15 @@ export default function Home() {
             />
           </div>
 
-          {/* -- HOST YOUR VENUE CTA -- */}
-          <div className="!mt-4 px-2">
-            <Link to="/business/venue" className="relative block overflow-hidden rounded-2xl w-full aspect-video shadow-[0_4px_20px_rgba(0,0,0,0.5)] group border border-white/[0.05] hover:border-[#BFF367]/50 transition-all duration-300">
-              <div className="absolute inset-0 bg-cover bg-center group-hover:scale-105 transition-transform duration-700" style={{ backgroundImage: "url('/host-venue-bg-custom-2.png')" }} />
-              <div className="relative z-10 w-[45%] h-full p-4 flex flex-col justify-center gap-1.5 pl-5">
-                <h3 className="text-[16px] leading-tight font-black text-white uppercase drop-shadow-lg">Host Your Venue</h3>
-                <p className="text-[9px] font-medium text-white/90 leading-snug drop-shadow-md">Partner with us to list your turf and manage bookings seamlessly.</p>
-              </div>
-            </Link>
-          </div>
+          {/* -- PROMOTIONS -- */}
+          {((marketingContent?.banners || []).filter(b => b.type === "PROMOTION")).length > 0 && (
+            <div className="!mt-4">
+              <AdBannerSection 
+                banners={(marketingContent?.banners || []).filter(b => b.type === "PROMOTION")} 
+                hideContent={true}
+              />
+            </div>
+          )}
 
           {/* -- SOCIAL ARENA -- */}
           <div className="px-2">

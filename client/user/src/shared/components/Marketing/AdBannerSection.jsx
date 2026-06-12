@@ -113,32 +113,9 @@ export const AdBannerSection = ({ banners = [] }) => {
                       className="w-full h-full object-cover opacity-90"
                     />
                   )}
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/30 to-transparent" />
-                  <div className="absolute inset-0 bg-gradient-to-r from-black/75 via-transparent to-transparent" />
-
-                  {/* Content per slide */}
-                  <div className="absolute inset-0 flex flex-col justify-end p-8 md:p-12 z-20">
-                    <div className="max-w-2xl space-y-3">
-                      <h2 className="font-display text-3xl md:text-5xl lg:text-6xl uppercase leading-none text-white tracking-tight">
-                        {banner.title}
-                      </h2>
-                      {banner.description && (
-                        <p className="text-white/80 text-xs md:text-sm line-clamp-2 max-w-xl font-medium leading-relaxed">
-                          {banner.description}
-                        </p>
-                      )}
-                      {banner.targetUrl && (
-                        <a 
-                          href={banner.targetUrl}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="inline-flex items-center gap-2 bg-white text-black px-5 py-2.5 rounded-[6px] font-bold hover:bg-[#BFF367] hover:scale-105 transition-all text-xs group"
-                        >
-                          Explore Now <ExternalLink size={12} className="group-hover:translate-x-1 transition-transform" />
-                        </a>
-                      )}
-                    </div>
-                  </div>
+                  {banner.targetUrl && (
+                    <a href={banner.targetUrl} target="_blank" rel="noopener noreferrer" className="absolute inset-0 z-20" />
+                  )}
                 </div>
               );
             })}
@@ -164,23 +141,7 @@ export const AdBannerSection = ({ banners = [] }) => {
             </div>
           )}
 
-          {/* Navigation Controls */}
-          <div className="absolute inset-y-0 left-4 flex items-center opacity-0 group-hover:opacity-100 transition-opacity z-20">
-            <button 
-              onClick={prevSlide}
-              className="w-10 h-10 rounded-full bg-black/50 backdrop-blur-md border border-white/10 flex items-center justify-center text-white hover:bg-primary hover:text-black transition-all"
-            >
-              <ChevronLeft size={20} />
-            </button>
-          </div>
-          <div className="absolute inset-y-0 right-4 flex items-center opacity-0 group-hover:opacity-100 transition-opacity z-20">
-            <button 
-              onClick={nextSlide}
-              className="w-10 h-10 rounded-full bg-black/50 backdrop-blur-md border border-white/10 flex items-center justify-center text-white hover:bg-primary hover:text-black transition-all"
-            >
-              <ChevronRight size={20} />
-            </button>
-          </div>
+
 
           {/* Indicators */}
           <div className="absolute bottom-6 right-8 flex gap-2 z-20">

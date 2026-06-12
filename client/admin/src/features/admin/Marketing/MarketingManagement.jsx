@@ -24,6 +24,10 @@ export const MarketingManagement = () => {
     isActive: true,
   });
 
+  const displayBanners = activeTab === "promotions" 
+    ? banners.filter(b => b.type === "PROMOTION")
+    : banners.filter(b => b.type !== "PROMOTION");
+
   const API_BASE = "/api/admin/marketing";
 
   useEffect(() => {
@@ -66,7 +70,7 @@ export const MarketingManagement = () => {
         imageUrl: "",
         videoUrl: "",
         targetUrl: "",
-        order: banners.length + 1,
+        order: displayBanners.length + 1,
         isActive: true,
       });
     }
@@ -88,13 +92,14 @@ export const MarketingManagement = () => {
       let dataToSubmit;
       let headers = {};
 
-      if (activeTab === "banners") {
+      if (activeTab === "banners" || activeTab === "promotions") {
         const fData = new FormData();
-        fData.append("title", formData.title);
+        fData.append("title", formData.title || `Banner ${Date.now()}`);
         fData.append("description", formData.description || "");
         fData.append("targetUrl", formData.targetUrl || "");
         fData.append("order", formData.order);
         fData.append("isActive", formData.isActive);
+        fData.append("type", activeTab === "promotions" ? "PROMOTION" : "HOME");
         
         if (selectedFile) {
           fData.append("image", selectedFile);
@@ -107,7 +112,7 @@ export const MarketingManagement = () => {
       }
 
       if (editingItem) {
-        await axiosInstance.put(`${API_BASE}/banners/${editingItem._id}`, dataToSubmit, { headers });
+        await axiosInstance.put(`${API_BASE}/banners/${editingItem._id || editingItem.id}`, dataToSubmit, { headers });
         toast.success("Updated successfully");
       } else {
         await axiosInstance.post(`${API_BASE}/banners`, dataToSubmit, { headers });
@@ -183,6 +188,15 @@ export const MarketingManagement = () => {
           </div>
         </button>
         <button
+          onClick={() => setActiveTab("promotions")}
+          className={`px-6 py-3 text-sm font-bold uppercase tracking-wider transition-colors border-b-2 ${ activeTab === "promotions" ? "border-lime-500 text-lime-500" : "border-transparent text-gray-400 hover:text-white" }`}
+        >
+          <div className="flex items-center gap-2">
+            <ImageIcon size={16} />
+            Promotions
+          </div>
+        </button>
+        <button
           onClick={() => setActiveTab("notifications")}
           className={`px-6 py-3 text-sm font-bold uppercase tracking-wider transition-colors border-b-2 ${ activeTab === "notifications" ? "border-lime-500 text-lime-500" : "border-transparent text-gray-400 hover:text-white" }`}
         >
@@ -199,9 +213,9 @@ export const MarketingManagement = () => {
         <PushComposer />
       ) : (
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-          {banners.map((item) => (
+          {displayBanners.map((item) => (
             <div
-              key={item._id}
+              key={item._id || item.id}
               className="group relative flex flex-col rounded-[8px] border border-white/10 bg-[#1A1A1A] overflow-hidden transition-all hover:border-lime-500/50"
             >
               <div className="aspect-video w-full bg-black overflow-hidden relative">
@@ -240,7 +254,7 @@ export const MarketingManagement = () => {
                     Edit
                   </button>
                   <button
-                    onClick={() => handleDelete(item._id)}
+                    onClick={() => handleDelete(item._id || item.id)}
                     className="w-10 h-10 flex items-center justify-center rounded-lg bg-red-500/10 text-red-500 hover:bg-red-500 hover:text-white transition-all"
                   >
                     <Trash2 size={16} />
@@ -250,7 +264,7 @@ export const MarketingManagement = () => {
             </div>
           ))}
 
-          {(banners.length === 0) && (
+          {(displayBanners.length === 0) && (
             <div className="col-span-full py-20 flex flex-col items-center justify-center border border-dashed border-white/10 rounded-[8px]">
               <Layout size={40} className="text-gray-600 mb-4" />
               <h3 className="text-white font-bold">No banners found</h3>
@@ -276,25 +290,11 @@ export const MarketingManagement = () => {
 
             <form onSubmit={handleSubmit} className="p-6 space-y-5 max-h-[calc(100vh-200px)] overflow-y-auto custom-scrollbar">
               <div className="grid grid-cols-1 gap-5">
-                <div>
-                  <label className="block text-xs font-bold uppercase tracking-widest text-gray-500 mb-2">Title</label>
+                <div className="hidden">
                   <input
                     type="text"
-                    required
-                    value={formData.title}
+                    value={formData.title || `Ad - ${Date.now()}`}
                     onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                    className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-2.5 text-white focus:outline-none focus:border-lime-500 transition-colors text-sm"
-                    placeholder="Campaign Title"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-xs font-bold uppercase tracking-widest text-gray-500 mb-2">Description (Subtitle / 2 lines of text)</label>
-                  <textarea
-                    value={formData.description}
-                    onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                    className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-lime-500 transition-colors text-sm h-20 resize-none"
-                    placeholder="Enter two lines of description text to display in the banner..."
                   />
                 </div>
 
