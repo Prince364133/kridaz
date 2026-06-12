@@ -10,6 +10,9 @@ import App from "./app/App";
 import { ObservabilityProvider } from "./app/ObservabilityProvider";
 import "./index.css";
 import * as Sentry from "@sentry/react";
+import { setupProductionGuards } from "./utils/productionGuards";
+
+setupProductionGuards();
 
 if (import.meta.env.VITE_SENTRY_DSN) {
   Sentry.init({
