@@ -32,9 +32,9 @@ const CustomDropdown = ({ value, options, onChange, placeholder = "Select" }) =>
   const selectedOption = options.find(opt => opt.value === value) || { label: placeholder, value: "" };
 
   return (
-    <div className="relative min-w-[140px]" ref={dropdownRef}>
+    <div className="relative flex-1 md:min-w-[120px]" ref={dropdownRef}>
       <div
-        className="w-full bg-[#111] border border-white/10 rounded-[8px] py-2.5 px-3 sm:px-4 text-white text-[11px] sm:text-[12px] font-bold focus:outline-none hover:border-[#BFF367]/50 transition-all cursor-pointer hover:bg-[#1A1A1A] flex items-center justify-between gap-3 shadow-sm"
+        className="w-full bg-[#111]/80 backdrop-blur-md border border-white/5 rounded-md py-1.5 px-2.5 text-white/90 text-[11px] sm:text-[12px] font-medium focus:outline-none hover:border-[#BFF367]/40 hover:text-white transition-all cursor-pointer hover:bg-[#1A1A1A] flex items-center justify-between gap-2 shadow-sm"
         onClick={() => setIsOpen(!isOpen)}
       >
         <span className="truncate">{selectedOption.label}</span>
@@ -48,15 +48,15 @@ const CustomDropdown = ({ value, options, onChange, placeholder = "Select" }) =>
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -5 }}
             transition={{ duration: 0.15 }}
-            className="absolute top-[calc(100%+6px)] left-0 w-full min-w-[160px] bg-[#121212] border border-white/10 rounded-[8px] shadow-2xl overflow-hidden z-50 py-1.5"
+            className="absolute top-[calc(100%+4px)] left-0 w-full min-w-[120px] bg-[#121212]/95 backdrop-blur-xl border border-white/10 rounded-md shadow-2xl overflow-hidden z-50 py-1"
           >
             {options.map((opt) => (
               <div
                 key={opt.value}
-                className={`px-4 py-2.5 text-[12px] font-bold cursor-pointer transition-colors ${
+                className={`px-3 py-1.5 text-[11px] sm:text-[12px] font-medium cursor-pointer transition-colors ${
                   value === opt.value
                     ? "bg-[#BFF367]/10 text-[#BFF367]"
-                    : "text-white/70 hover:bg-white/5 hover:text-white"
+                    : "text-white/60 hover:bg-white/5 hover:text-white"
                 }`}
                 onClick={() => {
                   onChange(opt.value);
@@ -404,7 +404,7 @@ const CommunityFeed = ({ user, isLoggedIn, isAdmin, gateInteraction, activeFilte
       {!debouncedSearchQuery.trim() && (
         <div className="mb-6">
           {/* Unified View Filters Dropdowns */}
-          <div className="grid grid-cols-2 md:flex gap-3 items-center w-full pb-1">
+          <div className="flex gap-2 items-center w-full pb-1">
             {/* Post Type Filter */}
             <CustomDropdown 
               value={activeFilter}
