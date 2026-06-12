@@ -280,7 +280,7 @@ export const sendOtp = asyncHandler(async (req, res) => {
     email,
     deliveryMethod,
     otp: phoneOtp || emailOtp,
-    phoneTemplate: process.env.MSG91_WHATSAPP_OTP_TEMPLATE,
+    phoneTemplate: process.env.MSG91_WHATSAPP_OTP_TEMPLATE || "otp_verification",
     emailSubject: "Your Kridaz Verification Code",
     emailHtml: emailOtp ? `<p>Your verification code is <strong>${emailOtp}</strong>. It will expire in 10 minutes.</p>` : null
   });
@@ -2350,7 +2350,7 @@ export const sendPhoneVerificationOtp = asyncHandler(async (req, res) => {
       phone,
       email,
       otp: phoneOtp,
-      phoneTemplate: process.env.MSG91_WHATSAPP_OTP_TEMPLATE,
+      phoneTemplate: process.env.MSG91_WHATSAPP_OTP_TEMPLATE || "otp_verification",
       emailSubject: "Your Kridaz Phone Verification Code",
       emailHtml: `<p>Your phone verification code is <strong>${phoneOtp}</strong>. It will expire in 10 minutes.</p>`
     });
