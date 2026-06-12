@@ -996,11 +996,11 @@ const FindPlayers = () => {
               </div>
             </div>
 
-            <div className="flex items-center gap-2 flex-wrap md:flex-nowrap">
+            <div className="flex items-center gap-1 justify-between w-full mt-2 md:mt-0">
               <select 
                 value={filters.sport}
                 onChange={(e) => handleFilterChange("sport", e.target.value)}
-                className="bg-transparent px-3 py-1.5 text-[12px] font-[400] font-inter text-[rgba(255,255,255,0.70)] focus:text-[#B3DC26] outline-none cursor-pointer hover:text-[#FFFFFF] transition-all uppercase"
+                className="bg-transparent px-1 py-1.5 text-[10px] md:text-[12px] font-[400] font-inter text-[rgba(255,255,255,0.70)] focus:text-[#B3DC26] outline-none cursor-pointer hover:text-[#FFFFFF] transition-all uppercase flex-1 min-w-[70px] text-ellipsis overflow-hidden appearance-none md:appearance-auto"
               >
                 <option value="" className="bg-[#121212] text-[#FFFFFF]">All Sports</option>
                 {sports.map(s => <option key={s} value={s} className="bg-[#121212] text-[#FFFFFF]">{s}</option>)}
@@ -1051,27 +1051,27 @@ const FindPlayers = () => {
               </div>
 
               {/* Mobile/Tab Location Filters */}
-              <div className="relative group lg:hidden">
-                <MapPin className="absolute left-2.5 top-1/2 -translate-y-1/2 text-white/20 group-focus-within:text-[#B3DC26]" size={10} />
+              <div className="relative group lg:hidden flex-1 min-w-0">
+                <MapPin className="absolute left-1 md:left-2.5 top-1/2 -translate-y-1/2 text-white/20 group-focus-within:text-[#B3DC26]" size={10} />
                 <select
                   value={filters.state || ""}
                   onChange={(e) => {
                     handleFilterChange("state", e.target.value);
                     handleFilterChange("city", "");
                   }}
-                  className="bg-transparent pl-7 pr-3 py-1.5 text-[12px] font-[400] font-inter text-[rgba(255,255,255,0.70)] focus:text-[#B3DC26] outline-none w-24 md:w-28 cursor-pointer hover:text-[#FFFFFF] transition-all appearance-none uppercase"
+                  className="bg-transparent pl-4 md:pl-7 pr-1 md:pr-3 py-1.5 text-[10px] md:text-[12px] font-[400] font-inter text-[rgba(255,255,255,0.70)] focus:text-[#B3DC26] outline-none w-full cursor-pointer hover:text-[#FFFFFF] transition-all appearance-none uppercase text-ellipsis overflow-hidden"
                 >
                   <option value="" className="bg-[#121212] text-[#FFFFFF]">STATE...</option>
                   {statesList.map(s => <option key={s} value={s} className="bg-[#121212] text-[#FFFFFF]">{s}</option>)}
                 </select>
               </div>
-              <div className="relative group lg:hidden">
-                <MapPin className="absolute left-2.5 top-1/2 -translate-y-1/2 text-white/20 group-focus-within:text-[#B3DC26]" size={10} />
+              <div className="relative group lg:hidden flex-1 min-w-0">
+                <MapPin className="absolute left-1 md:left-2.5 top-1/2 -translate-y-1/2 text-white/20 group-focus-within:text-[#B3DC26]" size={10} />
                 <select
                   value={filters.city || ""}
                   onChange={(e) => handleFilterChange("city", e.target.value)}
                   disabled={!filters.state}
-                  className="bg-transparent pl-7 pr-3 py-1.5 text-[12px] font-[400] font-inter text-[rgba(255,255,255,0.70)] focus:text-[#B3DC26] outline-none w-24 md:w-28 cursor-pointer hover:text-[#FFFFFF] transition-all appearance-none disabled:opacity-40 uppercase"
+                  className="bg-transparent pl-4 md:pl-7 pr-1 md:pr-3 py-1.5 text-[10px] md:text-[12px] font-[400] font-inter text-[rgba(255,255,255,0.70)] focus:text-[#B3DC26] outline-none w-full cursor-pointer hover:text-[#FFFFFF] transition-all appearance-none disabled:opacity-40 uppercase text-ellipsis overflow-hidden"
                 >
                   <option value="" className="bg-[#121212] text-[#FFFFFF]">CITY...</option>
                   {citiesList.map(c => <option key={c} value={c} className="bg-[#121212] text-[#FFFFFF]">{c}</option>)}
@@ -1081,10 +1081,10 @@ const FindPlayers = () => {
               {activeTab === "players" && (
                 <button 
                   onClick={() => setShowNearbyOnly(!showNearbyOnly)}
-                  className={`flex items-center gap-2 px-3 h-10 rounded-[16px] transition-all text-[12px] font-[600] font-inter uppercase ${ showNearbyOnly ? "bg-gradient-to-r from-[#55DEE8] to-[#B3DC26] text-[#000000] shadow-[0px_8px_24px_rgba(179,220,38,0.15)] border-none" : "bg-[#1B1B1B] text-[#FFFFFF] border border-[rgba(255,255,255,0.08)] hover:brightness-110" }`}
+                  className={`flex items-center justify-center gap-1 px-1 md:px-3 h-8 md:h-10 rounded-[12px] md:rounded-[16px] transition-all text-[9px] md:text-[12px] font-[600] font-inter uppercase flex-1 min-w-0 ${ showNearbyOnly ? "bg-gradient-to-r from-[#55DEE8] to-[#B3DC26] text-[#000000] shadow-[0px_8px_24px_rgba(179,220,38,0.15)] border-none" : "bg-[#1B1B1B] text-[#FFFFFF] border border-[rgba(255,255,255,0.08)] hover:brightness-110" }`}
                 >
-                  <Navigation size={14} className={showNearbyOnly ? "animate-pulse" : ""} />
-                  Nearby
+                  <Navigation size={12} className={`shrink-0 ${showNearbyOnly ? "animate-pulse" : ""}`} />
+                  <span className="truncate">Nearby</span>
                 </button>
               )}
             </div>
