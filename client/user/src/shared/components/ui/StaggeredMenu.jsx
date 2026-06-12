@@ -19,7 +19,8 @@ export const StaggeredMenu = ({
   closeOnClickAway = true,
   onMenuOpen,
   onMenuClose,
-  headerExtra
+  headerExtra,
+  headerClassName
 }) => {
   const [open, setOpen] = useState(false);
   const openRef = useRef(false);
@@ -364,7 +365,7 @@ export const StaggeredMenu = ({
           return raw.map((c, i) => <div key={i} className="sm-prelayer" style={{ background: c }} />);
         })()}
       </div>
-      <header className="staggered-menu-header" aria-label="Main navigation header">
+      <header className={`staggered-menu-header ${headerClassName || ''}`} aria-label="Main navigation header">
         <div className="sm-logo" aria-label="Logo">
           <img
             src={logoUrl || '/src/assets/logos/reactbits-gh-white.svg'}
