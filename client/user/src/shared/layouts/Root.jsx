@@ -67,6 +67,9 @@ const Root = () => {
     if (window.self !== window.top) {
       document.documentElement.classList.add('no-scrollbar');
       document.body.classList.add('no-scrollbar');
+      
+      // Globally scale down all components inside the iframe to mimic a real mobile screen width
+      document.body.style.zoom = '0.82';
     }
   }, []);
 
