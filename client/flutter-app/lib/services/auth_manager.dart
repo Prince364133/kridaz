@@ -386,8 +386,9 @@ class AuthManager {
 
       final googleAuth = await googleUser.authentication;
       final accessToken = googleAuth.accessToken;
-      if (accessToken == null) {
-        return AuthResult.error('Failed to get Google access token');
+      final idToken = googleAuth.idToken;
+      if (idToken == null && accessToken == null) {
+        return AuthResult.error('Failed to get Google credentials');
       }
 
       // Forward any pending invite tokens so post-login redirects (team
@@ -397,7 +398,8 @@ class AuthManager {
       final umpireInvite = prefs.getString('umpireInvite');
 
       final payload = <String, dynamic>{
-        'accessToken': accessToken,
+        if (idToken != null) 'credential': idToken,
+        if (accessToken != null) 'accessToken': accessToken,
         'role': 'user',
         if (inviteToken != null) 'inviteToken': inviteToken,
         if (umpireInvite != null) 'umpireInvite': umpireInvite,
