@@ -61,7 +61,7 @@ const TeamDetails = ({ team, onInviteClick, onCreateClick, onBack }) => {
   };
 
   return (
-    <div className="h-full flex flex-col bg-[#0a0a0a] overflow-hidden relative">
+    <div className="h-full flex flex-col bg-[#0a0a0a] overflow-y-auto relative pb-20 custom-scrollbar">
       {/* Mobile Back Button */}
       <button 
         onClick={onBack}
@@ -71,11 +71,11 @@ const TeamDetails = ({ team, onInviteClick, onCreateClick, onBack }) => {
       </button>
 
       {/* Team Header Banner */}
-      <div className="relative h-48 md:h-64 shrink-0 overflow-hidden">
+      <div className="relative shrink-0 overflow-hidden pt-16 md:pt-20 px-4 md:px-6 pb-6 min-h-[14rem] md:min-h-[16rem]">
         <div className="absolute inset-0 bg-gradient-to-b from-[#BFF367]/15 via-[#BFF367]/5 to-[#0a0a0a]" />
         <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')] opacity-20" />
         
-        <div className="absolute top-6 right-6 z-10 flex items-center gap-2 px-4 py-2 bg-black/60 backdrop-blur-xl border border-white/10 rounded-[8px] group cursor-pointer hover:border-[#BFF367]/50 transition-all" onClick={copyToClipboard}>
+        <div className="absolute top-4 md:top-6 right-4 md:right-6 z-10 flex items-center gap-2 px-3 md:px-4 py-2 bg-black/60 backdrop-blur-xl border border-white/10 rounded-[8px] group cursor-pointer hover:border-[#BFF367]/50 transition-all" onClick={copyToClipboard}>
           <div className="flex flex-col items-end">
             <span className="text-[8px] font-black text-white/40 uppercase tracking-widest" style={{ fontFamily: "'Inter', sans-serif" }}>Unique Team ID</span>
             <span className="text-sm font-black text-[#BFF367] tracking-[0.2em]">{team.teamCode}</span>
@@ -83,21 +83,21 @@ const TeamDetails = ({ team, onInviteClick, onCreateClick, onBack }) => {
           <Copy size={16} className="text-white/20 group-hover:text-[#BFF367] transition-colors" />
         </div>
 
-        <div className="absolute bottom-0 left-0 right-0 p-6 flex flex-col md:flex-row items-end gap-6">
-          <div className="w-24 h-24 md:w-32 md:h-32 rounded-[8px] bg-black border-4 border-[#0a0a0a] shadow-2xl flex items-center justify-center text-[#BFF367] text-4xl font-bold overflow-hidden shrink-0">
+        <div className="relative z-10 flex flex-col md:flex-row items-start md:items-end gap-4 md:gap-6 mt-14 md:mt-12">
+          <div className="w-20 h-20 md:w-32 md:h-32 rounded-[8px] bg-black border-4 border-[#0a0a0a] shadow-2xl flex items-center justify-center text-[#BFF367] text-3xl md:text-4xl font-bold overflow-hidden shrink-0">
             {team.image ? <img src={team.image} alt={team.name} className="w-full h-full object-cover" /> : team.name.charAt(0).toUpperCase()}
           </div>
-          <div className="flex-1 pb-2">
-            <div className="flex items-center gap-3 mb-1">
-              <h1 className="text-2xl md:text-4xl font-bold text-white tracking-tight" style={{ fontFamily: "'Open Sans', sans-serif" }}>{team.name}</h1>
-              <span className="px-3 py-1 rounded-full bg-gradient-to-r from-[#BFF367]/10 to-[#BFF367]/10 border border-[#BFF367]/10 text-[#BFF367] text-[10px] font-black uppercase tracking-widest" style={{ fontFamily: "'Inter', sans-serif" }}>{team.sportType}</span>
+          <div className="flex-1 w-full">
+            <div className="flex items-center flex-wrap gap-3 mb-1">
+              <h1 className="text-2xl md:text-4xl font-bold text-white tracking-tight break-all" style={{ fontFamily: "'Open Sans', sans-serif" }}>{team.name}</h1>
+              <span className="px-3 py-1 rounded-full bg-gradient-to-r from-[#BFF367]/10 to-[#BFF367]/10 border border-[#BFF367]/10 text-[#BFF367] text-[10px] font-black uppercase tracking-widest shrink-0" style={{ fontFamily: "'Inter', sans-serif" }}>{team.sportType}</span>
             </div>
             <p className="text-white/60 text-sm md:text-base max-w-2xl line-clamp-2" style={{ fontFamily: "'Inter', sans-serif" }}>{team.description || "No description provided."}</p>
           </div>
-          <div className="pb-2">
+          <div className="w-full md:w-auto mt-2 md:mt-0 pb-1">
             <button 
               onClick={onInviteClick}
-              className="px-6 py-3 bg-gradient-to-r from-[#BFF367] to-[#BFF367] hover:brightness-[1.04] text-black font-black rounded-[8px] flex items-center gap-2 shadow-lg shadow-[#BFF367]/10 hover:shadow-[#BFF367]/15 transition-all hover:-translate-y-0.5 active:translate-y-0 duration-300 whitespace-nowrap uppercase tracking-widest text-xs"
+              className="w-full md:w-auto px-6 py-3 bg-gradient-to-r from-[#BFF367] to-[#BFF367] hover:brightness-[1.04] text-black font-black rounded-[8px] flex items-center justify-center gap-2 shadow-lg shadow-[#BFF367]/10 hover:shadow-[#BFF367]/15 transition-all hover:-translate-y-0.5 active:translate-y-0 duration-300 uppercase tracking-widest text-xs"
               style={{ fontFamily: "'Inter', sans-serif" }}
             >
               <UserPlus size={16} /> Add Members
@@ -109,11 +109,11 @@ const TeamDetails = ({ team, onInviteClick, onCreateClick, onBack }) => {
       {/* Team Info Cards */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4 p-6 shrink-0">
         <div className="bg-[#121212] p-4 rounded-[8px] border border-white/5 flex items-center gap-4">
-          <div className="w-12 h-12 rounded-[8px] bg-blue-500/10 flex items-center justify-center text-blue-500">
+          <div className="w-12 h-12 rounded-[8px] shrink-0 bg-blue-500/10 flex items-center justify-center text-blue-500">
             <Shield size={20} />
           </div>
-          <div className="overflow-hidden">
-            <p className="text-white/40 text-[9px] uppercase font-black tracking-wider">Captain</p>
+          <div className="flex-1 min-w-0">
+            <p className="text-white/40 text-[9px] uppercase font-black tracking-wider truncate">Captain</p>
             <p className="text-white font-black truncate text-sm uppercase">{team.captainName || "Not set"}</p>
           </div>
         </div>
@@ -136,18 +136,18 @@ const TeamDetails = ({ team, onInviteClick, onCreateClick, onBack }) => {
           </div>
         </div>
         <div className="bg-[#121212] p-4 rounded-[8px] border border-white/5 flex items-center gap-4">
-          <div className="w-12 h-12 rounded-[8px] bg-green-500/10 flex items-center justify-center text-green-500">
+          <div className="w-12 h-12 rounded-[8px] shrink-0 bg-green-500/10 flex items-center justify-center text-green-500">
             <Calendar size={20} />
           </div>
-          <div>
-            <p className="text-white/40 text-[9px] uppercase font-black tracking-wider">Created</p>
-            <p className="text-white font-black text-sm">{new Date(team.createdAt).toLocaleDateString()}</p>
+          <div className="flex-1 min-w-0">
+            <p className="text-white/40 text-[9px] uppercase font-black tracking-wider truncate">Created</p>
+            <p className="text-white font-black truncate text-sm">{new Date(team.createdAt).toLocaleDateString()}</p>
           </div>
         </div>
       </div>
 
       {/* Main Content Area */}
-      <div className="flex-1 overflow-y-auto px-6 pb-6 custom-scrollbar">
+      <div className="flex-1 px-4 md:px-6 pb-6 mt-4">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           
           {/* Members List (Left Column) */}

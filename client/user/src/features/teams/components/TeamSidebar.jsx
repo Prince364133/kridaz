@@ -60,12 +60,12 @@ const TeamSidebar = ({ onSelectTeam, selectedTeamId, onCreateTeam }) => {
       {/* Header */}
       <div className="p-5 border-b border-[rgba(255,255,255,0.08)] bg-[#000000]">
         <div className="mb-4 flex items-center justify-between">
-          <div>
-            <h2 className="text-[20px] font-[700] text-[#FFFFFF] tracking-tight uppercase font-inter">
+          <div className="flex-1 min-w-0 mr-2">
+            <h2 className="text-[18px] sm:text-[20px] font-[700] text-[#FFFFFF] tracking-tight uppercase font-inter truncate">
               {activeTab === 'myTeams' ? 'My Teams' : activeTab === 'opponentTeams' ? 'Opponents' : 'My Matches'}
             </h2>
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 shrink-0">
             <button 
               onClick={() => setIsStartScoringOpen(true)}
               className="flex items-center justify-center px-4 h-8 bg-gradient-to-r from-[#55DEE8] to-[#B3DC26] text-[#000000] rounded-[16px] hover:scale-105 shadow-[0_4px_24px_rgba(179,220,38,0.25)] transition-all duration-300 shrink-0"

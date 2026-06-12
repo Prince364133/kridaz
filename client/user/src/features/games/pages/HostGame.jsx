@@ -1160,7 +1160,7 @@ const HostGame = () => {
              <div className="flex gap-3">
               <button 
                 onClick={() => setStep(1)} 
-                className="flex-1 py-3 sm:py-3.5 bg-[#121212] text-white/70 font-bold rounded-[16px] sm:rounded-[16px] border border-white/10 hover:border-white/10 transition-all duration-300 text-sm sm:text-base font-open-sans uppercase tracking-wider"
+                className="flex-1 h-[40px] flex items-center justify-center bg-[#121212] text-white/70 font-bold rounded-[16px] border border-white/10 hover:border-white/20 transition-all duration-300 text-xs font-open-sans uppercase tracking-wider"
               >
                 Back
               </button>
@@ -1269,7 +1269,7 @@ const HostGame = () => {
             </div>
 
             <div className="flex gap-3 max-w-lg mx-auto w-full">
-              <button onClick={() => setStep(3)} className="flex-1 py-3 sm:py-3.5 bg-[#121212] text-white/70 font-black rounded-[16px] border-2 border-white/10 hover:border-white/10 transition-all text-sm sm:text-base uppercase tracking-widest">BACK</button>
+              <button onClick={() => setStep(3)} className="flex-1 h-[40px] flex items-center justify-center bg-[#121212] text-white/70 font-bold rounded-[16px] border border-white/10 hover:border-white/20 transition-all text-xs font-open-sans uppercase tracking-wider">BACK</button>
               <button
                 onClick={() => setStep(5)}
                 className="flex-[2] h-[40px] bg-gradient-to-r from-[#55DEE8] to-[#BFF367] text-[#000000] font-bold rounded-[16px] hover:scale-[1.01] active:scale-[0.99] transition-all duration-300 text-xs font-open-sans shadow-[0_8px_24px_rgba(191,243,103,0.15)] uppercase tracking-widest"
@@ -1466,7 +1466,7 @@ const HostGame = () => {
 
 
             <div className="flex gap-3">
-              <button onClick={() => setStep(3)} className="flex-1 py-5 bg-[#121212] text-white/70 font-black rounded-[16px] border-2 border-white/10 hover:border-white/10 transition-all text-lg uppercase tracking-widest">Back</button>
+              <button onClick={() => setStep(3)} className="flex-1 h-[40px] flex items-center justify-center bg-[#121212] text-white/70 font-bold rounded-[16px] border border-white/10 hover:border-white/20 transition-all text-xs font-open-sans uppercase tracking-wider">Back</button>
               <button
                 onClick={() => setStep(5)}
                 className="flex-[2] h-[40px] bg-gradient-to-r from-[#55DEE8] to-[#BFF367] text-[#000000] font-bold rounded-[16px] hover:scale-[1.01] active:scale-[0.99] transition-all text-xs shadow-[0_8px_24px_rgba(191,243,103,0.15)] font-open-sans uppercase tracking-wider"

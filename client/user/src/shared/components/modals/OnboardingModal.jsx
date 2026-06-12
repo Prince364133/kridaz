@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import { Check, Trophy, Activity, Zap, Target, MapPin, ChevronLeft, Loader2, Image as ImageIcon, ChevronDown } from "lucide-react";
+import { Check, Trophy, Activity, Zap, Target, MapPin, ChevronLeft, Loader2, Image as ImageIcon, ChevronDown, X } from "lucide-react";
 import axiosInstance from "@hooks/useAxiosInstance";
 import toast from "react-hot-toast";
 import { useDispatch } from "react-redux";
@@ -32,10 +32,10 @@ const CustomSelect = ({ value, onChange, options, placeholder }) => {
   return (
     <div className="relative flex-1" ref={dropdownRef}>
       <div 
-        className="w-full bg-[#121212] border border-white/[0.08] rounded-[16px] py-4 px-4 text-white hover:border-[#55DEE8] outline-none transition-all cursor-pointer flex justify-between items-center"
+        className="w-full bg-[#121212] border border-white/[0.08] rounded-[16px] py-2.5 md:py-4 px-4 text-white hover:border-[#55DEE8] outline-none transition-all cursor-pointer flex justify-between items-center"
         onClick={() => setIsOpen(!isOpen)}
       >
-        <span className={value ? "text-white" : "text-white/40"}>
+        <span className={value ? "text-white text-sm md:text-base" : "text-white/40 text-sm md:text-base"}>
           {value ? options.find(o => o.value === value)?.label : placeholder}
         </span>
         <ChevronDown size={16} className={`text-white/40 transition-transform ${isOpen ? "rotate-180" : ""}`} />
@@ -438,6 +438,15 @@ const OnboardingModal = ({ isOpen, onClose, initialData, onComplete }) => {
 
         {/* Right Side: Form Area */}
         <div className="w-full md:w-1/2 flex flex-col relative bg-[#1B1B1B]">
+          {/* Close Button */}
+          <button 
+            onClick={onClose}
+            className="absolute top-4 right-4 z-50 p-2 text-white/50 hover:text-white bg-white/5 hover:bg-white/10 rounded-full transition-all"
+            aria-label="Close"
+          >
+            <X size={20} />
+          </button>
+
           {/* Progress Bar (Hidden for step 1 to match design) */}
           {step > 1 && (
             <div className="flex h-1.5 bg-[#000000] absolute top-0 left-0 right-0 overflow-hidden z-20">
@@ -451,29 +460,29 @@ const OnboardingModal = ({ isOpen, onClose, initialData, onComplete }) => {
           <div className="p-5 md:p-6 pt-6 md:pt-8 flex-1 flex flex-col min-h-0 relative z-10">
           {/* Header */}
           {step === 1 ? (
-            <div className="text-left mb-3 shrink-0">
-              <h2 className="text-[24px] md:text-[28px] font-bold text-white tracking-tight leading-[1.1] font-['Inter']">
+            <div className="text-left mb-2 md:mb-3 shrink-0">
+              <h2 className="text-[24px] md:text-[28px] font-bold text-white tracking-tight leading-[1.1] font-['Inter'] uppercase">
                 Tell me some<br />details please?
               </h2>
             </div>
           ) : step === 2 ? (
-            <div className="text-left mb-6 shrink-0">
-              <h2 className="text-[32px] md:text-[36px] font-bold text-white tracking-tight leading-[1.1] font-['Inter']">
+            <div className="text-left mb-4 md:mb-6 shrink-0">
+              <h2 className="text-[28px] md:text-[36px] font-bold text-white tracking-tight leading-[1.1] font-['Inter']">
                 What is<br />your gender?
               </h2>
-              <p className="text-white/60 text-sm mt-3 leading-relaxed">
+              <p className="text-white/60 text-xs md:text-sm mt-2 md:mt-3 leading-relaxed">
                 This help us find you more<br />relevant content
               </p>
             </div>
           ) : (
-            <div className="text-left mb-6 shrink-0">
-              <h2 className="text-[32px] md:text-[40px] font-black text-white leading-tight mb-2 uppercase">
+            <div className="text-left mb-3 md:mb-6 shrink-0">
+              <h2 className="text-[28px] md:text-[40px] font-black text-white leading-tight mb-2 uppercase">
                 {step === 3 && (
                   <>WHAT ARE YOU<br />INTERESTED IN?</>
                 )}
                 {step === 4 && "ALMOST DONE!"}
               </h2>
-              <p className="text-[#999999] text-[13px] md:text-[14px]">
+              <p className="text-[#999999] text-[12px] md:text-[14px]">
                 {step === 3 && "Select sports to find relevant content"}
                 {step === 4 && "Finalize your account details"}
               </p>
@@ -483,13 +492,13 @@ const OnboardingModal = ({ isOpen, onClose, initialData, onComplete }) => {
           {/* Content */}
           <div className="flex-1 flex flex-col justify-start min-h-0 overflow-y-auto custom-scrollbar -mx-2 px-2 pb-4">
             {step === 1 && (
-              <div className="space-y-5 animate-in slide-in-from-bottom-8 duration-300">
+              <div className="space-y-4 md:space-y-5 animate-in slide-in-from-bottom-8 duration-300">
                 
                 {/* Image Upload Placeholder */}
-                <div className="flex justify-center mb-3 mt-0">
+                <div className="flex justify-center mb-2 md:mb-3 mt-0">
                   <div 
                     onClick={() => fileInputRef.current?.click()}
-                    className="w-[80px] h-[80px] rounded-full bg-[#121212] flex items-center justify-center relative cursor-pointer border border-white/[0.08] hover:border-[#55DEE8] transition-colors group shadow-[0px_4px_16px_rgba(0,0,0,0.4)] overflow-hidden"
+                    className="w-[64px] h-[64px] md:w-[80px] md:h-[80px] rounded-full bg-[#121212] flex items-center justify-center relative cursor-pointer border border-white/[0.08] hover:border-[#55DEE8] transition-colors group shadow-[0px_4px_16px_rgba(0,0,0,0.4)] overflow-hidden"
                   >
                     {previewImage ? (
                       <img src={previewImage} alt="Profile" className="w-full h-full object-cover" />
@@ -515,27 +524,27 @@ const OnboardingModal = ({ isOpen, onClose, initialData, onComplete }) => {
                 {/* Name Fields */}
                 <div className="grid grid-cols-2 gap-3 mt-1">
                   <label className="block">
-                    <span className="text-[11px] font-semibold text-white/60 uppercase tracking-widest mb-2 block">First Name</span>
+                    <span className="text-[10px] md:text-[11px] font-semibold text-white/60 uppercase tracking-widest mb-1.5 md:mb-2 block">First Name</span>
                     <input
                       type="text"
                       value={formData.firstName}
                       onChange={(e) => setFormData({...formData, firstName: e.target.value})}
-                      className="w-full bg-[#121212] border border-white/[0.08] rounded-[16px] py-3 px-4 text-white focus:border-[#55DEE8] outline-none transition-all text-sm"
+                      className="w-full bg-[#121212] border border-white/[0.08] rounded-[16px] py-2.5 md:py-3 px-4 text-white focus:border-[#55DEE8] outline-none transition-all text-xs md:text-sm"
                     />
                   </label>
                   <label className="block">
-                    <span className="text-[11px] font-semibold text-white/60 uppercase tracking-widest mb-2 block">Last Name</span>
+                    <span className="text-[10px] md:text-[11px] font-semibold text-white/60 uppercase tracking-widest mb-1.5 md:mb-2 block">Last Name</span>
                     <input
                       type="text"
                       value={formData.lastName}
                       onChange={(e) => setFormData({...formData, lastName: e.target.value})}
-                      className="w-full bg-[#121212] border border-white/[0.08] rounded-[16px] py-3 px-4 text-white focus:border-[#55DEE8] outline-none transition-all text-sm"
+                      className="w-full bg-[#121212] border border-white/[0.08] rounded-[16px] py-2.5 md:py-3 px-4 text-white focus:border-[#55DEE8] outline-none transition-all text-xs md:text-sm"
                     />
                   </label>
                 </div>
 
                 <label className="block">
-                  <span className="text-[11px] font-semibold text-white/60 uppercase tracking-widest mb-2 block">Date of Birth</span>
+                  <span className="text-[10px] md:text-[11px] font-semibold text-white/60 uppercase tracking-widest mb-1.5 md:mb-2 block">Date of Birth</span>
                   <div className="flex gap-2">
                     <CustomSelect 
                       value={dobDay} 
@@ -561,14 +570,14 @@ const OnboardingModal = ({ isOpen, onClose, initialData, onComplete }) => {
             )}
 
             {step === 2 && (
-              <div className="flex justify-center gap-5 animate-in slide-in-from-bottom-8 duration-300 mt-6">
+              <div className="flex justify-center gap-3 md:gap-5 animate-in slide-in-from-bottom-8 duration-300 mt-2 md:mt-6">
                 <button
                   onClick={() => setFormData({...formData, gender: "Male"})}
-                  className={`w-[158px] h-[228px] shrink-0 rounded-[16px] border transition-all duration-300 relative overflow-hidden flex flex-col pt-5 ${
+                  className={`w-[130px] h-[170px] md:w-[158px] md:h-[228px] shrink-0 rounded-[16px] border transition-all duration-300 relative overflow-hidden flex flex-col pt-3 md:pt-5 ${
                     formData.gender === "Male" ? "border-white bg-[#1B1B1B]" : "border-white/[0.08] bg-[#121212]"
                   }`}
                 >
-                  <span className="text-white font-medium text-[15px] relative z-10 mb-2">Male</span>
+                  <span className="text-white font-medium text-[13px] md:text-[15px] relative z-10 mb-2">Male</span>
                   <div className="flex-1 w-full relative">
                     <img 
                       src={formData.gender === "Male" ? "/gender/male_selected.png" : "/gender/male_default.png"} 
@@ -580,7 +589,7 @@ const OnboardingModal = ({ isOpen, onClose, initialData, onComplete }) => {
 
                 <button
                   onClick={() => setFormData({...formData, gender: "Female"})}
-                  className={`w-[158px] h-[228px] shrink-0 rounded-[16px] border transition-all duration-300 relative overflow-hidden flex flex-col pt-5 ${
+                  className={`w-[130px] h-[170px] md:w-[158px] md:h-[228px] shrink-0 rounded-[16px] border transition-all duration-300 relative overflow-hidden flex flex-col pt-3 md:pt-5 ${
                     formData.gender === "Female" ? "border-white bg-[#1B1B1B]" : "border-white/[0.08] bg-[#121212]"
                   }`}
                 >
@@ -599,8 +608,8 @@ const OnboardingModal = ({ isOpen, onClose, initialData, onComplete }) => {
             {step === 3 && (
               <div className="animate-in slide-in-from-bottom-8 duration-300">
                 <div className="flex flex-col">
-                  <span className="text-[11px] font-semibold text-white/60 uppercase tracking-widest mb-3 block shrink-0">Pick Your Sports</span>
-                  <div className="grid grid-cols-2 gap-4">
+                  <span className="text-[10px] md:text-[11px] font-semibold text-white/60 uppercase tracking-widest mb-1.5 md:mb-3 block shrink-0">Pick Your Sports</span>
+                  <div className="grid grid-cols-2 md:grid-cols-3 gap-2 md:gap-4">
                     {sports.map((sport) => {
                       const isSelected = formData.sportTypes.includes(sport.name);
                       const isPrimary = isSelected && formData.sportTypes[0] === sport.name;
@@ -608,7 +617,7 @@ const OnboardingModal = ({ isOpen, onClose, initialData, onComplete }) => {
                         <button
                           key={sport.name}
                           onClick={() => toggleSport(sport.name)}
-                          className={`group relative w-full aspect-[4/5] rounded-[16px] transition-all duration-300 overflow-hidden ${ isSelected ? "scale-[1.02] z-10" : "border border-white/[0.08] opacity-60 hover:opacity-100 hover:border-white/[0.2]" }`}
+                          className={`group relative w-full aspect-square md:aspect-[4/5] rounded-[12px] md:rounded-[16px] transition-all duration-300 overflow-hidden ${ isSelected ? "scale-[1.02] z-10" : "border border-white/[0.08] opacity-60 hover:opacity-100 hover:border-white/[0.2]" }`}
                         >
                           {isSelected && (
                             <svg className="absolute inset-0 w-full h-full z-20 pointer-events-none">
@@ -634,16 +643,16 @@ const OnboardingModal = ({ isOpen, onClose, initialData, onComplete }) => {
                             
                             <div className={`absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent transition-opacity duration-300 ${isSelected ? "opacity-100" : "opacity-80 group-hover:opacity-100"}`} />
                             
-                            <div className="absolute inset-x-0 bottom-0 p-3 z-30">
-                            <div className="flex items-center gap-2 mb-1">
-                              <div className={`w-5 h-5 rounded-full flex items-center justify-center border transition-all ${isSelected ? "bg-[#B3DC26] border-[#B3DC26] text-black" : "border-white/30 text-white"}`}>
-                                {isSelected ? <Check size={12} strokeWidth={3} /> : <div className="w-1.5 h-1.5 rounded-full bg-white/30" />}
+                            <div className="absolute inset-x-0 bottom-0 p-2 md:p-3 z-30">
+                            <div className="flex items-center gap-1.5 md:gap-2 mb-0.5 md:mb-1">
+                              <div className={`w-4 h-4 md:w-5 md:h-5 rounded-full flex items-center justify-center border transition-all ${isSelected ? "bg-[#B3DC26] border-[#B3DC26] text-black" : "border-white/30 text-white"}`}>
+                                {isSelected ? <Check size={10} className="md:w-3 md:h-3" strokeWidth={3} /> : <div className="w-1 h-1 md:w-1.5 md:h-1.5 rounded-full bg-white/30" />}
                               </div>
-                              <span className={`text-[13px] font-bold tracking-wide transition-colors ${isSelected ? "text-[#B3DC26]" : "text-white"}`}>{sport.name}</span>
+                              <span className={`text-[11px] md:text-[13px] font-bold tracking-wide transition-colors ${isSelected ? "text-[#B3DC26]" : "text-white"}`}>{sport.name}</span>
                             </div>
                             
                             {isPrimary && (
-                              <div className="bg-[#B3DC26]/20 text-[#B3DC26] text-[9px] font-bold uppercase tracking-wider py-0.5 px-2 rounded-full w-fit mt-1 border border-[#B3DC26]/30">
+                              <div className="bg-[#B3DC26]/20 text-[#B3DC26] text-[8px] md:text-[9px] font-bold uppercase tracking-wider py-0.5 px-1.5 md:px-2 rounded-full w-fit mt-0.5 md:mt-1 border border-[#B3DC26]/30">
                                 Primary
                               </div>
                             )}
@@ -658,12 +667,12 @@ const OnboardingModal = ({ isOpen, onClose, initialData, onComplete }) => {
             )}
 
             {step === 4 && (
-              <div className="space-y-6 animate-in slide-in-from-bottom-8 duration-300">
-                <div className="space-y-5">
-                  <span className="text-[11px] font-semibold text-white/60 uppercase tracking-widest mb-2 block">Account Details</span>
+              <div className="space-y-4 md:space-y-6 animate-in slide-in-from-bottom-8 duration-300">
+                <div className="space-y-3 md:space-y-5">
+                  <span className="text-[10px] md:text-[11px] font-semibold text-white/60 uppercase tracking-widest mb-1.5 md:mb-2 block">Account Details</span>
                   
                   <div className="block" ref={locationRef}>
-                    <span className="text-[11px] font-semibold text-white/60 uppercase tracking-widest mb-2 block">Your City/Area</span>
+                    <span className="text-[10px] md:text-[11px] font-semibold text-white/60 uppercase tracking-widest mb-1.5 md:mb-2 block">Your City/Area</span>
                     <div className="relative">
                       <MapPin className="absolute left-4 top-1/2 -translate-y-1/2 text-white/40 z-10" size={18} />
                       <input
@@ -672,7 +681,7 @@ const OnboardingModal = ({ isOpen, onClose, initialData, onComplete }) => {
                         onChange={(e) => setFormData({...formData, location: e.target.value})}
                         onFocus={() => setShowSuggestions(locationSuggestions.length > 0)}
                         placeholder="Select your location"
-                        className="w-full bg-[#121212] border border-white/[0.08] rounded-[16px] py-4 pl-12 pr-4 text-white focus:border-[#55DEE8] outline-none transition-all placeholder-white/40"
+                        className="w-full bg-[#121212] border border-white/[0.08] rounded-[16px] py-2.5 md:py-4 pl-12 pr-4 text-white focus:border-[#55DEE8] outline-none transition-all placeholder-white/40 text-sm md:text-base"
                       />
                       {isSearchingLocation && (
                         <div className="absolute right-4 top-1/2 -translate-y-1/2">
@@ -711,13 +720,13 @@ const OnboardingModal = ({ isOpen, onClose, initialData, onComplete }) => {
 
                   {(!isGoogle && initialData?.authMethod === 'email') || (isGoogle && !initialData?.user?.phone) ? (
                     <label className="block">
-                      <span className="text-[11px] font-semibold text-white/60 uppercase tracking-widest mb-2 block">Phone Number</span>
+                      <span className="text-[10px] md:text-[11px] font-semibold text-white/60 uppercase tracking-widest mb-1.5 md:mb-2 block">Phone Number</span>
                       <div className="relative flex gap-2">
                         <select
                           value={formData.countryCode}
                           onChange={(e) => setFormData({...formData, countryCode: e.target.value})}
                           disabled={isPhoneVerified}
-                          className="bg-[#121212] border border-white/[0.08] rounded-[16px] py-4 px-3 text-white focus:border-[#55DEE8] outline-none transition-all w-[100px] text-sm appearance-none cursor-pointer"
+                          className="bg-[#121212] border border-white/[0.08] rounded-[16px] py-2.5 md:py-4 px-3 text-white focus:border-[#55DEE8] outline-none transition-all w-[90px] md:w-[100px] text-xs md:text-sm appearance-none cursor-pointer"
                         >
                           <option value="+91">IN (+91)</option>
                           {countryCodeOptions.map((c, i) => (
@@ -737,48 +746,48 @@ const OnboardingModal = ({ isOpen, onClose, initialData, onComplete }) => {
                                 setIsPhoneVerified(false);
                               }
                             }}
-                            className="w-full bg-[#121212] border border-white/[0.08] rounded-[16px] py-4 px-4 text-white focus:border-[#55DEE8] outline-none transition-all disabled:opacity-60 disabled:cursor-not-allowed"
+                            className="w-full bg-[#121212] border border-white/[0.08] rounded-[16px] py-2.5 md:py-4 px-4 text-white focus:border-[#55DEE8] outline-none transition-all disabled:opacity-60 disabled:cursor-not-allowed text-sm md:text-base"
                           />
                         </div>
-                        
-                        {needsPhoneVerification && !isPhoneVerified && (
-                          <div className="flex flex-col gap-2">
-                            <button
-                              type="button"
-                              onClick={() => handleSendPhoneOtp(false)}
-                              disabled={sendingPhoneOtp || !formData.phone || formData.phone.length < 10 || timeLeft > 0}
-                              className="px-4 py-2 bg-[linear-gradient(90deg,#55DEE8_0%,#B3DC26_100%)] rounded-[16px] font-bold text-xs uppercase tracking-wider text-[#000000] shadow-[0px_8px_24px_rgba(179,220,38,0.15)] transition-all disabled:opacity-40 disabled:cursor-not-allowed whitespace-nowrap h-full max-h-[44px] flex items-center justify-center"
-                            >
-                              {sendingPhoneOtp ? <Loader2 className="animate-spin w-4 h-4 mx-auto" /> : (timeLeft > 0 ? `Resend in ${timeLeft}s` : (phoneOtpSent ? "Resend" : "Get OTP"))}
-                            </button>
-                          </div>
-                        )}
 
                         {needsPhoneVerification && isPhoneVerified && (
-                          <div className="px-4 bg-green-500/10 border border-green-500/30 rounded-[8px] font-bold text-xs uppercase tracking-wider text-green-400 flex items-center gap-1.5 whitespace-nowrap animate-bounce">
+                          <div className="px-4 bg-green-500/10 border border-green-500/30 rounded-[8px] font-bold text-xs uppercase tracking-wider text-green-400 flex items-center gap-1.5 whitespace-nowrap animate-bounce h-[44px]">
                             <Check size={14} strokeWidth={3} />
                             Verified
                           </div>
                         )}
                       </div>
+                      
+                      {needsPhoneVerification && !isPhoneVerified && (
+                        <div className="mt-2 md:mt-3">
+                          <button
+                            type="button"
+                            onClick={() => handleSendPhoneOtp(false)}
+                            disabled={sendingPhoneOtp || !formData.phone || formData.phone.length < 10 || timeLeft > 0}
+                            className="w-full py-3 bg-[linear-gradient(90deg,#55DEE8_0%,#B3DC26_100%)] rounded-[16px] font-bold text-xs uppercase tracking-wider text-[#000000] shadow-[0px_8px_24px_rgba(179,220,38,0.15)] transition-all disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center"
+                          >
+                            {sendingPhoneOtp ? <Loader2 className="animate-spin w-4 h-4 mx-auto" /> : (timeLeft > 0 ? `Resend in ${timeLeft}s` : (phoneOtpSent ? "Resend" : "Get OTP"))}
+                          </button>
+                        </div>
+                      )}
 
                       {needsPhoneVerification && phoneOtpSent && !isPhoneVerified && (
                         <div className="mt-3 space-y-2 animate-in fade-in slide-in-from-top-2 duration-200">
                           <span className="text-[10px] font-black text-white/40 uppercase tracking-[0.2em] ml-1">Phone Verification OTP</span>
-                          <div className="flex gap-2">
+                          <div className="flex flex-col gap-2 md:flex-row md:gap-3">
                             <input
                               type="text"
                               maxLength={6}
                               value={phoneOtp}
                               onChange={(e) => setPhoneOtp(e.target.value.replace(/\D/g, ''))}
                               placeholder="Enter 6-digit OTP"
-                              className="flex-1 bg-[#121212] border border-white/[0.08] rounded-[16px] py-3 px-4 text-white placeholder:text-white/40 focus:border-[#55DEE8] outline-none transition-all text-center tracking-widest font-black"
+                              className="w-full md:flex-1 bg-[#121212] border border-white/[0.08] rounded-[16px] py-3 md:py-4 px-4 text-white placeholder:text-white/40 focus:border-[#55DEE8] outline-none transition-all text-center tracking-widest font-black text-sm md:text-base"
                             />
                             <button
                               type="button"
                               onClick={handleVerifyPhoneOtp}
                               disabled={verifyingPhoneOtp || phoneOtp.length < 6}
-                              className="px-6 bg-[linear-gradient(90deg,#55DEE8_0%,#B3DC26_100%)] rounded-[16px] font-black text-xs uppercase tracking-wider text-[#000000] shadow-[0px_8px_24px_rgba(179,220,38,0.15)] transition-all disabled:opacity-40 disabled:scale-100"
+                              className="w-full md:w-auto md:px-8 py-3 md:py-4 bg-[linear-gradient(90deg,#55DEE8_0%,#B3DC26_100%)] rounded-[16px] font-black text-xs md:text-sm uppercase tracking-wider text-[#000000] shadow-[0px_8px_24px_rgba(179,220,38,0.15)] transition-all disabled:opacity-40 disabled:scale-100 flex items-center justify-center"
                             >
                               {verifyingPhoneOtp ? <Loader2 className="animate-spin w-4 h-4" /> : "Verify"}
                             </button>
@@ -788,14 +797,14 @@ const OnboardingModal = ({ isOpen, onClose, initialData, onComplete }) => {
                     </label>
                   ) : null}
 
-                  <label className="block pt-2">
-                    <span className="text-[11px] font-semibold text-white/60 uppercase tracking-widest mb-2 block">Create Password</span>
+                  <label className="block pt-1 md:pt-2">
+                    <span className="text-[10px] md:text-[11px] font-semibold text-white/60 uppercase tracking-widest mb-1.5 md:mb-2 block">Create Password</span>
                     <input
                       type="password"
                       value={formData.password}
                       onChange={(e) => setFormData({...formData, password: e.target.value})}
                       placeholder="Must be at least 6 characters"
-                      className="w-full bg-[#121212] border border-white/[0.08] rounded-[16px] py-4 px-4 text-white focus:border-[#55DEE8] outline-none transition-all"
+                      className="w-full bg-[#121212] border border-white/[0.08] rounded-[16px] py-2.5 md:py-4 px-4 text-white focus:border-[#55DEE8] outline-none transition-all text-sm md:text-base"
                     />
                   </label>
                 </div>
@@ -804,12 +813,12 @@ const OnboardingModal = ({ isOpen, onClose, initialData, onComplete }) => {
           </div>
 
           {/* Footer Actions */}
-          <div className="flex gap-4 pt-4 mt-auto shrink-0 z-10 bg-[#1B1B1B]">
-            <div className="flex w-full h-[58px] gap-4">
+          <div className="flex pt-3 md:pt-4 mt-auto shrink-0 z-10 bg-[#1B1B1B]">
+            <div className="flex w-full h-[48px] md:h-[58px] gap-3 md:gap-4">
               {step > 1 && (
                 <button
                   onClick={handleBack}
-                  className="w-[110px] shrink-0 bg-[#1B1B1B] text-white h-full rounded-[16px] font-bold uppercase tracking-widest text-xs flex items-center justify-center gap-2 transition-all border border-white/[0.08]"
+                  className="w-[90px] md:w-[110px] shrink-0 bg-[#1B1B1B] text-white h-full rounded-[16px] font-bold uppercase tracking-widest text-[10px] md:text-xs flex items-center justify-center gap-1.5 md:gap-2 transition-all border border-white/[0.08]"
                 >
                   <ChevronLeft size={16} />
                   BACK
@@ -819,7 +828,7 @@ const OnboardingModal = ({ isOpen, onClose, initialData, onComplete }) => {
               {step < 4 ? (
                 <button
                   onClick={handleNext}
-                  className="flex-1 bg-[linear-gradient(90deg,#55DEE8_0%,#B3DC26_100%)] shadow-[0px_8px_24px_rgba(179,220,38,0.15)] text-[#000000] h-full rounded-[16px] font-bold text-[18px] flex items-center justify-center transition-all disabled:opacity-40"
+                  className="flex-1 bg-[linear-gradient(90deg,#55DEE8_0%,#B3DC26_100%)] shadow-[0px_8px_24px_rgba(179,220,38,0.15)] text-[#000000] h-full rounded-[16px] font-bold text-[14px] md:text-[18px] flex items-center justify-center transition-all disabled:opacity-40"
                 >
                 CONTINUE
               </button>
@@ -827,13 +836,13 @@ const OnboardingModal = ({ isOpen, onClose, initialData, onComplete }) => {
               <button
                 onClick={handleSubmit}
                 disabled={loading || formData.sportTypes.length === 0}
-                className="flex-1 bg-[linear-gradient(90deg,#55DEE8_0%,#B3DC26_100%)] shadow-[0px_8px_24px_rgba(179,220,38,0.15)] text-[#000000] h-full rounded-[16px] font-bold text-[18px] flex items-center justify-center gap-2 transition-all disabled:opacity-40"
+                className="flex-1 bg-[linear-gradient(90deg,#55DEE8_0%,#B3DC26_100%)] shadow-[0px_8px_24px_rgba(179,220,38,0.15)] text-[#000000] h-full rounded-[16px] font-bold text-[13px] md:text-[18px] flex items-center justify-center gap-1.5 md:gap-2 transition-all disabled:opacity-40 whitespace-nowrap"
               >
                 {loading ? (
                   <Loader2 className="animate-spin text-[#000000]" size={20} />
                 ) : (
                   <>
-                    <Trophy size={18} className="text-[#000000]" />
+                    <Trophy size={16} className="text-[#000000] hidden sm:block" />
                     ENTER THE ARENA
                   </>
                 )}

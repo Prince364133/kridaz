@@ -4,11 +4,11 @@ import { Link } from "react-router-dom";
 
 export default function DashboardHero() {
   return (
-    <div className="flex overflow-x-auto gap-3 md:gap-4 mb-0 w-full pb-0 snap-x snap-mandatory [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
+    <div className="grid grid-cols-4 gap-2 md:gap-3 mb-0 w-full pb-0 px-2">
       {/* Leaderboard / Players Nearby */}
       <Link
         to="/players"
-        className="flex-shrink-0 w-[85px] md:w-[100px] flex flex-col items-center gap-2 cursor-pointer group snap-start"
+        className="w-full flex flex-col items-center gap-1.5 md:gap-2 cursor-pointer group"
       >
         <div
           className="relative w-full rounded-[12px] overflow-visible force-overflow-visible flex items-center justify-center aspect-square transition-all duration-300 shadow-xl border border-[#EBEBEB]/15 group-hover:scale-[1.02]"
@@ -21,7 +21,7 @@ export default function DashboardHero() {
           <img
             src="/3d_map_location.svg"
             alt="Leaderboard Map Icon"
-            className="w-[90%] h-[90%] object-contain pointer-events-none transform group-hover:scale-110 transition-all duration-300 z-10"
+            className="absolute inset-0 w-full h-full object-contain p-[5%] pointer-events-none transform group-hover:scale-110 transition-all duration-300 z-10"
           />
         </div>
         <div className="h-[28px] flex items-start justify-center">
@@ -35,7 +35,7 @@ export default function DashboardHero() {
       <Link
         to="/my-teams"
         state={{ openStartScoringModal: true }}
-        className="flex-shrink-0 w-[85px] md:w-[100px] flex flex-col items-center gap-2 cursor-pointer group snap-start"
+        className="w-full flex flex-col items-center gap-1.5 md:gap-2 cursor-pointer group"
       >
         <div
           className="relative w-full rounded-[12px] overflow-visible force-overflow-visible flex items-center justify-center aspect-square transition-all duration-300 shadow-xl border border-[#EBEBEB]/15 group-hover:scale-[1.02]"
@@ -48,7 +48,7 @@ export default function DashboardHero() {
           <img
             src="/3d_scoreboard_v2.png"
             alt="Scorer Icon"
-            className="w-[95%] h-[95%] object-contain pointer-events-none transform group-hover:scale-110 transition-all duration-300 z-10"
+            className="absolute inset-0 w-full h-full object-contain p-[2.5%] pointer-events-none transform group-hover:scale-110 transition-all duration-300 z-10"
           />
         </div>
         <div className="h-[28px] flex items-start justify-center">
@@ -61,7 +61,7 @@ export default function DashboardHero() {
       {/* Host & Join Games */}
       <Link
         to="/join-games"
-        className="flex-shrink-0 w-[85px] md:w-[100px] flex flex-col items-center gap-2 cursor-pointer group snap-start"
+        className="w-full flex flex-col items-center gap-1.5 md:gap-2 cursor-pointer group"
       >
         <div
           className="relative w-full rounded-[12px] overflow-visible force-overflow-visible flex items-center justify-center aspect-square transition-all duration-300 shadow-xl border border-[#EBEBEB]/15 group-hover:scale-[1.02]"
@@ -74,7 +74,7 @@ export default function DashboardHero() {
           <img
             src="/3d_whistle.svg"
             alt="Host & Join Games Whistle Icon"
-            className="w-[95%] h-[95%] object-contain pointer-events-none transform group-hover:scale-110 transition-all duration-300 z-10"
+            className="absolute inset-0 w-full h-full object-contain p-[2.5%] pointer-events-none transform group-hover:scale-110 transition-all duration-300 z-10"
           />
         </div>
         <div className="h-[28px] flex items-start justify-center">
@@ -87,7 +87,7 @@ export default function DashboardHero() {
       {/* Pros */}
       <Link
         to="/professionals"
-        className="flex-shrink-0 w-[85px] md:w-[100px] flex flex-col items-center gap-2 cursor-pointer group snap-start"
+        className="w-full flex flex-col items-center gap-1.5 md:gap-2 cursor-pointer group"
       >
         <div
           className="relative w-full rounded-[12px] overflow-visible force-overflow-visible flex items-center justify-center aspect-square transition-all duration-300 shadow-xl border border-[#EBEBEB]/15 group-hover:scale-[1.02]"
@@ -100,7 +100,7 @@ export default function DashboardHero() {
           <img
             src="/3d_professional_v2.png"
             alt="Pros Icon"
-            className="w-[80%] h-[80%] object-contain pointer-events-none transform group-hover:scale-110 transition-all duration-300 z-10"
+            className="absolute inset-0 w-full h-full object-contain p-[10%] pointer-events-none transform group-hover:scale-110 transition-all duration-300 z-10"
           />
         </div>
         <div className="h-[28px] flex items-start justify-center">

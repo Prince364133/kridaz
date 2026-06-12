@@ -31,7 +31,7 @@ const ProfessionalBottomNav = () => {
                   <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-1 h-1 bg-[#BFF367] rounded-full shadow-[0_0_8px_#BFF367]" />
                 )}
               </div>
-              <span className={`text-[10px] font-bold uppercase tracking-widest ${ isActive ? "opacity-100" : "opacity-60" }`}>
+              <span className={`text-[8px] sm:text-[9px] font-bold uppercase tracking-wider ${ isActive ? "opacity-100" : "opacity-60" }`}>
                 {item.name}
               </span>
             </Link>

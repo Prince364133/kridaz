@@ -10,7 +10,7 @@ export default {
         "primary-focus": "#a2d152",
       },
       fontFamily: {
-        sans: ['"Open Sans"', "sans-serif"],
+        sans: ['"Inter"', '"Satoshi"', '"General Sans"', '"Poppins"', "sans-serif"],
       },
       backgroundImage: {
         banner: "url('/r.png')",

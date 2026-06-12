@@ -824,19 +824,19 @@ const ChatWindow = ({ chat, onBack, onSelectChat }) => {
     const canMessage = isAnnouncement ? (isAdmin || isParentCommunityAdmin) : (!chat.adminOnlyMessages || isAdmin || isParentCommunityAdmin);
 
     return canMessage ? (
-      <form onSubmit={handleSendMessage} className="p-3 bg-[#0A0A0A] border-t border-white/5 z-10 relative">
-        <div className="flex items-center gap-2 bg-white/[0.04] border border-white/5 rounded-[8px] px-4 py-1 focus-within:border-[#BFF367]/40 transition-all">
+      <form onSubmit={handleSendMessage} className="p-3 pb-8 md:pb-4 bg-[#0A0A0A] border-t border-white/5 z-10 relative">
+        <div className="flex items-center gap-2 bg-[#1A1A1A] border border-white/10 rounded-full px-4 py-1 focus-within:border-[#BFF367]/40 transition-all shadow-sm">
           <input
             type="text"
             value={message}
             onChange={typingHandler}
             placeholder="Type a message..."
-            className="flex-1 bg-transparent border-none text-white py-2.5 focus:ring-0 focus:outline-none text-sm placeholder:text-white/20"
+            className="flex-1 bg-transparent border-none text-white py-2.5 focus:ring-0 focus:outline-none text-sm placeholder:text-white/40"
           />
           <button
             type="submit"
             disabled={!message.trim()}
-            className="p-2 bg-[#BFF367] text-black rounded-[8px] hover:scale-105 active:scale-95 transition-all disabled:opacity-30 disabled:scale-100 disabled:bg-white/10 disabled:text-white/30"
+            className="p-2 bg-[#BFF367] text-black rounded-full hover:scale-105 active:scale-95 transition-all disabled:opacity-30 disabled:scale-100 disabled:bg-white/10 disabled:text-white/30"
           >
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
@@ -845,7 +845,7 @@ const ChatWindow = ({ chat, onBack, onSelectChat }) => {
         </div>
       </form>
     ) : (
-      <div className="p-6 bg-[#0A0A0A] border-t border-white/5 text-center relative z-10">
+      <div className="p-6 pb-10 md:pb-6 bg-[#0A0A0A] border-t border-white/5 text-center relative z-10">
         <p className="text-xs text-[#BFF367]/60 font-bold uppercase tracking-widest">
           Only admins can send messages to this group
         </p>

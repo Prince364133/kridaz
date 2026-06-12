@@ -383,7 +383,7 @@ export default function Home() {
 
 
           {/* -- FIND YOUR ARENA -- */}
-          <div className="!mt-0">
+          <div className="!mt-0 px-2">
             <VenuesSection
               userLocation={userLocation}
               loading={loading}
@@ -395,7 +395,7 @@ export default function Home() {
           </div>
 
           {/* -- FIND PLAYERS NEAR YOU -- */}
-          <div className="!mt-2">
+          <div className="!mt-2 px-2">
             <PlayersSection
               loading={loading}
               players={players}
@@ -416,26 +416,30 @@ export default function Home() {
           </div>
 
           {/* -- SOCIAL ARENA -- */}
-          <SocialArenaSection reelsFeed={reelsFeed} />
+          <div className="px-2">
+            <SocialArenaSection reelsFeed={reelsFeed} />
+          </div>
 
           {/* -- JOIN GAMES NEAR YOU (Feature Flag) -- */}
-          <JoinGamesSection
-            featureFlags={featureFlags}
-            selectedHomeState={selectedHomeState}
-            setSelectedHomeState={setSelectedHomeState}
-            selectedHomeCity={selectedHomeCity}
-            setSelectedHomeCity={setSelectedHomeCity}
-            states={states}
-            loadingStates={loadingStates}
-            cities={cities}
-            loadingCities={loadingCities}
-            selectedGameSport={selectedGameSport}
-            setSelectedGameSport={setSelectedGameSport}
-            hostedGames={hostedGames}
-            hostedGamesLoading={hostedGamesLoading}
-          />
+          <div className="px-2">
+            <JoinGamesSection
+              featureFlags={featureFlags}
+              selectedHomeState={selectedHomeState}
+              setSelectedHomeState={setSelectedHomeState}
+              selectedHomeCity={selectedHomeCity}
+              setSelectedHomeCity={setSelectedHomeCity}
+              states={states}
+              loadingStates={loadingStates}
+              cities={cities}
+              loadingCities={loadingCities}
+              selectedGameSport={selectedGameSport}
+              setSelectedGameSport={setSelectedGameSport}
+              hostedGames={hostedGames}
+              hostedGamesLoading={hostedGamesLoading}
+            />
+          </div>
 
-          <div className={shouldHideRest ? 'hidden' : ''}>
+          <div className={`px-2 ${shouldHideRest ? 'hidden' : ''}`}>
             {/* -- FIND PROFESSIONALS (Feature Flag) -- */}
             <ProfessionalsSection
               featureFlags={featureFlags}

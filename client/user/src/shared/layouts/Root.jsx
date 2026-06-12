@@ -165,13 +165,13 @@ const Root = () => {
         <BackgroundUploadManager />
 
         {/* Left Side: Mobile View Container */}
-        <div className="w-1/2 xl:w-[45%] 2xl:w-[40%] h-full border-r border-white/5 bg-[#050505] relative z-20 flex-shrink-0 flex items-center justify-center p-4 sm:p-6 md:p-8 lg:p-12 xl:p-16 2xl:pl-24 pt-16">
+        <div className="w-1/2 xl:w-[45%] 2xl:w-[40%] h-full border-r border-white/5 bg-[#050505] relative z-20 flex-shrink-0 flex items-center justify-center p-2 sm:p-4 md:p-4 lg:p-6 xl:p-8 2xl:pl-12 pt-8">
           
           <div 
             className="relative h-full shadow-2xl mx-auto bg-transparent" 
             style={{ 
-              maxWidth: 'min(550px, 100%)',
-              maxHeight: '1130px',
+              maxWidth: 'min(650px, 100%)',
+              maxHeight: '1250px',
               aspectRatio: '443/913', 
               containerType: 'inline-size', 
               transform: 'translateZ(0)', 
@@ -179,7 +179,7 @@ const Root = () => {
             }}
           >
             {/* "Experience the app live!" Decorative Text */}
-            <div className="hidden xl:flex absolute top-1/2 -translate-y-[50%] right-[100%] mr-8 md:mr-12 flex-col items-center pointer-events-none opacity-90 z-50 whitespace-nowrap">
+            <div className="hidden xl:flex absolute top-1/2 -translate-y-[50%] right-[100%] mr-2 md:mr-6 flex-col items-center pointer-events-none opacity-90 z-50 whitespace-nowrap">
               <div className="font-['Caveat',cursive] text-base md:text-lg font-bold text-center leading-snug tracking-wider -rotate-6">
                 <div className="text-[#BFF367]">Experience</div>
                 <div className="text-white/90">the app</div>
@@ -191,22 +191,28 @@ const Root = () => {
               </svg>
             </div>
 
-            {/* The Screen (exactly aligned to the SVG inner hole) */}
+            {/* The Screen (exactly aligned to the SVG inner hole, adjusted for extra padding) */}
             <div 
               className="absolute overflow-hidden bg-[#050505] z-0" 
               style={{ 
-                top: '0.657%', 
-                bottom: '0.657%', 
-                left: '2.5%', 
-                right: '2.5%', 
-                borderRadius: '13cqw' 
+                top: '1.5%', 
+                bottom: '1.5%', 
+                left: '4.5%', 
+                right: '4.5%', 
+                borderRadius: '11cqw' 
               }}
             >
               <iframe
                 ref={iframeRef}
                 src={location.pathname + location.search}
-                className="w-full h-full border-none bg-[#050505]"
-                style={{ borderRadius: 'inherit' }}
+                className="absolute top-0 left-0 border-none bg-[#050505]"
+                style={{ 
+                  width: '111.11%', 
+                  height: '111.11%', 
+                  transform: 'scale(0.9)', 
+                  transformOrigin: 'top left',
+                  borderRadius: '12cqw' 
+                }}
                 onLoad={handleIframeLoad}
               />
             </div>

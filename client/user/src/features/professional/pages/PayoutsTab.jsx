@@ -216,11 +216,11 @@ const PayoutsTab = ({ role }) => {
           // BANK CONFIGURATION INPUT FORM
           <div className="space-y-6">
             <div className="flex items-center justify-between border-b border-[#2D2D2D] pb-4">
-              <div className="flex items-center gap-2.5">
-                <Landmark size={22} className="text-[#BFF367]" />
-                <div>
-                  <h3 className="text-lg font-bold tracking-tight">Configure Payout Destination</h3>
-                  <p className="text-xs text-gray-400">Fill details to request payouts. Verification status will show as pending.</p>
+              <div className="flex items-start sm:items-center gap-2.5 flex-1 min-w-0">
+                <Landmark size={22} className="text-[#BFF367] shrink-0 mt-1 sm:mt-0" />
+                <div className="flex-1 min-w-0">
+                  <h3 className="text-[16px] sm:text-lg font-black tracking-widest uppercase font-inter text-white break-words">Configure Payout Destination</h3>
+                  <p className="text-xs text-gray-400 mt-1 break-words">Fill details to request payouts. Verification status will show as pending.</p>
                 </div>
               </div>
               {hasConfiguredBank && (
@@ -233,7 +233,7 @@ const PayoutsTab = ({ role }) => {
               )}
             </div>
 
-            <div className="flex bg-black p-1 rounded-xl border border-[#2D2D2D] gap-2 max-w-xs">
+            <div className="flex bg-black p-1 rounded-xl border border-[#2D2D2D] gap-2 w-full sm:max-w-xs">
               <button
                 type="button"
                 onClick={() => setPayoutMode("BANK")}
@@ -251,8 +251,8 @@ const PayoutsTab = ({ role }) => {
             </div>
 
             <form onSubmit={handleSaveBanking} className="grid grid-cols-1 md:grid-cols-2 gap-5">
-              <div className="space-y-2">
-                <label className="text-xs text-[#878C9F] font-bold uppercase tracking-widest ml-1">Account Holder Name</label>
+              <div className="space-y-2 min-w-0">
+                <label className="text-xs text-[#878C9F] font-bold uppercase tracking-widest ml-1 truncate block">Account Holder Name</label>
                 <input 
                   type="text" 
                   required
@@ -265,8 +265,8 @@ const PayoutsTab = ({ role }) => {
 
               {payoutMode === "BANK" ? (
                 <>
-                  <div className="space-y-2">
-                    <label className="text-xs text-[#878C9F] font-bold uppercase tracking-widest ml-1">Bank Name</label>
+                  <div className="space-y-2 min-w-0">
+                    <label className="text-xs text-[#878C9F] font-bold uppercase tracking-widest ml-1 truncate block">Bank Name</label>
                     <input 
                       type="text" 
                       required
@@ -276,8 +276,8 @@ const PayoutsTab = ({ role }) => {
                       className="w-full bg-black border border-[#2D2D2D] rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-[#BFF367] transition-colors"
                     />
                   </div>
-                  <div className="space-y-2">
-                    <label className="text-xs text-[#878C9F] font-bold uppercase tracking-widest ml-1">IFSC Code</label>
+                  <div className="space-y-2 min-w-0">
+                    <label className="text-xs text-[#878C9F] font-bold uppercase tracking-widest ml-1 truncate block">IFSC Code</label>
                     <input 
                       type="text" 
                       required
@@ -287,8 +287,8 @@ const PayoutsTab = ({ role }) => {
                       className="w-full bg-black border border-[#2D2D2D] rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-[#BFF367] transition-colors font-mono uppercase"
                     />
                   </div>
-                  <div className="space-y-2">
-                    <label className="text-xs text-[#878C9F] font-bold uppercase tracking-widest ml-1">Account Number</label>
+                  <div className="space-y-2 min-w-0">
+                    <label className="text-xs text-[#878C9F] font-bold uppercase tracking-widest ml-1 truncate block">Account Number</label>
                     <input 
                       type="text" 
                       required
@@ -300,8 +300,8 @@ const PayoutsTab = ({ role }) => {
                   </div>
                 </>
               ) : (
-                <div className="space-y-2 md:col-span-2">
-                  <label className="text-xs text-[#878C9F] font-bold uppercase tracking-widest ml-1">UPI ID / VPA</label>
+                <div className="space-y-2 md:col-span-2 min-w-0">
+                  <label className="text-xs text-[#878C9F] font-bold uppercase tracking-widest ml-1 truncate block">UPI ID / VPA</label>
                   <input 
                     type="text" 
                     required
@@ -313,13 +313,13 @@ const PayoutsTab = ({ role }) => {
                 </div>
               )}
 
-              <div className="md:col-span-2 pt-2">
+              <div className="md:col-span-2 pt-2 flex flex-col sm:flex-row gap-3 min-w-0 w-full">
                 <button 
                   type="submit"
                   disabled={isSavingDetails}
-                  className="w-full md:w-auto px-8 bg-[#BFF367] hover:bg-[#aee057] text-black font-extrabold rounded-xl py-3.5 transition-all text-sm shadow-[0_0_20px_rgba(191,243,103,0.15)] uppercase tracking-wider"
+                  className="w-full md:w-auto px-4 sm:px-8 bg-[#BFF367] hover:bg-[#aee057] text-black font-extrabold rounded-xl py-3.5 transition-all text-xs sm:text-sm shadow-[0_0_20px_rgba(191,243,103,0.15)] uppercase tracking-wider whitespace-normal break-words"
                 >
-                  {isSavingDetails ? "Saving Configuration..." : "Submit Bank Details for Verification"}
+                  {isSavingDetails ? "Saving Configuration..." : "Submit for Verification"}
                 </button>
               </div>
             </form>
@@ -331,12 +331,12 @@ const PayoutsTab = ({ role }) => {
               <div className="w-14 h-14 rounded-2xl bg-[#BFF367]/10 flex items-center justify-center border border-[#BFF367]/20">
                 <Landmark size={28} className="text-[#BFF367]" />
               </div>
-              <div className="space-y-1">
-                <div className="flex items-center gap-2.5">
-                  <h4 className="font-bold text-white tracking-tight text-lg">
+              <div className="space-y-1 flex-1 min-w-0">
+                <div className="flex flex-wrap items-center gap-2.5">
+                  <h4 className="font-bold text-white tracking-tight text-lg truncate">
                     {payoutMode === "BANK" ? bankName : "UPI Payment Destination"}
                   </h4>
-                  <span className={`px-2.5 py-0.5 rounded-full text-[9px] font-black uppercase tracking-wider border ${
+                  <span className={`px-2.5 py-0.5 rounded-full text-[9px] font-black uppercase tracking-wider border whitespace-nowrap ${
                     kycStatus === "VERIFIED" 
                       ? "bg-green-500/10 text-green-400 border-green-500/20" 
                       : kycStatus === "REJECTED" 
@@ -346,7 +346,7 @@ const PayoutsTab = ({ role }) => {
                     {kycStatus === "VERIFIED" ? "Verified" : kycStatus === "REJECTED" ? "Rejected" : "Verification Pending"}
                   </span>
                 </div>
-                <p className="text-xs text-[#878C9F] font-semibold uppercase tracking-widest font-mono">
+                <p className="text-xs text-[#878C9F] font-semibold uppercase tracking-widest font-mono truncate">
                   {payoutMode === "BANK" 
                     ? `A/C Number: *******${accountNumber.slice(-4)} (${accountName})`
                     : `UPI ID: ${upiId} (${accountName})`
@@ -385,8 +385,8 @@ const PayoutsTab = ({ role }) => {
             <IndianRupee size={50} />
           </div>
           <div>
-            <div className="flex items-center justify-between">
-              <span className="text-[9px] text-[#878C9F] font-bold uppercase tracking-[0.15em]">Usable Balance</span>
+            <div className="flex items-center justify-between mb-1">
+              <span className="text-[9px] text-[#878C9F] font-bold uppercase tracking-[0.15em] truncate mr-1">Usable Balance</span>
               <button 
                 onClick={() => setActiveDescCard(activeDescCard === "usable" ? null : "usable")}
                 className="text-gray-500 hover:text-white transition-colors"
@@ -411,8 +411,8 @@ const PayoutsTab = ({ role }) => {
         {/* Card 2: Reserved Escrow */}
         <div className="p-4 rounded-xl bg-[#141414] border border-[#2D2D2D] relative overflow-hidden flex flex-col justify-between min-h-[120px]">
           <div>
-            <div className="flex items-center justify-between">
-              <span className="text-[9px] text-[#878C9F] font-bold uppercase tracking-[0.15em]">Reserved Escrow</span>
+            <div className="flex items-center justify-between mb-1">
+              <span className="text-[9px] text-[#878C9F] font-bold uppercase tracking-[0.15em] truncate mr-1">Reserved Escrow</span>
               <button 
                 onClick={() => setActiveDescCard(activeDescCard === "reserved" ? null : "reserved")}
                 className="text-gray-500 hover:text-white transition-colors"
@@ -437,8 +437,8 @@ const PayoutsTab = ({ role }) => {
         {/* Card 3: Dispute Balance */}
         <div className="p-4 rounded-xl bg-[#141414] border border-[#2D2D2D] relative overflow-hidden flex flex-col justify-between min-h-[120px]">
           <div>
-            <div className="flex items-center justify-between">
-              <span className="text-[9px] text-[#878C9F] font-bold uppercase tracking-[0.15em]">Conflict Balance</span>
+            <div className="flex items-center justify-between mb-1">
+              <span className="text-[9px] text-[#878C9F] font-bold uppercase tracking-[0.15em] truncate mr-1">Conflict Balance</span>
               <button 
                 onClick={() => setActiveDescCard(activeDescCard === "dispute" ? null : "dispute")}
                 className="text-gray-500 hover:text-white transition-colors"
@@ -463,8 +463,8 @@ const PayoutsTab = ({ role }) => {
         {/* Card 4: Total Lifetime Earnings with Filtering */}
         <div className="p-4 rounded-xl bg-[#141414] border border-[#2D2D2D] relative overflow-hidden flex flex-col justify-between min-h-[120px]">
           <div>
-            <div className="flex items-center justify-between">
-              <span className="text-[9px] text-[#878C9F] font-bold uppercase tracking-[0.15em]">Lifetime Earnings</span>
+            <div className="flex items-center justify-between mb-1">
+              <span className="text-[9px] text-[#878C9F] font-bold uppercase tracking-[0.15em] truncate mr-1">Lifetime Earnings</span>
               <button 
                 onClick={() => setActiveDescCard(activeDescCard === "lifetime" ? null : "lifetime")}
                 className="text-gray-500 hover:text-white transition-colors"
@@ -525,12 +525,12 @@ const PayoutsTab = ({ role }) => {
 
       {/* GRAPH / ANALYTICS SECTION */}
       <div className="p-6 rounded-2xl bg-[#141414] border border-[#2D2D2D] space-y-6">
-        <div className="flex items-center justify-between border-b border-[#2D2D2D] pb-4">
-          <div>
-            <h3 className="text-lg font-bold tracking-tight">Balance Distribution</h3>
-            <p className="text-xs text-[#878C9F]">Live breakdown of your wallet across categories</p>
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between border-b border-[#2D2D2D] pb-4 gap-4 sm:gap-0">
+          <div className="min-w-0 flex-1">
+            <h3 className="text-[16px] sm:text-lg font-black tracking-widest uppercase font-inter text-white break-words">Balance Distribution</h3>
+            <p className="text-xs text-[#878C9F] mt-1 break-words">Live breakdown of your wallet across categories</p>
           </div>
-          <div className="flex items-center gap-3">
+          <div className="flex flex-wrap items-center gap-3 shrink-0">
             <div className="flex items-center gap-1.5">
               <div className="w-3 h-3 rounded-sm bg-[#BFF367]" />
               <span className="text-[10px] text-gray-400 font-bold uppercase tracking-wider">Active Balance</span>
@@ -583,7 +583,7 @@ const PayoutsTab = ({ role }) => {
             </button>
 
             <div className="space-y-1">
-              <h3 className="text-xl font-bold tracking-tight text-white uppercase italic">Request Fund Withdrawal</h3>
+              <h3 className="text-lg sm:text-xl font-black tracking-widest text-[#BFF367] uppercase italic font-inter">Request Fund Withdrawal</h3>
               <p className="text-xs text-gray-400">Withdraw money from your usable balance directly to your configured payout destination.</p>
             </div>
 
