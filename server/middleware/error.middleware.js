@@ -24,6 +24,11 @@ const LEGACY_MESSAGE_AS_CODE = new Set([
  */
 const normalizePrismaError = (err) => {
   if (err instanceof PrismaClientKnownRequestError) {
+    logger.error(`[PRISMA_ERROR] code=${err.code} message=${err.message}`, {
+      prismaCode: err.code,
+      meta: err.meta,
+      clientVersion: err.clientVersion,
+    });
     switch (err.code) {
       case 'P2002': {
         const field = Array.isArray(err.meta?.target) ? err.meta.target.join(', ') : 'field';
@@ -48,6 +53,7 @@ const normalizePrismaError = (err) => {
   }
 
   if (err instanceof PrismaClientValidationError) {
+    logger.error(`[PRISMA_VALIDATION_ERROR] ${err.message}`);
     return new BadRequestError('Invalid data provided.', { code: 'VALIDATION_ERROR' });
   }
 

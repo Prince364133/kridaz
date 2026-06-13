@@ -43,4 +43,4 @@ COPY --from=builder --chown=node:node /app/server ./server
 WORKDIR /app/server
 USER node
 EXPOSE 4000
-CMD ["sh", "-c", "pnpm prisma migrate deploy && pnpm run start"]
+CMD ["sh", "-c", "pnpm prisma db push --accept-data-loss && pnpm run start"]
