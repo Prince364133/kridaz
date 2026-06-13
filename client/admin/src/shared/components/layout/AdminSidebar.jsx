@@ -73,6 +73,7 @@ const AdminSidebar = ({ isOpen, toggleSidebar, isMinimized, className }) => {
       ],
     },
     { to: "/admin/audit", label: "Audit Logs", icon: Shield },
+    { to: "/admin/error-logs", label: "System Errors", icon: Shield },
     { to: "/admin/marketing", label: "Marketing", icon: Activity },
     { to: "/admin/coupons", label: "Coupons", icon: Tag },
     { to: "/admin/blogs", label: "Blogs", icon: FileText },

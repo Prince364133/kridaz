@@ -1440,3 +1440,40 @@ export const resolveDispute = async (req, res) => {
     return res.status(error.status || 500).json({ message: error.message });
   }
 };
+
+export const getAllErrorLogs = async (req, res) => {
+  const adminRole = req.admin.role;
+  if (adminRole?.toUpperCase() !== "ADMIN") {
+    return res.status(403).json({ success: false, message: "Unauthorized" });
+  }
+
+  try {
+    const alerts = await prisma.sentryAlert.findMany({
+      orderBy: { createdAt: 'desc' },
+      take: 200
+    });
+    return res.status(200).json({ success: true, alerts });
+  } catch (error) {
+    logger.error("Error fetching sentry alerts:", error);
+    return res.status(500).json({ success: false, message: "Internal server error" });
+  }
+};
+
+export const resolveErrorLog = async (req, res) => {
+  const adminRole = req.admin.role;
+  if (adminRole?.toUpperCase() !== "ADMIN") {
+    return res.status(403).json({ success: false, message: "Unauthorized" });
+  }
+
+  try {
+    const { id } = req.params;
+    const alert = await prisma.sentryAlert.update({
+      where: { id },
+      data: { isResolved: true }
+    });
+    return res.status(200).json({ success: true, alert });
+  } catch (error) {
+    logger.error("Error resolving sentry alert:", error);
+    return res.status(500).json({ success: false, message: "Internal server error" });
+  }
+};

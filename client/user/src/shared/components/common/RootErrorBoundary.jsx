@@ -15,6 +15,8 @@ class RootErrorBoundary extends React.Component {
   }
 
   render() {
+    const isDev = import.meta.env.DEV;
+
     if (this.state.hasError) {
       return (
         <div className="min-h-screen bg-black flex items-center justify-center p-6 text-center">
@@ -22,11 +24,20 @@ class RootErrorBoundary extends React.Component {
             <div className="space-y-4">
               <h1 className="text-6xl font-black text-[#BFF367] uppercase tracking-tighter">FATAL ERROR</h1>
               <p className="text-xl font-bold text-white uppercase tracking-tight">System Malfunction Detected</p>
-              <div className="p-4 bg-red-500/10 border border-red-500/20 rounded-[8px]">
-                <p className="text-red-400 text-xs font-mono break-all">
-                  {this.state.error?.message || "An unexpected error occurred within the portal telemetry."}
-                </p>
-              </div>
+              
+              {isDev ? (
+                <div className="p-4 bg-red-500/10 border border-red-500/20 rounded-[8px]">
+                  <p className="text-red-400 text-xs font-mono break-all">
+                    {this.state.error?.message || "An unexpected error occurred within the portal telemetry."}
+                  </p>
+                </div>
+              ) : (
+                <div className="p-4 bg-white/5 border border-white/10 rounded-[8px]">
+                  <p className="text-zinc-400 text-sm">
+                    We've encountered an unexpected issue while processing your request. Our engineering team has been notified.
+                  </p>
+                </div>
+              )}
             </div>
             
             <div className="pt-6">

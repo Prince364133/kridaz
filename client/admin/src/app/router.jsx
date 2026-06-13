@@ -34,6 +34,7 @@ const ProfessionalDetailsPage = lazy(() => import("../features/admin").then(m =>
 const HostedGamesPage = lazy(() => import("../features/admin").then(m => ({ default: m.HostedGamesPage })));
 const CouponManagement = lazy(() => import("../features/admin").then(m => ({ default: m.CouponManagement })));
 const ReelReports = lazy(() => import("../features/admin").then(m => ({ default: m.ReelReports })));
+const ErrorLogs = lazy(() => import("../features/admin").then(m => ({ default: m.ErrorLogs })));
 
 const S = ({ children }) => <Suspense fallback={<PageLoader />}>{children}</Suspense>;
 
@@ -87,6 +88,7 @@ const router = createBrowserRouter([
       { path: "games",        element: <S><HostedGamesPage /></S> },
       { path: "coupons",      element: <S><CouponManagement /></S> },
       { path: "reels-reports",element: <S><ReelReports /></S> },
+      { path: "error-logs",   element: <S><ErrorLogs /></S> },
       { path: "*",            element: <Navigate to="/admin" replace /> },
     ],
   },

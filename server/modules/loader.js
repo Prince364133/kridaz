@@ -96,6 +96,11 @@ const MODULE_MANIFEST = [
     mountPath: "/scorer",
     description: "Scorer role assignment, acceptance & scoring actions",
   },
+  {
+    module: "webhooks",
+    mountPath: "/webhooks",
+    description: "Incoming external webhooks (Sentry, etc.)",
+  },
 ];
 
 /**

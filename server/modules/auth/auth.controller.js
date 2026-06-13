@@ -2225,6 +2225,24 @@ export const updateProfile = asyncHandler(async (req, res) => {
       });
     }
   }
+
+  // Check if phone is taken
+  if (phone) {
+    const conflictPhone = await prisma.user.findFirst({
+      where: {
+        phone,
+        NOT: {
+          id: user.id
+        }
+      }
+    });
+    if (conflictPhone) {
+      return res.status(400).json({
+        success: false,
+        message: "Phone number already registered to another account"
+      });
+    }
+  }
   const finalInterests = interests || sportTypes || [];
   let hashedPassword;
   if (password) {

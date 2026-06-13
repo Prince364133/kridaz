@@ -1600,3 +1600,12 @@ model UserDevice {
 
   @@index([userId])
 }
+
+model SentryAlert {
+  id           String   @id @default(uuid())
+  sentryUrl    String   // Link directly to the Sentry video replay & logs
+  errorMessage String
+  level        String   // "error", "fatal", etc.
+  isResolved   Boolean  @default(false)
+  createdAt    DateTime @default(now())
+}
