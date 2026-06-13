@@ -12,9 +12,20 @@ import { initCronJobs } from "./utils/cronJobs.js";
 
 import logger from "./utils/logger.js";
 import { trackQueue } from "./utils/metrics.js";
+import http from "http";
 
 const startWorker = async () => {
   try {
+    // Start dummy HTTP server for Azure Web App health checks
+    const port = process.env.PORT || 4000;
+    const healthServer = http.createServer((req, res) => {
+      res.writeHead(200, { "Content-Type": "text/plain" });
+      res.end("Worker is running\n");
+    });
+    healthServer.listen(port, () => {
+      logger.info(`[WORKER_PROCESS] Health check server listening on port ${port}`);
+    });
+
     await connectDB();
     logger.info("[WORKER_PROCESS] Database connection established successfully.");
 
