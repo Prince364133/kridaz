@@ -417,7 +417,7 @@ export default function Profile() {
     onSuccess: async (tokenResponse) => {
       try {
         setVerifyingEmail(true);
-        const res = await axiosInstance.post("/user/auth/verify-email-google", {
+        const res = await axiosInstance.post("/api/user/auth/verify-email-google", {
           accessToken: tokenResponse.access_token,
           source: "profile"
         });
@@ -733,32 +733,7 @@ export default function Profile() {
     }
   };
 
-  const verifyWithGoogle = useGoogleLogin({
-    flow: "implicit",
-    onSuccess: async (tokenResponse) => {
-      try {
-        setVerifyingEmail(true);
-        const res = await axiosInstance.post("/api/user/auth/verify-email-google", {
-          accessToken: tokenResponse.access_token,
-          source: "profile"
-        });
-        if (res.data?.success) {
-          toast.success("Email verified successfully via Google!");
-          dispatch(updateUser({ isEmailVerified: true }));
-        } else {
-          toast.error(res.data?.message || "Google verification failed");
-        }
-      } catch (error) {
-        toast.error(error?.response?.data?.message || "Failed to verify via Google");
-      } finally {
-        setVerifyingEmail(false);
-      }
-    },
-    onError: (error) => {
-      console.error("Google verify error:", error);
-      toast.error("Google verification cancelled");
-    }
-  });
+
 
   const handleLogout = async () => {
     try {
