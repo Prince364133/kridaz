@@ -17,7 +17,7 @@ import http from "http";
 const startWorker = async () => {
   try {
     // Start dummy HTTP server for Azure Web App health checks
-    const port = process.env.PORT || 4000;
+    const port = process.env.WORKER_PORT || (process.env.NODE_ENV === "production" ? process.env.PORT || 4000 : 4001);
     const healthServer = http.createServer((req, res) => {
       res.writeHead(200, { "Content-Type": "text/plain" });
       res.end("Worker is running\n");
