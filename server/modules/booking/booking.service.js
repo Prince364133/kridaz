@@ -352,6 +352,25 @@ export const verifyBookingPayment = async (userId, paymentData) => {
     logger.error("[INVOICE] Failed to generate/queue invoice:", err.message);
   });
 
+  if (user.phone) {
+    const ticketUrl = `${process.env.USER_URL || 'https://kridaz.com'}/booking-pass/${booking.id}`;
+    const invoiceUrl = `${process.env.APP_BASE_URL || 'https://api.kridaz.com'}/api/booking/user/invoice/${booking.id}`;
+    
+    NotificationService.sendWhatsApp({
+      phone: user.phone,
+      message: `Your booking at ${turf.name} on ${formattedDate} is confirmed.`,
+      templateName: process.env.MSG91_WHATSAPP_BOOKING_TEMPLATE,
+      params: [
+        user.name || "Player",
+        turf.name,
+        formattedDate,
+        formattedStartTime,
+        ticketUrl,
+        invoiceUrl
+      ]
+    });
+  }
+
   return updatedBooking;
 };
 
@@ -569,6 +588,25 @@ export const processWalletBooking = async (userId, bookingData) => {
     type: "BOOKING",
     link: "/venue-owner/bookings"
   });
+
+  if (user.phone) {
+    const ticketUrl = `${process.env.USER_URL || 'https://kridaz.com'}/booking-pass/${booking.id}`;
+    const invoiceUrl = `${process.env.APP_BASE_URL || 'https://api.kridaz.com'}/api/booking/user/invoice/${booking.id}`;
+    
+    NotificationService.sendWhatsApp({
+      phone: user.phone,
+      message: `Your booking at ${turf.name} on ${formattedDate} is confirmed.`,
+      templateName: process.env.MSG91_WHATSAPP_BOOKING_TEMPLATE,
+      params: [
+        user.name || "Player",
+        turf.name,
+        formattedDate,
+        formattedStartTime,
+        ticketUrl,
+        invoiceUrl
+      ]
+    });
+  }
 
   return updatedBooking;
 };
@@ -943,7 +981,7 @@ export const processBookingCancellation = async (userId, bookingId) => {
   return await prisma.$transaction(async (tx) => {
     const booking = await tx.booking.findUnique({
       where: { id: bookingId },
-      include: { turf: { include: { owner: true } }, timeSlot: true }
+      include: { turf: { include: { owner: true } }, timeSlot: true, user: true }
     });
 
     if (!booking) {
@@ -1016,6 +1054,26 @@ export const processBookingCancellation = async (userId, bookingId) => {
       type: "BOOKING",
       link: "/profile/bookings"
     });
+
+    if (booking.user && booking.user.phone) {
+      const dateStr = booking.timeSlot 
+        ? format(new Date(booking.timeSlot.startTime), "d MMM yyyy") 
+        : "the scheduled date";
+      
+      NotificationService.sendWhatsApp({
+        phone: booking.user.phone,
+        message: `Cancellation for ${booking.turf.name}`,
+        templateName: process.env.MSG91_WHATSAPP_CANCEL_TEMPLATE || "general_messages",
+        params: {
+          customer_name: booking.user.name || "Player",
+          update_line_1: `Your booking at ${booking.turf.name} on ${dateStr} has been cancelled.`,
+          update_line_2: refundAmount > 0 ? `A refund of ₹${refundAmount} has been processed to your wallet.` : "No refund was eligible for this cancellation.",
+          update_line_3: "",
+          status_text: "Cancelled",
+          footer_note: "Thank you for using Kridaz!"
+        }
+      });
+    }
 
     return { booking: updatedBooking, refundAmount };
   });

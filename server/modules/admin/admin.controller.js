@@ -800,7 +800,8 @@ export const approveWithdrawalRequest = async (req, res) => {
     }
 
     const owner = await prisma.ownerProfile.findUnique({
-      where: { id: request.ownerId }
+      where: { id: request.ownerId },
+      include: { user: true }
     });
     if (!owner) {
       return res.status(404).json({ success: false, message: "Owner not found" });
@@ -848,6 +849,25 @@ export const approveWithdrawalRequest = async (req, res) => {
       </div>
     `;
     NotificationService.sendEmail({ to, subject, html });
+    
+    // WhatsApp Notification
+    const phone = owner.user?.phone;
+    const name = owner.user?.name || owner.businessName || "Partner";
+    if (phone) {
+      NotificationService.sendWhatsApp({
+        phone: phone,
+        message: `Withdrawal Approved`,
+        templateName: process.env.MSG91_WHATSAPP_PAYOUT_TEMPLATE || "general_messages",
+        params: {
+          customer_name: name,
+          update_line_1: `Your withdrawal request of ₹${request.amount} has been approved.`,
+          update_line_2: `Transaction ID: ${transactionId || "N/A"}`,
+          update_line_3: `The funds will reflect in your account shortly.`,
+          status_text: "Approved",
+          footer_note: "Thank you for partnering with Kridaz!"
+        }
+      });
+    }
     await logAdminAction(req, "APPROVE_WITHDRAWAL", "FINANCE", request.id, {
       amount: request.amount,
       transactionId
@@ -882,7 +902,8 @@ export const rejectWithdrawalRequest = async (req, res) => {
     }
 
     const owner = await prisma.ownerProfile.findUnique({
-      where: { id: request.ownerId }
+      where: { id: request.ownerId },
+      include: { user: true }
     });
 
     await prisma.$transaction(async (tx) => {
@@ -917,6 +938,25 @@ export const rejectWithdrawalRequest = async (req, res) => {
         </div>
       `;
       NotificationService.sendEmail({ to, subject, html });
+
+      // WhatsApp Notification
+      const phone = owner.user?.phone;
+      const name = owner.user?.name || owner.businessName || "Partner";
+      if (phone) {
+        NotificationService.sendWhatsApp({
+          phone: phone,
+          message: `Withdrawal Rejected`,
+          templateName: process.env.MSG91_WHATSAPP_PAYOUT_TEMPLATE || "general_messages",
+          params: {
+            customer_name: name,
+            update_line_1: `Your withdrawal request of ₹${request.amount} has been rejected.`,
+            update_line_2: `Reason: ${reason || "No specific reason provided."}`,
+            update_line_3: `The amount has been credited back to your usable balance.`,
+            status_text: "Rejected",
+            footer_note: "Contact support for more details."
+          }
+        });
+      }
     }
 
     await logAdminAction(req, "REJECT_WITHDRAWAL", "FINANCE", request.id, {

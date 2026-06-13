@@ -33,22 +33,30 @@ export const sendWhatsAppMessage = async (phone, message, templateName = null, p
     let payload;
     if (templateName) {
       // Build the components object e.g., body_1, body_2
-      const componentsObj = {};
-      params.forEach((param, index) => {
-        componentsObj[`body_${index + 1}`] = {
-          type: "text",
-          value: String(param)
-        };
-        // For Authentication templates (like OTP) with a "Copy code" button,
-        // WhatsApp/MSG91 also requires the OTP value mapped to button_1.
-        if (index === 0) {
-          componentsObj[`button_1`] = {
-            subtype: "url",
+      let componentsObj = {};
+      if (Array.isArray(params)) {
+        params.forEach((param, index) => {
+          componentsObj[`body_${index + 1}`] = {
             type: "text",
             value: String(param)
           };
-        }
-      });
+          if (index === 0) {
+            componentsObj[`button_1`] = {
+              subtype: "url",
+              type: "text",
+              value: String(param)
+            };
+          }
+        });
+      } else if (typeof params === 'object' && params !== null) {
+        Object.entries(params).forEach(([key, value]) => {
+          componentsObj[`body_${key}`] = {
+            type: "text",
+            value: String(value),
+            parameter_name: key
+          };
+        });
+      }
 
       payload = {
         integrated_number: sender,

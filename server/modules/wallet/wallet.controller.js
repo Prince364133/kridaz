@@ -263,6 +263,23 @@ export const verifyTopup = async (req, res) => {
       });
     }
 
+    const user = await prisma.user.findUnique({ where: { id: req.user.id } });
+    if (user && user.phone) {
+      NotificationService.sendWhatsApp({
+        phone: user.phone,
+        message: `Wallet topped up with ₹${transaction.amount}`,
+        templateName: process.env.MSG91_WHATSAPP_WALLET_TEMPLATE || "general_messages",
+        params: {
+          customer_name: user.name || "Player",
+          update_line_1: `Your wallet has been successfully recharged.`,
+          update_line_2: `Amount Added: ₹${transaction.amount}`,
+          update_line_3: `Current Balance: ₹${newBalance}`,
+          status_text: "Success",
+          footer_note: "Thank you for using Kridaz!"
+        }
+      });
+    }
+
     return res.status(200).json({
       success: true,
       message: "Wallet topped up successfully",

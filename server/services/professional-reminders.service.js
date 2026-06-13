@@ -1,4 +1,5 @@
 import logger from "../utils/logger.js";
+import NotificationService from "../utils/notification.service.js";
 
 /**
  * ProfessionalReminderService
@@ -34,7 +35,19 @@ class ProfessionalReminderService {
   static async sendWhatsAppReminder(customer, task) {
     if (!customer.phone) return;
     logger.info(`Sending WhatsApp reminder to ${customer.phone} for task: ${task.title}`);
-    // Integrations with Twilio/Meta WhatsApp API goes here
+    NotificationService.sendWhatsApp({
+      phone: customer.phone,
+      message: `Reminder: ${task.title}`,
+      templateName: process.env.MSG91_WHATSAPP_REMINDER_TEMPLATE || "general_messages",
+      params: {
+        customer_name: customer.name || "Player",
+        update_line_1: `This is a reminder for your upcoming session: ${task.title}.`,
+        update_line_2: `Date: ${task.date} | Time: ${task.startTime}`,
+        update_line_3: `Please be on time.`,
+        status_text: "Reminder",
+        footer_note: "See you there!"
+      }
+    });
   }
 }
 
