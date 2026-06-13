@@ -201,25 +201,33 @@ const OnboardingModal = ({ isOpen, onClose, initialData, onComplete }) => {
   // Sync initialData to formData
   useEffect(() => {
     if (isOpen && initialData) {
+      let savedData = null;
+      try {
+        const saved = localStorage.getItem("kridaz_onboarding");
+        if (saved) {
+          savedData = JSON.parse(saved);
+        }
+      } catch(e) {}
+
       const isGoogle = initialData.authMethod === 'google';
       const userObj = isGoogle ? (initialData.user || {}) : {};
       
-      const emailVal = isGoogle ? (userObj.email || "") : (initialData?.email || "");
-      const derivedName = isGoogle 
+      const emailVal = savedData?.email || (isGoogle ? (userObj.email || "") : (initialData?.email || ""));
+      const derivedName = savedData?.name || (isGoogle 
         ? (userObj.name || getNameFromEmail(emailVal)) 
-        : (initialData?.name || getNameFromEmail(emailVal));
+        : (initialData?.name || getNameFromEmail(emailVal)));
 
       setFormData(prev => ({
-        name: prev.name || initialData?.name || derivedName || "",
-        firstName: prev.firstName || initialData?.firstName || derivedName.split(' ')[0] || "",
-        lastName: prev.lastName || initialData?.lastName || derivedName.split(' ').slice(1).join(' ') || "",
-        email: prev.email || emailVal || "",
-        phone: prev.phone || initialData?.phone || (isGoogle ? (userObj.phone || "") : ""),
-        gender: prev.gender || initialData?.gender || (isGoogle ? (userObj.gender || "") : ""),
-        dob: prev.dob || initialData?.dob || (isGoogle ? (userObj.dob ? new Date(userObj.dob).toISOString().split('T')[0] : "") : ""),
-        location: prev.location || initialData?.location || (isGoogle ? (userObj.city || userObj.location || "") : ""),
-        sportTypes: prev.sportTypes?.length ? prev.sportTypes : (initialData?.sportTypes?.length ? initialData.sportTypes : (isGoogle ? (userObj.sportTypes || []) : [])),
-        password: prev.password || initialData?.password || "",
+        name: savedData?.name || prev.name || initialData?.name || derivedName || "",
+        firstName: savedData?.firstName || prev.firstName || initialData?.firstName || derivedName.split(' ')[0] || "",
+        lastName: savedData?.lastName || prev.lastName || initialData?.lastName || derivedName.split(' ').slice(1).join(' ') || "",
+        email: savedData?.email || prev.email || emailVal || "",
+        phone: savedData?.phone || prev.phone || initialData?.phone || (isGoogle ? (userObj.phone || "") : ""),
+        gender: savedData?.gender || prev.gender || initialData?.gender || (isGoogle ? (userObj.gender || "") : ""),
+        dob: savedData?.dob || prev.dob || initialData?.dob || (isGoogle ? (userObj.dob ? new Date(userObj.dob).toISOString().split('T')[0] : "") : ""),
+        location: savedData?.location || prev.location || initialData?.location || (isGoogle ? (userObj.city || userObj.location || "") : ""),
+        sportTypes: savedData?.sportTypes?.length ? savedData.sportTypes : (prev.sportTypes?.length ? prev.sportTypes : (initialData?.sportTypes?.length ? initialData.sportTypes : (isGoogle ? (userObj.sportTypes || []) : []))),
+        password: savedData?.password || prev.password || initialData?.password || "",
         otp: prev.otp || initialData?.otp || "",
       }));
 
@@ -439,6 +447,7 @@ const OnboardingModal = ({ isOpen, onClose, initialData, onComplete }) => {
           }
 
           toast.success("Profile completed! Welcome to the arena.");
+          localStorage.removeItem("kridaz_onboarding");
           onComplete();
           onClose();
         }
@@ -493,6 +502,7 @@ const OnboardingModal = ({ isOpen, onClose, initialData, onComplete }) => {
         }
 
         toast.success("Registration complete! Welcome to the arena.");
+        localStorage.removeItem("kridaz_onboarding");
         onComplete();
         onClose();
       }
