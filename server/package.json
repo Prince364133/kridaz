@@ -8,7 +8,7 @@
     "dev": "concurrently \"nodemon server.js\" \"nodemon worker.js\"",
     "test": "cross-env NODE_OPTIONS=--experimental-vm-modules jest",
     "test:watch": "cross-env NODE_OPTIONS=--experimental-vm-modules jest --watch",
-    "start": "node server.js",
+    "start": "node worker.js & node server.js",
     "migrate": "npx prisma migrate deploy",
     "server": "nodemon server.js",
     "worker": "node worker.js",
