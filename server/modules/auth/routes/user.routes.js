@@ -20,7 +20,10 @@ import {
   sendPhoneVerificationOtp,
   verifyPhoneOtp,
   forgotPasswordOtp,
-  resetPassword
+  resetPassword,
+  sendEmailVerificationLink,
+  verifyEmailToken,
+  verifyEmailGoogle
 } from "../auth.controller.js";
 import { 
   userRegisterSchema, 
@@ -56,6 +59,9 @@ const router = express.Router();
  */
 router.post("/send-otp", otpLimiter, validate(sendOtpSchema), sendOtp);
 router.post("/verify-otp", otpLimiter, verifyOtp);
+router.post("/send-email-verification", authLimiter, sendEmailVerificationLink);
+router.post("/verify-email", verifyEmailToken);
+router.post("/verify-email-google", authLimiter, verifyEmailGoogle);
 
 /**
  * @swagger

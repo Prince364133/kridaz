@@ -23,6 +23,7 @@ model User {
   longitude               Decimal?                      @db.Decimal(11, 8)
   locationSharingEnabled  Boolean                       @default(true)
   isVerified              Boolean                       @default(false)
+  isEmailVerified         Boolean                       @default(false)
   isOnboarded             Boolean                       @default(false)
   gender                  String?
   dob                     DateTime?

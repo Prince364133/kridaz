@@ -99,6 +99,48 @@ const SignUp = ({ isModal = false }) => {
     }
   }, [searchParams]);
 
+  const verifyAttempted = React.useRef(false);
+
+  useEffect(() => {
+    const verifyToken = searchParams.get("verifyToken");
+    if (verifyToken && !verifyAttempted.current) {
+      verifyAttempted.current = true;
+      const verifyEmailToken = async () => {
+        setLoading(true);
+        try {
+          const res = await axiosInstance.post('/api/user/auth/verify-email', { token: verifyToken });
+          if (res.data.success) {
+            toast.success("Email verified successfully!");
+            const savedData = localStorage.getItem("kridaz_onboarding");
+            let onboardingDataObj = { authMethod: 'unified' };
+            if (savedData) {
+              try {
+                onboardingDataObj = JSON.parse(savedData);
+                // Clean up local storage if we want, or keep it until signup complete
+              } catch(e) {}
+            }
+            setOnboardingData({
+              ...onboardingDataObj,
+              isEmailVerified: true,
+              emailRegistrationToken: res.data.emailRegistrationToken
+            });
+            setShowOnboarding(true);
+            
+            // Clean up url
+            const newSearchParams = new URLSearchParams(searchParams);
+            newSearchParams.delete('verifyToken');
+            navigate(`/signup${newSearchParams.toString() ? `?${newSearchParams.toString()}` : ''}`, { replace: true });
+          }
+        } catch (error) {
+          toast.error(error.response?.data?.message || "Failed to verify email. Link may be expired.");
+        } finally {
+          setLoading(false);
+        }
+      };
+      verifyEmailToken();
+    }
+  }, [searchParams, navigate]);
+
   const handleSendOtp = async (e, forceSms = false) => {
     if (e && e.preventDefault) e.preventDefault();
     if (!identifier) return toast.error("Phone number required");

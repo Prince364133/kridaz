@@ -10,6 +10,7 @@ import {
 } from 'recharts';
 import toast from "react-hot-toast";
 import axiosInstance from "@hooks/useAxiosInstance";
+import { useGoogleLogin } from "@react-oauth/google";
 import { logout, updateUser, followUser, unfollowUser } from "@redux/slices/authSlice";
 import useLoginOnDemand from "@hooks/useLoginOnDemand";
 import { StoryViewer } from "@features/networking";
@@ -407,7 +408,38 @@ export default function Profile() {
   const [activeProfileTab, setActiveProfileTab] = useState("matches");
   const [isBioExpanded, setIsBioExpanded] = useState(false);
   const [proReviews, setProReviews] = useState([]);
-  
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [sendingVerification, setSendingVerification] = useState(false);
+  const [verifyingEmail, setVerifyingEmail] = useState(false);
+
+  const verifyWithGoogle = useGoogleLogin({
+    flow: "implicit",
+    onSuccess: async (tokenResponse) => {
+      try {
+        setVerifyingEmail(true);
+        const res = await axiosInstance.post("/user/auth/verify-email-google", {
+          accessToken: tokenResponse.access_token,
+          source: "profile"
+        });
+        if (res.data?.success) {
+          toast.success("Email verified successfully via Google!");
+          // Update Redux state immediately
+          dispatch(updateUser({ isEmailVerified: true }));
+        } else {
+          toast.error(res.data?.message || "Google verification failed");
+        }
+      } catch (error) {
+        toast.error(error?.response?.data?.message || "Failed to verify via Google");
+      } finally {
+        setVerifyingEmail(false);
+      }
+    },
+    onError: (error) => {
+      console.error("Google verify error:", error);
+      toast.error("Google verification cancelled");
+    }
+  });
+
   const { isUserOnline } = useSocket();
   const isOwnProfile = !userId || (currentUser && (userId === currentUser.id || userId === currentUser._id));
   const targetUserId = isOwnProfile ? (currentUser?.id || currentUser?._id) : userId;
@@ -648,6 +680,85 @@ export default function Profile() {
       toast.error("Action failed");
     }
   };
+
+  const verifyAttempted = useRef(false);
+
+  useEffect(() => {
+    const verifyToken = searchParams.get("verifyToken");
+    if (verifyToken && currentUser && !currentUser.isEmailVerified && isOwnProfile && !verifyAttempted.current) {
+      verifyAttempted.current = true;
+      const verifyEmail = async () => {
+        setVerifyingEmail(true);
+        try {
+          const res = await axiosInstance.post('/api/user/auth/verify-email', { token: verifyToken });
+          if (res.data.success) {
+            toast.success("Email verified successfully!");
+            dispatch(updateUser({ isEmailVerified: true }));
+            
+            // Clean up url
+            const newSearchParams = new URLSearchParams(searchParams);
+            newSearchParams.delete('verifyToken');
+            navigate(`/profile${newSearchParams.toString() ? `?${newSearchParams.toString()}` : ''}`, { replace: true });
+          }
+        } catch (error) {
+          toast.error(error.response?.data?.message || "Failed to verify email. Link may be expired.");
+        } finally {
+          setVerifyingEmail(false);
+        }
+      };
+      verifyEmail();
+    }
+  }, [searchParams, navigate, currentUser, isOwnProfile, dispatch]);
+
+  const handleSendVerificationEmail = async () => {
+    if (!currentUser?.email) {
+      toast.error("No email associated with your account.");
+      return;
+    }
+    setSendingVerification(true);
+    try {
+      const res = await axiosInstance.post("/api/user/auth/send-email-verification", {
+        email: currentUser.email,
+        source: 'profile'
+      });
+      if (res.data.success) {
+        toast.success("Verification email sent! Check your inbox.");
+      } else {
+        toast.error(res.data.message || "Failed to send verification email");
+      }
+    } catch (error) {
+      toast.error(error.response?.data?.message || "Something went wrong.");
+    } finally {
+      setSendingVerification(false);
+    }
+  };
+
+  const verifyWithGoogle = useGoogleLogin({
+    flow: "implicit",
+    onSuccess: async (tokenResponse) => {
+      try {
+        setVerifyingEmail(true);
+        const res = await axiosInstance.post("/api/user/auth/verify-email-google", {
+          accessToken: tokenResponse.access_token,
+          source: "profile"
+        });
+        if (res.data?.success) {
+          toast.success("Email verified successfully via Google!");
+          dispatch(updateUser({ isEmailVerified: true }));
+        } else {
+          toast.error(res.data?.message || "Google verification failed");
+        }
+      } catch (error) {
+        toast.error(error?.response?.data?.message || "Failed to verify via Google");
+      } finally {
+        setVerifyingEmail(false);
+      }
+    },
+    onError: (error) => {
+      console.error("Google verify error:", error);
+      toast.error("Google verification cancelled");
+    }
+  });
 
   const handleLogout = async () => {
     try {
@@ -951,6 +1062,40 @@ export default function Profile() {
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 md:px-8 mt-8">
         <>
+          {isOwnProfile && currentUser && !currentUser.isEmailVerified && (
+            <div className="mb-6 px-4 py-3 bg-[#BFF367]/10 border border-[#BFF367]/30 rounded-xl flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <ShieldCheck size={20} className="text-[#BFF367]" />
+                <div>
+                  <h4 className="text-sm font-bold text-white uppercase tracking-wider">Verify your email</h4>
+                  <p className="text-xs text-gray-400">Please verify your email to secure your account and access all features.</p>
+                </div>
+              </div>
+              <div className="flex items-center gap-2">
+                <button 
+                  onClick={() => verifyWithGoogle()}
+                  disabled={sendingVerification || verifyingEmail}
+                  className="px-4 py-2 bg-white text-black text-xs font-black uppercase tracking-wider rounded-lg hover:bg-neutral-200 transition-colors disabled:opacity-50 flex items-center gap-2"
+                >
+                  <svg width="14" height="14" viewBox="0 0 48 48">
+                    <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z" />
+                    <path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z" />
+                    <path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24s.92 7.54 2.56 10.78l7.97-6.19z" />
+                    <path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z" />
+                    <path fill="none" d="M0 0h48v48H0z" />
+                  </svg>
+                  Verify with Google
+                </button>
+                <button 
+                  onClick={handleSendVerificationEmail} 
+                  disabled={sendingVerification || verifyingEmail}
+                  className="px-4 py-2 bg-[#BFF367] text-black text-xs font-black uppercase tracking-wider rounded-lg hover:bg-[#a5db52] transition-colors disabled:opacity-50"
+                >
+                  {verifyingEmail ? "Verifying..." : sendingVerification ? "Sending..." : "Verify via Link"}
+                </button>
+              </div>
+            </div>
+          )}
           {/* Short Bio Section */}
           {!isProfessionalRole(profileUser?.role) && profileUser?.bio ? (
             <div className="mb-6 px-2">

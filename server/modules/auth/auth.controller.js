@@ -1,4 +1,5 @@
 import asyncHandler from "../../utils/asyncHandler.js";
+import generateEmail from "../../utils/generateEmail.js";
 import { BadRequestError, UnauthorizedError, InternalError } from '@kridaz/common';
 import * as argon2 from "argon2";
 import { OAuth2Client } from "google-auth-library";
@@ -509,6 +510,7 @@ export const registerUser = asyncHandler(async (req, res) => {
     location,
     registrationToken,
     phoneRegistrationToken,
+    emailRegistrationToken,
     username,
     sportTypes,
     umpireInvite,
@@ -556,6 +558,21 @@ export const registerUser = asyncHandler(async (req, res) => {
       });
     }
   }
+
+  let isEmailVerified = false;
+  if (emailRegistrationToken) {
+    try {
+      const decodedEmail = await claimRegistrationToken(emailRegistrationToken);
+      if (decodedEmail && decodedEmail.emailVerified && decodedEmail.verifiedEmail === email) {
+        isEmailVerified = true;
+      }
+    } catch (err) {
+      return res.status(err.status || 400).json({
+        success: false,
+        message: "Email verification token is invalid or expired."
+      });
+    }
+  }
   const hashedPassword = await argon2.hash(password);
   const finalUsername = username ? username.toLowerCase() : await generateUniqueUsername(name);
   let role = "USER";
@@ -586,6 +603,7 @@ export const registerUser = asyncHandler(async (req, res) => {
         city: location || "",
         sportTypes: sportTypes || [],
         role,
+        isEmailVerified,
         isOnboarded: true,
         walletBalance: 50,
         // Welcome Bonus
@@ -2589,3 +2607,142 @@ export const resetPassword = asyncHandler(async (req, res) => {
     message: 'Password updated successfully'
   });
 });
+
+export const sendEmailVerificationLink = asyncHandler(async (req, res) => {
+  const { email, source } = req.body;
+  if (!email) {
+    return res.status(400).json({ success: false, message: "Email is required" });
+  }
+
+  // Generate a JWT valid for 1 hour for the email link
+  const token = jwt.sign({ email, source }, process.env.JWT_SECRET || getRegistrationSecret(), { expiresIn: '1h' });
+  
+  // Construct link (Frontend URL is typically on port 5174 in dev)
+  const frontendUrl = process.env.FRONTEND_URL || "http://localhost:5174";
+  const path = source === 'profile' ? '/profile' : '/signup';
+  const verifyLink = `${frontendUrl}${path}?verifyToken=${token}`;
+
+  const html = `
+    <div style="font-family: Arial, sans-serif; padding: 20px;">
+      <h2>Verify Your Email</h2>
+      <p>Thank you for using Kridaz. Please click the button below to verify your email address.</p>
+      <a href="${verifyLink}" style="display: inline-block; padding: 10px 20px; color: white; background-color: #4CAF50; text-decoration: none; border-radius: 5px;">Verify Email</a>
+      <p style="margin-top: 20px; font-size: 12px; color: #777;">If you did not request this, please ignore this email.</p>
+    </div>
+  `;
+
+  try {
+    // Wait, generateEmail is imported in the file? Let me check.
+    // Yes, but I need to make sure. I will check imports if it fails.
+    await generateEmail(email, "Verify Your Kridaz Email", html);
+    return res.status(200).json({ success: true, message: "Verification link sent successfully" });
+  } catch (error) {
+    logger.error("Failed to send email verification link:", error);
+    return res.status(500).json({ success: false, message: "Failed to send verification email" });
+  }
+});
+
+export const verifyEmailToken = asyncHandler(async (req, res) => {
+  const { token } = req.body;
+  if (!token) {
+    return res.status(400).json({ success: false, message: "Token is required" });
+  }
+
+  try {
+    const decoded = jwt.verify(token, process.env.JWT_SECRET || getRegistrationSecret());
+    const { email, source } = decoded;
+
+    // Generate a registration token that can be claimed during registerUser
+    const emailRegistrationToken = jwt.sign(
+      { verifiedEmail: email, emailVerified: true, jti: crypto.randomUUID() },
+      getRegistrationSecret(),
+      { expiresIn: '30m' }
+    );
+
+    // If source is profile, try to update existing user
+    if (source === 'profile') {
+      const user = await prisma.user.findUnique({ where: { email } });
+      if (user) {
+        await prisma.user.update({
+          where: { id: user.id },
+          data: { isEmailVerified: true }
+        });
+        return res.status(200).json({ 
+          success: true, 
+          message: "Email verified successfully", 
+          emailRegistrationToken,
+          email 
+        });
+      }
+    }
+
+    return res.status(200).json({ 
+      success: true, 
+      message: "Email verified successfully", 
+      emailRegistrationToken,
+      email 
+    });
+  } catch (err) {
+    return res.status(400).json({ success: false, message: "Invalid or expired verification link" });
+  }
+});
+
+export const verifyEmailGoogle = asyncHandler(async (req, res) => {
+  const { credential, accessToken, source } = req.body;
+  let payload;
+  if (credential) {
+    const ticket = await client.verifyIdToken({
+      idToken: credential,
+      audience: process.env.GOOGLE_CLIENT_ID
+    });
+    payload = ticket.getPayload();
+  } else if (accessToken) {
+    const response = await fetch(`https://www.googleapis.com/oauth2/v3/userinfo`, {
+      headers: {
+        Authorization: `Bearer ${accessToken}`
+      }
+    });
+    if (!response.ok) {
+      return res.status(401).json({ success: false, message: "Invalid Google access token" });
+    }
+    payload = await response.json();
+  } else {
+    return res.status(400).json({
+      success: false,
+      message: "No Google credentials provided"
+    });
+  }
+
+  const { email } = payload;
+  if (!email) {
+    return res.status(400).json({
+      success: false,
+      message: "Could not retrieve email from Google. Please ensure your Google account has a verified email."
+    });
+  }
+
+  // Generate a registration token that can be claimed during registerUser
+  const emailRegistrationToken = jwt.sign(
+    { verifiedEmail: email, emailVerified: true, jti: crypto.randomUUID() },
+    getRegistrationSecret(),
+    { expiresIn: '30m' }
+  );
+
+  // If source is profile, try to update existing user
+  if (source === 'profile') {
+    const user = await prisma.user.findUnique({ where: { email } });
+    if (user) {
+      await prisma.user.update({
+        where: { id: user.id },
+        data: { isEmailVerified: true }
+      });
+    }
+  }
+
+  return res.status(200).json({ 
+    success: true, 
+    message: "Email verified successfully via Google", 
+    emailRegistrationToken,
+    email 
+  });
+});

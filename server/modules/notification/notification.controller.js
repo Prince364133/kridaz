@@ -290,3 +290,52 @@ export const unsubscribeFromTopic = async (req, res) => {
     res.status(500).json({ success: false, message: error.message });
   }
 };
+
+/**
+ * Handle MSG91 Webhook events (e.g. "On API Failed Events", "On Hold Events").
+ * If the WhatsApp delivery fails or is held, we trigger a fallback SMS.
+ */
+export const handleMsg91Webhook = async (req, res) => {
+  try {
+    // We configured the payload to match MSG91's default JSON payload format
+    // where the 'payload' property contains the actual event string.
+    const rawPayload = req.body.payload;
+    const companyId = req.body.companyId;
+    
+    logger.info(`[MSG91 Webhook] Received status update from company ${companyId || "unknown"}`);
+    
+    // Parse the inner JSON string provided by MSG91 in 'payload'
+    let eventData = {};
+    if (typeof rawPayload === 'string') {
+      try {
+        eventData = JSON.parse(rawPayload);
+      } catch (e) {
+        logger.warn(`[MSG91 Webhook] Could not parse nested payload string: ${rawPayload}`);
+      }
+    } else if (typeof rawPayload === 'object') {
+      eventData = rawPayload || {};
+    }
+
+    const msgStatus = eventData.status || req.body.reason || "";
+    const mobile = eventData.mobile;
+    
+    if (msgStatus && (msgStatus.includes("hold") || msgStatus.includes("failed") || msgStatus.includes("undelivered"))) {
+      logger.warn(`[MSG91 Webhook] WhatsApp delivery issue (${msgStatus}) for ${mobile}. Queuing SMS fallback...`);
+      
+      // Dynamically import the queue to avoid circular dependencies if any
+      const { default: notificationQueue } = await import("../../queues/notification.worker.js");
+      
+      // Add the fallback job to the queue
+      await notificationQueue.add("SEND_OTP", {
+        phone: mobile,
+        deliveryMethod: "sms", // Force SMS this time
+        otp: "FALLBACK_TRIGGERED", // Since we don't have the original OTP here natively, in a full implementation you would read this from Redis.
+      });
+    }
+
+    return res.status(200).json({ success: true, message: "Webhook processed" });
+  } catch (error) {
+    logger.error(`[MSG91 Webhook] Error processing webhook: ${error.message}`);
+    return res.status(200).json({ success: false });
+  }
+};

@@ -5,6 +5,7 @@ import toast from "react-hot-toast";
 import { useDispatch } from "react-redux";
 import { updateUser, login } from "@redux/slices/authSlice";
 import { searchLocations, fetchCountryCodes } from "@utils/locationService";
+import { useGoogleLogin } from "@react-oauth/google";
 
 const getNameFromEmail = (email) => {
   if (!email) return "";
@@ -81,6 +82,46 @@ const OnboardingModal = ({ isOpen, onClose, initialData, onComplete }) => {
   const [verifyingPhoneOtp, setVerifyingPhoneOtp] = useState(false);
   const [phoneRegistrationToken, setPhoneRegistrationToken] = useState("");
   const [timeLeft, setTimeLeft] = useState(0);
+
+  // Email verification state
+  const [isEmailVerified, setIsEmailVerified] = useState(false);
+  const [sendingEmailLink, setSendingEmailLink] = useState(false);
+  const [emailLinkSent, setEmailLinkSent] = useState(false);
+  const [emailRegistrationToken, setEmailRegistrationToken] = useState("");
+  const [verifyingGoogle, setVerifyingGoogle] = useState(false);
+
+  const verifyWithGoogle = useGoogleLogin({
+    flow: "implicit",
+    onSuccess: async (tokenResponse) => {
+      try {
+        setVerifyingGoogle(true);
+        const res = await axiosInstance.post("/user/auth/verify-email-google", {
+          accessToken: tokenResponse.access_token,
+          source: "signup"
+        });
+        if (res.data?.success) {
+          toast.success("Email verified successfully via Google!");
+          setIsEmailVerified(true);
+          if (res.data.emailRegistrationToken) {
+            setEmailRegistrationToken(res.data.emailRegistrationToken);
+          }
+          if (res.data.email && (!formData.email || formData.email !== res.data.email)) {
+            setFormData(prev => ({ ...prev, email: res.data.email }));
+          }
+        } else {
+          toast.error(res.data?.message || "Google verification failed");
+        }
+      } catch (error) {
+        toast.error(error?.response?.data?.message || "Failed to verify via Google");
+      } finally {
+        setVerifyingGoogle(false);
+      }
+    },
+    onError: (error) => {
+      console.error("Google verify error:", error);
+      toast.error("Google verification cancelled");
+    }
+  });
 
   useEffect(() => {
     if (timeLeft > 0) {
@@ -169,15 +210,15 @@ const OnboardingModal = ({ isOpen, onClose, initialData, onComplete }) => {
         : (initialData?.name || getNameFromEmail(emailVal));
 
       setFormData(prev => ({
-        name: prev.name || derivedName || "",
-        firstName: prev.firstName || derivedName.split(' ')[0] || "",
-        lastName: prev.lastName || derivedName.split(' ').slice(1).join(' ') || "",
+        name: prev.name || initialData?.name || derivedName || "",
+        firstName: prev.firstName || initialData?.firstName || derivedName.split(' ')[0] || "",
+        lastName: prev.lastName || initialData?.lastName || derivedName.split(' ').slice(1).join(' ') || "",
         email: prev.email || emailVal || "",
-        phone: prev.phone || (isGoogle ? (userObj.phone || "") : (initialData?.phone || "")),
-        gender: prev.gender || (isGoogle ? (userObj.gender || "") : ""),
-        dob: prev.dob || (isGoogle ? (userObj.dob ? new Date(userObj.dob).toISOString().split('T')[0] : "") : ""),
-        location: prev.location || (isGoogle ? (userObj.city || userObj.location || "") : ""),
-        sportTypes: prev.sportTypes?.length ? prev.sportTypes : (isGoogle ? (userObj.sportTypes || []) : []),
+        phone: prev.phone || initialData?.phone || (isGoogle ? (userObj.phone || "") : ""),
+        gender: prev.gender || initialData?.gender || (isGoogle ? (userObj.gender || "") : ""),
+        dob: prev.dob || initialData?.dob || (isGoogle ? (userObj.dob ? new Date(userObj.dob).toISOString().split('T')[0] : "") : ""),
+        location: prev.location || initialData?.location || (isGoogle ? (userObj.city || userObj.location || "") : ""),
+        sportTypes: prev.sportTypes?.length ? prev.sportTypes : (initialData?.sportTypes?.length ? initialData.sportTypes : (isGoogle ? (userObj.sportTypes || []) : [])),
         password: prev.password || initialData?.password || "",
         otp: prev.otp || initialData?.otp || "",
       }));
@@ -187,15 +228,43 @@ const OnboardingModal = ({ isOpen, onClose, initialData, onComplete }) => {
       }
 
       // Set DOB state if available
-      const existingDob = formData.dob || (isGoogle ? (userObj.dob ? new Date(userObj.dob).toISOString().split('T')[0] : "") : "");
+      const existingDob = formData.dob || initialData?.dob || (isGoogle ? (userObj.dob ? new Date(userObj.dob).toISOString().split('T')[0] : "") : "");
       if (existingDob && existingDob.includes('-')) {
         const [y, m, d] = existingDob.split('-');
         setDobYear(y);
         setDobMonth(m);
         setDobDay(d);
       }
+
+      if (initialData?.isEmailVerified) {
+        setIsEmailVerified(true);
+      }
+      if (initialData?.emailRegistrationToken) {
+        setEmailRegistrationToken(initialData.emailRegistrationToken);
+      }
     }
   }, [isOpen, initialData]);
+
+  const handleSendEmailVerificationLink = async () => {
+    if (!formData.email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
+      return toast.error("Please enter a valid email address");
+    }
+    setSendingEmailLink(true);
+    try {
+      // Save form data to localStorage before redirect
+      localStorage.setItem("kridaz_onboarding", JSON.stringify(formData));
+      
+      const endpoint = "/api/user/auth/send-email-verification";
+      await axiosInstance.post(endpoint, { email: formData.email, source: "signup" });
+      setEmailLinkSent(true);
+      toast.success("Verification link sent to your email! Please check your inbox.");
+    } catch (error) {
+      console.error("Email verification error:", error);
+      toast.error(error.response?.data?.message || "Failed to send verification link");
+    } finally {
+      setSendingEmailLink(false);
+    }
+  };
 
   const handleSendPhoneOtp = async (forceSms = false) => {
     if (!formData.phone || formData.phone.length < 10) {
@@ -276,8 +345,15 @@ const OnboardingModal = ({ isOpen, onClose, initialData, onComplete }) => {
     setStep(prev => prev - 1);
   };
 
+  const skipNextLocationSearch = useRef(false);
+
   // Location Autocomplete Effect
   useEffect(() => {
+    if (skipNextLocationSearch.current) {
+      skipNextLocationSearch.current = false;
+      return;
+    }
+
     if (!formData.location || formData.location.length < 3) {
       setLocationSuggestions([]);
       setShowSuggestions(false);
@@ -312,6 +388,7 @@ const OnboardingModal = ({ isOpen, onClose, initialData, onComplete }) => {
   }, []);
 
   const handleSelectLocation = (suggestion) => {
+    skipNextLocationSearch.current = true;
     setFormData({ ...formData, location: suggestion.display_name });
     setShowSuggestions(false);
   };
@@ -321,10 +398,11 @@ const OnboardingModal = ({ isOpen, onClose, initialData, onComplete }) => {
     
     // Only require email/phone/password validation if they are rendered for the specific flow
     if (!isGoogle && initialData?.authMethod === 'phone') {
-      if (!formData.email) return toast.error("Email required");
-      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-      if (!emailRegex.test(formData.email)) {
-        return toast.error("Please enter a valid email address (e.g., name@example.com)");
+      if (formData.email) {
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(formData.email)) {
+          return toast.error("Please enter a valid email address (e.g., name@example.com)");
+        }
       }
     }
     if (!formData.password) return toast.error("Please create a password");
@@ -386,6 +464,10 @@ const OnboardingModal = ({ isOpen, onClose, initialData, onComplete }) => {
           payload.phoneRegistrationToken = phoneRegistrationToken;
         } else {
           payload.otp = formData.otp;
+        }
+
+        if (emailRegistrationToken) {
+          payload.emailRegistrationToken = emailRegistrationToken;
         }
 
         const res = await axiosInstance.post("/api/user/auth/register", payload);
@@ -708,13 +790,58 @@ const OnboardingModal = ({ isOpen, onClose, initialData, onComplete }) => {
 
                   {!isGoogle && initialData?.authMethod === 'phone' && (
                     <label className="block">
-                      <span className="text-[11px] font-semibold text-white/60 uppercase tracking-widest mb-2 block">Email Address</span>
-                      <input
-                        type="email"
-                        value={formData.email}
-                        onChange={(e) => setFormData({...formData, email: e.target.value})}
-                        className="w-full bg-[#121212] border border-white/[0.08] rounded-[16px] py-4 px-4 text-white focus:border-[#55DEE8] outline-none transition-all"
-                      />
+                      <span className="text-[11px] font-semibold text-white/60 uppercase tracking-widest mb-2 block">Email Address (Optional)</span>
+                      <div className="relative flex gap-2">
+                        <div className="relative flex-1">
+                          <input
+                            type="email"
+                            value={formData.email}
+                            disabled={isEmailVerified}
+                            onChange={(e) => {
+                              setFormData({...formData, email: e.target.value});
+                              if (emailLinkSent) {
+                                setEmailLinkSent(false);
+                                setIsEmailVerified(false);
+                              }
+                            }}
+                            className="w-full bg-[#121212] border border-white/[0.08] rounded-[16px] py-4 px-4 text-white focus:border-[#55DEE8] outline-none transition-all disabled:opacity-60 disabled:cursor-not-allowed"
+                          />
+                        </div>
+                        {isEmailVerified ? (
+                          <div className="px-4 bg-green-500/10 border border-green-500/30 rounded-[16px] font-bold text-xs uppercase tracking-wider text-green-400 flex items-center justify-center gap-1.5 whitespace-nowrap animate-bounce">
+                            <Check size={14} strokeWidth={3} />
+                            Verified
+                          </div>
+                        ) : (
+                          <div className="flex gap-2 shrink-0">
+                            <button
+                              type="button"
+                              onClick={() => verifyWithGoogle()}
+                              disabled={sendingEmailLink || verifyingGoogle}
+                              className="px-3 bg-[#121212] border border-white/10 rounded-[16px] text-white hover:bg-white/5 transition-all flex items-center justify-center hover:border-white/20"
+                              title="Verify with Google"
+                            >
+                              {verifyingGoogle ? <Loader2 className="animate-spin w-4 h-4 mx-auto text-white/50" /> : (
+                                <svg width="18" height="18" viewBox="0 0 48 48">
+                                  <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z" />
+                                  <path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z" />
+                                  <path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24s.92 7.54 2.56 10.78l7.97-6.19z" />
+                                  <path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z" />
+                                  <path fill="none" d="M0 0h48v48H0z" />
+                                </svg>
+                              )}
+                            </button>
+                            <button
+                              type="button"
+                              onClick={handleSendEmailVerificationLink}
+                              disabled={sendingEmailLink || !formData.email || emailLinkSent || verifyingGoogle}
+                              className="px-4 bg-[linear-gradient(90deg,#55DEE8_0%,#B3DC26_100%)] rounded-[16px] font-bold text-xs uppercase tracking-wider text-[#000000] shadow-[0px_8px_24px_rgba(179,220,38,0.15)] transition-all disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center whitespace-nowrap"
+                            >
+                              {sendingEmailLink ? <Loader2 className="animate-spin w-4 h-4 mx-auto" /> : (emailLinkSent ? "Link Sent" : "Verify Email")}
+                            </button>
+                          </div>
+                        )}
+                      </div>
                     </label>
                   )}
 
