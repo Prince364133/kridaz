@@ -23,7 +23,9 @@ import {
   resetPassword,
   sendEmailVerificationLink,
   verifyEmailToken,
-  verifyEmailGoogle
+  verifyEmailGoogle,
+  updateProfileEmailWithGoogle,
+  updateProfileEmailWithOtp
 } from "../auth.controller.js";
 import { 
   userRegisterSchema, 
@@ -175,6 +177,8 @@ router.post("/profile-picture", userAuth, upload.single("profilePicture"), updat
 router.post("/banner-picture", userAuth, upload.single("bannerPicture"), updateBannerPicture);
 router.post("/send-phone-verification-otp", userAuth, sendPhoneVerificationOtp);
 router.post("/verify-phone-otp", userAuth, verifyPhoneOtp);
+router.post("/profile/verify-email-google", userAuth, updateProfileEmailWithGoogle);
+router.post("/profile/verify-email-otp", userAuth, updateProfileEmailWithOtp);
 
 /**
  * @swagger

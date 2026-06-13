@@ -33,7 +33,7 @@ const CustomSelect = ({ value, onChange, options, placeholder }) => {
   return (
     <div className="relative flex-1" ref={dropdownRef}>
       <div 
-        className="w-full bg-[#121212] border border-white/[0.08] rounded-[16px] py-2.5 md:py-4 px-4 text-white hover:border-[#55DEE8] outline-none transition-all cursor-pointer flex justify-between items-center"
+        className="w-full bg-[#121212] border border-white/[0.08] rounded-[16px] py-2.5 md:py-4 px-4 text-white hover:border-[#BFF367] outline-none transition-all cursor-pointer flex justify-between items-center"
         onClick={() => setIsOpen(!isOpen)}
       >
         <span className={value ? "text-white text-sm md:text-base" : "text-white/40 text-sm md:text-base"}>
@@ -46,7 +46,7 @@ const CustomSelect = ({ value, onChange, options, placeholder }) => {
           {options.map((opt) => (
             <div 
               key={opt.value}
-              className={`px-4 py-3 cursor-pointer transition-colors text-sm ${value === opt.value ? 'bg-[#B3DC26] text-[#000000] font-bold' : 'text-white/80 hover:bg-white/5 hover:text-white'}`}
+              className={`px-4 py-3 cursor-pointer transition-colors text-sm ${value === opt.value ? 'bg-[#BFF367] text-[#000000] font-bold' : 'text-white/80 hover:bg-white/5 hover:text-white'}`}
               onClick={() => { onChange(opt.value); setIsOpen(false); }}
             >
               {opt.label}
@@ -85,43 +85,8 @@ const OnboardingModal = ({ isOpen, onClose, initialData, onComplete }) => {
 
   // Email verification state
   const [isEmailVerified, setIsEmailVerified] = useState(false);
-  const [sendingEmailLink, setSendingEmailLink] = useState(false);
   const [emailLinkSent, setEmailLinkSent] = useState(false);
   const [emailRegistrationToken, setEmailRegistrationToken] = useState("");
-  const [verifyingGoogle, setVerifyingGoogle] = useState(false);
-
-  const verifyWithGoogle = useGoogleLogin({
-    flow: "implicit",
-    onSuccess: async (tokenResponse) => {
-      try {
-        setVerifyingGoogle(true);
-        const res = await axiosInstance.post("/user/auth/verify-email-google", {
-          accessToken: tokenResponse.access_token,
-          source: "signup"
-        });
-        if (res.data?.success) {
-          toast.success("Email verified successfully via Google!");
-          setIsEmailVerified(true);
-          if (res.data.emailRegistrationToken) {
-            setEmailRegistrationToken(res.data.emailRegistrationToken);
-          }
-          if (res.data.email && (!formData.email || formData.email !== res.data.email)) {
-            setFormData(prev => ({ ...prev, email: res.data.email }));
-          }
-        } else {
-          toast.error(res.data?.message || "Google verification failed");
-        }
-      } catch (error) {
-        toast.error(error?.response?.data?.message || "Failed to verify via Google");
-      } finally {
-        setVerifyingGoogle(false);
-      }
-    },
-    onError: (error) => {
-      console.error("Google verify error:", error);
-      toast.error("Google verification cancelled");
-    }
-  });
 
   useEffect(() => {
     if (timeLeft > 0) {
@@ -489,7 +454,6 @@ const OnboardingModal = ({ isOpen, onClose, initialData, onComplete }) => {
           try {
             const picRes = await axiosInstance.post("/api/user/auth/profile-picture", formDataImage, {
               headers: { 
-                'Content-Type': 'multipart/form-data',
                 'Authorization': `Bearer ${result.token}`
               }
             });
@@ -543,7 +507,7 @@ const OnboardingModal = ({ isOpen, onClose, initialData, onComplete }) => {
           {step > 1 && (
             <div className="flex h-1.5 bg-[#000000] absolute top-0 left-0 right-0 overflow-hidden z-20">
               <div 
-                className="bg-[#B3DC26] transition-all duration-500" 
+                className="bg-[#BFF367] transition-all duration-500" 
                 style={{ width: `${(step / 4) * 100}%` }}
               />
             </div>
@@ -590,7 +554,7 @@ const OnboardingModal = ({ isOpen, onClose, initialData, onComplete }) => {
                 <div className="flex justify-center mb-2 md:mb-3 mt-0">
                   <div 
                     onClick={() => fileInputRef.current?.click()}
-                    className="w-[64px] h-[64px] md:w-[80px] md:h-[80px] rounded-full bg-[#121212] flex items-center justify-center relative cursor-pointer border border-white/[0.08] hover:border-[#55DEE8] transition-colors group shadow-[0px_4px_16px_rgba(0,0,0,0.4)] overflow-hidden"
+                    className="w-[64px] h-[64px] md:w-[80px] md:h-[80px] rounded-full bg-[#121212] flex items-center justify-center relative cursor-pointer border border-white/[0.08] hover:border-[#BFF367] transition-colors group shadow-[0px_4px_16px_rgba(0,0,0,0.4)] overflow-hidden"
                   >
                     {previewImage ? (
                       <img src={previewImage} alt="Profile" className="w-full h-full object-cover" />
@@ -621,7 +585,7 @@ const OnboardingModal = ({ isOpen, onClose, initialData, onComplete }) => {
                       type="text"
                       value={formData.firstName}
                       onChange={(e) => setFormData({...formData, firstName: e.target.value})}
-                      className="w-full bg-[#121212] border border-white/[0.08] rounded-[16px] py-2.5 md:py-3 px-4 text-white focus:border-[#55DEE8] outline-none transition-all text-xs md:text-sm"
+                      className="w-full bg-[#121212] border border-white/[0.08] rounded-[16px] py-2.5 md:py-3 px-4 text-white focus:border-[#BFF367] outline-none transition-all text-xs md:text-sm"
                     />
                   </label>
                   <label className="block">
@@ -630,7 +594,7 @@ const OnboardingModal = ({ isOpen, onClose, initialData, onComplete }) => {
                       type="text"
                       value={formData.lastName}
                       onChange={(e) => setFormData({...formData, lastName: e.target.value})}
-                      className="w-full bg-[#121212] border border-white/[0.08] rounded-[16px] py-2.5 md:py-3 px-4 text-white focus:border-[#55DEE8] outline-none transition-all text-xs md:text-sm"
+                      className="w-full bg-[#121212] border border-white/[0.08] rounded-[16px] py-2.5 md:py-3 px-4 text-white focus:border-[#BFF367] outline-none transition-all text-xs md:text-sm"
                     />
                   </label>
                 </div>
@@ -719,7 +683,7 @@ const OnboardingModal = ({ isOpen, onClose, initialData, onComplete }) => {
                                 width="calc(100% - 2px)" height="calc(100% - 2px)" 
                                 rx="15" 
                                 fill="none" 
-                                stroke="#B3DC26" 
+                                stroke="#BFF367" 
                                 strokeWidth={isPrimary ? "3" : "2"} 
                                 opacity={isPrimary ? "1" : "0.6"}
                               />
@@ -737,14 +701,14 @@ const OnboardingModal = ({ isOpen, onClose, initialData, onComplete }) => {
                             
                             <div className="absolute inset-x-0 bottom-0 p-2 md:p-3 z-30">
                             <div className="flex items-center gap-1.5 md:gap-2 mb-0.5 md:mb-1">
-                              <div className={`w-4 h-4 md:w-5 md:h-5 rounded-full flex items-center justify-center border transition-all ${isSelected ? "bg-[#B3DC26] border-[#B3DC26] text-black" : "border-white/30 text-white"}`}>
+                              <div className={`w-4 h-4 md:w-5 md:h-5 rounded-full flex items-center justify-center border transition-all ${isSelected ? "bg-[#BFF367] border-[#BFF367] text-black" : "border-white/30 text-white"}`}>
                                 {isSelected ? <Check size={10} className="md:w-3 md:h-3" strokeWidth={3} /> : <div className="w-1 h-1 md:w-1.5 md:h-1.5 rounded-full bg-white/30" />}
                               </div>
-                              <span className={`text-[11px] md:text-[13px] font-bold tracking-wide transition-colors ${isSelected ? "text-[#B3DC26]" : "text-white"}`}>{sport.name}</span>
+                              <span className={`text-[11px] md:text-[13px] font-bold tracking-wide transition-colors ${isSelected ? "text-[#BFF367]" : "text-white"}`}>{sport.name}</span>
                             </div>
                             
                             {isPrimary && (
-                              <div className="bg-[#B3DC26]/20 text-[#B3DC26] text-[8px] md:text-[9px] font-bold uppercase tracking-wider py-0.5 px-1.5 md:px-2 rounded-full w-fit mt-0.5 md:mt-1 border border-[#B3DC26]/30">
+                              <div className="bg-[#BFF367]/20 text-[#BFF367] text-[8px] md:text-[9px] font-bold uppercase tracking-wider py-0.5 px-1.5 md:px-2 rounded-full w-fit mt-0.5 md:mt-1 border border-[#BFF367]/30">
                                 Primary
                               </div>
                             )}
@@ -773,11 +737,11 @@ const OnboardingModal = ({ isOpen, onClose, initialData, onComplete }) => {
                         onChange={(e) => setFormData({...formData, location: e.target.value})}
                         onFocus={() => setShowSuggestions(locationSuggestions.length > 0)}
                         placeholder="Select your location"
-                        className="w-full bg-[#121212] border border-white/[0.08] rounded-[16px] py-2.5 md:py-4 pl-12 pr-4 text-white focus:border-[#55DEE8] outline-none transition-all placeholder-white/40 text-sm md:text-base"
+                        className="w-full bg-[#121212] border border-white/[0.08] rounded-[16px] py-2.5 md:py-4 pl-12 pr-4 text-white focus:border-[#BFF367] outline-none transition-all placeholder-white/40 text-sm md:text-base"
                       />
                       {isSearchingLocation && (
                         <div className="absolute right-4 top-1/2 -translate-y-1/2">
-                          <Loader2 className="w-4 h-4 text-[#B3DC26] animate-spin" />
+                          <Loader2 className="w-4 h-4 text-[#BFF367] animate-spin" />
                         </div>
                       )}
                       {showSuggestions && locationSuggestions.length > 0 && (
@@ -814,7 +778,7 @@ const OnboardingModal = ({ isOpen, onClose, initialData, onComplete }) => {
                                 setIsEmailVerified(false);
                               }
                             }}
-                            className="w-full bg-[#121212] border border-white/[0.08] rounded-[16px] py-4 px-4 text-white focus:border-[#55DEE8] outline-none transition-all disabled:opacity-60 disabled:cursor-not-allowed"
+                            className="w-full bg-[#121212] border border-white/[0.08] rounded-[16px] py-4 px-4 text-white focus:border-[#BFF367] outline-none transition-all disabled:opacity-60 disabled:cursor-not-allowed"
                           />
                         </div>
                         {isEmailVerified ? (
@@ -822,35 +786,7 @@ const OnboardingModal = ({ isOpen, onClose, initialData, onComplete }) => {
                             <Check size={14} strokeWidth={3} />
                             Verified
                           </div>
-                        ) : (
-                          <div className="flex gap-2 shrink-0">
-                            <button
-                              type="button"
-                              onClick={() => verifyWithGoogle()}
-                              disabled={sendingEmailLink || verifyingGoogle}
-                              className="px-3 bg-[#121212] border border-white/10 rounded-[16px] text-white hover:bg-white/5 transition-all flex items-center justify-center hover:border-white/20"
-                              title="Verify with Google"
-                            >
-                              {verifyingGoogle ? <Loader2 className="animate-spin w-4 h-4 mx-auto text-white/50" /> : (
-                                <svg width="18" height="18" viewBox="0 0 48 48">
-                                  <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z" />
-                                  <path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z" />
-                                  <path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24s.92 7.54 2.56 10.78l7.97-6.19z" />
-                                  <path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z" />
-                                  <path fill="none" d="M0 0h48v48H0z" />
-                                </svg>
-                              )}
-                            </button>
-                            <button
-                              type="button"
-                              onClick={handleSendEmailVerificationLink}
-                              disabled={sendingEmailLink || !formData.email || emailLinkSent || verifyingGoogle}
-                              className="px-4 bg-[linear-gradient(90deg,#55DEE8_0%,#B3DC26_100%)] rounded-[16px] font-bold text-xs uppercase tracking-wider text-[#000000] shadow-[0px_8px_24px_rgba(179,220,38,0.15)] transition-all disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center whitespace-nowrap"
-                            >
-                              {sendingEmailLink ? <Loader2 className="animate-spin w-4 h-4 mx-auto" /> : (emailLinkSent ? "Link Sent" : "Verify Email")}
-                            </button>
-                          </div>
-                        )}
+                        ) : null}
                       </div>
                     </label>
                   )}
@@ -863,7 +799,7 @@ const OnboardingModal = ({ isOpen, onClose, initialData, onComplete }) => {
                           value={formData.countryCode}
                           onChange={(e) => setFormData({...formData, countryCode: e.target.value})}
                           disabled={isPhoneVerified}
-                          className="bg-[#121212] border border-white/[0.08] rounded-[16px] py-2.5 md:py-4 px-3 text-white focus:border-[#55DEE8] outline-none transition-all w-[90px] md:w-[100px] text-xs md:text-sm appearance-none cursor-pointer"
+                          className="bg-[#121212] border border-white/[0.08] rounded-[16px] py-2.5 md:py-4 px-3 text-white focus:border-[#BFF367] outline-none transition-all w-[90px] md:w-[100px] text-xs md:text-sm appearance-none cursor-pointer"
                         >
                           <option value="+91">IN (+91)</option>
                           {countryCodeOptions.map((c, i) => (
@@ -883,7 +819,7 @@ const OnboardingModal = ({ isOpen, onClose, initialData, onComplete }) => {
                                 setIsPhoneVerified(false);
                               }
                             }}
-                            className="w-full bg-[#121212] border border-white/[0.08] rounded-[16px] py-2.5 md:py-4 px-4 text-white focus:border-[#55DEE8] outline-none transition-all disabled:opacity-60 disabled:cursor-not-allowed text-sm md:text-base"
+                            className="w-full bg-[#121212] border border-white/[0.08] rounded-[16px] py-2.5 md:py-4 px-4 text-white focus:border-[#BFF367] outline-none transition-all disabled:opacity-60 disabled:cursor-not-allowed text-sm md:text-base"
                           />
                         </div>
 
@@ -901,7 +837,7 @@ const OnboardingModal = ({ isOpen, onClose, initialData, onComplete }) => {
                             type="button"
                             onClick={() => handleSendPhoneOtp(false)}
                             disabled={sendingPhoneOtp || !formData.phone || formData.phone.length < 10 || timeLeft > 0}
-                            className="w-full py-3 bg-[linear-gradient(90deg,#55DEE8_0%,#B3DC26_100%)] rounded-[16px] font-bold text-xs uppercase tracking-wider text-[#000000] shadow-[0px_8px_24px_rgba(179,220,38,0.15)] transition-all disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center"
+                            className="w-full py-3 bg-[#BFF367] rounded-[16px] font-bold text-xs uppercase tracking-wider text-[#000000] shadow-[0px_8px_24px_rgba(179,220,38,0.15)] transition-all disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center"
                           >
                             {sendingPhoneOtp ? <Loader2 className="animate-spin w-4 h-4 mx-auto" /> : (timeLeft > 0 ? `Resend in ${timeLeft}s` : (phoneOtpSent ? "Resend" : "Get OTP"))}
                           </button>
@@ -918,13 +854,13 @@ const OnboardingModal = ({ isOpen, onClose, initialData, onComplete }) => {
                               value={phoneOtp}
                               onChange={(e) => setPhoneOtp(e.target.value.replace(/\D/g, ''))}
                               placeholder="Enter 6-digit OTP"
-                              className="w-full md:flex-1 bg-[#121212] border border-white/[0.08] rounded-[16px] py-3 md:py-4 px-4 text-white placeholder:text-white/40 focus:border-[#55DEE8] outline-none transition-all text-center tracking-widest font-black text-sm md:text-base"
+                              className="w-full md:flex-1 bg-[#121212] border border-white/[0.08] rounded-[16px] py-3 md:py-4 px-4 text-white placeholder:text-white/40 focus:border-[#BFF367] outline-none transition-all text-center tracking-widest font-black text-sm md:text-base"
                             />
                             <button
                               type="button"
                               onClick={handleVerifyPhoneOtp}
                               disabled={verifyingPhoneOtp || phoneOtp.length < 6}
-                              className="w-full md:w-auto md:px-8 py-3 md:py-4 bg-[linear-gradient(90deg,#55DEE8_0%,#B3DC26_100%)] rounded-[16px] font-black text-xs md:text-sm uppercase tracking-wider text-[#000000] shadow-[0px_8px_24px_rgba(179,220,38,0.15)] transition-all disabled:opacity-40 disabled:scale-100 flex items-center justify-center"
+                              className="w-full md:w-auto md:px-8 py-3 md:py-4 bg-[#BFF367] rounded-[16px] font-black text-xs md:text-sm uppercase tracking-wider text-[#000000] shadow-[0px_8px_24px_rgba(179,220,38,0.15)] transition-all disabled:opacity-40 disabled:scale-100 flex items-center justify-center"
                             >
                               {verifyingPhoneOtp ? <Loader2 className="animate-spin w-4 h-4" /> : "Verify"}
                             </button>
@@ -941,7 +877,7 @@ const OnboardingModal = ({ isOpen, onClose, initialData, onComplete }) => {
                       value={formData.password}
                       onChange={(e) => setFormData({...formData, password: e.target.value})}
                       placeholder="Must be at least 6 characters"
-                      className="w-full bg-[#121212] border border-white/[0.08] rounded-[16px] py-2.5 md:py-4 px-4 text-white focus:border-[#55DEE8] outline-none transition-all text-sm md:text-base"
+                      className="w-full bg-[#121212] border border-white/[0.08] rounded-[16px] py-2.5 md:py-4 px-4 text-white focus:border-[#BFF367] outline-none transition-all text-sm md:text-base"
                     />
                   </label>
                 </div>
@@ -965,7 +901,7 @@ const OnboardingModal = ({ isOpen, onClose, initialData, onComplete }) => {
               {step < 4 ? (
                 <button
                   onClick={handleNext}
-                  className="flex-1 bg-[linear-gradient(90deg,#55DEE8_0%,#B3DC26_100%)] shadow-[0px_8px_24px_rgba(179,220,38,0.15)] text-[#000000] h-full rounded-[16px] font-bold text-[14px] md:text-[18px] flex items-center justify-center transition-all disabled:opacity-40"
+                  className="flex-1 bg-[#BFF367] shadow-[0px_8px_24px_rgba(179,220,38,0.15)] text-[#000000] h-full rounded-[16px] font-bold text-[14px] md:text-[18px] flex items-center justify-center transition-all disabled:opacity-40"
                 >
                 CONTINUE
               </button>
@@ -973,7 +909,7 @@ const OnboardingModal = ({ isOpen, onClose, initialData, onComplete }) => {
               <button
                 onClick={handleSubmit}
                 disabled={loading || formData.sportTypes.length === 0}
-                className="flex-1 bg-[linear-gradient(90deg,#55DEE8_0%,#B3DC26_100%)] shadow-[0px_8px_24px_rgba(179,220,38,0.15)] text-[#000000] h-full rounded-[16px] font-bold text-[13px] md:text-[18px] flex items-center justify-center gap-1.5 md:gap-2 transition-all disabled:opacity-40 whitespace-nowrap"
+                className="flex-1 bg-[#BFF367] shadow-[0px_8px_24px_rgba(179,220,38,0.15)] text-[#000000] h-full rounded-[16px] font-bold text-[13px] md:text-[18px] flex items-center justify-center gap-1.5 md:gap-2 transition-all disabled:opacity-40 whitespace-nowrap"
               >
                 {loading ? (
                   <Loader2 className="animate-spin text-[#000000]" size={20} />

@@ -2007,16 +2007,7 @@ export const updateProfilePicture = asyncHandler(async (req, res) => {
       profilePicture: profilePictureUrl
     }
   });
-  if (user.ownerProfile) {
-    await prisma.ownerProfile.update({
-      where: {
-        id: user.ownerProfile.id
-      },
-      data: {
-        profilePicture: profilePictureUrl
-      }
-    });
-  }
+  // The OwnerProfile schema doesn't have a profilePicture field (it relies on User.profilePicture)
 
   // Real-time update
   const io = getIO();
@@ -2135,17 +2126,7 @@ export const updateInterests = asyncHandler(async (req, res) => {
       }
     }
   });
-  if (user.ownerProfile) {
-    await prisma.ownerProfile.update({
-      where: {
-        id: user.ownerProfile.id
-      },
-      data: {
-        interests: sportTypes,
-        gameTypes: sportTypes
-      }
-    });
-  }
+  // OwnerProfile schema does not have interests or gameTypes fields (relies on User profile)
   return res.status(200).json({
     success: true,
     message: "Interests updated",
@@ -2295,22 +2276,7 @@ export const updateProfile = asyncHandler(async (req, res) => {
       }
     }
   });
-  if (user.ownerProfile) {
-    // Only update ownerProfile fields that actually exist in the OwnerProfile schema
-    const ownerSafeUpdate = {};
-    if (finalInterests.length > 0) {
-      ownerSafeUpdate.gameTypes = finalInterests;
-      ownerSafeUpdate.interests = finalInterests;
-    }
-    if (Object.keys(ownerSafeUpdate).length > 0) {
-      await prisma.ownerProfile.update({
-        where: {
-          id: user.ownerProfile.id
-        },
-        data: ownerSafeUpdate
-      });
-    }
-  }
+  // OwnerProfile schema does not have gameTypes or interests fields (relies on User schema)
   return res.status(200).json({
     success: true,
     message: "Profile updated successfully",
@@ -2763,4 +2729,92 @@ export const verifyEmailGoogle = asyncHandler(async (req, res) => {
     emailRegistrationToken,
     email 
   });
-});
+});
+
+export const updateProfileEmailWithGoogle = asyncHandler(async (req, res) => {
+  const { credential, accessToken, expectedEmail } = req.body;
+  if (!expectedEmail) {
+    return res.status(400).json({ success: false, message: "Expected email is required" });
+  }
+
+  let payload;
+  if (credential) {
+    const ticket = await client.verifyIdToken({
+      idToken: credential,
+      audience: process.env.GOOGLE_CLIENT_ID
+    });
+    payload = ticket.getPayload();
+  } else if (accessToken) {
+    const response = await fetch(`https://www.googleapis.com/oauth2/v3/userinfo`, {
+      headers: { Authorization: `Bearer ${accessToken}` }
+    });
+    if (!response.ok) {
+      return res.status(401).json({ success: false, message: "Invalid Google access token" });
+    }
+    payload = await response.json();
+  } else {
+    return res.status(400).json({ success: false, message: "No Google credentials provided" });
+  }
+
+  const { email } = payload;
+  if (!email || email.toLowerCase() !== expectedEmail.toLowerCase()) {
+    return res.status(400).json({
+      success: false,
+      message: "Google account is different than field. Please select the matching Google account."
+    });
+  }
+
+  const existingUser = await prisma.user.findUnique({ where: { email: expectedEmail.toLowerCase() } });
+  if (existingUser && existingUser.id !== req.user.id) {
+    return res.status(400).json({ success: false, message: "This email is already taken by another account." });
+  }
+
+  await prisma.user.update({
+    where: { id: req.user.id },
+    data: { email: expectedEmail.toLowerCase(), isEmailVerified: true }
+  });
+
+  return res.status(200).json({ 
+    success: true, 
+    message: "Email verified successfully via Google", 
+    email: expectedEmail.toLowerCase()
+  });
+});
+
+export const updateProfileEmailWithOtp = asyncHandler(async (req, res) => {
+  const { email, otp } = req.body;
+  if (!email || !otp) {
+    return res.status(400).json({ success: false, message: "Email and OTP are required" });
+  }
+
+  const otpRecord = await prisma.oTP.findFirst({
+    where: { email: email.toLowerCase(), emailOtp: otp }
+  });
+
+  if (!otpRecord) {
+    return res.status(400).json({ success: false, message: "OTP is wrong" });
+  }
+
+  if (otpRecord.expiresAt < new Date()) {
+    return res.status(400).json({ success: false, message: "OTP has expired" });
+  }
+
+  const existingUser = await prisma.user.findUnique({ where: { email: email.toLowerCase() } });
+  if (existingUser && existingUser.id !== req.user.id) {
+    return res.status(400).json({ success: false, message: "This email is already taken by another account." });
+  }
+
+  await prisma.oTP.delete({ where: { id: otpRecord.id } });
+
+  await prisma.user.update({
+    where: { id: req.user.id },
+    data: { email: email.toLowerCase(), isEmailVerified: true }
+  });
+
+  return res.status(200).json({
+    success: true,
+    message: "Email verified successfully",
+    email: email.toLowerCase()
+  });
+});
+

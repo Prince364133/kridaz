@@ -409,22 +409,87 @@ export default function Profile() {
   const [isBioExpanded, setIsBioExpanded] = useState(false);
   const [proReviews, setProReviews] = useState([]);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [uploadingAvatar, setUploadingAvatar] = useState(false);
+  const [uploadingBanner, setUploadingBanner] = useState(false);
   const [sendingVerification, setSendingVerification] = useState(false);
   const [verifyingEmail, setVerifyingEmail] = useState(false);
+  const [editingEmail, setEditingEmail] = useState(false);
+  const [tempEmail, setTempEmail] = useState("");
+  const [otpState, setOtpState] = useState("idle");
+  const [otpCode, setOtpCode] = useState("");
+
+  const handleEditEmailClick = () => {
+    setEditingEmail(true);
+    setTempEmail(profileUser?.email || currentUser?.email || "");
+  };
+
+  const handleSendOTP = async () => {
+    const emailToVerify = editingEmail ? tempEmail : (profileUser?.email || currentUser?.email);
+    if (!emailToVerify) {
+      toast.error("Please enter an email");
+      return;
+    }
+    try {
+      setSendingVerification(true);
+      const res = await axiosInstance.post("/api/user/auth/send-otp", {
+        email: emailToVerify
+      });
+      if (res.data?.success) {
+        toast.success("OTP sent successfully!");
+        setOtpState("sent");
+      }
+    } catch (error) {
+      toast.error(error.response?.data?.message || "Failed to send OTP");
+    } finally {
+      setSendingVerification(false);
+    }
+  };
+
+  const handleVerifyOTP = async () => {
+    const emailToVerify = editingEmail ? tempEmail : (profileUser?.email || currentUser?.email);
+    if (otpCode.length !== 6) {
+      toast.error("Please enter a valid 6-digit OTP");
+      return;
+    }
+    try {
+      setVerifyingEmail(true);
+      const res = await axiosInstance.post("/api/user/auth/profile/verify-email-otp", {
+        email: emailToVerify,
+        otp: otpCode
+      });
+      if (res.data?.success) {
+        toast.success("Email verified successfully!");
+        dispatch(updateUser({ email: emailToVerify, isEmailVerified: true }));
+        setEditingEmail(false);
+        setOtpState("idle");
+        setOtpCode("");
+      }
+    } catch (error) {
+      toast.error(error.response?.data?.message || "Invalid or expired OTP");
+    } finally {
+      setVerifyingEmail(false);
+    }
+  };
 
   const verifyWithGoogle = useGoogleLogin({
     flow: "implicit",
     onSuccess: async (tokenResponse) => {
+      const emailToVerify = editingEmail ? tempEmail : currentUser.email;
+      if (!emailToVerify) {
+        toast.error("Please enter an email to verify");
+        return;
+      }
       try {
         setVerifyingEmail(true);
-        const res = await axiosInstance.post("/api/user/auth/verify-email-google", {
+        const res = await axiosInstance.post("/api/user/auth/profile/verify-email-google", {
           accessToken: tokenResponse.access_token,
-          source: "profile"
+          expectedEmail: emailToVerify
         });
         if (res.data?.success) {
           toast.success("Email verified successfully via Google!");
-          // Update Redux state immediately
-          dispatch(updateUser({ isEmailVerified: true }));
+          dispatch(updateUser({ email: emailToVerify, isEmailVerified: true }));
+          setEditingEmail(false);
+          setOtpState("idle");
         } else {
           toast.error(res.data?.message || "Google verification failed");
         }
@@ -709,29 +774,6 @@ export default function Profile() {
       verifyEmail();
     }
   }, [searchParams, navigate, currentUser, isOwnProfile, dispatch]);
-
-  const handleSendVerificationEmail = async () => {
-    if (!currentUser?.email) {
-      toast.error("No email associated with your account.");
-      return;
-    }
-    setSendingVerification(true);
-    try {
-      const res = await axiosInstance.post("/api/user/auth/send-email-verification", {
-        email: currentUser.email,
-        source: 'profile'
-      });
-      if (res.data.success) {
-        toast.success("Verification email sent! Check your inbox.");
-      } else {
-        toast.error(res.data.message || "Failed to send verification email");
-      }
-    } catch (error) {
-      toast.error(error.response?.data?.message || "Something went wrong.");
-    } finally {
-      setSendingVerification(false);
-    }
-  };
 
 
 
@@ -1037,37 +1079,83 @@ export default function Profile() {
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 md:px-8 mt-8">
         <>
-          {isOwnProfile && currentUser && !currentUser.isEmailVerified && (
-            <div className="mb-6 px-4 py-3 bg-[#BFF367]/10 border border-[#BFF367]/30 rounded-xl flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <ShieldCheck size={20} className="text-[#BFF367]" />
-                <div>
-                  <h4 className="text-sm font-bold text-white uppercase tracking-wider">Verify your email</h4>
-                  <p className="text-xs text-gray-400">Please verify your email to secure your account and access all features.</p>
+          {isOwnProfile && profileUser?.email && !profileUser?.isEmailVerified && (
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mt-4 p-3 bg-[#121212] border border-white/[0.08] rounded-[16px]">
+              <div className="flex items-center gap-2.5">
+                <div className="px-2 py-0.5 bg-red-500/10 border border-red-500/20 text-red-400 text-[10px] font-black uppercase tracking-wider rounded-[6px]">
+                  Pending
                 </div>
+                {editingEmail ? (
+                  <input
+                    type="email"
+                    value={tempEmail}
+                    onChange={(e) => setTempEmail(e.target.value)}
+                    className="bg-[#000000] border border-white/[0.08] rounded-[8px] px-3 py-1.5 text-xs text-white w-full sm:w-[160px] outline-none focus:border-[#BFF367] transition-all placeholder:text-white/30"
+                    placeholder="Enter new email"
+                    autoFocus
+                  />
+                ) : (
+                  <span className="text-xs text-white/80 font-medium truncate max-w-[150px] sm:max-w-[200px]">
+                    {profileUser.email}
+                  </span>
+                )}
+                {!editingEmail && (
+                  <button onClick={handleEditEmailClick} className="text-white/40 hover:text-[#BFF367] transition-colors p-1" title="Edit Email">
+                    <Edit2 size={12} />
+                  </button>
+                )}
+                {editingEmail && (
+                  <button onClick={() => { setEditingEmail(false); setOtpState("idle"); }} className="text-white/40 hover:text-white transition-colors text-[9px] uppercase font-bold" title="Cancel">
+                    Cancel
+                  </button>
+                )}
               </div>
-              <div className="flex items-center gap-2">
-                <button 
-                  onClick={() => verifyWithGoogle()}
-                  disabled={sendingVerification || verifyingEmail}
-                  className="px-4 py-2 bg-white text-black text-xs font-black uppercase tracking-wider rounded-lg hover:bg-neutral-200 transition-colors disabled:opacity-50 flex items-center gap-2"
-                >
-                  <svg width="14" height="14" viewBox="0 0 48 48">
-                    <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z" />
-                    <path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z" />
-                    <path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24s.92 7.54 2.56 10.78l7.97-6.19z" />
-                    <path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z" />
-                    <path fill="none" d="M0 0h48v48H0z" />
-                  </svg>
-                  Verify with Google
-                </button>
-                <button 
-                  onClick={handleSendVerificationEmail} 
-                  disabled={sendingVerification || verifyingEmail}
-                  className="px-4 py-2 bg-[#BFF367] text-black text-xs font-black uppercase tracking-wider rounded-lg hover:bg-[#a5db52] transition-colors disabled:opacity-50"
-                >
-                  {verifyingEmail ? "Verifying..." : sendingVerification ? "Sending..." : "Verify via Link"}
-                </button>
+              
+              <div className="flex items-center gap-2 shrink-0">
+                {otpState === "sent" ? (
+                  <>
+                    <input
+                      type="text"
+                      maxLength={6}
+                      value={otpCode}
+                      onChange={(e) => setOtpCode(e.target.value.replace(/\D/g, ''))}
+                      placeholder="6-digit OTP"
+                      className="bg-[#000000] border border-white/[0.08] rounded-[8px] px-3 py-1.5 text-xs text-white w-[90px] outline-none focus:border-[#BFF367] text-center tracking-widest font-black transition-all"
+                    />
+                    <button 
+                      onClick={handleVerifyOTP} 
+                      disabled={verifyingEmail || otpCode.length !== 6}
+                      className="px-4 py-1.5 bg-gradient-to-r from-[#55DEE8] to-[#BFF367] text-[#000000] text-[10px] font-black uppercase tracking-widest rounded-[8px] hover:opacity-90 transition-all disabled:opacity-50 shadow-[0_4px_12px_rgba(191,243,103,0.15)]"
+                    >
+                      {verifyingEmail ? "..." : "Verify"}
+                    </button>
+                  </>
+                ) : (
+                  <>
+                    <button 
+                      onClick={() => verifyWithGoogle()}
+                      disabled={sendingVerification || verifyingEmail || (editingEmail && !tempEmail)}
+                      className="px-3 py-1.5 bg-white/[0.03] border border-white/[0.08] text-white text-[10px] font-black uppercase tracking-wider rounded-[8px] hover:bg-white/[0.08] transition-all disabled:opacity-50 flex items-center gap-1.5"
+                      title="Verify with Google"
+                    >
+                      <svg width="12" height="12" viewBox="0 0 48 48">
+                        <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z" />
+                        <path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z" />
+                        <path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24s.92 7.54 2.56 10.78l7.97-6.19z" />
+                        <path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z" />
+                        <path fill="none" d="M0 0h48v48H0z" />
+                      </svg>
+                      <span className="hidden sm:inline">Google</span>
+                    </button>
+                    <button 
+                      onClick={handleSendOTP} 
+                      disabled={sendingVerification || verifyingEmail || (editingEmail && !tempEmail)}
+                      className="px-4 py-1.5 bg-gradient-to-r from-[#55DEE8] to-[#BFF367] text-[#000000] text-[10px] font-black uppercase tracking-widest rounded-[8px] hover:opacity-90 transition-all disabled:opacity-50 shadow-[0_4px_12px_rgba(191,243,103,0.15)]"
+                    >
+                      {sendingVerification ? "..." : "Get OTP"}
+                    </button>
+                  </>
+                )}
               </div>
             </div>
           )}
